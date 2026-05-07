@@ -1,0 +1,7 @@
+{
+  "name": "shared-hooks",
+  "$schema": "../../../../node_modules/nx/schemas/project.json",
+  "sourceRoot": "libs/shared/hooks/src",
+  "projectType": "library",
+  "tags": ["type:util", "scope:shared", "platform:web"]
+}

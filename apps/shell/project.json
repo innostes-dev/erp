@@ -1,0 +1,7 @@
+{
+  "name": "shell",
+  "$schema": "../../node_modules/nx/schemas/project.json",
+  "sourceRoot": "apps/shell/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:shell", "platform:web"]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "shared-testing",
+  "$schema": "../../../../node_modules/nx/schemas/project.json",
+  "sourceRoot": "libs/shared/testing/src",
+  "projectType": "library",
+  "tags": ["type:testing", "scope:shared", "platform:web"]
+}

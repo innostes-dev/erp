@@ -1,0 +1,31 @@
+# Global fallback
+*                           @platform-team
+
+# Shell & kernel — platform team owns the runtime
+/apps/shell/                @platform-team
+/libs/kernel/               @platform-team
+/libs/ui/                   @platform-team
+/libs/shared/               @platform-team
+/libs/data-access/          @platform-team
+/tools/                     @platform-team
+
+# Domain modules — each team owns their slice
+/libs/modules/checkout/     @checkout-team
+/apps/service-checkout/     @checkout-team
+
+/libs/modules/account/      @account-team
+/apps/service-auth/         @account-team
+
+/libs/modules/catalog/      @catalog-team
+/apps/service-catalog/      @catalog-team
+
+/libs/modules/orders/       @orders-team
+/apps/service-orders/       @orders-team
+
+/libs/modules/payments/     @payments-team
+/apps/service-payments/     @payments-team
+
+/libs/modules/notifications/ @notifications-team
+/apps/service-notifications/ @notifications-team
+
+/libs/modules/admin/        @admin-team

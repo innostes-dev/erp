@@ -1,0 +1,7 @@
+{
+  "name": "ui-tokens",
+  "$schema": "../../../../node_modules/nx/schemas/project.json",
+  "sourceRoot": "libs/ui/tokens/src",
+  "projectType": "library",
+  "tags": ["type:ui", "scope:ui", "platform:web"]
+}

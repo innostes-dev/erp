@@ -1,0 +1,7 @@
+{
+  "name": "shared-constants",
+  "$schema": "../../../../node_modules/nx/schemas/project.json",
+  "sourceRoot": "libs/shared/constants/src",
+  "projectType": "library",
+  "tags": ["type:util", "scope:shared", "platform:isomorphic"]
+}
