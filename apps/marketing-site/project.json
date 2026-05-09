@@ -1,0 +1,7 @@
+{
+  "name": "marketing-site",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/marketing-site/src",
+  "projectType": "application",
+  "tags": ["scope:app", "type:frontend"]
+}

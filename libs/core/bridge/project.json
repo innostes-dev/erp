@@ -1,0 +1,7 @@
+{
+  "name": "core-bridge",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/core/bridge/src",
+  "projectType": "library",
+  "tags": ["scope:core", "type:api"]
+}

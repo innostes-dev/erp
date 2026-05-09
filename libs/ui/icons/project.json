@@ -1,7 +1,0 @@
-{
-  "name": "ui-icons",
-  "$schema": "../../../../node_modules/nx/schemas/project.json",
-  "sourceRoot": "libs/ui/icons/src",
-  "projectType": "library",
-  "tags": ["type:ui", "scope:ui", "platform:web"]
-}

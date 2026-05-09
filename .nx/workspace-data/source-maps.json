@@ -1,0 +1,320 @@
+{
+  "apps/api-gateway": {
+    "root": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:app": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:backend": [
+      "apps/api-gateway/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "apps/marketing-site": {
+    "root": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:app": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:frontend": [
+      "apps/marketing-site/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "apps/os-shell": {
+    "root": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:app": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:frontend": [
+      "apps/os-shell/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/core/bridge": {
+    "root": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:core": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:api": [
+      "libs/core/bridge/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/core/database": {
+    "root": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:core": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:data": [
+      "libs/core/database/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/core/design-system": {
+    "root": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:core": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:ui": [
+      "libs/core/design-system/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/modules/hrms/api-logic": {
+    "root": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:module": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.module:hrms": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:api": [
+      "libs/modules/hrms/api-logic/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/modules/hrms/data-access": {
+    "root": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:module": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.module:hrms": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:data": [
+      "libs/modules/hrms/data-access/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/modules/hrms/feature-ui": {
+    "root": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:module": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.module:hrms": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:ui": [
+      "libs/modules/hrms/feature-ui/project.json",
+      "nx/core/project-json"
+    ]
+  }
+}

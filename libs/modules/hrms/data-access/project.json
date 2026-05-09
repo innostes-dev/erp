@@ -1,0 +1,7 @@
+{
+  "name": "module-hrms-data-access",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/modules/hrms/data-access/src",
+  "projectType": "library",
+  "tags": ["scope:module", "module:hrms", "type:data"]
+}

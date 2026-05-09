@@ -1,0 +1,7 @@
+{
+  "name": "module-hrms-feature-ui",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/modules/hrms/feature-ui/src",
+  "projectType": "library",
+  "tags": ["scope:module", "module:hrms", "type:ui"]
+}

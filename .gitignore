@@ -1,2 +1,6 @@
 node_modules
-.nx
+.next
+dist
+tmp
+.env
+coverage

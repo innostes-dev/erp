@@ -1,7 +1,0 @@
-{
-  "name": "data-access-http",
-  "$schema": "../../../../node_modules/nx/schemas/project.json",
-  "sourceRoot": "libs/data-access/http/src",
-  "projectType": "library",
-  "tags": ["type:data-access", "scope:shared", "platform:web"]
-}

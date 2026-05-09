@@ -1,0 +1,7 @@
+{
+  "name": "os-shell",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/os-shell/src",
+  "projectType": "application",
+  "tags": ["scope:app", "type:frontend"]
+}

@@ -1,7 +1,0 @@
-{
-  "name": "shared-types",
-  "$schema": "../../../../node_modules/nx/schemas/project.json",
-  "sourceRoot": "libs/shared/types/src",
-  "projectType": "library",
-  "tags": ["type:types", "scope:shared", "platform:isomorphic"]
-}

@@ -1,0 +1,7 @@
+{
+  "name": "module-hrms-api-logic",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/modules/hrms/api-logic/src",
+  "projectType": "library",
+  "tags": ["scope:module", "module:hrms", "type:api"]
+}

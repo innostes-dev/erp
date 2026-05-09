@@ -1,0 +1,32 @@
+{
+  "root": true,
+  "ignorePatterns": ["**/*"],
+  "plugins": ["@nx"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "rules": {
+        "@nx/enforce-module-boundaries": [
+          "error",
+          {
+            "allow": [],
+            "depConstraints": [
+              {
+                "sourceTag": "scope:app",
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:module", "scope:shared"]
+              },
+              {
+                "sourceTag": "scope:core",
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:shared"]
+              },
+              {
+                "sourceTag": "scope:module",
+                "onlyDependOnLibsWithTags": ["scope:core", "scope:module", "scope:shared"]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

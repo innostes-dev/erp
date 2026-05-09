@@ -1,0 +1,400 @@
+{
+  "version": "6.0",
+  "nxVersion": "20.8.4",
+  "pathMappings": {
+    "@innostes/core/design-system": [
+      "libs/core/design-system/src/index.ts"
+    ],
+    "@innostes/core/database": [
+      "libs/core/database/src/index.ts"
+    ],
+    "@innostes/core/bridge": [
+      "libs/core/bridge/src/index.ts"
+    ],
+    "@innostes/modules/hrms/feature-ui": [
+      "libs/modules/hrms/feature-ui/src/index.ts"
+    ],
+    "@innostes/modules/hrms/api-logic": [
+      "libs/modules/hrms/api-logic/src/index.ts"
+    ],
+    "@innostes/modules/hrms/data-access": [
+      "libs/modules/hrms/data-access/src/index.ts"
+    ],
+    "@innostes/modules/*": [
+      "libs/modules/*/src/index.ts"
+    ],
+    "@innostes/core/*": [
+      "libs/core/*/src/index.ts"
+    ]
+  },
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "nonProjectFiles": [
+      {
+        "file": "package-lock.json",
+        "hash": "7424813119855513044"
+      },
+      {
+        "file": "tsconfig.json",
+        "hash": "14114119442747068236"
+      },
+      {
+        "file": ".eslintrc.base.json",
+        "hash": "13806347261303468223"
+      },
+      {
+        "file": "README.md",
+        "hash": "17184061362568653635"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "8923589860890286576"
+      },
+      {
+        "file": "package.json",
+        "hash": "1045535101236981126"
+      },
+      {
+        "file": "scratch/test-tokens.js",
+        "hash": "15006887078546799879"
+      },
+      {
+        "file": "tailwind.config.ts",
+        "hash": "11171802254643587070"
+      },
+      {
+        "file": "nx.json",
+        "hash": "15426588978653821757"
+      },
+      {
+        "file": "nest-cli.json",
+        "hash": "1844835875567988696"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "8196942834386355879"
+      },
+      {
+        "file": "postcss.config.js",
+        "hash": "16750483254333733706"
+      },
+      {
+        "file": "tools/generate-module.mjs",
+        "hash": "4311252484681059050"
+      }
+    ],
+    "projectFileMap": {
+      "core-bridge": [
+        {
+          "file": "libs/core/bridge/project.json",
+          "hash": "1890724825957067276"
+        },
+        {
+          "file": "libs/core/bridge/src/index.ts",
+          "hash": "1288310607895255425"
+        },
+        {
+          "file": "libs/core/bridge/src/lib/module-bridge.service.ts",
+          "hash": "9177418369566458196",
+          "deps": [
+            "core-database"
+          ]
+        },
+        {
+          "file": "libs/core/bridge/src/lib/public-api.decorator.ts",
+          "hash": "4767498302021164894"
+        }
+      ],
+      "module-hrms-api-logic": [
+        {
+          "file": "libs/modules/hrms/api-logic/project.json",
+          "hash": "9061688119603115102"
+        },
+        {
+          "file": "libs/modules/hrms/api-logic/src/hrms-public.service.ts",
+          "hash": "4442873730008907741",
+          "deps": [
+            "core-bridge",
+            "core-database",
+            "module-hrms-data-access"
+          ]
+        },
+        {
+          "file": "libs/modules/hrms/api-logic/src/index.ts",
+          "hash": "12244957917774836979"
+        }
+      ],
+      "core-design-system": [
+        {
+          "file": "libs/core/design-system/project.json",
+          "hash": "9679146855537913892"
+        },
+        {
+          "file": "libs/core/design-system/src/index.ts",
+          "hash": "15499722780109994586"
+        },
+        {
+          "file": "libs/core/design-system/src/module-theme.ts",
+          "hash": "13190911099214198266",
+          "deps": [
+            "npm:@luxis-ui/react"
+          ]
+        },
+        {
+          "file": "libs/core/design-system/src/tokens.ts",
+          "hash": "6992046506031472338",
+          "deps": [
+            "npm:@luxis-ui/react"
+          ]
+        }
+      ],
+      "module-hrms-data-access": [
+        {
+          "file": "libs/modules/hrms/data-access/project.json",
+          "hash": "15995019832527574293"
+        },
+        {
+          "file": "libs/modules/hrms/data-access/src/index.ts",
+          "hash": "10468750929946148793"
+        },
+        {
+          "file": "libs/modules/hrms/data-access/src/schema.ts",
+          "hash": "6575915528844794613"
+        }
+      ],
+      "core-database": [
+        {
+          "file": "libs/core/database/project.json",
+          "hash": "2209837001963986473"
+        },
+        {
+          "file": "libs/core/database/src/index.ts",
+          "hash": "7102345854969941681"
+        },
+        {
+          "file": "libs/core/database/src/lib/schema/kernel.ts",
+          "hash": "15563459418943262447"
+        }
+      ],
+      "os-shell": [
+        {
+          "file": "apps/os-shell/next-env.d.ts",
+          "hash": "10054213917412045845"
+        },
+        {
+          "file": "apps/os-shell/next.config.js",
+          "hash": "8870474073375173455"
+        },
+        {
+          "file": "apps/os-shell/project.json",
+          "hash": "17174012877208859008"
+        },
+        {
+          "file": "apps/os-shell/src/app/(auth)/auth/page.tsx",
+          "hash": "3381386327426411787",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/app/(suite)/[appId]/layout.tsx",
+          "hash": "2016488477494599699",
+          "deps": [
+            "npm:react",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/app/(suite)/[appId]/loading.tsx",
+          "hash": "3563342774448571861"
+        },
+        {
+          "file": "apps/os-shell/src/app/(suite)/[appId]/page.tsx",
+          "hash": "3679676770492514293"
+        },
+        {
+          "file": "apps/os-shell/src/app/(suite)/layout.tsx",
+          "hash": "18352832909317815049",
+          "deps": [
+            "npm:react",
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/app/(suite)/loading.tsx",
+          "hash": "3568877842012791352"
+        },
+        {
+          "file": "apps/os-shell/src/app/(suite)/workspace/page.tsx",
+          "hash": "12822575143084389691",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/app/globals.css",
+          "hash": "10207638551057618899"
+        },
+        {
+          "file": "apps/os-shell/src/app/layout.tsx",
+          "hash": "12584994200554991933",
+          "deps": [
+            "npm:react",
+            "npm:@luxis-ui/react",
+            "core-design-system"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/app/page.tsx",
+          "hash": "8202010902834399056",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/components/module-registry-hydrator.tsx",
+          "hash": "11156801957500254593",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/components/shell/app-launcher.tsx",
+          "hash": "10932686324971008499",
+          "deps": [
+            "npm:next",
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/components/shell/module-theme-provider.tsx",
+          "hash": "13831773491358230410",
+          "deps": [
+            "npm:react",
+            "npm:@luxis-ui/react",
+            "core-design-system"
+          ]
+        },
+        {
+          "file": "apps/os-shell/src/lib/registry.ts",
+          "hash": "9062073772081612601"
+        },
+        {
+          "file": "apps/os-shell/src/store/use-module-registry.ts",
+          "hash": "3240682540551999955",
+          "deps": [
+            "npm:zustand"
+          ]
+        },
+        {
+          "file": "apps/os-shell/tsconfig.json",
+          "hash": "2628268809868210825"
+        }
+      ],
+      "module-hrms-feature-ui": [
+        {
+          "file": "libs/modules/hrms/feature-ui/project.json",
+          "hash": "9116211851507209741"
+        },
+        {
+          "file": "libs/modules/hrms/feature-ui/src/index.ts",
+          "hash": "3805874488458031465"
+        },
+        {
+          "file": "libs/modules/hrms/feature-ui/src/manifest.ts",
+          "hash": "7730019906674686338"
+        }
+      ],
+      "api-gateway": [
+        {
+          "file": "apps/api-gateway/project.json",
+          "hash": "3681470551773513983"
+        },
+        {
+          "file": "apps/api-gateway/src/app/app.module.ts",
+          "hash": "7326327534934260861",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/core",
+            "core-bridge"
+          ]
+        },
+        {
+          "file": "apps/api-gateway/src/app/module-catalog.ts",
+          "hash": "3143804185314491808",
+          "deps": [
+            "module-hrms-api-logic",
+            "module-hrms-feature-ui"
+          ]
+        },
+        {
+          "file": "apps/api-gateway/src/app/registry.controller.ts",
+          "hash": "11017867178002361849",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:drizzle-orm",
+            "core-database"
+          ]
+        },
+        {
+          "file": "apps/api-gateway/src/main.ts",
+          "hash": "12567148509501878491"
+        },
+        {
+          "file": "apps/api-gateway/src/tenant/tenant-context.interceptor.ts",
+          "hash": "15514036155609076804"
+        },
+        {
+          "file": "apps/api-gateway/src/tenant/tenant-context.service.ts",
+          "hash": "4231716518635212258"
+        },
+        {
+          "file": "apps/api-gateway/tsconfig.app.json",
+          "hash": "14920210833329768319"
+        }
+      ],
+      "marketing-site": [
+        {
+          "file": "apps/marketing-site/next-env.d.ts",
+          "hash": "10054213917412045845"
+        },
+        {
+          "file": "apps/marketing-site/next.config.js",
+          "hash": "7358310502512500376"
+        },
+        {
+          "file": "apps/marketing-site/project.json",
+          "hash": "4657979996291779960"
+        },
+        {
+          "file": "apps/marketing-site/src/app/docs/page.tsx",
+          "hash": "5652033150163807451"
+        },
+        {
+          "file": "apps/marketing-site/src/app/globals.css",
+          "hash": "3537899929837971384"
+        },
+        {
+          "file": "apps/marketing-site/src/app/layout.tsx",
+          "hash": "12827244181720307162",
+          "deps": [
+            "npm:react",
+            "npm:@luxis-ui/react",
+            "core-design-system"
+          ]
+        },
+        {
+          "file": "apps/marketing-site/src/app/page.tsx",
+          "hash": "4768286030810345194",
+          "deps": [
+            "npm:next"
+          ]
+        },
+        {
+          "file": "apps/marketing-site/tsconfig.json",
+          "hash": "5112302003887359304"
+        }
+      ]
+    }
+  }
+}

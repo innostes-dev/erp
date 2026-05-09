@@ -1,7 +1,0 @@
-{
-  "name": "kernel-router",
-  "$schema": "../../../../node_modules/nx/schemas/project.json",
-  "sourceRoot": "libs/kernel/router/src",
-  "projectType": "library",
-  "tags": ["type:kernel", "scope:kernel", "platform:web"]
-}
