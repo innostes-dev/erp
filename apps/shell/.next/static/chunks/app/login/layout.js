@@ -8,10 +8,10 @@
  */
 (self["webpackChunk_N_E"] = self["webpackChunk_N_E"] || []).push([["app/login/layout"],{
 
-/***/ "(app-pages-browser)/../../node_modules/.pnpm/next@15.5.15_@babel+core@7.29.0_@playwright+test@1.59.1_babel-plugin-macros@3.1.0_react_fce79d15b207395c1f34809b91893a57/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=false!":
-/*!*******************************************************************************************************************************************************************************************************************************************************!*\
-  !*** ../../node_modules/.pnpm/next@15.5.15_@babel+core@7.29.0_@playwright+test@1.59.1_babel-plugin-macros@3.1.0_react_fce79d15b207395c1f34809b91893a57/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=false! ***!
-  \*******************************************************************************************************************************************************************************************************************************************************/
+/***/ "(app-pages-browser)/../../node_modules/.pnpm/next@15.5.16_@babel+core@7._53dd27294cce9f646edf001f7575b9b3/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=false!":
+/*!*******************************************************************************************************************************************************************************************!*\
+  !*** ../../node_modules/.pnpm/next@15.5.16_@babel+core@7._53dd27294cce9f646edf001f7575b9b3/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=false! ***!
+  \*******************************************************************************************************************************************************************************************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
 
@@ -21,7 +21,7 @@
 },
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ __webpack_require__.O(0, ["main-app"], () => (__webpack_exec__("(app-pages-browser)/../../node_modules/.pnpm/next@15.5.15_@babel+core@7.29.0_@playwright+test@1.59.1_babel-plugin-macros@3.1.0_react_fce79d15b207395c1f34809b91893a57/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=false!")));
+/******/ __webpack_require__.O(0, ["main-app"], () => (__webpack_exec__("(app-pages-browser)/../../node_modules/.pnpm/next@15.5.16_@babel+core@7._53dd27294cce9f646edf001f7575b9b3/node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?server=false!")));
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ _N_E = __webpack_exports__;
 /******/ }
