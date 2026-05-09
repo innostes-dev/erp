@@ -88,7 +88,8 @@ function buildCurl(method: string, path: string, operation: OpenAPIOperation): s
   const hasBody = !!operation.requestBody;
   const isAuth = (operation.security?.length ?? 0) > 0;
   const lines: string[] = [`curl -s -X ${method.toUpperCase()} \\`];
-  lines.push(`  'http://localhost:3001${path}' \\`);
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  lines.push(`  '${baseUrl}${path}' \\`);
   lines.push(`  -H 'Content-Type: application/json' \\`);
   if (isAuth) lines.push(`  -H 'Authorization: Bearer <token>' \\`);
   if (hasBody) lines.push(`  -d '{"email":"admin@mono.dev","password":"admin123"}'`);
@@ -101,7 +102,8 @@ function buildFetch(method: string, path: string, operation: OpenAPIOperation): 
   const isAuth = (operation.security?.length ?? 0) > 0;
   const bodyStr = hasBody ? `\n  body: JSON.stringify({\n    email: 'admin@mono.dev',\n    password: 'admin123',\n  }),` : '';
   const authStr = isAuth ? `\n    Authorization: \`Bearer \${token}\`,` : '';
-  return `const res = await fetch('http://localhost:3001${path}', {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  return `const res = await fetch('${baseUrl}${path}', {
   method: '${method.toUpperCase()}',
   headers: {
     'Content-Type': 'application/json',${authStr}
@@ -241,7 +243,7 @@ function IntroPanel() {
         </p>
         <div className="mt-5 flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
           <span className="text-xs font-semibold text-gray-500">BASE URL</span>
-          <code className="flex-1 font-mono text-sm text-gray-800">http://localhost:3001/api</code>
+          <code className="flex-1 font-mono text-sm text-gray-800">{process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api</code>
           <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">dev</span>
         </div>
       </div>
@@ -458,7 +460,8 @@ export default function ApiDocsPage() {
   const [codeTab, setCodeTab] = useState<'curl' | 'fetch'>('curl');
 
   useEffect(() => {
-    fetch('/api/docs-json')
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    fetch(`${baseUrl}/api/docs-json`)
       .then((r) => { if (!r.ok) throw new Error(); return r.json() as Promise<OpenAPISpec>; })
       .then(setSpec)
       .catch(() => setError(true))

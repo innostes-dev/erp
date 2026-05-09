@@ -1,14 +1,17 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { and, eq } from 'drizzle-orm';
 import { db, moduleRegistry } from '@innostes/core/database';
 import { TenantContextService } from '../tenant/tenant-context.service';
 import { MODULE_MANIFESTS } from './module-catalog';
 
+@ApiTags('registry')
 @Controller('registry')
 export class RegistryController {
   constructor(private readonly tenantContext: TenantContextService) {}
 
   @Get('modules')
+  @ApiOperation({ summary: 'Get enabled modules for current tenant' })
   async getEnabledModules() {
     const tenantId = this.tenantContext.getTenantId();
     const rows = await db

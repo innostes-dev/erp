@@ -11,7 +11,9 @@ import {
 import fastifyCookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
+import { HttpExceptionFilter } from '@innostes/core/auth';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -54,7 +56,26 @@ async function bootstrap() {
     })
   );
 
+  // 6. Global Filter
+  app.useGlobalFilters(new HttpExceptionFilter());
+
+  // 7. Swagger Documentation
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Business OS — API Gateway')
+    .setDescription('The core API gateway for the multi-tenant Business OS.')
+    .setVersion('1.0')
+    .addTag('auth', 'Authentication and session management')
+    .addApiKey({ type: 'apiKey', name: 'x-tenant-id', in: 'header' }, 'x-tenant-id')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document, {
+    jsonDocumentUrl: 'api/docs-json',
+  });
+
+  // 8. Global Prefix — Set AFTER Swagger to avoid path interference
   app.setGlobalPrefix('api/v1');
+
   app.enableShutdownHooks();
 
   const port = config.get<number>('PORT', 3001);

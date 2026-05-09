@@ -1,22 +1,25 @@
 import { and, eq } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from './lib/schema';
 
-const connectionString =
-  process.env.DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/innostes_os';
+// Export for NestJS
+export * from './lib/database.module';
+export * from './lib/database.service';
+export * from './lib/schema';
 
-const client = postgres(connectionString, { prepare: false });
-export const db = drizzle(client, {
-  schema,
-});
+// Legacy compatibility exports (Static DB instance)
+// WARNING: This uses the environment variable directly. In NestJS, preferred way is DatabaseService.
+const databaseUrl = process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/innostes_os';
+const sql = neon(databaseUrl);
+export const db = drizzle(sql, { schema });
 
 type TenantTable = {
-  tenantId: unknown;
+  tenantId: any;
 };
 
 type TenantQueryOptions = {
-  where?: unknown;
+  where?: any;
 };
 
 export const withTenant = <TTable extends TenantTable>(
@@ -24,12 +27,10 @@ export const withTenant = <TTable extends TenantTable>(
   tenantId: string,
   options: TenantQueryOptions = {}
 ) => {
-  const tenantScope = eq(table.tenantId as never, tenantId);
+  const tenantScope = eq(table.tenantId, tenantId);
   if (!options.where) {
     return { ...options, where: tenantScope };
   }
 
-  return { ...options, where: and(tenantScope, options.where as never) };
+  return { ...options, where: and(tenantScope, options.where) };
 };
-
-export * from './lib/schema';
