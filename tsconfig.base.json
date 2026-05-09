@@ -21,7 +21,8 @@
       "@innostes/modules/hrms/api-logic": ["libs/modules/hrms/api-logic/src/index.ts"],
       "@innostes/modules/hrms/data-access": ["libs/modules/hrms/data-access/src/index.ts"],
       "@innostes/modules/*": ["libs/modules/*/src/index.ts"],
-      "@innostes/core/*": ["libs/core/*/src/index.ts"]
+      "@innostes/core/*": ["libs/core/*/src/index.ts"],
+      "@innostes/shared": ["libs/shared/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
