@@ -3,5 +3,18 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/marketing-site/src",
   "projectType": "application",
-  "tags": ["scope:app", "type:frontend"]
+  "tags": ["scope:app", "type:frontend"],
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "root": "apps/marketing-site",
+        "outputPath": "dist/apps/marketing-site"
+      },
+      "configurations": {
+        "production": {}
+      }
+    }
+  }
 }

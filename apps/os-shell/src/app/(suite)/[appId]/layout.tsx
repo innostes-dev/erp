@@ -6,11 +6,12 @@ export default async function ModuleLayout({
   params,
   children,
 }: {
-  params: { appId: string };
+  params: Promise<{ appId: string }>;
   children: ReactNode;
 }) {
+  const { appId } = await params;
   const modules = await fetchRegistryModules();
-  const active = modules.find((module) => module.id === params.appId);
+  const active = modules.find((module) => module.id === appId);
   const sidebarGroups = active?.sidebarGroups ?? [];
 
   return (

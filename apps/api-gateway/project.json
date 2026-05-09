@@ -3,5 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/api-gateway/src",
   "projectType": "application",
-  "tags": ["scope:app", "type:backend"]
+  "tags": ["scope:app", "type:backend"],
+  "targets": {
+    "build": {
+      "command": "nest build api-gateway",
+      "outputs": ["{workspaceRoot}/dist/apps/api-gateway"]
+    }
+  }
 }

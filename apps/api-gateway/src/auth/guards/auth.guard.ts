@@ -33,7 +33,7 @@ export class AuthGuard implements CanActivate {
       // Note: User requested NOT to check DB every time for valid session to save CPU.
       // If we wanted to, we would inject Drizzle here and verify the sid exists in sessions table.
 
-      request['user'] = {
+      (request as any)['user'] = {
         userId: payload.sub,
         sessionId: payload.sid,
       };
