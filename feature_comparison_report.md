@@ -35,6 +35,7 @@ The `api-gateway` in `master` is production-ready with standardized patterns.
 | **Backend Auth** | JWT Guards, CurrentUser decorators, and full `AuthModule`. | Missing auth logic/guards. |
 | **Request/Response** | Global Interceptors for response wrapping and filters for error handling. | Missing standardized envelopes. |
 | **Health Checks** | Dedicated health probes for monitoring. | Missing. |
+| **API UI Design** | Three-column interactive API reference (`developer/api/page.tsx`). | Design differs from the new Marketing Site documentation; requires visual alignment. |
 
 ## 4. Tooling & Documentation
 `master` follows better monorepo practices and provides more developer guidance.
