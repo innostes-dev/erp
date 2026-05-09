@@ -849,3 +849,911 @@
 [NX v20.8.4 Daemon Server] - 2026-05-08T17:27:02.084Z - [WATCHER]: Processing file changes in outputs
 [NX v20.8.4 Daemon Server] - 2026-05-08T17:27:02.193Z - [WATCHER]: Processing file changes in outputs
 [NX v20.8.4 Daemon Server] - 2026-05-08T17:27:05.328Z - [WATCHER]: Processing file changes in outputs
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.968Z - Started listening on: /tmp/f53b52ad6d21cceb72df/d.sock
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.971Z - [WATCHER]: Subscribed to changes within: /app (native)
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.978Z - Established a connection. Number of open connections: 1
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.979Z - Established a connection. Number of open connections: 2
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.982Z - Closed a connection. Number of open connections: 1
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.984Z - [REQUEST]: Responding to the client. Shutdown initiated
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.984Z - Done responding to the client Shutdown initiated
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.985Z - Handled FORCE_SHUTDOWN. Handling time: 0. Response time: 1.
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.986Z - [WATCHER]: Stopping the watcher for /app (sources)
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.986Z - Closed a connection. Number of open connections: 0
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.986Z - [WATCHER]: Stopping the watcher for /app (outputs)
+[NX v20.8.4 Daemon Server] - 2026-05-09T14:59:14.987Z - Server stopped because: "Request to shutdown"
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.644Z - Started listening on: /tmp/f53b52ad6d21cceb72df/d.sock
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.647Z - [WATCHER]: Subscribed to changes within: /app (native)
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.652Z - Established a connection. Number of open connections: 1
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.653Z - Established a connection. Number of open connections: 2
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.655Z - Closed a connection. Number of open connections: 1
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.657Z - [REQUEST]: Client Request for Project Graph Received
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.673Z - Time taken for 'loadSpecifiedNxPlugins' 1.4887139999999874ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.950Z - Time taken for 'Load Nx Plugin: /app/node_modules/nx/src/plugins/js' 291.806275ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:45.984Z - Time taken for 'Load Nx Plugin: /app/node_modules/nx/src/plugins/package-json' 325.328304ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.028Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.028Z - [REQUEST]:
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.028Z - [REQUEST]:
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.046Z - Time taken for 'loadDefaultNxPlugins' 369.44076900000005ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.110Z - Time taken for 'build-project-configs' 51.716432000000054ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.576Z - [SYNC]: collect registered sync generators
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.577Z - [REQUEST]: Responding to the client. project-graph
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.578Z - Time taken for 'total for creating and serializing project graph' 920.116895ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.591Z - Done responding to the client project-graph
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.591Z - Handled REQUEST_PROJECT_GRAPH. Handling time: 920. Response time: 14.
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.604Z - [REQUEST]: Responding to the client. handleRunPreTasksExecution
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.604Z - Done responding to the client handleRunPreTasksExecution
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.604Z - Handled PRE_TASKS_EXECUTION. Handling time: 1. Response time: 0.
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.605Z - Time taken for 'preTasksExecution' 0.5234330000000682ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:03:46.608Z - Closed a connection. Number of open connections: 0
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.602Z - [WATCHER]: Processing file changes in outputs
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.603Z - [WATCHER]: jest.config.js was created or restored
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.704Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.705Z - [REQUEST]: jest.config.js
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.705Z - [REQUEST]:
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.710Z - Time taken for 'hash changed files from watcher' 0.24055699999735225ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.737Z - Time taken for 'build-project-configs' 23.468676000004052ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.799Z - [SYNC]: collect registered sync generators
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.799Z - [SYNC]: project graph hash is the same, not collecting task sync generators
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.799Z - [SYNC]: nx.json hash is the same, not collecting global sync generators
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:04:29.799Z - Time taken for 'total execution time for createProjectGraph()' 43.47400199999538ms
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+
+> NX runtime error err=cannot send event from fs watcher: sending into a full channel
+
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.029Z - [WATCHER]: package.json was modified
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.029Z - [WATCHER]: Processing file changes in outputs
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.229Z - [REQUEST]: Updated workspace context based on watched changes, recomputing project graph...
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.229Z - [REQUEST]: package.json
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.229Z - [REQUEST]:
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.236Z - Time taken for 'hash changed files from watcher' 0.24291499999526422ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.263Z - Time taken for 'build-project-configs' 21.463403000001563ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.315Z - [SYNC]: collect registered sync generators
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.315Z - [SYNC]: project graph hash is the same, not collecting task sync generators
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.316Z - [SYNC]: nx.json hash is the same, not collecting global sync generators
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.316Z - Time taken for 'total execution time for createProjectGraph()' 48.26973599998746ms
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.454Z - [WATCHER]: Stopping the watcher for /app (sources)
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.454Z - [WATCHER]: Processing file changes in outputs
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.454Z - [WATCHER]: Stopping the watcher for /app (outputs)
+[NX v20.8.4 Daemon Server] - 2026-05-09T15:05:24.455Z - Server stopped because: "LOCK_FILES_CHANGED"

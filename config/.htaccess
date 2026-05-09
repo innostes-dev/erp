@@ -1,0 +1,6 @@
+# Apache mod_proxy must be enabled on the cPanel server.
+# HTTPS terminates at Apache. NestJS sees plain HTTP on port 3001.
+# X-Forwarded-For is passed so extractIp() can log real client IPs.
+RewriteEngine On
+RewriteRule ^api/(.*)$ http://127.0.0.1:3001/api/$1 [P,L]
+Header set X-Forwarded-Proto "https"
