@@ -1,4 +1,4 @@
-import { timestamp, text, index } from 'drizzle-orm/pg-core';
+import { timestamp, text } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
 
 /**
@@ -12,7 +12,7 @@ export const auditColumns = {
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
     .defaultNow()
     .notNull()
-    .$onUpdate(() => new Date().toISOString()),
+    .$onUpdateFn(() => new Date().toISOString()),
 };
 
 /**

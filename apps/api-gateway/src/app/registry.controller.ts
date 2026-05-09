@@ -22,8 +22,8 @@ export class RegistryController {
       .map((module) => ({
         id: module.id,
         name: module.name,
-        themeColor: module.themeColor,
-        theme: module.theme,
+        themeColor: (module as any).themeColor,
+        theme: (module as any).theme,
         sidebarGroups: module.sidebarGroups,
       }));
   }

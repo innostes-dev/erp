@@ -1,0 +1,12 @@
+/**
+ * apps/api-gateway/src/auth/decorators/current-user.decorator.ts
+ */
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { UserContext } from '@innostes/shared';
+
+export const CurrentUser = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext): UserContext => {
+    const request = ctx.switchToHttp().getRequest();
+    return request.user;
+  },
+);
