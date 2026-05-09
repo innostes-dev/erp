@@ -6,6 +6,8 @@ export type RegistryModule = {
     links: Array<{ href: string; label: string }>;
   }>;
   headerNav?: Array<{ href: string; label: string }>;
+  theme?: { primary: string };
+  themeColor?: string;
 };
 
 export async function fetchRegistryModules(): Promise<RegistryModule[]> {

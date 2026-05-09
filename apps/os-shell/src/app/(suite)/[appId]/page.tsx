@@ -1,14 +1,15 @@
 import { BRANDING } from '@innostes/core/design-system';
 
-export default async function ModuleHome({ params }: { params: { appId: string } }) {
-  const isHrms = params.appId === 'hr';
+export default async function ModuleHome({ params }: { params: Promise<{ appId: string }> }) {
+  const { appId } = await params;
+  const isHrms = appId === 'hr';
 
   return (
     <section className="module-dashboard">
       <header className="dashboard-header">
         <div>
-          <h1>Welcome to {isHrms ? 'HRMS' : params.appId.toUpperCase()}</h1>
-          <p>Real-time enterprise overview for the {isHrms ? 'Human Resources' : params.appId} module.</p>
+          <h1>Welcome to {isHrms ? 'HRMS' : appId.toUpperCase()}</h1>
+          <p>Real-time enterprise overview for the {isHrms ? 'Human Resources' : appId} module.</p>
         </div>
         <div className="dashboard-actions">
           <button className="primary-btn">+ Add Employee</button>

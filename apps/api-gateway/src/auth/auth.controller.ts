@@ -49,9 +49,9 @@ export class AuthController {
     const ip = extractIp(req);
     const result = await this.authService.register(dto, device, ip);
 
-    if (result['accessToken']) {
-      this.setCookies(res, result['accessToken'], result['refreshToken']);
-      return { success: true, data: result['user'] };
+    if ('accessToken' in result && result.accessToken) {
+      this.setCookies(res, result.accessToken, result.refreshToken);
+      return { success: true, data: result.user };
     }
 
     return { success: true, data: result };

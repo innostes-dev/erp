@@ -9,16 +9,16 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  firstName: string;
+  firstName!: string;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
-  lastName: string;
+  lastName!: string;
 
   @IsEmail()
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(8)
@@ -26,13 +26,13 @@ export class RegisterDto {
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'Password is too weak. Must contain uppercase, lowercase, and a digit or special character.',
   })
-  password: string;
+  password!: string;
 
   @IsString()
   @IsNotEmpty()
-  tenantId: string;
+  tenantId!: string;
 
   @IsString()
   @IsNotEmpty()
-  branchId: string;
+  branchId!: string;
 }
