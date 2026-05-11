@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { fetchRegistryModules } from '../../../lib/registry';
 
+export const dynamic = 'force-dynamic';
+
 export default async function WorkspacePage() {
   const modules = await fetchRegistryModules();
 

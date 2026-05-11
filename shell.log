@@ -1,0 +1,25 @@
+
+> innostes-business-os@0.1.0 dev:shell
+> next dev apps/os-shell
+
+   ▲ Next.js 15.0.3
+   - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.5s
+ ○ Compiling /workspace ...
+ ✓ Compiled /workspace in 7.3s (670 modules)
+Failed to fetch registry modules: [TypeError: fetch failed] {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Failed to fetch registry modules: [TypeError: fetch failed] {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+ HEAD /workspace 200 in 8518ms
+Failed to fetch registry modules: [TypeError: fetch failed] {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+Failed to fetch registry modules: [TypeError: fetch failed] {
+  [cause]: [AggregateError: ] { code: 'ECONNREFUSED' }
+}
+ GET /workspace 200 in 122ms
