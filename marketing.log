@@ -1,0 +1,13 @@
+
+> innostes-business-os@0.1.0 dev:marketing
+> next dev apps/marketing-site
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+   ▲ Next.js 15.0.3
+   - Local:        http://localhost:3001
+
+ ✓ Starting...
+ ✓ Ready in 1873ms
+ ○ Compiling / ...
+ ✓ Compiled / in 9.5s (627 modules)
+ GET / 200 in 10792ms
