@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { fetchRegistryModules } from '../../../lib/registry';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ModuleLayout({
   params,
   children,
