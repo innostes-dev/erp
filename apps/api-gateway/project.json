@@ -8,6 +8,9 @@
     "build": {
       "command": "nest build api-gateway",
       "outputs": ["{workspaceRoot}/dist/apps/api-gateway"]
+    },
+    "test": {
+      "command": "npx jest -c jest.config.js apps/api-gateway"
     }
   }
 }
