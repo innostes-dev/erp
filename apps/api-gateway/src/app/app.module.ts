@@ -7,22 +7,10 @@ import { TenantContextInterceptor } from '../tenant/tenant-context.interceptor';
 import { TenantContextService } from '../tenant/tenant-context.service';
 import { BRIDGE_HANDLER_INJECTS, buildBridgeHandlers, MODULE_SERVICES } from './module-catalog';
 import { AuthModule } from '@innostes/core/auth';
-import { LoggerModule, FileTransport, ConsoleTransport } from '@innostes/core/logger';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    LoggerModule.register({
-      transports: [
-        new ConsoleTransport(),
-        new FileTransport({
-          filePath: 'logs/api.log',
-          maxFileSizeBytes: 10 * 1024 * 1024, // 10 MB
-          maxFiles: 5,
-          redactFields: ['headers'],
-        }),
-      ],
-    }),
     AuthModule,
   ],
   controllers: [RegistryController],
