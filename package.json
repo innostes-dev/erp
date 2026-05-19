@@ -5,7 +5,6 @@
   "scripts": {
     "dev:shell": "next dev apps/os-shell",
     "dev:marketing": "next dev apps/marketing-site",
-    "dev:setup": "next dev apps/setup-wizard -p 3003",
     "dev:api": "nest start api-gateway --watch",
     "generate:module": "node tools/generate-module.mjs",
     "lint": "nx run-many -t lint",

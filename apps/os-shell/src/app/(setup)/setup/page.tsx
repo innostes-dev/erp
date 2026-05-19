@@ -38,7 +38,7 @@ export default function SetupPage() {
       const res = await fetch('/api/v1/auth/setup-status');
       const data = await res.json();
       if (data.isInitialized) {
-        window.location.href = `${process.env.NEXT_PUBLIC_SHELL_URL || 'http://localhost:3000'}/auth`;
+        router.push('/auth');
       } else {
         setIsLoading(false);
       }
@@ -262,7 +262,7 @@ export default function SetupPage() {
             </div>
             <button 
               className="setup-finish-btn"
-              onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_SHELL_URL || 'http://localhost:3000'}/auth`}
+              onClick={() => router.push('/auth')}
             >
               Launch Dashboard <Rocket size={18} className="ml-2" />
             </button>
