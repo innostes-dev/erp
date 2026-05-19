@@ -28,7 +28,6 @@ export async function middleware(request: NextRequest) {
   // 2. If flag is missing, verify status with the backend
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const setupUrl = process.env.NEXT_PUBLIC_SETUP_URL || 'http://localhost:3003';
 
     // We call the backend directly from the server-side middleware
     const statusRes = await fetch(`${apiUrl}/api/v1/auth/setup-status`, {
@@ -54,8 +53,10 @@ export async function middleware(request: NextRequest) {
       
       return response;
     } else {
-      // If NOT initialized, force them to the standalone setup wizard
-      return NextResponse.redirect(new URL('/setup', setupUrl));
+      // If NOT initialized, force them to the local setup wizard
+      if (pathname !== '/setup') {
+        return NextResponse.redirect(new URL('/setup', request.url));
+      }
     }
   } catch (err) {
     // If backend is down, allow request to proceed to avoid total blackout,
