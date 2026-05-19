@@ -10,13 +10,18 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { DatabaseService, users, roles, sessions, branches } from '@innostes/core/database';
+import { DatabaseService, users, roles, sessions, branches, authEvents, otpTokens, tenants, moduleRegistry } from '@innostes/core/database';
+import { encryptEmail, hashEmail, decryptEmail } from '../utils/crypto.util';
 import { eq, and, gt, lt, isNull, sql as drizzleSql, desc } from 'drizzle-orm';
 import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
 import { createId } from '@paralleldrive/cuid2';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { VerifyOtpDto } from '../dto/verify-otp.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { SetupDto } from '../dto/setup.dto';
 import { JwtPayload, SessionInfo } from '@innostes/shared';
 
 const DUMMY_HASH =
@@ -46,10 +51,11 @@ export class AuthService implements OnModuleInit {
   }
 
   async register(dto: RegisterDto, device: { deviceName: string | null; deviceType: string | null }, ip: string | null) {
+    const emailHmac = hashEmail(dto.email);
     const existingUser = await this.dbService.db
       .select()
       .from(users)
-      .where(and(eq(users.email, dto.email), eq(users.tenantId, dto.tenantId)))
+      .where(and(eq(users.emailHmac, emailHmac), eq(users.tenantId, dto.tenantId)))
       .limit(1);
 
     if (existingUser.length) {
@@ -86,7 +92,8 @@ export class AuthService implements OnModuleInit {
     const [user] = await this.dbService.db
       .insert(users)
       .values({
-        email: dto.email,
+        emailEnc: encryptEmail(dto.email),
+        emailHmac,
         password: hashedPassword,
         firstName: dto.firstName,
         lastName: dto.lastName,
@@ -112,12 +119,20 @@ export class AuthService implements OnModuleInit {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     });
 
+    await this.dbService.db.insert(authEvents).values({
+      userId: user.id,
+      tenantId: user.tenantId,
+      eventType: 'REGISTER',
+      ipAddress: ip,
+      userAgent: device.deviceName,
+    });
+
     const accessToken = this.jwtService.sign({ sub: user.id, sid: sessionId });
 
     return {
       user: {
         id: user.id,
-        email: user.email,
+        email: dto.email,
         firstName: user.firstName,
         lastName: user.lastName,
       },
@@ -127,20 +142,38 @@ export class AuthService implements OnModuleInit {
   }
 
   async login(dto: LoginDto, tenantId: string, device: { deviceName: string | null; deviceType: string | null }, ip: string | null) {
+    const emailHmac = hashEmail(dto.email);
     const [user] = await this.dbService.db
       .select()
       .from(users)
-      .where(and(eq(users.email, dto.email), eq(users.tenantId, tenantId)))
+      .where(and(eq(users.emailHmac, emailHmac), eq(users.tenantId, tenantId)))
       .limit(1);
 
     if (!user) {
       await argon2.verify(DUMMY_HASH, dto.password).catch(() => {});
+      await this.dbService.db.insert(authEvents).values({ tenantId, eventType: 'LOGIN_FAILURE', ipAddress: ip, userAgent: device.deviceName, metadata: { reason: 'user_not_found' } });
       throw new UnauthorizedException({ code: 'INVALID_CREDENTIALS' });
+    }
+
+    if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
+      await this.dbService.db.insert(authEvents).values({ userId: user.id, tenantId, eventType: 'ACCOUNT_LOCKED', ipAddress: ip, userAgent: device.deviceName });
+      throw new UnauthorizedException({ code: 'ACCOUNT_LOCKED', message: 'Account is temporarily locked' });
     }
 
     const passwordMatch = await argon2.verify(user.password, dto.password);
     if (!passwordMatch) {
+      const newFailCount = (user.failedLoginCount || 0) + 1;
+      let lockedUntil = null;
+      if (newFailCount >= 5) {
+        lockedUntil = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      }
+      await this.dbService.db.update(users).set({ failedLoginCount: newFailCount, lockedUntil }).where(eq(users.id, user.id));
+      await this.dbService.db.insert(authEvents).values({ userId: user.id, tenantId, eventType: 'LOGIN_FAILURE', ipAddress: ip, userAgent: device.deviceName, metadata: { reason: 'invalid_password' } });
       throw new UnauthorizedException({ code: 'INVALID_CREDENTIALS' });
+    }
+
+    if (user.failedLoginCount > 0 || user.lockedUntil) {
+      await this.dbService.db.update(users).set({ failedLoginCount: 0, lockedUntil: null }).where(eq(users.id, user.id));
     }
 
     if (!user.roleId) {
@@ -192,12 +225,20 @@ export class AuthService implements OnModuleInit {
       });
     }
 
+    await this.dbService.db.insert(authEvents).values({
+      userId: user.id,
+      tenantId,
+      eventType: 'LOGIN_SUCCESS',
+      ipAddress: ip,
+      userAgent: device.deviceName,
+    });
+
     const accessToken = this.jwtService.sign({ sub: user.id, sid: sessionId });
 
     return {
       user: {
         id: user.id,
-        email: user.email,
+        email: dto.email,
         firstName: user.firstName,
         lastName: user.lastName,
       },
@@ -313,7 +354,7 @@ export class AuthService implements OnModuleInit {
     const result = await this.dbService.db
       .select({
         id:          users.id,
-        email:       users.email,
+        emailEnc:    users.emailEnc,
         firstName:   users.firstName,
         lastName:    users.lastName,
         middleName:  users.middleName,
@@ -333,7 +374,7 @@ export class AuthService implements OnModuleInit {
 
     return {
       id:         row.id,
-      email:      row.email,
+      email:      row.emailEnc ? decryptEmail(row.emailEnc) : '',
       firstName:  row.firstName,
       lastName:   row.lastName,
       middleName: row.middleName,
@@ -346,4 +387,231 @@ export class AuthService implements OnModuleInit {
       },
     };
   }
+
+  async forgotPassword(dto: ForgotPasswordDto, ip: string | null) {
+    const emailHmac = hashEmail(dto.email);
+    const [user] = await this.dbService.db.select().from(users).where(and(eq(users.emailHmac, emailHmac), eq(users.tenantId, dto.tenantId))).limit(1);
+    if (!user) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return;
+    }
+
+    const otpCode = crypto.randomInt(100000, 999999).toString();
+    const otpHash = crypto.createHash('sha256').update(otpCode).digest('hex');
+
+    await this.dbService.db.insert(otpTokens).values({
+      userId: user.id,
+      otpHash,
+      purpose: 'FORGOT_PASSWORD',
+      ipAddress: ip,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+    });
+
+    this.logger.log(`OTP for ${dto.email}: ${otpCode}`);
+  }
+
+  async verifyOtp(dto: VerifyOtpDto, ip: string | null) {
+    const emailHmac = hashEmail(dto.email);
+    const [user] = await this.dbService.db.select().from(users).where(and(eq(users.emailHmac, emailHmac), eq(users.tenantId, dto.tenantId))).limit(1);
+    if (!user) throw new UnauthorizedException({ code: 'INVALID_OTP' });
+
+    const otpHash = crypto.createHash('sha256').update(dto.otp).digest('hex');
+    const [otp] = await this.dbService.db.select().from(otpTokens).where(
+      and(eq(otpTokens.userId, user.id), eq(otpTokens.purpose, 'FORGOT_PASSWORD'), isNull(otpTokens.usedAt))
+    ).orderBy(desc(otpTokens.createdAt)).limit(1);
+
+    if (!otp || new Date(otp.expiresAt) < new Date()) {
+      throw new UnauthorizedException({ code: 'INVALID_OTP' });
+    }
+
+    if (otp.attempts >= 5) {
+      throw new UnauthorizedException({ code: 'OTP_EXPIRED' });
+    }
+
+    if (otp.otpHash !== otpHash) {
+      await this.dbService.db.update(otpTokens).set({ attempts: otp.attempts + 1 }).where(eq(otpTokens.id, otp.id));
+      throw new UnauthorizedException({ code: 'INVALID_OTP' });
+    }
+
+    await this.dbService.db.update(otpTokens).set({ usedAt: new Date().toISOString() }).where(eq(otpTokens.id, otp.id));
+
+    const resetToken = this.jwtService.sign({ sub: user.id, purpose: 'RESET_PASSWORD' }, { expiresIn: '15m' });
+    return { resetToken };
+  }
+
+  async resetPassword(dto: ResetPasswordDto, ip: string | null, device: { deviceName: string | null; deviceType: string | null }) {
+    let payload;
+    try {
+      payload = this.jwtService.verify(dto.resetToken, { algorithms: ['HS256'] });
+    } catch {
+      throw new UnauthorizedException({ code: 'INVALID_RESET_TOKEN' });
+    }
+
+    if (payload.purpose !== 'RESET_PASSWORD') {
+      throw new UnauthorizedException({ code: 'INVALID_RESET_TOKEN' });
+    }
+
+    const userId = payload.sub;
+    const [user] = await this.dbService.db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!user) throw new NotFoundException();
+
+    const hashedPassword = await argon2.hash(dto.newPassword, { memoryCost: 65536, timeCost: 3, parallelism: 1, type: argon2.argon2id });
+    
+    await this.dbService.db.update(users).set({ 
+      password: hashedPassword, 
+      passwordChangedAt: new Date().toISOString(),
+      lockedUntil: null,
+      failedLoginCount: 0
+    }).where(eq(users.id, userId));
+
+    await this.logoutAll(userId);
+
+    await this.dbService.db.insert(authEvents).values({
+      userId,
+      tenantId: user.tenantId,
+      eventType: 'PASSWORD_CHANGED',
+      ipAddress: ip,
+      userAgent: device.deviceName,
+    });
+  }
+
+  async getSetupStatus() {
+    try {
+      const adminCount = await this.dbService.db
+        .select({ count: drizzleSql<number>`count(*)` })
+        .from(users)
+        .limit(1);
+
+      const isInitialized = Number(adminCount[0]?.count || 0) > 0;
+      return { isInitialized };
+    } catch (err: any) {
+      // Tables may not exist yet (pre-migration). Treat as uninitialized.
+      this.logger.warn(`getSetupStatus DB query failed: ${err.message}. Assuming uninitialized.`);
+      console.error('>>> [AuthService] getSetupStatus Error:', err);
+      return { isInitialized: false };
+    }
+  }
+
+  async initializeSetup(dto: SetupDto) {
+    const fs = require('fs');
+    const path = require('path');
+    const logFile = path.join(process.cwd(), 'setup_debug.log');
+    
+    const logToFile = (msg: string) => {
+      const timestamp = new Date().toISOString();
+      fs.appendFileSync(logFile, `[${timestamp}] ${msg}\n`);
+    };
+
+    logToFile(`>>> INIT ATTEMPT: Tenant ${dto.tenantId}`);
+
+    let status: { isInitialized: boolean };
+    try {
+      status = await this.getSetupStatus();
+    } catch (err: any) {
+      logToFile(`getSetupStatus error: ${err.message}`);
+      status = { isInitialized: false };
+    }
+
+    if (status.isInitialized) {
+      logToFile('ERROR: System already initialized');
+      throw new ForbiddenException({ code: 'SYSTEM_ALREADY_INITIALIZED' });
+    }
+
+    try {
+      // ── Step 1: Tenant ──────────────────────────────────────────────────────
+      logToFile('Step 1: Creating tenant...');
+      await this.dbService.db.insert(tenants).values({
+        id: dto.tenantId,
+        name: dto.tenantName,
+        slug: dto.tenantSlug,
+        branding: {},
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // ── Step 2: Branch ──────────────────────────────────────────────────────
+      logToFile('Step 2: Creating branch...');
+      const branchId = createId();
+      await this.dbService.db.insert(branches).values({
+        id: branchId,
+        tenantId: dto.tenantId,
+        name: dto.branchName || 'Headquarters',
+        branchCode: 'MAIN',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // ── Step 3: Super Admin Role ────────────────────────────────────────────
+      logToFile('Step 3: Creating Super Admin role...');
+      const roleId = createId();
+      await this.dbService.db.insert(roles).values({
+        id: roleId,
+        tenantId: dto.tenantId,
+        name: 'Super Admin',
+        description: 'Full system access',
+        isSystem: true,
+        permissions: ['*'],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      // ── Step 4: Super Admin User ────────────────────────────────────────────
+      logToFile('Step 4: Hashing password...');
+      const hashedPassword = await argon2.hash(dto.adminPassword, {
+        memoryCost: 65536,
+        timeCost: 3,
+        parallelism: 1,
+        type: argon2.argon2id,
+      });
+
+      logToFile('Step 4: Inserting user...');
+      const [user] = await this.dbService.db
+        .insert(users)
+        .values({
+          id: createId(),
+          tenantId: dto.tenantId,
+          emailEnc: encryptEmail(dto.adminEmail),
+          emailHmac: hashEmail(dto.adminEmail),
+          password: hashedPassword,
+          firstName: dto.adminFirstName,
+          lastName: dto.adminLastName,
+          roleId: roleId,
+          emailVerifiedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .returning();
+
+      // ── Step 5: Core Module Registry ────────────────────────────────────────
+      logToFile('Step 5: Registering core modules...');
+      const coreModules = ['auth', 'database', 'kernel', 'tenant'];
+      for (const mod of coreModules) {
+        await this.dbService.db.insert(moduleRegistry).values({
+          tenantId: dto.tenantId,
+          moduleId: mod,
+          isEnabled: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
+      logToFile('SUCCESS: System initialized');
+
+      return {
+        success: true,
+        message: 'System initialized successfully',
+        admin: {
+          id: user.id,
+          email: dto.adminEmail,
+        },
+      };
+
+    } catch (err: any) {
+      logToFile(`FATAL ERROR: ${err.message}`);
+      logToFile(`STACK: ${err.stack}`);
+      throw err;
+    }
+  }
 }
+
+

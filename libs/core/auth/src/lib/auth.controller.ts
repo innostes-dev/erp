@@ -20,6 +20,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { VerifyOtpDto } from '../dto/verify-otp.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { SetupDto } from '../dto/setup.dto';
 import { AuthGuard } from '../guards/auth.guard';
 import { TenantInterceptor } from '../interceptors/tenant.interceptor';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -78,7 +82,7 @@ export class AuthController {
     @Req() req: FastifyRequest,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const rawToken = req.cookies['refresh_token'];
+    const rawToken = req.cookies['__Secure-rt'];
     if (!rawToken) {
       return { success: false, error: { message: 'Refresh token missing', code: 'REFRESH_TOKEN_MISSING' } };
     }
@@ -86,6 +90,34 @@ export class AuthController {
     const result = await this.authService.refresh(rawToken);
     this.setAuthCookies(res, result.accessToken, result.refreshToken);
     return { success: true };
+  }
+
+  @Post('forgot-password')
+  @Throttle({ 'forgot-password': { ttl: 1800, limit: 3 } })
+  @ApiOperation({ summary: 'Request password reset OTP' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: FastifyRequest) {
+    const ip = extractIp(req);
+    await this.authService.forgotPassword(dto, ip);
+    return { success: true, data: { message: 'If the email exists, an OTP was sent.' } };
+  }
+
+  @Post('verify-otp')
+  @Throttle({ 'verify-otp': { ttl: 600, limit: 5 } })
+  @ApiOperation({ summary: 'Verify OTP' })
+  async verifyOtp(@Body() dto: VerifyOtpDto, @Req() req: FastifyRequest) {
+    const ip = extractIp(req);
+    const result = await this.authService.verifyOtp(dto, ip);
+    return { success: true, data: result };
+  }
+
+  @Post('reset-password')
+  @Throttle({ 'reset-password': { ttl: 600, limit: 3 } })
+  @ApiOperation({ summary: 'Reset password' })
+  async resetPassword(@Body() dto: ResetPasswordDto, @Req() req: FastifyRequest) {
+    const ip = extractIp(req);
+    const device = parseDevice(req.headers['user-agent']);
+    await this.authService.resetPassword(dto, ip, device);
+    return { success: true, data: { message: 'Password has been reset successfully.' } };
   }
 
   @Post('logout')
@@ -162,7 +194,7 @@ export class AuthController {
   }
 
   private setAuthCookies(res: FastifyReply, accessToken: string, refreshToken: string) {
-    res.setCookie('access_token', accessToken, {
+    res.setCookie('__Host-at', accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
@@ -170,7 +202,7 @@ export class AuthController {
       path: '/',
     });
 
-    res.setCookie('refresh_token', refreshToken, {
+    res.setCookie('__Secure-rt', refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
@@ -180,7 +212,22 @@ export class AuthController {
   }
 
   private clearAuthCookies(res: FastifyReply) {
-    res.setCookie('access_token', '', { maxAge: 0, path: '/' });
-    res.setCookie('refresh_token', '', { maxAge: 0, path: '/api/v1/auth/refresh' });
+    res.setCookie('__Host-at', '', { maxAge: 0, path: '/' });
+    res.setCookie('__Secure-rt', '', { maxAge: 0, path: '/api/v1/auth/refresh' });
+  }
+
+  @Get('setup-status')
+  @ApiOperation({ summary: 'Check if system initialization is required' })
+  async getSetupStatus() {
+    return this.authService.getSetupStatus();
+  }
+
+  @Post('setup')
+  @ApiOperation({ summary: 'Initial system setup (Tenant, Main Branch, Super Admin)' })
+  async initializeSetup(@Body() dto: SetupDto) {
+    console.log('>>> [AuthController] Received POST /auth/setup');
+    console.log('>>> Payload:', JSON.stringify(dto));
+    return this.authService.initializeSetup(dto);
   }
 }
+

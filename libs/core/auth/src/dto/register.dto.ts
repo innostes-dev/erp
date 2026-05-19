@@ -25,8 +25,8 @@ export class RegisterDto {
     description: 'Password (min 8 chars, must contain upper, lower, and digit/special)' 
   })
   @IsString()
-  @MinLength(8)
-  @MaxLength(72)
+  @MinLength(12)
+  @MaxLength(128)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'password is too weak. Must contain uppercase, lowercase, and a digit or special character.',
   })

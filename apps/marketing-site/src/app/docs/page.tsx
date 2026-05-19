@@ -62,18 +62,18 @@ interface FlatEndpoint {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const METHOD_STYLE: Record<string, { bg: string; text: string; border: string }> = {
-  get:    { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30' },
-  post:   { bg: 'bg-blue-500/10',   text: 'text-blue-400',    border: 'border-blue-500/30'   },
-  put:    { bg: 'bg-amber-500/10',  text: 'text-amber-400',   border: 'border-amber-500/30'  },
-  patch:  { bg: 'bg-orange-500/10', text: 'text-orange-400',  border: 'border-orange-500/30' },
-  delete: { bg: 'bg-red-500/10',    text: 'text-red-400',     border: 'border-red-500/30'    },
+  get: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+  post: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/30' },
+  put: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
+  patch: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/30' },
+  delete: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/30' },
 };
 
 const METHOD_BADGE: Record<string, string> = {
-  get:    'bg-emerald-500 text-white',
-  post:   'bg-blue-500 text-white',
-  put:    'bg-amber-500 text-white',
-  patch:  'bg-orange-500 text-white',
+  get: 'bg-emerald-500 text-white',
+  post: 'bg-blue-500 text-white',
+  put: 'bg-amber-500 text-white',
+  patch: 'bg-orange-500 text-white',
   delete: 'bg-red-500 text-white',
 };
 
@@ -315,7 +315,7 @@ function IntroPanel() {
               <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Meaning</th>
             </tr></thead>
             <tbody className="divide-y divide-gray-100">
-              {[['400','BADREQUEST','Validation failure — check message for field details'],['401','UNAUTHORIZED','Missing token, invalid token, or bad credentials'],['403','FORBIDDEN','Token valid but insufficient role/permission'],['404','NOTFOUND','Resource does not exist'],['500','INTERNAL_ERROR','Unhandled server error — check gateway logs']].map(([s,c,m]) => (
+              {[['400', 'BADREQUEST', 'Validation failure — check message for field details'], ['401', 'UNAUTHORIZED', 'Missing token, invalid token, or bad credentials'], ['403', 'FORBIDDEN', 'Token valid but insufficient role/permission'], ['404', 'NOTFOUND', 'Resource does not exist'], ['500', 'INTERNAL_ERROR', 'Unhandled server error — check gateway logs']].map(([s, c, m]) => (
                 <tr key={s}>
                   <td className="px-4 py-3"><span className={cn('rounded px-1.5 py-0.5 font-mono text-xs font-medium', s.startsWith('4') ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')}>{s}</span></td>
                   <td className="px-4 py-3 font-mono text-xs text-gray-700">{c}</td>

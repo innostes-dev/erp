@@ -14,10 +14,13 @@
     "jsx": "preserve",
     "types": ["node"],
     "paths": {
+      "@innostes/logger": ["packages/universal-logger/src/index.ts"],
+      "@innostes/logger/*": ["packages/universal-logger/src/*"],
       "@innostes/core/design-system": ["libs/core/design-system/src/index.ts"],
       "@innostes/core/database": ["libs/core/database/src/index.ts"],
       "@innostes/core/auth": ["libs/core/auth/src/index.ts"],
       "@innostes/core/bridge": ["libs/core/bridge/src/index.ts"],
+      "@innostes/core/logger": ["libs/core/logger/src/index.ts"],
       "@innostes/modules/hrms/feature-ui": ["libs/modules/hrms/feature-ui/src/index.ts"],
       "@innostes/modules/hrms/api-logic": ["libs/modules/hrms/api-logic/src/index.ts"],
       "@innostes/modules/hrms/data-access": ["libs/modules/hrms/data-access/src/index.ts"],

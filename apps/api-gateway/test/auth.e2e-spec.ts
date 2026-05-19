@@ -39,4 +39,39 @@ describe('AuthController (e2e)', () => {
         expect(JSON.parse(response.payload)).toHaveProperty('status', 'ok');
       });
   });
+  it('/auth/forgot-password (POST) - should fail with 400 on empty body', () => {
+    return app
+      .inject({
+        method: 'POST',
+        url: '/auth/forgot-password',
+        payload: {}
+      })
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+      });
+  });
+
+  it('/auth/forgot-password (POST) - should fail with 400 on invalid email', () => {
+    return app
+      .inject({
+        method: 'POST',
+        url: '/auth/forgot-password',
+        payload: { email: 'not-an-email', tenantId: 't1' }
+      })
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+      });
+  });
+
+  it('/auth/verify-otp (POST) - should fail with 400 on missing otp', () => {
+    return app
+      .inject({
+        method: 'POST',
+        url: '/auth/verify-otp',
+        payload: { email: 'test@test.com', tenantId: 't1' }
+      })
+      .then((response) => {
+        expect(response.statusCode).toBe(400);
+      });
+  });
 });

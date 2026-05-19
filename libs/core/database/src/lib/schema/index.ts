@@ -6,3 +6,5 @@ export * from './roles';
 export * from './permissions';
 export * from './auth.schema';
 export * from './module-registry';
+export * from './auth-events.schema';
+export * from './otp-tokens.schema';

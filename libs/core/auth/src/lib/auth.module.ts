@@ -8,6 +8,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { DatabaseModule } from '@innostes/core/database';
+import { AuthGuard } from '../guards/auth.guard';
+import { RoleGuard } from '../guards/role.guard';
+import { TenantInterceptor } from '../interceptors/tenant.interceptor';
+import { HttpExceptionFilter } from '../filters/http-exception.filter';
+import { APP_GUARD, APP_FILTER } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -36,7 +42,20 @@ import { DatabaseModule } from '@innostes/core/database';
     ]),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [
+    AuthService,
+    AuthGuard,
+    RoleGuard,
+    TenantInterceptor,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
+  exports: [AuthService, AuthGuard, RoleGuard, TenantInterceptor],
 })
 export class AuthModule {}

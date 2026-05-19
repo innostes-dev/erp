@@ -1,4 +1,4 @@
-import { pgTable, text, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, timestamp, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { auditColumns, idColumn, tenantColumn } from './utils';
 import { tenants } from './tenants';
@@ -9,8 +9,13 @@ export const users = pgTable(
   {
     ...idColumn,
     ...tenantColumn,
-    email: text('email').notNull(),
+    emailEnc: text('email_enc').notNull(),
+    emailHmac: text('email_hmac').notNull().unique(),
     password: text('password').notNull(),
+    failedLoginCount: integer('failed_login_count').notNull().default(0),
+    lockedUntil: timestamp('locked_until', { withTimezone: true, mode: 'string' }),
+    emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true, mode: 'string' }),
+    passwordChangedAt: timestamp('password_changed_at', { withTimezone: true, mode: 'string' }),
     firstName: text('first_name').notNull(),
     lastName: text('last_name').notNull(),
     middleName: text('middle_name'),
@@ -21,7 +26,7 @@ export const users = pgTable(
   },
   (table) => ({
     tenantIdx: index('users_tenant_idx').on(table.tenantId),
-    emailIdx: index('users_email_idx').on(table.email),
+    emailHmacIdx: index('users_email_hmac_idx').on(table.emailHmac),
     roleIdx: index('users_role_idx').on(table.roleId),
   })
 );

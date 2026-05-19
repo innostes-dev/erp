@@ -1,0 +1,20 @@
+{
+  "name": "setup-wizard",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/setup-wizard/src",
+  "projectType": "application",
+  "tags": ["scope:app", "type:frontend"],
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "root": "apps/setup-wizard",
+        "outputPath": "dist/apps/setup-wizard"
+      },
+      "configurations": {
+        "production": {}
+      }
+    }
+  }
+}
