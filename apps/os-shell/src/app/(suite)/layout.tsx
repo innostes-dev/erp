@@ -7,6 +7,8 @@ import { TopbarActions } from '../../components/shell/topbar-actions';
 import { fetchRegistryModules } from '../../lib/registry';
 import { BRANDING } from '@innostes/core/design-system';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SuiteLayout({ children }: { children: ReactNode }) {
   const modules = await fetchRegistryModules();
   return (
