@@ -12,7 +12,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "jsx": "preserve",
-    "types": ["node"],
+    "types": ["node", "jest"],
     "paths": {
       "@innostes/core/design-system": ["libs/core/design-system/src/index.ts"],
       "@innostes/core/database": ["libs/core/database/src/index.ts"],

@@ -15,6 +15,7 @@ import {
   Param,
 } from '@nestjs/common';
 import { FastifyRequest, FastifyReply } from 'fastify';
+import '@fastify/cookie';
 import { Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
 import { AuthService } from './auth.service';

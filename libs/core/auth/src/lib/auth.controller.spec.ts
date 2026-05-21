@@ -50,7 +50,12 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should set secure cookies and return user', async () => {
       mockReq.headers['x-tenant-id'] = 't1';
-      const result = await controller.login({ email: 'test@test.com', password: 'password', tenantId: 't1' }, mockReq as any, mockRes as any);
+      const result = await controller.login(
+        { email: 'test@test.com', password: 'password' },
+        't1',
+        mockReq as any,
+        mockRes as any
+      );
       expect(authService.login).toHaveBeenCalled();
       expect(mockRes.setCookie).toHaveBeenCalledWith('__Host-at', 'at', expect.any(Object));
       expect(mockRes.setCookie).toHaveBeenCalledWith('__Secure-rt', 'rt', expect.any(Object));
