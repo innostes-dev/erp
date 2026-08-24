@@ -1,6 +1,6 @@
 import express from 'express';
 import * as path from 'path';
-import { createDatabaseService, IDatabaseService } from '@core';
+import { createDatabaseService, IDatabaseService, createAuthRouter } from '@core';
 
 const app = express();
 app.use(express.json());
@@ -13,6 +13,8 @@ app.get('/api', async (req, res) => {
   res.send({ databaseHealthy: isHealthy });
 });
 
+app.use('/auth', createAuthRouter());
+
 // Database connectivity check & server startup
 dbService.healthCheck().then((connected) => {
   if (connected) {
@@ -21,6 +23,8 @@ dbService.healthCheck().then((connected) => {
     console.warn('Database Connection Failed!');
   }
 });
+
+
 
 const port = process.env.PORT || 3333;
 const server = app.listen(port, () => {
