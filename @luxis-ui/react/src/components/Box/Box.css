@@ -1,0 +1,143 @@
+/* ===== Box Component Base Styles ===== */
+.lxs-box {
+  box-sizing: border-box;
+}
+
+/* ===== Display Utilities ===== */
+.lxs-box--display-block {
+  display: block;
+}
+
+.lxs-box--display-inline-block {
+  display: inline-block;
+}
+
+.lxs-box--display-inline {
+  display: inline;
+}
+
+.lxs-box--display-flex {
+  display: flex;
+}
+
+.lxs-box--display-inline-flex {
+  display: inline-flex;
+}
+
+.lxs-box--display-grid {
+  display: grid;
+}
+
+.lxs-box--display-inline-grid {
+  display: inline-grid;
+}
+
+.lxs-box--display-none {
+  display: none;
+}
+
+/* ===== Position Utilities ===== */
+.lxs-box--position-static {
+  position: static;
+}
+
+.lxs-box--position-relative {
+  position: relative;
+}
+
+.lxs-box--position-absolute {
+  position: absolute;
+}
+
+.lxs-box--position-fixed {
+  position: fixed;
+}
+
+.lxs-box--position-sticky {
+  position: sticky;
+}
+
+/* ===== Overflow Utilities ===== */
+.lxs-box--overflow-visible {
+  overflow: visible;
+}
+
+.lxs-box--overflow-hidden {
+  overflow: hidden;
+}
+
+.lxs-box--overflow-scroll {
+  overflow: scroll;
+}
+
+.lxs-box--overflow-auto {
+  overflow: auto;
+}
+
+/* ===== Shadow Utilities ===== */
+.lxs-box--shadow-none {
+  box-shadow: none;
+}
+
+.lxs-box--shadow-sm {
+  box-shadow: var(
+    --lxs-shadow-sm,
+    0 1px 2px 0 rgba(0, 0, 0, 0.05)
+  );
+}
+
+.lxs-box--shadow-md {
+  box-shadow: var(
+    --lxs-shadow-md,
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06)
+  );
+}
+
+.lxs-box--shadow-lg {
+  box-shadow: var(
+    --lxs-shadow-lg,
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05)
+  );
+}
+
+.lxs-box--shadow-xl {
+  box-shadow: var(
+    --lxs-shadow-xl,
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04)
+  );
+}
+
+/* ===== Flex Direction ===== */
+.lxs-box--flex-dir-row          { flex-direction: row; }
+.lxs-box--flex-dir-row-reverse  { flex-direction: row-reverse; }
+.lxs-box--flex-dir-column       { flex-direction: column; }
+.lxs-box--flex-dir-column-reverse { flex-direction: column-reverse; }
+
+/* ===== Justify Content ===== */
+.lxs-box--justify-flex-start    { justify-content: flex-start; }
+.lxs-box--justify-flex-end      { justify-content: flex-end; }
+.lxs-box--justify-center        { justify-content: center; }
+.lxs-box--justify-space-between { justify-content: space-between; }
+.lxs-box--justify-space-around  { justify-content: space-around; }
+.lxs-box--justify-space-evenly  { justify-content: space-evenly; }
+
+/* ===== Align Items ===== */
+.lxs-box--align-flex-start { align-items: flex-start; }
+.lxs-box--align-flex-end   { align-items: flex-end; }
+.lxs-box--align-center     { align-items: center; }
+.lxs-box--align-baseline   { align-items: baseline; }
+.lxs-box--align-stretch    { align-items: stretch; }
+
+/* ===== Flex Wrap ===== */
+.lxs-box--flex-wrap-nowrap       { flex-wrap: nowrap; }
+.lxs-box--flex-wrap-wrap         { flex-wrap: wrap; }
+.lxs-box--flex-wrap-wrap-reverse { flex-wrap: wrap-reverse; }
+
+/* ===== Text Align ===== */
+.lxs-box--text-left    { text-align: left; }
+.lxs-box--text-center  { text-align: center; }
+.lxs-box--text-right   { text-align: right; }
+.lxs-box--text-justify { text-align: justify; }

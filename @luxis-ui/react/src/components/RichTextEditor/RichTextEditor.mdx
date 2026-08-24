@@ -1,0 +1,1252 @@
+---
+title: "RichTextEditor — Luxis UI React Component"
+description: "A WYSIWYG rich text editor with a formatting toolbar. Supports controlled/uncontrolled modes, character counting, validation states, custom toolbars, and link insertion."
+status: stable
+since: "1.0.0"
+category: "Components/RichTextEditor"
+npm: "@luxis-ui/react"
+import: "import { RichTextEditor } from '@luxis-ui/react'"
+component: "RichTextEditor"
+keywords:
+  - rich text editor
+  - wysiwyg
+  - rich text editor react
+  - luxis ui rich text editor
+  - typescript rich text editor
+  - accessible rich text editor
+  - react design system
+slug: /components/rich-text-editor
+canonical: "https://luxisui.com/docs/components/rich-text-editor"
+og_image: "/img/og/rich-text-editor.png"
+llm_summary: >
+  The RichTextEditor component renders a contentEditable div with a formatting toolbar. Primary use case is a WYSIWYG editor for structured rich-text content input. Do not use when a simple textarea or plain-text input would suffice. Implements WAI-ARIA textbox pattern. Import: `import { RichTextEditor } from '@luxis-ui/react'`. Props: label (string, default=undefined), helperText (string, default=undefined), error (string, default=undefined), success (string, default=undefined), size ('sm'|'md'|'lg', default=theme.global.size), fullWidth (boolean, default=true), clearable (boolean, default=false), onClear (() => void, default=undefined), showCount (boolean, default=false), maxLength (number, default=undefined), required (boolean, default=false), disabled (boolean, default=false), placeholder (string, default='Start typing...'), value (string, default=undefined), defaultValue (string, default=undefined), onChange ((html, text) => void, default=undefined), minHeight (number, default=200), hideToolbar (boolean, default=false), toolbarButtons (ToolbarButton[], default=all buttons), onInsertLink ((insert) => void, default=undefined), sanitize ((html) => string, default=undefined).
+---
+
+{/*
+LLM_CONTEXT
+  component    : RichTextEditor
+  source       : packages/luxis-ui/src/components/RichTextEditor/RichTextEditor.tsx
+  story        : apps/storybook/src/stories/RichTextEditor.stories.tsx
+  package      : @luxis-ui/react
+  framework    : React 18+, TypeScript
+  category     : Components/RichTextEditor
+  status       : stable
+  aria-pattern : textbox (multiline)
+
+  What it renders:
+  RichTextEditor renders a contentEditable <div> with role="textbox" and aria-multiline="true",
+  wrapped inside a container div that also hosts an optional formatting toolbar.
+
+  When to use:
+  - Collecting rich-text content (articles, comments, bios, product descriptions)
+  - Providing users with formatting controls (bold, italic, headings, lists, links)
+  - Situations where plain <textarea> is insufficient because markup must be preserved
+
+  When NOT to use:
+  - Single-line or plain-text-only input — use Input instead
+  - Very large document editing — consider a dedicated editor library (Tiptap, Quill, Slate)
+  - When the consumer cannot sanitize user-generated HTML before persisting or rendering it
+
+  Ecosystem equivalents:
+  - MUI        : No direct equivalent; often paired with react-quill
+  - Chakra UI  : No built-in; community solutions
+  - shadcn/ui  : No built-in; Tiptap integration recommended
+  - Radix UI   : No built-in
+  - HTML native: <textarea> (plain text only)
+
+  Props (must match source exactly — every single prop):
+  label (string, default=undefined) — Label text displayed above the editor
+  helperText (string, default=undefined) — Helper text displayed below the editor
+  error (string, default=undefined) — Error message; triggers error state; takes precedence over helperText
+  success (string, default=undefined) — Success message; triggers success state
+  size ('sm'|'md'|'lg', default=theme.global.size) — Editor size
+  fullWidth (boolean, default=true) — If true, editor takes full container width
+  clearable (boolean, default=false) — If true, shows a clear button when content is present
+  onClear (() => void, default=undefined) — Callback fired when clear button is clicked
+  showCount (boolean, default=false) — If true, shows a character counter
+  maxLength (number, default=undefined) — Maximum character length; also surfaces counter when set
+  wrapperClassName (string, default='') — Additional class name for the outer wrapper element
+  labelClassName (string, default='') — Additional class name for the label element
+  editorClassName (string, default='') — Additional class name for the contentEditable element
+  toolbarClassName (string, default='') — Additional class name for the toolbar element
+  required (boolean, default=false) — If true, marks the field as required
+  disabled (boolean, default=false) — If true, disables the editor and toolbar
+  placeholder (string, default='Start typing...') — Placeholder text shown when editor is empty
+  value (string, default=undefined) — Controlled HTML content
+  defaultValue (string, default=undefined) — Initial HTML content (uncontrolled)
+  onChange ((html: string, text: string) => void, default=undefined) — Fired on content change; receives html and plain-text
+  minHeight (number, default=200) — Minimum height of the editor area in pixels
+  id (string, default=undefined) — Custom id for the editor element
+  hideToolbar (boolean, default=false) — If true, hides the formatting toolbar
+  toolbarButtons (ToolbarButton[], default=all 17 buttons) — Subset of toolbar buttons to render
+  onInsertLink ((insert: (url: string) => void) => void, default=undefined) — Custom handler for link insertion
+  sanitize ((html: string) => string, default=undefined) — HTML sanitizer applied before setting innerHTML
+  aria-label (string, default=undefined) — Accessible label for the editor; required when no label prop is given
+  onFocus (React.FocusEventHandler, default=undefined) — Fired when the editor gains focus
+  onBlur (React.FocusEventHandler, default=undefined) — Fired when the editor loses focus
+  onKeyDown (React.KeyboardEventHandler, default=undefined) — Fired on keydown inside the editor
+
+  Accessibility:
+  WCAG: AA
+  Keyboard: Tab moves focus into editor, standard text-editing keys apply inside, toolbar buttons are excluded from tab order (tabIndex=-1)
+  Screen reader: Announces role='textbox', aria-multiline='true', aria-invalid on error, aria-required, aria-describedby linking to helper/error/success text
+END_LLM_CONTEXT
+*/}
+
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "RichTextEditor React Component — Luxis UI",
+  "description": "A WYSIWYG rich text editor with a formatting toolbar. Supports controlled/uncontrolled modes, character counting, validation states, custom toolbars, and link insertion.",
+  "keywords": "rich text editor, wysiwyg, rich text editor react, luxis ui rich text editor, typescript rich text editor, accessible rich text editor, react design system",
+  "author": { "@type": "Organization", "name": "Luxis UI" },
+  "programmingLanguage": ["TypeScript", "React"],
+  "about": {
+    "@type": "SoftwareSourceCode",
+    "name": "@luxis-ui/react",
+    "runtimePlatform": "React"
+  },
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I install and use RichTextEditor in React?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install with npm install @luxis-ui/react. Import with import { RichTextEditor } from '@luxis-ui/react'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What props does the Luxis UI RichTextEditor accept?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "RichTextEditor accepts props like label, helperText, error, success, size, fullWidth, clearable, showCount, maxLength, required, disabled, placeholder, value, defaultValue, onChange, minHeight, hideToolbar, toolbarButtons, onInsertLink, and sanitize."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I make the RichTextEditor accessible?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Always provide a visible label prop or an aria-label when no label is present. The component applies role='textbox', aria-multiline='true', aria-invalid, aria-required, and aria-describedby automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I sanitize user HTML in RichTextEditor?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pass a sanitize prop: sanitize={(html) => DOMPurify.sanitize(html)}. The sanitizer is applied before setting innerHTML from the value prop, preventing XSS."
+        }
+      }
+    ]
+  }
+}
+`}</script>
+
+# RichTextEditor
+
+<ComponentStatus status="stable" version="1.0.0" aria="WAI-ARIA textbox (multiline)" />
+
+A WYSIWYG rich text editor with a formatting toolbar. Supports controlled/uncontrolled modes, character counting, validation states, custom toolbars, and a safe link-insertion API.
+
+<!--
+EXAMPLE: Installation
+PURPOSE: Shows how to install the package
+OUTPUT: Bash install commands for npm, yarn, and pnpm
+USE WHEN: Setting up the project for the first time
+SOURCE: N/A
+-->
+```bash
+npm install @luxis-ui/react
+# or
+yarn add @luxis-ui/react
+# or
+pnpm add @luxis-ui/react
+```
+
+<!--
+EXAMPLE: Import
+PURPOSE: Shows the exact import statement for RichTextEditor
+OUTPUT: Single import line ready to paste
+USE WHEN: Adding RichTextEditor to any file
+SOURCE: packages/luxis-ui/src/components/RichTextEditor/index.ts
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+```
+
+<Callout type="info" title="Migrating from another library?">
+  Luxis UI `RichTextEditor` covers the same role as integrating react-quill with MUI or
+  using Tiptap with shadcn/ui, but ships as a single zero-dependency component.
+  It uses a native `contentEditable` surface styled via CSS variables.
+</Callout>
+
+## Before You Start
+
+RichTextEditor renders a `contentEditable` div with `role="textbox"` and a companion formatting toolbar.
+It relies on the browser's `execCommand` API for formatting and the WAI-ARIA `textbox` (multiline) pattern for accessibility.
+The Quick Start example below provides a basic initialization of RichTextEditor.
+
+<Callout type="warning" title="Security: always sanitize user HTML">
+  RichTextEditor produces raw HTML. Before persisting or rendering user-generated content
+  elsewhere in your app, run it through a sanitizer such as
+  [DOMPurify](https://github.com/cure53/DOMPurify) via the `sanitize` prop.
+</Callout>
+
+<Callout type="tip" title="New to Luxis UI?">
+  Check our Getting Started guide for overarching conventions.
+</Callout>
+
+## How to Use RichTextEditor in React
+
+The minimum code to render a working RichTextEditor:
+
+<!--
+EXAMPLE: Basic Usage
+PURPOSE: Minimum viable implementation of RichTextEditor
+OUTPUT: Basic working RichTextEditor instance
+USE WHEN: Prototyping standard layouts
+SOURCE: Derived from RichTextEditor.tsx defaults and simplest Story
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function Example() {
+  return (
+    <RichTextEditor
+      label="Article Content"
+      placeholder="Start writing your article..."
+    />
+  );
+}
+```
+
+This renders a standard RichTextEditor with a label, a full formatting toolbar, and default styling.
+
+## Try It Live
+
+Edit the code below — the preview updates in real time.
+
+<!--
+EXAMPLE: Live Playground
+PURPOSE: Interactive preview of RichTextEditor with key props
+OUTPUT: An interactive RichTextEditor component instance
+USE WHEN: Exploring props before copying to your project
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx
+-->
+```tsx live
+// ✏️ Edit this code — the preview updates in real time
+import { useState } from 'react';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function LiveExample() {
+  const [html, setHtml] = useState('');
+
+  return (
+    <RichTextEditor
+      label="Content"
+      placeholder="Start typing..."
+      value={html}
+      onChange={(h) => setHtml(h)}
+      showCount
+      maxLength={500}
+      fullWidth
+    />
+  );
+}
+```
+
+## RichTextEditor Examples
+
+Copy-paste ready examples for every variant. Each example is self-contained.
+
+---
+
+### Default
+
+Minimal editor with label and placeholder — no extra props required.
+
+<!--
+EXAMPLE: Default
+PURPOSE: Shows the Default configuration of RichTextEditor
+OUTPUT: Rendered RichTextEditor in Default state
+USE WHEN: Implementing a basic editor without special requirements
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → Default
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function DefaultExample() {
+  return (
+    <RichTextEditor
+      label="Article Content"
+      placeholder="Start writing your article..."
+    />
+  );
+}
+```
+
+---
+
+### With Helper Text
+
+Attach contextual guidance below the editor with `helperText`.
+
+<!--
+EXAMPLE: WithHelperText
+PURPOSE: Shows the WithHelperText configuration of RichTextEditor
+OUTPUT: Rendered RichTextEditor with helper text below
+USE WHEN: Guiding users on what content is expected
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → WithHelperText
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function WithHelperTextExample() {
+  return (
+    <RichTextEditor
+      label="Product Description"
+      helperText="Describe the product in detail. Markdown-style formatting is supported."
+      placeholder="Enter a rich product description..."
+    />
+  );
+}
+```
+
+---
+
+### Validation States
+
+Use `error` for an error state and `success` for a success state. `error` takes precedence over `helperText` when both are set.
+
+<!--
+EXAMPLE: ValidationStates
+PURPOSE: Shows error and success states of RichTextEditor
+OUTPUT: Two stacked RichTextEditor instances — one in error, one in success state
+USE WHEN: Providing form validation feedback
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → ValidationStates
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function ValidationStatesExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <RichTextEditor
+        label="Comment"
+        error="Comment cannot be empty."
+        placeholder="Write your comment..."
+      />
+      <RichTextEditor
+        label="Bio"
+        success="Bio saved successfully."
+        defaultValue="<p>Hello! I'm a software engineer.</p>"
+      />
+    </div>
+  );
+}
+```
+
+---
+
+### Character Counter
+
+Enable `showCount` to display a live character counter. Combine with `maxLength` to enforce a hard limit — the component blocks further input once the limit is reached.
+
+<!--
+EXAMPLE: WithCharacterCounter
+PURPOSE: Shows character counter with a hard limit
+OUTPUT: RichTextEditor with live counter and 300-character cap
+USE WHEN: Content must conform to a length constraint (bio, post, comment)
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → WithCharacterCounter
+-->
+```tsx
+import { useState } from 'react';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function WithCharacterCounterExample() {
+  const [html, setHtml] = useState('');
+
+  return (
+    <RichTextEditor
+      label="Short Bio"
+      placeholder="Write a short bio (max 300 characters)..."
+      showCount
+      maxLength={300}
+      value={html}
+      onChange={(h) => setHtml(h)}
+      helperText="Used on your public profile."
+    />
+  );
+}
+```
+
+---
+
+### Clearable
+
+Set `clearable` to show a clear button in the toolbar whenever the editor has content. Pair with `onClear` to reset controlled state.
+
+<!--
+EXAMPLE: Clearable
+PURPOSE: Shows the clear-content button in the toolbar
+OUTPUT: RichTextEditor with a × button that removes all content
+USE WHEN: Users may need a quick way to reset the field
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → Clearable
+-->
+```tsx
+import { useState } from 'react';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function ClearableExample() {
+  const [html, setHtml] = useState('<p>Edit me and then click the × button to clear.</p>');
+
+  return (
+    <RichTextEditor
+      label="Draft"
+      clearable
+      value={html}
+      onChange={(h) => setHtml(h)}
+      onClear={() => setHtml('')}
+    />
+  );
+}
+```
+
+---
+
+### Sizes
+
+Three sizes are available: `sm`, `md` (default), and `lg`. Size affects toolbar icon sizing, padding, and font size.
+
+<!--
+EXAMPLE: Sizes
+PURPOSE: Shows all three size variants of RichTextEditor
+OUTPUT: Three stacked RichTextEditor instances at sm, md, and lg sizes
+USE WHEN: Matching editor size to surrounding UI density
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → Sizes
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function SizesExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      {(['sm', 'md', 'lg'] as const).map((s) => (
+        <RichTextEditor key={s} label={`Size: ${s}`} size={s} minHeight={120} />
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+### Disabled
+
+Set `disabled` to prevent all editing and toolbar interactions.
+
+<!--
+EXAMPLE: Disabled
+PURPOSE: Shows the disabled state of RichTextEditor
+OUTPUT: RichTextEditor with locked content that cannot be edited
+USE WHEN: Displaying read-only archived or locked content
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → Disabled
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function DisabledExample() {
+  return (
+    <RichTextEditor
+      label="Archived Content"
+      disabled
+      defaultValue="<p>This content is locked and cannot be edited.</p>"
+    />
+  );
+}
+```
+
+---
+
+### Required
+
+Set `required` to mark the field with a visual asterisk and set `aria-required="true"` on the editor element.
+
+<!--
+EXAMPLE: Required
+PURPOSE: Shows the required state of RichTextEditor
+OUTPUT: RichTextEditor with an asterisk next to its label
+USE WHEN: The field must be filled before form submission
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → Required
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function RequiredExample() {
+  return (
+    <RichTextEditor
+      label="Terms & Conditions"
+      required
+      placeholder="You must provide this content..."
+    />
+  );
+}
+```
+
+---
+
+### Without Toolbar
+
+Set `hideToolbar` for a plain textarea-style surface without any formatting controls.
+
+<!--
+EXAMPLE: WithoutToolbar
+PURPOSE: Shows RichTextEditor with the toolbar hidden
+OUTPUT: Clean editor area with no formatting buttons
+USE WHEN: Free-form notes where markup is not needed
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → WithoutToolbar
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function WithoutToolbarExample() {
+  return (
+    <RichTextEditor
+      label="Plain Notes"
+      hideToolbar
+      placeholder="Write free-form notes..."
+      minHeight={160}
+    />
+  );
+}
+```
+
+---
+
+### Custom Toolbar Buttons
+
+Pass a `toolbarButtons` array with any subset of the 17 available button keys to tailor the toolbar to your use case.
+
+<!--
+EXAMPLE: CustomToolbarButtons
+PURPOSE: Shows a reduced toolbar with only the most common buttons
+OUTPUT: RichTextEditor with bold, italic, underline, lists, link, undo, redo
+USE WHEN: Limiting formatting options to reduce cognitive load
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → CustomToolbarButtons
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function CustomToolbarButtonsExample() {
+  return (
+    <RichTextEditor
+      label="Comment"
+      toolbarButtons={['bold', 'italic', 'underline', 'orderedList', 'unorderedList', 'link', 'undo', 'redo']}
+      placeholder="Write a focused comment..."
+    />
+  );
+}
+```
+
+Available toolbar button keys: `'bold'`, `'italic'`, `'underline'`, `'strikethrough'`, `'h1'`, `'h2'`, `'h3'`, `'orderedList'`, `'unorderedList'`, `'link'`, `'alignLeft'`, `'alignCenter'`, `'alignRight'`, `'code'`, `'clearFormat'`, `'undo'`, `'redo'`.
+
+---
+
+### Controlled
+
+When to use: When a parent component needs to read or drive the content.
+
+<Callout type="info" title="Controlled vs Uncontrolled">
+  By default RichTextEditor manages its own content (uncontrolled via `defaultValue`).
+  Use the controlled pattern — `value` + `onChange` — when syncing with a form
+  library, URL param, or another component.
+</Callout>
+
+<!--
+EXAMPLE: Controlled
+PURPOSE: useState-driven RichTextEditor with external state management
+OUTPUT: RichTextEditor whose content is owned by the parent, with live HTML preview
+USE WHEN: Programmatically reading or setting editor content
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → Controlled
+-->
+```tsx
+import { useState } from 'react';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function ControlledExample() {
+  const [html, setHtml] = useState('<p>Edit this content and watch the HTML update below.</p>');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <RichTextEditor
+        label="Controlled Editor"
+        value={html}
+        onChange={(h) => setHtml(h)}
+      />
+      <section style={{ background: '#f5f5f5', borderRadius: 8, padding: '12px 16px' }}>
+        <p style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: '#737373', margin: '0 0 8px' }}>
+          HTML Output
+        </p>
+        <pre style={{ fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+          {html}
+        </pre>
+      </section>
+    </div>
+  );
+}
+```
+
+---
+
+### Custom Link Insertion
+
+Override the default `window.prompt` with your own modal using `onInsertLink`. The callback receives an `insert` function — call it with the resolved URL when the user confirms.
+
+<!--
+EXAMPLE: Custom Link Insertion
+PURPOSE: Replacing the browser prompt with a custom link modal
+OUTPUT: RichTextEditor that opens a custom dialog for link URLs
+USE WHEN: The default browser prompt is not acceptable UX
+SOURCE: Derived from RichTextEditor.tsx onInsertLink prop
+-->
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function CustomLinkExample() {
+  const handleInsertLink = (insert: (url: string) => void) => {
+    // Replace with your own modal or URL picker
+    openLinkModal().then((url) => {
+      if (url) insert(url);
+    });
+  };
+
+  return (
+    <RichTextEditor
+      label="Content with Custom Link Dialog"
+      onInsertLink={handleInsertLink}
+    />
+  );
+}
+```
+
+---
+
+### With HTML Sanitizer
+
+Pass a `sanitize` function to strip dangerous markup before it is injected via `innerHTML`. This is essential when the `value` originates from user-generated content.
+
+<!--
+EXAMPLE: With HTML Sanitizer
+PURPOSE: Preventing XSS by sanitizing the value before rendering
+OUTPUT: RichTextEditor that sanitizes HTML through DOMPurify
+USE WHEN: value prop contains untrusted or user-generated HTML
+SOURCE: Derived from RichTextEditor.tsx sanitize prop
+-->
+```tsx
+import DOMPurify from 'dompurify';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function SanitizedExample() {
+  return (
+    <RichTextEditor
+      label="User Content"
+      value={untrustedHtml}
+      sanitize={(html) => DOMPurify.sanitize(html)}
+      onChange={(h) => handleChange(h)}
+    />
+  );
+}
+```
+
+## RichTextEditor Best Practices
+
+<DoAndDont
+  good={`// ✅ Always provide a visible label or aria-label
+<RichTextEditor label="Article Body" />`}
+  bad={`// ❌ Leaving the editor without an accessible name
+<RichTextEditor placeholder="Type here..." />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Sanitize untrusted HTML via the sanitize prop
+<RichTextEditor
+  value={userHtml}
+  sanitize={(html) => DOMPurify.sanitize(html)}
+/>`}
+  bad={`// ❌ Rendering raw user HTML without sanitization
+<RichTextEditor value={userHtml} />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Use onInsertLink to control the URL input experience
+<RichTextEditor onInsertLink={(insert) => openModal().then(insert)} />`}
+  bad={`// ❌ Relying on the default browser prompt in production UIs
+<RichTextEditor />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Use design tokens for theming
+<RichTextEditor style={{ '--lxs-richtext-border': '2px solid blue' }} />`}
+  bad={`// ❌ Overriding internal styles with !important
+<RichTextEditor className="force-blue-border" />`}
+/>
+
+## RichTextEditor Props & API Reference
+
+Complete reference for all props. All types and defaults sourced directly
+from `packages/luxis-ui/src/components/RichTextEditor/RichTextEditor.tsx`.
+
+### RichTextEditor Props
+
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `label` | `string` | `undefined` | No | Label text displayed above the editor |
+| `helperText` | `string` | `undefined` | No | Helper text displayed below the editor |
+| `error` | `string` | `undefined` | No | Error message; triggers error state; takes precedence over `helperText` |
+| `success` | `string` | `undefined` | No | Success message; triggers success state |
+| `size` | `'sm' \| 'md' \| 'lg'` | `theme.global.size` | No | Size of the editor |
+| `fullWidth` | `boolean` | `true` | No | If true, editor takes full container width |
+| `clearable` | `boolean` | `false` | No | If true, shows a clear button when content is present |
+| `onClear` | `() => void` | `undefined` | No | Callback fired when clear button is clicked |
+| `showCount` | `boolean` | `false` | No | If true, shows a live character counter |
+| `maxLength` | `number` | `undefined` | No | Maximum character length; also surfaces the counter |
+| `wrapperClassName` | `string` | `''` | No | Additional class name for the outer wrapper element |
+| `labelClassName` | `string` | `''` | No | Additional class name for the label element |
+| `editorClassName` | `string` | `''` | No | Additional class name for the contentEditable element |
+| `toolbarClassName` | `string` | `''` | No | Additional class name for the toolbar element |
+| `required` | `boolean` | `false` | No | If true, marks the field as required |
+| `disabled` | `boolean` | `false` | No | If true, disables the editor and all toolbar actions |
+| `placeholder` | `string` | `'Start typing...'` | No | Placeholder text shown when the editor is empty |
+| `value` | `string` | `undefined` | No | Controlled HTML content |
+| `defaultValue` | `string` | `undefined` | No | Initial HTML content (uncontrolled) |
+| `onChange` | `(html: string, text: string) => void` | `undefined` | No | Fired on content change; receives sanitized HTML and plain text |
+| `minHeight` | `number` | `200` | No | Minimum height of the editor area in pixels |
+| `id` | `string` | `undefined` | No | Custom id for the editor element |
+| `hideToolbar` | `boolean` | `false` | No | If true, hides the formatting toolbar |
+| `toolbarButtons` | `ToolbarButton[]` | all 17 buttons | No | Ordered list of toolbar buttons to render |
+| `onInsertLink` | `(insert: (url: string) => void) => void` | `undefined` | No | Custom handler for link insertion; replaces the default `window.prompt` |
+| `sanitize` | `(html: string) => string` | `undefined` | No | HTML sanitizer applied before setting innerHTML from the `value` prop |
+| `aria-label` | `string` | `undefined` | No | Accessible label; required when no `label` prop is provided |
+| `onFocus` | `React.FocusEventHandler<HTMLDivElement>` | `undefined` | No | Fired when the editor gains focus |
+| `onBlur` | `React.FocusEventHandler<HTMLDivElement>` | `undefined` | No | Fired when the editor loses focus |
+| `onKeyDown` | `React.KeyboardEventHandler<HTMLDivElement>` | `undefined` | No | Fired on keydown inside the editor |
+
+### ToolbarButton Type
+
+```ts
+type ToolbarButton =
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strikethrough'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'orderedList'
+  | 'unorderedList'
+  | 'link'
+  | 'alignLeft'
+  | 'alignCenter'
+  | 'alignRight'
+  | 'code'
+  | 'clearFormat'
+  | 'undo'
+  | 'redo';
+```
+
+<details>
+<summary>View full TypeScript interface</summary>
+
+<!--
+EXAMPLE: TypeScript Interface
+PURPOSE: Full type definition for RichTextEditor
+OUTPUT: Complete TypeScript interface
+USE WHEN: Typing component props in your codebase
+SOURCE: packages/luxis-ui/src/components/RichTextEditor/RichTextEditor.tsx
+-->
+```ts
+export interface RichTextEditorProps {
+  label?: string;
+  helperText?: string;
+  error?: string;
+  success?: string;
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
+  clearable?: boolean;
+  onClear?: () => void;
+  showCount?: boolean;
+  maxLength?: number;
+  wrapperClassName?: string;
+  labelClassName?: string;
+  editorClassName?: string;
+  toolbarClassName?: string;
+  required?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  value?: string;
+  defaultValue?: string;
+  onChange?: (html: string, text: string) => void;
+  minHeight?: number;
+  id?: string;
+  hideToolbar?: boolean;
+  toolbarButtons?: ToolbarButton[];
+  onInsertLink?: (insert: (url: string) => void) => void;
+  sanitize?: (html: string) => string;
+  'aria-label'?: string;
+  onFocus?: React.FocusEventHandler<HTMLDivElement>;
+  onBlur?: React.FocusEventHandler<HTMLDivElement>;
+  onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
+}
+```
+
+</details>
+
+## RichTextEditor Accessibility Guide
+
+RichTextEditor follows the WAI-ARIA `textbox` (multiline) pattern and meets WCAG AA standards.
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| <KeyboardKey>Tab</KeyboardKey> | Moves focus into the editor area |
+| <KeyboardKey>Shift+Tab</KeyboardKey> | Moves focus out of the editor area |
+| <KeyboardKey>Ctrl+B</KeyboardKey> | Bold (browser native via `execCommand`) |
+| <KeyboardKey>Ctrl+I</KeyboardKey> | Italic |
+| <KeyboardKey>Ctrl+U</KeyboardKey> | Underline |
+| <KeyboardKey>Ctrl+Z</KeyboardKey> | Undo |
+| <KeyboardKey>Ctrl+Y</KeyboardKey> | Redo |
+
+> Toolbar buttons are excluded from the tab order (`tabIndex=-1`) to keep the focus flow lean. They are clickable with a mouse and can be exposed to keyboard users via your own toolbar navigation if needed.
+
+### ARIA Attributes
+
+| Attribute | Value | When |
+|-----------|-------|------|
+| `role` | `"textbox"` | Always; establishes the editor as an input widget |
+| `aria-multiline` | `"true"` | Always; signals multi-line text entry |
+| `aria-label` | string | When no visible `label` prop is provided |
+| `aria-invalid` | `"true" \| undefined` | When `error` prop is set |
+| `aria-required` | `"true" \| undefined` | When `required` prop is true |
+| `aria-describedby` | string | Links to helper text, error, or success message IDs |
+
+### Screen Reader Behavior
+
+When focused, screen readers announce the element as a textbox (multiline), followed by its accessible name (from `label` or `aria-label`). Validation messages (`error`, `success`) are linked via `aria-describedby`; the error paragraph carries `role="alert"` for immediate announcement. The character counter uses `aria-live="polite"` to announce updates without interrupting the user.
+
+### Accessibility Checklist
+
+- [ ] Provide `label` or `aria-label` on every instance
+- [ ] Sanitize `value` content with the `sanitize` prop when the source is untrusted
+- [ ] Test keyboard navigation — Tab into editor, type, Tab out
+- [ ] Confirm error messages are announced by assistive technology
+- [ ] Verify focus outline is clearly visible on the editor container
+
+## RichTextEditor Design Tokens
+
+<Callout type="tip" title="What are design tokens?">
+  Design tokens are CSS custom properties that store design decisions
+  like colors, spacing, and radius. Override them to restyle
+  RichTextEditor without fighting CSS specificity.
+</Callout>
+
+| Token | Default Value | Description |
+|-------|--------------|-------------|
+| `--lxs-richtext-bg` | `var(--lxs-color-neutral-0)` | Background color of the editor container |
+| `--lxs-richtext-border` | `var(--lxs-color-neutral-300)` | Border color of the editor container |
+| `--lxs-richtext-border-focus` | `var(--lxs-color-primary-500)` | Border color when editor is focused |
+| `--lxs-richtext-border-error` | `var(--lxs-color-error-500)` | Border color in error state |
+| `--lxs-richtext-border-success` | `var(--lxs-color-success-500)` | Border color in success state |
+| `--lxs-richtext-text` | `var(--lxs-color-neutral-900)` | Editor text color |
+| `--lxs-richtext-placeholder` | `var(--lxs-color-neutral-400)` | Placeholder text color |
+| `--lxs-richtext-toolbar-bg` | `var(--lxs-color-neutral-50)` | Toolbar background color |
+| `--lxs-richtext-toolbar-border` | `var(--lxs-color-neutral-200)` | Toolbar bottom border color |
+| `--lxs-richtext-radius` | `var(--lxs-radius-md)` | Border radius of the container |
+
+**Override globally:**
+```css
+:root {
+  --lxs-richtext-border-focus: var(--lxs-color-secondary-500);
+}
+```
+
+**Override for one section:**
+```css
+.my-section {
+  --lxs-richtext-toolbar-bg: var(--lxs-color-neutral-100);
+}
+```
+
+**Override on one instance:**
+```tsx
+<RichTextEditor
+  style={{ '--lxs-richtext-border': '2px solid var(--lxs-color-primary-300)' }}
+/>
+```
+
+## Customizing RichTextEditor
+
+Three levels — start with Level 1 and go deeper only if needed.
+
+### Level 1 — className
+
+<!--
+EXAMPLE: className Override
+PURPOSE: Applying custom classes to RichTextEditor
+OUTPUT: RichTextEditor with additional styling
+USE WHEN: Quick one-off style overrides
+SOURCE: N/A
+-->
+```tsx
+<RichTextEditor wrapperClassName="mt-4" editorClassName="custom-editor-body" />
+```
+
+### Level 2 — Design Tokens
+
+<!--
+EXAMPLE: Token Override
+PURPOSE: Restyling via CSS custom properties
+OUTPUT: RichTextEditor with custom token values
+USE WHEN: Theming consistently across all instances
+SOURCE: N/A
+-->
+```tsx
+<RichTextEditor
+  style={{
+    '--lxs-richtext-border-focus': 'var(--lxs-color-secondary-500)',
+    '--lxs-richtext-radius': '12px',
+  }}
+/>
+```
+
+### Level 3 — Custom Toolbar
+
+<!--
+EXAMPLE: Custom Toolbar Composition
+PURPOSE: Rendering only the buttons relevant to your use case
+OUTPUT: RichTextEditor with a minimal, domain-specific toolbar
+USE WHEN: Full toolbar introduces unnecessary complexity
+SOURCE: N/A
+-->
+```tsx
+<RichTextEditor
+  toolbarButtons={['bold', 'italic', 'link', 'clearFormat']}
+  label="Bio"
+  maxLength={200}
+  showCount
+/>
+```
+
+### Using with forwardRef
+
+<!--
+EXAMPLE: forwardRef
+PURPOSE: Accessing the underlying contentEditable DOM node
+OUTPUT: RichTextEditor with an attached ref
+USE WHEN: Programmatically focusing or measuring the editor
+SOURCE: N/A
+-->
+```tsx
+import { useRef, useEffect } from 'react';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function RefExample() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    ref.current?.focus();
+  }, []);
+
+  return <RichTextEditor ref={ref} label="Auto-focused Editor" />;
+}
+```
+
+## Common RichTextEditor Patterns
+
+### Form-Integrated RichTextEditor
+
+Used when: Embedding RichTextEditor inside a form alongside other fields.
+
+<!--
+EXAMPLE: Form Integrated RichTextEditor
+PURPOSE: Utilizing RichTextEditor for form submission
+OUTPUT: A form element containing a RichTextEditor with validation
+USE WHEN: Designing data intake interfaces that include rich text
+SOURCE: Common usage pattern
+-->
+```tsx
+import { useState } from 'react';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function FormPattern() {
+  const [body, setBody] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!body.trim()) {
+      setError('Body is required.');
+      return;
+    }
+    setError('');
+    // submit...
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <RichTextEditor
+        label="Post Body"
+        required
+        value={body}
+        onChange={(html) => setBody(html)}
+        error={error}
+        minHeight={180}
+      />
+      <button type="submit">Publish</button>
+    </form>
+  );
+}
+```
+
+### RichTextEditor with react-hook-form
+
+Used when: Wiring RichTextEditor into a react-hook-form managed form.
+
+<!--
+EXAMPLE: react-hook-form Integration
+PURPOSE: Controlled integration with react-hook-form using Controller
+OUTPUT: A form-library-managed RichTextEditor
+USE WHEN: Using react-hook-form for form state management
+SOURCE: Common usage pattern
+-->
+```tsx
+import { Controller, useForm } from 'react-hook-form';
+import { RichTextEditor } from '@luxis-ui/react';
+
+interface FormValues {
+  content: string;
+}
+
+export default function RHFPattern() {
+  const { control, handleSubmit } = useForm<FormValues>({ defaultValues: { content: '' } });
+
+  return (
+    <form onSubmit={handleSubmit((data) => console.log(data))}>
+      <Controller
+        name="content"
+        control={control}
+        rules={{ required: 'Content is required' }}
+        render={({ field, fieldState }) => (
+          <RichTextEditor
+            label="Content"
+            value={field.value}
+            onChange={(html) => field.onChange(html)}
+            error={fieldState.error?.message}
+            required
+          />
+        )}
+      />
+      <button type="submit">Save</button>
+    </form>
+  );
+}
+```
+
+### RichTextEditor All Variants Overview
+
+Used when: You need a comprehensive showcase of all major feature combinations.
+
+<!--
+EXAMPLE: AllVariants
+PURPOSE: Full feature showcase of RichTextEditor
+OUTPUT: Multiple RichTextEditor instances demonstrating every major feature
+USE WHEN: Validating overall component behavior in a single view
+SOURCE: apps/storybook/src/stories/RichTextEditor.stories.tsx → AllVariants
+-->
+```tsx
+import { useState } from 'react';
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function AllVariantsExample() {
+  const [post, setPost] = useState('');
+  const [bio, setBio] = useState('');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+      <RichTextEditor label="Notes" placeholder="Start typing..." minHeight={150} />
+
+      <RichTextEditor
+        label="Post Content"
+        placeholder="Write your post..."
+        value={post}
+        onChange={(html) => setPost(html)}
+        showCount
+        maxLength={500}
+        clearable
+        onClear={() => setPost('')}
+        helperText="Posts are visible publicly."
+      />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <RichTextEditor label="Error State" error="This field is required." minHeight={120} />
+        <RichTextEditor
+          label="Success State"
+          success="Content saved."
+          defaultValue="<p>Saved content.</p>"
+          minHeight={120}
+        />
+      </div>
+
+      <RichTextEditor
+        label="Bio"
+        size="sm"
+        minHeight={100}
+        value={bio}
+        onChange={(html) => setBio(html)}
+        toolbarButtons={['bold', 'italic', 'link', 'clearFormat']}
+        showCount
+        maxLength={200}
+        required
+        placeholder="A short bio (max 200 chars)..."
+      />
+
+      <RichTextEditor
+        label="Archived"
+        disabled
+        defaultValue="<p>Locked content.</p>"
+        minHeight={100}
+      />
+    </div>
+  );
+}
+```
+
+## Troubleshooting RichTextEditor
+
+### Common Mistakes
+
+| Symptom | Wrong ❌ | Right ✅ |
+|---------|---------|---------|
+| Content not updating in controlled mode | Using `defaultValue` and expecting re-renders to update it | Use `value` + `onChange` for controlled behavior |
+| XSS vulnerability | Rendering `value` from user input without sanitization | Pass `sanitize={(html) => DOMPurify.sanitize(html)}` |
+| Link insertion shows browser prompt | Not providing `onInsertLink` | Pass a custom `onInsertLink` handler wired to your modal |
+| Screen readers silent | No `label` and no `aria-label` | Always provide at least one accessible name |
+| Counter not appearing | Setting only `maxLength` without `showCount` | Set `showCount` to `true`, or use `maxLength` alone (counter appears automatically with `maxLength`) |
+| Styles not applying | Hardcoding conflicting inline styles | Use CSS variables via `style` prop or `wrapperClassName` |
+
+<Callout type="warning" title="Next.js / SSR">
+  RichTextEditor uses `contentEditable` and browser APIs (`document.execCommand`,
+  `window.prompt`). Mark any component that renders it with `"use client"` in
+  Next.js App Router to avoid server-side rendering errors.
+</Callout>
+
+### Frequently Asked Questions
+
+**Q: Can I use RichTextEditor with Zod or Yup validation?**
+A: Yes. Use the controlled pattern (`value` + `onChange`) and pass the validation error string to the `error` prop. The component renders it in the error slot and applies `aria-invalid` automatically.
+
+**Q: Why does the toolbar use `execCommand` instead of a modern API?**
+A: `document.execCommand` is the only cross-browser API for `contentEditable` formatting. The component wraps it safely and a `NOSONAR` comment acknowledges the deprecation. No robust, broadly supported replacement exists for this use case today.
+
+**Q: How do I persist the HTML content to a database?**
+A: Read the `html` argument passed to `onChange`. Sanitize it with DOMPurify before storing, and set `sanitize={(html) => DOMPurify.sanitize(html)}` before rendering stored HTML back into the editor.
+
+**Q: Can I extend the toolbar with custom buttons?**
+A: The `toolbarButtons` prop only accepts the predefined `ToolbarButton` keys. For fully custom toolbar actions, wrap RichTextEditor with `hideToolbar` and build your own toolbar that calls methods on the forwarded ref.
+
+**Q: Does RichTextEditor work inside a `<dialog>` or modal?**
+A: Yes. Focus management is handled natively. Ensure your modal traps focus correctly so Tab cycles within the modal, and the editor will behave as expected.
+
+## Related Components
+
+<RelatedComponent
+  name="Input"
+  description="Use Input for single-line or plain-text entry where formatting is not needed"
+  href="/docs/components/input"
+/>
+<RelatedComponent
+  name="FormControl"
+  description="Wraps form fields with consistent label, helper text, and validation layout"
+  href="/docs/components/form-control"
+/>
+<RelatedComponent
+  name="Modal"
+  description="Use Modal to host a custom link-insertion dialog with onInsertLink"
+  href="/docs/components/modal"
+/>
+
+## Changelog
+
+| Version | Type | Description |
+|---------|------|-------------|
+| 1.0.0 | Release | Initial release with full formatting toolbar and controlled/uncontrolled support |
+| 1.1.0 | Feature | Added `onInsertLink` for custom link-insertion handlers |
+| 1.2.0 | Feature | Added `sanitize` prop for HTML sanitization before innerHTML injection |
+| 1.3.0 | Feature | Added `onFocus`, `onBlur`, `onKeyDown` event forwarding |
+
+{/*
+LLMS_TXT_ENTRY_START
+# RichTextEditor
+
+> RichTextEditor is a Components/RichTextEditor React component in Luxis UI for a WYSIWYG rich text editor with a formatting toolbar.
+
+## Source
+packages/luxis-ui/src/components/RichTextEditor/RichTextEditor.tsx
+
+## Story
+apps/storybook/src/stories/RichTextEditor.stories.tsx
+
+## Install
+```bash
+npm install @luxis-ui/react
+```
+
+## Import
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+```
+
+## Minimal usage
+```tsx
+import { RichTextEditor } from '@luxis-ui/react';
+
+export default function MinimalRichTextEditor() {
+  return (
+    <RichTextEditor label="Content" placeholder="Start typing..." />
+  );
+}
+```
+
+## Key props
+- `label` (string, default=`undefined`): Label text displayed above the editor
+- `value` (string, default=`undefined`): Controlled HTML content
+- `onChange` ((html: string, text: string) => void, default=`undefined`): Fired on content change
+- `error` (string, default=`undefined`): Error message; triggers error state
+- `showCount` (boolean, default=`false`): Show a live character counter
+- `maxLength` (number, default=`undefined`): Maximum character length
+- `clearable` (boolean, default=`false`): Show a clear button when content is present
+- `hideToolbar` (boolean, default=`false`): Hide the formatting toolbar
+- `toolbarButtons` (ToolbarButton[], default=all buttons): Ordered list of toolbar buttons to render
+- `disabled` (boolean, default=`false`): Disable the editor and toolbar
+- `sanitize` ((html: string) => string, default=`undefined`): HTML sanitizer applied before setting innerHTML
+
+## When to use
+Ideal for collecting rich-text content such as articles, product descriptions, comments, and bios where the user needs formatting controls.
+
+## When NOT to use
+Do not use for single-line or plain-text input — use Input instead. Do not use without sanitizing user-generated HTML content before persisting or rendering it elsewhere.
+
+## Accessibility
+WCAG: AA
+ARIA: role="textbox", aria-multiline="true", aria-invalid, aria-required, aria-describedby
+Keyboard: Tab moves focus into editor; Ctrl+B/I/U for formatting; toolbar buttons are excluded from tab order
+
+## Docs
+https://luxisui.com/docs/components/rich-text-editor
+LLMS_TXT_ENTRY_END
+*/}

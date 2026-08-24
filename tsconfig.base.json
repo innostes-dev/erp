@@ -19,7 +19,10 @@
     "target": "es2022",
     "customConditions": ["@business-os/source"],
     "paths": {
-      "@business-os/core": ["packages/core/src/index.ts"]
+      "@business-os/core": ["packages/core/src/index.ts"],
+      "@luxis-ui/react": ["@luxis-ui/react/src/index.ts"],
+      "@core": ["packages/core/src/index.ts"],
+      "@core/*": ["packages/core/src/*"]
     }
   }
 }

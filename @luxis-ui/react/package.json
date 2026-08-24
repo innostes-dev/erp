@@ -1,0 +1,48 @@
+{
+  "name": "@luxis-ui/react",
+  "version": "1.0.3",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "description": "Define your brand once. Luxis generates accessible color palettes, component tokens, and consistent UI — automatically across every component in your app.",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./styles": {
+      "default": "./dist/esm/theme/base.css"
+    },
+    "./styles.css": {
+      "default": "./dist/esm/index.css"
+    },
+    "./theme/base.css": "./dist/esm/theme/base.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "@types/react": ">=18",
+    "@types/react-dom": ">=18"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  },
+  "dependencies": {
+    "react-icons": "^5.6.0"
+  }
+}

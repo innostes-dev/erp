@@ -1,0 +1,115 @@
+/* ============================================================
+ * Container Component
+ * Bootstrap-inspired responsive layout container.
+ * Uses CSS custom properties so consumers can override widths.
+ * ============================================================ */
+
+/* ── Breakpoint width tokens ────────────────────────────────── */
+:root {
+  --lxs-container-xs:  100%;
+  --lxs-container-sm:  540px;
+  --lxs-container-md:  720px;
+  --lxs-container-lg:  960px;
+  --lxs-container-xl:  1140px;
+  --lxs-container-xxl: 1320px;
+
+  --lxs-container-gutter-sm: var(--lxs-spacing-3);  /* 12px */
+  --lxs-container-gutter-md: var(--lxs-spacing-4);  /* 16px */
+  --lxs-container-gutter-lg: var(--lxs-spacing-8);  /* 32px */
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+.lxs-container {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ── Centered (margin: auto) ────────────────────────────────── */
+.lxs-container--centered {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Max-width variants ─────────────────────────────────────── */
+.lxs-container--xs  { max-width: var(--lxs-container-xs);  }
+.lxs-container--sm  { max-width: var(--lxs-container-sm);  }
+.lxs-container--md  { max-width: var(--lxs-container-md);  }
+.lxs-container--lg  { max-width: var(--lxs-container-lg);  }
+.lxs-container--xl  { max-width: var(--lxs-container-xl);  }
+.lxs-container--xxl { max-width: var(--lxs-container-xxl); }
+.lxs-container--full { max-width: 100%; }
+.lxs-container--none { max-width: none; }
+
+/* ── Fluid: always full viewport width ──────────────────────── */
+.lxs-container--fluid {
+  max-width: 100%;
+}
+
+/* ── Gutter (horizontal padding) ───────────────────────────── */
+.lxs-container--gutter-none {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.lxs-container--gutter-sm {
+  padding-left: var(--lxs-container-gutter-sm);
+  padding-right: var(--lxs-container-gutter-sm);
+}
+
+.lxs-container--gutter-md {
+  padding-left: var(--lxs-container-gutter-md);
+  padding-right: var(--lxs-container-gutter-md);
+}
+
+.lxs-container--gutter-lg {
+  padding-left: var(--lxs-container-gutter-lg);
+  padding-right: var(--lxs-container-gutter-lg);
+}
+
+/* ── Responsive: grow gutters at larger screens ─────────────── */
+@media (min-width: 768px) {
+  .lxs-container--gutter-md {
+    padding-left: var(--lxs-spacing-6);   /* 24px */
+    padding-right: var(--lxs-spacing-6);
+  }
+
+  .lxs-container--gutter-lg {
+    padding-left: var(--lxs-spacing-12);  /* 48px */
+    padding-right: var(--lxs-spacing-12);
+  }
+}
+
+@media (min-width: 1280px) {
+  .lxs-container--gutter-lg {
+    padding-left: var(--lxs-spacing-16);  /* 64px */
+    padding-right: var(--lxs-spacing-16);
+  }
+}
+
+/* ── Responsive fluid breakpoints ──────────────────────────────
+ * When maxWidth is omitted (auto mode) the container behaves like
+ * Bootstrap's .container — steps up at each breakpoint.
+ * ──────────────────────────────────────────────────────────── */
+.lxs-container--responsive {
+  max-width: 100%;
+}
+
+@media (min-width: 576px) {
+  .lxs-container--responsive { max-width: var(--lxs-container-sm); }
+}
+
+@media (min-width: 768px) {
+  .lxs-container--responsive { max-width: var(--lxs-container-md); }
+}
+
+@media (min-width: 992px) {
+  .lxs-container--responsive { max-width: var(--lxs-container-lg); }
+}
+
+@media (min-width: 1200px) {
+  .lxs-container--responsive { max-width: var(--lxs-container-xl); }
+}
+
+@media (min-width: 1400px) {
+  .lxs-container--responsive { max-width: var(--lxs-container-xxl); }
+}

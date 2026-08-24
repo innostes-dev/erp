@@ -1,0 +1,395 @@
+/* =============================================================================
+   ErrorPage — Enterprise Analytics Widget
+   Luxis UI Design System
+   =============================================================================
+
+   Token reference:
+     --ep-accent          Main accent color (resolves from color-variant class)
+     --ep-accent-subtle   Soft fill for icon badges, backgrounds
+     --ep-accent-dark     Deep accent for active states
+     --ep-bg              Card/Background
+     --ep-border          Border color
+     --ep-shadow          Box shadow
+     --ep-radius          Border radius
+     --ep-padding         Inner padding
+     --ep-text-primary    Primary text color
+     --ep-text-secondary  Secondary text color
+     --ep-text-muted      Muted text color
+   ============================================================================= */
+
+/* ─── Base card shell ─────────────────────────────────────────────────────── */
+
+.lxs-error-page {
+  /* ── Accent scale — overridden by variant classes ─ */
+  --ep-accent:         var(--lxs-color-error-500, #ef4444);
+  --ep-accent-subtle:  var(--lxs-color-error-50,  #fef2f2);
+  --ep-accent-dark:    var(--lxs-color-error-700, #b91c1c);
+
+  /* ── Surface & structure ──────────────────────────────────────────── */
+  --ep-bg:             var(--lxs-color-white, #ffffff);
+  --ep-border:         var(--lxs-color-neutral-200, #e5e5e5);
+  --ep-shadow:         0 1px 4px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --ep-radius:         var(--lxs-radius-lg, 12px);
+  --ep-padding:        var(--lxs-spacing-6, 1.5rem);
+
+  /* ── Typography ───────────────────────────────────────────────────── */
+  --ep-text-primary:   var(--lxs-color-neutral-900, #171717);
+  --ep-text-secondary: var(--lxs-color-neutral-500, #737373);
+  --ep-text-muted:     var(--lxs-color-neutral-400, #a3a3a3);
+
+  font-family: var(--lxs-font-family-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  color: var(--ep-text-primary);
+}
+
+/* ─── COLOR VARIANTS ──────────────────────────────────────────────────────── */
+
+.lxs-error-page--variant-primary {
+  --ep-accent:        var(--lxs-color-primary-500,   #3b82f6);
+  --ep-accent-subtle: var(--lxs-color-primary-50,    #eff6ff);
+  --ep-accent-dark:   var(--lxs-color-primary-700,   #1d4ed8);
+}
+
+.lxs-error-page--variant-secondary {
+  --ep-accent:        var(--lxs-color-secondary-500, #8b5cf6);
+  --ep-accent-subtle: var(--lxs-color-secondary-50,  #f5f3ff);
+  --ep-accent-dark:   var(--lxs-color-secondary-700, #6d28d9);
+}
+
+.lxs-error-page--variant-success {
+  --ep-accent:        var(--lxs-color-success-500,   #22c55e);
+  --ep-accent-subtle: var(--lxs-color-success-50,    #f0fdf4);
+  --ep-accent-dark:   var(--lxs-color-success-700,   #15803d);
+}
+
+.lxs-error-page--variant-warning {
+  --ep-accent:        var(--lxs-color-warning-500,   #f59e0b);
+  --ep-accent-subtle: var(--lxs-color-warning-50,    #fffbeb);
+  --ep-accent-dark:   var(--lxs-color-warning-700,   #b45309);
+}
+
+.lxs-error-page--variant-error {
+  --ep-accent:        var(--lxs-color-error-500,     #ef4444);
+  --ep-accent-subtle: var(--lxs-color-error-50,      #fef2f2);
+  --ep-accent-dark:   var(--lxs-color-error-700,     #b91c1c);
+}
+
+.lxs-error-page--variant-info {
+  --ep-accent:        var(--lxs-color-info-500,      #0ea5e9);
+  --ep-accent-subtle: var(--lxs-color-info-50,       #f0f9ff);
+  --ep-accent-dark:   var(--lxs-color-info-700,      #0369a1);
+}
+
+.lxs-error-page--variant-neutral {
+  --ep-accent:        var(--lxs-color-neutral-500,   #737373);
+  --ep-accent-subtle: var(--lxs-color-neutral-100,   #f5f5f5);
+  --ep-accent-dark:   var(--lxs-color-neutral-700,   #404040);
+}
+
+/* ─── DARK MODE ───────────────────────────────────────────────────────────── */
+
+.lxs-error-page--mode-dark {
+  --ep-bg:             var(--lxs-color-neutral-800, #262626);
+  --ep-border:         var(--lxs-color-neutral-700, #404040);
+  --ep-shadow:         0 1px 4px 0 rgba(0, 0, 0, 0.4);
+
+  --ep-text-primary:   var(--lxs-color-neutral-50,  #fafafa);
+  --ep-text-secondary: var(--lxs-color-neutral-300, #d4d4d4);
+  --ep-text-muted:     var(--lxs-color-neutral-400, #a3a3a3);
+
+  /* Deepen subtles for dark mode legibility */
+  --ep-accent-subtle:  var(--ep-accent-dark);
+}
+
+/* ─── THEMES ──────────────────────────────────────────────────────────────── */
+
+/* 1. minimal (default) */
+.lxs-error-page--theme-minimal {
+  padding: var(--ep-padding);
+  background: transparent;
+}
+
+/* 2. card */
+.lxs-error-page--theme-card {
+  padding: var(--lxs-spacing-8, 2rem);
+  background-color: var(--ep-bg);
+  border-radius: var(--ep-radius);
+  box-shadow: var(--ep-shadow);
+  border: 1px solid var(--ep-border);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* 3. embedded */
+.lxs-error-page--theme-embedded {
+  padding: var(--lxs-spacing-4, 1rem);
+  background-color: var(--ep-accent-subtle);
+  border-radius: var(--ep-radius);
+  border: 1px dashed var(--ep-accent);
+}
+
+/* 4. full-page */
+.lxs-error-page--theme-full-page {
+  min-height: 100vh;
+  padding: var(--lxs-spacing-8, 2rem);
+  background-color: var(--ep-bg);
+  justify-content: center;
+}
+
+/* 5. illustrated */
+.lxs-error-page--theme-illustrated {
+  padding: var(--lxs-spacing-8, 2rem);
+  background-color: transparent;
+}
+
+/* 6. split */
+.lxs-error-page--theme-split {
+  flex-direction: row;
+  min-height: 100vh;
+  text-align: left;
+  background-color: var(--ep-bg);
+}
+.lxs-error-page--theme-split .lxs-error-page__split-content {
+  flex: 1;
+  padding: var(--lxs-spacing-12, 3rem) var(--lxs-spacing-8, 2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.lxs-error-page--theme-split .lxs-error-page__split-illustration {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--ep-accent-subtle);
+  padding: var(--lxs-spacing-8, 2rem);
+}
+.lxs-error-page--theme-split .lxs-error-page__content {
+  align-items: flex-start;
+  text-align: left;
+}
+.lxs-error-page--theme-split .lxs-error-page__actions {
+  justify-content: flex-start;
+}
+
+/* RESPONSIVE SPLIT */
+@media (max-width: 768px) {
+  .lxs-error-page--theme-split {
+    flex-direction: column-reverse;
+  }
+  .lxs-error-page--theme-split .lxs-error-page__split-content {
+    align-items: center;
+    text-align: center;
+  }
+  .lxs-error-page--theme-split .lxs-error-page__content {
+    align-items: center;
+    text-align: center;
+  }
+  .lxs-error-page--theme-split .lxs-error-page__actions {
+    justify-content: center;
+  }
+}
+
+/* ─── INTERNAL COMPONENTS ─────────────────────────────────────────────────── */
+
+.lxs-error-page__content {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: var(--lxs-spacing-4, 1rem);
+  max-width: 600px;
+}
+
+.lxs-error-page__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--ep-accent-subtle);
+  color: var(--ep-accent);
+  margin-bottom: var(--lxs-spacing-2, 0.5rem);
+}
+.lxs-error-page__icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.lxs-error-page__illustration {
+  margin-bottom: var(--lxs-spacing-4, 1rem);
+  max-width: 100%;
+}
+.lxs-error-page__illustration svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.lxs-error-page__status-code {
+  color: var(--ep-accent);
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+}
+
+.lxs-error-page__title {
+  color: var(--ep-text-primary);
+  margin: 0;
+}
+
+.lxs-error-page__description {
+  color: var(--ep-text-secondary);
+  margin: 0;
+  max-width: 480px;
+}
+
+.lxs-error-page__actions {
+  display: flex;
+  gap: var(--lxs-spacing-4, 1rem);
+  margin-top: var(--lxs-spacing-4, 1rem);
+  flex-wrap: wrap;
+  justify-content: inherit;
+}
+
+/* ─── NEW THEMES & ALIGNMENT ──────────────────────────────────────────────── */
+
+.lxs-error-page--left {
+  text-align: left;
+}
+.lxs-error-page--left .lxs-error-page__content {
+  align-items: flex-start;
+}
+.lxs-error-page--left .lxs-error-page__actions {
+  justify-content: flex-start;
+}
+
+.lxs-error-page--full-height {
+  min-height: 100vh;
+}
+
+/* 7. modern */
+.lxs-error-page--theme-modern {
+  padding: var(--lxs-spacing-8, 2rem) var(--lxs-spacing-6, 1.5rem);
+  border-radius: var(--ep-radius);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+.lxs-error-page--theme-modern.lxs-error-page--variant-primary {
+  background: linear-gradient(135deg, var(--lxs-color-primary-50, #eff6ff) 0%, var(--lxs-color-primary-100, #dbeafe) 100%);
+}
+.lxs-error-page--theme-modern.lxs-error-page--variant-error {
+  background: linear-gradient(135deg, var(--lxs-color-error-50, #fef2f2) 0%, var(--lxs-color-error-100, #fee2e2) 100%);
+}
+.lxs-error-page--theme-modern.lxs-error-page--variant-warning {
+  background: linear-gradient(135deg, var(--lxs-color-warning-50, #fffbeb) 0%, var(--lxs-color-warning-100, #fef3c7) 100%);
+}
+.lxs-error-page--theme-modern.lxs-error-page--variant-info {
+  background: linear-gradient(135deg, var(--lxs-color-info-50, #f0f9ff) 0%, var(--lxs-color-info-100, #e0f2fe) 100%);
+}
+.lxs-error-page--theme-modern .lxs-error-page__status-code {
+  font-size: clamp(80px, 15vw, 160px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--ep-accent), var(--ep-accent-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 8. professional */
+.lxs-error-page--theme-professional {
+  background: var(--ep-bg);
+  padding: clamp(40px, 7vw, 80px);
+  border-radius: var(--ep-radius);
+  border: 2px solid var(--ep-border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+}
+.lxs-error-page--theme-professional .lxs-error-page__status-code {
+  font-size: clamp(70px, 14vw, 140px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* 9. playful */
+.lxs-error-page--theme-playful {
+  padding: clamp(32px, 6vw, 64px);
+  border-radius: var(--lxs-radius-2xl, 20px);
+  background: radial-gradient(circle at top right, var(--ep-accent-subtle), transparent 70%),
+              radial-gradient(circle at bottom left, var(--ep-accent-subtle), transparent 70%);
+}
+.lxs-error-page--theme-playful .lxs-error-page__status-code {
+  font-size: clamp(90px, 18vw, 180px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  transform: rotate(-5deg);
+}
+
+/* 10. technical */
+.lxs-error-page--theme-technical {
+  background: var(--lxs-color-neutral-900, #171717);
+  padding: clamp(32px, 6vw, 64px);
+  border-radius: var(--lxs-radius-md, 8px);
+  border: 1px solid var(--lxs-color-neutral-700, #404040);
+  font-family: 'Courier New', monospace;
+  color: #fff;
+}
+.lxs-error-page--theme-technical .lxs-error-page__title,
+.lxs-error-page--theme-technical .lxs-error-page__description,
+.lxs-error-page--theme-technical .lxs-error-page__suggestion {
+  color: #fff;
+  font-family: 'Courier New', monospace;
+}
+.lxs-error-page--theme-technical .lxs-error-page__status-code {
+  font-size: clamp(60px, 12vw, 120px);
+  font-weight: 700;
+  color: #00ff00;
+  letter-spacing: 0.05em;
+  font-family: 'Courier New', monospace;
+}
+
+/* 11. elegant */
+.lxs-error-page--theme-elegant {
+  background: linear-gradient(to bottom, var(--ep-bg), var(--lxs-color-neutral-50, #fafafa));
+  padding: clamp(48px, 8vw, 96px);
+  border-radius: var(--ep-radius);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+.lxs-error-page--theme-elegant .lxs-error-page__status-code {
+  font-size: clamp(60px, 10vw, 100px);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+}
+
+/* ─── ADDITIONAL INFO ─────────────────────────────────────────────────────── */
+
+.lxs-error-page__info {
+  margin-top: var(--lxs-spacing-8, 2rem);
+  padding: clamp(16px, 2.5vw, 24px);
+  border-radius: var(--lxs-radius-md, 8px);
+  max-width: 600px;
+  width: 100%;
+  background: var(--ep-accent-subtle);
+  border-left: 4px solid var(--ep-accent);
+  text-align: left;
+}
+
+.lxs-error-page--theme-technical .lxs-error-page__info {
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 4px solid #00ff00;
+}
+
+.lxs-error-page__suggestion {
+  color: var(--ep-text-secondary);
+}
+
+/* Base status code scaling */
+.lxs-error-page__status-code {
+  font-size: clamp(60px, 12vw, 120px);
+}

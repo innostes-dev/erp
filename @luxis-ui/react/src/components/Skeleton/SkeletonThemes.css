@@ -1,0 +1,277 @@
+/* ==================== Skeleton Theme Base ==================== */
+
+.lxs-skeleton-theme {
+  width: 100%;
+  padding: 16px;
+}
+
+.lxs-skeleton-theme__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ==================== Card Theme ==================== */
+
+.lxs-skeleton-theme--card {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  overflow: hidden;
+  padding: 0;
+}
+
+.lxs-skeleton-theme--card .lxs-skeleton-theme__content {
+  padding: 16px;
+}
+
+/* ==================== Product Theme ==================== */
+
+.lxs-skeleton-theme--product {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  overflow: hidden;
+  padding: 0;
+}
+
+.lxs-skeleton-theme--product .lxs-skeleton-theme__content {
+  padding: 12px;
+  gap: 8px;
+}
+
+/* ==================== Article/Blog Post Theme ==================== */
+
+.lxs-skeleton-theme--article {
+  max-width: 800px;
+}
+
+/* ==================== Profile Theme ==================== */
+
+.lxs-skeleton-theme--profile {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  padding: 24px;
+}
+
+/* ==================== Comment Theme ==================== */
+
+.lxs-skeleton-theme--comment {
+  padding: 12px;
+  border-left: 2px solid var(--lxs-color-neutral-200, #e5e5e5);
+}
+
+/* ==================== List Item Theme ==================== */
+
+.lxs-skeleton-theme--list-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+}
+
+/* ==================== Table Row Theme ==================== */
+
+.lxs-skeleton-theme--table-row {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+}
+
+/* ==================== Form Theme ==================== */
+
+.lxs-skeleton-theme--form {
+  max-width: 500px;
+}
+
+/* ==================== Hero Theme ==================== */
+
+.lxs-skeleton-theme--hero {
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ==================== About/Content Block Theme ==================== */
+
+.lxs-skeleton-theme--about {
+  max-width: 900px;
+}
+
+/* ==================== Feature Card Theme ==================== */
+
+.lxs-skeleton-theme--feature {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ==================== Testimonial Theme ==================== */
+
+.lxs-skeleton-theme--testimonial {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  padding: 24px;
+  background: var(--lxs-color-neutral-50, #fafafa);
+}
+
+/* ==================== Pricing Card Theme ==================== */
+
+.lxs-skeleton-theme--pricing {
+  border: 2px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  padding: 32px 24px;
+  text-align: center;
+}
+
+/* ==================== Stats Theme ==================== */
+
+.lxs-skeleton-theme--stats {
+  text-align: center;
+  padding: 20px;
+}
+
+/* ==================== Team Member Theme ==================== */
+
+.lxs-skeleton-theme--team {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  overflow: hidden;
+  padding: 0;
+  text-align: center;
+}
+
+.lxs-skeleton-theme--team .lxs-skeleton-theme__content {
+  padding: 16px;
+}
+
+/* ==================== Gallery Item Theme ==================== */
+
+.lxs-skeleton-theme--gallery {
+  border-radius: var(--lxs-radius-lg, 12px);
+  overflow: hidden;
+  padding: 0;
+}
+
+.lxs-skeleton-theme--gallery .lxs-skeleton-theme__content {
+  padding: 12px;
+}
+
+/* ==================== Video Card Theme ==================== */
+
+.lxs-skeleton-theme--video {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  overflow: hidden;
+  padding: 0;
+}
+
+.lxs-skeleton-theme--video .lxs-skeleton-theme__content {
+  padding: 12px;
+}
+
+/* ==================== Order Card Theme ==================== */
+
+.lxs-skeleton-theme--order {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  padding: 16px;
+}
+
+/* ==================== Product Grid Theme ==================== */
+
+.lxs-skeleton-theme--product-grid {
+  border: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+  border-radius: var(--lxs-radius-lg, 12px);
+  overflow: hidden;
+}
+
+/* ==================== Container ==================== */
+
+.lxs-skeleton-theme-container {
+  width: 100%;
+}
+
+/* ==================== Responsive ==================== */
+
+@media (max-width: 768px) {
+  .lxs-skeleton-theme--hero {
+    padding: 32px 16px;
+  }
+
+  .lxs-skeleton-theme--pricing {
+    padding: 24px 16px;
+  }
+
+  .lxs-skeleton-theme--feature {
+    padding: 20px 16px;
+  }
+
+  .lxs-skeleton-theme--testimonial {
+    padding: 20px 16px;
+  }
+}
+
+/* ==================== Cart List Theme ==================== */
+
+.lxs-skeleton-theme--cart-list {
+  padding: 16px;
+  border-bottom: 1px solid var(--lxs-color-neutral-200, #e5e5e5);
+}
+
+.lxs-skeleton-theme--cart-list:last-child {
+  border-bottom: none;
+}
+
+/* ==================== Home Page Theme ==================== */
+
+.lxs-skeleton-theme--home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.lxs-skeleton-theme--home-page__carousel {
+  width: 100%;
+}
+
+.lxs-skeleton-theme--home-page__categories {
+  display: flex;
+  gap: 16px;
+  overflow: hidden;
+  padding-bottom: 8px;
+}
+
+.lxs-skeleton-theme--home-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* ==================== Checkout Theme ==================== */
+
+.lxs-skeleton-theme--checkout {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.lxs-skeleton-theme--checkout__main {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.lxs-skeleton-theme--checkout__sidebar {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .lxs-skeleton-theme--checkout__sidebar {
+    width: 100%;
+  }
+}

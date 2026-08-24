@@ -1,0 +1,210 @@
+/* Radio Base Styles */
+.lxs-radio {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-1);
+}
+
+/* Label Container */
+.lxs-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--lxs-spacing-2);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+/* Wrapper for input and visual radio */
+.lxs-radio-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Hidden input */
+.lxs-radio-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+/* Visual radio circle */
+.lxs-radio-circle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--lxs-radio-size, 20px);
+  height: var(--lxs-radio-size, 20px);
+  border: var(--lxs-radio-border-width, 2px) solid var(--lxs-color-neutral-300);
+  border-radius: 50%;
+  background-color: white;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+/* Inner dot */
+.lxs-radio-dot {
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  background-color: white;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Checked state */
+.lxs-radio-input:checked + .lxs-radio-circle {
+  background-color: var(--lxs-radio-color, var(--lxs-color-primary-600));
+  border-color: var(--lxs-radio-color, var(--lxs-color-primary-600));
+}
+
+.lxs-radio-input:checked + .lxs-radio-circle .lxs-radio-dot {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hover state */
+.lxs-radio-label:hover .lxs-radio-circle {
+  border-color: var(--lxs-color-neutral-400);
+}
+
+.lxs-radio-label:hover .lxs-radio-input:checked + .lxs-radio-circle {
+  background-color: var(--lxs-radio-hover-color, var(--lxs-color-primary-700));
+  border-color: var(--lxs-radio-hover-color, var(--lxs-color-primary-700));
+}
+
+/* Focus state */
+.lxs-radio-input:focus-visible + .lxs-radio-circle {
+  outline: 2px solid var(--lxs-radio-color, var(--lxs-color-primary-600));
+  outline-offset: 2px;
+}
+
+/* Label text */
+.lxs-radio-label-text {
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-base);
+  line-height: var(--lxs-line-height-normal);
+  color: var(--lxs-color-neutral-900);
+}
+
+/* Disabled state */
+.lxs-radio--disabled .lxs-radio-label {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.lxs-radio--disabled .lxs-radio-circle {
+  background-color: var(--lxs-color-neutral-100);
+  border-color: var(--lxs-color-neutral-300);
+}
+
+.lxs-radio--disabled .lxs-radio-input:checked + .lxs-radio-circle {
+  background-color: var(--lxs-color-neutral-400);
+  border-color: var(--lxs-color-neutral-400);
+}
+
+.lxs-radio--disabled .lxs-radio-label:hover .lxs-radio-circle,
+.lxs-radio--disabled .lxs-radio-label:hover .lxs-radio-input:checked + .lxs-radio-circle {
+  background-color: var(--lxs-color-neutral-100);
+  border-color: var(--lxs-color-neutral-300);
+}
+
+.lxs-radio--disabled .lxs-radio-label:hover .lxs-radio-input:checked + .lxs-radio-circle {
+  background-color: var(--lxs-color-neutral-400);
+  border-color: var(--lxs-color-neutral-400);
+}
+
+.lxs-radio--disabled .lxs-radio-label-text {
+  color: var(--lxs-color-neutral-500);
+}
+
+/* Error state */
+.lxs-radio--error .lxs-radio-circle {
+  border-color: var(--lxs-color-error-600);
+}
+
+.lxs-radio--error .lxs-radio-input:checked + .lxs-radio-circle {
+  background-color: var(--lxs-color-error-600);
+  border-color: var(--lxs-color-error-600);
+}
+
+.lxs-radio--error .lxs-radio-label:hover .lxs-radio-input:checked + .lxs-radio-circle {
+  background-color: var(--lxs-color-error-700);
+  border-color: var(--lxs-color-error-700);
+}
+
+/* Helper text */
+.lxs-radio-helper-text {
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-sm);
+  line-height: var(--lxs-line-height-normal);
+  color: var(--lxs-color-neutral-600);
+  margin-left: calc(var(--lxs-radio-size, 20px) + var(--lxs-spacing-2));
+}
+
+.lxs-radio--error .lxs-radio-helper-text {
+  color: var(--lxs-color-error-600);
+}
+
+/* Size variants */
+.lxs-radio--sm {
+  --lxs-radio-size: 16px;
+  --lxs-radio-border-width: 2px;
+}
+
+.lxs-radio--sm .lxs-radio-label-text {
+  font-size: var(--lxs-font-size-sm);
+}
+
+.lxs-radio--md {
+  --lxs-radio-size: 20px;
+  --lxs-radio-border-width: 2px;
+}
+
+.lxs-radio--lg {
+  --lxs-radio-size: 24px;
+  --lxs-radio-border-width: 2px;
+}
+
+.lxs-radio--lg .lxs-radio-label-text {
+  font-size: var(--lxs-font-size-lg);
+}
+
+/* Variants */
+.lxs-radio--primary {
+  --lxs-radio-color: var(--lxs-color-primary-600);
+  --lxs-radio-hover-color: var(--lxs-color-primary-700);
+}
+
+.lxs-radio--secondary {
+  --lxs-radio-color: var(--lxs-color-neutral-600);
+  --lxs-radio-hover-color: var(--lxs-color-neutral-700);
+}
+
+.lxs-radio--success {
+  --lxs-radio-color: var(--lxs-color-success-600);
+  --lxs-radio-hover-color: var(--lxs-color-success-700);
+}
+
+.lxs-radio--error {
+  --lxs-radio-color: var(--lxs-color-error-600);
+  --lxs-radio-hover-color: var(--lxs-color-error-700);
+}
+
+.lxs-radio--warning {
+  --lxs-radio-color: var(--lxs-color-warning-600);
+  --lxs-radio-hover-color: var(--lxs-color-warning-700);
+}
+
+.lxs-radio--info {
+  --lxs-radio-color: var(--lxs-color-info-600);
+  --lxs-radio-hover-color: var(--lxs-color-info-700);
+}

@@ -1,0 +1,155 @@
+/* Breadcrumb Component Styles */
+
+.lxs-breadcrumb {
+  display: block;
+}
+
+.lxs-breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lxs-spacing-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Responsive display */
+.lxs-breadcrumb-list--mobile {
+  display: none;
+}
+
+.lxs-breadcrumb-list--desktop {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .lxs-breadcrumb-list--desktop {
+    display: none;
+  }
+  
+  .lxs-breadcrumb-list--mobile {
+    display: flex;
+  }
+}
+
+/* Breadcrumb Item */
+.lxs-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.lxs-breadcrumb-item-content,
+.lxs-breadcrumb-item-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem; /* 2px — no --lxs-spacing-0-5 token exists in the design system */
+  text-decoration: none !important;
+  transition: color var(--lxs-transition-base);
+}
+
+.lxs-breadcrumb-item-content {
+  color: var(--lxs-color-neutral-600);
+}
+
+.lxs-breadcrumb-item-link {
+  cursor: pointer;
+}
+
+.lxs-breadcrumb-item-link:hover {
+  text-decoration: none !important;
+}
+
+.lxs-breadcrumb-item-link:focus-visible {
+  outline: 2px solid var(--lxs-color-primary-500);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Active item */
+.lxs-breadcrumb-item--active .lxs-breadcrumb-item-content {
+  color: var(--lxs-color-neutral-900);
+  font-weight: var(--lxs-font-weight-medium);
+}
+
+/* Ellipsis */
+.lxs-breadcrumb-item--ellipsis .lxs-breadcrumb-item-content {
+  color: var(--lxs-color-neutral-500);
+  cursor: default;
+  user-select: none;
+}
+
+/* Icon */
+.lxs-breadcrumb-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-right: 5px;
+}
+
+/* Label - ensure proper alignment with Text component */
+.lxs-breadcrumb-item-label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+/* Separator */
+.lxs-breadcrumb-separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lxs-color-neutral-400);
+  user-select: none;
+  line-height: 1;
+}
+
+/* ===== Size Variants ===== */
+/* Typography variant (caption/body2/body1) is handled by the component;
+   CSS adjusts gap and separator icon sizing to match. */
+.lxs-breadcrumb--sm .lxs-breadcrumb-list {
+  gap: var(--lxs-spacing-1);
+}
+
+.lxs-breadcrumb--md .lxs-breadcrumb-list {
+  gap: var(--lxs-spacing-1);
+}
+
+.lxs-breadcrumb--lg .lxs-breadcrumb-list {
+  gap: var(--lxs-spacing-2);
+}
+
+.lxs-breadcrumb--sm .lxs-breadcrumb-separator {
+  font-size: 0.625rem;
+}
+
+.lxs-breadcrumb--lg .lxs-breadcrumb-item-icon {
+  margin-right: var(--lxs-spacing-1);
+}
+
+/* ===== Disabled Item ===== */
+.lxs-breadcrumb-item--disabled .lxs-breadcrumb-item-content {
+  color: var(--lxs-text-disabled);
+  cursor: not-allowed;
+}
+
+/* ===== Dark Mode ===== */
+[data-theme='dark'] .lxs-breadcrumb-item-content,
+[data-theme='dark'] .lxs-breadcrumb-item-link {
+  color: var(--lxs-color-neutral-400);
+}
+
+[data-theme='dark'] .lxs-breadcrumb-item--active .lxs-breadcrumb-item-content {
+  color: var(--lxs-color-neutral-50);
+}
+
+[data-theme='dark'] .lxs-breadcrumb-item-link:hover {
+  color: var(--lxs-color-primary-400);
+}
+
+[data-theme='dark'] .lxs-breadcrumb-separator {
+  color: var(--lxs-color-neutral-600);
+}

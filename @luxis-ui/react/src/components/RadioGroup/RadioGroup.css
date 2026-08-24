@@ -1,0 +1,52 @@
+/* RadioGroup Base Styles */
+.lxs-radio-group {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-2);
+}
+
+/* Group Label */
+.lxs-radio-group-label {
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-base);
+  font-weight: var(--lxs-font-weight-medium);
+  line-height: var(--lxs-line-height-normal);
+  color: var(--lxs-color-neutral-900);
+  margin-bottom: var(--lxs-spacing-1);
+}
+
+.lxs-radio-group--disabled .lxs-radio-group-label {
+  color: var(--lxs-color-neutral-500);
+}
+
+.lxs-radio-group--error .lxs-radio-group-label {
+  color: var(--lxs-color-error-600);
+}
+
+/* Options Container */
+.lxs-radio-group-options {
+  display: flex;
+  gap: var(--lxs-spacing-3);
+}
+
+.lxs-radio-group--vertical .lxs-radio-group-options {
+  flex-direction: column;
+}
+
+.lxs-radio-group--horizontal .lxs-radio-group-options {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+/* Helper Text */
+.lxs-radio-group-helper-text {
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-sm);
+  line-height: var(--lxs-line-height-normal);
+  color: var(--lxs-color-neutral-600);
+  margin-top: var(--lxs-spacing-1);
+}
+
+.lxs-radio-group--error .lxs-radio-group-helper-text {
+  color: var(--lxs-color-error-600);
+}

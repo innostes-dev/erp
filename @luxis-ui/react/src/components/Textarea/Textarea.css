@@ -1,0 +1,246 @@
+/* ─────────────────────────────────────────────
+   Wrapper
+───────────────────────────────────────────── */
+.lxs-textarea-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-1);
+}
+
+.lxs-textarea-wrapper--full-width {
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────────
+   Label
+───────────────────────────────────────────── */
+.lxs-textarea-label {
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-sm);
+  font-weight: var(--lxs-font-weight-medium);
+  color: var(--lxs-color-neutral-700);
+  line-height: var(--lxs-line-height-tight);
+  letter-spacing: 0.01em;
+}
+
+.lxs-textarea-label__required {
+  color: var(--lxs-color-error-500);
+  margin-left: 2px;
+}
+
+/* ─────────────────────────────────────────────
+   Container (the border box)
+───────────────────────────────────────────── */
+.lxs-textarea-container {
+  position: relative;
+  display: flex;
+  background-color: var(--lxs-background-primary);
+  border: 1.5px solid var(--lxs-color-neutral-300);
+  border-radius: var(--lxs-radius-md);
+  transition:
+    border-color var(--lxs-transition-fast),
+    box-shadow var(--lxs-transition-fast);
+  overflow: hidden;
+}
+
+/* Hover */
+.lxs-textarea-container:hover:not(.lxs-textarea-container--disabled):not(:focus-within) {
+  border-color: var(--lxs-color-neutral-400);
+}
+
+/* Focus ring */
+.lxs-textarea-container:focus-within:not(.lxs-textarea-container--disabled) {
+  border-color: var(--lxs-color-primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  outline: none;
+}
+
+/* ── Error state ── */
+.lxs-textarea-container--error {
+  border-color: var(--lxs-color-error-500);
+}
+
+.lxs-textarea-container--error:hover:not(.lxs-textarea-container--disabled):not(:focus-within) {
+  border-color: var(--lxs-color-error-600);
+}
+
+.lxs-textarea-container--error:focus-within {
+  border-color: var(--lxs-color-error-500);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* ── Success state ── */
+.lxs-textarea-container--success {
+  border-color: var(--lxs-color-success-500);
+}
+
+.lxs-textarea-container--success:hover:not(.lxs-textarea-container--disabled):not(:focus-within) {
+  border-color: var(--lxs-color-success-600);
+}
+
+.lxs-textarea-container--success:focus-within {
+  border-color: var(--lxs-color-success-500);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+/* ── Disabled state ── */
+.lxs-textarea-container--disabled {
+  background-color: var(--lxs-color-neutral-50);
+  border-color: var(--lxs-color-neutral-200);
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────────
+   Sizes
+───────────────────────────────────────────── */
+.lxs-textarea-container--sm {
+  border-radius: var(--lxs-radius-base);
+}
+
+.lxs-textarea-container--lg {
+  border-radius: var(--lxs-radius-lg);
+}
+
+/* ─────────────────────────────────────────────
+   Native <textarea> element
+───────────────────────────────────────────── */
+.lxs-textarea {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-sm);
+  line-height: var(--lxs-line-height-normal);
+  color: var(--lxs-color-neutral-900);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: var(--lxs-spacing-2) var(--lxs-spacing-3);
+  /* leave room for the clear button when shown */
+  padding-right: var(--lxs-spacing-3);
+  box-sizing: border-box;
+}
+
+.lxs-textarea-container--clearable .lxs-textarea {
+  padding-right: var(--lxs-spacing-8);
+}
+
+.lxs-textarea::placeholder {
+  color: var(--lxs-color-neutral-400);
+}
+
+.lxs-textarea:disabled {
+  cursor: not-allowed;
+  color: var(--lxs-color-neutral-400);
+  -webkit-text-fill-color: var(--lxs-color-neutral-400);
+}
+
+/* Size-specific adjustments */
+.lxs-textarea-container--sm .lxs-textarea {
+  font-size: var(--lxs-font-size-xs);
+  padding: var(--lxs-spacing-1-5) var(--lxs-spacing-2);
+}
+
+.lxs-textarea-container--lg .lxs-textarea {
+  font-size: var(--lxs-font-size-base);
+  padding: var(--lxs-spacing-3) var(--lxs-spacing-4);
+}
+
+/* ─────────────────────────────────────────────
+   Clear button
+───────────────────────────────────────────── */
+.lxs-textarea-clear {
+  position: absolute;
+  top: var(--lxs-spacing-2);
+  right: var(--lxs-spacing-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: var(--lxs-color-neutral-200);
+  border: none;
+  border-radius: var(--lxs-radius-full);
+  color: var(--lxs-color-neutral-500);
+  cursor: pointer;
+  transition:
+    background-color var(--lxs-transition-fast),
+    color var(--lxs-transition-fast);
+  outline: none;
+  line-height: 1;
+}
+
+.lxs-textarea-clear:hover {
+  background: var(--lxs-color-neutral-300);
+  color: var(--lxs-color-neutral-700);
+}
+
+.lxs-textarea-clear:focus-visible {
+  box-shadow: 0 0 0 2px var(--lxs-color-primary-500);
+}
+
+/* ─────────────────────────────────────────────
+   Footer row  (messages + counter side by side)
+───────────────────────────────────────────── */
+.lxs-textarea-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--lxs-spacing-2);
+  min-height: 0;
+}
+
+.lxs-textarea-footer-left {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─────────────────────────────────────────────
+   Helper / Error / Success / Counter
+───────────────────────────────────────────── */
+.lxs-textarea-helper,
+.lxs-textarea-error,
+.lxs-textarea-success,
+.lxs-textarea-counter {
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-xs);
+  line-height: var(--lxs-line-height-normal);
+  margin: 0;
+}
+
+.lxs-textarea-helper {
+  color: var(--lxs-color-neutral-500);
+}
+
+.lxs-textarea-error {
+  color: var(--lxs-color-error-600);
+}
+
+.lxs-textarea-success {
+  color: var(--lxs-color-success-600);
+}
+
+.lxs-textarea-counter {
+  color: var(--lxs-color-neutral-400);
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lxs-textarea-counter--near-limit {
+  color: var(--lxs-color-warning-500);
+}
+
+.lxs-textarea-counter--at-limit {
+  color: var(--lxs-color-error-500);
+  font-weight: var(--lxs-font-weight-medium);
+}
+
+/* ─────────────────────────────────────────────
+   Dark mode
+───────────────────────────────────────────── */
+[data-theme='dark'] .lxs-textarea-container--disabled {
+  background-color: var(--lxs-color-neutral-100);
+}

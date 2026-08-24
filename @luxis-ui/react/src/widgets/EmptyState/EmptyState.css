@@ -1,0 +1,103 @@
+.lxs-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  font-family: var(--lxs-font-family-sans);
+  width: 100%;
+}
+
+/* ─── Themes ─── */
+
+.lxs-empty-state--theme-standard {
+  padding: var(--lxs-spacing-8) var(--lxs-spacing-4);
+}
+
+.lxs-empty-state--theme-minimal {
+  padding: var(--lxs-spacing-4) 0;
+}
+
+.lxs-empty-state--theme-card {
+  padding: var(--lxs-spacing-10) var(--lxs-spacing-6);
+  background-color: var(--lxs-color-surface);
+  border: 1px solid var(--lxs-color-neutral-200);
+  border-radius: var(--lxs-radius-2xl);
+  box-shadow: var(--lxs-shadow-sm);
+}
+
+.lxs-empty-state--theme-dashed {
+  padding: var(--lxs-spacing-10) var(--lxs-spacing-6);
+  background-color: var(--lxs-color-neutral-50);
+  border: 2px dashed var(--lxs-color-neutral-300);
+  border-radius: var(--lxs-radius-xl);
+}
+
+/* ─── Layout & Spacing ─── */
+
+.lxs-empty-state__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lxs-color-neutral-400);
+  margin-bottom: var(--lxs-spacing-5);
+}
+
+.lxs-empty-state__content {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-2);
+  margin-bottom: var(--lxs-spacing-6);
+}
+
+.lxs-empty-state__description {
+  color: var(--lxs-color-neutral-500);
+  line-height: 1.5;
+}
+
+.lxs-empty-state__actions {
+  margin-top: var(--lxs-spacing-2);
+}
+
+/* ─── Sizes ─── */
+
+.lxs-empty-state--size-sm .lxs-empty-state__icon svg {
+  width: 48px;
+  height: 48px;
+}
+.lxs-empty-state--size-sm .lxs-empty-state__icon {
+  margin-bottom: var(--lxs-spacing-3);
+}
+.lxs-empty-state--size-sm .lxs-empty-state__content {
+  margin-bottom: var(--lxs-spacing-4);
+}
+
+.lxs-empty-state--size-md .lxs-empty-state__icon svg {
+  width: 80px;
+  height: 80px;
+}
+
+.lxs-empty-state--size-lg .lxs-empty-state__icon svg {
+  width: 120px;
+  height: 120px;
+}
+.lxs-empty-state--size-lg .lxs-empty-state__icon {
+  margin-bottom: var(--lxs-spacing-6);
+}
+.lxs-empty-state--size-lg .lxs-empty-state__content {
+  margin-bottom: var(--lxs-spacing-8);
+  max-width: 600px;
+}
+
+/* Dark Mode support */
+:root[data-theme='dark'] .lxs-empty-state--theme-card {
+  background-color: var(--lxs-color-neutral-900);
+  border-color: var(--lxs-color-neutral-800);
+}
+
+:root[data-theme='dark'] .lxs-empty-state--theme-dashed {
+  background-color: var(--lxs-color-neutral-900);
+  border-color: var(--lxs-color-neutral-700);
+}

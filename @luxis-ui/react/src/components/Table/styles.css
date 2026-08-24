@@ -1,0 +1,605 @@
+/* ═══════════════════════════════════════════════
+   Table Component — LXS UI Design System
+   ─────────────────────────────────────────────
+   A lightweight, composable, accessible table.
+   All tokens are CSS custom properties so that
+   consumers can theme without touching the source.
+═══════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────
+   Public design tokens (override at :root or on
+   the element itself to theme the component)
+───────────────────────────────────────────── */
+:root {
+  --table-border-color:      var(--lxs-color-neutral-200, #e5e7eb);
+  --table-row-hover-bg:      var(--lxs-color-primary-50,  #eff6ff);
+  --table-header-bg:         var(--lxs-color-neutral-50,  #f9fafb);
+  --table-header-color:      var(--lxs-color-neutral-700, #374151);
+  --table-cell-padding-sm:   4px 8px;
+  --table-cell-padding-md:   10px 16px;
+  --table-cell-padding-lg:   14px 20px;
+  --table-cell-padding:      var(--table-cell-padding-md);
+  --table-row-selected-bg:   var(--lxs-color-primary-100, #dbeafe);
+  --table-row-selected-hover:var(--lxs-color-primary-200, #bfdbfe);
+  --table-stripe-bg:         var(--lxs-color-neutral-50,  #fafafa);
+  --table-disabled-opacity:  0.45;
+  --table-font-family:       var(--lxs-font-family-sans, 'Inter', system-ui, -apple-system, sans-serif);
+  --table-font-size-sm:      var(--lxs-font-size-xs,   12px);
+  --table-font-size-md:      var(--lxs-font-size-sm,   14px);
+  --table-font-size-lg:      var(--lxs-font-size-base, 16px);
+  --table-radius:            var(--lxs-radius-lg,      8px);
+  --table-bg:                var(--lxs-background-primary, #ffffff);
+  --table-text-color:        var(--lxs-color-neutral-700,  #374151);
+  --table-text-secondary:    var(--lxs-color-neutral-500,  #6b7280);
+  --table-sticky-shadow-right:  4px 0 6px -2px rgba(0, 0, 0, 0.1);
+  --table-sticky-shadow-left:  -4px 0 6px -2px rgba(0, 0, 0, 0.1);
+  --table-header-sort-color:    var(--lxs-color-primary-600, #2563eb);
+  --table-transition:           0.15s ease;
+  --table-empty-icon-color:     var(--lxs-color-neutral-400, #9ca3af);
+  --table-error-color:          var(--lxs-color-danger-600,  #dc2626);
+  --table-loading-opacity:      0.5;
+}
+
+/* ─────────────────────────────────────────────
+   Container
+───────────────────────────────────────────── */
+.lxs-table-container {
+  width: 100%;
+  position: relative;
+  background: var(--table-bg);
+  border-radius: var(--table-radius);
+  font-family: var(--table-font-family);
+}
+
+.lxs-table-container--scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lxs-table-container--max-height {
+  overflow-y: auto;
+}
+
+/* Scrollbar styling (webkit only — non-intrusive) */
+.lxs-table-container::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.lxs-table-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.lxs-table-container::-webkit-scrollbar-thumb {
+  background: var(--table-border-color);
+  border-radius: 999px;
+}
+
+/* ─────────────────────────────────────────────
+   Root Table Element
+───────────────────────────────────────────── */
+.lxs-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-family: var(--table-font-family);
+  color: var(--table-text-color);
+  background: var(--table-bg);
+  table-layout: auto;
+  font-size: var(--table-font-size-md);
+}
+
+/* Size modifiers */
+.lxs-table--sm {
+  font-size: var(--table-font-size-sm);
+}
+.lxs-table--lg {
+  font-size: var(--table-font-size-lg);
+}
+
+/* ─────────────────────────────────────────────
+   Loading overlay
+───────────────────────────────────────────── */
+.lxs-table--loading {
+  pointer-events: none;
+  opacity: var(--table-loading-opacity);
+  user-select: none;
+}
+
+/* ─────────────────────────────────────────────
+   Variants
+───────────────────────────────────────────── */
+
+/* simple — only horizontal rules */
+.lxs-table--simple thead tr,
+.lxs-table--simple tbody tr:not(:last-child),
+.lxs-table--simple tfoot tr {
+  border-bottom: 1px solid var(--table-border-color);
+}
+
+/* bordered — full grid lines */
+.lxs-table--bordered,
+.lxs-table--bordered th,
+.lxs-table--bordered td {
+  border: 1px solid var(--table-border-color);
+}
+.lxs-table--bordered {
+  border-radius: var(--table-radius);
+  overflow: hidden;
+}
+
+/* ghost — minimal, borderless */
+.lxs-table--ghost th,
+.lxs-table--ghost td {
+  border: none;
+}
+.lxs-table--ghost thead tr {
+  border-bottom: 2px solid var(--table-border-color);
+}
+
+/* striped — handled with zebra row class (see below) */
+.lxs-table--striped tbody tr:nth-child(even),
+.lxs-table--striped.lxs-table--zebra tbody tr:nth-child(even) {
+  background-color: var(--table-stripe-bg);
+}
+.lxs-table--zebra tbody tr:nth-child(even) {
+  background-color: var(--table-stripe-bg);
+}
+
+/* ─────────────────────────────────────────────
+   TableHead
+───────────────────────────────────────────── */
+.lxs-table-head {
+  background: var(--table-header-bg);
+}
+
+.lxs-table-head--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  /* Lift above body rows so shadow is visible */
+  box-shadow: 0 1px 0 var(--table-border-color);
+}
+
+/* ─────────────────────────────────────────────
+   TableFooter
+───────────────────────────────────────────── */
+.lxs-table-footer {
+  background: var(--table-header-bg);
+  border-top: 1px solid var(--table-border-color);
+}
+
+.lxs-table-footer--sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  box-shadow: 0 -1px 0 var(--table-border-color);
+}
+
+/* ─────────────────────────────────────────────
+   TableBody
+───────────────────────────────────────────── */
+.lxs-table-body {
+  /* Semantic wrapper — styles applied via parent table selectors */
+  display: table-row-group;
+}
+
+/* ─────────────────────────────────────────────
+   TableRow
+───────────────────────────────────────────── */
+.lxs-table-row {
+  transition: background-color var(--table-transition);
+  outline: none;
+}
+
+/* Hoverable */
+.lxs-table--hoverable .lxs-table-body .lxs-table-row:hover,
+.lxs-table-row--hoverable:hover {
+  background-color: var(--table-row-hover-bg) !important;
+}
+
+/* Clickable */
+.lxs-table-row--clickable {
+  cursor: pointer;
+}
+
+/* Selected */
+.lxs-table-row--selected {
+  background-color: var(--table-row-selected-bg);
+}
+.lxs-table-row--selected:hover {
+  background-color: var(--table-row-selected-hover) !important;
+}
+.lxs-table-row--selected:focus-visible {
+  outline: 2px solid var(--lxs-color-primary-500, #3b82f6);
+  outline-offset: -2px;
+}
+
+/* Disabled */
+.lxs-table-row--disabled {
+  opacity: var(--table-disabled-opacity);
+  pointer-events: none;
+}
+
+/* Expanded (e.g. expandable row parent row) */
+.lxs-table-row--expanded {
+  background-color: var(--table-row-hover-bg);
+}
+
+/* Focus rings for keyboard navigation */
+.lxs-table-row--clickable:focus-visible {
+  outline: 2px solid var(--lxs-color-primary-500, #3b82f6);
+  outline-offset: -2px;
+}
+
+/* ─────────────────────────────────────────────
+   TableCell (td)
+───────────────────────────────────────────── */
+.lxs-table-cell {
+  padding: var(--table-cell-padding);
+  text-align: left;
+  vertical-align: middle;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+  transition: background-color var(--table-transition);
+}
+
+.lxs-table--sm .lxs-table-cell {
+  padding: var(--table-cell-padding-sm);
+}
+.lxs-table--md .lxs-table-cell {
+  padding: var(--table-cell-padding-md);
+}
+.lxs-table--lg .lxs-table-cell {
+  padding: var(--table-cell-padding-lg);
+}
+
+/* Alignment */
+.lxs-table-cell--align-left    { text-align: left; }
+.lxs-table-cell--align-center  { text-align: center; }
+.lxs-table-cell--align-right   { text-align: right; }
+
+/* Numeric */
+.lxs-table-cell--numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  letter-spacing: 0;
+}
+
+/* Truncate */
+.lxs-table-cell--truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0; /* required so text-overflow works in table cells */
+}
+
+/* Sticky left */
+.lxs-table-cell--sticky-left {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: inherit;
+}
+.lxs-table-cell--sticky-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -6px;
+  bottom: 0;
+  width: 6px;
+  pointer-events: none;
+  box-shadow: var(--table-sticky-shadow-right);
+  clip-path: inset(0 -10px 0 0);
+}
+
+/* Sticky right */
+.lxs-table-cell--sticky-right {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: inherit;
+}
+.lxs-table-cell--sticky-right::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -6px;
+  bottom: 0;
+  width: 6px;
+  pointer-events: none;
+  box-shadow: var(--table-sticky-shadow-left);
+  clip-path: inset(0 0 0 -10px);
+}
+
+/* ─────────────────────────────────────────────
+   TableHeaderCell (th)
+───────────────────────────────────────────── */
+.lxs-table-header-cell {
+  padding: var(--table-cell-padding);
+  text-align: left;
+  vertical-align: bottom;
+  font-weight: 600;
+  color: var(--table-header-color);
+  white-space: nowrap;
+  background: var(--table-header-bg);
+  user-select: none;
+  position: relative;
+}
+
+.lxs-table--sm .lxs-table-header-cell {
+  padding: var(--table-cell-padding-sm);
+}
+.lxs-table--md .lxs-table-header-cell {
+  padding: var(--table-cell-padding-md);
+}
+.lxs-table--lg .lxs-table-header-cell {
+  padding: var(--table-cell-padding-lg);
+}
+
+/* Sortable button reset */
+.lxs-table-header-cell--sortable {
+  cursor: pointer;
+}
+
+.lxs-table-header-cell__sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: inherit;
+}
+
+.lxs-table-header-cell__sort-btn:focus-visible {
+  outline: 2px solid var(--lxs-color-primary-500, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.lxs-table-header-cell__sort-icon {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-shrink: 0;
+  opacity: 0.35;
+  transition: opacity var(--table-transition), transform var(--table-transition);
+}
+
+.lxs-table-header-cell--sorted .lxs-table-header-cell__sort-icon {
+  opacity: 1;
+  color: var(--table-header-sort-color);
+}
+
+.lxs-table-header-cell--sort-desc .lxs-table-header-cell__sort-icon {
+  transform: rotate(180deg);
+}
+
+/* ─────────────────────────────────────────────
+   TableCaption
+───────────────────────────────────────────── */
+.lxs-table-caption {
+  padding: 8px 16px;
+  font-size: 0.875em;
+  color: var(--table-text-secondary);
+  text-align: center;
+}
+
+.lxs-table-caption--top {
+  caption-side: top;
+}
+.lxs-table-caption--bottom {
+  caption-side: bottom;
+}
+
+/* ─────────────────────────────────────────────
+   TableEmptyState
+───────────────────────────────────────────── */
+.lxs-table-empty-state {
+  text-align: center;
+}
+
+.lxs-table-empty-state__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+}
+
+.lxs-table-empty-state__icon {
+  color: var(--table-empty-icon-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lxs-table-empty-state__message {
+  font-size: var(--table-font-size-md);
+  font-weight: 500;
+  color: var(--table-text-color);
+}
+
+.lxs-table-empty-state__description {
+  font-size: var(--table-font-size-sm, 12px);
+  color: var(--table-text-secondary);
+  max-width: 320px;
+}
+
+/* Error type */
+.lxs-table-empty-state--error .lxs-table-empty-state__message {
+  color: var(--table-error-color);
+}
+.lxs-table-empty-state--error .lxs-table-empty-state__icon {
+  color: var(--table-error-color);
+}
+
+/* ─────────────────────────────────────────────
+   TablePagination
+───────────────────────────────────────────── */
+.lxs-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--table-border-color);
+  background: var(--table-header-bg);
+  font-family: var(--table-font-family);
+  font-size: var(--table-font-size-md);
+  color: var(--table-text-color);
+}
+
+.lxs-table-pagination__info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  color: var(--table-text-secondary);
+  font-size: 0.875em;
+}
+
+.lxs-table-pagination__page-size {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875em;
+}
+
+.lxs-table-pagination__page-size select {
+  padding: 2px 6px;
+  border: 1px solid var(--table-border-color);
+  border-radius: 5px;
+  background: var(--table-bg);
+  color: var(--table-text-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.lxs-table-pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lxs-table-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border: 1px solid var(--table-border-color);
+  border-radius: 5px;
+  background: var(--table-bg);
+  color: var(--table-text-color);
+  font: inherit;
+  font-size: 0.875em;
+  cursor: pointer;
+  transition: background-color var(--table-transition), color var(--table-transition);
+  user-select: none;
+}
+
+.lxs-table-pagination__btn:hover:not(:disabled) {
+  background: var(--table-row-hover-bg);
+  border-color: var(--lxs-color-primary-300, #93c5fd);
+  color: var(--lxs-color-primary-700, #1d4ed8);
+}
+
+.lxs-table-pagination__btn:focus-visible {
+  outline: 2px solid var(--lxs-color-primary-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+.lxs-table-pagination__btn--active {
+  background: var(--lxs-color-primary-600, #2563eb);
+  border-color: var(--lxs-color-primary-600, #2563eb);
+  color: #fff;
+}
+
+.lxs-table-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─────────────────────────────────────────────
+   Sticky column helpers on root
+   (applied when stickyFirstColumn / stickyLastColumn)
+───────────────────────────────────────────── */
+.lxs-table--sticky-first-col td:first-child,
+.lxs-table--sticky-first-col th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: inherit;
+}
+.lxs-table--sticky-first-col td:first-child::after,
+.lxs-table--sticky-first-col th:first-child::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -6px; bottom: 0;
+  width: 6px;
+  pointer-events: none;
+  box-shadow: var(--table-sticky-shadow-right);
+  clip-path: inset(0 -10px 0 0);
+}
+
+.lxs-table--sticky-last-col td:last-child,
+.lxs-table--sticky-last-col th:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: inherit;
+}
+.lxs-table--sticky-last-col td:last-child::before,
+.lxs-table--sticky-last-col th:last-child::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -6px; bottom: 0;
+  width: 6px;
+  pointer-events: none;
+  box-shadow: var(--table-sticky-shadow-left);
+  clip-path: inset(0 0 0 -10px);
+}
+
+/* ─────────────────────────────────────────────
+   Dark mode overrides
+   (uses prefers-color-scheme; consumers can
+    also set data-theme="dark" on a parent)
+───────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --table-border-color:      var(--lxs-color-neutral-700, #374151);
+    --table-row-hover-bg:      rgba(59, 130, 246, 0.08);
+    --table-header-bg:         var(--lxs-color-neutral-800, #1f2937);
+    --table-header-color:      var(--lxs-color-neutral-200, #e5e7eb);
+    --table-row-selected-bg:   rgba(59, 130, 246, 0.15);
+    --table-row-selected-hover:rgba(59, 130, 246, 0.22);
+    --table-stripe-bg:         var(--lxs-color-neutral-800, #1f2937);
+    --table-bg:                var(--lxs-background-primary, #111827);
+    --table-text-color:        var(--lxs-color-neutral-100, #f3f4f6);
+    --table-text-secondary:    var(--lxs-color-neutral-400, #9ca3af);
+  }
+}
+
+[data-theme='dark'] {
+  --table-border-color:      var(--lxs-color-neutral-700, #374151);
+  --table-row-hover-bg:      rgba(59, 130, 246, 0.08);
+  --table-header-bg:         var(--lxs-color-neutral-800, #1f2937);
+  --table-header-color:      var(--lxs-color-neutral-200, #e5e7eb);
+  --table-row-selected-bg:   rgba(59, 130, 246, 0.15);
+  --table-row-selected-hover:rgba(59, 130, 246, 0.22);
+  --table-stripe-bg:         var(--lxs-color-neutral-800, #1f2937);
+  --table-bg:                var(--lxs-background-primary, #111827);
+  --table-text-color:        var(--lxs-color-neutral-100, #f3f4f6);
+  --table-text-secondary:    var(--lxs-color-neutral-400, #9ca3af);
+}

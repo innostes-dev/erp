@@ -1,0 +1,42 @@
+.lxs-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    /* Or block depending on usage, usually needs to fit container */
+    width: 100%;
+    height: 100%;
+}
+
+.lxs-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1;
+}
+
+.lxs-image-main {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease-in-out;
+    position: relative;
+    z-index: 2;
+}
+
+.lxs-image-main--loading {
+    opacity: 0;
+}
+
+.lxs-image-main--loaded {
+    opacity: 1;
+}
+
+.lxs-image-placeholder--hidden {
+    opacity: 0;
+    pointer-events: none;
+}

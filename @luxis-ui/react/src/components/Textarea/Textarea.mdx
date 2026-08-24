@@ -1,0 +1,851 @@
+---
+title: "Textarea — Luxis UI React Component"
+description: "A multi-line text input with label, helper text, validation states, character counter, clear button, resize control, and auto-resize support."
+status: stable
+since: "1.0.0"
+category: "Components/Textarea"
+npm: "@luxis-ui/react"
+import: "import { Textarea } from '@luxis-ui/react'"
+component: "Textarea"
+keywords:
+  - textarea
+  - multi-line input
+  - textarea react
+  - luxis ui textarea
+  - typescript textarea
+  - accessible textarea
+  - react design system
+slug: /components/textarea
+canonical: "https://luxisui.com/docs/components/textarea"
+og_image: "/img/og/textarea.png"
+llm_summary: >
+  The Textarea component renders a native <textarea> element. Primary use case is a multi-line text input with label, helper text, validation states, character counter, clear button, resize control, and auto-resize. Do not use when a single-line Input suffices. Implements WAI-ARIA implicit textbox pattern. Import: `import { Textarea } from '@luxis-ui/react'`. Props: label (string), helperText (string), error (string), success (string), size ('sm'|'md'|'lg', default=theme.global.size), fullWidth (boolean, default=false), clearable (boolean, default=false), onClear (() => void), showCount (boolean, default=false), maxLength (number), rows (number, default=4), resize ('none'|'both'|'horizontal'|'vertical', default='vertical'), autoResize (boolean, default=false), required (boolean, default=false), disabled (boolean, default=false), placeholder (string), value (string), onChange (ChangeEventHandler).
+---
+
+{/*
+LLM_CONTEXT
+  component    : Textarea
+  source       : packages/luxis-ui/src/components/Textarea/Textarea.tsx
+  story        : apps/storybook/src/stories/Textarea.stories.tsx
+  package      : @luxis-ui/react
+  framework    : React 18+, TypeScript
+  category     : Components/Textarea
+  status       : stable
+  aria-pattern : textbox (implicit, multiline native element)
+
+  What it renders:
+  Textarea renders a native <textarea> element inside a styled border
+  container, with an optional label above and an optional footer row
+  containing helper/error/success text on the left and a character
+  counter on the right.
+
+  When to use:
+  - Collecting multi-line text (messages, descriptions, bios, notes)
+  - Situations where the user may want to write several sentences or paragraphs
+  - When a character limit must be communicated in real time
+
+  When NOT to use:
+  - Single-line text entry — use Input instead
+  - Rich formatted content (bold, lists, links) — use RichTextEditor instead
+
+  Ecosystem equivalents:
+  - MUI        : <TextField multiline>
+  - Chakra UI  : <Textarea>
+  - shadcn/ui  : Textarea
+  - Radix UI   : No built-in
+  - HTML native: <textarea>
+
+  Props (must match source exactly):
+  label (string, default=undefined) — Label text displayed above the textarea
+  helperText (string, default=undefined) — Helper text shown below; hidden when error or success is set
+  error (string, default=undefined) — Error message; triggers error state; takes precedence over helperText
+  success (string, default=undefined) — Success message; triggers success state
+  size ('sm'|'md'|'lg', default=theme.global.size) — Size of the textarea
+  fullWidth (boolean, default=false) — If true, takes full container width
+  clearable (boolean, default=false) — If true, shows a clear button in the top-right corner when value is present
+  onClear (() => void, default=undefined) — Callback fired when clear button is clicked
+  showCount (boolean, default=false) — If true, shows a character counter; counter also shows automatically when maxLength is set
+  maxLength (number, default=undefined) — Maximum character length enforced by the browser; also triggers the counter
+  wrapperClassName (string, default='') — Additional class for the outer wrapper div
+  labelClassName (string, default='') — Additional class for the label element
+  textareaClassName (string, default='') — Additional class for the <textarea> element
+  rows (number, default=4) — Number of visible text rows (ignored when autoResize=true)
+  resize ('none'|'both'|'horizontal'|'vertical', default='vertical') — CSS resize handle behaviour
+  autoResize (boolean, default=false) — If true, textarea grows to fit its content; overrides resize
+  required (boolean, default=false) — Marks the field required
+  disabled (boolean, default=false) — Disables the textarea and clear button
+  placeholder (string, default=undefined) — Placeholder text
+  value (string, default=undefined) — Controlled value
+  onChange (React.ChangeEventHandler<HTMLTextAreaElement>, default=undefined) — Standard change handler
+
+  Accessibility:
+  WCAG: AA
+  Keyboard: Tab moves focus to the textarea; standard text-editing keys apply inside
+  Screen reader: Announces as a multiline textbox (native element), aria-invalid on error,
+                 aria-required on required, aria-describedby linking to helper/error/success IDs,
+                 counter uses aria-live="polite"
+END_LLM_CONTEXT
+*/}
+
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Textarea React Component — Luxis UI",
+  "description": "A multi-line text input with label, helper text, validation states, character counter, clear button, resize control, and auto-resize support.",
+  "keywords": "textarea, multi-line input, textarea react, luxis ui textarea, typescript textarea, accessible textarea, react design system",
+  "author": { "@type": "Organization", "name": "Luxis UI" },
+  "programmingLanguage": ["TypeScript", "React"],
+  "about": {
+    "@type": "SoftwareSourceCode",
+    "name": "@luxis-ui/react",
+    "runtimePlatform": "React"
+  },
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I install and use Textarea in React?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install with npm install @luxis-ui/react. Import with import { Textarea } from '@luxis-ui/react'."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What props does the Luxis UI Textarea accept?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Textarea accepts label, helperText, error, success, size, fullWidth, clearable, showCount, maxLength, rows, resize, autoResize, required, disabled, placeholder, value, and onChange, plus all standard HTML textarea attributes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I show a character counter in the Textarea?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Set maxLength — the counter appears automatically as 'current / max'. Optionally also set showCount={true} if you want the counter without enforcing a limit."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I make the Textarea grow with its content?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Set autoResize={true}. The textarea will expand vertically as the user types and ignore the resize handle."
+        }
+      }
+    ]
+  }
+}
+`}</script>
+
+# Textarea
+
+<ComponentStatus status="stable" version="1.0.0" aria="WAI-ARIA textbox (native multiline)" />
+
+A multi-line text input with label, helper text, validation states, character counter, clear button, resize control, and auto-resize support.
+
+```bash
+npm install @luxis-ui/react
+# or
+yarn add @luxis-ui/react
+# or
+pnpm add @luxis-ui/react
+```
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+```
+
+<Callout type="info" title="Migrating from another library?">
+  Luxis UI `Textarea` is equivalent to MUI's `<TextField multiline>`,
+  Chakra UI's `<Textarea>`, and shadcn/ui's `Textarea`.
+  It renders a native `<textarea>` element for maximum accessibility and form compatibility.
+</Callout>
+
+## Before You Start
+
+Textarea wraps the native `<textarea>` element with a consistent design language shared with Input.
+Use it whenever users need to enter more than one line of plain text.
+
+<Callout type="tip" title="Need rich formatting?">
+  If users need bold, lists, or links, use `RichTextEditor` instead.
+  For single-line text, use `Input`.
+</Callout>
+
+## How to Use Textarea in React
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function Example() {
+  return (
+    <Textarea
+      label="Message"
+      placeholder="Enter your message..."
+      helperText="We'll reply within 24 hours."
+    />
+  );
+}
+```
+
+## Try It Live
+
+```tsx live
+import { useState } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function LiveExample() {
+  const [value, setValue] = useState('');
+
+  return (
+    <Textarea
+      label="Bio"
+      placeholder="Tell us about yourself..."
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      maxLength={200}
+      fullWidth
+    />
+  );
+}
+```
+
+## Textarea Examples
+
+---
+
+### Default
+
+Minimal textarea with a label and placeholder.
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function DefaultExample() {
+  return (
+    <Textarea
+      label="Description"
+      placeholder="Enter a description..."
+    />
+  );
+}
+```
+
+---
+
+### With Helper Text
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function WithHelperTextExample() {
+  return (
+    <Textarea
+      label="Bio"
+      helperText="Write a short bio displayed on your public profile."
+      placeholder="Tell us about yourself..."
+    />
+  );
+}
+```
+
+---
+
+### Validation States
+
+`error` triggers the red error state; `success` triggers the green success state. `error` takes precedence over `helperText`.
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function ValidationStatesExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <Textarea
+        label="Feedback"
+        error="Feedback cannot be empty."
+        placeholder="Share your thoughts..."
+      />
+      <Textarea
+        label="Notes"
+        success="Notes saved successfully."
+        value="Looking good!"
+      />
+    </div>
+  );
+}
+```
+
+---
+
+### Character Counter — maxLength
+
+Set `maxLength` and the counter appears automatically below the textarea as **`current / max`**. No additional prop is required.
+
+```tsx
+import { useState } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function WithMaxLengthExample() {
+  const [value, setValue] = useState('');
+
+  return (
+    <Textarea
+      label="Short Bio"
+      placeholder="Write a short bio (max 150 characters)..."
+      maxLength={150}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      helperText="Displayed on your public profile."
+    />
+  );
+}
+```
+
+---
+
+### Character Counter — showCount with Colour Cues
+
+Use `showCount` together with `maxLength` to get a counter that turns **orange at 90 %** of the limit and **red at 100 %**.
+
+```tsx
+import { useState } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function WithCharacterCounterExample() {
+  const [value, setValue] = useState('');
+
+  return (
+    <Textarea
+      label="Comment"
+      placeholder="Write your comment..."
+      showCount
+      maxLength={300}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      helperText="Counter turns orange near the limit and red at the limit."
+    />
+  );
+}
+```
+
+---
+
+### Clearable
+
+Set `clearable` to show a clear button in the top-right corner whenever the textarea has content. Pair with `onClear` to reset controlled state.
+
+```tsx
+import { useState } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function ClearableExample() {
+  const [value, setValue] = useState('Clear me using the × button.');
+
+  return (
+    <Textarea
+      label="Draft"
+      clearable
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onClear={() => setValue('')}
+    />
+  );
+}
+```
+
+---
+
+### Sizes
+
+Three sizes: `sm`, `md` (default), and `lg`.
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function SizesExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {(['sm', 'md', 'lg'] as const).map((s) => (
+        <Textarea key={s} label={`Size: ${s}`} size={s} rows={3} />
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+### Disabled
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function DisabledExample() {
+  return (
+    <Textarea
+      label="Archived Notes"
+      disabled
+      value="This content is locked and cannot be edited."
+    />
+  );
+}
+```
+
+---
+
+### Required
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function RequiredExample() {
+  return (
+    <Textarea
+      label="Terms & Conditions"
+      required
+      placeholder="You must provide this content..."
+    />
+  );
+}
+```
+
+---
+
+### Resize Variants
+
+Control the resize handle with the `resize` prop.
+
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function ResizeVariantsExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <Textarea label="resize: none"       resize="none"       rows={3} />
+      <Textarea label="resize: vertical"   resize="vertical"   rows={3} />
+      <Textarea label="resize: horizontal" resize="horizontal" rows={3} />
+      <Textarea label="resize: both"       resize="both"       rows={3} />
+    </div>
+  );
+}
+```
+
+---
+
+### Auto Resize
+
+Set `autoResize` and the textarea grows vertically with the content. The resize handle is hidden automatically.
+
+```tsx
+import { useState } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function AutoResizeExample() {
+  const [value, setValue] = useState('');
+
+  return (
+    <Textarea
+      label="Auto-resize Notes"
+      autoResize
+      rows={2}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      placeholder="Keep typing — the textarea grows with your content..."
+    />
+  );
+}
+```
+
+---
+
+### Controlled
+
+When to use: When a parent component needs to read or drive the value.
+
+<Callout type="info" title="Controlled vs Uncontrolled">
+  Omit `value` for uncontrolled usage. Pass `value` + `onChange` for controlled usage,
+  e.g. when syncing with a form library or URL param.
+</Callout>
+
+```tsx
+import { useState } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function ControlledExample() {
+  const [value, setValue] = useState('Edit this content and watch the live output below.');
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <Textarea
+        label="Controlled Textarea"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        maxLength={200}
+      />
+      <pre style={{ fontSize: 12, background: '#f5f5f5', padding: '12px 16px', borderRadius: 8, margin: 0 }}>
+        {value}
+      </pre>
+    </div>
+  );
+}
+```
+
+## Textarea Best Practices
+
+<DoAndDont
+  good={`// ✅ Always provide a visible label or aria-label
+<Textarea label="Message" />`}
+  bad={`// ❌ Relying on placeholder as the only label
+<Textarea placeholder="Message" />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Use maxLength to enforce and communicate limits
+<Textarea maxLength={300} value={text} onChange={...} />`}
+  bad={`// ❌ Silently truncating in onChange without feedback
+<Textarea onChange={(e) => setText(e.target.value.slice(0, 300))} />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Use autoResize for open-ended content
+<Textarea autoResize value={notes} onChange={...} />`}
+  bad={`// ❌ Setting a fixed height that cuts off content
+<Textarea style={{ height: 40 }} />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Pair clearable with onClear in controlled mode
+<Textarea clearable value={v} onClear={() => setValue('')} />`}
+  bad={`// ❌ Using clearable without onClear in controlled mode
+<Textarea clearable value={v} />`}
+/>
+
+## Textarea Props & API Reference
+
+### Textarea Props
+
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `label` | `string` | `undefined` | No | Label text displayed above the textarea |
+| `helperText` | `string` | `undefined` | No | Helper text shown below; hidden when `error` or `success` is set |
+| `error` | `string` | `undefined` | No | Error message; triggers error state; takes precedence over `helperText` |
+| `success` | `string` | `undefined` | No | Success message; triggers success state |
+| `size` | `'sm' \| 'md' \| 'lg'` | `theme.global.size` | No | Size of the textarea |
+| `fullWidth` | `boolean` | `false` | No | If true, takes full container width |
+| `clearable` | `boolean` | `false` | No | If true, shows a clear button when value is present |
+| `onClear` | `() => void` | `undefined` | No | Callback fired when clear button is clicked |
+| `showCount` | `boolean` | `false` | No | If true, shows a character counter; counter also appears automatically when `maxLength` is set |
+| `maxLength` | `number` | `undefined` | No | Maximum character length; enforced by the browser; auto-shows the counter |
+| `rows` | `number` | `4` | No | Number of visible text rows (ignored when `autoResize` is true) |
+| `resize` | `'none' \| 'both' \| 'horizontal' \| 'vertical'` | `'vertical'` | No | CSS resize handle behaviour |
+| `autoResize` | `boolean` | `false` | No | If true, textarea grows to fit content; overrides `resize` |
+| `required` | `boolean` | `false` | No | Marks the field as required |
+| `disabled` | `boolean` | `false` | No | Disables the textarea and clear button |
+| `placeholder` | `string` | `undefined` | No | Placeholder text |
+| `value` | `string` | `undefined` | No | Controlled value |
+| `onChange` | `React.ChangeEventHandler<HTMLTextAreaElement>` | `undefined` | No | Standard change handler |
+| `wrapperClassName` | `string` | `''` | No | Additional class for the outer wrapper |
+| `labelClassName` | `string` | `''` | No | Additional class for the label |
+| `textareaClassName` | `string` | `''` | No | Additional class for the `<textarea>` element |
+
+Textarea also forwards all standard HTML `<textarea>` attributes (e.g. `name`, `form`, `autoComplete`, `spellCheck`, `readOnly`, `onFocus`, `onBlur`, `onKeyDown`).
+
+<details>
+<summary>View full TypeScript interface</summary>
+
+```ts
+export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'> {
+  label?: string;
+  helperText?: string;
+  error?: string;
+  success?: string;
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
+  clearable?: boolean;
+  onClear?: () => void;
+  showCount?: boolean;
+  maxLength?: number;
+  wrapperClassName?: string;
+  labelClassName?: string;
+  textareaClassName?: string;
+  rows?: number;
+  resize?: 'none' | 'both' | 'horizontal' | 'vertical';
+  autoResize?: boolean;
+}
+```
+
+</details>
+
+## Textarea Accessibility Guide
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| <KeyboardKey>Tab</KeyboardKey> | Moves focus to the textarea |
+| <KeyboardKey>Shift+Tab</KeyboardKey> | Moves focus out of the textarea |
+| Standard text keys | Type, select, cut, copy, paste inside the textarea |
+
+### ARIA Attributes
+
+| Attribute | Value | When |
+|-----------|-------|------|
+| `aria-invalid` | `"true" \| undefined` | When `error` prop is set |
+| `aria-required` | `"true" \| undefined` | When `required` prop is true |
+| `aria-describedby` | string | Links to helper text, error, or success message IDs |
+
+The `<textarea>` element is natively recognized as a multiline textbox by all screen readers — no extra `role` is needed.
+
+The error paragraph carries `role="alert"` for immediate announcement. The success message uses `<output>`. The character counter uses `aria-live="polite"`.
+
+### Accessibility Checklist
+
+- [ ] Provide `label` on every instance (or `aria-label` if no visible label is appropriate)
+- [ ] Test with keyboard — Tab in, type, Tab out
+- [ ] Confirm error and success messages are announced by assistive technology
+- [ ] Verify focus ring is clearly visible on the container
+
+## Textarea Design Tokens
+
+<Callout type="tip" title="What are design tokens?">
+  CSS custom properties that store design decisions like colors and spacing.
+  Override them to restyle Textarea without fighting specificity.
+</Callout>
+
+| Token | Default Value | Description |
+|-------|--------------|-------------|
+| `--lxs-textarea-bg` | `var(--lxs-background-primary)` | Background of the textarea container |
+| `--lxs-textarea-border` | `var(--lxs-color-neutral-300)` | Default border color |
+| `--lxs-textarea-border-focus` | `var(--lxs-color-primary-500)` | Border color when focused |
+| `--lxs-textarea-border-error` | `var(--lxs-color-error-500)` | Border color in error state |
+| `--lxs-textarea-border-success` | `var(--lxs-color-success-500)` | Border color in success state |
+| `--lxs-textarea-text` | `var(--lxs-color-neutral-900)` | Text color |
+| `--lxs-textarea-placeholder` | `var(--lxs-color-neutral-400)` | Placeholder text color |
+| `--lxs-textarea-radius` | `var(--lxs-radius-md)` | Border radius |
+
+**Override globally:**
+```css
+:root {
+  --lxs-textarea-border-focus: var(--lxs-color-secondary-500);
+}
+```
+
+**Override on one instance:**
+```tsx
+<Textarea style={{ '--lxs-textarea-border': '2px solid var(--lxs-color-primary-300)' }} />
+```
+
+## Customizing Textarea
+
+### Level 1 — className
+
+```tsx
+<Textarea wrapperClassName="mt-4" textareaClassName="font-mono" />
+```
+
+### Level 2 — Design Tokens
+
+```tsx
+<Textarea style={{ '--lxs-textarea-radius': '12px' }} />
+```
+
+### Using with forwardRef
+
+```tsx
+import { useRef, useEffect } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function RefExample() {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    ref.current?.focus();
+  }, []);
+
+  return <Textarea ref={ref} label="Auto-focused Message" />;
+}
+```
+
+## Common Textarea Patterns
+
+### Form-Integrated Textarea
+
+```tsx
+import { useState } from 'react';
+import { Textarea } from '@luxis-ui/react';
+
+export default function FormPattern() {
+  const [body, setBody] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!body.trim()) { setError('Body is required.'); return; }
+    setError('');
+    // submit...
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <Textarea
+        label="Message"
+        required
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        error={error}
+        maxLength={500}
+        fullWidth
+      />
+      <button type="submit">Send</button>
+    </form>
+  );
+}
+```
+
+### Textarea with react-hook-form
+
+```tsx
+import { Controller, useForm } from 'react-hook-form';
+import { Textarea } from '@luxis-ui/react';
+
+interface FormValues { description: string; }
+
+export default function RHFPattern() {
+  const { control, handleSubmit } = useForm<FormValues>({ defaultValues: { description: '' } });
+
+  return (
+    <form onSubmit={handleSubmit((data) => console.log(data))}>
+      <Controller
+        name="description"
+        control={control}
+        rules={{ required: 'Description is required' }}
+        render={({ field, fieldState }) => (
+          <Textarea
+            label="Description"
+            value={field.value}
+            onChange={field.onChange}
+            error={fieldState.error?.message}
+            maxLength={500}
+            required
+          />
+        )}
+      />
+      <button type="submit">Save</button>
+    </form>
+  );
+}
+```
+
+## Troubleshooting Textarea
+
+| Symptom | Wrong ❌ | Right ✅ |
+|---------|---------|---------|
+| Counter not showing | No `maxLength` and `showCount` is false | Set `maxLength` — counter appears automatically |
+| Clear button does nothing | Using `clearable` without `onClear` in controlled mode | Always pair `clearable` with `onClear={() => setValue('')}` |
+| Textarea not growing | `autoResize` not set | Add `autoResize` and provide `value` + `onChange` |
+| Content cut off | Fixed `height` via inline style | Use `rows` to set initial height; let `autoResize` or user resize handle the rest |
+| Screen readers silent | No `label` and no `aria-label` | Always provide an accessible name |
+
+<Callout type="warning" title="Next.js / SSR">
+  Textarea uses `useRef` and `useEffect` for auto-resize. If you are using the
+  Next.js App Router, mark any component that renders it with `"use client"`.
+</Callout>
+
+### Frequently Asked Questions
+
+**Q: Do I need both `showCount` and `maxLength` to show a counter?**
+A: No. Setting `maxLength` alone is enough — the counter (`x / max`) appears automatically. Use `showCount` without `maxLength` if you want to display a plain character count with no cap.
+
+**Q: Why isn't `onClear` resetting the value?**
+A: In controlled mode (`value` prop set), you must reset state yourself inside `onClear`. Example: `onClear={() => setValue('')}`.
+
+**Q: Can I use Textarea with Zod or Yup?**
+A: Yes. Use the controlled pattern and pass the validation error string to the `error` prop. It integrates seamlessly with `react-hook-form`'s `Controller`.
+
+**Q: How do I set a minimum height?**
+A: Use the `rows` prop (e.g. `rows={6}`) to control the initial visible height. Each row is approximately one line height.
+
+## Related Components
+
+<RelatedComponent
+  name="Input"
+  description="Single-line text input — use when only one line of text is needed"
+  href="/docs/components/input"
+/>
+<RelatedComponent
+  name="RichTextEditor"
+  description="WYSIWYG editor — use when formatted text (bold, lists, links) is required"
+  href="/docs/components/rich-text-editor"
+/>
+<RelatedComponent
+  name="FormControl"
+  description="Wraps form fields with consistent label and validation layout"
+  href="/docs/components/form-control"
+/>
+
+## Changelog
+
+| Version | Type | Description |
+|---------|------|-------------|
+| 1.0.0 | Release | Initial release with validation states, counter, clearable, resize, and auto-resize support |
+
+{/*
+LLMS_TXT_ENTRY_START
+# Textarea
+
+> Textarea is a Components/Textarea React component in Luxis UI for a multi-line plain-text input.
+
+## Source
+packages/luxis-ui/src/components/Textarea/Textarea.tsx
+
+## Story
+apps/storybook/src/stories/Textarea.stories.tsx
+
+## Install
+```bash
+npm install @luxis-ui/react
+```
+
+## Import
+```tsx
+import { Textarea } from '@luxis-ui/react';
+```
+
+## Minimal usage
+```tsx
+import { Textarea } from '@luxis-ui/react';
+
+export default function MinimalTextarea() {
+  return <Textarea label="Message" placeholder="Enter your message..." />;
+}
+```
+
+## Key props
+- `label` (string): Label above the textarea
+- `maxLength` (number): Enforces a character limit and auto-shows the `current / max` counter
+- `showCount` (boolean, default=`false`): Shows a plain character count when no maxLength cap is needed
+- `clearable` (boolean, default=`false`): Shows a × button when value is present
+- `autoResize` (boolean, default=`false`): Grows to fit content automatically
+- `resize` ('none'|'both'|'horizontal'|'vertical', default=`'vertical'`): CSS resize handle
+- `error` (string): Triggers error state
+- `rows` (number, default=`4`): Visible text rows
+
+## When to use
+Multi-line plain text entry: messages, descriptions, bios, notes, feedback.
+
+## When NOT to use
+Single-line input → use Input. Rich formatted content → use RichTextEditor.
+
+## Accessibility
+WCAG: AA
+Native <textarea> — no explicit ARIA role needed.
+aria-invalid on error, aria-required on required, aria-describedby for messages, aria-live counter.
+
+## Docs
+https://luxisui.com/docs/components/textarea
+LLMS_TXT_ENTRY_END
+*/}

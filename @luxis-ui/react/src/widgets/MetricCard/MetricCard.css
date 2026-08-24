@@ -1,0 +1,919 @@
+/* =============================================================================
+   MetricCard — Enterprise Analytics Widget
+   Luxis UI Design System
+   =============================================================================
+
+   Token reference:
+     --mc-accent          Main accent color   (resolves from color-variant class)
+     --mc-accent-subtle   Soft fill for icon badges, hover states (50-shade)
+     --mc-accent-dark     Deep accent for gradients and hover emphasis (700-shade)
+     --mc-bg              Card background
+     --mc-border          Card border
+     --mc-shadow          Card box-shadow
+     --mc-radius          Card border-radius
+     --mc-padding         Card inner padding
+     --mc-text-primary    Primary text color
+     --mc-text-secondary  Secondary / label text color
+     --mc-text-muted      Muted / description text color
+     --mc-value-size      Value font-size
+     --mc-trend-up-bg     Trend "up" pill background   → --lxs-color-success-50
+     --mc-trend-up-text   Trend "up" pill text         → --lxs-color-success-700
+     --mc-trend-dn-bg     Trend "down" pill background → --lxs-color-error-50
+     --mc-trend-dn-text   Trend "down" pill text       → --lxs-color-error-700
+     --mc-trend-nu-bg     Trend "neutral" pill background
+     --mc-trend-nu-text   Trend "neutral" pill text
+   =============================================================================
+
+   COLOR VARIANT CLASSES
+   Each variant class wires --mc-accent / --mc-accent-subtle / --mc-accent-dark
+   to the corresponding ThemeProvider token scale.
+   Applied automatically from the `variant` prop (default: "primary").
+   Override the entire accent with `accentColor` prop → sets --mc-accent inline.
+   ============================================================================= */
+
+/* ─── Base card shell ─────────────────────────────────────────────────────── */
+
+.lxs-metric-card {
+  /* ── Accent scale — overridden by .lxs-metric-card--color-* classes ─ */
+  --mc-accent:         var(--lxs-color-primary-500, #3b82f6);
+  --mc-accent-subtle:  var(--lxs-color-primary-50,  #eff6ff);
+  --mc-accent-dark:    var(--lxs-color-primary-700, #1d4ed8);
+
+  /* ── Surface & structure ──────────────────────────────────────────── */
+  --mc-bg:             var(--lxs-color-white, #ffffff);
+  --mc-border:         var(--lxs-color-neutral-200, #e5e5e5);
+  --mc-shadow:         0 1px 4px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --mc-radius:         var(--lxs-radius-lg, 12px);
+  --mc-padding:        var(--lxs-spacing-6, 1.5rem);
+
+  /* ── Typography ───────────────────────────────────────────────────── */
+  --mc-text-primary:   var(--lxs-color-neutral-900, #171717);
+  --mc-text-secondary: var(--lxs-color-neutral-500, #737373);
+  --mc-text-muted:     var(--lxs-color-neutral-400, #a3a3a3);
+  --mc-value-size:     2rem;
+
+  /* ── Trend badge colors — always semantic; independent of `color` prop ── */
+  --mc-trend-up-bg:    var(--lxs-color-success-50,  #f0fdf4);
+  --mc-trend-up-text:  var(--lxs-color-success-700, #15803d);
+  --mc-trend-dn-bg:    var(--lxs-color-error-50,    #fef2f2);
+  --mc-trend-dn-text:  var(--lxs-color-error-700,   #b91c1c);
+  --mc-trend-nu-bg:    var(--lxs-color-neutral-100, #f5f5f5);
+  --mc-trend-nu-text:  var(--lxs-color-neutral-500, #737373);
+
+  background-color: var(--mc-bg);
+  border-radius: var(--mc-radius);
+  box-shadow: var(--mc-shadow);
+  border: 1px solid var(--mc-border);
+  padding: var(--mc-padding);
+  font-family: var(--lxs-font-family-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  display: flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-2, 0.5rem);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+  width: 100%;
+  min-width: 0;
+  isolation: isolate;
+}
+
+/* ─── COLOR VARIANTS — wire accent scale to ThemeProvider token scales ────── */
+/*
+   Each class sets three levels of the chosen color:
+     --mc-accent        (500) → icons, borders, active states
+     --mc-accent-subtle (50)  → icon badge background, soft fills
+     --mc-accent-dark   (700) → gradient stops, hover depth
+
+   When the user sets `accentColor` as a prop, only --mc-accent is overridden
+   via inline style. subtle/dark continue to fall back to the variant class.
+*/
+
+.lxs-metric-card--variant-primary {
+  --mc-accent:        var(--lxs-color-primary-500,   #3b82f6);
+  --mc-accent-subtle: var(--lxs-color-primary-50,    #eff6ff);
+  --mc-accent-dark:   var(--lxs-color-primary-700,   #1d4ed8);
+}
+
+.lxs-metric-card--variant-secondary {
+  --mc-accent:        var(--lxs-color-secondary-500, #8b5cf6);
+  --mc-accent-subtle: var(--lxs-color-secondary-50,  #f5f3ff);
+  --mc-accent-dark:   var(--lxs-color-secondary-700, #6d28d9);
+}
+
+.lxs-metric-card--variant-success {
+  --mc-accent:        var(--lxs-color-success-500,   #22c55e);
+  --mc-accent-subtle: var(--lxs-color-success-50,    #f0fdf4);
+  --mc-accent-dark:   var(--lxs-color-success-700,   #15803d);
+}
+
+.lxs-metric-card--variant-warning {
+  --mc-accent:        var(--lxs-color-warning-500,   #f59e0b);
+  --mc-accent-subtle: var(--lxs-color-warning-50,    #fffbeb);
+  --mc-accent-dark:   var(--lxs-color-warning-700,   #b45309);
+}
+
+.lxs-metric-card--variant-error {
+  --mc-accent:        var(--lxs-color-error-500,     #ef4444);
+  --mc-accent-subtle: var(--lxs-color-error-50,      #fef2f2);
+  --mc-accent-dark:   var(--lxs-color-error-700,     #b91c1c);
+}
+
+.lxs-metric-card--variant-info {
+  --mc-accent:        var(--lxs-color-info-500,      #3b82f6);
+  --mc-accent-subtle: var(--lxs-color-info-50,       #eff6ff);
+  --mc-accent-dark:   var(--lxs-color-info-700,      #1d4ed8);
+}
+
+/* ─── Shared primitives ───────────────────────────────────────────────────── */
+
+.mc-row {
+  display: flex;
+  align-items: center;
+}
+
+.mc-row--space-between {
+  justify-content: space-between;
+}
+
+.mc-row--align-start {
+  align-items: flex-start;
+}
+
+.mc-row--align-center {
+  align-items: center;
+}
+
+.mc-row--gap-sm {
+  gap: var(--lxs-spacing-2, 0.5rem);
+}
+
+/* ─── Label ───────────────────────────────────────────────────────────────── */
+
+.mc-label {
+  margin: 0;
+  font-size: var(--lxs-font-size-sm, 0.875rem);
+  font-weight: var(--lxs-font-weight-medium, 500);
+  color: var(--mc-text-secondary);
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mc-label--uppercase {
+  font-size: var(--lxs-font-size-xs, 0.75rem);
+  font-weight: var(--lxs-font-weight-semibold, 600);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mc-label--glass {
+  font-size: var(--lxs-font-size-xs, 0.75rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mc-label--inverted {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--lxs-font-size-xs, 0.75rem);
+  font-weight: var(--lxs-font-weight-semibold, 600);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mc-label--enterprise {
+  font-size: var(--lxs-font-size-xs, 0.75rem);
+  font-weight: var(--lxs-font-weight-medium, 500);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mc-text-secondary);
+}
+
+.mc-label--compact {
+  font-size: 0.6875rem; /* 11px */
+  font-weight: var(--lxs-font-weight-medium, 500);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mc-text-secondary);
+  line-height: 1.3;
+}
+
+/* ─── Value ───────────────────────────────────────────────────────────────── */
+
+.mc-value {
+  margin: 0;
+  font-weight: var(--lxs-font-weight-bold, 700);
+  color: var(--mc-text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.mc-value--xl {
+  font-size: var(--mc-value-size);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.mc-value--glass {
+  color: #ffffff;
+}
+
+.mc-value--inverted {
+  color: #ffffff;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: var(--lxs-font-weight-extrabold, 800);
+  letter-spacing: -0.03em;
+}
+
+.mc-value--enterprise {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.mc-value--compact {
+  font-size: 1rem;
+  font-weight: var(--lxs-font-weight-bold, 700);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.mc-value--trend {
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: var(--lxs-font-weight-extrabold, 800);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+/* ─── Trend badge ─────────────────────────────────────────────────────────── */
+
+.mc-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--lxs-font-size-xs, 0.75rem);
+  font-weight: var(--lxs-font-weight-semibold, 600);
+  line-height: 1;
+  width: fit-content;
+}
+
+/* Trend colours */
+.mc-trend--up   { color: var(--mc-trend-up-text); }
+.mc-trend--down { color: var(--mc-trend-dn-text); }
+.mc-trend--neutral { color: var(--mc-trend-nu-text); }
+
+/* Pill modifier */
+.mc-trend--pill {
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: var(--lxs-font-size-xs, 0.75rem);
+}
+
+.mc-trend--pill.mc-trend--up      { background-color: var(--mc-trend-up-bg); }
+.mc-trend--pill.mc-trend--down    { background-color: var(--mc-trend-dn-bg); }
+.mc-trend--pill.mc-trend--neutral { background-color: var(--mc-trend-nu-bg); }
+
+/* Inline modifier */
+.mc-trend--inline {
+  padding: 0;
+}
+
+/* Glass modifier */
+.mc-trend--glass {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+.mc-trend--glass.mc-trend--up      { background-color: rgba(34, 197, 94, 0.2); color: #bbf7d0; }
+.mc-trend--glass.mc-trend--down    { background-color: rgba(239, 68, 68, 0.2); color: #fecaca; }
+.mc-trend--glass.mc-trend--neutral { background-color: rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.7); }
+
+/* Inverted modifier (gradient card) */
+.mc-trend--inverted {
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+}
+
+.mc-trend--inverted.mc-trend--up      { background-color: rgba(255, 255, 255, 0.2); color: #ffffff; }
+.mc-trend--inverted.mc-trend--down    { background-color: rgba(255, 255, 255, 0.15); color: #fecaca; }
+.mc-trend--inverted.mc-trend--neutral { background-color: rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.75); }
+
+/* Enterprise modifier */
+.mc-trend--enterprise {
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+}
+
+.mc-trend--enterprise.mc-trend--up      { background-color: var(--mc-trend-up-bg);  }
+.mc-trend--enterprise.mc-trend--down    { background-color: var(--mc-trend-dn-bg);  }
+.mc-trend--enterprise.mc-trend--neutral { background-color: var(--mc-trend-nu-bg);  }
+
+/* Compact modifier */
+.mc-trend--compact {
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.mc-trend--compact.mc-trend--up      { background-color: var(--mc-trend-up-bg); }
+.mc-trend--compact.mc-trend--down    { background-color: var(--mc-trend-dn-bg); }
+.mc-trend--compact.mc-trend--neutral { background-color: var(--mc-trend-nu-bg); }
+
+/* Label inside trend badge */
+.mc-trend__label {
+  font-weight: var(--lxs-font-weight-normal, 400);
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* ─── Description ─────────────────────────────────────────────────────────── */
+
+.mc-description {
+  margin: 0;
+  font-size: var(--lxs-font-size-xs, 0.75rem);
+  color: var(--mc-text-muted);
+  line-height: 1.5;
+}
+
+.mc-description--muted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mc-description--inverted {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.mc-description--enterprise {
+  font-size: 0.6875rem;
+  color: var(--mc-text-muted);
+  margin-top: var(--lxs-spacing-1, 0.25rem);
+}
+
+/* ─── Icon Badge ──────────────────────────────────────────────────────────── */
+
+.mc-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  border-radius: var(--lxs-radius-md, 8px);
+  background-color: var(--mc-accent-subtle);
+  color: var(--mc-accent);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.mc-icon-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.mc-icon-gradient {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.mc-icon-compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  border-radius: var(--lxs-radius-sm, 6px);
+  background-color: var(--mc-accent-subtle);
+  color: var(--mc-accent);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.mc-icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mc-text-secondary);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* ─── THEME: minimal ─────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-minimal {
+  --mc-shadow: none;
+  --mc-border: transparent;
+  --mc-bg: transparent;
+  --mc-padding: var(--lxs-spacing-4, 1rem);
+  gap: var(--lxs-spacing-2, 0.5rem);
+}
+
+.lxs-metric-card--theme-minimal .mc-value--xl {
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: var(--lxs-font-weight-extrabold, 800);
+}
+
+/* ─── THEME: modern ──────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-modern {
+  --mc-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  gap: var(--lxs-spacing-2, 0.5rem);
+}
+
+/* Accent bar on the top edge */
+.lxs-metric-card--theme-modern::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--mc-accent), var(--mc-accent-dark));
+  border-radius: var(--mc-radius) var(--mc-radius) 0 0;
+  opacity: 0.8;
+}
+
+/* ─── THEME: glass ───────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-glass {
+  --mc-bg: rgba(255, 255, 255, 0.12);
+  --mc-border: rgba(255, 255, 255, 0.25);
+  --mc-shadow:
+    0 8px 32px 0 rgba(31, 38, 135, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background-color: var(--mc-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--mc-border);
+  gap: var(--lxs-spacing-3, 0.75rem);
+  color: #ffffff;
+}
+
+/* ─── THEME: gradient ────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-gradient {
+  background: linear-gradient(
+    135deg,
+    var(--mc-accent) 0%,
+    var(--mc-accent-dark) 100%
+  );
+  --mc-border: transparent;
+  --mc-shadow:
+    0 10px 30px -5px rgba(0, 0, 0, 0.25),
+    0 4px 6px -2px rgba(0, 0, 0, 0.12);
+  border: none;
+  gap: var(--lxs-spacing-2, 0.5rem);
+}
+
+/* ─── THEME: filled ──────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-filled {
+  background-color: var(--mc-accent);
+  --mc-border: transparent;
+  --mc-shadow:
+    0 4px 14px -2px rgba(0, 0, 0, 0.2),
+    0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  border: none;
+  gap: var(--lxs-spacing-2, 0.5rem);
+}
+
+/* ─── THEME: enterprise ──────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-enterprise {
+  --mc-radius: var(--lxs-radius-md, 8px);
+  --mc-padding: var(--lxs-spacing-4, 1rem) var(--lxs-spacing-5, 1.25rem);
+  --mc-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.06),
+    0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --mc-border: var(--lxs-color-neutral-200, #e5e5e5);
+  border-left: 3px solid var(--mc-accent);
+  gap: 0;
+}
+
+.mc-enterprise__grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--lxs-spacing-3, 0.75rem);
+  align-items: center;
+  width: 100%;
+}
+
+.mc-enterprise__data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-1, 0.25rem);
+  min-width: 0;
+}
+
+.mc-enterprise__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--lxs-radius-md, 8px);
+  background-color: var(--mc-accent-subtle);
+  color: var(--mc-accent);
+  font-size: 1.375rem;
+  flex-shrink: 0;
+}
+
+/* ─── THEME: compact ─────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-compact {
+  --mc-padding: var(--lxs-spacing-3, 0.75rem) var(--lxs-spacing-4, 1rem);
+  --mc-radius: var(--lxs-radius-md, 8px);
+  --mc-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.08);
+  gap: 0;
+}
+
+.mc-compact__row {
+  display: flex;
+  align-items: center;
+  gap: var(--lxs-spacing-3, 0.75rem);
+  width: 100%;
+  min-width: 0;
+}
+
+.mc-compact__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+/* ─── THEME: trend ───────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-trend {
+  --mc-shadow:
+    0 4px 12px -2px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.08);
+  gap: var(--lxs-spacing-2, 0.5rem);
+}
+
+.lxs-metric-card--theme-trend::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--mc-accent) 0%, transparent 100%);
+  opacity: 0.6;
+}
+
+.mc-trend-variant__body {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--lxs-spacing-3, 0.75rem);
+  flex-wrap: wrap;
+}
+
+.mc-trend-variant__indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: var(--lxs-font-weight-bold, 700);
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+
+.mc-trend-variant__indicator--up {
+  background-color: var(--mc-trend-up-bg);
+  color: var(--mc-trend-up-text);
+}
+
+.mc-trend-variant__indicator--down {
+  background-color: var(--mc-trend-dn-bg);
+  color: var(--mc-trend-dn-text);
+}
+
+.mc-trend-variant__indicator--neutral {
+  background-color: var(--mc-trend-nu-bg);
+  color: var(--mc-trend-nu-text);
+}
+
+.mc-trend-variant__arrow {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mc-trend-variant__change {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── THEME: inline ──────────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-inline {
+  gap: var(--lxs-spacing-2, 0.5rem);
+}
+
+.lxs-metric-card--theme-inline .mc-value--xl {
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: var(--lxs-font-weight-extrabold, 800);
+  letter-spacing: -0.03em;
+}
+
+/* ─── THEME: centered ───────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-centered {
+  gap: var(--lxs-spacing-3, 0.75rem);
+  align-items: center;
+}
+
+.mc-centered__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--lxs-spacing-2, 0.5rem);
+  text-align: center;
+  width: 100%;
+}
+
+.mc-icon-centered {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background-color: var(--mc-accent-subtle);
+  color: var(--mc-accent);
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-bottom: var(--lxs-spacing-1, 0.25rem);
+}
+
+/* ─── THEME: surface ────────────────────────────────────────────────────────── */
+
+.lxs-metric-card--theme-surface {
+  background-color: var(--mc-accent-subtle);
+  --mc-border: transparent;
+  --mc-shadow: none;
+  border: none;
+}
+
+.mc-surface__layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lxs-spacing-3, 0.75rem);
+  width: 100%;
+}
+
+.mc-surface__data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-1, 0.25rem);
+  min-width: 0;
+}
+
+.mc-surface__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  background-color: var(--mc-accent);
+  color: #ffffff;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* ─── DARK MODE ───────────────────────────────────────────────────────────── */
+
+.lxs-metric-card--mode-dark {
+  --mc-bg:             #1e2028;
+  --mc-border:         rgba(255, 255, 255, 0.08);
+  --mc-shadow:         0 2px 8px 0 rgba(0, 0, 0, 0.35);
+  --mc-text-primary:   #f4f4f5;
+  --mc-text-secondary: #a1a1aa;
+  --mc-text-muted:     #71717a;
+  --mc-trend-up-bg:    rgba(34, 197, 94, 0.15);
+  --mc-trend-up-text:  #86efac;
+  --mc-trend-dn-bg:    rgba(239, 68, 68, 0.15);
+  --mc-trend-dn-text:  #fca5a5;
+  --mc-trend-nu-bg:    rgba(255, 255, 255, 0.07);
+  --mc-trend-nu-text:  #a1a1aa;
+}
+
+.lxs-metric-card--mode-dark.lxs-metric-card--theme-minimal {
+  --mc-bg: transparent;
+  --mc-border: transparent;
+  --mc-shadow: none;
+}
+
+.lxs-metric-card--mode-dark.lxs-metric-card--theme-glass {
+  --mc-bg: rgba(255, 255, 255, 0.06);
+  --mc-border: rgba(255, 255, 255, 0.12);
+  --mc-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.lxs-metric-card--mode-dark.lxs-metric-card--theme-enterprise {
+  --mc-bg: #1e2028;
+  --mc-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ─── SKELETON loading state ──────────────────────────────────────────────── */
+
+@keyframes mc-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.mc-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-3, 0.75rem);
+  width: 100%;
+}
+
+.mc-skeleton--compact .mc-skeleton__compact-row {
+  display: flex;
+  align-items: center;
+  gap: var(--lxs-spacing-3, 0.75rem);
+}
+
+.mc-skeleton--compact .mc-skeleton__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mc-skeleton__label,
+.mc-skeleton__value,
+.mc-skeleton__trend,
+.mc-skeleton__icon {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.1)  50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: mc-shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--lxs-radius-sm, 4px);
+}
+
+.mc-skeleton__label {
+  height: 0.75rem;
+  width: 45%;
+}
+
+.mc-skeleton__value {
+  height: 2.25rem;
+  width: 65%;
+  border-radius: var(--lxs-radius-md, 6px);
+}
+
+.mc-skeleton__trend {
+  height: 1.375rem;
+  width: 40%;
+  border-radius: 999px;
+}
+
+.mc-skeleton__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--lxs-radius-sm, 6px);
+  flex-shrink: 0;
+}
+
+/* Dark skeleton */
+.lxs-metric-card--mode-dark .mc-skeleton__label,
+.lxs-metric-card--mode-dark .mc-skeleton__value,
+.lxs-metric-card--mode-dark .mc-skeleton__trend,
+.lxs-metric-card--mode-dark .mc-skeleton__icon {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1)  50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* Glass / gradient / filled skeleton */
+.lxs-metric-card--theme-glass .mc-skeleton__label,
+.lxs-metric-card--theme-glass .mc-skeleton__value,
+.lxs-metric-card--theme-glass .mc-skeleton__trend,
+.lxs-metric-card--theme-gradient .mc-skeleton__label,
+.lxs-metric-card--theme-gradient .mc-skeleton__value,
+.lxs-metric-card--theme-gradient .mc-skeleton__trend,
+.lxs-metric-card--theme-filled .mc-skeleton__label,
+.lxs-metric-card--theme-filled .mc-skeleton__value,
+.lxs-metric-card--theme-filled .mc-skeleton__trend {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.2)  50%,
+    rgba(255, 255, 255, 0.08) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-skeleton__label,
+  .mc-skeleton__value,
+  .mc-skeleton__trend,
+  .mc-skeleton__icon {
+    animation: none;
+  }
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────────────────────── */
+
+/* — Mobile-first base is already set; tablet and up get more space — */
+
+@media (min-width: 480px) {
+  .lxs-metric-card {
+    --mc-padding: var(--lxs-spacing-6, 1.5rem);
+  }
+
+  .lxs-metric-card--theme-compact {
+    --mc-padding: var(--lxs-spacing-3, 0.75rem) var(--lxs-spacing-4, 1rem);
+  }
+
+  .mc-value--xl {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .lxs-metric-card {
+    --mc-padding: var(--lxs-spacing-6, 1.5rem);
+    --mc-value-size: 2.25rem;
+  }
+
+  .lxs-metric-card--theme-enterprise {
+    --mc-padding: var(--lxs-spacing-5, 1.25rem) var(--lxs-spacing-6, 1.5rem);
+  }
+
+  .lxs-metric-card--theme-compact {
+    --mc-padding: var(--lxs-spacing-3, 0.75rem) var(--lxs-spacing-5, 1.25rem);
+  }
+
+  .mc-enterprise__icon-wrap {
+    width: 3.25rem;
+    height: 3.25rem;
+    font-size: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .lxs-metric-card {
+    --mc-padding: var(--lxs-spacing-6, 1.5rem) var(--lxs-spacing-8, 2rem);
+  }
+
+  .mc-value--trend {
+    font-size: 2.5rem;
+  }
+
+  .mc-trend-variant__indicator {
+    font-size: 1rem;
+  }
+}
+
+/* Print: flatten visuals */
+@media print {
+  .lxs-metric-card {
+    box-shadow: none;
+    border: 1px solid #d4d4d4;
+  }
+
+  .lxs-metric-card--gradient {
+    background: #2563eb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

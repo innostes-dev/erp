@@ -1,0 +1,62 @@
+.lxs-process-timeline-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.lxs-process-timeline-card > .lxs-card-content {
+  padding: 0;
+}
+
+.lxs-process-timeline {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: var(--lxs-font-family-sans);
+  width: 100%;
+}
+
+.lxs-process-timeline__header {
+  padding: var(--lxs-spacing-5) var(--lxs-spacing-5) 0;
+}
+
+.lxs-process-timeline__body {
+  padding: var(--lxs-spacing-5);
+  width: 100%;
+  overflow-x: auto; /* handle small horizontal screens */
+}
+
+/* ─── Timeline Overrides ─── */
+
+.lxs-process-timeline__timeline {
+  width: 100%;
+}
+
+/* Make step text centered properly horizontally */
+.lxs-process-timeline__timeline.timeline--horizontal .timeline-step-label {
+  text-align: center;
+  margin-top: var(--lxs-spacing-2);
+  color: var(--lxs-color-neutral-800);
+  font-weight: var(--lxs-font-weight-medium);
+}
+
+.lxs-process-timeline__timeline.timeline--horizontal .timeline-step-description {
+  text-align: center;
+  color: var(--lxs-color-neutral-500);
+}
+
+/* Adjust connector so it sits behind the icon */
+.lxs-process-timeline__timeline.timeline--horizontal .timeline-connector {
+  z-index: 1;
+}
+
+.lxs-process-timeline__icon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* Dark mode */
+:root[data-theme='dark'] .lxs-process-timeline__timeline .timeline-step-label {
+  color: var(--lxs-color-neutral-100);
+}

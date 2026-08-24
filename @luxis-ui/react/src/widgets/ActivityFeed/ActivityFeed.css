@@ -1,0 +1,161 @@
+.lxs-activity-feed-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.lxs-activity-feed {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  font-family: var(--lxs-font-family-sans);
+  width: 100%;
+}
+
+.lxs-activity-feed__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--lxs-spacing-5) var(--lxs-spacing-5) var(--lxs-spacing-3);
+  border-bottom: 1px solid var(--lxs-color-neutral-200);
+}
+
+/* When not in a card, adjust padding */
+:not(.lxs-activity-feed-card) > .lxs-activity-feed > .lxs-activity-feed__header {
+  padding: 0 0 var(--lxs-spacing-3);
+  margin-bottom: var(--lxs-spacing-4);
+}
+
+.lxs-activity-feed__body {
+  padding: var(--lxs-spacing-5);
+  flex-grow: 1;
+}
+
+:not(.lxs-activity-feed-card) > .lxs-activity-feed > .lxs-activity-feed__body {
+  padding: 0;
+}
+
+.lxs-activity-feed__empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--lxs-spacing-8) 0;
+  text-align: center;
+}
+
+/* ─── Timeline Overrides ─── */
+.lxs-activity-feed__timeline.timeline--vertical .timeline-step {
+  padding-bottom: var(--lxs-spacing-8); /* increase bottom padding to match image */
+}
+
+.lxs-activity-feed__timeline.timeline--vertical .timeline-step-content {
+  margin-top: 4px; /* Move text down to center-align with the icon */
+}
+
+.lxs-activity-feed__timeline.timeline--vertical .timeline-step-indicator {
+  margin-right: var(--lxs-spacing-4); /* Space between icon and text */
+}
+
+/* Fix the connector line alignment for our custom 32px icon */
+.lxs-activity-feed__timeline.timeline--vertical .timeline-connector {
+  left: 16px; /* Half of 32px icon */
+}
+
+/* ─── Content Formatting ─── */
+
+.lxs-activity-feed__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lxs-spacing-1);
+}
+
+.lxs-activity-feed__header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--lxs-spacing-3);
+  flex-wrap: wrap;
+}
+
+.lxs-activity-feed__title {
+  color: var(--lxs-color-neutral-800);
+  flex: 1;
+  min-width: 120px;
+}
+
+.lxs-activity-feed__time {
+  white-space: nowrap;
+}
+
+.lxs-activity-feed__details {
+  margin-top: var(--lxs-spacing-1);
+}
+
+/* ─── Icons ─── */
+
+.lxs-activity-feed__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--lxs-color-surface); /* Create gap illusion from line */
+  background-color: var(--lxs-color-neutral-100);
+  color: var(--lxs-color-neutral-600);
+  z-index: 2; /* Sit above the timeline line */
+  box-shadow: 0 0 0 4px var(--lxs-color-surface); /* Hide line underneath */
+}
+
+/* Make sure timeline doesn't render its own default dot/line over ours */
+.lxs-activity-feed__timeline .timeline-step-indicator {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.lxs-activity-feed__icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.lxs-activity-feed__icon--primary {
+  background-color: var(--lxs-color-primary-100);
+  color: var(--lxs-color-primary-600);
+}
+
+.lxs-activity-feed__icon--success {
+  background-color: var(--lxs-color-success-100);
+  color: var(--lxs-color-success-600);
+}
+
+.lxs-activity-feed__icon--warning {
+  background-color: var(--lxs-color-warning-100);
+  color: var(--lxs-color-warning-600);
+}
+
+.lxs-activity-feed__icon--error {
+  background-color: var(--lxs-color-error-100);
+  color: var(--lxs-color-error-600);
+}
+
+.lxs-activity-feed__icon--info {
+  background-color: var(--lxs-color-secondary-100);
+  color: var(--lxs-color-secondary-600);
+}
+
+/* Dark Mode support */
+:root[data-theme='dark'] .lxs-activity-feed__header {
+  border-bottom-color: var(--lxs-color-neutral-800);
+}
+:root[data-theme='dark'] .lxs-activity-feed__title {
+  color: var(--lxs-color-neutral-100);
+}
+:root[data-theme='dark'] .lxs-activity-feed__icon {
+  border-color: var(--lxs-color-neutral-900);
+  box-shadow: 0 0 0 4px var(--lxs-color-neutral-900);
+}
+:root[data-theme='dark'] .lxs-activity-feed-card .lxs-activity-feed__icon {
+  border-color: var(--lxs-card-bg, var(--lxs-color-neutral-800));
+  box-shadow: 0 0 0 4px var(--lxs-card-bg, var(--lxs-color-neutral-800));
+}

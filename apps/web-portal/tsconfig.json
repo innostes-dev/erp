@@ -11,6 +11,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "customConditions": [],
     "plugins": [
       {
         "name": "next"
@@ -19,7 +22,13 @@
     "types": [
       "jest",
       "node"
-    ]
+    ],
+    "paths": {
+      "@business-os/core": ["../../packages/core/src/index.ts"],
+      "@luxis-ui/react": ["../../@luxis-ui/react/src/index.ts"],
+      "@core": ["../../packages/core/src/index.ts"],
+      "@core/*": ["../../packages/core/src/*"]
+    }
   },
   "include": [
     "**/*.ts",

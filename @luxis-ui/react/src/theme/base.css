@@ -1,0 +1,555 @@
+/**
+ * VTX UI Design System - Base CSS Variables
+ * 
+ * This file defines all CSS custom properties with default values from our design tokens.
+ * These variables can be overridden by users through ThemeProvider or custom CSS.
+ * 
+ * Usage:
+ * - Import this file in your app entry point or ThemeProvider
+ * - Override variables using :root selector or data-theme attributes
+ * - All components use these variables with fallback values
+ */
+
+:root {
+  /* ============================================
+   * COLOR TOKENS
+   * ============================================ */
+
+  /* Primary Colors */
+  --lxs-color-primary-50: #eff6ff;
+  --lxs-color-primary-100: #dbeafe;
+  --lxs-color-primary-200: #bfdbfe;
+  --lxs-color-primary-300: #93c5fd;
+  --lxs-color-primary-400: #60a5fa;
+  --lxs-color-primary-500: #3b82f6;
+  --lxs-color-primary-600: #2563eb;
+  --lxs-color-primary-700: #1d4ed8;
+  --lxs-color-primary-800: #1e40af;
+  --lxs-color-primary-900: #1e3a8a;
+
+  /* Secondary Colors */
+  --lxs-color-secondary-50: #f5f3ff;
+  --lxs-color-secondary-100: #ede9fe;
+  --lxs-color-secondary-200: #ddd6fe;
+  --lxs-color-secondary-300: #c4b5fd;
+  --lxs-color-secondary-400: #a78bfa;
+  --lxs-color-secondary-500: #8b5cf6;
+  --lxs-color-secondary-600: #7c3aed;
+  --lxs-color-secondary-700: #6d28d9;
+  --lxs-color-secondary-800: #5b21b6;
+  --lxs-color-secondary-900: #4c1d95;
+
+  /* Neutral Colors */
+  --lxs-color-neutral-50: #fafafa;
+  --lxs-color-neutral-100: #f5f5f5;
+  --lxs-color-neutral-200: #e5e5e5;
+  --lxs-color-neutral-300: #d4d4d4;
+  --lxs-color-neutral-400: #a3a3a3;
+  --lxs-color-neutral-500: #737373;
+  --lxs-color-neutral-600: #525252;
+  --lxs-color-neutral-700: #404040;
+  --lxs-color-neutral-800: #262626;
+  --lxs-color-neutral-900: #171717;
+
+  /* Success Colors */
+  --lxs-color-success-50: #f0fdf4;
+  --lxs-color-success-500: #22c55e;
+  --lxs-color-success-600: #16a34a;
+  --lxs-color-success-700: #15803d;
+
+  /* Warning Colors */
+  --lxs-color-warning-50: #fffbeb;
+  --lxs-color-warning-500: #f59e0b;
+  --lxs-color-warning-600: #d97706;
+  --lxs-color-warning-700: #b45309;
+
+  /* Error Colors */
+  --lxs-color-error-50: #fef2f2;
+  --lxs-color-error-500: #ef4444;
+  --lxs-color-error-600: #dc2626;
+  --lxs-color-error-700: #b91c1c;
+
+  /* Info Colors */
+  --lxs-color-info-50: #eff6ff;
+  --lxs-color-info-500: #3b82f6;
+  --lxs-color-info-600: #2563eb;
+  --lxs-color-info-700: #1d4ed8;
+
+  /* ============================================
+   * SPACING TOKENS
+   * ============================================ */
+  --lxs-spacing-0: 0;
+  --lxs-spacing-1: 0.25rem;
+  /* 4px */
+  --lxs-spacing-2: 0.5rem;
+  /* 8px */
+  --lxs-spacing-3: 0.75rem;
+  /* 12px */
+  --lxs-spacing-4: 1rem;
+  /* 16px */
+  --lxs-spacing-5: 1.25rem;
+  /* 20px */
+  --lxs-spacing-6: 1.5rem;
+  /* 24px */
+  --lxs-spacing-8: 2rem;
+  /* 32px */
+  --lxs-spacing-10: 2.5rem;
+  /* 40px */
+  --lxs-spacing-12: 3rem;
+  /* 48px */
+  --lxs-spacing-16: 4rem;
+  /* 64px */
+  --lxs-spacing-20: 5rem;
+  /* 80px */
+  --lxs-spacing-24: 6rem;
+  /* 96px */
+
+  /* ============================================
+   * TYPOGRAPHY TOKENS
+   * ============================================ */
+
+  /* Font Families */
+  --lxs-font-family-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --lxs-font-family-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Font Sizes */
+  --lxs-font-size-xs: 0.75rem;
+  /* 12px */
+  --lxs-font-size-sm: 0.875rem;
+  /* 14px */
+  --lxs-font-size-base: 1rem;
+  /* 16px */
+  --lxs-font-size-lg: 1.125rem;
+  /* 18px */
+  --lxs-font-size-xl: 1.25rem;
+  /* 20px */
+  --lxs-font-size-2xl: 1.5rem;
+  /* 24px */
+  --lxs-font-size-3xl: 1.875rem;
+  /* 30px */
+  --lxs-font-size-4xl: 2.25rem;
+  /* 36px */
+
+  /* Font Weights */
+  --lxs-font-weight-normal: 400;
+  --lxs-font-weight-medium: 500;
+  --lxs-font-weight-semibold: 600;
+  --lxs-font-weight-bold: 700;
+
+  /* Line Heights */
+  --lxs-line-height-tight: 1.25;
+  --lxs-line-height-snug: 1.375;
+  --lxs-line-height-normal: 1.5;
+  --lxs-line-height-relaxed: 1.75;
+
+  /* ============================================
+   * TEXT VARIANT TOKENS
+   * ============================================ */
+
+  /* Heading Variants (Mobile First / Base) */
+  --lxs-text-h1-font-size: 2.25rem;
+  /* 36px */
+  --lxs-text-h1-font-weight: 700;
+  --lxs-text-h1-line-height: 1.2;
+  --lxs-text-h1-letter-spacing: -0.025em;
+
+  --lxs-text-h2-font-size: 1.875rem;
+  /* 30px */
+  --lxs-text-h2-font-weight: 700;
+  --lxs-text-h2-line-height: 1.25;
+  --lxs-text-h2-letter-spacing: -0.025em;
+
+  --lxs-text-h3-font-size: 1.5rem;
+  /* 24px */
+  --lxs-text-h3-font-weight: 600;
+  --lxs-text-h3-line-height: 1.3;
+  --lxs-text-h3-letter-spacing: -0.025em;
+
+  --lxs-text-h4-font-size: 1.25rem;
+  /* 20px */
+  --lxs-text-h4-font-weight: 600;
+  --lxs-text-h4-line-height: 1.35;
+  --lxs-text-h4-letter-spacing: 0;
+
+  --lxs-text-h5-font-size: 1.125rem;
+  /* 18px */
+  --lxs-text-h5-font-weight: 600;
+  --lxs-text-h5-line-height: 1.4;
+  --lxs-text-h5-letter-spacing: 0;
+
+  --lxs-text-h6-font-size: 1rem;
+  /* 16px */
+  --lxs-text-h6-font-weight: 600;
+  --lxs-text-h6-line-height: 1.5;
+  --lxs-text-h6-letter-spacing: 0;
+
+  /* Body Text Variants */
+  --lxs-text-body1-font-size: 1rem;
+  /* 16px */
+  --lxs-text-body1-font-weight: 400;
+  --lxs-text-body1-line-height: 1.6;
+  --lxs-text-body1-letter-spacing: 0;
+
+  --lxs-text-body2-font-size: 0.875rem;
+  /* 14px */
+  --lxs-text-body2-font-weight: 400;
+  --lxs-text-body2-line-height: 1.6;
+  --lxs-text-body2-letter-spacing: 0;
+
+  /* Subtitle Variants */
+  --lxs-text-subtitle1-font-size: 1.125rem;
+  /* 18px */
+  --lxs-text-subtitle1-font-weight: 500;
+  --lxs-text-subtitle1-line-height: 1.5;
+  --lxs-text-subtitle1-letter-spacing: 0.0075em;
+
+  --lxs-text-subtitle2-font-size: 0.875rem;
+  /* 14px */
+  --lxs-text-subtitle2-font-weight: 500;
+  --lxs-text-subtitle2-line-height: 1.57;
+  --lxs-text-subtitle2-letter-spacing: 0.0075em;
+
+  /* Utility Text Variants */
+  --lxs-text-caption-font-size: 0.75rem;
+  /* 12px */
+  --lxs-text-caption-font-weight: 400;
+  --lxs-text-caption-line-height: 1.66;
+  --lxs-text-caption-letter-spacing: 0.033em;
+
+  --lxs-text-overline-font-size: 0.75rem;
+  /* 12px - minimum for WCAG legibility (was 10px) */
+  --lxs-text-overline-font-weight: 600;
+  --lxs-text-overline-line-height: 2.66;
+  --lxs-text-overline-letter-spacing: 0.08em;
+
+  --lxs-text-button-font-size: 0.875rem;
+  /* 14px */
+  --lxs-text-button-font-weight: 600;
+  --lxs-text-button-line-height: 1.75;
+  --lxs-text-button-letter-spacing: 0.028em;
+
+  --lxs-text-label-font-size: 0.875rem;
+  /* 14px */
+  --lxs-text-label-font-weight: 500;
+  --lxs-text-label-line-height: 1.5;
+  --lxs-text-label-letter-spacing: 0;
+
+  /* ============================================
+   * BORDER RADIUS TOKENS
+   * ============================================ */
+  --lxs-radius-none: 0;
+  --lxs-radius-sm: 0.125rem;
+  /* 2px */
+  --lxs-radius-base: 0.25rem;
+  /* 4px */
+  --lxs-radius-md: 0.375rem;
+  /* 6px */
+  --lxs-radius-lg: 0.5rem;
+  /* 8px */
+  --lxs-radius-xl: 0.75rem;
+  /* 12px */
+  --lxs-radius-2xl: 1rem;
+  /* 16px */
+  --lxs-radius-full: 9999px;
+
+  /* ============================================
+   * SHADOW TOKENS
+   * ============================================ */
+  --lxs-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --lxs-shadow-base: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --lxs-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --lxs-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --lxs-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --lxs-shadow-none: none;
+
+  /* ============================================
+   * TRANSITION TOKENS
+   * ============================================ */
+  --lxs-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --lxs-transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --lxs-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ============================================
+  /* Z-INDEX TOKENS
+   * ============================================ */
+  --lxs-z-dropdown: 1000;
+  --lxs-z-sticky: 1100;
+  --lxs-z-modal: 1200;
+  --lxs-z-tooltip: 1300;
+  --lxs-z-notification: 1400;
+
+  --lxs-color-white: #ffffff;
+  --lxs-color-black: #000000;
+
+  /* ============================================
+   * SEMANTIC COLOR ALIASES
+   * ============================================ */
+  /* Text colors */
+  --lxs-text-primary: var(--lxs-color-neutral-900);
+  --lxs-text-secondary: var(--lxs-color-neutral-600);
+  --lxs-text-tertiary: var(--lxs-color-neutral-500);
+  --lxs-text-disabled: var(--lxs-color-neutral-400);
+
+  /* Background colors */
+  --lxs-background-primary: #ffffff;
+  --lxs-background-secondary: var(--lxs-color-neutral-50);
+  --lxs-background-hover: var(--lxs-color-neutral-100);
+  --lxs-background-active: var(--lxs-color-neutral-200);
+
+  /* Border colors */
+  --lxs-border-color: var(--lxs-color-neutral-300);
+  --lxs-border-color-light: var(--lxs-color-neutral-200);
+  --lxs-border-color-dark: var(--lxs-color-neutral-400);
+
+  /* Additional common aliases */
+  --lxs-transition-normal: var(--lxs-transition-base);
+}
+
+/* ============================================
+ * DARK THEME OVERRIDES
+ * ============================================ */
+[data-theme='dark'] {
+  /* Invert neutral colors for dark mode */
+  --lxs-color-neutral-50: #171717;
+  --lxs-color-neutral-100: #262626;
+  --lxs-color-neutral-200: #404040;
+  --lxs-color-neutral-300: #525252;
+  --lxs-color-neutral-400: #737373;
+  --lxs-color-neutral-500: #a3a3a3;
+  --lxs-color-neutral-600: #d4d4d4;
+  --lxs-color-neutral-700: #e5e5e5;
+  --lxs-color-neutral-800: #f5f5f5;
+  --lxs-color-neutral-900: #fafafa;
+
+  /* Dark mode semantic colors */
+  --lxs-text-primary: var(--lxs-color-neutral-50);
+  --lxs-text-secondary: var(--lxs-color-neutral-400);
+  --lxs-text-tertiary: var(--lxs-color-neutral-500);
+  --lxs-text-disabled: var(--lxs-color-neutral-600);
+
+  --lxs-background-primary: #0a0a0a;
+  --lxs-background-secondary: var(--lxs-color-neutral-900);
+  --lxs-background-hover: rgba(255, 255, 255, 0.05);
+  --lxs-background-active: rgba(255, 255, 255, 0.1);
+
+  --lxs-border-color: var(--lxs-color-neutral-700);
+  --lxs-border-color-light: var(--lxs-color-neutral-800);
+  --lxs-border-color-dark: var(--lxs-color-neutral-600);
+}
+
+/* ============================================
+ * GLOBAL RESETS
+ * ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Set root font size for rem calculations */
+html {
+  font-size: 16px;
+  /* 1rem = 16px base */
+}
+
+/* Set base font styles for entire website */
+body {
+  font-family: var(--lxs-font-family-sans);
+  font-size: var(--lxs-font-size-base);
+  /* 1rem = 16px */
+  line-height: var(--lxs-line-height-normal);
+  /* 1.5 */
+  font-weight: var(--lxs-font-weight-normal);
+  /* 400 */
+  color: var(--lxs-color-neutral-900);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+/* Apply default font to all elements unless overridden */
+*:not(code):not(pre):not(kbd):not(samp) {
+  font-family: inherit;
+}
+
+/* Reset default margins and ensure consistent font inheritance */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+ul,
+ol,
+li,
+dl,
+dt,
+dd,
+figure,
+figcaption,
+table,
+thead,
+tbody,
+tfoot,
+tr,
+th,
+td {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+}
+
+/* Ensure form elements inherit typography */
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* ============================================
+ * UTILITY CLASSES
+ * ============================================ */
+
+/* Cursor utilities */
+.lxs-cursor-pointer {
+  cursor: pointer;
+}
+
+.lxs-cursor-default {
+  cursor: default;
+}
+
+.lxs-cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+.lxs-no-text-decoration {
+  text-decoration: none;
+}
+
+/* ============================================
+ * DISPLAY UTILITIES
+ * ============================================ */
+
+/* Breakpoints:
+ * Mobile: < 768px
+ * Tablet: 768px - 1024px
+ * Desktop: > 1024px
+ */
+
+/* --- HIDE UTILITIES --- */
+
+/* Hide on Mobile (< 768px) */
+@media (max-width: 767.98px) {
+  .mobile-hide {
+    display: none !important;
+  }
+}
+
+/* Hide on Tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-hide {
+    display: none !important;
+  }
+}
+
+/* Hide on Desktop (> 1024px) */
+@media (min-width: 1024.02px) {
+  .desktop-hide {
+    display: none !important;
+  }
+}
+
+/* --- SHOW UTILITIES --- */
+
+/* Show on Mobile Only (Hide on Tablet & Desktop) */
+@media (min-width: 768px) {
+  .mobile-show {
+    display: none !important;
+  }
+}
+
+/* Show on Tablet Only (Hide on Mobile & Desktop) */
+@media (max-width: 767.98px),
+(min-width: 1024.02px) {
+  .tablet-show {
+    display: none !important;
+  }
+}
+
+/* Show on Desktop Only (Hide on Mobile & Tablet) */
+@media (max-width: 1024px) {
+  .desktop-show {
+    display: none !important;
+  }
+}
+
+/* ============================================
+ * RESPONSIVE TYPOGRAPHY OVERRIDES
+ * ============================================ */
+
+/* Tablet (md): >= 768px */
+@media (min-width: 768px) {
+  :root {
+    --lxs-text-h1-font-size: 3rem;
+    /* 48px */
+    --lxs-text-h2-font-size: 2.25rem;
+    /* 36px */
+    --lxs-text-h3-font-size: 1.875rem;
+    /* 30px */
+    --lxs-text-h4-font-size: 1.5rem;
+    /* 24px */
+    --lxs-text-h5-font-size: 1.25rem;
+    /* 20px */
+    --lxs-text-h6-font-size: 1.125rem;
+    /* 18px */
+  }
+}
+
+/* Desktop (lg): >= 1024px */
+@media (min-width: 1024px) {
+  :root {
+    --lxs-text-h1-font-size: 3.75rem;
+    /* 60px */
+    --lxs-text-h2-font-size: 3rem;
+    /* 48px */
+    --lxs-text-h3-font-size: 2.25rem;
+    /* 36px */
+    --lxs-text-h4-font-size: 1.875rem;
+    /* 30px */
+    --lxs-text-h5-font-size: 1.5rem;
+    /* 24px */
+    --lxs-text-h6-font-size: 1.25rem;
+    /* 20px */
+  }
+}
+
+/* XL Desktop (xl): >= 1280px */
+@media (min-width: 1280px) {
+  :root {
+    --lxs-text-h1-font-size: 4.5rem;
+    /* 72px */
+    --lxs-text-h2-font-size: 3.75rem;
+    /* 60px */
+    --lxs-text-h3-font-size: 3rem;
+    /* 48px */
+    --lxs-text-h4-font-size: 2.25rem;
+    /* 36px */
+    --lxs-text-h5-font-size: 1.875rem;
+    /* 30px */
+    --lxs-text-h6-font-size: 1.5rem;
+    /* 24px */
+  }
+}

@@ -1,0 +1,366 @@
+/* ===== Typography Component Base Styles ===== */
+.lxs-typography {
+  margin: 0;
+  padding: 0;
+  font-family: var(--lxs-font-family-sans);
+  color: inherit;
+  /* Note: CSS containment is intentionally omitted — it creates a new stacking context
+     and clips positioned descendants, which breaks common typography usage patterns. */
+}
+
+/* ===== Typography Variants ===== */
+
+/* ===== Headings with Fluid Typography ===== */
+/* ===== Headings ===== */
+.lxs-typography--h1 {
+  font-size: var(--lxs-text-h1-font-size);
+  font-weight: var(--lxs-text-h1-font-weight);
+  line-height: var(--lxs-text-h1-line-height);
+  letter-spacing: var(--lxs-text-h1-letter-spacing);
+  margin-bottom: var(--lxs-spacing-4);
+}
+
+.lxs-typography--h2 {
+  font-size: var(--lxs-text-h2-font-size);
+  font-weight: var(--lxs-text-h2-font-weight);
+  line-height: var(--lxs-text-h2-line-height);
+  letter-spacing: var(--lxs-text-h2-letter-spacing);
+  margin-bottom: var(--lxs-spacing-3);
+}
+
+.lxs-typography--h3 {
+  font-size: var(--lxs-text-h3-font-size);
+  font-weight: var(--lxs-text-h3-font-weight);
+  line-height: var(--lxs-text-h3-line-height);
+  letter-spacing: var(--lxs-text-h3-letter-spacing);
+  margin-bottom: var(--lxs-spacing-3);
+}
+
+.lxs-typography--h4 {
+  font-size: var(--lxs-text-h4-font-size);
+  font-weight: var(--lxs-text-h4-font-weight);
+  line-height: var(--lxs-text-h4-line-height);
+  letter-spacing: var(--lxs-text-h4-letter-spacing);
+  margin-bottom: var(--lxs-spacing-2);
+}
+
+.lxs-typography--h5 {
+  font-size: var(--lxs-text-h5-font-size);
+  font-weight: var(--lxs-text-h5-font-weight);
+  line-height: var(--lxs-text-h5-line-height);
+  letter-spacing: var(--lxs-text-h5-letter-spacing);
+  margin-bottom: var(--lxs-spacing-2);
+}
+
+.lxs-typography--h6 {
+  font-size: var(--lxs-text-h6-font-size);
+  font-weight: var(--lxs-text-h6-font-weight);
+  line-height: var(--lxs-text-h6-line-height);
+  letter-spacing: var(--lxs-text-h6-letter-spacing);
+  margin-bottom: var(--lxs-spacing-2);
+}
+
+/* ===== Body Typography ===== */
+.lxs-typography--body1 {
+  font-size: var(--lxs-text-body1-font-size);
+  font-weight: var(--lxs-text-body1-font-weight);
+  line-height: var(--lxs-text-body1-line-height);
+  letter-spacing: var(--lxs-text-body1-letter-spacing);
+  margin-bottom: var(--lxs-spacing-2);
+}
+
+.lxs-typography--body2 {
+  font-size: var(--lxs-text-body2-font-size);
+  font-weight: var(--lxs-text-body2-font-weight);
+  line-height: var(--lxs-text-body2-line-height);
+  letter-spacing: var(--lxs-text-body2-letter-spacing);
+  margin-bottom: var(--lxs-spacing-2);
+}
+
+/* ===== Subtitles ===== */
+.lxs-typography--subtitle1 {
+  font-size: var(--lxs-text-subtitle1-font-size);
+  font-weight: var(--lxs-text-subtitle1-font-weight);
+  line-height: var(--lxs-text-subtitle1-line-height);
+  letter-spacing: var(--lxs-text-subtitle1-letter-spacing);
+  margin-bottom: var(--lxs-spacing-2);
+}
+
+.lxs-typography--subtitle2 {
+  font-size: var(--lxs-text-subtitle2-font-size);
+  font-weight: var(--lxs-text-subtitle2-font-weight);
+  line-height: var(--lxs-text-subtitle2-line-height);
+  letter-spacing: var(--lxs-text-subtitle2-letter-spacing);
+  margin-bottom: var(--lxs-spacing-2);
+}
+
+/* ===== Caption & Overline ===== */
+.lxs-typography--caption {
+  font-size: var(--lxs-text-caption-font-size);
+  font-weight: var(--lxs-text-caption-font-weight);
+  line-height: var(--lxs-text-caption-line-height);
+  letter-spacing: var(--lxs-text-caption-letter-spacing);
+  color: var(--lxs-text-secondary);
+}
+
+.lxs-typography--overline {
+  font-size: var(--lxs-text-overline-font-size);
+  font-weight: var(--lxs-text-overline-font-weight);
+  line-height: var(--lxs-text-overline-line-height);
+  letter-spacing: var(--lxs-text-overline-letter-spacing);
+  text-transform: uppercase;
+  color: var(--lxs-text-secondary);
+}
+
+/* ===== Button & Label ===== */
+.lxs-typography--button {
+  font-size: var(--lxs-text-button-font-size);
+  font-weight: var(--lxs-text-button-font-weight);
+  line-height: var(--lxs-text-button-line-height);
+  letter-spacing: var(--lxs-text-button-letter-spacing);
+}
+
+.lxs-typography--label {
+  font-size: var(--lxs-text-label-font-size);
+  font-weight: var(--lxs-text-label-font-weight);
+  line-height: var(--lxs-text-label-line-height);
+  letter-spacing: var(--lxs-text-label-letter-spacing);
+  display: inline-block;
+  margin-bottom: var(--lxs-spacing-1);
+}
+
+/* ===== Responsive Typography (Optimized) ===== */
+/* Typography responsiveness is handled via CSS variables in base.css */
+
+/* ===== Typography Alignment ===== */
+.lxs-typography--align-left {
+  text-align: left;
+}
+
+.lxs-typography--align-center {
+  text-align: center;
+}
+
+.lxs-typography--align-right {
+  text-align: right;
+}
+
+.lxs-typography--align-justify {
+  text-align: justify;
+}
+
+/* ===== Semantic Colors ===== */
+.lxs-typography--color-primary {
+  color: var(--lxs-color-primary-500);
+}
+
+.lxs-typography--color-secondary {
+  color: var(--lxs-color-secondary-500);
+}
+
+.lxs-typography--color-success {
+  color: var(--lxs-color-success-500);
+}
+
+.lxs-typography--color-error {
+  color: var(--lxs-color-error-500);
+}
+
+.lxs-typography--color-warning {
+  color: var(--lxs-color-warning-500);
+}
+
+.lxs-typography--color-info {
+  color: var(--lxs-color-info-500);
+}
+
+.lxs-typography--color-inherit {
+  color: inherit;
+}
+
+/* Note: ‘inherit’ maps directly to the base color:inherit and never adds a class.
+   The rule above is kept only as a CSS override escape hatch. */
+
+.lxs-typography--color-muted {
+  color: var(--lxs-text-secondary);
+}
+
+.lxs-typography--color-disabled {
+  color: var(--lxs-text-disabled);
+  cursor: not-allowed;
+}
+
+/* ===== Font Weights ===== */
+.lxs-typography--weight-thin {
+  font-weight: var(--lxs-font-weight-thin, 100);
+}
+
+.lxs-typography--weight-extralight {
+  font-weight: var(--lxs-font-weight-extralight, 200);
+}
+
+.lxs-typography--weight-light {
+  font-weight: var(--lxs-font-weight-light, 300);
+}
+
+.lxs-typography--weight-normal {
+  font-weight: var(--lxs-font-weight-normal, 400);
+}
+
+.lxs-typography--weight-medium {
+  font-weight: var(--lxs-font-weight-medium, 500);
+}
+
+.lxs-typography--weight-semibold {
+  font-weight: var(--lxs-font-weight-semibold, 600);
+}
+
+.lxs-typography--weight-bold {
+  font-weight: var(--lxs-font-weight-bold, 700);
+}
+
+.lxs-typography--weight-extrabold {
+  font-weight: var(--lxs-font-weight-extrabold, 800);
+}
+
+.lxs-typography--weight-black {
+  font-weight: var(--lxs-font-weight-black, 900);
+}
+
+/* ===== Typography Transform ===== */
+.lxs-typography--transform-none {
+  text-transform: none;
+}
+
+.lxs-typography--transform-uppercase {
+  text-transform: uppercase;
+}
+
+.lxs-typography--transform-lowercase {
+  text-transform: lowercase;
+}
+
+.lxs-typography--transform-capitalize {
+  text-transform: capitalize;
+}
+
+/* ===== Typography Decoration ===== */
+.lxs-typography--decoration-none {
+  text-decoration: none;
+}
+
+.lxs-typography--decoration-underline {
+  text-decoration: underline;
+}
+
+.lxs-typography--decoration-line-through {
+  text-decoration: line-through;
+}
+
+.lxs-typography--decoration-overline {
+  text-decoration: overline;
+}
+
+/* ===== Typography Utilities ===== */
+/* Truncation */
+.lxs-typography--truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Line Clamp */
+.lxs-typography--line-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Must override truncate’s white-space: nowrap so multi-line clamping works */
+  white-space: normal;
+}
+
+/* Break Word */
+.lxs-typography--break-word {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Italic */
+.lxs-typography--italic {
+  font-style: italic;
+}
+
+/* Underline */
+.lxs-typography--underline {
+  text-decoration: underline;
+}
+
+/* Strikethrough */
+.lxs-typography--strikethrough {
+  text-decoration: line-through;
+}
+
+/* Gradient Typography */
+.lxs-typography--gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 100%;
+}
+
+/* No Select */
+.lxs-typography--no-select {
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+}
+
+/* ===== Dark Theme Support ===== */
+/* caption and overline already use var(--lxs-text-secondary), which the dark-theme
+   token map overrides automatically — no additional rule needed here. */
+
+/* Responsive Breakpoint Adjustments handled in base.css */
+
+/* ===== High Resolution Displays ===== */
+@media (min-resolution: 2dppx) {
+  .lxs-typography {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  .lxs-typography {
+    color: #000;
+  }
+
+  .lxs-typography--gradient {
+    -webkit-text-fill-color: initial;
+    background-clip: initial;
+    -webkit-background-clip: initial;
+  }
+}
+
+/* ===== Utility Classes ===== */
+.lxs-typography--no-margin {
+  margin: 0 !important;
+}
+
+.lxs-typography--no-padding {
+  padding: 0 !important;
+}
+
+/* ===== Accessibility ===== */
+.lxs-typography:focus-visible {
+  outline: 2px solid var(--lxs-color-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--lxs-radius-sm);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .lxs-typography {
+    transition: none;
+  }
+}

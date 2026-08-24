@@ -1,0 +1,924 @@
+---
+title: "Timeline — Luxis UI React Component"
+description: "A visual step-progress indicator for sequential processes and ordered events. Supports horizontal and vertical orientations, four visual variants, five color schemes, custom icons, clickable steps, and three sizes."
+status: stable
+since: "1.0.0"
+category: "Components/Timeline"
+npm: "@luxis-ui/react"
+import: "import { Timeline } from '@luxis-ui/react'"
+component: "Timeline"
+keywords:
+  - timeline
+  - stepper
+  - progress steps
+  - timeline react
+  - luxis ui timeline
+  - typescript timeline
+  - accessible timeline
+  - react design system
+slug: /components/timeline
+canonical: "https://luxisui.com/docs/components/timeline"
+og_image: "/img/og/timeline.png"
+llm_summary: >
+  The Timeline component renders a sequential step-progress indicator. Primary use case is visualising progress through multi-step processes (checkout, onboarding, order tracking). Do not use for unordered or non-sequential content. Import: `import { Timeline } from '@luxis-ui/react'`. Required props: steps (TimelineStep[] | string[]), currentStep (number). Optional props: orientation ('horizontal'|'vertical', default='horizontal'), variant ('default'|'circle'|'numbered'|'simple', default='default'), color ('primary'|'success'|'info'|'warning'|'error', default='success'), size ('sm'|'md'|'lg', default='md'), showCheckmarks (boolean, default=true), className (string), style (CSSProperties). TimelineStep: { label: string; description?: string; icon?: ReactNode; onClick?: () => void }.
+---
+
+{/*
+LLM_CONTEXT
+  component    : Timeline
+  source       : packages/luxis-ui/src/components/Timeline/Timeline.tsx
+  story        : apps/storybook/src/stories/Timeline.stories.tsx
+  package      : @luxis-ui/react
+  framework    : React 18+, TypeScript
+  category     : Components/Timeline
+  status       : stable
+  aria-pattern : list of steps (implicit via ordered markup)
+
+  What it renders:
+  Timeline renders a row (horizontal) or column (vertical) of step nodes
+  connected by fill-progressing connector lines. Each node has an indicator
+  (dot, circle, number, or custom icon) and optional label + description text.
+  Steps are automatically classified as completed, active, or pending based
+  on the currentStep index.
+
+  When to use:
+  - Multi-step checkout, registration, or onboarding flows
+  - Order / shipment tracking
+  - Numbered tutorial or wizard steps
+  - Any sequential process with a defined start and end
+
+  When NOT to use:
+  - Unordered lists or non-sequential content — use a List or Card instead
+  - Event history with arbitrary timestamps — consider a custom feed component
+  - Navigation menus — use SideMenu or Tabs
+
+  Ecosystem equivalents:
+  - MUI        : <Stepper> / <Step>
+  - Chakra UI  : No built-in stepper; community solutions
+  - shadcn/ui  : No built-in stepper
+  - Radix UI   : No built-in
+  - HTML native: <ol> with custom styling
+
+  Props (must match source exactly):
+  steps (TimelineStep[] | string[], required) — Array of step data; strings are auto-promoted to { label: string }
+  currentStep (number, required) — 0-based index of the active step; steps below are completed, steps above are pending
+  orientation ('horizontal'|'vertical', default='horizontal') — Layout direction
+  variant ('default'|'circle'|'numbered'|'simple', default='default') — Visual style of the step indicator
+  color ('primary'|'success'|'info'|'warning'|'error', default='success') — Color applied to active and completed nodes and connectors
+  size ('sm'|'md'|'lg', default='md') — Scale of the step indicators and typography
+  showCheckmarks (boolean, default=true) — If true, completed steps show a checkmark; if false they keep their indicator style
+  className (string, default='') — Additional CSS class for the root element
+  style (React.CSSProperties, default=undefined) — Inline styles for the root element
+
+  TimelineStep interface:
+  label (string, required) — Display label for the step
+  description (string, optional) — Secondary text rendered beneath the label
+  icon (ReactNode, optional) — Custom icon node; takes precedence over all indicator styles including checkmarks and numbers
+  onClick (() => void, optional) — Click handler; makes the step interactive with pointer cursor
+
+  Step status logic:
+  index < currentStep  → 'completed'
+  index === currentStep → 'active'
+  index > currentStep  → 'pending'
+
+  Connector fill logic:
+  The connector after step N is filled when N < currentStep (i.e. the next step is at least active).
+
+  Accessibility:
+  WCAG: AA
+  Keyboard: If onClick is provided, the step receives pointer cursor; wrap in a <button> for full keyboard support
+  Screen reader: Steps are rendered in document order; labels and descriptions read naturally
+END_LLM_CONTEXT
+*/}
+
+<script type="application/ld+json">{`
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Timeline React Component — Luxis UI",
+  "description": "A visual step-progress indicator for sequential processes and ordered events. Supports horizontal and vertical orientations, four visual variants, five color schemes, custom icons, and clickable steps.",
+  "keywords": "timeline, stepper, progress steps, timeline react, luxis ui timeline, typescript timeline, accessible timeline, react design system",
+  "author": { "@type": "Organization", "name": "Luxis UI" },
+  "programmingLanguage": ["TypeScript", "React"],
+  "about": {
+    "@type": "SoftwareSourceCode",
+    "name": "@luxis-ui/react",
+    "runtimePlatform": "React"
+  },
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I install and use Timeline in React?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Install with npm install @luxis-ui/react. Import with import { Timeline } from '@luxis-ui/react'. Pass a steps array and a currentStep index."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What props does the Luxis UI Timeline accept?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Required: steps, currentStep. Optional: orientation, variant, color, size, showCheckmarks, className, style. Each step object can have label, description, icon, and onClick."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I make Timeline steps clickable?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Add an onClick handler to each TimelineStep object. The step will render with a pointer cursor when clicked."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I show custom icons in Timeline steps?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pass an icon prop (any ReactNode) to a TimelineStep. Custom icons take precedence over all indicator styles, including checkmarks and numbers."
+        }
+      }
+    ]
+  }
+}
+`}</script>
+
+# Timeline
+
+<ComponentStatus status="stable" version="1.0.0" aria="Sequential step list" />
+
+A visual step-progress indicator for sequential processes and ordered events. Supports horizontal and vertical orientations, four visual variants, five color schemes, custom icons per step, clickable steps, and three sizes.
+
+```bash
+npm install @luxis-ui/react
+# or
+yarn add @luxis-ui/react
+# or
+pnpm add @luxis-ui/react
+```
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+```
+
+<Callout type="info" title="Migrating from another library?">
+  Luxis UI `Timeline` covers the same role as MUI's `<Stepper>` / `<Step>`.
+  It is a single self-contained component — no child `<Step>` wrappers needed.
+</Callout>
+
+## Before You Start
+
+Timeline tracks progress through a sequence of steps by comparing each step's index against `currentStep`. Steps before it are **completed**, the matching index is **active**, and steps after it are **pending**. State management is left entirely to the consumer — pass the index you control.
+
+<Callout type="tip" title="New to Luxis UI?">
+  Check our Getting Started guide for overarching conventions.
+</Callout>
+
+## How to Use Timeline in React
+
+The minimum code to render a working Timeline:
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+
+const steps = ['Cart', 'Shipping', 'Payment', 'Confirmation'];
+
+export default function Example() {
+  return <Timeline steps={steps} currentStep={1} />;
+}
+```
+
+This renders a horizontal timeline with `steps[1]` active, `steps[0]` completed with a checkmark, and `steps[2]`–`steps[3]` pending.
+
+## Try It Live
+
+```tsx live
+// ✏️ Edit currentStep to see status changes
+import { Timeline } from '@luxis-ui/react';
+
+const steps = [
+  { label: 'Order Placed',     description: 'Jan 10, 2026' },
+  { label: 'Processing',       description: 'Jan 11, 2026' },
+  { label: 'Shipped',          description: 'Jan 12, 2026' },
+  { label: 'Out for Delivery', description: 'Jan 13, 2026' },
+  { label: 'Delivered',        description: 'Jan 14, 2026' },
+];
+
+export default function LiveExample() {
+  return <Timeline steps={steps} currentStep={2} color="primary" />;
+}
+```
+
+## Timeline Examples
+
+---
+
+### Default
+
+Horizontal timeline with dot indicators and checkmarks on completed steps.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+
+const steps = ['Requirements', 'Design', 'Development', 'Testing', 'Deployment'];
+
+export default function DefaultExample() {
+  return <Timeline steps={steps} currentStep={2} />;
+}
+```
+
+---
+
+### With Descriptions
+
+Each `TimelineStep` can carry an optional `description` rendered beneath the label.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+
+const steps: TimelineStep[] = [
+  { label: 'Order Placed',     description: 'Jan 10, 2026' },
+  { label: 'Processing',       description: 'Jan 11, 2026' },
+  { label: 'Shipped',          description: 'Jan 12, 2026' },
+  { label: 'Out for Delivery', description: 'Jan 13, 2026' },
+  { label: 'Delivered',        description: 'Jan 14, 2026' },
+];
+
+export default function WithDescriptionsExample() {
+  return <Timeline steps={steps} currentStep={3} color="primary" />;
+}
+```
+
+---
+
+### All Variants
+
+Four indicator styles: `default` (dot), `circle` (outline ring), `numbered`, and `simple` (content only).
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+
+const steps = ['Requirements', 'Design', 'Development', 'Testing', 'Deployment'];
+
+export default function AllVariantsExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+      {(['default', 'circle', 'numbered', 'simple'] as const).map((variant) => (
+        <div key={variant}>
+          <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>variant="{variant}"</p>
+          <Timeline steps={steps} currentStep={2} variant={variant} />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+### All Colors
+
+Color controls the active node and the filled connector line. Available: `primary`, `success`, `info`, `warning`, `error`.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+
+const steps = ['Requirements', 'Design', 'Development', 'Testing', 'Deployment'];
+
+export default function AllColorsExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+      {(['primary', 'success', 'info', 'warning', 'error'] as const).map((color) => (
+        <div key={color}>
+          <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>color="{color}"</p>
+          <Timeline steps={steps} currentStep={2} color={color} />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+### Sizes
+
+Three sizes scale the indicators and typography: `sm`, `md` (default), `lg`.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+
+const steps = ['Requirements', 'Design', 'Development', 'Testing', 'Deployment'];
+
+export default function SizesExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+      {(['sm', 'md', 'lg'] as const).map((size) => (
+        <div key={size}>
+          <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>size="{size}"</p>
+          <Timeline steps={steps} currentStep={2} size={size} />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+### Vertical Orientation
+
+Set `orientation="vertical"` to stack steps top-to-bottom.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+
+const steps: TimelineStep[] = [
+  { label: 'Order Placed',     description: 'Jan 10, 2026' },
+  { label: 'Processing',       description: 'Jan 11, 2026' },
+  { label: 'Shipped',          description: 'Jan 12, 2026' },
+  { label: 'Out for Delivery', description: 'Jan 13, 2026' },
+  { label: 'Delivered',        description: 'Jan 14, 2026' },
+];
+
+export default function VerticalExample() {
+  return (
+    <div style={{ display: 'flex', gap: 60 }}>
+      <div>
+        <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>Default</p>
+        <Timeline steps={steps} currentStep={2} orientation="vertical" color="primary" />
+      </div>
+      <div>
+        <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>Numbered</p>
+        <Timeline steps={steps} currentStep={2} orientation="vertical" variant="numbered" color="success" />
+      </div>
+      <div>
+        <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>Circle</p>
+        <Timeline steps={steps} currentStep={2} orientation="vertical" variant="circle" color="info" />
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### Custom Icons
+
+Pass an `icon` (any `ReactNode`) to a step. Custom icons override all indicator styles — including checkmarks and numbers.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+
+const UserIcon  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+const StarIcon  = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>;
+const CheckIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17L4 12"/></svg>;
+const RocketIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>;
+
+const steps: TimelineStep[] = [
+  { label: 'Sign Up',    description: 'Create your account',    icon: <UserIcon />  },
+  { label: 'Highlights', description: 'Explore features',       icon: <StarIcon />  },
+  { label: 'Set Up',     description: 'Configure preferences',  icon: <CheckIcon /> },
+  { label: 'Launch',     description: 'You are ready!',         icon: <RocketIcon />},
+];
+
+export default function CustomIconsExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+      <Timeline steps={steps} currentStep={1} color="primary" />
+      <Timeline steps={steps} currentStep={1} color="primary" orientation="vertical" />
+    </div>
+  );
+}
+```
+
+---
+
+### Without Checkmarks
+
+Set `showCheckmarks={false}` to keep the indicator dot/circle/number on completed steps instead of replacing it with a checkmark.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+
+const steps = ['Requirements', 'Design', 'Development', 'Testing', 'Deployment'];
+
+export default function NoCheckmarksExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div>
+        <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>showCheckmarks=true (default)</p>
+        <Timeline steps={steps} currentStep={2} showCheckmarks />
+      </div>
+      <div>
+        <p style={{ marginBottom: 12, fontWeight: 600, fontSize: 13 }}>showCheckmarks=false</p>
+        <Timeline steps={steps} currentStep={2} showCheckmarks={false} />
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### Clickable Steps
+
+Add an `onClick` handler to any `TimelineStep` to make it interactive. The step renders with a pointer cursor.
+
+```tsx
+import { useState } from 'react';
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+
+const BASE_STEPS = [
+  { label: 'Create Account', description: 'Sign up with your email' },
+  { label: 'Verify Email',   description: 'Check your inbox' },
+  { label: 'Complete Profile', description: 'Add your details' },
+  { label: 'Invite Team',    description: 'Add team members' },
+  { label: 'Go Live',        description: 'Start using the platform' },
+];
+
+export default function ClickableStepsExample() {
+  const [active, setActive] = useState(0);
+
+  const steps: TimelineStep[] = BASE_STEPS.map((s, i) => ({
+    ...s,
+    onClick: () => setActive(i),
+  }));
+
+  return (
+    <div>
+      <p style={{ marginBottom: 16, fontSize: 13, color: '#6b7280' }}>
+        Click any step to navigate directly to it.
+      </p>
+      <Timeline steps={steps} currentStep={active} variant="numbered" color="primary" />
+      <div style={{ marginTop: 24, padding: '16px 20px', background: '#f9fafb', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 14 }}>
+        <strong>Active: {BASE_STEPS[active].label}</strong>
+        <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 13 }}>{BASE_STEPS[active].description}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+### Interactive Stepper with Prev / Next
+
+When to use: When a wizard or multi-step form drives the step progression.
+
+<Callout type="info" title="Controlled pattern">
+  Timeline does not manage steps internally. Keep `currentStep` in your own
+  `useState` and increment/decrement it with buttons.
+</Callout>
+
+```tsx
+import { useState } from 'react';
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+
+const STEPS: TimelineStep[] = [
+  { label: 'Create Account', description: 'Sign up with your email' },
+  { label: 'Verify Email',   description: 'Check your inbox' },
+  { label: 'Complete Profile', description: 'Add your details' },
+  { label: 'Invite Team',    description: 'Add team members' },
+  { label: 'Go Live',        description: 'Start using the platform' },
+];
+
+export default function InteractiveStepperExample() {
+  const [step, setStep] = useState(0);
+  const total = STEPS.length;
+
+  return (
+    <div>
+      <Timeline
+        steps={STEPS}
+        currentStep={step}
+        variant="numbered"
+        color="primary"
+      />
+      <div style={{ display: 'flex', gap: 12, marginTop: 28, justifyContent: 'center', alignItems: 'center' }}>
+        <button onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
+          ← Back
+        </button>
+        <span style={{ fontSize: 13, color: '#6b7280' }}>Step {step + 1} of {total}</span>
+        <button onClick={() => setStep((s) => Math.min(total - 1, s + 1))} disabled={step === total - 1}>
+          Next →
+        </button>
+      </div>
+      <div style={{ marginTop: 24, padding: '16px 20px', background: '#f9fafb', borderRadius: 8, fontSize: 14 }}>
+        <strong>{STEPS[step].label}</strong>
+        <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 13 }}>{STEPS[step].description}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+## Timeline Best Practices
+
+<DoAndDont
+  good={`// ✅ Manage currentStep externally with useState
+const [step, setStep] = useState(0);
+<Timeline steps={steps} currentStep={step} />`}
+  bad={`// ❌ Expecting the component to manage its own step
+<Timeline steps={steps} />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Use string arrays for simple, label-only flows
+<Timeline steps={['Cart', 'Shipping', 'Payment', 'Confirm']} currentStep={1} />`}
+  bad={`// ❌ Building complex objects when strings suffice
+<Timeline steps={[{ label: 'Cart' }, { label: 'Shipping' }]} currentStep={1} />`}
+/>
+
+<DoAndDont
+  good={`// ✅ Add onClick to each step for direct navigation
+const steps = items.map((s, i) => ({ ...s, onClick: () => setStep(i) }));
+<Timeline steps={steps} currentStep={active} />`}
+  bad={`// ❌ Wrapping the entire component in an onClick handler
+<div onClick={handleClick}><Timeline steps={steps} currentStep={active} /></div>`}
+/>
+
+<DoAndDont
+  good={`// ✅ Use orientation="vertical" for long descriptions
+<Timeline steps={detailedSteps} currentStep={2} orientation="vertical" />`}
+  bad={`// ❌ Using horizontal layout when descriptions make it overflow
+<Timeline steps={longDescriptionSteps} currentStep={2} />`}
+/>
+
+## Timeline Props & API Reference
+
+### Timeline Props
+
+| Prop | Type | Default | Required | Description |
+|------|------|---------|----------|-------------|
+| `steps` | `TimelineStep[] \| string[]` | — | **Yes** | Array of step data; plain strings are auto-promoted to `{ label: string }` |
+| `currentStep` | `number` | — | **Yes** | 0-based index of the active step; steps below are completed, steps above are pending |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | No | Layout direction |
+| `variant` | `'default' \| 'circle' \| 'numbered' \| 'simple'` | `'default'` | No | Visual style of the step indicator |
+| `color` | `'primary' \| 'success' \| 'info' \| 'warning' \| 'error'` | `'success'` | No | Color applied to active and completed nodes and connectors |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | No | Scale of the step indicators and typography |
+| `showCheckmarks` | `boolean` | `true` | No | If true, completed steps show a checkmark icon instead of their indicator |
+| `className` | `string` | `''` | No | Additional CSS class for the root element |
+| `style` | `React.CSSProperties` | `undefined` | No | Inline styles for the root element |
+
+### TimelineStep Interface
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `label` | `string` | **Yes** | Display label for the step |
+| `description` | `string` | No | Secondary text rendered beneath the label |
+| `icon` | `React.ReactNode` | No | Custom icon node; overrides all indicator styles including checkmarks and numbers |
+| `onClick` | `() => void` | No | Click handler; renders the step with a pointer cursor |
+
+### Step Status Logic
+
+| Condition | Status |
+|-----------|--------|
+| `index < currentStep` | `completed` — checkmark shown (if `showCheckmarks`) |
+| `index === currentStep` | `active` — highlighted with the chosen `color` |
+| `index > currentStep` | `pending` — neutral / greyed out |
+
+The connector line between step N and step N+1 fills when `N < currentStep`.
+
+<details>
+<summary>View full TypeScript interfaces</summary>
+
+```ts
+export interface TimelineStep {
+  label: string;
+  description?: string;
+  icon?: React.ReactNode;
+  onClick?: () => void;
+}
+
+export interface TimelineProps {
+  steps: TimelineStep[] | string[];
+  currentStep: number;
+  orientation?: 'horizontal' | 'vertical';
+  variant?: 'default' | 'circle' | 'numbered' | 'simple';
+  showCheckmarks?: boolean;
+  color?: 'primary' | 'success' | 'info' | 'warning' | 'error';
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+  style?: React.CSSProperties;
+}
+```
+
+</details>
+
+## Timeline Accessibility Guide
+
+### Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| <KeyboardKey>Tab</KeyboardKey> | Moves focus through any focusable elements inside the timeline |
+| <KeyboardKey>Enter</KeyboardKey> / <KeyboardKey>Space</KeyboardKey> | Activates a clickable step (when wrapped in a focusable element) |
+
+> The `onClick` handler on `TimelineStep` adds a pointer cursor but does not automatically add `tabIndex` or keyboard handling. For full keyboard accessibility on clickable steps, consider wrapping the step label in a `<button>` via a custom render approach or ensure your surrounding stepper nav provides equivalent keyboard control.
+
+### ARIA Attributes
+
+Timeline relies on document reading order for accessibility. Labels and descriptions are rendered in the DOM in step order, so screen readers announce them sequentially. No explicit ARIA roles are applied to the root — the visual progress is conveyed implicitly through text content (step labels, descriptions, and the active step's visual styling).
+
+### Accessibility Checklist
+
+- [ ] Ensure `currentStep` reflects the true active step — screen readers rely on text cues, not visual color
+- [ ] If steps are clickable, provide equivalent keyboard navigation via surrounding prev/next buttons
+- [ ] Use `description` to convey important state information (dates, status text) rather than relying on color alone
+- [ ] Confirm sufficient color contrast for active and completed nodes against the background
+
+## Timeline Design Tokens
+
+<Callout type="tip" title="What are design tokens?">
+  CSS custom properties that store design decisions like colors and spacing.
+  Override them to restyle Timeline without fighting specificity.
+</Callout>
+
+| Token | Default Value | Description |
+|-------|--------------|-------------|
+| `--lxs-timeline-connector-bg` | `var(--lxs-color-neutral-200)` | Color of the unfilled connector line |
+| `--lxs-timeline-step-bg` | `var(--lxs-background-primary)` | Background of a pending step indicator |
+| `--lxs-timeline-step-border` | `var(--lxs-color-neutral-300)` | Border color of a pending step |
+| `--lxs-timeline-label-color` | `var(--lxs-color-neutral-700)` | Label text color |
+| `--lxs-timeline-desc-color` | `var(--lxs-color-neutral-500)` | Description text color |
+| `--lxs-timeline-active-color` | Derived from `color` prop | Fill color for active/completed nodes and connectors |
+
+**Override globally:**
+```css
+:root {
+  --lxs-timeline-connector-bg: var(--lxs-color-neutral-300);
+}
+```
+
+**Override on one instance:**
+```tsx
+<Timeline
+  steps={steps}
+  currentStep={2}
+  style={{ '--lxs-timeline-connector-bg': '#e2e8f0' }}
+/>
+```
+
+## Customizing Timeline
+
+### Level 1 — className
+
+```tsx
+<Timeline steps={steps} currentStep={2} className="mt-6 px-4" />
+```
+
+### Level 2 — Design Tokens
+
+```tsx
+<Timeline
+  steps={steps}
+  currentStep={2}
+  style={{ '--lxs-timeline-label-color': 'var(--lxs-color-neutral-900)' }}
+/>
+```
+
+## Common Timeline Patterns
+
+### Order Tracking
+
+Used when: Showing the status of an e-commerce order with timestamped events.
+
+```tsx
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+
+const ORDER_STEPS: TimelineStep[] = [
+  { label: 'Order Placed',     description: 'Jan 10, 10:30 AM' },
+  { label: 'Processing',       description: 'Jan 11, 11:00 AM' },
+  { label: 'Shipped',          description: 'Jan 12, 09:15 AM' },
+  { label: 'Out for Delivery', description: 'Jan 13, 08:45 AM' },
+  { label: 'Delivered',        description: 'Jan 14, 14:20 PM' },
+];
+
+export default function OrderTrackingPattern() {
+  // currentStep would come from your order API
+  return (
+    <Timeline
+      steps={ORDER_STEPS}
+      currentStep={3}
+      orientation="vertical"
+      variant="circle"
+      color="primary"
+    />
+  );
+}
+```
+
+### Multi-Step Checkout Form
+
+Used when: A form wizard drives step progression.
+
+```tsx
+import { useState } from 'react';
+import { Timeline } from '@luxis-ui/react';
+
+const CHECKOUT_STEPS = ['Cart', 'Shipping', 'Payment', 'Confirmation'];
+
+export default function CheckoutPattern() {
+  const [step, setStep] = useState(0);
+
+  return (
+    <div>
+      <Timeline steps={CHECKOUT_STEPS} currentStep={step} color="primary" />
+      <div style={{ marginTop: 32 }}>
+        {/* Render the active form step here */}
+        {step === 0 && <CartForm onNext={() => setStep(1)} />}
+        {step === 1 && <ShippingForm onBack={() => setStep(0)} onNext={() => setStep(2)} />}
+        {step === 2 && <PaymentForm onBack={() => setStep(1)} onNext={() => setStep(3)} />}
+        {step === 3 && <Confirmation />}
+      </div>
+    </div>
+  );
+}
+```
+
+### Onboarding Wizard
+
+Used when: Guiding a new user through a setup process with rich per-step content.
+
+```tsx
+import { useState } from 'react';
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+
+const ONBOARDING: TimelineStep[] = [
+  { label: 'Create Account',   description: 'Sign up with your email' },
+  { label: 'Verify Email',     description: 'Check your inbox' },
+  { label: 'Complete Profile', description: 'Add your details' },
+  { label: 'Invite Team',      description: 'Add team members' },
+  { label: 'Go Live',          description: 'Start using the platform' },
+];
+
+export default function OnboardingPattern() {
+  const [step, setStep] = useState(0);
+
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <Timeline
+        steps={ONBOARDING}
+        currentStep={step}
+        variant="numbered"
+        color="success"
+      />
+      <div style={{ marginTop: 32 }}>
+        <h2>{ONBOARDING[step].label}</h2>
+        <p>{ONBOARDING[step].description}</p>
+        <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+          {step > 0 && (
+            <button onClick={() => setStep((s) => s - 1)}>← Back</button>
+          )}
+          {step < ONBOARDING.length - 1 && (
+            <button onClick={() => setStep((s) => s + 1)}>Continue →</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Troubleshooting Timeline
+
+| Symptom | Wrong ❌ | Right ✅ |
+|---------|---------|---------|
+| All steps appear pending | Forgetting to update `currentStep` | Manage `currentStep` with `useState` and update it on navigation |
+| Checkmarks not showing on completed steps | `showCheckmarks={false}` or custom `icon` overriding them | Remove `showCheckmarks={false}`; note custom `icon` always override checkmarks |
+| Steps overflow in horizontal layout | Long labels on many steps | Switch to `orientation="vertical"` or shorten labels |
+| Connector fills too early / late | Misunderstanding the fill logic | Connector after step N fills when `N < currentStep` (next step is at least active) |
+| Custom icon not appearing | Passing a string instead of a JSX element | Pass `icon={<MyIcon />}` not `icon="myicon"` |
+| Clicking step does nothing in controlled usage | `onClick` set but `currentStep` state not updated | In the `onClick` handler call your state setter: `onClick: () => setActive(i)` |
+
+<Callout type="warning" title="Next.js / SSR">
+  Timeline is a pure presentational component with no browser-specific APIs.
+  It works in SSR without a `"use client"` directive unless you use interactive
+  patterns (`useState`) in the same file, in which case mark that file as a
+  Client Component.
+</Callout>
+
+### Frequently Asked Questions
+
+**Q: Can I have some steps clickable and others not?**
+A: Yes. Only add `onClick` to the steps you want to be interactive. Steps without `onClick` render normally without any pointer cursor.
+
+**Q: How do I mark all steps as completed?**
+A: Set `currentStep` to `steps.length` (one past the last index). All steps will be in `completed` state.
+
+**Q: Can I use Timeline as a read-only event log?**
+A: Yes. Set `currentStep` to the index of the most recent event and `orientation="vertical"`. Omit `onClick` on all steps to keep it non-interactive.
+
+**Q: Does the `icon` prop override checkmarks on completed steps?**
+A: Yes. A step-level `icon` takes precedence over all indicator logic — including the `showCheckmarks` checkmark and the `numbered` variant number.
+
+**Q: Can I mix string steps and object steps?**
+A: No. The `steps` array must be either all strings (`string[]`) or all objects (`TimelineStep[]`). TypeScript will enforce this.
+
+## Related Components
+
+<RelatedComponent
+  name="Button"
+  description="Used alongside Timeline in stepper navigation for prev/next actions"
+  href="/docs/components/button"
+/>
+<RelatedComponent
+  name="Tabs"
+  description="Use Tabs when steps are non-linear or when users need to switch freely between sections"
+  href="/docs/components/tabs"
+/>
+<RelatedComponent
+  name="Card"
+  description="Wrap each step's detail content inside a Card for structured layout"
+  href="/docs/components/card"
+/>
+
+## Changelog
+
+| Version | Type | Description |
+|---------|------|-------------|
+| 1.0.0 | Release | Initial release with horizontal/vertical orientations, four variants, five colors, custom icons, and clickable steps |
+
+{/*
+LLMS_TXT_ENTRY_START
+# Timeline
+
+> Timeline is a Components/Timeline React component in Luxis UI for a visual step-progress indicator for sequential processes and ordered events.
+
+## Source
+packages/luxis-ui/src/components/Timeline/Timeline.tsx
+
+## Story
+apps/storybook/src/stories/Timeline.stories.tsx
+
+## Install
+```bash
+npm install @luxis-ui/react
+```
+
+## Import
+```tsx
+import { Timeline } from '@luxis-ui/react';
+import type { TimelineStep } from '@luxis-ui/react';
+```
+
+## Minimal usage
+```tsx
+import { Timeline } from '@luxis-ui/react';
+
+export default function MinimalTimeline() {
+  return (
+    <Timeline
+      steps={['Cart', 'Shipping', 'Payment', 'Confirmation']}
+      currentStep={1}
+    />
+  );
+}
+```
+
+## Key props
+- `steps` (TimelineStep[] | string[], **required**): Array of step data
+- `currentStep` (number, **required**): 0-based index of the active step
+- `orientation` ('horizontal'|'vertical', default=`'horizontal'`): Layout direction
+- `variant` ('default'|'circle'|'numbered'|'simple', default=`'default'`): Indicator style
+- `color` ('primary'|'success'|'info'|'warning'|'error', default=`'success'`): Active/completed color
+- `size` ('sm'|'md'|'lg', default=`'md'`): Scale of indicators
+- `showCheckmarks` (boolean, default=`true`): Show checkmarks on completed steps
+
+## TimelineStep fields
+- `label` (string, required)
+- `description` (string, optional)
+- `icon` (ReactNode, optional) — overrides all indicator styles
+- `onClick` (() => void, optional) — makes step interactive
+
+## Status logic
+- index < currentStep → completed (checkmark shown by default)
+- index === currentStep → active (highlighted with color)
+- index > currentStep → pending (neutral)
+
+## When to use
+Sequential multi-step processes: checkout, onboarding, order tracking, wizard forms.
+
+## When NOT to use
+Unordered lists, non-sequential content, or navigation menus.
+
+## Accessibility
+WCAG: AA
+Steps are in document order — screen readers announce labels and descriptions naturally.
+For clickable steps, provide equivalent keyboard navigation via external prev/next buttons.
+
+## Docs
+https://luxisui.com/docs/components/timeline
+LLMS_TXT_ENTRY_END
+*/}
