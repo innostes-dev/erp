@@ -5,3 +5,4 @@ export * from './lib/domain/user';
 export * from './lib/domain/user-credentials';
 export * from './lib/domain/devices';
 export * from './lib/domain/sessions';
+export * from './lib/domain/password-reset-tokens';
