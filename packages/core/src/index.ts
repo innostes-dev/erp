@@ -4,3 +4,4 @@ export * from './lib/domain/auth';
 export * from './lib/domain/user';
 export * from './lib/domain/user-credentials';
 export * from './lib/domain/devices';
+export * from './lib/domain/sessions';
