@@ -1,6 +1,6 @@
 import express from 'express';
 import * as path from 'path';
-import { createDatabaseService, IDatabaseService, createAuthRouter } from '@core';
+import { createDatabaseService, IDatabaseService, createAuthRouter, userRouter, userCredentialsRouter, deviceRouter, sessionsRoutes, passwordResetTokensRouter } from '@core';
 
 const app = express();
 app.use(express.json());
@@ -14,7 +14,11 @@ app.get('/api', async (req, res) => {
 });
 
 app.use('/auth', createAuthRouter());
-
+app.use('/users', userRouter());
+app.use('/user-credentials', userCredentialsRouter());
+app.use('/devices', deviceRouter());
+app.use('/sessions', sessionsRoutes());
+app.use('/password-reset-tokens', passwordResetTokensRouter());
 // Database connectivity check & server startup
 dbService.healthCheck().then((connected) => {
   if (connected) {
