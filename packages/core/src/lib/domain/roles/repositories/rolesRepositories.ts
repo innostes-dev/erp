@@ -43,7 +43,7 @@ export function rolesRepositories() {
     }
   }
 
-  const updateRole = async (id:number,roleData: any) => {
+  const updateRole = async (id:string,roleData: any) => {
     const dbService = createDatabaseService();
     const db = dbService.getDb();
     try {
@@ -66,7 +66,7 @@ export function rolesRepositories() {
       }
     }
 
-    const deleteRole = async (id: number) => {
+    const deleteRole = async (id: string) => {
       const dbService = createDatabaseService();
       const db = dbService.getDb();
       try {

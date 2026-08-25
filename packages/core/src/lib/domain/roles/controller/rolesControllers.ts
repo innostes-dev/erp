@@ -31,7 +31,7 @@ export function rolesController(): Router {
 
   const updateRole = async (req: Request, res: Response) => {
     try {
-        const result = await rolesServices().updateRole(parseInt(req.params["id"]), req.body);
+        const result = await rolesServices().updateRole(req.params["id"], req.body);
         return res.status(200).json(result);
     } catch (error) {
         console.error("Error updating role:", error);
@@ -43,7 +43,7 @@ export function rolesController(): Router {
 
     const deleteRole = async (req: Request, res: Response) => {
     try {
-        const result = await rolesServices().deleteRole(parseInt(req.params["id"]));
+        const result = await rolesServices().deleteRole(req.params["id"]);
         return res.status(200).json(result);
     }
     catch (error) {
