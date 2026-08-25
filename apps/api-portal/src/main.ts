@@ -1,6 +1,6 @@
 import express from 'express';
 import * as path from 'path';
-import { createDatabaseService, IDatabaseService, createAuthRouter } from '@core';
+import { createDatabaseService, IDatabaseService, createAuthRouter, userSecurityRouter } from '@core';
 
 const app = express();
 app.use(express.json());
@@ -14,6 +14,7 @@ app.get('/api', async (req, res) => {
 });
 
 app.use('/auth', createAuthRouter());
+app.use('/user-security', userSecurityRouter());
 
 // Database connectivity check & server startup
 dbService.healthCheck().then((connected) => {
