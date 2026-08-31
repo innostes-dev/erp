@@ -5,4 +5,5 @@ export * from './lib/domain/roles';
 export * from './lib/domain/tenants';
 export * from './lib/domain/ipreputation';
 export * from './lib/domain/loginAttempts';
-export * from './lib/domain/user-security'
+export * from './lib/domain/user-security';
+export * from './lib/domain/auditlog';
