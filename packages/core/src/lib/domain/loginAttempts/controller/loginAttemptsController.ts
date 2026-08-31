@@ -1,8 +1,7 @@
-import { Router, Request, Response } from "express";
+import {  Request, Response } from "express";
 import { loginAttemptsServices } from "../services/loginAttemptsServices";
 
-export function loginAttemptsController(): Router {
-  const router = Router();
+export function loginAttemptsController() {
 
   const createloginAttempts = async (req: Request, res: Response) => {
     try {
@@ -28,7 +27,9 @@ export function loginAttemptsController(): Router {
         });
     }
   } 
-  router.post("/create", createloginAttempts);
-  router.get("/getAll", getloginAttempts); 
-  return router;
+  
+  return{
+    createloginAttempts,
+    getloginAttempts
+  }
 }

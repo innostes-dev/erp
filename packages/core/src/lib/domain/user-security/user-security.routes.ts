@@ -1,10 +1,9 @@
 import {Router} from 'express';
-import { createUserSecurityController } from './controllers';
-import { updateUserSecurityController } from './controllers';
+import {userController} from './controllers/user-securityController';
 
 export  function userSecurityRouter(): Router{
     const router = Router();
-    router.post('/create-user-security', createUserSecurityController);
-    router.put('/update-user-security', updateUserSecurityController);
+    const userctrl = userController();
+    router.post('/create-user-security', userctrl.createUserSecurity);
     return router;
 }

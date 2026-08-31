@@ -1,9 +1,8 @@
-import { Router, Request, Response } from "express";
+import {  Request, Response } from "express";
 import { ipReputationServices } from "../services/ipReputationServices";
 
-export function ipReputationController(): Router {
-  const router = Router();
-
+export function ipReputationController(){
+  
   const createIpReputation = async (req: Request, res: Response) => {
     try {
       const result = await ipReputationServices().createIpReputation(req.body);
@@ -15,6 +14,9 @@ export function ipReputationController(): Router {
       });
     }
   };
-  router.post("/create", createIpReputation);
-  return router;
+  
+  return{
+    createIpReputation
+  }
+
 }

@@ -5,7 +5,7 @@ export function ipReputationRouter(): Router {
   const router = Router();
   const ipReputationCtrl = ipReputationController();
 
-  router.use("/values", ipReputationCtrl);
+   router.post("/create", ipReputationCtrl.createIpReputation);
 
   return router;
 }

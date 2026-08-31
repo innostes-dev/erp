@@ -1,9 +1,7 @@
-import { Router, Request, Response } from "express";
+import {  Request, Response } from "express";
 import { tenantServices } from "../services/tenantServices";
 
-export function tenantController(): Router {
-  const router = Router();
-
+export function tenantController() {
   const createTenant = async (req: Request, res: Response) => {
     try {
       const result = await tenantServices().createTenant(req.body);
@@ -54,9 +52,10 @@ export function tenantController(): Router {
     }
     };
 
-  router.post("/create", createTenant);
-  router.get("/getAll", getTenants);
-  router.put("/update/:id", updateTenant);
-  router.delete("/delete/:id", deleteTenant); 
-  return router;
+  return {
+    createTenant,
+    getTenants,
+    updateTenant,
+    deleteTenant
+  }
 }

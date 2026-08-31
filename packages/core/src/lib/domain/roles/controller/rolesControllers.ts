@@ -1,9 +1,7 @@
-import { Router, Request, Response } from "express";
+import { Request, Response } from "express";
 import { rolesServices } from "../services/rolesServices";
 
-export function rolesController(): Router {
-  const router = Router();
-
+export function rolesController() {
   const createRole = async (req: Request, res: Response) => {
     try {
       const result = await rolesServices().createRole(req.body);
@@ -54,9 +52,10 @@ export function rolesController(): Router {
     }
     };
 
-  router.post("/create", createRole);
-  router.get("/getAll", getRoles);
-  router.put("/update/:id", updateRole);
-  router.delete("/delete/:id", deleteRole); 
-  return router;
+  return{
+    createRole, 
+    getRoles,
+    updateRole,
+    deleteRole
+  }
 }

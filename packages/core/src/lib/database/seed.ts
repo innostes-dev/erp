@@ -1,5 +1,5 @@
 import { createDatabaseService } from './database.factory';
-import { roles, users } from './schemas';
+import { roles } from './schemas';
 
 async function main() {
   console.log('Running database seed script...');
@@ -7,12 +7,7 @@ async function main() {
   const db = dbService.getDb();
 
   try {
-    // Insert some mock users
-    await db.insert(users).values([
-      { name: 'Alice Smith', email: 'alice@example.com' },
-      { name: 'Bob Jones', email: 'bob@example.com' },
-      { name: 'Charlie Brown', email: 'charlie@example.com' },
-    ]);
+    
 
     await db.insert(roles).values([
       {

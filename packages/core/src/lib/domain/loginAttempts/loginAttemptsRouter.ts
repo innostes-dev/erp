@@ -5,7 +5,8 @@ export function loginAttemptsRouter(): Router {
   const router = Router();
   const loginAttemptsCtrl = loginAttemptsController();
 
-  router.use("/values", loginAttemptsCtrl);
+  router.post("/create", loginAttemptsCtrl.createloginAttempts);
+  router.get("/getAll", loginAttemptsCtrl.getloginAttempts); 
 
   return router;
 }

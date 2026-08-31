@@ -5,7 +5,10 @@ export function rolesRouter(): Router {
   const router = Router();
   const rolesCtrl = rolesController();
 
-  router.use("/values", rolesCtrl);
+  router.post("/create", rolesCtrl.createRole);
+  router.get("/getAll", rolesCtrl.getRoles);
+  router.put("/update/:id", rolesCtrl.updateRole);
+  router.delete("/delete/:id", rolesCtrl.deleteRole); 
 
   return router;
 }
