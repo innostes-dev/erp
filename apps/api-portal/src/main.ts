@@ -1,6 +1,6 @@
 import express from 'express';
 import * as path from 'path';
-import { createDatabaseService, IDatabaseService, createAuthRouter } from '@core';
+import { createDatabaseService, IDatabaseService,  usersRouter, userCredentialsRouter, devicesRouter, sessionsRouter, passwordResetTokensRouter, userSecurityRouter, createAuthRouter, rolesRouter, tenantRouter,ipReputationRouter, loginAttemptsRouter, auditlogRouter} from '@core';
 
 const app = express();
 app.use(express.json());
@@ -14,6 +14,17 @@ app.get('/api', async (req, res) => {
 });
 
 app.use('/auth', createAuthRouter());
+app.use('/role', rolesRouter());
+app.use('/tenant', tenantRouter());
+app.use('/ip-reputation', ipReputationRouter());
+app.use('/login-attempts', loginAttemptsRouter());
+app.use('/users', usersRouter());
+app.use('/user-credentials', userCredentialsRouter());
+app.use('/devices', devicesRouter());
+app.use('/sessions', sessionsRouter());
+app.use('/password-reset-tokens', passwordResetTokensRouter());
+app.use('/user-security', userSecurityRouter());
+app.use('/audit-log',auditlogRouter());
 
 // Database connectivity check & server startup
 dbService.healthCheck().then((connected) => {
