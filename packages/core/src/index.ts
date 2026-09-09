@@ -7,3 +7,4 @@ export * from './lib/domain/ipreputation';
 export * from './lib/domain/loginAttempts';
 export * from './lib/domain/users';
 export * from './lib/domain/auditlog';
+export * from './lib/domain/userCredentials';

@@ -1,6 +1,6 @@
 import express from 'express';
 import * as path from 'path';
-import { createDatabaseService, IDatabaseService,  usersRouter,createAuthRouter, rolesRouter, tenantRouter,ipReputationRouter, loginAttemptsRouter, auditlogRouter} from '@core';
+import { createDatabaseService, IDatabaseService,  usersRouter, userCredentialsRouter, createAuthRouter, rolesRouter, tenantRouter,ipReputationRouter, loginAttemptsRouter, auditlogRouter} from '@core';
 
 const app = express();
 app.use(express.json());
@@ -19,6 +19,7 @@ app.use('/tenant', tenantRouter());
 app.use('/ip-reputation', ipReputationRouter());
 app.use('/login-attempts', loginAttemptsRouter());
 app.use('/users', usersRouter());
+app.use('/user-credentials', userCredentialsRouter());
 app.use('/audit-log',auditlogRouter());
 
 // Database connectivity check & server startup
