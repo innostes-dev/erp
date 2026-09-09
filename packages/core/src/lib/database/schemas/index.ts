@@ -6,3 +6,4 @@ export * from './loginAttempts.schema';
 export * from './auditlog.schema';
 export * from './userCredentials.schema';
 export * from './device.schema';
+export * from './session.schema';

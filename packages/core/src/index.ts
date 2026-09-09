@@ -9,3 +9,4 @@ export * from './lib/domain/users';
 export * from './lib/domain/auditlog';
 export * from './lib/domain/userCredentials';
 export * from './lib/domain/devices';
+export * from './lib/domain/sessions';
