@@ -11,3 +11,4 @@ export * from './lib/domain/userCredentials';
 export * from './lib/domain/devices';
 export * from './lib/domain/sessions';
 export * from './lib/domain/passwordResetTokens';
+export * from './lib/domain/userSecurity';
