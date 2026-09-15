@@ -610,7 +610,7 @@ const Autocomplete = React.forwardRef<HTMLInputElement, AutocompleteProps>(
               if (typeof ref === 'function') {
                 ref(node);
               } else if (ref) {
-                ref.current = node;
+                (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
               }
               (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
             }}

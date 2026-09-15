@@ -444,7 +444,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       if (typeof ref === 'function') {
         ref(node);
       } else if (ref) {
-        ref.current = node;
+            (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
       }
     };
 

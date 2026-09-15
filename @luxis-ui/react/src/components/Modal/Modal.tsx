@@ -349,7 +349,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
           if (typeof ref === 'function') {
             ref(node);
           } else if (ref) {
-            ref.current = node;
+            (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
           }
         }}
         className={modalClassNames}
