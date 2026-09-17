@@ -19,6 +19,7 @@
         "name": "next"
       }
     ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "types": [
       "jest",
       "node"
