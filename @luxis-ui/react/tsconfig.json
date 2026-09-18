@@ -11,6 +11,8 @@
     "moduleResolution": "bundler",
     "target": "es2020",
     "lib": ["es2020", "dom", "dom.iterable"],
+    "composite": false,
+    "emitDeclarationOnly": false,
     "strict": true,
     "skipLibCheck": true,
     "paths": {
