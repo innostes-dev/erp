@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'web-portal',
   preset: '../../jest.preset.js',
   transform: {
