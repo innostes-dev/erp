@@ -150,15 +150,15 @@ export interface TabListProps extends React.HTMLAttributes<HTMLDivElement> {
 const TabList = forwardRef<HTMLDivElement, TabListProps>(
   ({ children, className, showScrollControls = false, ...props }, ref) => {
     const { orientation } = useTabsContext();
-    const listRef = React.useRef<HTMLDivElement>(null);
+    const listRef = React.useRef<HTMLDivElement | null>(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
 
     // Merge refs
-    const mergedRef = (node: HTMLDivElement) => {
+    const mergedRef = (node: HTMLDivElement | null) => {
       listRef.current = node;
       if (typeof ref === 'function') ref(node);
-      else if (ref) (ref as any).current = node;
+      else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
     };
 
     const checkScroll = () => {
