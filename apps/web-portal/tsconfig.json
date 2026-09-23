@@ -11,6 +11,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "esnext",
     "moduleResolution": "bundler",
     "customConditions": [],
