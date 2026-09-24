@@ -9,7 +9,7 @@ import { initGlobalStyles } from '../utils/parseClass';
 
 export type Size = 'sm' | 'md' | 'lg';
 
-export type RadiusSize = 'none' | 'sm' | 'base' | 'md' | 'lg' | 'xl' | '2xl' | 'full' | (string & {});
+export type RadiusSize = 'none' | 'sm' | 'base' | 'md' | 'lg' | 'xl' | '2xl' | 'full' | string;
 
 export type ColorContrast = 'light' | 'dark';
 

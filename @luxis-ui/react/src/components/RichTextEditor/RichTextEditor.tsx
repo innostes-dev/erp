@@ -329,7 +329,6 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         editorRef.current.innerHTML = sanitizeHtml(initialContent);
         updateLength();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // intentional empty-deps: only set initial content on mount
 
     // Update content when value changes (controlled mode)
@@ -511,7 +510,6 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       <div className={wrapperClassNames}>
         {label && (
           // onClick forwards focus to contenteditable — htmlFor alone does not activate non-labelable elements
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
           <label
             htmlFor={id}
             onClick={() => editorRef.current?.focus()}

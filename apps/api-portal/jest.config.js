@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'api-portal',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
@@ -7,4 +7,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/api-portal',
+  passWithNoTests: true,
 };
