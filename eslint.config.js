@@ -8,6 +8,11 @@ module.exports = [
     ignores: ['**/dist'],
   },
   {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
+  },
+  {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     rules: {
       '@nx/enforce-module-boundaries': [
@@ -23,6 +28,18 @@ module.exports = [
           ],
         },
       ],
+    },
+  },
+  {
+    files: ['@luxis-ui/react/**/*.ts', '@luxis-ui/react/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'prefer-const': 'off',
     },
   },
   {

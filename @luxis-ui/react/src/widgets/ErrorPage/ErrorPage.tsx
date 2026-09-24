@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react/no-unused-prop-types */
 
 import React from "react";
 import { Typography } from "../../components/Typography";

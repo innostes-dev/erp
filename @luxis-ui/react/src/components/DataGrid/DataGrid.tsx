@@ -181,8 +181,6 @@ const HEADER_HEIGHTS: Record<GridDensity, number> = {
   comfortable: 52,
 };
 
-const GROUP_ROW_HEIGHT = 36; // px — fixed height for group header rows
-
 const DEFAULT_COL_WIDTH = 160;
 const CHECKBOX_COL_WIDTH = 40;
 const EXPAND_COL_WIDTH = 40;
@@ -1639,7 +1637,6 @@ function DataGridComponent<T extends Record<string, unknown>>(
     editingCell: null,
     editingValue: null,
     columnFilters: {} as Record<string, ColumnFilterEntry>,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), []); // intentionally only on mount
 
   const [state, dispatch] = useReducer(gridReducer, initialState);
