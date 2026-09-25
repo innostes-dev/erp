@@ -150,7 +150,7 @@ export interface TabListProps extends React.HTMLAttributes<HTMLDivElement> {
 const TabList = forwardRef<HTMLDivElement, TabListProps>(
   ({ children, className, showScrollControls = false, ...props }, ref) => {
     const { orientation } = useTabsContext();
-    const listRef = React.useRef<HTMLDivElement>(null);
+    const listRef = React.useRef<HTMLDivElement | null>(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
 
