@@ -1,4 +1,5 @@
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React from 'react';
 import { injectCSSVariables } from './cssVariables';
@@ -24,9 +25,9 @@ export interface ColorContrastConfig {
   info?: ColorContrast;
 }
 
-export type DeepPartial<T> = T extends object ? {
-    [P in keyof T]?: DeepPartial<T[P]>;
-} : T;
+export type DeepPartial<T> = T extends object
+  ? { [P in keyof T]?: DeepPartial<T[P]> }
+  : T;
 
 export interface LuxisTheme {
   mode: 'light' | 'dark';

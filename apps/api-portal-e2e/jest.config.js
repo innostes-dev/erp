@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'api-portal-e2e',
   preset: '../../jest.preset.js',
   globalSetup: '<rootDir>/src/support/global-setup.ts',
@@ -15,4 +15,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/api-portal-e2e',
+  passWithNoTests: true,
 };

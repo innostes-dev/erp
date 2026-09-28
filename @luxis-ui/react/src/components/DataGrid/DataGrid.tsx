@@ -181,8 +181,6 @@ const HEADER_HEIGHTS: Record<GridDensity, number> = {
   comfortable: 52,
 };
 
-const GROUP_ROW_HEIGHT = 36; // px — fixed height for group header rows
-
 const DEFAULT_COL_WIDTH = 160;
 const CHECKBOX_COL_WIDTH = 40;
 const EXPAND_COL_WIDTH = 40;
