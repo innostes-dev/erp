@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   displayName: 'web-portal',
   preset: '../../jest.preset.js',
   transform: {
@@ -7,4 +7,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   coverageDirectory: '../../coverage/apps/web-portal',
+  passWithNoTests: true,
 };

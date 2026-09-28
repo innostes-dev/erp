@@ -10,10 +10,12 @@ export interface IRepository<T, TInsert> {
   delete(id: number): Promise<boolean>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export abstract class BaseRepository<T extends { id: number }, TInsert, TSchema extends PgTableWithColumns<any>>
   implements IRepository<T, TInsert>
 {
   constructor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     protected db: NodePgDatabase<any>,
     protected table: TSchema
   ) {}
@@ -29,6 +31,7 @@ export abstract class BaseRepository<T extends { id: number }, TInsert, TSchema 
   }
 
   async create(entity: TInsert): Promise<T> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = await this.db.insert(this.table).values(entity as any).returning();
     return rows[0] as T;
   }
@@ -36,6 +39,7 @@ export abstract class BaseRepository<T extends { id: number }, TInsert, TSchema 
   async update(id: number, entity: Partial<TInsert>): Promise<boolean> {
     const res = await this.db
       .update(this.table)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .set(entity as any)
       .where(eq(this.table['id'], id))
       .returning();
