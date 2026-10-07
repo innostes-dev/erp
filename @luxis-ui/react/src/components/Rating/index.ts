@@ -1,4 +1,0 @@
-import './Rating.css';
-
-export { default as Rating } from './Rating';
-export type { RatingProps } from './Rating';
