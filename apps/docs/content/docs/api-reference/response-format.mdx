@@ -1,0 +1,65 @@
+---
+title: "API Response Envelope Format"
+description: Overview of standard JSON response envelopes, success structures, and metadata properties.
+---
+
+Innostes ERP guarantees that **100% of API responses** adhere to a unified JSON response contract defined by `createSuccessResponse` and `createErrorResponse` in `@innostes/core`.
+
+---
+
+## Success Response Structure
+
+Every successful API request returns `success: true`, a `data` field containing the target resource, and a `meta` object with timestamping.
+
+```json title="HTTP 200 / 201 Response Envelope"
+{
+  "success": true,
+  "data": {
+    "id": "e4b2a8d1-c9e3-4f7a-b0c4-d2e8f1a9b3c5",
+    "name": "Acme Enterprise",
+    "slug": "acme-enterprise",
+    "createdAt": "2026-10-08T17:30:00.000Z",
+    "updatedAt": "2026-10-08T17:30:00.000Z",
+    "deletedAt": null
+  },
+  "meta": {
+    "timestamp": "2026-10-08T17:30:00.123Z",
+    "brand": "Innostes OS",
+    "message": "Organization created successfully"
+  }
+}
+```
+
+---
+
+## Error Response Structure
+
+Failed requests return `success: false` alongside an `error` object containing a machine-readable error `code`, human-readable `message`, and optional error `details`.
+
+```json title="HTTP 400 Bad Request Envelope"
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_INPUT",
+    "message": "Organization name must be at least 2 characters long",
+    "details": null
+  },
+  "meta": {
+    "timestamp": "2026-10-08T17:31:00.456Z",
+    "brand": "Innostes OS"
+  }
+}
+```
+
+---
+
+## Response Fields Reference
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `success` | `boolean` | `true` if request completed successfully, `false` on failure. |
+| `data` | `object \| array \| null` | The resource object or collection returned by the operation. |
+| `error.code` | `string` | Machine-readable string code (e.g., `ORGANIZATION_SLUG_CONFLICT`, `UNAUTHORIZED`). |
+| `error.message` | `string` | Human-readable explanation of the error. |
+| `meta.timestamp` | `string` | ISO-8601 UTC server timestamp. |
+| `meta.brand` | `string` | System branding tag (`Innostes OS`). |

@@ -1,0 +1,139 @@
+---
+title: "Organization Kernel Service API"
+description: Complete endpoint specification for managing tenant organizations, slugs, and soft-delete lifecycles.
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+The Organization Kernel Service (`/api/organizations`) manages tenant organizations, vanity slugs, and workspace isolation.
+
+---
+
+## Endpoint Summary
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/organizations` | Create a new tenant organization |
+| `GET` | `/api/organizations` | List all active tenant organizations |
+| `GET` | `/api/organizations/:identifier` | Get organization by UUID or slug |
+| `PUT` | `/api/organizations/:id` | Update organization name or slug |
+| `DELETE` | `/api/organizations/:id` | Soft-delete organization |
+
+---
+
+## 1. Create Organization (`POST /api/organizations`)
+
+Creates a new organization record. If `slug` is omitted, the service automatically converts `name` into a URL-safe slug.
+
+### Request Body Schema
+| Field | Type | Required | Constraints |
+| :--- | :--- | :---: | :--- |
+| `name` | `string` | **Yes** | `min: 2`, `max: 255` characters |
+| `slug` | `string` | No | `min: 2`, `max: 255`, lowercase alphanumeric + hyphens |
+
+### Request Code Example
+<Tabs items={['cURL', 'TypeScript (Fetch)', 'Python']}>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST http://localhost:3000/api/organizations \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "Acme Enterprise",
+        "slug": "acme-enterprise"
+      }'
+    ```
+  </Tab>
+  <Tab value="TypeScript (Fetch)">
+    ```typescript
+    const response = await fetch('http://localhost:3000/api/organizations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Acme Enterprise',
+        slug: 'acme-enterprise',
+      }),
+    });
+    const result = await response.json();
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    import requests
+
+    response = requests.post(
+        "http://localhost:3000/api/organizations",
+        json={"name": "Acme Enterprise", "slug": "acme-enterprise"}
+    )
+    print(response.json())
+    ```
+  </Tab>
+</Tabs>
+
+### Success Response (`201 Created`)
+```json
+{
+  "success": true,
+  "data": {
+    "id": "e4b2a8d1-c9e3-4f7a-b0c4-d2e8f1a9b3c5",
+    "name": "Acme Enterprise",
+    "slug": "acme-enterprise",
+    "createdAt": "2026-10-08T17:30:00.000Z",
+    "updatedAt": "2026-10-08T17:30:00.000Z",
+    "deletedAt": null
+  },
+  "meta": {
+    "timestamp": "2026-10-08T17:30:00.123Z",
+    "brand": "Innostes OS",
+    "message": "Organization created successfully"
+  }
+}
+```
+
+---
+
+## 2. List Organizations (`GET /api/organizations`)
+
+Retrieves all active organizations where `deleted_at IS NULL`.
+
+```bash
+curl -X GET http://localhost:3000/api/organizations
+```
+
+---
+
+## 3. Get Organization (`GET /api/organizations/:identifier`)
+
+Retrieves an organization by its UUID or slug string.
+
+```bash
+# Query by Slug
+curl -X GET http://localhost:3000/api/organizations/acme-enterprise
+
+# Query by UUID
+curl -X GET http://localhost:3000/api/organizations/e4b2a8d1-c9e3-4f7a-b0c4-d2e8f1a9b3c5
+```
+
+---
+
+## 4. Update Organization (`PUT /api/organizations/:id`)
+
+Updates organization name or slug attributes.
+
+```bash
+curl -X PUT http://localhost:3000/api/organizations/e4b2a8d1-c9e3-4f7a-b0c4-d2e8f1a9b3c5 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Acme Global Corporation"
+  }'
+```
+
+---
+
+## 5. Delete Organization (`DELETE /api/organizations/:id`)
+
+Performs a soft delete on the organization, setting `deleted_at = NOW()`.
+
+```bash
+curl -X DELETE http://localhost:3000/api/organizations/e4b2a8d1-c9e3-4f7a-b0c4-d2e8f1a9b3c5
+```

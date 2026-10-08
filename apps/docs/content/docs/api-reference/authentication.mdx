@@ -1,0 +1,75 @@
+---
+title: "API Authentication & Security"
+description: Overview of JWT Bearer authentication headers, token expiration, and security protocols.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Innostes ERP uses **JSON Web Tokens (JWT)** signed with HMAC SHA-256 (`JWT_SECRET`) for stateless API authentication.
+
+---
+
+## Authorization Header Format
+
+Protected API endpoints require a valid JWT token sent in the HTTP `Authorization` request header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your_jwt_access_token>
+```
+
+<Callout type="warn" title="Header Formatting">
+  Ensure there is a single space between `Bearer` and your cryptographic JWT string. Invalid header formats will trigger HTTP `401 Unauthorized`.
+</Callout>
+
+---
+
+## Request Example across Languages
+
+<Tabs items={['cURL', 'TypeScript (Fetch)', 'Python (Requests)']}>
+  <Tab value="cURL">
+    ```bash
+    curl -X GET http://localhost:3000/api/auth/me \
+      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+      -H "Content-Type: application/json"
+    ```
+  </Tab>
+  <Tab value="TypeScript (Fetch)">
+    ```typescript
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+
+    const response = await fetch('http://localhost:3000/api/auth/me', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+    console.log(data);
+    ```
+  </Tab>
+  <Tab value="Python (Requests)">
+    ```python
+    import requests
+
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+
+    response = requests.get("http://localhost:3000/api/auth/me", headers=headers)
+    print(response.json())
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Obtaining Tokens
+
+Tokens are issued upon calling the authentication endpoints:
+- `POST /api/auth/login` — Exchange email and password for a JWT token.
+- `POST /api/auth/register` — Create a new account and receive a token.

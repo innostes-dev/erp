@@ -1,0 +1,52 @@
+---
+title: "Authentication"
+description: Complete guide to API Keys, Bearer JWT access tokens, Organization context headers, and tenant isolation in Innostes ERP.
+---
+
+Innostes ERP enforces dual authentication mechanisms for statutory data protection, multi-tenant isolation, and fine-grained role authorization.
+
+---
+
+## 1. Authentication Methods
+
+### A. Bearer JWT Tokens (User Sessions)
+Used by web applications and interactive client sessions.
+Include the issued token in the `Authorization` request header:
+
+```http
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+To obtain a Bearer JWT, submit user credentials to the login endpoint:
+`POST /api/auth/login`
+
+### B. ERP Secret Keys (Server-to-Server)
+Used by backend services, webhooks, and automated background jobs.
+Include your secret key in the `X-API-Key` request header:
+
+```http
+X-API-Key: erp_live_998877665544332211
+```
+
+---
+
+## 2. Organization Tenant Context
+
+Innostes ERP is natively **Multi-Tenant**. Every business transaction belongs strictly to an Organization entity.
+
+Pass the target organization identifier in the `X-Organization-Id` header:
+
+```http
+X-Organization-Id: org_12345
+```
+
+---
+
+## 3. Security Best Practices
+
+> [!WARNING]
+> Never commit API Secret Keys or JWT tokens to version control repositories. Use environment variables.
+
+- Keep credentials strictly on server-side environments.
+- Use **Sandbox API Keys** during development and testing.
+- Rotate compromise-suspected keys immediately from the Admin Console.

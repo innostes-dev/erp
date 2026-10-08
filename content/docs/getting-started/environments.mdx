@@ -1,0 +1,29 @@
+---
+title: "Environments & Self-Hosting"
+description: Configure Sandbox, Production, and custom self-hosted ERP API server instances.
+---
+
+Innostes ERP supports isolated development, staging, and self-hosted production environments.
+
+---
+
+## 1. Official Environments
+
+| Environment | Base URL | Purpose |
+| :--- | :--- | :--- |
+| **Sandbox** | `https://sandbox-api.innostes.com` | Safe testing & integration prototyping with dummy data. |
+| **Production** | `https://api.innostes.com` | Live ERP enterprise transactions, accounting ledgers, & billing. |
+| **Local Dev** | `http://localhost:3000` | Local developer workstation running Hono engine. |
+
+---
+
+## 2. Self-Hosted Environments
+
+Because Innostes ERP is open-source and self-hosted, your deployment may run under custom domains:
+
+```bash
+# Custom Self-Hosted Domain Example
+PUBLIC_API_URL=https://erp.company.com/api
+```
+
+The Developer Portal and OpenAPI specification dynamically respect your configured `PUBLIC_API_URL`.

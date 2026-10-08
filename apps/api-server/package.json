@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",
+    "@hono/zod-openapi": "^0.18.4",
     "@innostes/core": "workspace:*",
     "@innostes/kernel-auth": "workspace:*",
+    "@innostes/kernel-organization": "workspace:*",
+    "@scalar/hono-api-reference": "^0.12.10",
     "hono": "^4.13.13"
   },
   "devDependencies": {

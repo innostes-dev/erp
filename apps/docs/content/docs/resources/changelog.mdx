@@ -1,0 +1,17 @@
+---
+title: "API Changelog & Versioning"
+description: Semantic versioning history, endpoint additions, and non-breaking API updates.
+---
+
+Innostes ERP follows **Semantic Versioning (SemVer)** for API evolution. All breaking changes are isolated behind version path prefixes (e.g. `/api/v1`, `/api/v2`).
+
+---
+
+## Release v1.0.0 (October 2026)
+
+### Added
+- **OpenAPI 3.1 Specification**: Exposed dynamic `/openapi.json` source of truth powered by `@hono/zod-openapi`.
+- **Scalar Developer Portal**: Integrated commercial-grade interactive API reference console.
+- **Kernel Services**: Mounted `/api/auth` login and `/api/organizations` management CRUD endpoints.
+- **Unified Error Handling**: Enforced standardized JSON error contract across all microkernel modules.
+- **Multi-Tenant Context**: Added `X-Organization-Id` tenant isolation header support.

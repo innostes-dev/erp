@@ -1,4 +1,5 @@
 import type { Hono } from 'hono';
+import type { OpenAPIHono } from '@hono/zod-openapi';
 import type { InnostesDatabase } from '../db/types.js';
 
 /**
@@ -25,7 +26,7 @@ export interface PlatformBackendModule<TSchema extends Record<string, unknown> =
   /**
    * Called by the host application to mount the module's router.
    */
-  registerRoutes: (app: Hono, ctx: ModuleContext<TSchema>) => void | Promise<void>;
+  registerRoutes: (app: OpenAPIHono<any, any, any> | Hono<any, any, any> | any, ctx: ModuleContext<TSchema>) => void | Promise<void>;
   /**
    * Optional lifecycle hook executed when the host server starts up.
    * Useful for seeding default data, registering event listeners, etc.

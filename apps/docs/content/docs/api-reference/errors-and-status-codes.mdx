@@ -1,0 +1,50 @@
+---
+title: "Errors & Status Codes"
+description: Complete reference matrix of HTTP status codes, error classifications, and handling recommendations.
+---
+
+Innostes ERP uses standard HTTP status codes combined with domain-specific error strings.
+
+---
+
+## Status Code Reference Matrix
+
+| HTTP Status | Error Code | Description |
+| :---: | :--- | :--- |
+| `200 OK` | — | Request succeeded. Resource retrieved or updated. |
+| `201 Created` | — | Resource created successfully. |
+| `400 Bad Request` | `INVALID_INPUT` | Payload failed Zod schema validation or malformed JSON. |
+| `401 Unauthorized` | `UNAUTHORIZED` | Missing or invalid Bearer JWT token in Authorization header. |
+| `403 Forbidden` | `FORBIDDEN` | Authenticated user lacks required RBAC permissions. |
+| `404 Not Found` | `NOT_FOUND` / `ORGANIZATION_NOT_FOUND` | Target endpoint or resource identifier does not exist. |
+| `409 Conflict` | `ORGANIZATION_SLUG_CONFLICT` | Resource attribute conflict (e.g. slug or email already exists). |
+| `422 Unprocessable` | `UNPROCESSABLE_ENTITY` | Business logic validation failed. |
+| `500 Internal Error`| `INTERNAL_SERVER_ERROR` | Unexpected backend error. |
+
+---
+
+## Handling Errors in Client Applications
+
+When receiving non-2xx responses, client SDKs should extract `error.code` for programmatic branching:
+
+```typescript
+try {
+  const response = await fetch('/api/organizations', { /* ... */ });
+  const result = await response.json();
+
+  if (!result.success) {
+    switch (result.error.code) {
+      case 'ORGANIZATION_SLUG_CONFLICT':
+        alert('This organization slug is already taken. Please choose another.');
+        break;
+      case 'INVALID_INPUT':
+        alert(`Validation Error: ${result.error.message}`);
+        break;
+      default:
+        console.error('API Error:', result.error.message);
+    }
+  }
+} catch (err) {
+  console.error('Network Error:', err);
+}
+```

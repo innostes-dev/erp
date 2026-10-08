@@ -1,0 +1,42 @@
+---
+title: "Software Development Kits (SDKs)"
+description: Architecture for client libraries generated directly from OpenAPI 3.1 specifications.
+---
+
+Innostes ERP provides type-safe client SDKs generated directly from the canonical OpenAPI 3.1 specification (`/openapi.json`), eliminating API client drift.
+
+---
+
+## 1. Planned Language SDKs
+
+- **TypeScript / Node.js**: `@innostes/sdk`
+- **Python**: `innostes-sdk`
+- **Go**: `github.com/innostes/erp-go-sdk`
+- **PHP**: `innostes/erp-php-sdk`
+
+---
+
+## 2. TypeScript SDK Example Usage
+
+```typescript
+import { InnostesERP } from '@innostes/sdk';
+
+const erp = new InnostesERP({
+  apiKey: process.env.ERP_API_KEY,
+  organizationId: 'org_12345',
+});
+
+// Type-safe API execution
+const organization = await erp.organizations.create({
+  name: 'Acme International',
+  slug: 'acme-int',
+});
+
+console.log('Created Org ID:', organization.data.id);
+```
+
+---
+
+## 3. Code Generation Pipeline
+
+Client SDKs are generated automatically using OpenAPI generators (`openapi-generator-cli` or `hey-api`) targeting `/openapi.json` upon every release build.

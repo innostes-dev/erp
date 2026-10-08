@@ -1,0 +1,90 @@
+---
+title: "Auth Kernel Service API"
+description: Endpoint specification for user registration, authentication, token issuance, and profile retrieval.
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+The Authentication Kernel Service (`/api/auth`) manages user accounts, password security, and JSON Web Token (JWT) session issuance.
+
+---
+
+## Endpoint Summary
+
+| Method | Endpoint | Auth Required | Description |
+| :--- | :--- | :---: | :--- |
+| `POST` | `/api/auth/register` | No | Register a new user account |
+| `POST` | `/api/auth/login` | No | Authenticate credentials and receive Bearer JWT |
+| `GET` | `/api/auth/me` | **Yes** | Fetch current authenticated user profile |
+| `POST` | `/api/auth/logout` | **Yes** | Terminate active user session |
+
+---
+
+## 1. User Login (`POST /api/auth/login`)
+
+Exchanges user credentials for a signed JWT access token.
+
+### Request Body Schema
+| Field | Type | Required | Constraints |
+| :--- | :--- | :---: | :--- |
+| `email` | `string` | **Yes** | Valid email format |
+| `password` | `string` | **Yes** | `min: 6` characters |
+
+### Request Code Example
+<Tabs items={['cURL', 'TypeScript (Fetch)']}>
+  <Tab value="cURL">
+    ```bash
+    curl -X POST http://localhost:3000/api/auth/login \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "admin@innostes.com",
+        "password": "Admin123!"
+      }'
+    ```
+  </Tab>
+  <Tab value="TypeScript (Fetch)">
+    ```typescript
+    const response = await fetch('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'admin@innostes.com',
+        password: 'Admin123!',
+      }),
+    });
+    const result = await response.json();
+    console.log('JWT Token:', result.data.token);
+    ```
+  </Tab>
+</Tabs>
+
+### Success Response (`200 OK`)
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIn0...",
+    "user": {
+      "id": "usr_9988776655",
+      "email": "admin@innostes.com",
+      "name": "System Administrator",
+      "role": "ADMIN"
+    }
+  },
+  "meta": {
+    "timestamp": "2026-10-08T17:35:00.000Z",
+    "brand": "Innostes OS"
+  }
+}
+```
+
+---
+
+## 2. Get User Profile (`GET /api/auth/me`)
+
+Retrieves profile data for the authenticated Bearer token.
+
+```bash
+curl -X GET http://localhost:3000/api/auth/me \
+  -H "Authorization: Bearer <jwt_access_token>"
+```

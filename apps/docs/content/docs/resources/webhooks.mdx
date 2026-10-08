@@ -1,0 +1,80 @@
+---
+title: "Webhooks Architecture"
+description: Complete guide to event-driven webhooks, payload schemas, signature verification, retry policies, and idempotency.
+---
+
+Webhooks allow external systems to receive real-time HTTP notifications whenever domain events occur within the Innostes ERP platform.
+
+---
+
+## 1. Supported Webhook Events
+
+### Customer Domain
+- `customer.created` — Fired when a new customer profile is registered.
+- `customer.updated` — Fired when customer contact or tax information changes.
+- `customer.deleted` — Fired when a customer record is soft-deleted.
+
+### Order Domain
+- `order.created` — Fired when a sales order is submitted.
+- `order.updated` — Fired when line items or status updates occur.
+- `order.cancelled` — Fired when an order is voided.
+- `order.completed` — Fired when fulfillment and delivery succeed.
+
+### Invoice Domain
+- `invoice.created` — Fired when an invoice is issued.
+- `invoice.paid` — Fired when payment settlement clears.
+- `invoice.overdue` — Fired when due date lapses without settlement.
+
+---
+
+## 2. Event Payload Structure
+
+```json
+{
+  "id": "evt_9988776655",
+  "event": "customer.created",
+  "created_at": "2026-10-08T18:00:00.000Z",
+  "organization_id": "org_12345",
+  "data": {
+    "id": "cust_887766",
+    "name": "Acme Global Inc",
+    "email": "billing@acme.com"
+  }
+}
+```
+
+---
+
+## 3. HMAC Signature Verification
+
+Innostes ERP signs every webhook payload using SHA-256 HMAC. Verify the signature before processing payloads:
+
+```http
+X-Innostes-Signature: t=1760000000,v1=9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+```
+
+Verify in Node.js / TypeScript:
+
+```typescript
+import crypto from 'crypto';
+
+function verifyWebhook(payload: string, header: string, secret: string): boolean {
+  const parts = Object.fromEntries(header.split(',').map((p) => p.split('=')));
+  const timestamp = parts.t;
+  const signature = parts.v1;
+
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(`${timestamp}.${payload}`)
+    .digest('hex');
+
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+}
+```
+
+---
+
+## 4. Retry Policy & Idempotency
+
+- **Retries**: If your endpoint returns non-`2xx` status codes, the delivery worker retries with exponential backoff (up to 5 attempts over 24 hours).
+- **Idempotency**: Webhook delivery guarantees **at-least-once** delivery. Use `evt_...` ID to ignore duplicate notifications.
