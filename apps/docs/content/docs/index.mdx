@@ -1,0 +1,80 @@
+---
+title: Innostes ERP Architecture
+description: Comprehensive overview of the modular enterprise resource planning platform powered by the Innostes Plug & Play Engine.
+---
+
+import { Cards, Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Welcome to the official developer and architecture documentation for **Innostes ERP**—a modular, open-source enterprise resource planning ecosystem built as a TypeScript monorepo using `pnpm` workspaces, Hono, React 19, and Drizzle ORM.
+
+<Callout type="info" title="Modular Core Philosophy">
+  Innostes ERP is designed with strict **Inversion of Control (IoC)** and **Loose Coupling**. Host applications are thin runtime shells that hardcode no business logic. Feature slices, database schemas, API routes, and frontend views are co-located in pluggable modules managed by the **Innostes Plug & Play Engine**.
+</Callout>
+
+---
+
+## High-Level System Architecture
+
+The host runtime shell (`apps/api-server`) boots up, creates a shared infrastructure context (`ModuleContext`), and delegates all domain registration to the **Innostes Engine**. The engine dynamically mounts routes, executes boot-time lifecycle hooks, and seeds initial data across mandatory platform slices (`kernel/*`) and optional business domains (`modules/*`).
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                        HOST RUNTIME SHELLS                             │
+│     [ apps/api-server (Hono Backend) ]     [ apps/web (React 19 Frontend) ]│
+└───────────────────┬──────────────────────────────────┬─────────────────┘
+                    │                                  │
+┌───────────────────▼──────────────────────────────────▼─────────────────┐
+│                 INNOSTES ENGINE (Runtime Orchestrator)                 │
+│      Context Creation ➔ Dynamic Module Mount ➔ Boot & Seed Hooks       │
+└──────────┬─────────────────────────┬─────────────────────────┬─────────┘
+           │                         │                         │
+┌──────────▼──────────┐   ┌──────────▼──────────┐   ┌──────────▼──────────┐
+│    Kernel: Auth     │   │     Module: HRMS    │   │    Module: Inventory│
+│  (Backend+Frontend) │   │  (Backend+Frontend) │   │  (Backend+Frontend) │
+└─────────────────────┘   └─────────────────────┘   └─────────────────────┘
+```
+
+---
+
+## Key Platform Characteristics
+
+1. **Zero-Coupling Plug & Play:** Business modules (HRMS, Invoicing, Inventory, CRM) are vertical slices. Enabling or disabling a module is as simple as adding or removing it from the Innostes Engine registry array.
+2. **Context Injection:** Global resources like `node-postgres` connection pools, Drizzle ORM database instances, loggers, and event buses are injected dynamically into modules via `ModuleContext`.
+3. **Co-located Vertical Slices:** Each module owns its database tables, DTO validations, repositories, backend Hono controllers, and frontend UI components.
+4. **Unified Database Layer:** Centralized `node-postgres` (`pg.Pool`) factory with Drizzle ORM, aggregating domain schemas without tight monolithic dependencies.
+
+---
+
+## Technology Stack Matrix
+
+| Layer | Technology | Description |
+| :--- | :--- | :--- |
+| **Monorepo Manager** | `pnpm` + Turborepo | High-performance workspace orchestration and build caching |
+| **Backend Framework** | Hono | Ultra-fast TypeScript web framework with OpenAPI / RPC capabilities |
+| **Frontend Framework** | React 19 + Vite | Modern UI framework with co-located module views |
+| **Database & ORM** | PostgreSQL + Drizzle ORM | Type-safe SQL ORM connected via `node-postgres` (`pg.Pool`) |
+| **Design System** | `@innostes/ui` + Tailwind | Shared accessible design tokens and component library |
+| **Documentation** | Fumadocs + MDX | Fast, type-safe MDX documentation engine |
+
+---
+
+## Explore the Documentation
+
+<Cards>
+  <Card title="Getting Started" href="/docs/getting-started/quickstart">
+    Prerequisites, local installation, PostgreSQL connection, and running the dev environment.
+  </Card>
+  <Card title="Monorepo Structure" href="/docs/architecture/monorepo-structure">
+    Learn about `apps/`, `packages/`, `kernel/`, and `modules/` directory taxonomy and import guardrails.
+  </Card>
+  <Card title="Innostes Engine & Lifecycle" href="/docs/architecture/innostes-engine-and-lifecycle">
+    Deep dive into `PlatformBackendModule`, `ModuleContext`, and the server boot cycle.
+  </Card>
+  <Card title="Create a Module Guide" href="/docs/guides/create-a-module">
+    Step-by-step tutorial on scaffolding and plugging in a new business module from scratch.
+  </Card>
+  <Card title="Building & Deployment" href="/docs/deployment/production-deployment">
+    Docker containerization, environment setup, PM2, and production deployment pipelines.
+  </Card>
+</Cards>

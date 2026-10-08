@@ -1,0 +1,55 @@
+---
+title: Environment Variables
+description: Complete reference guide for configuring environment variables across local, testing, staging, and production environments.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Innostes ERP uses a centralized `.env` configuration file located at the monorepo root. Environment variables dictate database connections, security secret keys, runtime logging, and automated boot-time migration behaviors.
+
+---
+
+## Configuration Reference Matrix
+
+| Variable | Required | Default (Dev) | Description |
+| :--- | :---: | :--- | :--- |
+| `PORT` | No | `3000` | HTTP port on which `apps/api-server` listens. |
+| `NODE_ENV` | Yes | `development` | Runtime environment mode (`development`, `test`, `production`). |
+| `DATABASE_URL` | Yes | `postgresql://postgres:postgres@localhost:5432/innostes_db` | Full PostgreSQL connection URL used by Drizzle ORM and migration runners. |
+| `PGHOST` | No | `localhost` | PostgreSQL host address for standard `pg.Pool` connection factory. |
+| `PGPORT` | No | `5432` | PostgreSQL port number. |
+| `PGUSER` | No | `postgres` | Database username. |
+| `PGPASSWORD` | No | `postgres` | Database user password. |
+| `PGDATABASE` | No | `innostes_db` | Target database name. |
+| `JWT_SECRET` | Yes | *See below* | Cryptographic secret key used to sign and verify JSON Web Tokens in `kernel/auth`. |
+| `AUTO_MIGRATE` | No | `true` | When `true`, automatically applies pending Drizzle migrations during engine boot. |
+| `AUTO_SEED` | No | `true` | When `true`, executes boot-time module seeding routines (`onBoot`). |
+
+---
+
+## Production Security Best Practices
+
+<Callout type="warn" title="Security Warning">
+  Never use default `JWT_SECRET` keys in staging or production environments! Secrets must be generated using high-entropy random strings.
+</Callout>
+
+To generate a secure 256-bit random key for production:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Set the generated secret in your production environment vault or Docker environment declaration:
+
+```ini title=".env.production"
+NODE_ENV=production
+PORT=3000
+DATABASE_URL=postgresql://db_prod_user:SuperSecretPass@db.internal:5432/innostes_erp_prod
+JWT_SECRET=8f9d3b1e7c5a204689b0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2
+AUTO_MIGRATE=false
+AUTO_SEED=false
+```
+
+<Callout type="info" title="CI/CD Migration Strategy">
+  In production, set `AUTO_MIGRATE=false` and `AUTO_SEED=false`. Migrations should be executed in your CI/CD deployment pipeline before rolling out new application code using `pnpm --filter @innostes/core db:migrate`.
+</Callout>

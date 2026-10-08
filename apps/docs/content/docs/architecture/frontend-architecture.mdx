@@ -1,0 +1,104 @@
+---
+title: Frontend Architecture & UI Slices
+description: Overview of React 19 frontend applications, co-located module UI slices, shared design tokens, and API integration.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Innostes ERP adopts a **co-located frontend vertical slice** strategy. Instead of organizing UI code into a monolithic frontend application, UI views, forms, and tables live alongside their corresponding backend domain logic within `kernel/*` and `modules/*`.
+
+---
+
+## Architecture Overview
+
+```text
+apps/web (React 19 Shell / Router)
+  ├── Imports Layout & Shell Navigation
+  ├── Imports Kernel Views:  @innostes/kernel-auth/frontend
+  └── Imports Module Views:  @innostes/module-hrms/frontend
+                                 │
+                                 ▼
+                     @innostes/ui (Shared Design System)
+```
+
+1. **`apps/web` (Host Web Shell):** Houses the main application layout, top navigation bar, sidebar menu loader, global authentication state provider, and client routing.
+2. **Co-located Module Views:** Modules export complete React page views, components, and state hooks (`modules/hrms/frontend`, `kernel/auth/frontend`).
+3. **`packages/ui` (`@innostes/ui`):** Shared React component library providing buttons, text inputs, data tables, modals, badges, and Tailwind styling variables.
+
+---
+
+## Co-located Frontend Module Structure
+
+A standard module frontend slice contains:
+
+```text
+modules/hrms/frontend/
+├── index.tsx                 # Main exported module React view component
+├── components/               # Module-specific UI components
+│   ├── EmployeeTable.tsx
+│   └── AddEmployeeModal.tsx
+├── hooks/                    # Data fetching & state hooks
+│   └── useEmployees.ts
+└── api/                      # Hono API client call wrappers
+    └── hrms.api.ts
+```
+
+---
+
+## Design System (`@innostes/ui`)
+
+All module views consume UI elements from `@innostes/ui` to maintain visual consistency across the platform:
+
+```tsx title="modules/hrms/frontend/index.tsx"
+import React, { useState } from 'react';
+import { Button, Card, Table, Badge } from '@innostes/ui';
+
+export function HrmsModuleView() {
+  return (
+    <Card className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-2xl font-bold">Employee Directory</h2>
+          <p className="text-gray-500">Manage organizational staff and departments</p>
+        </div>
+        <Button variant="primary">+ Add Employee</Button>
+      </div>
+
+      <Table
+        headers={['ID', 'Name', 'Role', 'Status']}
+        rows={[
+          ['EMP-001', 'Alice Smith', 'Engineering Lead', <Badge variant="success">Active</Badge>],
+          ['EMP-002', 'Bob Jones', 'HR Manager', <Badge variant="success">Active</Badge>],
+        ]}
+      />
+    </Card>
+  );
+}
+```
+
+---
+
+## Hono API Client Integration
+
+Frontend slices communicate with backend Hono endpoints using typed API client wrappers:
+
+```typescript title="kernel/auth/frontend/api/auth.api.ts"
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+export async function loginUser(credentials: { email: string; password: string }) {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error?.message || 'Login failed');
+  }
+
+  // Store JWT token in local storage or auth store
+  localStorage.setItem('innostes_auth_token', data.data.token);
+  return data.data;
+}
+```

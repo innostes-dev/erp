@@ -1,0 +1,137 @@
+---
+title: API & Security Architecture
+description: Overview of Hono HTTP routers, security middleware pipelines, JWT authentication, error handling, and DTO validation.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Innostes ERP leverages **Hono**—a lightweight, high-performance web framework designed for TypeScript—to deliver fast, secure REST endpoints across all kernel services and ERP modules.
+
+---
+
+## HTTP Middleware Pipeline
+
+Every HTTP request passing into `apps/api-server` flows through a global security and utility middleware chain configured in [`apps/api-server/src/app.ts`](file:///e:/innostes_projects/erp/apps/api-server/src/app.ts):
+
+```typescript title="apps/api-server/src/app.ts"
+// 1. Secure HTTP Headers (Content-Security-Policy, X-Frame-Options, HSTS)
+app.use('*', secureHeaders());
+
+// 2. Cross-Origin Resource Sharing (CORS) Configuration
+app.use(
+  '*',
+  cors({
+    origin: (origin) => origin || '*',
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+```
+
+---
+
+## Authentication & Authorization Architecture
+
+Authentication is driven by the `kernel/auth` slice, utilizing JSON Web Tokens (JWT) signed with HMAC SHA-256.
+
+```text
+ Client (Browser / Mobile)               Hono API Router                    Token Engine
+   │                                           │                                 │
+   │─── 1. POST /api/auth/login ──────────────►│                                 │
+   │    { email, password }                    │─── 2. Verify Credentials ──────►│
+   │                                           │                                 │
+   │◄── 3. Return JWT Token ───────────────────│◄── 4. Generate Bearer Token ────│
+   │    { token, user }                        │                                 │
+   │                                           │                                 │
+   │─── 5. GET /api/hrms/employees ───────────►│                                 │
+   │    Header: Authorization: Bearer <jwt>    │─── 6. Validate Signature ───────│
+   │                                           │    & Extract User Payload       │
+```
+
+### JWT Bearer Validation Middleware
+Modules protect sensitive endpoints by injecting authentication middleware:
+
+```typescript
+import { Hono } from 'hono';
+import { verifyJwt } from '@innostes/kernel-auth/backend';
+
+export function createProtectedRouter() {
+  const router = new Hono();
+
+  router.use('*', async (c, next) => {
+    const authHeader = c.req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'UNAUTHORIZED', message: 'Missing Authorization header' }, 401);
+    }
+    const token = authHeader.split(' ')[1];
+    const user = await verifyJwt(token);
+    c.set('user', user);
+    await next();
+  });
+
+  return router;
+}
+```
+
+---
+
+## Standardized API Responses & Global Error Handling
+
+All API endpoints return predictable response envelopes. Errors are handled uniformly by Hono's global error handler.
+
+### Error Response Schema
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Invalid email or password provided.",
+    "details": null
+  },
+  "timestamp": "2026-10-08T16:15:00.000Z"
+}
+```
+
+### Exception Hierarchy
+Custom HTTP exceptions inherit from `HttpException` defined in `@innostes/core`:
+
+```typescript
+import { HttpException, createErrorResponse } from '@innostes/core';
+
+app.onError((err, c) => {
+  if (err instanceof HttpException) {
+    return c.json(
+      createErrorResponse(err.message, err.code, err.details),
+      err.statusCode as any
+    );
+  }
+
+  return c.json(
+    createErrorResponse(err.message || 'Internal server error', 'INTERNAL_SERVER_ERROR'),
+    500
+  );
+});
+```
+
+---
+
+## DTO & Input Validation
+
+Input request bodies are validated using type-safe Data Transfer Objects (DTOs) before executing controller logic:
+
+```typescript title="kernel/auth/backend/dto/login.dto.ts"
+export interface LoginDto {
+  email: string;
+  password: string;
+}
+
+export function validateLoginDto(input: any): LoginDto {
+  if (!input.email || typeof input.email !== 'string') {
+    throw new HttpException(400, 'INVALID_INPUT', 'Valid email address is required.');
+  }
+  if (!input.password || typeof input.password !== 'string') {
+    throw new HttpException(400, 'INVALID_INPUT', 'Password is required.');
+  }
+  return { email: input.email.trim().toLowerCase(), password: input.password };
+}
+```

@@ -1,0 +1,103 @@
+---
+title: Monorepo Structure & Guardrails
+description: Deep dive into the workspace directory taxonomy, pnpm linking, and strict dependency direction guardrails.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Innostes ERP is organized as a high-performance monorepo using **pnpm workspaces** and **Turborepo**. The codebase is cleanly segmented into four distinct top-level directories, each carrying a dedicated responsibility in the system lifecycle.
+
+---
+
+## Workspace Directory Taxonomy
+
+```text
+erp/
+├── apps/                 # Host runtime applications & entrypoints
+│   ├── api-server/       # Hono HTTP server shell
+│   ├── web/              # React 19 single-page app shell
+│   └── docs/             # Fumadocs documentation workspace
+├── packages/             # Shared foundational infrastructure & contracts
+│   ├── core/             # Framework interfaces, DB pool client, HTTP response utils
+│   ├── ui/               # Shared React design system component library
+│   ├── eslint-config/    # Monorepo linting rules
+│   └── typescript-config/# Shared tsconfig presets
+├── kernel/               # Mandatory platform foundations (Backend + Frontend)
+│   └── auth/             # Core authentication, users, sessions, RBAC
+└── modules/              # Optional plug-and-play business domain slices
+    ├── hrms/             # Human Resource Management slice (optional)
+    ├── invoicing/        # Invoicing & Billing slice (optional)
+    └── inventory/        # Inventory Management slice (optional)
+```
+
+---
+
+## Distinct Directory Responsibilities
+
+### 1. `apps/` (Host Runtime Shells)
+Host applications are thin runtime shells. They do **not** contain hardcoded business logic or domain SQL tables. Instead, host applications initialize global infrastructure (HTTP server, database connection pools) and mount modules dynamically.
+
+### 2. `packages/` (Shared Infrastructure)
+Shared, domain-agnostic utilities and contracts:
+- `@innostes/core`: Defines contracts (`PlatformBackendModule`, `ModuleContext`), connection factory (`createDatabaseClient`), base error classes, and DTO helpers.
+- `@innostes/ui`: Shared design tokens, buttons, inputs, modals, and Tailwind configurations.
+
+### 3. `kernel/` (Mandatory Platform Foundations)
+Essential system slices required for the platform to operate. Co-locates `backend/` and `frontend/` logic.
+- Example: `kernel/auth` provides database user tables, password hashing, JWT creation, login controllers, and React login/signup UI components.
+
+### 4. `modules/` (Pluggable Business Domains)
+Fully decoupled business modules. Each module is an independent package containing its own Drizzle schemas, Hono routes, business logic repositories, and React UI components. Modules can be installed, upgraded, or removed without breaking the host application shell.
+
+---
+
+## pnpm Workspace Linking & Rules
+
+The monorepo configuration is managed via [`pnpm-workspace.yaml`](file:///e:/innostes_projects/erp/pnpm-workspace.yaml):
+
+```yaml title="pnpm-workspace.yaml"
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "modules/*"
+  - "kernel/*"
+```
+
+Inter-package dependencies inside the monorepo use pnpm's `workspace:*` protocol in `package.json`:
+
+```json title="apps/api-server/package.json"
+{
+  "name": "@innostes/api-server",
+  "dependencies": {
+    "@innostes/core": "workspace:*",
+    "@innostes/kernel-auth": "workspace:*"
+  }
+}
+```
+
+---
+
+## Dependency Direction Guardrails
+
+To preserve modularity and prevent circular dependencies, imports must strictly flow according to the following architectural rules:
+
+```text
+   ┌─────────────────────────────────────────────────────────┐
+   │                  apps/* (Host Shells)                   │
+   └──────────┬───────────────────┬───────────────────┬──────┘
+              │                   │                   │
+   ┌──────────▼──────────┐ ┌──────▼────────────┐ ┌────▼───────────┐
+   │      kernel/*       │ │    modules/*      │ │  packages/ui  │
+   └──────────┬──────────┘ └──────┬────────────┘ └────┬───────────┘
+              │                   │                   │
+   ┌──────────▼───────────────────▼───────────────────▼───────────┐
+   │                    packages/core                             │
+   └──────────────────────────────────────────────────────────────┘
+```
+
+<Callout type="warn" title="Import Rules & Guardrails">
+  - **Rule 1:** Host applications (`apps/*`) can import `packages/*`, `kernel/*`, and `modules/*`.
+  - **Rule 2:** Modules (`modules/*`) and Kernel slices (`kernel/*`) can import `packages/*` (`@innostes/core`, `@innostes/ui`), but **MUST NEVER** import host apps (`apps/*`).
+  - **Rule 3:** Modules (`modules/*`) **MUST NEVER** directly import other business modules (`modules/*`). Cross-module communication must occur via event buses or shared core contracts.
+  - **Rule 4:** `packages/core` **MUST NEVER** import `kernel/*`, `modules/*`, or `apps/*`.
+</Callout>

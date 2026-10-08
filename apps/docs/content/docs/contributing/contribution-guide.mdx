@@ -1,0 +1,52 @@
+---
+title: Contribution Guidelines & Code Standards
+description: Guidelines for open-source contributors covering code style, conventional commits, pull requests, and testing standards.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Thank you for contributing to Innostes ERP! We welcome pull requests, bug fixes, module additions, and documentation enhancements from the open-source community.
+
+---
+
+## Code Formatting & Style Rules
+
+To maintain high quality and consistency across our TypeScript monorepo:
+
+1. **Strict TypeScript Mode:** All code must pass `pnpm check-types` without errors or `any` type suppression.
+2. **ESLint & Prettier:** Run `pnpm lint` and `pnpm format` before opening a pull request.
+3. **No Monolithic Leaks:** Ensure business logic remains co-located within `kernel/*` or `modules/*`. Do not introduce dependencies between modules.
+
+---
+
+## Conventional Commits Protocol
+
+We enforce Conventional Commits for clear Git history and automated changelog generation.
+
+### Commit Syntax
+```text
+<type>(<scope>): <short description>
+```
+
+### Supported Commit Types:
+- `feat`: A new feature or business module (e.g. `feat(modules/crm): add customer leads API`).
+- `fix`: A bug fix (e.g. `fix(kernel/auth): resolve JWT expiration parsing issue`).
+- `docs`: Documentation updates (e.g. `docs(architecture): expand Innostes Engine lifecycle page`).
+- `refactor`: Code improvements without functional changes.
+- `chore`: Dependency upgrades or build tool updates.
+
+---
+
+## Pull Request Submission Process
+
+1. **Fork & Branch:** Create a feature branch off `main`:
+   ```bash
+   git checkout -b feat/crm-customer-notes
+   ```
+2. **Implement & Test:** Verify local build and static typecheck pass cleanly:
+   ```bash
+   pnpm check-types
+   pnpm lint
+   pnpm build
+   ```
+3. **Submit PR:** Push your branch to GitHub and open a Pull Request describing your changes, motivation, and verification steps.

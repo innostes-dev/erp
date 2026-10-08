@@ -1,0 +1,139 @@
+---
+title: Innostes Plug & Play Engine
+description: Deep dive into the Innostes Engine contracts, context injection, dynamic route mounting, and lifecycle boot sequence.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+The **Innostes Engine** is the central orchestration layer responsible for dynamically loading, initializing, and isolating backend modules and kernel services without tight coupling.
+
+---
+
+## Core Contracts (`@innostes/core`)
+
+All plug-and-play backend modules implement the `PlatformBackendModule` (aliased as `InnostesOSModule`) contract exported from `@innostes/core`:
+
+```typescript title="packages/core/src/types/module.ts"
+import type { Hono } from 'hono';
+import type { InnostesDatabase } from '../db/types.js';
+
+/**
+ * Shared runtime context injected by the host server into each module.
+ */
+export interface ModuleContext<TSchema extends Record<string, unknown> = Record<string, unknown>> {
+  db?: InnostesDatabase<TSchema>;
+  events?: unknown;
+  logger?: {
+    info: (msg: string, ...args: unknown[]) => void;
+    warn: (msg: string, ...args: unknown[]) => void;
+    error: (msg: string, ...args: unknown[]) => void;
+  };
+}
+
+/**
+ * Contract required for any backend module (Kernel service, ERP module, or micro-tool).
+ */
+export interface PlatformBackendModule<TSchema extends Record<string, unknown> = Record<string, unknown>> {
+  id: string;
+  name: string;
+  version?: string;
+
+  /**
+   * Called by the Innostes Engine to mount the module's routes.
+   */
+  registerRoutes: (app: Hono, ctx: ModuleContext<TSchema>) => void | Promise<void>;
+
+  /**
+   * Optional lifecycle hook executed when the host server boots up.
+   * Useful for seeding default data, registering event listeners, etc.
+   */
+  onBoot?: (ctx: ModuleContext<TSchema>) => void | Promise<void>;
+
+  /**
+   * Optional lifecycle hook executed during graceful server shutdown.
+   */
+  onDestroy?: () => void | Promise<void>;
+}
+```
+
+---
+
+## Why Route Registration Wrappers?
+
+Unlike traditional Node.js/Express monolithic apps that directly export static router instances (`export const authRouter = new Router()`), Innostes modules export a module definition object implementing `registerRoutes(app, ctx)`.
+
+### Advantages of Inversion of Control:
+1. **Late Dependency Injection:** Modules receive the initialized `ModuleContext` (DB pool instance, logger, configuration) at runtime when routes are registered.
+2. **Encapsulated Dependency Graph:** Repositories, services, and controllers are instantiated lazily inside `registerRoutes` using the injected context.
+3. **Dynamic Route Prefixing:** The engine mounts routes dynamically under standard API path conventions (e.g. `app.route('/api/auth', authRouter)`).
+
+---
+
+## Real-World Kernel Module Implementation
+
+Here is how `kernel/auth` implements `PlatformBackendModule`:
+
+```typescript title="kernel/auth/backend/index.ts"
+import type { Hono } from 'hono';
+import type { InnostesOSModule, ModuleContext } from '@innostes/core';
+import { UserRepository } from './repositories/user.repository.js';
+import { TokenService } from './services/token.service.js';
+import { PasswordService } from './services/password.service.js';
+import { AuthService } from './services/auth.service.js';
+import { AuthController } from './controllers/auth.controller.js';
+import { createAuthRouter } from './routes/auth.routes.js';
+
+const authKernelModule: InnostesOSModule = {
+  id: 'auth',
+  name: 'Innostes OS Auth Kernel Service',
+  version: '1.0.0',
+  registerRoutes: (app: Hono, ctx: ModuleContext) => {
+    // 1. Instantiate repositories with injected database pool
+    const userRepository = new UserRepository(ctx.db!);
+    const tokenService = new TokenService();
+    const passwordService = new PasswordService();
+
+    // 2. Instantiate domain services & controller
+    const authService = new AuthService(userRepository, tokenService, passwordService);
+    const authController = new AuthController(authService);
+    
+    // 3. Create Hono router & mount under host application
+    const authRouter = createAuthRouter(authController);
+    app.route('/api/auth', authRouter);
+  },
+  onBoot: async (_ctx: ModuleContext) => {
+    console.log('[Innostes:Auth] Core authentication service bootstrapped successfully.');
+  },
+};
+
+export default authKernelModule;
+```
+
+---
+
+## Step-by-Step Server Boot Sequence
+
+When `apps/api-server` starts up, the Innostes Engine executes the following boot cycle in [`apps/api-server/src/app.ts`](file:///e:/innostes_projects/erp/apps/api-server/src/app.ts):
+
+<Steps>
+  <Step>
+    ### Global Middleware Mount
+    The server initializes security headers (`secureHeaders()`) and CORS policies (`cors()`).
+  </Step>
+
+  <Step>
+    ### Connection Pool & Context Assembly
+    `createDatabaseClient()` creates the PostgreSQL pool and Drizzle ORM client. If database ping fails, the engine gracefully transitions to fallback mode without crashing.
+  </Step>
+
+  <Step>
+    ### Module Route Mounting
+    The engine iterates through registered modules array (`modules: InnostesOSModule[]`), invoking `module.registerRoutes(app, context)` for each item.
+  </Step>
+
+  <Step>
+    ### Lifecycle Boot Hooks (`onBoot`)
+    The engine invokes `await module.onBoot(context)` sequentially, allowing modules to run database seeders or subscribe to message queues.
+  </Step>
+</Steps>

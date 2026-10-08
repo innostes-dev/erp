@@ -1,0 +1,156 @@
+---
+title: Production Deployment & Docker
+description: Comprehensive deployment guide covering Docker containerization, PM2 process management, environment checklists, and CI/CD pipelines.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Deploying Innostes ERP to production requires running the Hono backend server (`apps/api-server`), building static frontend assets (`apps/web`), and hosting a PostgreSQL database instance.
+
+---
+
+## Production Readiness Checklist
+
+Before deploying to staging or production:
+
+<Callout type="warn" title="Pre-Deployment Audit">
+  - [ ] Set `NODE_ENV=production`
+  - [ ] Set `AUTO_MIGRATE=false` (run migrations via pre-deploy CI/CD step)
+  - [ ] Set `AUTO_SEED=false`
+  - [ ] Generate a 256-bit random string for `JWT_SECRET`
+  - [ ] Configure PostgreSQL SSL connections (`ssl=true` or SSL CA certs)
+  - [ ] Ensure database pool size (`max: 20`) matches your database instance resources
+</Callout>
+
+---
+
+## Containerization with Docker
+
+Below is the multi-stage `Dockerfile` template for building and packaging `apps/api-server`:
+
+```dockerfile title="Dockerfile"
+# 1. Base Image
+FROM node:24-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# 2. Builder Stage
+FROM base AS builder
+WORKDIR /app
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm build
+
+# 3. Production Runner Stage
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+PORT=3000
+
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api-server/dist ./apps/api-server/dist
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/kernel ./kernel
+COPY --from=builder /app/modules ./modules
+
+EXPOSE 3000
+CMD ["node", "apps/api-server/dist/index.js"]
+```
+
+---
+
+## Docker Compose Production Setup
+
+Use `docker-compose.yml` to orchestrate PostgreSQL and the Innostes API Server container:
+
+```yaml title="docker-compose.yml"
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: innostes_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: innostes_user
+      POSTGRES_PASSWORD: SecureProdPassword2026!
+      POSTGRES_DB: innostes_erp_prod
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: innostes_api_server
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://innostes_user:SecureProdPassword2026!@postgres:5432/innostes_erp_prod
+      JWT_SECRET: e4b2a8d1c9e3f7a5b0c4d2e8f1a9b3c5d7e0f2a4b6c8d1e3f5a7b9c1d3e5f7a9
+      AUTO_MIGRATE: "false"
+      AUTO_SEED: "false"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+```
+
+### Launching Services
+```bash
+docker compose up -d --build
+```
+
+---
+
+## GitHub Actions CI/CD Pipeline Outline
+
+Create a `.github/workflows/deploy.yml` workflow to validate and deploy code automatically on push to `main`:
+
+```yaml title=".github/workflows/deploy.yml"
+name: CI/CD Production Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type Check & Lint
+        run: |
+          pnpm check-types
+          pnpm lint
+
+      - name: Build Packages & Apps
+        run: pnpm build
+
+      - name: Execute Database Migrations
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: pnpm --filter @innostes/core db:migrate
+```

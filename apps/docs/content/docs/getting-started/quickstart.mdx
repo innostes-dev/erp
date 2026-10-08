@@ -1,0 +1,124 @@
+---
+title: Quickstart Guide
+description: Learn how to set up your local environment, install dependencies, configure PostgreSQL, and run the Innostes ERP platform.
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Follow this guide to get Innostes ERP up and running on your local development machine in under 5 minutes.
+
+## Prerequisites
+
+Before starting, ensure you have the following installed on your machine:
+
+- **Node.js**: `v24.0.0` or higher
+- **pnpm**: `v11.25.0` or higher (`corepack enable` or `npm i -g pnpm`)
+- **PostgreSQL**: `v15` or higher running locally (or via Docker)
+- **Git**: Latest release
+
+---
+
+## Local Setup Walkthrough
+
+<Steps>
+  <Step>
+    ### Clone the Repository
+
+    Clone the monorepo from GitHub and navigate into the root project directory:
+
+    ```bash
+    git clone https://github.com/innostes-dev/erp.git
+    cd erp
+    ```
+  </Step>
+
+  <Step>
+    ### Install Workspace Dependencies
+
+    Install all workspace packages and node modules across `apps/`, `packages/`, `kernel/`, and `modules/`:
+
+    ```bash
+    pnpm install
+    ```
+  </Step>
+
+  <Step>
+    ### Configure Environment Variables
+
+    Copy the provided `.env.example` file to `.env` in the workspace root:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Ensure your local PostgreSQL connection credentials match your database instance:
+
+    ```ini title=".env"
+    PORT=3000
+    NODE_ENV=development
+
+    DATABASE_URL=postgresql://postgres:postgres@localhost:5432/innostes_db
+    PGHOST=localhost
+    PGPORT=5432
+    PGUSER=postgres
+    PGPASSWORD=postgres
+    PGDATABASE=innostes_db
+
+    JWT_SECRET=innostes-os-kernel-auth-secret-key-2026
+    AUTO_MIGRATE=true
+    AUTO_SEED=true
+    ```
+  </Step>
+
+  <Step>
+    ### Create PostgreSQL Database
+
+    Create the target PostgreSQL database using your preferred SQL CLI or psql tool:
+
+    ```bash
+    psql -U postgres -c "CREATE DATABASE innostes_db;"
+    ```
+  </Step>
+
+  <Step>
+    ### Run Development Server
+
+    Launch the Turborepo development pipeline across backend services and frontend apps:
+
+    ```bash
+    pnpm dev
+    ```
+
+    This command boots all applications concurrently:
+    - **API Server:** `http://localhost:3000`
+    - **Web Frontend:** `http://localhost:5173`
+    - **Docs Site:** `http://localhost:3001`
+  </Step>
+</Steps>
+
+---
+
+## Verification
+
+To verify that the **Innostes Engine** bootstrapped successfully with database connectivity and registered modules:
+
+1. Open your terminal or browser and query the health endpoint:
+   ```bash
+   curl http://localhost:3000/api/health
+   ```
+2. You should receive a JSON response confirming health status:
+   ```json
+   {
+     "status": "ok",
+     "timestamp": "2026-10-08T16:00:00.000Z",
+     "database": "connected"
+   }
+   ```
+3. Look for the server console output logs confirming module auto-loading:
+   ```text
+   [Innostes OS] Database connection established successfully.
+   [Innostes OS] Mounted module routes: Innostes OS Auth Kernel Service (auth)
+   [Innostes:Auth] Core authentication service bootstrapped successfully.
+   ```

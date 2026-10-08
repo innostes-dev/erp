@@ -1,0 +1,97 @@
+---
+title: "Guide: Migrations & Seeding"
+description: Learn how to manage database schema updates, run Drizzle Kit migration commands, and write module seeders.
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+
+This guide explains how to alter PostgreSQL database tables, generate raw SQL migration files, apply migrations safely, and seed module data across environments.
+
+---
+
+## Schema Modification Lifecycle
+
+<Steps>
+  <Step>
+    ### Edit Domain Schema File
+
+    Locate the target module's schema file (e.g. `kernel/auth/backend/schemas/auth.schema.ts` or `modules/crm/backend/schema.ts`) and modify column definitions:
+
+    ```typescript title="kernel/auth/backend/schemas/auth.schema.ts"
+    export const usersTable = pgTable('users', {
+      id: uuid('id').primaryKey().defaultRandom(),
+      email: varchar('email', { length: 255 }).notNull().unique(),
+      passwordHash: text('password_hash').notNull(),
+      fullName: varchar('full_name', { length: 255 }).notNull(),
+      phoneNumber: varchar('phone_number', { length: 50 }), // <-- ADDED NEW COLUMN
+      createdAt: timestamp('created_at').defaultNow().notNull(),
+    });
+    ```
+  </Step>
+
+  <Step>
+    ### Generate SQL Migration Artifact
+
+    Run Drizzle Kit from the workspace root to generate a new timestamped migration file:
+
+    ```bash
+    pnpm --filter @innostes/core db:generate
+    ```
+
+    Drizzle Kit compares your TypeScript schema against previous snapshots and outputs a `.sql` file inside `packages/core/drizzle/`:
+
+    ```text
+    packages/core/drizzle/
+    ├── 0000_initial_auth_tables.sql
+    └── 0001_add_user_phone_number.sql
+    ```
+  </Step>
+
+  <Step>
+    ### Apply Migrations to Database
+
+    Apply pending migrations against your target PostgreSQL database instance:
+
+    ```bash
+    pnpm --filter @innostes/core db:migrate
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Writing Custom Module Seeders
+
+Modules can define seed functions to populate initial data (such as default tax categories, system permissions, or admin accounts).
+
+### Implementing a Seeder Function
+```typescript title="modules/invoicing/backend/db/seed.ts"
+import type { InnostesDatabase } from '@innostes/core';
+import { taxRatesTable } from '../schema.js';
+
+export async function seedTaxRates(db: InnostesDatabase) {
+  await db.insert(taxRatesTable).values([
+    { name: 'Standard GST', percentage: 18.0, isDefault: true },
+    { name: 'Reduced Tax', percentage: 5.0, isDefault: false },
+  ]).onConflictDoNothing();
+
+  console.log('[Innostes:Invoicing] Default tax rates seeded successfully.');
+}
+```
+
+### Triggering Seeders on Boot
+Invoke seeders inside the module's `onBoot` lifecycle hook:
+
+```typescript title="modules/invoicing/backend/index.ts"
+export const invoicingModule: InnostesOSModule = {
+  id: 'invoicing',
+  name: 'Invoicing & Billing',
+  registerRoutes: (app, ctx) => { /* ... */ },
+  onBoot: async (ctx) => {
+    if (ctx.db && process.env.AUTO_SEED === 'true') {
+      await seedTaxRates(ctx.db);
+    }
+  },
+};
+```

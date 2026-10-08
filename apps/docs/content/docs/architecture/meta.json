@@ -1,0 +1,10 @@
+{
+  "title": "Architecture & Engine",
+  "pages": [
+    "monorepo-structure",
+    "innostes-engine-and-lifecycle",
+    "database-and-migrations",
+    "api-and-security",
+    "frontend-architecture"
+  ]
+}

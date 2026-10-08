@@ -1,0 +1,88 @@
+---
+title: Monorepo Build System
+description: Deep dive into Turborepo pipeline caching, pnpm task execution, TypeScript compilation, and build outputs.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Innostes ERP relies on **Turborepo** to orchestrate workspace compilation, linting, typechecking, and packaging across the monorepo graph in optimal parallel execution order.
+
+---
+
+## Turborepo Configuration (`turbo.json`)
+
+Workspace tasks are defined in [`turbo.json`](file:///e:/innostes_projects/erp/turbo.json):
+
+```json title="turbo.json"
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
+
+### Dependency Topological Ordering (`^build`)
+The `"dependsOn": ["^build"]` directive guarantees that foundational packages (`packages/core`, `@innostes/ui`) are compiled **before** downstream host apps (`apps/api-server`, `apps/web`) begin building.
+
+---
+
+## Core Build Commands
+
+Run all build operations from the monorepo root:
+
+| Command | Action |
+| :--- | :--- |
+| `pnpm build` | Compiles all packages and applications, producing static bundles and TypeScript `dist/` folders. |
+| `pnpm dev` | Starts live-reloading dev servers concurrently across backend and frontend apps. |
+| `pnpm check-types` | Executes `tsc --noEmit` across all workspace projects to enforce strict static typing. |
+| `pnpm lint` | Runs ESLint analysis across all monorepo directories. |
+| `pnpm format` | Formats all source code using Prettier. |
+
+## Workspace Shortcut Commands
+
+Instead of manually typing `--filter` flags, you can run single-word commands from the monorepo root:
+
+| Command | Targeted Workspace & Task |
+| :--- | :--- |
+| `pnpm docs` | Starts the documentation dev server (`apps/docs`) |
+| `pnpm docs:build` | Builds static documentation pages (`apps/docs`) |
+| `pnpm api` | Starts the Hono backend server (`apps/api-server`) |
+| `pnpm api:build` | Compiles the backend server bundle (`apps/api-server`) |
+| `pnpm web` | Starts the React 19 frontend app (`apps/web`) |
+| `pnpm web:build` | Compiles the web frontend bundle (`apps/web`) |
+| `pnpm db:migrate` | Runs database migrations across all modules (`packages/core`) |
+| `pnpm db:generate` | Generates new Drizzle SQL migration files (`packages/core`) |
+
+---
+
+## Targeted Filtering Examples
+
+To run an ad-hoc command against a single package without compiling the entire monorepo, use pnpm's `--filter` flag:
+
+```bash
+# Build only the API server
+pnpm --filter @innostes/api-server build
+
+# Typecheck only the documentation app
+pnpm --filter @innostes/docs check-types
+
+# Add a package dependency to kernel-auth
+pnpm --filter @innostes/kernel-auth add bcrypt
+```
+

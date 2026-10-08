@@ -1,0 +1,227 @@
+---
+title: "Guide: Create a Plug & Play Module"
+description: Step-by-step tutorial on scaffolding, implementing, and registering a new business module (e.g., CRM) in Innostes ERP.
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+This practical guide walks open-source contributors and core developers through building a new business module from scratch (e.g., `modules/crm`) and registering it into the **Innostes Plug & Play Engine**.
+
+---
+
+## Module Layout Blueprint
+
+Every business module lives under `modules/<module-name>` and adheres to the following file layout:
+
+```text
+modules/crm/
+├── package.json
+├── tsconfig.json
+├── backend/
+│   ├── index.ts                # InnostesOSModule contract implementation
+│   ├── schema.ts               # Drizzle ORM database tables
+│   ├── routes/
+│   │   └── crm.routes.ts       # Hono HTTP router endpoints
+│   ├── controllers/
+│   │   └── crm.controller.ts   # Request controllers
+│   └── services/
+│       └── crm.service.ts      # Domain business logic
+└── frontend/
+    └── index.tsx               # React UI page slice
+```
+
+---
+
+## Step-by-Step Implementation
+
+<Steps>
+  <Step>
+    ### Create Module Directory & `package.json`
+
+    Create the module directory under `modules/crm` and add a workspace `package.json`:
+
+    ```json title="modules/crm/package.json"
+    {
+      "name": "@innostes/module-crm",
+      "version": "1.0.0",
+      "private": true,
+      "type": "module",
+      "main": "./dist/backend/index.js",
+      "types": "./dist/backend/index.d.ts",
+      "exports": {
+        "./backend": "./dist/backend/index.js",
+        "./frontend": "./dist/frontend/index.js"
+      },
+      "scripts": {
+        "build": "tsc -b",
+        "dev": "tsc -b --watch"
+      },
+      "dependencies": {
+        "@innostes/core": "workspace:*",
+        "@innostes/ui": "workspace:*",
+        "drizzle-orm": "^0.38.4",
+        "hono": "^4.6.14",
+        "react": "^19.3.0"
+      }
+    }
+    ```
+  </Step>
+
+  <Step>
+    ### Define Database Schema (`backend/schema.ts`)
+
+    Define the domain SQL tables using Drizzle ORM column builders:
+
+    ```typescript title="modules/crm/backend/schema.ts"
+    import { pgTable, uuid, varchar, timestamp, text } from 'drizzle-orm/pg-core';
+
+    export const customersTable = pgTable('crm_customers', {
+      id: uuid('id').primaryKey().defaultRandom(),
+      companyName: varchar('company_name', { length: 255 }).notNull(),
+      contactEmail: varchar('contact_email', { length: 255 }).notNull().unique(),
+      status: varchar('status', { length: 50 }).notNull().default('lead'),
+      notes: text('notes'),
+      createdAt: timestamp('created_at').defaultNow().notNull(),
+    });
+
+    export type Customer = typeof customersTable.$inferSelect;
+    export type NewCustomer = typeof customersTable.$inferInsert;
+    ```
+  </Step>
+
+  <Step>
+    ### Implement Innostes Engine Contract (`backend/index.ts`)
+
+    Implement the `PlatformBackendModule` contract, wiring repositories, controllers, Hono routes, and `onBoot` hooks:
+
+    ```typescript title="modules/crm/backend/index.ts"
+    import { Hono } from 'hono';
+    import type { InnostesOSModule, ModuleContext } from '@innostes/core';
+    import { customersTable } from './schema.js';
+
+    export * from './schema.js';
+
+    export const crmBackendModule: InnostesOSModule = {
+      id: 'crm',
+      name: 'Innostes CRM Module',
+      version: '1.0.0',
+      registerRoutes: (app: Hono, ctx: ModuleContext) => {
+        const router = new Hono();
+
+        // GET /api/crm/customers
+        router.get('/customers', async (c) => {
+          if (!ctx.db) {
+            return c.json({ success: false, error: 'Database disconnected' }, 500);
+          }
+          const customers = await ctx.db.select().from(customersTable);
+          return c.json({ success: true, data: customers });
+        });
+
+        // POST /api/crm/customers
+        router.post('/customers', async (c) => {
+          if (!ctx.db) {
+            return c.json({ success: false, error: 'Database disconnected' }, 500);
+          }
+          const body = await c.req.json();
+          const [newCustomer] = await ctx.db
+            .insert(customersTable)
+            .values({
+              companyName: body.companyName,
+              contactEmail: body.contactEmail,
+            })
+            .returning();
+
+          return c.json({ success: true, data: newCustomer }, 201);
+        });
+
+        // Mount module router under /api/crm
+        app.route('/api/crm', router);
+      },
+      onBoot: async (ctx: ModuleContext) => {
+        ctx.logger?.info('[Innostes:CRM] Customer Relationship Module bootstrapped.');
+      },
+    };
+
+    export default crmBackendModule;
+    ```
+  </Step>
+
+  <Step>
+    ### Create Frontend UI Slice (`frontend/index.tsx`)
+
+    Build the frontend component slice consumed by host React applications:
+
+    ```tsx title="modules/crm/frontend/index.tsx"
+    import React from 'react';
+    import { Card, Button } from '@innostes/ui';
+
+    export function CrmModuleView() {
+      return (
+        <Card className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold">CRM Leads & Customers</h1>
+            <Button variant="primary">+ New Customer</Button>
+          </div>
+          <p className="text-gray-600">Track sales pipelines and customer inquiries.</p>
+        </Card>
+      );
+    }
+    ```
+  </Step>
+
+  <Step>
+    ### Register Module in Innostes Engine
+
+    Mount the new module into the Innostes Engine inside [`apps/api-server/src/app.ts`](file:///e:/innostes_projects/erp/apps/api-server/src/app.ts) in **one single line**:
+
+    ```typescript title="apps/api-server/src/app.ts"
+    import authKernelModule from '@innostes/kernel-auth/backend';
+    import crmBackendModule from '@innostes/module-crm/backend'; // 1. Import module
+
+    export async function createApplication() {
+      // ... initialization code ...
+
+      // 2. Add to Innostes OS Module registry array
+      const modules: InnostesOSModule[] = [
+        authKernelModule,
+        crmBackendModule, // <-- PLUG & PLAY MOUNT
+      ];
+
+      for (const module of modules) {
+        if (module.registerRoutes) {
+          await module.registerRoutes(app, context);
+        }
+        if (module.onBoot) {
+          await module.onBoot(context);
+        }
+      }
+
+      return app;
+    }
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Verification
+
+1. Install newly added dependencies:
+   ```bash
+   pnpm install
+   ```
+2. Start the dev server:
+   ```bash
+   pnpm dev
+   ```
+3. Test the newly mounted endpoint:
+   ```bash
+   curl http://localhost:3000/api/crm/customers
+   ```
+4. Check console output to confirm engine mounting:
+   ```text
+   [Innostes OS] Mounted module routes: Innostes CRM Module (crm)
+   [Innostes:CRM] Customer Relationship Module bootstrapped.
+   ```

@@ -1,0 +1,136 @@
+---
+title: Database & Migrations Pipeline
+description: Deep dive into the connection factory pattern, Drizzle ORM schema aggregation, migration runners, and modular seeding.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Steps, Step } from 'fumadocs-ui/components/steps';
+
+Innostes ERP combines **node-postgres (`pg.Pool`)** with **Drizzle ORM** to achieve maximum query performance, type safety, and modular database schema aggregation.
+
+---
+
+## Connection Pool Factory Pattern
+
+To prevent unmanaged database connection leaks across monorepo packages, database client creation is centralized inside `@innostes/core` in [`packages/core/src/db/client.ts`](file:///e:/innostes_projects/erp/packages/core/src/db/client.ts):
+
+```typescript title="packages/core/src/db/client.ts"
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
+import { resolveDatabaseConnectionString } from './config.js';
+import type { DatabaseConnectionOptions, InnostesDatabase } from './types.js';
+
+const { Pool } = pg;
+
+export function createDatabaseClient<TSchema extends Record<string, unknown> = Record<string, unknown>>(
+  options: DatabaseConnectionOptions = {},
+  schema?: TSchema
+) {
+  const connectionString = resolveDatabaseConnectionString(options.connectionString);
+  const pool = new Pool({
+    connectionString,
+    max: options.max ?? 20,
+    idleTimeoutMillis: options.idleTimeoutMillis ?? 30000,
+    connectionTimeoutMillis: options.connectionTimeoutMillis ?? 2000,
+    ssl: options.ssl,
+  });
+
+  const db: InnostesDatabase<TSchema> = drizzle(pool, { schema });
+
+  return { db, pool, connectionString };
+}
+```
+
+### Health Ping Diagnostics
+The database layer exposes a non-blocking `pingDatabase` function to verify pool health on boot:
+
+```typescript
+export async function pingDatabase(pool: pg.Pool): Promise<boolean> {
+  try {
+    const client = await pool.connect();
+    try {
+      await client.query('SELECT 1');
+      return true;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('[Innostes:DB] Health check ping failed:', error);
+    return false;
+  }
+}
+```
+
+---
+
+## Domain Schema Aggregation
+
+Each module co-locates its Drizzle table definitions inside its own `backend/schemas/` directory.
+
+### Example: Auth Table Definitions
+```typescript title="kernel/auth/backend/schemas/auth.schema.ts"
+import { pgTable, uuid, varchar, timestamp, text, boolean } from 'drizzle-orm/pg-core';
+
+export const usersTable = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  passwordHash: text('password_hash').notNull(),
+  fullName: varchar('full_name', { length: 255 }).notNull(),
+  role: varchar('role', { length: 50 }).notNull().default('user'),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+```
+
+Modules export their table definitions so that the central database package or host application can aggregate them into a unified Drizzle schema object.
+
+---
+
+## Migration Workflows
+
+Drizzle Kit is configured to scan all module schema files and generate raw SQL migration files inside `packages/core/drizzle`.
+
+### 1. Generating SQL Migrations
+Whenever you add or modify a column in any module's schema:
+
+```bash
+pnpm --filter @innostes/core db:generate
+```
+
+### 2. Applying Migrations
+To execute pending SQL migrations against your target PostgreSQL database:
+
+```bash
+pnpm --filter @innostes/core db:migrate
+```
+
+<Callout type="info" title="Automated Runtime Migrations">
+  In development mode (`AUTO_MIGRATE=true`), the Innostes Engine can automatically apply pending migrations on server startup via `@innostes/core/db/migrate`.
+</Callout>
+
+---
+
+## Modular Seeding Pipeline
+
+Initial platform data (such as default admin accounts, system roles, and lookup tables) is seeded through module-level seeder functions invoked during `onBoot`.
+
+```typescript title="kernel/auth/backend/db/seed.ts"
+import type { InnostesDatabase } from '@innostes/core';
+import { usersTable } from '../schemas/auth.schema.js';
+import { PasswordService } from '../services/password.service.js';
+
+export async function seedAuth(db: InnostesDatabase) {
+  const passwordService = new PasswordService();
+  const hashedPassword = await passwordService.hash('Admin123!');
+
+  await db.insert(usersTable).values({
+    email: 'admin@innostes.com',
+    fullName: 'System Administrator',
+    passwordHash: hashedPassword,
+    role: 'admin',
+  }).onConflictDoNothing();
+
+  console.log('[Innostes:Auth] Default admin account verified/seeded.');
+}
+```

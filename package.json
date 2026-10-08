@@ -1,13 +1,33 @@
 {
   "name": "innostes-ecosystem",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "docs": "pnpm --filter @innostes/docs dev",
+    "docs:dev": "pnpm --filter @innostes/docs dev",
+    "docs:build": "pnpm --filter @innostes/docs build",
+    "docs:start": "pnpm --filter @innostes/docs start",
+    "api": "pnpm --filter @innostes/api-server dev",
+    "api:dev": "pnpm --filter @innostes/api-server dev",
+    "api:build": "pnpm --filter @innostes/api-server build",
+    "api:start": "pnpm --filter @innostes/api-server start",
+    "web": "pnpm --filter @innostes/core-web dev",
+    "web:dev": "pnpm --filter @innostes/core-web dev",
+    "web:build": "pnpm --filter @innostes/core-web build",
+    "db:migrate": "pnpm --filter @innostes/core db:migrate",
+    "db:generate": "pnpm --filter @innostes/core db:generate"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.30.3"
+  "devDependencies": {
+    "prettier": "3.9.6",
+    "turbo": "^2.11.7",
+    "typescript": "7.0.2"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24"
+  }
 }
