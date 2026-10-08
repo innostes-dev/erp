@@ -9,10 +9,9 @@ import {
   HttpException,
   type InnostesOSModule,
   type ModuleContext,
-} from '@innostes/core';
+} from '@innostes/kernel';
 import { healthRouter } from './routes/health.route.js';
-import authKernelModule from '@innostes/kernel-auth/backend';
-import organizationKernelModule from '@innostes/kernel-organization/backend';
+import kernelModule from '@innostes/kernel';
 
 export async function createApplication() {
   const app = new OpenAPIHono();
@@ -68,16 +67,15 @@ export async function createApplication() {
   // 4. Base Routes
   app.route('/api/health', healthRouter as any);
 
-  // 5. Innostes OS Module & Micro-Tool Auto-Loader Engine
+  // 5. Innostes OS Unified Kernel Auto-Loader Engine
   const modules: InnostesOSModule[] = [
-    authKernelModule,
-    organizationKernelModule,
+    kernelModule,
   ];
 
   for (const module of modules) {
     if (module.registerRoutes) {
       await module.registerRoutes(app, context);
-      console.log(`[Innostes OS] Mounted module routes: ${module.name} (${module.id})`);
+      console.log(`[Innostes OS] Mounted kernel module: ${module.name} (${module.id})`);
     }
     if (module.onBoot) {
       await module.onBoot(context);
@@ -122,6 +120,7 @@ Multi-tenant requests require the header \`X-Organization-Id: <org_id>\` or cont
     tags: [
       { name: 'Core', description: 'System health, tenant organization, & security management' },
       { name: 'Auth', description: 'Authentication, credentials, and token session issuance' },
+      { name: 'Role', description: 'Role-based access control (RBAC) & permissions' },
       { name: 'Organization', description: 'Tenant organization & multi-entity management' },
       { name: 'CRM', description: 'Customer relationship management & contacts' },
       { name: 'Sales', description: 'Quotations, sales orders, and invoices' },
