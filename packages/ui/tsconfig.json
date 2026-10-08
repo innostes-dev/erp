@@ -1,8 +1,12 @@
 {
   "extends": "@innostes/typescript-config/react-library.json",
   "compilerOptions": {
+    "rootDir": "src",
     "outDir": "dist",
-    "strictNullChecks": true
+    "declarationDir": "dist",
+    "strictNullChecks": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

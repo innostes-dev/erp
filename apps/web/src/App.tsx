@@ -1,121 +1,105 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { Button, type ButtonProps } from '@innostes/ui'
+import { Sparkles, Send, Trash2, ArrowRight, CheckCircle2 } from 'lucide-react'
 
-function App() {
+// Custom wrapper component demonstrating usage of exported ButtonProps
+function CustomActionButton(props: ButtonProps) {
+  return <Button variant="primary" {...props} />
+}
+
+export function App() {
   const [count, setCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleAsyncAction = () => {
+    setIsLoading(true)
+    setTimeout(() => setIsLoading(false), 2000)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 p-8 flex flex-col items-center justify-center font-sans">
+      <div className="max-w-3xl w-full bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-8 space-y-8">
+        
+        {/* Header */}
+        <div className="border-b border-slate-200 dark:border-slate-700 pb-6">
+          <div className="flex items-center gap-3">
+            <span className="p-2 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-lg">
+              <Sparkles className="w-6 h-6" />
+            </span>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Design System Showcase</h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                Testing <code className="bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400">@innostes/ui</code> Button Component &amp; <code className="bg-slate-100 dark:bg-slate-900 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400">ButtonProps</code>
+              </p>
+            </div>
+          </div>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
 
-      <div className="ticks"></div>
+        {/* Interactive State Demo */}
+        <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            Interactive Test
+          </h2>
+          <div className="flex flex-wrap items-center gap-4">
+            <CustomActionButton
+              size="lg"
+              leftIcon={<Sparkles className="w-4 h-4" />}
+              onClick={() => setCount((c) => c + 1)}
+            >
+              Clicked {count} times
+            </CustomActionButton>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+            <Button
+              variant="secondary"
+              size="lg"
+              isLoading={isLoading}
+              onClick={handleAsyncAction}
+            >
+              {isLoading ? 'Processing...' : 'Simulate Async Action'}
+            </Button>
+          </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {/* Button Variants Section */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            Button Variants
+          </h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="primary">Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="destructive" leftIcon={<Trash2 className="w-4 h-4" />}>
+              Delete
+            </Button>
+            <Button variant="link">Link Button</Button>
+          </div>
+        </div>
+
+        {/* Button Sizes Section */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            Button Sizes &amp; Icons
+          </h2>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="primary" size="sm" leftIcon={<CheckCircle2 className="w-3.5 h-3.5" />}>
+              Small
+            </Button>
+            <Button variant="primary" size="default" rightIcon={<Send className="w-4 h-4" />}>
+              Default
+            </Button>
+            <Button variant="primary" size="lg" rightIcon={<ArrowRight className="w-5 h-5" />}>
+              Large
+            </Button>
+            <Button variant="outline" size="icon" aria-label="Icon only">
+              <Sparkles className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+      </div>
+    </div>
   )
 }
 
