@@ -1,0 +1,102 @@
+---
+title: DropdownMenu
+description: Accessible popover menu powered by Base UI Menu primitives, featuring item icons, keyboard shortcuts, section headers, and separators.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# DropdownMenu
+
+The `DropdownMenu` component presents a contextual menu when a trigger element is clicked. It supports custom alignment, destructive items, leading icons, section labels, and keyboard shortcut hints.
+
+---
+
+## Import
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  type DropdownMenuContentProps,
+  type DropdownMenuItemProps,
+} from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Basic Dropdown Menu
+
+```tsx
+import { Button, DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from "@innostes/ui";
+import { User, Settings, LogOut, Shield } from "lucide-react";
+
+export function AccountMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">My Account</Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Account Preferences</DropdownMenuLabel>
+        
+        <DropdownMenuItem leftIcon={<User />}>
+          Profile
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem leftIcon={<Settings />} rightShortcut="⌘S">
+          Settings
+        </DropdownMenuItem>
+
+        <DropdownMenuItem leftIcon={<Shield />}>
+          Security
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem destructive leftIcon={<LogOut />}>
+          Log out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+---
+
+## API Reference
+
+### Component Exports
+
+| Export | Base Primitive | Description |
+| :--- | :--- | :--- |
+| `DropdownMenu` | `BaseMenu.Root` | Root menu provider managing open/closed state. |
+| `DropdownMenuTrigger` | `BaseMenu.Trigger` | Interactive trigger button. |
+| `DropdownMenuContent` | `BaseMenu.Popup` | Positioned popover panel container. |
+| `DropdownMenuItem` | `BaseMenu.Item` | Interactive menu item option. |
+| `DropdownMenuSeparator` | `div` | Visual horizontal divider line. |
+| `DropdownMenuLabel` | `div` | Non-interactive text label header for grouping items. |
+
+### DropdownMenuContent Props
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `align` | `'start' \| 'center' \| 'end'` | `'start'` | Alignment position relative to the trigger. |
+| `sideOffset` | `number` | `4` | Distance in pixels between trigger and popover popup. |
+| `className` | `string` | `undefined` | Custom CSS class names. |
+
+### DropdownMenuItem Props
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `leftIcon` | `React.ReactNode` | `undefined` | Optional icon component to render before item text. |
+| `rightShortcut` | `string` | `undefined` | Keyboard shortcut label text displayed on the right edge. |
+| `destructive` | `boolean` | `false` | When true, highlights the item in red danger styling on hover. |
+| `disabled` | `boolean` | `false` | Disables interaction and reduces opacity. |

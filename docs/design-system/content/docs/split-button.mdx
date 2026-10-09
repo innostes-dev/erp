@@ -1,0 +1,87 @@
+---
+title: SplitButton
+description: Dual-action component combining a primary action button with an attached chevron trigger for additional contextual menu options.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# SplitButton
+
+The `SplitButton` component combines a primary click action on the main button with a dropdown menu trigger on the right side for secondary or alternative actions.
+
+---
+
+## Import
+
+```tsx
+import { SplitButton, type SplitButtonProps, type SplitButtonOption } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Primary Action with Menu Options
+
+```tsx
+import { SplitButton } from "@innostes/ui";
+import { Download, FileSpreadsheet, FileCode, Archive } from "lucide-react";
+
+export function ExportData() {
+  const options = [
+    {
+      label: "Export as CSV",
+      leftIcon: <FileSpreadsheet />,
+      onClick: () => console.log("Export CSV"),
+    },
+    {
+      label: "Export as JSON",
+      leftIcon: <FileCode />,
+      onClick: () => console.log("Export JSON"),
+    },
+    {
+      label: "Archive Dataset",
+      leftIcon: <Archive />,
+      destructive: true,
+      onClick: () => console.log("Archive"),
+    },
+  ];
+
+  return (
+    <SplitButton
+      variant="primary"
+      onClick={() => console.log("Default PDF Export")}
+      options={options}
+    >
+      Export PDF
+    </SplitButton>
+  );
+}
+```
+
+---
+
+## API Reference
+
+### SplitButton Props
+
+`SplitButton` extends `ButtonProps` (excluding `rightIcon` and `className`), with the following added props:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `options` | `SplitButtonOption[]` | *(Required)* | Array of dropdown menu items. |
+| `dropdownAriaLabel` | `string` | `'More options'` | Accessible `aria-label` for the dropdown chevron trigger button. |
+| `variant` | `'primary' \| 'secondary' \| 'outline' \| 'destructive'` | `'primary'` | Visual variant applied to both main button and dropdown trigger. |
+| `size` | `'sm' \| 'default' \| 'lg'` | `'default'` | Size dimensions. |
+| `isLoading` | `boolean` | `false` | Displays a loading spinner and disables both main button and menu trigger. |
+| `disabled` | `boolean` | `false` | Disables both main button and menu trigger. |
+
+### SplitButtonOption Object
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `label` | `React.ReactNode` | Content/text to render inside the menu item. |
+| `onClick` | `() => void` | Callback function fired when the item is clicked. |
+| `disabled` | `boolean` | Disables the individual menu item. |
+| `destructive` | `boolean` | Applies red danger styling to the menu item. |
+| `leftIcon` | `React.ReactNode` | Optional leading icon for the menu item. |

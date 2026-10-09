@@ -1,0 +1,61 @@
+---
+title: ButtonGroup
+description: Container component for grouping related action buttons horizontally or vertically into a unified control block.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# ButtonGroup
+
+The `ButtonGroup` component wraps multiple `Button` elements to format them as a continuous, cohesive group with integrated borders and corner rounding.
+
+---
+
+## Import
+
+```tsx
+import { ButtonGroup, Button, type ButtonGroupProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Horizontal Group
+
+By default, buttons align horizontally in a single row.
+
+```tsx
+<ButtonGroup>
+  <Button variant="outline">Day</Button>
+  <Button variant="outline">Week</Button>
+  <Button variant="outline">Month</Button>
+  <Button variant="outline">Year</Button>
+</ButtonGroup>
+```
+
+### Vertical Group
+
+Set `orientation="vertical"` to stack buttons into a vertical toolbar.
+
+```tsx
+<ButtonGroup orientation="vertical">
+  <Button variant="secondary">Top</Button>
+  <Button variant="secondary">Middle</Button>
+  <Button variant="secondary">Bottom</Button>
+</ButtonGroup>
+```
+
+---
+
+## API Reference
+
+### ButtonGroup Props
+
+`ButtonGroup` accepts standard `React.HTMLAttributes<HTMLDivElement>` in addition to:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Direction layout of the grouped buttons. |
+| `children` | `React.ReactNode` | *(Required)* | Child `Button` or interactive components to group. |
+| `className` | `string` | `undefined` | Custom CSS class names to apply to the wrapper `div`. |

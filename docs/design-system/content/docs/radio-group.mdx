@@ -1,0 +1,116 @@
+---
+title: RadioGroup
+description: Accessible radio selection group built on Base UI supporting vertical/horizontal orientation and custom rich card layouts.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# RadioGroup
+
+The `RadioGroup` and `RadioItem` components allow users to choose a single value from a list of mutually exclusive options.
+
+---
+
+## Import
+
+```tsx
+import { RadioGroup, RadioItem, type RadioGroupProps, type RadioItemProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Standard Vertical Radio Group
+
+```tsx
+import { useState } from "react";
+
+export function PaymentMethodSelector() {
+  const [value, setValue] = useState("credit_card");
+
+  return (
+    <RadioGroup
+      label="Payment Method"
+      value={value}
+      onValueChange={setValue}
+      required
+    >
+      <RadioItem value="credit_card" label="Credit / Debit Card" />
+      <RadioItem value="bank_transfer" label="Direct Bank Transfer" />
+      <RadioItem value="paypal" label="PayPal Account" />
+    </RadioGroup>
+  );
+}
+```
+
+### Horizontal Radio Group
+
+Set `orientation="horizontal"` to align items side by side.
+
+```tsx
+<RadioGroup
+  label="Billing Frequency"
+  orientation="horizontal"
+  defaultValue="monthly"
+>
+  <RadioItem value="monthly" label="Monthly" />
+  <RadioItem value="quarterly" label="Quarterly" />
+  <RadioItem value="annually" label="Annually" />
+</RadioGroup>
+```
+
+### Card Layout (`card=true`)
+
+Pass `card` to `RadioItem` to transform items into rich selectable cards with titles and descriptions.
+
+```tsx
+<RadioGroup label="Select Server Plan" defaultValue="pro">
+  <RadioItem
+    card
+    value="starter"
+    label="Starter Plan"
+    description="Ideal for small teams with up to 5 members and 10GB storage."
+  />
+  <RadioItem
+    card
+    value="pro"
+    label="Professional Plan"
+    description="Unlimited projects, high performance computing, and priority support."
+  />
+  <RadioItem
+    card
+    value="enterprise"
+    label="Enterprise Plan"
+    description="Custom SLA, dedicated database cluster, and custom integrations."
+  />
+</RadioGroup>
+```
+
+---
+
+## API Reference
+
+### RadioGroup Props
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `value` | `string` | `undefined` | Controlled selected value. |
+| `defaultValue` | `string` | `undefined` | Default selected value when uncontrolled. |
+| `onValueChange` | `(value: string) => void` | `undefined` | Callback fired when the selection changes. |
+| `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Layout direction of items. |
+| `label` | `React.ReactNode` | `undefined` | Group label text. |
+| `hint` | `React.ReactNode` | `undefined` | Helper text displayed below the group. |
+| `error` | `React.ReactNode` | `undefined` | Validation error text. |
+| `required` | `boolean` | `false` | Shows red asterisk next to label. |
+| `disabled` | `boolean` | `false` | Disables all radio choices. |
+
+### RadioItem Props
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `value` | `string` | *(Required)* | Unique value associated with this option. |
+| `label` | `React.ReactNode` | *(Required)* | Main label text. |
+| `description` | `React.ReactNode` | `undefined` | Additional detail text (used primarily with `card` layout). |
+| `card` | `boolean` | `false` | When true, renders a bordered card container around the radio item. |
+| `disabled` | `boolean` | `false` | Disables this specific item. |

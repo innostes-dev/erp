@@ -6,23 +6,23 @@ Designed to be consumed internally within the monorepo workspace or published as
 
 ---
 
-## 🏗️ Architecture & Structure
+## 🏗️ Architecture & Theme Integration
 
-The package is structured around two main concepts: **Components** (atomic primitives) and **Widgets** (composite UI blocks).
+`@innostes/ui` uses a **dual-mode flexible theme system** designed to adapt seamlessly to any consuming website's Tailwind configuration and theme.
 
 ```
 packages/ui/
 ├── src/
 │   ├── components/       # Atomic design system components (Button, Input, Card, etc.)
-│   │   └── button/       # Button component (built with Base UI + Tailwind)
-│   ├── widgets/          # Higher-level composite UI widgets (Data tables, Forms, Cards)
+│   ├── widgets/          # Higher-level composite UI widgets
 │   ├── lib/              # Internal utilities (cn class merge helper)
-│   ├── styles/           # Global styles and Tailwind design tokens
-│   │   └── globals.css   # Main CSS entry point
+│   ├── styles/           # Global styles & Tailwind design tokens
+│   │   ├── theme.css     # Pure Tailwind v4 @theme token mappings
+│   │   ├── variables.css # Default CSS custom properties (:root & .dark)
+│   │   └── globals.css   # Main compiled CSS entry point
 │   └── index.ts          # Main package export barrel
+├── preset.js             # Tailwind v3 / JS config preset helper
 ├── dist/                 # Compiled ESM, CJS, declaration files (.d.ts), & styles.css
-├── tsup.config.ts        # Library bundler config
-├── tsconfig.json         # TypeScript config
 └── package.json          # NPM package config & export maps
 ```
 
@@ -35,20 +35,77 @@ packages/ui/
 | `@innostes/ui` | Main entry point exporting all components & widgets |
 | `@innostes/ui/components` | Atomic component primitives only |
 | `@innostes/ui/widgets` | Composite widgets only |
-| `@innostes/ui/styles.css` | Built CSS stylesheet containing Tailwind design tokens |
+| `@innostes/ui/theme.css` | Pure `@theme` token definitions for Tailwind v4 host apps |
+| `@innostes/ui/variables.css` | Baseline `:root` and `.dark` CSS custom properties |
+| `@innostes/ui/styles.css` | Pre-compiled CSS stylesheet (includes default variables & utilities) |
+| `@innostes/ui/preset` | Tailwind preset for projects using `tailwind.config.js` |
 
 ---
 
-## 🚀 Usage
+## 🎨 Website Theme Integration Strategies
 
-### 1. In standard React / Next.js / Vite project:
+### Option A: Tailwind CSS v4 Host Website (Recommended)
 
-Import the compiled CSS stylesheet in your app entry point (`main.tsx` or `_app.tsx`):
+In your host website's main CSS file (`index.css` or `globals.css`), import the design system theme:
+
+```css
+@import "tailwindcss";
+@import "@innostes/ui/theme.css";
+
+/* Website custom theme overrides */
+:root {
+  --primary: 221.2 83.2% 53.3%;
+  --radius: 0.5rem;
+}
+```
+
+### Option B: Runtime CSS Custom Property Overrides
+
+Any host website can customize components globally or locally by defining CSS variables on `:root`, `.dark`, or on a parent container:
+
+```css
+/* Custom website brand theme */
+:root {
+  --primary: 142.1 76.2% 36.3%; /* Emerald Green */
+  --primary-foreground: 355.7 100% 97.3%;
+  --radius: 0.75rem;
+}
+```
+
+Or scoped to a specific card or section:
+
+```tsx
+<div style={{ '--primary': '262.1 83.3% 57.8%' }}>
+  <Button variant="primary">Deep Purple Button</Button>
+</div>
+```
+
+### Option C: Tailwind v3 (`tailwind.config.js`) Host Website
+
+In your host website's `tailwind.config.js`:
+
+```js
+module.exports = {
+  presets: [require("@innostes/ui/preset")],
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@innostes/ui/dist/**/*.js",
+  ],
+};
+```
+
+### Option D: Standalone Pre-built CSS Import
+
+For websites without Tailwind CSS compilation:
+
 ```tsx
 import "@innostes/ui/styles.css";
 ```
 
-Import and use components:
+---
+
+## 🚀 Usage Example
+
 ```tsx
 import { Button } from "@innostes/ui";
 import { Send } from "lucide-react";

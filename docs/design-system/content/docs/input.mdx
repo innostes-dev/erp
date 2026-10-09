@@ -1,0 +1,120 @@
+---
+title: Input
+description: Text input component supporting integrated form fields, icons, prefix/suffix text, clearable buttons, and size variants.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Input
+
+The `Input` component renders a text field with integrated `Field` support (labels, hints, validation errors), icon attachments, clearable action buttons, and prefix/suffix labels.
+
+---
+
+## Import
+
+```tsx
+import { Input, type InputProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Basic Input with Label and Hint
+
+```tsx
+<Input
+  label="Company Name"
+  placeholder="e.g. Innostes Technologies"
+  hint="Enter the legal registered entity name."
+  required
+/>
+```
+
+### With Left and Right Icons
+
+```tsx
+import { Search, Filter } from "lucide-react";
+
+<Input
+  placeholder="Search transactions..."
+  leftIcon={<Search className="w-4 h-4" />}
+  rightIcon={<Filter className="w-4 h-4" />}
+/>
+```
+
+### Clearable Input
+
+Pass `clearable` and `onClear` to show an `X` clear button when value is present.
+
+```tsx
+import { useState } from "react";
+
+export function SearchField() {
+  const [query, setQuery] = useState("Active Query");
+
+  return (
+    <Input
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      clearable
+      onClear={() => setQuery("")}
+      placeholder="Type to search..."
+    />
+  );
+}
+```
+
+### Prefix and Suffix Text
+
+```tsx
+<div className="flex flex-col gap-4">
+  <Input
+    label="API Endpoint Domain"
+    prefixText="https://"
+    placeholder="api.innostes.com"
+  />
+
+  <Input
+    label="Storage Quotas"
+    suffixText="GB"
+    type="number"
+    defaultValue="50"
+  />
+</div>
+```
+
+### Validation Error State
+
+```tsx
+<Input
+  label="Username"
+  value="usr_invalid spaces!"
+  error="Username can only contain alphanumeric characters and underscores."
+  required
+/>
+```
+
+---
+
+## API Reference
+
+### Input Props
+
+`Input` extends standard `React.InputHTMLAttributes<HTMLInputElement>` (except `size`), plus the following:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `size` | `'sm' \| 'default' \| 'lg'` | `'default'` | Height and font size variant. |
+| `label` | `React.ReactNode` | `undefined` | Form field label text. |
+| `hint` | `React.ReactNode` | `undefined` | Helper text displayed below input. |
+| `error` | `React.ReactNode` | `undefined` | Error message string. Applies danger borders and text colors. |
+| `required` | `boolean` | `false` | Adds required asterisk indicator to the label. |
+| `leftIcon` | `React.ReactNode` | `undefined` | Icon element anchored inside the left edge. |
+| `rightIcon` | `React.ReactNode` | `undefined` | Icon element anchored inside the right edge. |
+| `prefixText` | `string` | `undefined` | Static prefix label text (e.g. `'https://'`). |
+| `suffixText` | `string` | `undefined` | Static suffix label text (e.g. `'USD'`). |
+| `clearable` | `boolean` | `false` | Shows a clear button when the input has content. |
+| `onClear` | `() => void` | `undefined` | Callback fired when the clear button is clicked. |
+| `fieldClassName` | `string` | `undefined` | Custom CSS class names passed to the outer `Field` container. |

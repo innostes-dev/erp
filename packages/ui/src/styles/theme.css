@@ -1,0 +1,51 @@
+/* @innostes/ui Theme Configuration for Tailwind CSS v4 */
+@theme {
+  --color-border: var(--color-border, var(--border, #E2E8F0));
+  --color-input: var(--color-input, var(--input, #E2E8F0));
+  --color-ring: var(--color-ring, var(--ring, #2563EB));
+  --color-background: var(--color-background, var(--background, #F8FAFC));
+  --color-foreground: var(--color-foreground, var(--foreground, #0F172A));
+
+  /* Primary Palette */
+  --color-primary: var(--color-primary, var(--primary, #2563EB));
+  --color-primary-dark: var(--color-primary-dark, var(--primary-dark, #1D4ED8));
+  --color-primary-light: var(--color-primary-light, var(--primary-light, #EFF6FF));
+  --color-primary-subtle: var(--color-primary-subtle, var(--primary-subtle, #DBEAFE));
+  --color-primary-foreground: var(--color-primary-foreground, var(--primary-foreground, #FFFFFF));
+
+  /* Text & Neutral Shades */
+  --color-navy: var(--color-navy, var(--navy, #0F172A));
+  --color-slate: var(--color-slate, var(--slate, #475569));
+
+  --color-secondary: var(--color-secondary, var(--secondary, #F1F5F9));
+  --color-secondary-foreground: var(--color-secondary-foreground, var(--secondary-foreground, #0F172A));
+
+  /* Surface & Container Colors */
+  --color-surface: var(--color-surface, var(--surface, #FFFFFF));
+  --color-card: var(--color-card, var(--card, #FFFFFF));
+  --color-card-foreground: var(--color-card-foreground, var(--card-foreground, #0F172A));
+
+  --color-popover: var(--color-popover, var(--popover, #FFFFFF));
+  --color-popover-foreground: var(--color-popover-foreground, var(--popover-foreground, #0F172A));
+
+  /* State Colors */
+  --color-success: var(--color-success, var(--success, #16A34A));
+  --color-success-foreground: var(--color-success-foreground, #FFFFFF);
+
+  --color-warning: var(--color-warning, var(--warning, #D97706));
+  --color-warning-foreground: var(--color-warning-foreground, #FFFFFF);
+
+  --color-destructive: var(--color-destructive, var(--destructive, #DC2626));
+  --color-destructive-foreground: var(--color-destructive-foreground, var(--destructive-foreground, #FFFFFF));
+  --color-danger: var(--color-danger, var(--danger, #DC2626));
+
+  --color-muted: var(--color-muted, var(--muted, #F1F5F9));
+  --color-muted-foreground: var(--color-muted-foreground, var(--muted-foreground, #475569));
+
+  --color-accent: var(--color-accent, var(--accent, #F1F5F9));
+  --color-accent-foreground: var(--color-accent-foreground, var(--accent-foreground, #0F172A));
+
+  --radius-lg: var(--radius, 0.5rem);
+  --radius-md: calc(var(--radius, 0.5rem) - 2px);
+  --radius-sm: calc(var(--radius, 0.5rem) - 4px);
+}

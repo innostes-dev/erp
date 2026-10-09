@@ -7,7 +7,9 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "preset.js",
+    "src/styles"
   ],
   "sideEffects": [
     "*.css"
@@ -28,7 +30,10 @@
       "import": "./dist/widgets/index.js",
       "require": "./dist/widgets/index.cjs"
     },
+    "./theme.css": "./src/styles/theme.css",
+    "./variables.css": "./src/styles/variables.css",
     "./styles.css": "./dist/styles.css",
+    "./preset": "./preset.js",
     "./package.json": "./package.json"
   },
   "scripts": {

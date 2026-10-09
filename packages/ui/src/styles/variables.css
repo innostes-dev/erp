@@ -1,0 +1,84 @@
+/* @innostes/ui Default CSS Custom Properties (Theme Tokens) */
+@layer base {
+  :root {
+    --background: #F8FAFC;
+    --foreground: #0F172A;
+
+    --surface: #FFFFFF;
+    --card: #FFFFFF;
+    --card-foreground: #0F172A;
+
+    --popover: #FFFFFF;
+    --popover-foreground: #0F172A;
+
+    --primary: #2563EB;
+    --primary-dark: #1D4ED8;
+    --primary-light: #EFF6FF;
+    --primary-subtle: #DBEAFE;
+    --primary-foreground: #FFFFFF;
+
+    --navy: #0F172A;
+    --slate: #475569;
+
+    --secondary: #F1F5F9;
+    --secondary-foreground: #0F172A;
+
+    --muted: #F1F5F9;
+    --muted-foreground: #475569;
+
+    --accent: #F1F5F9;
+    --accent-foreground: #0F172A;
+
+    --success: #16A34A;
+    --warning: #D97706;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --danger: #DC2626;
+
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #2563EB;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: #0F172A;
+    --foreground: #F8FAFC;
+
+    --surface: #1E293B;
+    --card: #1E293B;
+    --card-foreground: #F8FAFC;
+
+    --popover: #1E293B;
+    --popover-foreground: #F8FAFC;
+
+    --primary: #3B82F6;
+    --primary-dark: #2563EB;
+    --primary-light: #1E3A8A;
+    --primary-subtle: #1E293B;
+    --primary-foreground: #FFFFFF;
+
+    --navy: #F8FAFC;
+    --slate: #94A3B8;
+
+    --secondary: #334155;
+    --secondary-foreground: #F8FAFC;
+
+    --muted: #334155;
+    --muted-foreground: #94A3B8;
+
+    --accent: #334155;
+    --accent-foreground: #F8FAFC;
+
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --danger: #EF4444;
+
+    --border: #334155;
+    --input: #334155;
+    --ring: #3B82F6;
+  }
+}

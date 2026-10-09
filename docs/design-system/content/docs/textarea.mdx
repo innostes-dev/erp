@@ -1,0 +1,85 @@
+---
+title: Textarea
+description: Multi-line text entry component with character counter options, row sizing, and integrated Field wrappers.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Textarea
+
+The `Textarea` component handles multi-line input such as notes, descriptions, address lines, and JSON payloads.
+
+---
+
+## Import
+
+```tsx
+import { Textarea, type TextareaProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Basic Textarea with Label
+
+```tsx
+<Textarea
+  label="Project Notes"
+  placeholder="Enter notes or updates regarding this task..."
+  rows={4}
+/>
+```
+
+### Character Counter (`showCount` & `maxLength`)
+
+Pass `maxLength` along with `showCount` to display a live character counter at the bottom right.
+
+```tsx
+import { useState } from "react";
+
+export function FeedbackForm() {
+  const [text, setText] = useState("");
+
+  return (
+    <Textarea
+      label="Audit Remarks"
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      maxLength={250}
+      showCount
+      placeholder="Summarize key audit findings (max 250 characters)..."
+    />
+  );
+}
+```
+
+### Validation Error State
+
+```tsx
+<Textarea
+  label="Shipping Address"
+  value="123 Main St"
+  error="Address is incomplete. Please include street, city, state, and postal code."
+  required
+/>
+```
+
+---
+
+## API Reference
+
+### Textarea Props
+
+`Textarea` extends standard `React.TextareaHTMLAttributes<HTMLTextAreaElement>`, with the following properties:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `label` | `React.ReactNode` | `undefined` | Label rendered above the textarea. |
+| `hint` | `React.ReactNode` | `undefined` | Helper hint text. |
+| `error` | `React.ReactNode` | `undefined` | Validation error text. |
+| `required` | `boolean` | `false` | Shows red asterisk next to label. |
+| `rows` | `number` | `3` | Default visible text row lines. |
+| `maxLength` | `number` | `undefined` | Maximum allowed character length constraint. |
+| `showCount` | `boolean` | `false` | Shows live character count indicator when `maxLength` is specified. |
+| `fieldClassName` | `string` | `undefined` | Class names for the outer `Field` wrapper. |

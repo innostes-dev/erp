@@ -1,0 +1,91 @@
+---
+title: Field
+description: Accessible form control container wrapper managing labels, required asterisks, helper hint messages, and validation errors.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Field
+
+The `Field` component serves as the underlying structural wrapper for all form inputs. It ensures consistent spacing, label association, required indicator asterisks (`*`), optional text indicators, helper hint descriptions, and animated validation error displays.
+
+---
+
+## Import
+
+```tsx
+import { Field, type FieldProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Basic Field Wrapper
+
+```tsx
+<Field
+  label="User Email"
+  required
+  hint="We will never share your email address with third parties."
+>
+  <input
+    type="email"
+    placeholder="user@innostes.com"
+    className="border border-border rounded-md px-3 py-2 text-sm w-full"
+  />
+</Field>
+```
+
+### Validation Error State
+
+When `error` is provided, `Field` automatically hides the hint message and renders an animated red validation message.
+
+```tsx
+<Field
+  label="Organization Code"
+  required
+  error="Organization code must be 6 alphanumeric characters."
+>
+  <input
+    type="text"
+    value="INVALID_CODE"
+    className="border border-danger rounded-md px-3 py-2 text-sm w-full text-danger"
+  />
+</Field>
+```
+
+### Optional Field Indicator
+
+```tsx
+<Field
+  label="Middle Name"
+  optionalText="Optional"
+  hint="Enter middle initial or full middle name if applicable."
+>
+  <input
+    type="text"
+    placeholder="e.g. Alexander"
+    className="border border-border rounded-md px-3 py-2 text-sm w-full"
+  />
+</Field>
+```
+
+---
+
+## API Reference
+
+### Field Props
+
+`Field` wraps Base UI `BaseField.Root` and accepts standard HTML attributes:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `label` | `React.ReactNode` | `undefined` | Label text or node rendered above the form control. |
+| `hint` | `React.ReactNode` | `undefined` | Secondary helper/description text rendered below the form control. |
+| `error` | `React.ReactNode` | `undefined` | Error message rendered in red. Replaces hint when present. |
+| `required` | `boolean` | `false` | When true, appends a red asterisk (`*`) to the label. |
+| `optionalText` | `string` | `undefined` | Text (e.g. `'Optional'`) rendered in parentheses next to the label when not required. |
+| `disabled` | `boolean` | `false` | Reduces label opacity and sets disabled state context. |
+| `className` | `string` | `undefined` | Custom CSS class names applied to the container field div. |
+| `children` | `React.ReactNode` | *(Required)* | The interactive form input element. |

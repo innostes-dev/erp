@@ -1,3 +1,4 @@
+
 import { globalIgnores } from "eslint/config";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";

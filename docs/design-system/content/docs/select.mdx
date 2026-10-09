@@ -1,0 +1,125 @@
+---
+title: Select
+description: Accessible dropdown select component built on Base UI Select primitives with options arrays, placeholders, and form integration.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Select
+
+The `Select` component allows users to pick a single value from a list of options via a styled, keyboard-accessible popover menu.
+
+---
+
+## Import
+
+```tsx
+import { Select, type SelectProps, type SelectOption } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Basic Select
+
+```tsx
+import { Select } from "@innostes/ui";
+
+const currencyOptions = [
+  { value: "USD", label: "USD ($) - US Dollar" },
+  { value: "EUR", label: "EUR (€) - Euro" },
+  { value: "GBP", label: "GBP (£) - British Pound" },
+  { value: "INR", label: "INR (₹) - Indian Rupee" },
+];
+
+export function CurrencyPicker() {
+  return (
+    <Select
+      label="Base Currency"
+      placeholder="Select transaction currency..."
+      options={currencyOptions}
+      required
+    />
+  );
+}
+```
+
+### Sizes
+
+```tsx
+<div className="flex flex-col gap-4 max-w-sm">
+  <Select size="sm" placeholder="Small Select" options={currencyOptions} />
+  <Select size="default" placeholder="Default Select" options={currencyOptions} />
+  <Select size="lg" placeholder="Large Select" options={currencyOptions} />
+</div>
+```
+
+### Disabled Options and Controlled Value
+
+```tsx
+import { useState } from "react";
+
+const roleOptions = [
+  { value: "admin", label: "System Administrator" },
+  { value: "manager", label: "Store Manager" },
+  { value: "auditor", label: "External Auditor (Read-only)", disabled: true },
+];
+
+export function UserRolePicker() {
+  const [role, setRole] = useState("manager");
+
+  return (
+    <Select
+      label="Assign Security Role"
+      value={role}
+      onValueChange={(val) => setRole(val as string)}
+      options={roleOptions}
+      hint="Selected role dictates workspace read/write permissions."
+    />
+  );
+}
+```
+
+### Validation Error State
+
+```tsx
+<Select
+  label="Department"
+  placeholder="Select department..."
+  options={currencyOptions}
+  error="Please select a valid department before continuing."
+  required
+/>
+```
+
+---
+
+## API Reference
+
+### Select Props
+
+`Select` accepts the following properties:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `options` | `SelectOption[]` | *(Required)* | Array of option objects containing `value`, `label`, and optional `disabled`. |
+| `placeholder` | `string` | `'Select an option...'` | Placeholder text rendered when no option is selected. |
+| `value` | `string` | `undefined` | Controlled value of the selected option. |
+| `defaultValue` | `string` | `undefined` | Default selected value when uncontrolled. |
+| `onValueChange` | `(value: string) => void` | `undefined` | Event handler called when a new option is selected. |
+| `size` | `'sm' \| 'default' \| 'lg'` | `'default'` | Height and padding size of the select trigger button. |
+| `label` | `React.ReactNode` | `undefined` | Form field label text. |
+| `hint` | `React.ReactNode` | `undefined` | Helper hint text displayed below the trigger. |
+| `error` | `React.ReactNode` | `undefined` | Error message string. Highlights border in red. |
+| `required` | `boolean` | `false` | Shows red asterisk next to label. |
+| `disabled` | `boolean` | `false` | Disables the select trigger. |
+| `fieldClassName` | `string` | `undefined` | Class names for the outer `Field` container wrapper. |
+
+### SelectOption Object
+
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `value` | `string` | Unique option identifier value. |
+| `label` | `string` | Human-readable label displayed in the dropdown list and select trigger. |
+| `disabled` | `boolean` | Optional flag to disable picking this specific option. |

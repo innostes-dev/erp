@@ -1,0 +1,95 @@
+---
+title: Button
+description: Interactive button component supporting design system variants, sizes, icon slots, and built-in loading states.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Button
+
+The `Button` component triggers user actions and form submissions across the ERP platform. Built on Base UI's `Button` primitive and stylized with Class Variance Authority (CVA).
+
+---
+
+## Import
+
+```tsx
+import { Button, buttonVariants, type ButtonProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Variants
+
+Use the `variant` prop to set the visual importance of the button.
+
+```tsx
+<div className="flex flex-wrap gap-3">
+  <Button variant="default">Default / Primary</Button>
+  <Button variant="secondary">Secondary</Button>
+  <Button variant="outline">Outline</Button>
+  <Button variant="ghost">Ghost</Button>
+  <Button variant="destructive">Destructive</Button>
+  <Button variant="link">Link</Button>
+</div>
+```
+
+### Sizes
+
+Choose from four predefined sizes: `sm`, `default`, `lg`, or `icon`.
+
+```tsx
+<div className="flex items-center gap-3">
+  <Button size="sm">Small</Button>
+  <Button size="default">Default</Button>
+  <Button size="lg">Large</Button>
+</div>
+```
+
+### Loading State
+
+Pass `isLoading` to disable the button and show an animated spinner.
+
+```tsx
+<Button isLoading variant="primary">
+  Saving Changes...
+</Button>
+```
+
+### Icons
+
+Buttons support `leftIcon` and `rightIcon` props for rendering icons cleanly alongside text.
+
+```tsx
+import { Plus, ArrowRight } from "lucide-react";
+
+<div className="flex gap-3">
+  <Button leftIcon={<Plus className="w-4 h-4" />}>
+    Create Order
+  </Button>
+
+  <Button variant="secondary" rightIcon={<ArrowRight className="w-4 h-4" />}>
+    Next Step
+  </Button>
+</div>
+```
+
+---
+
+## API Reference
+
+### Button Props
+
+`Button` accepts all standard Base UI button props and `React.ButtonHTMLAttributes<HTMLButtonElement>`, plus the following properties:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `variant` | `'default' \| 'primary' \| 'secondary' \| 'destructive' \| 'outline' \| 'ghost' \| 'link'` | `'default'` | Visual style variant of the button. |
+| `size` | `'default' \| 'sm' \| 'lg' \| 'icon'` | `'default'` | Height and padding size of the button. |
+| `isLoading` | `boolean` | `false` | When true, renders a spinning loader icon and disables interactions. |
+| `leftIcon` | `React.ReactNode` | `undefined` | Icon element to render before the children text. |
+| `rightIcon` | `React.ReactNode` | `undefined` | Icon element to render after the children text. |
+| `disabled` | `boolean` | `false` | Standard HTML disabled state. Automatically set when `isLoading` is true. |
+| `className` | `string` | `undefined` | Additional Tailwind CSS class names to merge. |

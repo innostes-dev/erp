@@ -1,0 +1,20 @@
+{
+  "title": "UI Design System",
+  "pages": [
+    "index",
+    "---Actions---",
+    "button",
+    "button-group",
+    "icon-button",
+    "dropdown-menu",
+    "split-button",
+    "---Forms---",
+    "field",
+    "input",
+    "textarea",
+    "checkbox",
+    "radio-group",
+    "switch",
+    "select"
+  ]
+}

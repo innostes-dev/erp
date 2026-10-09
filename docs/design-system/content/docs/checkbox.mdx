@@ -1,0 +1,69 @@
+---
+title: Checkbox
+description: Accessible checkbox control built on Base UI Checkbox primitives supporting checked, unchecked, and indeterminate states.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Checkbox
+
+The `Checkbox` component allows users to toggle binary choices or select multiple items from a list. It supports checked, unchecked, and indeterminate states.
+
+---
+
+## Import
+
+```tsx
+import { Checkbox, type CheckboxProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Basic Checkbox with Label
+
+```tsx
+<Checkbox
+  label="I accept the Terms of Service and Privacy Policy"
+  hint="You must agree before submitting your registration."
+/>
+```
+
+### Indeterminate State
+
+Use `indeterminate` state for "Select All" table headers where only a subset of child items are selected.
+
+```tsx
+<Checkbox
+  label="Select All Items"
+  indeterminate={true}
+/>
+```
+
+### Disabled and Checked States
+
+```tsx
+<div className="flex flex-col gap-3">
+  <Checkbox label="Disabled option" disabled />
+  <Checkbox label="Disabled checked option" disabled checked />
+</div>
+```
+
+---
+
+## API Reference
+
+### Checkbox Props
+
+`Checkbox` wraps Base UI `BaseCheckbox.Root` and accepts standard checkbox properties:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `checked` | `boolean` | `undefined` | Controlled checked state. |
+| `indeterminate` | `boolean` | `false` | When true, displays a minus icon (`-`) instead of a checkmark. |
+| `label` | `React.ReactNode` | `undefined` | Label text positioned beside the checkbox. |
+| `hint` | `React.ReactNode` | `undefined` | Helper text displayed below the checkbox label. |
+| `error` | `React.ReactNode` | `undefined` | Error message string. Applies danger outline. |
+| `disabled` | `boolean` | `false` | Disables interaction and reduces opacity. |
+| `fieldClassName` | `string` | `undefined` | Custom CSS class names applied to the `Field` wrapper. |

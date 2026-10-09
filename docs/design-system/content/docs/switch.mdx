@@ -1,0 +1,92 @@
+---
+title: Switch
+description: Accessible toggle switch component built on Base UI Switch primitives supporting size variants and left/right label positioning.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# Switch
+
+The `Switch` component toggles the state of a single setting on or off.
+
+---
+
+## Import
+
+```tsx
+import { Switch, type SwitchProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Standard Switch
+
+```tsx
+import { useState } from "react";
+
+export function NotificationSettings() {
+  const [enabled, setEnabled] = useState(true);
+
+  return (
+    <Switch
+      checked={enabled}
+      onCheckedChange={setEnabled}
+      label="Enable Email Notifications"
+      hint="Receive daily digest summaries of system activities."
+    />
+  );
+}
+```
+
+### Sizes
+
+Choose between `sm`, `default`, or `lg` toggle sizes.
+
+```tsx
+<div className="flex flex-col gap-4">
+  <Switch size="sm" label="Small Switch" />
+  <Switch size="default" label="Default Switch" />
+  <Switch size="lg" label="Large Switch" />
+</div>
+```
+
+### Left-Aligned Label (`labelPosition="left"`)
+
+Set `labelPosition="left"` to position the text on the left and align the toggle switch to the right edge.
+
+```tsx
+<div className="w-full max-w-sm space-y-3">
+  <Switch
+    labelPosition="left"
+    label="Two-Factor Authentication"
+    hint="Enforce 2FA for all team members."
+  />
+  <Switch
+    labelPosition="left"
+    label="Automatic Data Backups"
+    hint="Run database snapshots every midnight."
+  />
+</div>
+```
+
+---
+
+## API Reference
+
+### Switch Props
+
+`Switch` wraps Base UI `BaseSwitch.Root` and accepts the following properties:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `checked` | `boolean` | `undefined` | Controlled checked state. |
+| `onCheckedChange` | `(checked: boolean) => void` | `undefined` | Callback fired when state toggles. |
+| `size` | `'sm' \| 'default' \| 'lg'` | `'default'` | Size dimensions of the switch thumb and track. |
+| `label` | `React.ReactNode` | `undefined` | Label content. |
+| `labelPosition` | `'right' \| 'left'` | `'right'` | Position of the label relative to the switch toggle. |
+| `hint` | `React.ReactNode` | `undefined` | Helper description text. |
+| `error` | `React.ReactNode` | `undefined` | Validation error text. |
+| `disabled` | `boolean` | `false` | Disables toggle interaction. |
+| `fieldClassName` | `string` | `undefined` | Custom CSS class names passed to the outer `Field` container. |

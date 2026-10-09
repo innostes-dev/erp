@@ -1,0 +1,81 @@
+---
+title: UI Design System Overview
+description: Documentation and component specifications for the @innostes/ui component library.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+# UI Design System Overview
+
+Welcome to the **Innostes UI Design System**. The `@innostes/ui` package provides a modern, accessible, and themeable set of React UI components designed specifically for the Innostes ERP platform. Built on top of **Base UI primitives**, **Tailwind CSS v4**, **Class Variance Authority (CVA)**, and **Lucide React icons**.
+
+---
+
+## Installation & Setup
+
+All UI components are distributed via the `@innostes/ui` workspace package.
+
+<Tabs items={['pnpm', 'npm', 'yarn']}>
+  <Tab value="pnpm">
+```bash
+pnpm add @innostes/ui
+```
+  </Tab>
+  <Tab value="npm">
+```bash
+npm install @innostes/ui
+```
+  </Tab>
+  <Tab value="yarn">
+```bash
+yarn add @innostes/ui
+```
+  </Tab>
+</Tabs>
+
+### Styling Setup
+
+Import `@innostes/ui/styles.css` in your entry file (e.g. `src/main.tsx` or `src/app/layout.tsx`):
+
+```tsx
+import "@innostes/ui/styles.css";
+```
+
+<Callout type="info">
+  Components support dark mode and custom color palette variables via Tailwind CSS configuration tokens defined in `@innostes/ui/preset`.
+</Callout>
+
+---
+
+## Component Catalog
+
+### Action Components
+
+| Component | Description | Primitives / Specs |
+| :--- | :--- | :--- |
+| **[Button](/docs/button)** | Primary action trigger with multiple variants, sizes, icon slots, and loading states. | Base UI Button, CVA |
+| **[ButtonGroup](/docs/button-group)** | Container for grouping actions horizontally or vertically with merged borders. | Flex / Border utilities |
+| **[IconButton](/docs/icon-button)** | Compact icon-only button requiring an accessible `aria-label`. | Button wrapper |
+| **[DropdownMenu](/docs/dropdown-menu)** | Accessible popover menu with items, icons, section labels, and keyboard shortcuts. | Base UI Menu |
+| **[SplitButton](/docs/split-button)** | Primary action button combined with an attached dropdown trigger for sub-actions. | ButtonGroup + DropdownMenu |
+
+### Form Controls
+
+| Component | Description | Primitives / Specs |
+| :--- | :--- | :--- |
+| **[Field](/docs/field)** | Form field wrapper providing labels, required asterisks, hints, and validation errors. | Base UI Field |
+| **[Input](/docs/input)** | Text input control with left/right icons, prefix/suffix text, clearable button, and Field wrapper. | HTML Input + Field |
+| **[Textarea](/docs/textarea)** | Multi-line text field supporting auto-rows, character count limits (`showCount`), and Field wrapper. | HTML Textarea + Field |
+| **[Checkbox](/docs/checkbox)** | Checkbox control supporting checked, unchecked, and `indeterminate` states. | Base UI Checkbox |
+| **[RadioGroup](/docs/radio-group)** | Radio button list supporting vertical/horizontal orientation and custom rich card layouts. | Base UI RadioGroup |
+| **[Switch](/docs/switch)** | Toggle switch with left/right label positioning and size variants (`sm`, `default`, `lg`). | Base UI Switch |
+| **[Select](/docs/select)** | Accessible dropdown select built on Base UI Select with options array and validation feedback. | Base UI Select |
+
+---
+
+## Key Design System Principles
+
+1. **Accessibility First**: Built using Base UI primitives to guarantee WAI-ARIA compliance, focus trapping, keyboard navigation, and screen reader announcements.
+2. **Integrated Form Validation**: Form controls seamlessly bind to `<Field />` to display consistent labels, helper text, and error messages without extra boilerplate.
+3. **TypeScript Safety**: Fully typed props with explicit TS exports for all component variant types.

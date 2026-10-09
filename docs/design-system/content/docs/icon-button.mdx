@@ -1,0 +1,65 @@
+---
+title: IconButton
+description: Accessible icon-only button variant requiring an explicit aria-label for screen reader support.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+# IconButton
+
+The `IconButton` component provides a compact square button tailored for standalone icon triggers, toolbar actions, and table row items.
+
+---
+
+## Import
+
+```tsx
+import { IconButton, type IconButtonProps } from "@innostes/ui";
+```
+
+---
+
+## Examples
+
+### Standard Usage
+
+Pass an icon component and a required `aria-label` describing the action.
+
+```tsx
+import { Edit, Trash2, MoreHorizontal } from "lucide-react";
+
+<div className="flex gap-2">
+  <IconButton
+    icon={<Edit className="w-4 h-4" />}
+    aria-label="Edit item"
+    variant="outline"
+  />
+  <IconButton
+    icon={<Trash2 className="w-4 h-4" />}
+    aria-label="Delete item"
+    variant="destructive"
+  />
+  <IconButton
+    icon={<MoreHorizontal className="w-4 h-4" />}
+    aria-label="More options"
+    variant="ghost"
+  />
+</div>
+```
+
+---
+
+## API Reference
+
+### IconButton Props
+
+`IconButton` extends `ButtonProps` (excluding `children`, `leftIcon`, `rightIcon`) and enforces an `aria-label`:
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `icon` | `React.ReactNode` | *(Required)* | The icon element to render inside the button. |
+| `aria-label` | `string` | *(Required)* | Accessible label for screen readers. |
+| `variant` | `'default' \| 'primary' \| 'secondary' \| 'destructive' \| 'outline' \| 'ghost'` | `'outline'` | Visual style variant. |
+| `size` | `'default' \| 'sm' \| 'lg' \| 'icon'` | `'icon'` | Size dimensions of the icon button. |
+| `isLoading` | `boolean` | `false` | Displays a loading spinner when true. |
+| `disabled` | `boolean` | `false` | Disables interaction. |
