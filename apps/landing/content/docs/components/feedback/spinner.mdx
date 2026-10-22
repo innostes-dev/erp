@@ -1,0 +1,29 @@
+---
+title: Spinner
+description: An animated loading indicator.
+icon: LoaderCircle
+status: Stable
+summary: Inherits the text colour; sized with utility classes.
+---
+
+<ComponentPreview name="feedback/spinner/basic" />
+
+## Import
+
+```tsx
+import { Spinner } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Spinner />                                   {/* announced as "Loading" */}
+<Spinner className="size-6 text-primary" label="Loading orders" />
+<span><Spinner label={null} /> Syncing…</span> {/* text already says it */}
+```
+
+For buttons, use `<Button loading>` instead; it handles the spinner and the busy state.
+
+## API Reference
+
+<ApiTable components={['Spinner']} />

@@ -1,0 +1,60 @@
+/*
+ * Optional dark theme for innostes UI.
+ *
+ * Activates under a `.dark` class or `data-theme="dark"` on any ancestor (usually <html>).
+ * Import it after the main stylesheet:
+ *
+ *   @import '@innostes/ui/tailwind.css';   (or '@innostes/ui/styles.css')
+ *   @import '@innostes/ui/dark.css';
+ *
+ * Works with and without Tailwind: it only sets CSS variables.
+ * Values are literal (not var(--color-*)) so it also works when Tailwind didn't emit the palette.
+ */
+.dark,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-background: oklch(14.1% 0.005 285.823); /* zinc-950 */
+  --color-foreground: oklch(98.5% 0 0); /* zinc-50 */
+  --color-card: oklch(21% 0.006 285.885); /* zinc-900 */
+  --color-card-foreground: oklch(98.5% 0 0);
+  --color-popover: oklch(21% 0.006 285.885);
+  --color-popover-foreground: oklch(98.5% 0 0);
+
+  --color-primary: oklch(62.3% 0.214 259.815); /* blue-500 */
+  --color-primary-hover: oklch(70.7% 0.165 254.624); /* blue-400 */
+  --color-primary-foreground: oklch(100% 0 0);
+  --color-secondary: oklch(27.4% 0.006 286.033); /* zinc-800 */
+  --color-secondary-hover: oklch(37% 0.013 285.805); /* zinc-700 */
+  --color-secondary-foreground: oklch(98.5% 0 0);
+
+  --color-muted: oklch(27.4% 0.006 286.033);
+  --color-muted-foreground: oklch(70.5% 0.015 286.067); /* zinc-400 */
+  --color-accent: oklch(27.4% 0.006 286.033);
+  --color-accent-foreground: oklch(98.5% 0 0);
+
+  --color-destructive: oklch(63.7% 0.237 25.331); /* red-500 */
+  --color-destructive-hover: oklch(70.4% 0.191 22.216); /* red-400 */
+  --color-destructive-foreground: oklch(100% 0 0);
+  --color-success: oklch(69.6% 0.17 162.48); /* emerald-500 */
+  --color-success-foreground: oklch(16.2% 0.02 166); /* emerald-950 */
+  --color-warning: oklch(76.9% 0.188 70.08); /* amber-500 */
+  --color-warning-foreground: oklch(27.9% 0.077 45.635); /* amber-950 */
+  --color-info: oklch(68.5% 0.169 237.323); /* sky-500 */
+  --color-info-foreground: oklch(100% 0 0);
+
+  --color-border: oklch(100% 0 0 / 0.1);
+  --color-input: oklch(100% 0 0 / 0.15);
+  --color-ring: oklch(62.3% 0.214 259.815);
+
+  --color-chart-1: oklch(62.3% 0.214 259.815); /* blue-500 */
+  --color-chart-2: oklch(70.2% 0.183 293.541); /* violet-400 */
+  --color-chart-3: oklch(76.5% 0.177 163.223); /* emerald-400 */
+  --color-chart-4: oklch(82.8% 0.189 84.429); /* amber-400 */
+  --color-chart-5: oklch(71.2% 0.194 13.428); /* rose-400 */
+  --color-chart-6: oklch(78.9% 0.154 211.53); /* cyan-400 */
+  --color-chart-7: oklch(75% 0.183 55.934); /* orange-400 */
+  --color-chart-8: oklch(70.4% 0.04 256.788); /* slate-400 */
+
+  --color-overlay: rgb(0 0 0 / 0.6);
+}

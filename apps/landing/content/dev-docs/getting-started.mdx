@@ -1,0 +1,91 @@
+---
+title: Getting Started
+description: Install the tools, set up the repo and run every app locally.
+icon: Terminal
+install: pnpm install
+---
+
+## Prerequisites
+
+| Tool | Version | Check |
+| --- | --- | --- |
+| Node.js | 22 or newer | `node -v` |
+| pnpm | 12 or newer | `pnpm -v` |
+| Python | 3.12 or newer (only for `api-server`) | `python --version` |
+| Git | any recent version | `git --version` |
+
+<Callout title="Use pnpm only">
+  The repo uses a pnpm workspace and `pnpm-lock.yaml`. Don't run `npm install` or `yarn` — they
+  create a second lockfile and a different `node_modules` layout.
+</Callout>
+
+<Steps>
+<Step>
+
+### Install dependencies
+
+From the repo root:
+
+```bash
+pnpm install
+```
+
+This installs packages for every app and package in the workspace.
+
+</Step>
+<Step>
+
+### Set up the API (optional)
+
+The API runs in its own Python virtual environment. Create it and install its packages once:
+
+```bash
+pnpm nx run api-server:install
+```
+
+</Step>
+<Step>
+
+### Run the apps
+
+Each app runs on its own port:
+
+| App | Command | URL |
+| --- | --- | --- |
+| landing (website + docs) | `pnpm nx dev landing` | http://localhost:3000 |
+| web-app | `pnpm nx serve web-app` | http://localhost:4200 |
+| api-server | `pnpm nx serve api-server` | http://localhost:8000 (API docs at `/docs`) |
+
+Use one terminal per app. `pnpm nx dev landing` builds `@innostes/ui` first, so the website always
+uses the latest components.
+
+</Step>
+<Step>
+
+### Check your changes
+
+```bash
+pnpm nx run-many -t build typecheck
+```
+
+Before opening a pull request, make sure this passes.
+
+</Step>
+</Steps>
+
+## Useful commands
+
+```bash
+pnpm nx show projects          # list all projects
+pnpm nx show project landing   # list a project's tasks
+pnpm nx graph                  # open the dependency graph in the browser
+pnpm nx affected -t build      # build only what your changes affect
+pnpm nx reset                  # clear the Nx cache and daemon if things act strange
+```
+
+## Next steps
+
+<Cards>
+  <Card title="Project Structure" href="/docs/project-structure" />
+  <Card title="Working with Nx" href="/docs/guides/nx" />
+</Cards>

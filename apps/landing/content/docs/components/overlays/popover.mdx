@@ -1,0 +1,36 @@
+---
+title: Popover
+description: Interactive content anchored to a trigger.
+icon: MessageSquare
+status: Stable
+summary: Small forms, share panels and pickers that float next to their trigger.
+---
+
+<ComponentPreview name="overlays/popover/basic" />
+
+## Import
+
+```tsx
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverTitle,
+  PopoverDescription,
+  PopoverClose,
+} from '@innostes/ui';
+```
+
+## Usage
+
+`side`, `align` and `sideOffset` on `PopoverContent` position it; it flips automatically when
+there's no room. For plain hints, use [Tooltip](/ui/docs/components/overlays/tooltip).
+
+## Accessibility
+
+- The trigger has `aria-expanded`. Focus moves into the popover and returns on close.
+- Escape and outside click close it.
+
+## API Reference
+
+<ApiTable components={['PopoverContent', 'PopoverTitle', 'PopoverDescription']} baseUi="popover" />

@@ -1,0 +1,24 @@
+{
+  "name": "api-server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/api-server/app",
+  "targets": {
+    "install": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api-server",
+        "commands": ["python -m venv .venv", ".venv/Scripts/python -m pip install -r requirements.txt"],
+        "parallel": false
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "cwd": "apps/api-server",
+        "command": ".venv/Scripts/python -m fastapi dev app/main.py --port 8000"
+      }
+    }
+  }
+}

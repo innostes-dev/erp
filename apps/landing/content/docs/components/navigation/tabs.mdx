@@ -1,0 +1,41 @@
+---
+title: Tabs
+description: Switch between related panels in the same place.
+icon: PanelTop
+status: Stable
+summary: Underline and pill styles with an animated indicator, horizontal or vertical.
+---
+
+<ComponentPreview name="navigation/tabs/basic" />
+
+## Import
+
+```tsx
+import { Tabs, TabsList, TabsTab, TabsPanel } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Tabs defaultValue="overview">
+  <TabsList>
+    <TabsTab value="overview">Overview</TabsTab>
+    <TabsTab value="activity">Activity</TabsTab>
+  </TabsList>
+  <TabsPanel value="overview">…</TabsPanel>
+  <TabsPanel value="activity">…</TabsPanel>
+</Tabs>
+```
+
+- `variant="underline"` (default) for page sections; `variant="pills"` for compact switches,
+  like a date range above a chart.
+- To sync the tab with the URL, control it with `value` / `onValueChange`.
+- `orientation="vertical"` stacks the tabs for settings pages.
+
+## Accessibility
+
+- Arrow keys move between tabs; the active panel is linked with `aria-controls`/`aria-labelledby`.
+
+## API Reference
+
+<ApiTable components={['Tabs', 'TabsList', 'TabsTab', 'TabsPanel']} baseUi="tabs" />

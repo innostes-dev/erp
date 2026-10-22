@@ -1,0 +1,39 @@
+---
+title: Alert Dialog
+description: Asks the user to confirm an important action.
+icon: ShieldAlert
+status: Stable
+summary: A dialog that can't be dismissed by clicking outside; the user must choose.
+---
+
+<ComponentPreview name="overlays/alert-dialog/basic" />
+
+## Import
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogClose,
+} from '@innostes/ui';
+```
+
+## Writing good confirmations
+
+- Title asks the question: "Delete Acme Corp?", not "Are you sure?".
+- Description states the consequence: what's lost, and whether it can be undone.
+- The confirm button repeats the action ("Delete customer"), not "OK".
+
+## Accessibility
+
+- `role="alertdialog"`, labelled by the title and described by the description.
+- Focus starts inside the dialog; Escape cancels.
+
+## API Reference
+
+<ApiTable components={['AlertDialogContent', 'AlertDialogTitle', 'AlertDialogDescription']} baseUi="alert-dialog" />

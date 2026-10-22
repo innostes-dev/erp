@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": false,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "types": ["@testing-library/jest-dom/vitest"],
+    "paths": {
+      "react": ["./node_modules/@types/react/index.d.ts"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-dom": ["./node_modules/@types/react-dom/index.d.ts"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"],
+      "@base-ui/react": ["./node_modules/@base-ui/react/index.d.ts"],
+      "@base-ui/react/*": ["./node_modules/@base-ui/react/*"],
+      "@testing-library/react": ["./node_modules/@testing-library/react"],
+      "@innostes/ui": ["../../packages/ui/dist/index.d.ts"]
+    }
+  },
+  "include": [
+    "../../packages/ui/src/components/**/*.test.tsx",
+    "../../packages/ui/src/widgets/**/*.test.tsx"
+  ]
+}

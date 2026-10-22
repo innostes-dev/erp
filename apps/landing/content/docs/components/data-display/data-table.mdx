@@ -1,0 +1,106 @@
+---
+title: Data Table
+description: A typed data grid for admin lists.
+icon: Sheet
+status: Beta
+summary: Sorting, row selection, pagination, loading and empty states. Client-side or server-side.
+---
+
+<ComponentPreview name="data-display/data-table/basic" align="start" />
+
+## Import
+
+```tsx
+import { DataTable, type DataTableColumn, type SortState } from '@innostes/ui';
+```
+
+## Columns
+
+Columns are typed against your row type. `accessor` returns the raw value (used for sorting and
+as the default cell text); `cell` renders anything.
+
+```tsx
+const columns: DataTableColumn<Invoice>[] = [
+  { id: 'number', header: 'Invoice', accessor: (r) => r.number, sortable: true },
+  { id: 'status', header: 'Status', cell: (r) => <Badge variant={tone[r.status]}>{r.status}</Badge> },
+  {
+    id: 'amount',
+    header: 'Amount',
+    accessor: (r) => r.amount,
+    sortable: true,
+    align: 'end',
+    cell: (r) => money.format(r.amount),
+  },
+];
+
+<DataTable aria-label="Invoices" data={invoices} columns={columns} getRowId={(r) => r.id} />
+```
+
+Sorting is natural and locale-aware ("Item 2" before "Item 10"); dates and numbers sort by value;
+empty values always go last.
+
+## Selection, sorting and pagination
+
+Each piece of state can be uncontrolled (`defaultSort`, `defaultSelectedIds`, `defaultPage`) or
+controlled (`sort` + `onSortChange`, `selectedIds` + `onSelectedIdsChange`, `page` + `onPageChange`),
+so you can keep it in the URL or a store.
+
+```tsx
+<DataTable
+  aria-label="Orders"
+  data={orders}
+  columns={columns}
+  getRowId={(o) => o.id}
+  selectable
+  selectedIds={selected}
+  onSelectedIdsChange={setSelected}
+  defaultSort={{ columnId: 'date', direction: 'desc' }}
+  pageSize={20}
+/>
+```
+
+## Server-side data
+
+Turn on `manualSorting` and `manualPagination`, pass the current page of rows as `data`, and fetch
+in the change handlers. `totalCount` tells the table how many pages exist.
+
+```tsx
+const [sort, setSort] = useState<SortState | null>({ columnId: 'date', direction: 'desc' });
+const [page, setPage] = useState(1);
+const { data, isLoading } = useOrders({ sort, page, pageSize: 20 }); // your data hook
+
+<DataTable
+  aria-label="Orders"
+  data={data?.rows ?? []}
+  totalCount={data?.total}
+  columns={columns}
+  getRowId={(o) => o.id}
+  manualSorting
+  sort={sort}
+  onSortChange={setSort}
+  manualPagination
+  page={page}
+  onPageChange={setPage}
+  pageSize={20}
+  loading={isLoading}
+/>
+```
+
+## Loading and empty states
+
+<ComponentPreview name="data-display/data-table/loading" align="start" />
+
+## Accessibility
+
+- Real `<table>` markup with `aria-sort` on sortable headers and sort buttons inside them.
+- The table needs a name: pass `aria-label`.
+- Selection checkboxes are labelled; the selected count is announced politely.
+- `onRowClick` is for convenience only. Keep the same action reachable by keyboard (e.g. a link in
+  the first cell, or the row actions menu).
+
+## API Reference
+
+<ApiTable components={['DataTable']} />
+
+`DataTableColumn<TRow>` fields: `id`, `header`, `accessor`, `cell`, `sortable`, `align`, `width`,
+`className`, `headerClassName`. They're documented with TSDoc, so your editor shows them on hover.

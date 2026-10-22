@@ -1,0 +1,44 @@
+---
+title: landing
+description: The public website, the design system site and all documentation.
+icon: Rocket
+status: Stable
+summary: Next.js 16 app with Fumadocs. Serves /, /ui, /ui/docs and /docs.
+install: pnpm nx dev landing
+---
+
+## Routes
+
+| Route | What | Source |
+| --- | --- | --- |
+| `/` | Marketing home page | `app/(home)/page.tsx` |
+| `/ui` | innostes UI overview | `app/(home)/ui/page.tsx` |
+| `/ui/docs` | innostes UI documentation | `content/docs/**/*.mdx` |
+| `/docs` | Developer documentation (this site) | `content/dev-docs/**/*.mdx` |
+| `/api/search` | Search index for both doc sets | `app/api/search/route.ts` |
+
+## Tasks
+
+| Command | What it does |
+| --- | --- |
+| `pnpm nx dev landing` | Dev server on http://localhost:3000 |
+| `pnpm nx build landing` | Production build into `.next/` |
+| `pnpm nx start landing` | Build, then serve the production build |
+| `pnpm nx typecheck landing` | Type-check with Next.js route types |
+
+All of them build `@innostes/ui` first.
+
+## How it's put together
+
+- **Next.js App Router.** Route groups keep layouts apart: `(home)` uses the marketing header,
+  `(docs)` uses the docs layout.
+- **Fumadocs** turns the MDX files into pages, the sidebar, the table of contents and search.
+  Content sources are defined in `lib/source.ts`.
+- **One docs design.** Both doc sets use `components/docs/docs-shell.tsx` (top bar, sidebar, theme
+  picker) and `components/docs/docs-page.tsx` (page header with badge and command box).
+- **Styling.** Tailwind CSS v4 with the `@innostes/ui` theme. Docs colours are set in
+  `app/global.css`.
+
+## Adding pages
+
+See [Writing Docs](/docs/guides/writing-docs).

@@ -1,0 +1,29 @@
+---
+title: Textarea
+description: A multi-line text field.
+icon: TextAlignStart
+status: Stable
+summary: Optional auto-resize, and automatic Field wiring.
+---
+
+<ComponentPreview name="forms/textarea/basic" />
+
+## Import
+
+```tsx
+import { Textarea } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Textarea name="notes" rows={4} />
+<Textarea autoResize rows={2} />  {/* grows with the content */}
+```
+
+`autoResize` uses CSS `field-sizing: content`. Browsers without support fall back to a normal,
+vertically resizable textarea.
+
+## API Reference
+
+<ApiTable components={['Textarea']} />

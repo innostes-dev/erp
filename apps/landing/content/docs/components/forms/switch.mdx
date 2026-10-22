@@ -1,0 +1,34 @@
+---
+title: Switch
+description: An on/off control for settings that apply immediately.
+icon: ToggleRight
+status: Stable
+summary: Two sizes, form submission and Field support.
+---
+
+<ComponentPreview name="forms/switch/basic" />
+
+## Import
+
+```tsx
+import { Switch } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<label className="flex items-center gap-3">
+  <Switch name="notifications" defaultChecked /> Email notifications
+</label>
+```
+
+Use a switch when the change takes effect right away. When the user must press Save, a
+[Checkbox](/ui/docs/components/forms/checkbox) is clearer.
+
+## Accessibility
+
+- Announced as `role="switch"` with `aria-checked`. Space toggles it.
+
+## API Reference
+
+<ApiTable components={['Switch']} baseUi="switch" />

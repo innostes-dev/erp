@@ -1,0 +1,49 @@
+---
+title: Input
+description: A single-line text field.
+icon: TextCursorInput
+status: Stable
+summary: Three sizes, invalid and disabled states, file inputs, and automatic Field wiring.
+---
+
+<ComponentPreview name="forms/input/basic" />
+
+## Import
+
+```tsx
+import { Input } from '@innostes/ui';
+```
+
+## Usage
+
+Use it inside a [Field](/ui/docs/components/forms/field) so it gets a label and validation:
+
+```tsx
+<Field>
+  <FieldLabel>Email</FieldLabel>
+  <Input type="email" name="email" required />
+  <FieldError />
+</Field>
+```
+
+`size` changes the height (`sm` 32px, `md` 40px, `lg` 48px). The native `size` attribute is
+available as `htmlSize`.
+
+## Styling other controls like an input
+
+`inputVariants()` returns the input classes, for building custom controls that match:
+
+```tsx
+import { inputVariants } from '@innostes/ui';
+
+<div className={inputVariants({ size: 'sm' })}>…</div>
+```
+
+## Accessibility
+
+- Always give the input a label: `FieldLabel`, a `<label>`, or `aria-label`.
+- Invalid styles come from `aria-invalid` (set automatically inside `Field`).
+
+## API Reference
+
+<ApiTable components={['Input']} baseUi="input" />

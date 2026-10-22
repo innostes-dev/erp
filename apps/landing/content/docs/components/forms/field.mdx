@@ -1,0 +1,84 @@
+---
+title: Field & Form
+description: Labels, descriptions, validation and form submission.
+icon: RectangleEllipsis
+status: Stable
+summary: Accessible wiring between label, control, help text and errors, with native and custom validation.
+---
+
+<ComponentPreview name="forms/field/basic" />
+
+## Import
+
+```tsx
+import {
+  Field,
+  FieldLabel,
+  FieldDescription,
+  FieldError,
+  FieldItem,
+  Fieldset,
+  FieldsetLegend,
+  Form,
+  Label,
+} from '@innostes/ui';
+```
+
+## Anatomy
+
+```tsx
+<Form>
+  <Fieldset>
+    <FieldsetLegend />
+    <Field>
+      <FieldLabel />
+      {/* Input, Textarea, Select, Checkbox, … */}
+      <FieldDescription />
+      <FieldError />
+    </Field>
+  </Fieldset>
+</Form>
+```
+
+Every innostes form control works inside `Field`: the label, description and error are linked to
+it automatically (`for`/`id`, `aria-describedby`, `aria-invalid`).
+
+## Validation and server errors
+
+Validation uses native constraints (`required`, `type`, `minLength`, `pattern`, …) and the
+`validate` prop. Server errors go to `Form`'s `errors` prop, keyed by field `name`, and show in the
+matching `FieldError`.
+
+<ComponentPreview name="forms/field/form" />
+
+- Use `match` on `FieldError` to show your own message per constraint
+  (`valueMissing`, `typeMismatch`, `tooShort`, …). Without children it shows the browser message.
+- `validationMode` on `Field` (`onSubmit` by default, or `onBlur` / `onChange`) controls when it runs.
+- `onFormSubmit` receives the values as an object, keyed by `name`.
+
+## With React Hook Form or TanStack Form
+
+The controls are regular inputs, so form libraries work as usual. Pass their error state to the field:
+
+```tsx
+<Field name="email" invalid={!!errors.email}>
+  <FieldLabel>Email</FieldLabel>
+  <Input {...register('email')} />
+  <FieldError match={!!errors.email}>{errors.email?.message}</FieldError>
+</Field>
+```
+
+## Label
+
+`Label` is a standalone `<label>` for controls outside a `Field`. Inside a `Field`, use `FieldLabel`.
+
+## Accessibility
+
+- Errors set `aria-invalid` on the control and are announced through `aria-describedby`.
+- `required` on `FieldLabel` adds a visual `*` hidden from screen readers. Set `required` on the
+  control as well so it's announced and validated.
+- `Fieldset` renders a native `<fieldset>`; `disabled` disables every control inside.
+
+## API Reference
+
+<ApiTable components={['Field', 'FieldLabel', 'FieldDescription', 'FieldError', 'FieldItem', 'Fieldset', 'FieldsetLegend', 'Form', 'Label']} baseUi="field" />

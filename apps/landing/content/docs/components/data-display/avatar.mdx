@@ -1,0 +1,36 @@
+---
+title: Avatar
+description: A user or entity image with a fallback.
+icon: CircleUser
+status: Stable
+summary: Image with initials fallback, four sizes, round or square, and stacked groups.
+---
+
+<ComponentPreview name="data-display/avatar/basic" />
+
+## Import
+
+```tsx
+import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Avatar>
+  <AvatarImage src={user.photoUrl} alt="" />
+  <AvatarFallback>{initials(user.name)}</AvatarFallback>
+</Avatar>
+```
+
+The fallback shows while the image loads and if it fails. Use `delay` on `AvatarFallback` (ms) to
+avoid a flash of initials on fast connections.
+
+## Accessibility
+
+- When the person's name is shown next to the avatar, use `alt=""` so it isn't read twice.
+- `AvatarGroup` labels its "+N" counter (e.g. "2 more").
+
+## API Reference
+
+<ApiTable components={['Avatar', 'AvatarImage', 'AvatarFallback', 'AvatarGroup']} baseUi="avatar" />

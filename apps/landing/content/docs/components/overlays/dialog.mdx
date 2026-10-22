@@ -1,0 +1,63 @@
+---
+title: Dialog
+description: A modal window for focused tasks.
+icon: AppWindow
+status: Stable
+summary: Focus trap, Escape and outside-click to close, nested dialogs, and five sizes.
+---
+
+<ComponentPreview name="overlays/dialog/basic" />
+
+## Import
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@innostes/ui';
+```
+
+## Anatomy
+
+```tsx
+<Dialog>
+  <DialogTrigger />
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle />
+      <DialogDescription />
+    </DialogHeader>
+    {/* content */}
+    <DialogFooter>
+      <DialogClose />
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+## Usage
+
+- Use `render` to make the trigger and close buttons our `Button`:
+  `<DialogTrigger render={<Button />}>Edit</DialogTrigger>`.
+- Control it with `open` / `onOpenChange` to close after an async save (see the demo).
+- `size` on `DialogContent`: `sm`, `md` (default), `lg`, `xl`, `full`.
+- Set `showCloseButton={false}` to hide the × button.
+
+Use a dialog for short, focused tasks. For larger forms next to the content, a
+[Sheet](/ui/docs/components/overlays/sheet) keeps more context visible. To confirm destructive
+actions, use [Alert Dialog](/ui/docs/components/overlays/alert-dialog).
+
+## Accessibility
+
+- Focus moves into the dialog on open and back to the trigger on close; Tab stays inside.
+- Labelled by `DialogTitle` and described by `DialogDescription`. Always include a title.
+
+## API Reference
+
+<ApiTable components={['DialogContent', 'DialogTitle', 'DialogDescription', 'DialogHeader', 'DialogFooter']} baseUi="dialog" />

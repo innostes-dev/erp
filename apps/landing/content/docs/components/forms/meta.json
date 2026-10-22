@@ -1,0 +1,20 @@
+{
+  "title": "Forms",
+  "pages": [
+    "field",
+    "input",
+    "input-group",
+    "textarea",
+    "checkbox",
+    "radio-group",
+    "switch",
+    "select",
+    "searchable-select",
+    "combobox",
+    "locale-select",
+    "number-field",
+    "slider",
+    "calendar",
+    "date-picker"
+  ]
+}

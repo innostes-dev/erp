@@ -1,0 +1,75 @@
+{
+  "name": "@innostes/ui",
+  "version": "0.0.1",
+  "description": "innostes UI: accessible React components for admin interfaces, built on Base UI and styled with Tailwind CSS design tokens.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@innostes/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./tailwind.css": "./tailwind/tailwind.css",
+    "./theme.css": "./tailwind/theme.css",
+    "./dark.css": "./tailwind/dark.css",
+    "./styles.css": "./dist/styles.css",
+    "./api.json": "./dist/api.json"
+  },
+  "files": [
+    "dist",
+    "tailwind/tailwind.css",
+    "tailwind/theme.css",
+    "tailwind/dark.css",
+    "!**/*.tsbuildinfo"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.7.0"
+  },
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "innostes",
+    "design-system",
+    "react",
+    "tailwindcss",
+    "base-ui",
+    "admin",
+    "dashboard",
+    "components",
+    "accessible",
+    "ui"
+  ],
+  "nx": {
+    "name": "ui"
+  },
+  "devDependencies": {
+    "react-is": "^19.3.1",
+    "recharts": "^3.10.1"
+  }
+}

@@ -1,0 +1,35 @@
+---
+title: Skeleton
+description: A placeholder that mirrors content while it loads.
+icon: RectangleHorizontal
+status: Stable
+summary: Pulsing shapes sized with utility classes. Respects reduced motion.
+---
+
+<ComponentPreview name="feedback/skeleton/basic" />
+
+## Import
+
+```tsx
+import { Skeleton } from '@innostes/ui';
+```
+
+## Usage
+
+Match the shape of the real content so the layout doesn't jump when it loads:
+
+```tsx
+<div aria-busy="true" aria-label="Loading profile" className="flex items-center gap-3">
+  <Skeleton className="size-10 rounded-full" />
+  <Skeleton className="h-4 w-40" />
+</div>
+```
+
+## Accessibility
+
+- Skeletons are hidden from screen readers. Mark the container with `aria-busy="true"`.
+- The pulse stops for users who prefer reduced motion.
+
+## API Reference
+
+`Skeleton` takes the props of a `<div>`.

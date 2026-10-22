@@ -1,0 +1,84 @@
+---
+title: API Conventions
+description: The rules every innostes UI component follows, so you can guess the API.
+icon: Ruler
+---
+
+Learn these once and every component works the way you expect.
+
+## Composition
+
+Components with several parts are **flat named exports**, not namespaces:
+
+```tsx
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@innostes/ui';
+```
+
+Everything is exported from the package root. Imports are tree-shaken: you only ship what you use.
+
+## Controlled and uncontrolled
+
+Every stateful component works both ways, using React's naming:
+
+| Uncontrolled | Controlled | Callback |
+| --- | --- | --- |
+| `defaultValue` | `value` | `onValueChange` |
+| `defaultOpen` | `open` | `onOpenChange` |
+| `defaultChecked` | `checked` | `onCheckedChange` |
+| `defaultPressed` | `pressed` | `onPressedChange` |
+
+Callbacks receive the new value first, then an `eventDetails` object (with `reason` and `event`).
+
+## Styling
+
+- **`className`** is merged with `tailwind-merge`, so your classes win over ours.
+  On interactive parts it can also be a function of the component state:
+  `className={({ disabled }) => (disabled ? 'opacity-30' : undefined)}`.
+- **`data-slot`** names every part (`data-slot="dialog-content"`), so you can target parts from CSS
+  or a parent: `[&_[data-slot=card-title]]:text-lg`.
+- **State attributes** come from Base UI: `data-open`, `data-checked`, `data-disabled`,
+  `data-highlighted`, `data-invalid`, … Style states with Tailwind's `data-*:` variants.
+- **Variant helpers** (`buttonVariants`, `badgeVariants`, `inputVariants`, `toggleVariants`) give you
+  the classes without the component, e.g. for router links. They're server-safe.
+
+## Rendering another element
+
+Parts built on Base UI take a `render` prop to change the element or compose with your own:
+
+```tsx
+<Button render={<Link href="/orders" />} nativeButton={false}>Orders</Button>
+<DialogTrigger render={<Button variant="outline" />}>Edit</DialogTrigger>
+```
+
+Our props and handlers are merged into the element you pass.
+
+## Refs
+
+Every component forwards `ref` to its root element with `forwardRef`, so refs work the same on
+React 17, 18 and 19.
+
+## Server Components
+
+Interactive components ship with `"use client"`, so you can import them into Server Components.
+Pure helpers (`cn`, `buttonVariants`, `getPaginationRange`, …) don't, and work on the server.
+
+## Sizes
+
+Controls share one size scale so they line up in a row:
+
+| Size | Height | Use |
+| --- | --- | --- |
+| `sm` | 32px | Dense tables, toolbars |
+| `md` | 40px | Default |
+| `lg` | 48px | Marketing pages, touch-first screens |
+
+## Accessibility
+
+- Keyboard support and ARIA come from Base UI, which follows the WAI-ARIA Authoring Practices.
+- Icon-only controls require an `aria-label`. The docs for each component list what you must provide.
+- Every component is tested for its roles and keyboard behaviour.
+
+## Versioning
+
+innostes UI follows [semantic versioning](https://semver.org). Breaking changes only happen in major
+versions and are listed in the changelog with a migration note.

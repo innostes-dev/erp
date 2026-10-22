@@ -1,0 +1,59 @@
+---
+title: Combobox
+description: A searchable select.
+icon: Search
+status: Beta
+summary: Type to filter, arrow keys to move, Enter to pick. For long lists like countries or customers.
+---
+
+<ComponentPreview name="forms/combobox/basic" />
+
+## Import
+
+```tsx
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxGroupLabel,
+  ComboboxSeparator,
+} from '@innostes/ui';
+```
+
+## Usage
+
+Pass all options as `items`. `ComboboxList` takes a function and renders it for each item that
+matches the filter.
+
+```tsx
+<Combobox items={customers} itemToStringLabel={(c) => c.name}>
+  <ComboboxInput placeholder="Search customers…" aria-label="Customer" />
+  <ComboboxContent>
+    <ComboboxEmpty>No customer found.</ComboboxEmpty>
+    <ComboboxList>
+      {(customer: Customer) => (
+        <ComboboxItem key={customer.id} value={customer}>
+          {customer.name}
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
+
+- For objects, pass `itemToStringLabel` (shown text) and, if needed, `isItemEqualToValue`.
+- For server-side search, control the input with `onInputValueChange` and pass the results as `items`.
+- `showClear` and `showTrigger` on `ComboboxInput` toggle the clear and open buttons.
+
+## Accessibility
+
+- Follows the WAI-ARIA combobox pattern: the input owns a listbox, and the highlighted option is
+  announced as you move.
+
+## API Reference
+
+<ApiTable components={['ComboboxInput', 'ComboboxContent', 'ComboboxList', 'ComboboxItem', 'ComboboxEmpty', 'ComboboxGroup', 'ComboboxGroupLabel', 'ComboboxSeparator']} baseUi="combobox" />

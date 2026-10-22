@@ -1,0 +1,36 @@
+---
+title: Radio Group
+description: Pick exactly one option from a set.
+icon: CircleDot
+status: Stable
+summary: Arrow-key navigation, form submission and Field support.
+---
+
+<ComponentPreview name="forms/radio-group/basic" />
+
+## Import
+
+```tsx
+import { Radio, RadioGroup } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<RadioGroup name="plan" defaultValue="business" aria-label="Plan">
+  <label className="flex items-center gap-2"><Radio value="starter" /> Starter</label>
+  <label className="flex items-center gap-2"><Radio value="business" /> Business</label>
+</RadioGroup>
+```
+
+Use radios for 2–6 visible options. For longer lists, use [Select](/ui/docs/components/forms/select).
+Style a selected option's wrapper with `has-data-checked:` (as in the demo).
+
+## Accessibility
+
+- Arrow keys move and select; Tab enters and leaves the group.
+- Label the group (`aria-label`, or `aria-labelledby` pointing at a heading).
+
+## API Reference
+
+<ApiTable components={['RadioGroup', 'Radio']} baseUi="radio" />

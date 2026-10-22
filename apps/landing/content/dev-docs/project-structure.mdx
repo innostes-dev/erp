@@ -1,0 +1,81 @@
+---
+title: Project Structure
+description: How the monorepo is organised and what each folder is for.
+icon: FolderTree
+---
+
+## Folders
+
+<Files>
+  <Folder name="apps" defaultOpen>
+    <Folder name="landing">
+      <Folder name="app" />
+      <Folder name="components" />
+      <Folder name="content">
+        <Folder name="dev-docs" />
+        <Folder name="docs" />
+      </Folder>
+      <File name="package.json" />
+    </Folder>
+    <Folder name="web-app">
+      <Folder name="src" />
+      <File name="vite.config.mts" />
+    </Folder>
+    <Folder name="api-server">
+      <Folder name="app" />
+      <File name="project.json" />
+      <File name="requirements.txt" />
+    </Folder>
+  </Folder>
+  <Folder name="packages" defaultOpen>
+    <Folder name="ui">
+      <Folder name="src" />
+      <Folder name="tailwind" />
+      <File name="vite.config.mts" />
+    </Folder>
+  </Folder>
+  <Folder name=".github">
+    <Folder name="workflows" />
+  </Folder>
+  <File name="nx.json" />
+  <File name="package.json" />
+  <File name="pnpm-workspace.yaml" />
+  <File name="tsconfig.base.json" />
+  <File name="tsconfig.json" />
+</Files>
+
+| Path | What it is |
+| --- | --- |
+| `apps/` | Deployable applications. Apps can depend on packages, never on other apps. |
+| `packages/` | Shared, reusable code. Can be published to npm. |
+| `nx.json` | Nx settings: plugins, task defaults and release config. |
+| `pnpm-workspace.yaml` | Which folders are workspace packages (`apps/*`, `packages/*`) and which install scripts may run. |
+| `tsconfig.base.json` | TypeScript settings shared by every project. |
+| `tsconfig.json` | Project references, kept up to date by `nx sync`. |
+
+## Naming
+
+- Every project has an npm name in the `@innostes/` scope, e.g. `@innostes/web-app`.
+- Nx uses a short name for tasks, e.g. `pnpm nx build web-app`. It's set in each `package.json`
+  under `"nx": { "name": "..." }`, or in `project.json`.
+
+## How projects depend on each other
+
+Workspace packages are linked with the `workspace:*` protocol:
+
+```json title="apps/landing/package.json"
+{
+  "dependencies": {
+    "@innostes/ui": "workspace:*"
+  }
+}
+```
+
+Nx reads these links to build the dependency graph. When you run `pnpm nx build landing`, Nx builds
+`@innostes/ui` first. Run `pnpm nx graph` to see the whole graph.
+
+## What's not in git
+
+Build output (`dist/`, `.next/`), `node_modules/`, the Nx cache and the API's `.venv/` are ignored.
+AI assistant folders (`.claude/`, `.cursor/`, `AGENTS.md`, …) are also ignored, so each developer
+can keep their own setup. `pnpm-lock.yaml` **is** committed.

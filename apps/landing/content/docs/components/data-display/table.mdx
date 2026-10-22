@@ -1,0 +1,38 @@
+---
+title: Table
+description: Styled table parts for tabular data.
+icon: Table
+status: Stable
+summary: Native table markup with consistent spacing, hover and selected rows, and horizontal scrolling.
+---
+
+<ComponentPreview name="data-display/table/basic" />
+
+## Import
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from '@innostes/ui';
+```
+
+## Usage
+
+Use `Table` when you render rows yourself. For sorting, selection and pagination, use
+[Data Table](/ui/docs/components/data-display/data-table), which is built from these parts.
+
+- Right-align numbers with `className="text-end"` and use `tabular-nums` so digits line up.
+- Mark a selected row with `data-state="selected"`.
+
+## API Reference
+
+<ApiTable components={['Table']} />
+
+The other parts take the props of their HTML element (`thead`, `tbody`, `tr`, `th`, `td`, …).

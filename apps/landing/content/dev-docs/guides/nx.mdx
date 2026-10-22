@@ -1,0 +1,69 @@
+---
+title: Working with Nx
+description: Run tasks, use the cache and only rebuild what changed.
+icon: Workflow
+---
+
+[Nx](https://nx.dev) runs every task in the repo: builds, dev servers, type checks. Always run it
+through pnpm: `pnpm nx <command>`.
+
+## Running tasks
+
+```bash
+pnpm nx build web-app                     # one task for one project
+pnpm nx run api-server:install            # same thing, long form
+pnpm nx run-many -t build                 # one task for every project that has it
+pnpm nx run-many -t build typecheck -p ui landing   # several tasks, some projects
+```
+
+## Where tasks come from
+
+| Project | Tasks defined by |
+| --- | --- |
+| `web-app`, `ui` | **Inferred** from `vite.config.mts` by `@nx/vite/plugin` |
+| `landing` | `scripts` in `package.json`, with options under `nx.targets` |
+| `api-server` | `targets` in `project.json` |
+
+See a project's tasks with `pnpm nx show project <name>`.
+
+## Dependencies between tasks
+
+`"dependsOn": ["^build"]` means "build my dependencies first". That's why
+`pnpm nx dev landing` builds `@innostes/ui` before starting Next.js.
+
+## Cache
+
+Nx caches task results. If inputs haven't changed, a task finishes instantly with the cached output.
+
+```bash
+pnpm nx build ui --skip-nx-cache   # ignore the cache once
+pnpm nx reset                      # clear the cache and stop the Nx daemon
+```
+
+## Affected
+
+Only run tasks for projects changed since `main`:
+
+```bash
+pnpm nx affected -t build typecheck
+```
+
+## Project graph
+
+```bash
+pnpm nx graph
+```
+
+Opens an interactive graph of projects and their dependencies.
+
+## TypeScript project references
+
+Nx keeps the `references` in `tsconfig.json` files in sync with the dependency graph. If a task
+says the workspace is out of sync, run:
+
+```bash
+pnpm nx sync
+```
+
+and commit the changes. `landing` is excluded from the Nx TypeScript plugin because Next.js
+type-checks it itself.

@@ -1,0 +1,10 @@
+/*
+ * Source for the precompiled `@innostes/ui/styles.css` (for websites without Tailwind).
+ * No preflight/reset is included, so it won't restyle the rest of the website.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities) source(none);
+@import './theme.css';
+
+@source '../src';

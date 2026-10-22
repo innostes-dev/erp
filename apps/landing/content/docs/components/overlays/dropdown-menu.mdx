@@ -1,0 +1,60 @@
+---
+title: Dropdown Menu
+description: A list of actions opened from a button.
+icon: ListCollapse
+status: Stable
+summary: Groups, shortcuts, checkbox and radio items, submenus and destructive actions.
+---
+
+<ComponentPreview name="overlays/dropdown-menu/basic" />
+
+## Import
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLinkItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuGroup,
+  DropdownMenuGroupLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+} from '@innostes/ui';
+```
+
+## Row actions
+
+The most common admin pattern: a "⋯" button per table row.
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger render={<Button variant="ghost" size="sm" iconOnly aria-label={`Actions for ${order.id}`} />}>
+    <MoreHorizontalIcon />
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="end">
+    <DropdownMenuItem onClick={() => open(order)}>View</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem variant="destructive" onClick={() => refund(order)}>Refund</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+## Submenus
+
+Put a `DropdownMenuSubTrigger` and a `DropdownMenuContent` inside `DropdownMenuSub`.
+
+## Accessibility
+
+- Arrow keys move between items, type-ahead jumps to an item, Enter/Space activates, Escape closes.
+- `DropdownMenuShortcut` is a visual hint only; register the keyboard shortcut yourself.
+
+## API Reference
+
+<ApiTable components={['DropdownMenuContent', 'DropdownMenuItem', 'DropdownMenuShortcut']} baseUi="menu" />

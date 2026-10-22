@@ -1,0 +1,8 @@
+{
+  "title": "Widgets",
+  "pages": [
+    "metric-card",
+    "widget-card",
+    "sparkline"
+  ]
+}

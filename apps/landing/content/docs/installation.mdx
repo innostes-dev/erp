@@ -1,0 +1,114 @@
+---
+title: Installation
+description: Add innostes UI to a React app in a few minutes.
+icon: Download
+install: pnpm add @innostes/ui
+---
+
+## Requirements
+
+- React 17, 18 or 19 (and the matching React DOM). The test suite runs on all three.
+- Tailwind CSS v4 (optional, recommended)
+
+`@base-ui/react`, `class-variance-authority`, `clsx` and `tailwind-merge` are installed with the package.
+
+<Steps>
+<Step>
+
+### Install the package
+
+```bash tab="pnpm"
+pnpm add @innostes/ui
+```
+
+```bash tab="npm"
+npm install @innostes/ui
+```
+
+```bash tab="yarn"
+yarn add @innostes/ui
+```
+
+</Step>
+<Step>
+
+### Add the styles
+
+<Tabs items={['With Tailwind CSS', 'Without Tailwind CSS']}>
+<Tab value="With Tailwind CSS">
+
+Import the package after Tailwind in your main CSS file. Components then use **your** theme, and
+Tailwind only generates the classes the components actually use.
+
+```css title="app/globals.css"
+@import 'tailwindcss';
+@import '@innostes/ui/tailwind.css';
+@import '@innostes/ui/dark.css'; /* optional dark theme */
+```
+
+</Tab>
+<Tab value="Without Tailwind CSS">
+
+Import the precompiled stylesheet once, in your app entry.
+
+```ts title="main.tsx"
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css'; // optional dark theme
+```
+
+It uses the default theme and contains no CSS reset, so it won't restyle the rest of your app.
+
+</Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+### Add the providers
+
+Mount `Toaster` once to show [toasts](/ui/docs/components/feedback/toast), and wrap the app in
+`TooltipProvider` so tooltips share their delay.
+
+```tsx title="app/layout.tsx"
+import { Toaster, TooltipProvider } from '@innostes/ui';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <TooltipProvider>{children}</TooltipProvider>
+        <Toaster />
+      </body>
+    </html>
+  );
+}
+```
+
+Popups render in a portal at the end of `<body>`. If your root element creates its own stacking
+context, add `isolation: isolate` to it so popups always appear on top.
+
+</Step>
+<Step>
+
+### Use a component
+
+```tsx
+import { Button, toast } from '@innostes/ui';
+
+export function SaveButton() {
+  return <Button onClick={() => toast.success('Saved')}>Save</Button>;
+}
+```
+
+</Step>
+</Steps>
+
+## Next.js
+
+Interactive components ship with `"use client"`, so you can import them straight into Server
+Components. Helpers like `cn()` and `buttonVariants()` work on the server too.
+
+## TypeScript
+
+Types ship with the package. Every prop has TSDoc, so your editor shows descriptions and defaults
+on hover.

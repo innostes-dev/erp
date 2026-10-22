@@ -1,0 +1,36 @@
+---
+title: Button Group
+description: Joins related buttons into one control.
+icon: Group
+status: Stable
+summary: Merges borders and corners of adjacent buttons, horizontally or vertically.
+---
+
+<ComponentPreview name="actions/button-group/basic" />
+
+## Import
+
+```tsx
+import { Button, ButtonGroup } from '@innostes/ui';
+```
+
+## Usage
+
+Use a group for actions that belong together: a pager, a split button, or a set of views.
+For buttons that toggle state, use [Toggle Group](/ui/docs/components/actions/toggle-group) instead.
+
+```tsx
+<ButtonGroup aria-label="Pager">
+  <Button variant="outline">Previous</Button>
+  <Button variant="outline">Next</Button>
+</ButtonGroup>
+```
+
+## Accessibility
+
+- Renders `role="group"`. Give it an `aria-label` that describes the set.
+- Focus outlines stay on top of neighbouring buttons.
+
+## API Reference
+
+<ApiTable components={['ButtonGroup']} />

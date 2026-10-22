@@ -1,0 +1,14 @@
+/*
+ * For websites that use Tailwind CSS v4:
+ *
+ *   @import "tailwindcss";
+ *   @import "@innostes/ui/tailwind.css";
+ *
+ *   @theme {
+ *     --color-primary: var(--color-emerald-600);   (optional overrides)
+ *   }
+ */
+@import './theme.css';
+
+/* Let the website's Tailwind find the classes used by the built components. */
+@source '../dist/**/*.js';

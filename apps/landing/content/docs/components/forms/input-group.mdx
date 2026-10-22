@@ -1,0 +1,56 @@
+---
+title: Input Group
+description: Inputs with text, icons or buttons attached, plus search and password fields.
+icon: TextCursor
+status: Stable
+summary: InputGroup, SearchInput (clear, Escape, shortcut hint) and PasswordInput (show/hide).
+---
+
+<ComponentPreview name="forms/input-group/basic" />
+
+## Import
+
+```tsx
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+  SearchInput,
+  PasswordInput,
+} from '@innostes/ui';
+```
+
+## InputGroup
+
+```tsx
+<InputGroup>
+  <InputGroupAddon>https://</InputGroupAddon>
+  <InputGroupInput placeholder="acme" aria-label="Workspace" />
+  <InputGroupAddon>.innostes.app</InputGroupAddon>
+</InputGroup>
+```
+
+`InputGroupAddon` has two looks: `variant="text"` (default) for units and domains, and
+`variant="icon"` for icons and small buttons.
+
+## SearchInput
+
+```tsx
+<SearchInput aria-label="Search orders" placeholder="Search orders…" onValueChange={setQuery} shortcut="⌘K" />
+```
+
+Escape and the × button clear it. `onValueChange` fires on every keystroke; debounce in your data
+layer if each change triggers a request.
+
+## PasswordInput
+
+```tsx
+<PasswordInput name="password" autoComplete="current-password" required />
+```
+
+The toggle button has `aria-pressed` and a label that changes ("Show password" / "Hide password").
+Translate it with `toggleLabels`.
+
+## API Reference
+
+<ApiTable components={['InputGroup', 'InputGroupAddon', 'SearchInput', 'PasswordInput']} baseUi="input" />

@@ -1,0 +1,45 @@
+---
+title: Checkbox
+description: A box that is checked, unchecked or indeterminate.
+icon: SquareCheck
+status: Stable
+summary: Single checkboxes and groups with a "select all" parent.
+---
+
+<ComponentPreview name="forms/checkbox/basic" />
+
+## Import
+
+```tsx
+import { Checkbox, CheckboxGroup } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<label className="flex items-center gap-2">
+  <Checkbox name="terms" required /> I accept the terms
+</label>
+
+// Controlled
+<Checkbox checked={value} onCheckedChange={setValue} aria-label="Select row" />
+
+// Indeterminate (e.g. "some rows selected")
+<Checkbox indeterminate aria-label="Select all" />
+```
+
+## Groups
+
+`CheckboxGroup` manages several checkboxes as one array value. Pass `allValues` and add a
+`parent` checkbox to get a working "select all" with the indeterminate state.
+
+<ComponentPreview name="forms/checkbox/group" />
+
+## Accessibility
+
+- Announced as a checkbox with `aria-checked` (`mixed` when indeterminate).
+- Space toggles it. Label every checkbox, by wrapping it in a `<label>` or with `aria-label`.
+
+## API Reference
+
+<ApiTable components={['Checkbox', 'CheckboxGroup']} baseUi="checkbox" />

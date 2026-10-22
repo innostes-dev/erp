@@ -1,0 +1,37 @@
+---
+title: Context Menu
+description: A menu opened by right-click or long-press.
+icon: MousePointerClick
+status: Stable
+summary: Same items as Dropdown Menu, positioned at the pointer.
+---
+
+<ComponentPreview name="overlays/context-menu/basic" />
+
+## Import
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  // …and ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuSub, etc.
+} from '@innostes/ui';
+```
+
+## Usage
+
+Items are the same components as [Dropdown Menu](/ui/docs/components/overlays/dropdown-menu),
+exported with `ContextMenu*` names.
+
+<Callout type="warn">
+  Right-click is hard to discover and unavailable to some users. Make every action in a context menu
+  reachable another way too, e.g. a row actions button.
+</Callout>
+
+## API Reference
+
+<ApiTable components={['ContextMenuContent']} baseUi="context-menu" />

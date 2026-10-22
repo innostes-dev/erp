@@ -1,0 +1,67 @@
+---
+title: Releasing
+description: Version and publish @innostes/ui to npm.
+icon: Send
+install: pnpm nx release --dry-run
+---
+
+Only `@innostes/ui` is published. Apps are never released to npm. This is set in `nx.json`:
+
+```json title="nx.json"
+{
+  "release": {
+    "projects": ["ui"],
+    "version": { "preVersionCommand": "pnpm nx run-many -t build -p ui" }
+  }
+}
+```
+
+## Before the first release
+
+1. Create the `innostes` organization on [npmjs.com](https://www.npmjs.com) (the package is
+   published as `@innostes/ui`).
+2. Log in: `npm login`.
+
+## Release
+
+<Steps>
+<Step>
+
+Preview what will happen:
+
+```bash
+pnpm nx release --dry-run
+```
+
+</Step>
+<Step>
+
+Release. Nx builds the package, sets the new version in `package.json`, writes the changelog,
+commits, tags, and then asks before publishing:
+
+```bash
+pnpm nx release patch      # or minor, major, or an exact version like 1.2.0
+```
+
+For the very first release add `--first-release`, because there's no earlier git tag or npm version yet.
+
+</Step>
+</Steps>
+
+## Test a release locally
+
+The repo includes a local npm registry ([Verdaccio](https://verdaccio.org)) for trying a publish
+without touching npm:
+
+```bash
+pnpm nx local-registry   # run from the repo root; starts http://localhost:4873
+```
+
+Then, in another terminal, version without publishing, and publish to the local registry:
+
+```bash
+pnpm nx release patch --skip-publish
+pnpm nx release publish --registry=http://localhost:4873
+```
+
+Undo the version commit and tag afterwards if it was only a test.

@@ -1,0 +1,51 @@
+---
+title: Sheet
+description: A panel that slides in from a screen edge.
+icon: PanelRight
+status: Stable
+summary: For filters, record details and edit forms next to a list. Slides from any side, RTL-aware.
+---
+
+<ComponentPreview name="overlays/sheet/basic" />
+
+## Import
+
+```tsx
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetBody,
+  SheetFooter,
+  SheetClose,
+} from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Sheet>
+  <SheetTrigger render={<Button variant="outline" />}>Filters</SheetTrigger>
+  <SheetContent side="right">
+    <SheetHeader>
+      <SheetTitle>Filters</SheetTitle>
+    </SheetHeader>
+    <SheetBody>…</SheetBody>   {/* scrolls when content is long */}
+    <SheetFooter>…</SheetFooter>
+  </SheetContent>
+</Sheet>
+```
+
+`side` is `right` (default), `left`, `top` or `bottom`. Left and right flip in right-to-left layouts.
+
+## Accessibility
+
+Same as [Dialog](/ui/docs/components/overlays/dialog): focus is trapped, Escape closes, and the
+title labels the panel.
+
+## API Reference
+
+<ApiTable components={['SheetContent', 'SheetTitle', 'SheetDescription']} baseUi="dialog" />

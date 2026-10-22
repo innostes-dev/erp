@@ -1,0 +1,66 @@
+---
+title: Toast
+description: Temporary notifications you can trigger from anywhere.
+icon: BellRing
+status: Stable
+summary: Success, error, warning, loading and promise toasts with actions, swipe to dismiss and a queue limit.
+---
+
+<ComponentPreview name="feedback/toast/basic" />
+
+## Setup
+
+Mount `Toaster` once, near the root of your app:
+
+```tsx title="app/layout.tsx"
+import { Toaster } from '@innostes/ui';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <Toaster position="bottom-right" />
+      </body>
+    </html>
+  );
+}
+```
+
+## Usage
+
+`toast` works anywhere, including outside React (API clients, stores, event handlers):
+
+```tsx
+import { toast } from '@innostes/ui';
+
+toast('Order archived', { action: { label: 'Undo', onClick: restore } });
+toast.success('Invoice sent');
+toast.error('Could not save', { description: error.message });
+
+// Loading → success / error
+await toast.promise(saveOrder(), {
+  loading: 'Saving order…',
+  success: (order) => `${order.id} saved`,
+  error: (err) => `Failed: ${err.message}`,
+});
+
+// Manual control
+const id = toast.loading('Uploading…');
+toast.update(id, { title: 'Uploaded', type: 'success', timeout: 4000 });
+toast.dismiss(id);
+```
+
+## Accessibility
+
+- Toasts are announced politely; `error` toasts use high priority and are announced immediately.
+- Keyboard users can jump to the toasts with <kbd>F6</kbd>. Toasts pause while hovered or focused.
+- Toasts disappear, so don't put anything the user must act on only in a toast. Use an
+  [Alert](/ui/docs/components/feedback/alert) for that.
+
+## API Reference
+
+<ApiTable components={['Toaster']} baseUi="toast" />
+
+`toast(title, options)` options: `description`, `type`, `timeout` (ms, `0` = until dismissed),
+`priority`, `action` (`{ label, onClick }`) and `onClose`.

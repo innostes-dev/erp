@@ -1,0 +1,40 @@
+---
+title: Searchable Select
+description: A select you can type into to filter.
+icon: TextSearch
+status: Stable
+summary: For long lists of simple options. Matches labels and keywords, accent-insensitive.
+---
+
+<ComponentPreview name="forms/searchable-select/basic" />
+
+## Import
+
+```tsx
+import { SearchableSelect, type SearchableSelectOption } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+const options: SearchableSelectOption[] = warehouses.map((w) => ({
+  value: w.id,
+  label: w.name,
+  keywords: [w.city, w.code],   // also matched by the search
+  trailing: w.city,             // shown at the end of the option
+}));
+
+<SearchableSelect aria-label="Warehouse" options={options} value={id} onValueChange={setId} name="warehouseId" />
+```
+
+- `value` is the option's `value` string (or `null`), so it fits straight into forms and APIs.
+- Search ignores case and accents ("sao" finds "São Paulo") and matches `keywords` too.
+- `leading` shows an element before the label (an avatar, a flag), also inside the input once selected.
+
+Use [Select](/ui/docs/components/forms/select) for short lists (under ~10 options), and
+[Combobox](/ui/docs/components/forms/combobox) when you need custom item rendering, groups or
+server-side search.
+
+## API Reference
+
+<ApiTable components={['SearchableSelect']} baseUi="combobox" />

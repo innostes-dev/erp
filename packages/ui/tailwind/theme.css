@@ -1,0 +1,77 @@
+/*
+ * innostes UI design tokens.
+ *
+ * `@theme default` makes every token a fallback: anything the app defines in its own
+ * `@theme { ... }` wins. Defaults point at Tailwind's palette, so an app that customises
+ * e.g. `--color-blue-600` changes `primary` too.
+ *
+ * Naming: `<role>` is a surface or fill, `<role>-foreground` is text/icons drawn on it,
+ * `<role>-hover` is its hover state.
+ */
+@theme default {
+  /* Surfaces */
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-zinc-950);
+  --color-card: var(--color-white);
+  --color-card-foreground: var(--color-zinc-950);
+  --color-popover: var(--color-white);
+  --color-popover-foreground: var(--color-zinc-950);
+
+  /* Actions */
+  --color-primary: var(--color-blue-600);
+  --color-primary-hover: var(--color-blue-700);
+  --color-primary-foreground: var(--color-white);
+  --color-secondary: var(--color-zinc-100);
+  --color-secondary-hover: var(--color-zinc-200);
+  --color-secondary-foreground: var(--color-zinc-900);
+
+  /* Subtle UI: muted text/backgrounds, and the hover/highlight colour for items */
+  --color-muted: var(--color-zinc-100);
+  --color-muted-foreground: var(--color-zinc-500);
+  --color-accent: var(--color-zinc-100);
+  --color-accent-foreground: var(--color-zinc-900);
+
+  /* Status */
+  --color-destructive: var(--color-red-600);
+  --color-destructive-hover: var(--color-red-700);
+  --color-destructive-foreground: var(--color-white);
+  --color-success: var(--color-emerald-600);
+  --color-success-foreground: var(--color-white);
+  --color-warning: var(--color-amber-500);
+  --color-warning-foreground: var(--color-amber-950);
+  --color-info: var(--color-sky-600);
+  --color-info-foreground: var(--color-white);
+
+  /* Lines and focus */
+  --color-border: var(--color-zinc-200);
+  --color-input: var(--color-zinc-300);
+  --color-ring: var(--color-blue-500);
+
+  /*
+   * Categorical colours for charts, icon tiles and avatars: distinct hues that work together.
+   * Use them in order (chart-1, chart-2, …) for data series.
+   */
+  --color-chart-1: var(--color-blue-600);
+  --color-chart-2: var(--color-violet-500);
+  --color-chart-3: var(--color-emerald-500);
+  --color-chart-4: var(--color-amber-500);
+  --color-chart-5: var(--color-rose-500);
+  --color-chart-6: var(--color-cyan-500);
+  --color-chart-7: var(--color-orange-500);
+  --color-chart-8: var(--color-slate-500);
+
+  /* Dimmed layer behind dialogs and drawers */
+  --color-overlay: rgb(0 0 0 / 0.4);
+
+  /* Motion: sliding bar for indeterminate progress */
+  --animate-indeterminate: innostes-indeterminate 1.4s ease-in-out infinite;
+
+  @keyframes innostes-indeterminate {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(300%);
+    }
+  }
+}

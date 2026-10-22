@@ -1,0 +1,80 @@
+---
+title: Writing Docs
+description: Add and edit pages in the developer docs and the innostes UI docs.
+icon: PenLine
+---
+
+Both doc sets live in `apps/landing` and are written in MDX (Markdown with React components).
+
+| Docs | Folder | URL |
+| --- | --- | --- |
+| Developer docs | `content/dev-docs/` | `/docs` |
+| innostes UI docs | `content/docs/` | `/ui/docs` |
+
+Run `pnpm nx dev landing` and edit. Pages reload on save.
+
+## Add a page
+
+Create an `.mdx` file. The path becomes the URL: `content/dev-docs/guides/testing.mdx` →
+`/docs/guides/testing`.
+
+```mdx title="content/dev-docs/guides/testing.mdx"
+---
+title: Testing
+description: How we test innostes.
+icon: FlaskConical
+---
+
+## Unit tests
+
+Write content here.
+```
+
+## Frontmatter
+
+| Field | Required | Purpose |
+| --- | --- | --- |
+| `title` | yes | Page title and sidebar label |
+| `description` | no | Shown under the title and in search |
+| `icon` | no | A [Lucide](https://lucide.dev/icons) icon name for the sidebar, e.g. `Rocket` |
+| `status` | no | Badge: `Stable`, `Beta` or `Experimental` |
+| `summary` | no | Short text on the right of the header |
+| `install` | no | A command shown with a copy button |
+
+## Order and sections
+
+Each folder has a `meta.json` that sets the sidebar order. `---Name---` adds a section heading, and
+`...folder` lists a folder's pages without nesting them.
+
+```json title="content/dev-docs/meta.json"
+{
+  "pages": ["---Get Started---", "index", "getting-started", "---Guides---", "...guides"]
+}
+```
+
+A new page doesn't show in the sidebar until you add it to `meta.json`.
+
+## Components you can use
+
+| Component | Use for |
+| --- | --- |
+| `<Callout type="info \| warn \| error">` | Notes and warnings |
+| `<Cards>` / `<Card href>` | Link grids |
+| `<Steps>` / `<Step>` | Step-by-step instructions |
+| `<Tabs items>` / `<Tab value>` | Alternatives, e.g. with and without Tailwind |
+| `<Files>` / `<Folder>` / `<File>` | Folder trees |
+| `<TypeTable type>` | Props tables |
+| `<Preview>` / `<PreviewRow>` | Live component previews (UI docs) |
+| `<Button>` | The real `@innostes/ui` button |
+
+Components are registered in `components/mdx.tsx`. Add new ones there.
+
+## Code blocks
+
+````mdx
+```tsx title="example.tsx"
+export function Example() {}
+```
+````
+
+Add `tab="pnpm"` to several blocks in a row to show them as tabs.

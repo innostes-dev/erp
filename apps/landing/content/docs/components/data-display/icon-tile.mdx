@@ -1,0 +1,31 @@
+---
+title: Icon Tile
+description: A coloured square or circle holding an icon.
+icon: SquareDashed
+status: Stable
+summary: 14 colours, soft or solid, four sizes. Used by metric cards, lists and feature grids.
+---
+
+<ComponentPreview name="data-display/icon-tile/basic" />
+
+## Import
+
+```tsx
+import { IconTile, type IconTileTone } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<IconTile tone="chart-2"><UsersIcon /></IconTile>
+<IconTile tone="success" variant="solid" shape="circle" size="sm"><CheckIcon /></IconTile>
+```
+
+- **Semantic tones** (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) carry meaning.
+- **Categorical tones** (`chart-1` … `chart-8`) tell items apart, e.g. one colour per module.
+  They're the same colours the charts use, so a module looks the same everywhere.
+- The tile is decorative (`aria-hidden`); put the meaning in the text next to it.
+
+## API Reference
+
+<ApiTable components={['IconTile']} />

@@ -1,0 +1,50 @@
+---
+title: Managing Dependencies
+description: Add npm packages to the right project with pnpm.
+icon: Package
+---
+
+## Add a package to one project
+
+Use `--filter` with the project's npm name:
+
+```bash
+pnpm add zod --filter @innostes/web-app
+pnpm add -D @types/lodash --filter @innostes/web-app
+```
+
+## Add a tool for the whole repo
+
+Build tools used by every project go in the root `package.json`:
+
+```bash
+pnpm add -D -w prettier
+```
+
+## Use a workspace package
+
+```bash
+pnpm add @innostes/ui@workspace:* --filter @innostes/web-app
+```
+
+`workspace:*` always points at the local copy. When `@innostes/ui` is published, pnpm swaps it for
+the real version number.
+
+## Install scripts
+
+pnpm doesn't run package install scripts unless they're allowed. If an install stops with
+`ERR_PNPM_IGNORED_BUILDS`, decide per package in `pnpm-workspace.yaml`:
+
+```yaml title="pnpm-workspace.yaml"
+allowBuilds:
+  '@swc/core': true        # needs its script
+  nx: true
+  esbuild: false           # ships prebuilt binaries, script not needed
+  '@parcel/watcher': false
+```
+
+Only allow a script when the package needs it to work.
+
+## Python packages
+
+The API's Python dependencies are separate. See [api-server](/docs/apps/api-server#adding-a-python-package).

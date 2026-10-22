@@ -1,0 +1,37 @@
+---
+title: Accordion
+description: Stacked sections that expand and collapse.
+icon: ListChevronsDownUp
+status: Stable
+summary: One or many open sections, animated height, keyboard support.
+---
+
+<ComponentPreview name="navigation/accordion/basic" />
+
+## Import
+
+```tsx
+import { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Accordion defaultValue={['billing']}>
+  <AccordionItem value="billing">
+    <AccordionTrigger>Billing</AccordionTrigger>
+    <AccordionPanel>…</AccordionPanel>
+  </AccordionItem>
+</Accordion>
+```
+
+Add `multiple` to allow several open sections. `value` is always an array.
+
+## Accessibility
+
+- Triggers are buttons inside headings, with `aria-expanded` and `aria-controls`.
+- Arrow keys move between triggers.
+
+## API Reference
+
+<ApiTable components={['Accordion', 'AccordionItem', 'AccordionTrigger', 'AccordionPanel']} baseUi="accordion" />

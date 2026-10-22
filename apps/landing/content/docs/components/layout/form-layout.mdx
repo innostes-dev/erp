@@ -1,0 +1,44 @@
+---
+title: Form Layout
+description: Grids, sections and action bars for forms.
+icon: LayoutTemplate
+status: Stable
+summary: FormGrid, FormSection and FormActions. Responsive to the space they're in, not the screen.
+---
+
+<ComponentPreview name="layout/form-layout/basic" align="start" />
+
+## Import
+
+```tsx
+import { FormGrid, FormSection, FormActions } from '@innostes/ui';
+```
+
+## FormGrid
+
+Places fields in 1–4 columns. Make a field span the row with `className="col-span-full"`.
+
+```tsx
+<FormGrid columns={2}>
+  <Field>…</Field>
+  <Field>…</Field>
+  <Field className="col-span-full">…</Field>
+</FormGrid>
+```
+
+It uses **container queries**: the columns follow the width of the form's container, so the
+same form works in a page, a sheet or a dialog.
+
+## FormSection
+
+A titled group of fields. `layout="aside"` puts the title on the left (settings pages);
+`layout="stacked"` (default) puts it above (wizards, dialogs).
+
+## FormActions
+
+The button row at the end of a form. `align="between"` puts the first button at the start
+(Cancel / Back) and the rest at the end. `sticky` keeps it visible on long forms.
+
+## API Reference
+
+<ApiTable components={['FormGrid', 'FormSection', 'FormActions']} />

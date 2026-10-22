@@ -1,0 +1,48 @@
+---
+title: Locale Selects
+description: Country, time zone, language, currency and date format pickers.
+icon: Globe
+status: Stable
+summary: Names come from the browser's Intl API in the user's language. No data files to bundle or update.
+---
+
+<ComponentPreview name="forms/locale-select/basic" />
+
+## Import
+
+```tsx
+import {
+  CountrySelect,
+  TimezoneSelect,
+  LanguageSelect,
+  CurrencySelect,
+  DateFormatSelect,
+} from '@innostes/ui';
+```
+
+## Values
+
+| Component | Value | Example |
+| --- | --- | --- |
+| `CountrySelect` | ISO 3166-1 alpha-2 | `"IN"` |
+| `TimezoneSelect` | IANA time zone | `"Asia/Kolkata"` |
+| `LanguageSelect` | BCP 47 tag | `"en-IN"` |
+| `CurrencySelect` | ISO 4217 | `"INR"` |
+| `DateFormatSelect` | Pattern | `"DD/MM/YYYY"` |
+
+These are the standard codes your backend and `Intl` already use.
+
+## Options
+
+- `locale` sets the language of the names: `<CountrySelect locale="de" />` shows "Deutschland".
+- `priority` lists some values first, e.g. the countries you operate in: `priority={['IN', 'US']}`.
+- `include` limits the list, e.g. to the currencies you support.
+- `TimezoneSelect` is sorted by UTC offset and labelled `(GMT+05:30) Asia/Kolkata`; search matches the
+  city and the offset. Renamed zones (Calcutta → Kolkata, Kiev → Kyiv) show their current name.
+- `LanguageSelect` shows each language's own name too ("German · Deutsch"); pass `languages` for your list.
+- `CountrySelect` uses emoji flags. Windows shows these as two letters; pass `renderFlag` to use an
+  image or icon library instead.
+
+## API Reference
+
+<ApiTable components={['CountrySelect', 'TimezoneSelect', 'LanguageSelect', 'CurrencySelect', 'DateFormatSelect']} baseUi="combobox" />

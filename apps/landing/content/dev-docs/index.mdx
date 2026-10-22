@@ -1,0 +1,48 @@
+---
+title: Introduction
+description: Everything you need to build, run and ship the innostes platform.
+icon: BookOpen
+summary: Developer documentation for the innostes monorepo.
+---
+
+innostes is built as a single **Nx monorepo** managed with **pnpm**. All apps and shared packages
+live in one repository, share one lockfile, and are built and tested with the same commands.
+
+## What's in the repo
+
+<Cards>
+  <Card icon={<Rocket />} title="landing" href="/docs/apps/landing">
+    Public website and documentation (this site). Next.js + Fumadocs.
+  </Card>
+  <Card icon={<Boxes />} title="web-app" href="/docs/apps/web-app">
+    The innostes application front end. React + Vite.
+  </Card>
+  <Card icon={<Server />} title="api-server" href="/docs/apps/api-server">
+    Backend API. Python + FastAPI.
+  </Card>
+  <Card icon={<Layers />} title="@innostes/ui" href="/docs/packages/ui">
+    The design system. React components on Base UI and Tailwind CSS, published to npm.
+  </Card>
+</Cards>
+
+## Tech stack
+
+| Area | Tools |
+| --- | --- |
+| Monorepo | Nx 23, pnpm workspaces |
+| Language | TypeScript 6, Python 3.12+ |
+| Front end | React 19, Vite 8, Next.js 16 |
+| Styling | Tailwind CSS v4, `@innostes/ui` |
+| Docs | Fumadocs (MDX) |
+| Backend | FastAPI |
+
+## Start here
+
+<Cards>
+  <Card icon={<Terminal />} title="Getting Started" href="/docs/getting-started">
+    Install the tools and run every app locally.
+  </Card>
+  <Card icon={<GitBranch />} title="Project Structure" href="/docs/project-structure">
+    Where things live and why.
+  </Card>
+</Cards>

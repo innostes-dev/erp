@@ -1,0 +1,28 @@
+{
+  "title": "innostes UI",
+  "pages": [
+    "---Get Started---",
+    "index",
+    "installation",
+    "theming",
+    "conventions",
+    "---Examples---",
+    "...examples",
+    "---Widgets---",
+    "...widgets",
+    "---Actions---",
+    "...components/actions",
+    "---Forms---",
+    "...components/forms",
+    "---Data Display---",
+    "...components/data-display",
+    "---Feedback---",
+    "...components/feedback",
+    "---Overlays---",
+    "...components/overlays",
+    "---Navigation---",
+    "...components/navigation",
+    "---Layout---",
+    "...components/layout"
+  ]
+}

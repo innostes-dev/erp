@@ -1,0 +1,82 @@
+---
+title: Theming
+description: Change colours once in your Tailwind theme and every component follows.
+icon: Palette
+---
+
+Components are styled with **semantic tokens** such as `bg-primary`, `text-muted-foreground` or
+`border-border`. Each token is a CSS variable with a default from Tailwind's palette.
+
+<ThemingDemo />
+
+## Override tokens
+
+With Tailwind, set any token in your `@theme` block. Anything you leave out keeps its default.
+
+```css title="app/globals.css"
+@import 'tailwindcss';
+@import '@innostes/ui/tailwind.css';
+
+@theme {
+  --color-primary: var(--color-emerald-600);
+  --color-primary-hover: var(--color-emerald-700);
+  --radius-md: 0.75rem;
+}
+```
+
+Because defaults point at Tailwind's palette (`--color-primary` is `--color-blue-600`), changing
+your palette also changes the components.
+
+Without Tailwind, set the same CSS variables on `:root`:
+
+```css
+:root {
+  --color-primary: #16a34a;
+  --color-primary-hover: #15803d;
+}
+```
+
+## Dark mode
+
+Import the dark theme. It switches on under a `.dark` class or `data-theme="dark"` on any ancestor,
+usually `<html>`, which is what `next-themes` and most theme switchers set.
+
+```css
+@import '@innostes/ui/dark.css';
+```
+
+To customise it, override tokens inside your own `.dark` block after the import.
+
+## Scoped themes
+
+Tokens are plain CSS variables, so you can re-theme a part of the page, e.g. a white-label area:
+
+```tsx
+<section style={{ '--color-primary': 'var(--color-violet-600)' } as React.CSSProperties}>
+  <Button>Uses violet</Button>
+</section>
+```
+
+## Tokens
+
+| Token | Default | Used for |
+| --- | --- | --- |
+| `background` / `foreground` | white / zinc-950 | Page surface and text |
+| `card` / `card-foreground` | white / zinc-950 | Cards, tables, sidebar |
+| `popover` / `popover-foreground` | white / zinc-950 | Menus, dialogs, popovers, toasts |
+| `primary` (`-hover`, `-foreground`) | blue-600 (blue-700, white) | Main actions, selection, focus |
+| `secondary` (`-hover`, `-foreground`) | zinc-100 (zinc-200, zinc-900) | Secondary actions |
+| `muted` / `muted-foreground` | zinc-100 / zinc-500 | Subtle backgrounds, help text |
+| `accent` / `accent-foreground` | zinc-100 / zinc-900 | Hovered and highlighted items |
+| `destructive` (`-hover`, `-foreground`) | red-600 (red-700, white) | Dangerous actions, errors |
+| `success` / `success-foreground` | emerald-600 / white | Positive status |
+| `warning` / `warning-foreground` | amber-500 / amber-950 | Caution status |
+| `info` / `info-foreground` | sky-600 / white | Neutral status |
+| `border` | zinc-200 | Dividers and outlines |
+| `input` | zinc-300 | Form control borders |
+| `ring` | blue-500 | Focus outlines |
+| `overlay` | black / 40% | Backdrop behind dialogs |
+
+Each token is a colour variable: `--color-<token>`, used as `bg-<token>`, `text-<token>`,
+`border-<token>` and so on. Sizes, radius and fonts use Tailwind's standard tokens
+(`--spacing`, `--radius-md`, `--text-sm`, …).

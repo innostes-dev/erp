@@ -1,0 +1,44 @@
+---
+title: Stepper
+description: Progress through a multi-step flow.
+icon: ListOrdered
+status: Stable
+summary: Horizontal or vertical, with descriptions, error states and clickable completed steps.
+---
+
+<ComponentPreview name="navigation/stepper/basic" />
+
+## Import
+
+```tsx
+import { Stepper, type StepperStep } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+const [step, setStep] = useState(0);
+
+<Stepper steps={steps} currentStep={step} onStepClick={setStep} />
+```
+
+- Steps before `currentStep` are complete. Set `status: 'error'` on a step to flag a problem.
+- With `onStepClick`, completed steps become buttons, so users can go back but not skip ahead.
+- `labelPlacement="end"` puts titles next to the markers for a more compact horizontal stepper.
+
+## Vertical
+
+For order tracking, import jobs and long flows:
+
+<ComponentPreview name="navigation/stepper/vertical" />
+
+## Accessibility
+
+- A `<nav aria-label="Progress">` with an ordered list; the current step has `aria-current="step"`.
+- Completed and failed steps are announced ("completed", "has errors"), not shown by colour only.
+
+See the [Setup Wizard example](/ui/docs/examples/setup-wizard) for a full flow.
+
+## API Reference
+
+<ApiTable components={['Stepper']} />

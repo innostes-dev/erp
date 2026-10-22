@@ -1,0 +1,36 @@
+---
+title: Badge
+description: A short label for status, category or count.
+icon: Tag
+status: Stable
+summary: Semantic colours for statuses, with an optional dot.
+---
+
+<ComponentPreview name="data-display/badge/basic" />
+
+## Import
+
+```tsx
+import { Badge, badgeVariants } from '@innostes/ui';
+```
+
+## Usage
+
+Map your domain statuses to a variant once, and reuse it:
+
+```tsx
+const statusVariant = {
+  paid: 'success',
+  pending: 'warning',
+  overdue: 'destructive',
+  draft: 'info',
+} as const satisfies Record<InvoiceStatus, BadgeVariant>;
+
+<Badge variant={statusVariant[invoice.status]} dot>{invoice.status}</Badge>
+```
+
+Don't rely on colour alone: the text says what the status is.
+
+## API Reference
+
+<ApiTable components={['Badge']} />

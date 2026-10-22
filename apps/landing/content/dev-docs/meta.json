@@ -1,0 +1,15 @@
+{
+  "title": "Developer Docs",
+  "pages": [
+    "---Get Started---",
+    "index",
+    "getting-started",
+    "project-structure",
+    "---Apps---",
+    "...apps",
+    "---Packages---",
+    "...packages",
+    "---Guides---",
+    "...guides"
+  ]
+}

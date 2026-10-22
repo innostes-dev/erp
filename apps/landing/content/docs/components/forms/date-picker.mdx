@@ -1,0 +1,54 @@
+---
+title: Date Picker
+description: Date and date range fields with a calendar popup.
+icon: CalendarRange
+status: Stable
+summary: DatePicker and DateRangePicker with presets, min/max, clearing, and plain-form submission.
+---
+
+<ComponentPreview name="forms/date-picker/basic" />
+
+## Import
+
+```tsx
+import { DatePicker, DateRangePicker, defaultDateRangePresets, type DateRange } from '@innostes/ui';
+```
+
+## DatePicker
+
+```tsx
+<Label htmlFor="due">Due date</Label>
+<DatePicker id="due" name="dueDate" value={due} onValueChange={setDue} min={new Date()} />
+```
+
+- Shows the date with `Intl` (`dateStyle: 'medium'` by default); change it with `format`
+  (`Intl.DateTimeFormat` options or a function).
+- `name` submits the date as `YYYY-MM-DD`, so it works with plain forms and server actions.
+- `captionLayout="dropdown"` adds month and year selects, for dates of birth.
+- `clearable` (default `true`) shows a clear button.
+
+## DateRangePicker
+
+```tsx
+<DateRangePicker aria-label="Report period" value={range} onValueChange={setRange} startName="from" endName="to" />
+```
+
+- `onValueChange` fires once both ends are picked, or when a preset is chosen.
+- `presets` defaults to Today, Yesterday, Last 7 / 30 days, This / Last month and This year.
+  Pass your own (with translated labels), or `[]` to hide them:
+
+```tsx
+const presets = [
+  { label: 'Q1', range: () => ({ from: new Date(2026, 0, 1), to: new Date(2026, 2, 31) }) },
+  ...defaultDateRangePresets,
+];
+```
+
+## Accessibility
+
+- The trigger is a button. Label it with `<Label htmlFor>` + `id`, or `aria-label`.
+- The calendar gets focus when it opens; Escape closes it and returns focus to the trigger.
+
+## API Reference
+
+<ApiTable components={['DatePicker', 'DateRangePicker']} baseUi="popover" />

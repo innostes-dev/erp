@@ -1,0 +1,39 @@
+---
+title: Toggle Group
+description: A set of toggles where one or several can be on.
+icon: Columns3
+status: Stable
+summary: Single or multiple selection with roving focus and arrow-key navigation.
+---
+
+<ComponentPreview name="actions/toggle-group/basic" />
+
+## Import
+
+```tsx
+import { ToggleGroup, ToggleGroupItem } from '@innostes/ui';
+```
+
+## Usage
+
+`value` is always an array of the pressed items' values. Add `multiple` to allow several.
+
+```tsx
+const [view, setView] = useState(['list']);
+
+<ToggleGroup value={view} onValueChange={setView} aria-label="View">
+  <ToggleGroupItem value="list">List</ToggleGroupItem>
+  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+</ToggleGroup>
+```
+
+`variant` and `size` set on the group apply to every item.
+
+## Accessibility
+
+- Arrow keys move focus between items; Tab leaves the group.
+- Each item exposes `aria-pressed`. Label the group with `aria-label`.
+
+## API Reference
+
+<ApiTable components={['ToggleGroup', 'ToggleGroupItem']} baseUi="toggle-group" />

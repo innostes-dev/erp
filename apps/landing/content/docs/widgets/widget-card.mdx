@@ -1,0 +1,52 @@
+---
+title: Widget Card
+description: The frame for every dashboard widget.
+icon: LayoutPanelTop
+status: Stable
+summary: Header with title, count, actions and "View all", plus built-in loading, empty and error states.
+---
+
+<ComponentPreview name="widgets/widget-card/basic" />
+
+## Import
+
+```tsx
+import { WidgetCard } from '@innostes/ui';
+```
+
+## Usage
+
+Wrap any dashboard content (a list, a table, a chart) to give it a consistent header and the
+three states every data widget needs:
+
+```tsx
+const { data, isLoading, error, refetch } = usePendingActions();
+
+<WidgetCard
+  title="Pending actions"
+  count={data?.length}
+  viewAll={{ href: '/approvals' }}
+  actions={<PeriodSelect />}
+  loading={isLoading}
+  error={error ? 'Could not load pending actions.' : undefined}
+  onRetry={refetch}
+  empty={data?.length === 0}
+  emptyState="You're all caught up."
+>
+  <PendingActionList items={data} />
+</WidgetCard>
+```
+
+- `viewAll` takes `href`, `onClick` or `render={<Link href="…" />}` for your router.
+- `padding="none"` lets tables and charts reach the card edges.
+- `count` shows a badge next to the title (`99+` above 99); `countTone` changes its colour.
+
+## Accessibility
+
+- Renders a `<section>` labelled by its title, so screen-reader users can jump between widgets.
+- `headingLevel` (default `h2`) keeps the page outline correct.
+- Loading sets `aria-busy`; errors use `role="alert"`.
+
+## API Reference
+
+<ApiTable components={['WidgetCard']} />

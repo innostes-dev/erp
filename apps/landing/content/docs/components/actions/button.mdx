@@ -1,0 +1,204 @@
+---
+title: Button
+description: Buttons let users take actions and make choices with a single tap.
+icon: SquareMousePointer
+status: Stable
+summary: A flexible button component with multiple variants, sizes, and states.
+install: pnpm add @innostes/ui
+---
+
+<PageTabs
+  items={[
+    { label: 'Overview', href: 'preview' },
+    { label: 'Examples', href: 'examples' },
+    { label: 'API', href: 'api-reference' },
+    { label: 'Customization', href: 'theming' },
+    { label: 'Accessibility', href: 'accessibility' },
+  ]}
+/>
+
+## Preview
+
+Different variants, sizes and states of the button component.
+
+<ButtonShowcase />
+
+## Usage
+
+Import the Button component and use it in your application.
+
+<UsageGrid>
+
+```tsx title="example.tsx"
+import { Button } from '@innostes/ui';
+
+export function Example() {
+  return (
+    <Button variant="primary" size="md">
+      Click me
+    </Button>
+  );
+}
+```
+
+<ButtonPlayground />
+
+</UsageGrid>
+
+## Variants
+
+Use `variant` to change the visual style of the button.
+
+<VariantCards />
+
+```tsx
+<Button variant="primary">Primary</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="destructive">Destructive</Button>
+<Button variant="link">Link</Button>
+```
+
+## Sizes
+
+Use `size` to change the height and padding: `sm` (32px), `md` (40px, default) or `lg` (48px).
+
+<SizesDemo />
+
+```tsx
+<Button size="sm">Small</Button>
+<Button size="md">Medium</Button>
+<Button size="lg">Large</Button>
+```
+
+## With Icons
+
+Use `startIcon` and `endIcon` for icons next to the label. For a square button with only an icon,
+use `iconOnly` and always add an `aria-label`.
+
+<IconsDemo />
+
+```tsx
+<Button startIcon={<Plus />}>Add item</Button>
+<Button variant="outline" endIcon={<ArrowRight />}>Continue</Button>
+<Button variant="ghost" iconOnly aria-label="Close">
+  <X />
+</Button>
+```
+
+SVG icons are 16px by default. Give an icon a `size-*` class to change it.
+
+## Loading State
+
+`loading` shows a spinner and blocks clicks. The button stays focusable and announces
+`aria-busy`, so keyboard and screen reader users don't lose their place.
+Use `loadingText` to change the label while loading.
+
+<LoadingDemo />
+
+```tsx
+<Button loading>Save</Button>
+<Button loading loadingText="Saving…">Save</Button>
+```
+
+## Disabled State
+
+`disabled` blocks interaction. Add `focusableWhenDisabled` to keep the button in the tab order,
+for example when a tooltip explains why it's disabled.
+
+<DisabledDemo />
+
+```tsx
+<Button disabled>Disabled</Button>
+<Button disabled focusableWhenDisabled>Focusable when disabled</Button>
+```
+
+## Full Width
+
+`fullWidth` stretches the button to fill its container.
+
+<FullWidthDemo />
+
+```tsx
+<Button fullWidth>Sign in</Button>
+```
+
+## Examples
+
+### As a link
+
+Use `render` to output a different element while keeping the button styles and behaviour.
+Set `nativeButton={false}` when the element is not a `<button>`.
+
+<AsLinkDemo />
+
+```tsx
+<Button render={<a href="/pricing" />} nativeButton={false}>
+  See pricing
+</Button>
+```
+
+### With a router link
+
+`buttonVariants()` returns the button classes, so any element can look like a button.
+
+```tsx
+import Link from 'next/link';
+import { buttonVariants } from '@innostes/ui';
+
+<Link href="/dashboard" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+  Dashboard
+</Link>
+```
+
+### In a form
+
+Buttons default to `type="button"`, so they never submit a form by accident. Set `type="submit"` for the submit button.
+
+```tsx
+<form onSubmit={save}>
+  <Button type="submit" loading={isSaving}>Save</Button>
+  <Button variant="ghost" onClick={cancel}>Cancel</Button>
+</form>
+```
+
+## API Reference
+
+<ApiTable components={['Button']} baseUi="button" />
+
+
+### Data attributes
+
+| Attribute | When |
+| --- | --- |
+| `data-variant` | Always, with the variant name |
+| `data-disabled` | The button is disabled or loading |
+| `data-loading` | The button is loading |
+
+## Accessibility
+
+- Renders a native `<button>` with `type="button"` by default.
+- Built on [Base UI Button](https://base-ui.com/react/components/button): keyboard activation with
+  <kbd>Enter</kbd> and <kbd>Space</kbd>, and correct roles when rendered as another element.
+- Visible focus ring from the `--color-ring` token.
+- `loading` sets `aria-busy` and keeps focus, so the user isn't moved away.
+- Icon-only buttons need an `aria-label`. Icons inside buttons are hidden from screen readers.
+
+## Theming
+
+The button uses the `primary`, `secondary`, `muted`, `destructive`, `border` and `ring` tokens.
+Change them in your theme to restyle every button. See [Theming](/ui/docs/theming).
+
+```css
+@theme {
+  --color-primary: var(--color-violet-600);
+  --color-primary-hover: var(--color-violet-700);
+}
+```
+
+Or change one button with `className`:
+
+```tsx
+<Button className="rounded-full px-6">Rounded</Button>
+```

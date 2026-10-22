@@ -1,0 +1,61 @@
+---
+title: Adding an App or Package
+description: Generate new projects that follow the repo conventions.
+icon: SquarePlus
+---
+
+Use Nx generators so new projects get the same setup as existing ones. Add `--dry-run` to any
+command to preview the files first.
+
+## React app
+
+```bash
+pnpm nx g @nx/react:app apps/<name> --name=<name> --bundler=vite
+```
+
+Then set the npm name in `apps/<name>/package.json` to `@innostes/<name>`.
+
+## Shared library
+
+```bash
+pnpm nx g @nx/react:library packages/<name> --name=<name> --bundler=vite \
+  --importPath=@innostes/<name>
+```
+
+Add `--publishable` if it will be published to npm.
+
+## After generating
+
+<Steps>
+<Step>
+
+Install and sync:
+
+```bash
+pnpm install
+pnpm nx sync
+```
+
+</Step>
+<Step>
+
+Check it builds:
+
+```bash
+pnpm nx run-many -t build typecheck -p <name>
+```
+
+</Step>
+<Step>
+
+Add a page for it under `apps/landing/content/dev-docs/` (see [Writing Docs](/docs/guides/writing-docs)).
+
+</Step>
+</Steps>
+
+## Conventions
+
+- Apps go in `apps/`, shared code in `packages/`.
+- npm names use the `@innostes/` scope.
+- Apps may depend on packages. Packages never depend on apps.
+- Use `@innostes/ui` for UI instead of building one-off buttons and inputs.

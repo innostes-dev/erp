@@ -1,0 +1,40 @@
+---
+title: Number Field
+description: A numeric input with step buttons and locale-aware formatting.
+icon: Hash
+status: Stable
+summary: Min/max clamping, keyboard and wheel stepping, currency and percent formats.
+---
+
+<ComponentPreview name="forms/number-field/basic" />
+
+## Import
+
+```tsx
+import { NumberField } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<NumberField defaultValue={1} min={0} max={99} aria-label="Quantity" />
+
+<NumberField
+  value={price}
+  onValueChange={setPrice}
+  step={0.01}
+  format={{ style: 'currency', currency: 'EUR' }}
+  aria-label="Price"
+/>
+```
+
+`format` takes [`Intl.NumberFormat` options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options)
+and formats for the user's locale. The value stays a plain `number` (or `null` when empty).
+
+## Accessibility
+
+- Arrow Up/Down step by `step`; Page Up/Down by `largeStep`; Home/End jump to `min`/`max`.
+
+## API Reference
+
+<ApiTable components={['NumberField']} baseUi="number-field" />

@@ -1,0 +1,44 @@
+---
+title: Breadcrumb
+description: Where the current page sits in the hierarchy.
+icon: ChevronsRight
+status: Stable
+summary: Links to each ancestor, a marked current page, and an ellipsis for long paths.
+---
+
+<ComponentPreview name="navigation/breadcrumb/basic" />
+
+## Import
+
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+} from '@innostes/ui';
+```
+
+## With your router
+
+`BreadcrumbLink` renders an `<a>`. Pass `render` to use your router's link:
+
+```tsx
+import Link from 'next/link';
+
+<BreadcrumbLink render={<Link href="/orders" />}>Orders</BreadcrumbLink>
+```
+
+## Accessibility
+
+- A `<nav aria-label="Breadcrumb">` containing an ordered list.
+- The current page has `aria-current="page"`; separators are hidden from screen readers.
+
+## API Reference
+
+<ApiTable components={['BreadcrumbLink']} />
+
+The other parts take the props of their HTML element.

@@ -1,0 +1,62 @@
+---
+title: Select
+description: Pick a value from a list.
+icon: ChevronsUpDown
+status: Stable
+summary: Groups, separators, multiple selection, type-ahead and form submission.
+---
+
+<ComponentPreview name="forms/select/basic" />
+
+## Import
+
+```tsx
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectGroupLabel,
+  SelectSeparator,
+} from '@innostes/ui';
+```
+
+## Usage
+
+Pass `items` so `SelectValue` can show the selected label (not just the value):
+
+```tsx
+const statuses = [
+  { value: 'active', label: 'Active' },
+  { value: 'archived', label: 'Archived' },
+];
+
+<Select items={statuses} defaultValue="active" name="status">
+  <SelectTrigger aria-label="Status">
+    <SelectValue />
+  </SelectTrigger>
+  <SelectContent>
+    {statuses.map((s) => (
+      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+```
+
+- Add `placeholder` to `SelectValue` for an empty state.
+- Add `multiple` to `Select` to pick several values (`value` becomes an array).
+- The list opens below the trigger. Set `alignItemWithTrigger` on `SelectContent` for the
+  macOS-style list that overlaps the trigger.
+
+For long or searchable lists, use [Combobox](/ui/docs/components/forms/combobox).
+
+## Accessibility
+
+- Arrow keys, Home/End and type-ahead move through options; Enter selects; Escape closes.
+- Label it with `FieldLabel` inside a `Field`, or `aria-label` on the trigger.
+
+## API Reference
+
+<ApiTable components={['SelectTrigger', 'SelectValue', 'SelectContent', 'SelectItem', 'SelectGroup', 'SelectGroupLabel', 'SelectSeparator']} baseUi="select" />

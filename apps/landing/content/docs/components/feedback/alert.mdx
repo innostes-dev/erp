@@ -1,0 +1,36 @@
+---
+title: Alert
+description: A message in the page flow.
+icon: TriangleAlert
+status: Stable
+summary: Info, success, warning and error messages with matching icons and live-region roles.
+---
+
+<ComponentPreview name="feedback/alert/basic" />
+
+## Import
+
+```tsx
+import { Alert, AlertTitle, AlertDescription } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Alert variant="warning">
+  <AlertTitle>Your trial ends in 3 days</AlertTitle>
+  <AlertDescription>Add a payment method to keep your data.</AlertDescription>
+</Alert>
+```
+
+- Each variant has a default icon. Pass `icon={<MyIcon />}` to change it, or `icon={null}` to hide it.
+- Use an alert for messages tied to the page. For short-lived confirmations, use [Toast](/ui/docs/components/feedback/toast).
+
+## Accessibility
+
+- `destructive` and `warning` use `role="alert"` (announced immediately). Others use `role="status"`.
+  Override with `role` if needed.
+
+## API Reference
+
+<ApiTable components={['Alert']} />

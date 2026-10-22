@@ -1,0 +1,51 @@
+{
+  "name": "@innostes/ui-react18-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runs the @innostes/ui test suite and a type check against React 18, like a consumer app.",
+  "scripts": {
+    "test": "node ../../node_modules/vitest/vitest.mjs run",
+    "typecheck": "node ../../node_modules/typescript/bin/tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-is": "18.3.1",
+    "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0"
+  },
+  "nx": {
+    "name": "ui-react18-tests",
+    "implicitDependencies": [
+      "ui"
+    ],
+    "targets": {
+      "test": {
+        "dependsOn": [
+          {
+            "projects": [
+              "ui"
+            ],
+            "target": "build"
+          }
+        ]
+      },
+      "typecheck": {
+        "dependsOn": [
+          {
+            "projects": [
+              "ui"
+            ],
+            "target": "build"
+          }
+        ]
+      }
+    }
+  }
+}

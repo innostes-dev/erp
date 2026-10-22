@@ -1,0 +1,33 @@
+---
+title: Continuous Integration
+description: What runs on every push and pull request.
+icon: GitPullRequest
+---
+
+The workflow is in `.github/workflows/ci.yml`. It runs on pushes to `main` and on every pull
+request.
+
+## What it checks
+
+```bash
+nx format:check --base=origin/main
+nx run-many -t lint test build typecheck e2e
+```
+
+Nx skips tasks a project doesn't have, so this covers every project that defines them.
+
+<Callout type="warn" title="Needs updating">
+  The workflow still comes from the Nx template: it installs with `npm ci` on Node 24 and connects to
+  Nx Cloud. This repo uses pnpm, so CI must switch to `pnpm install --frozen-lockfile` (with
+  `pnpm/action-setup`) before it can pass. Remove the `nx start-ci-run` and `nx fix-ci` steps unless
+  you set up Nx Cloud.
+</Callout>
+
+## Run the same checks locally
+
+```bash
+pnpm nx format:check
+pnpm nx run-many -t build typecheck
+```
+
+Fix formatting with `pnpm nx format:write`.

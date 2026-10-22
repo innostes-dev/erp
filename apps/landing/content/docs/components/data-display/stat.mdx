@@ -1,0 +1,30 @@
+---
+title: Stat
+description: A KPI tile for dashboards.
+icon: TrendingUp
+status: Stable
+summary: Label, value and trend, with colours that know whether "up" is good.
+---
+
+<ComponentPreview name="data-display/stat/basic" />
+
+## Import
+
+```tsx
+import { Stat } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Stat label="Revenue" value="€48,250" delta="+12.5%" helper="vs last month" />
+<Stat label="Churn" value="2.1%" delta="+0.4%" upIsGood={false} />
+```
+
+- `trend` is inferred from a leading `+` or `-` in `delta`; pass it explicitly when `delta` isn't a string.
+- Set `upIsGood={false}` for metrics where an increase is bad (churn, refunds, response time).
+- Format values yourself (e.g. with `Intl.NumberFormat`), so they match the user's locale.
+
+## API Reference
+
+<ApiTable components={['Stat']} />

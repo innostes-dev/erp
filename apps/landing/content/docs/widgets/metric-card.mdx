@@ -1,0 +1,81 @@
+---
+title: Metric Card
+description: KPI cards for dashboards, in seven layouts.
+icon: ChartNoAxesColumnIncreasing
+status: Stable
+summary: 'One component, seven designs: default, compact, sparkline, progress, comparison, split and accent.'
+---
+
+<ComponentPreview name="widgets/metric-card/variants" align="start" />
+
+## Import
+
+```tsx
+import { MetricCard, MetricGrid, MetricDelta } from '@innostes/ui';
+```
+
+## Choosing a variant
+
+| Variant | Use it for |
+| --- | --- |
+| `default` | The standard KPI row: icon, value, trend and comparison. |
+| `compact` | Many metrics in little space, e.g. a sidebar or a dense ops dashboard. |
+| `accent` | The one or two metrics that matter most on the page. |
+| `sparkline` | When the direction over time matters more than one number. |
+| `progress` | Progress towards a target: sales quota, budget, OKR. |
+| `comparison` | This period next to the previous one, side by side. |
+| `split` | One total broken down into a few parts, e.g. attendance by status. |
+
+Use one variant per row so the row lines up.
+
+## Deltas and trends
+
+```tsx
+<MetricCard label="Revenue" value="€48,250" delta={0.125} comparison="vs last month" />   // ↑ +12.5% (green)
+<MetricCard label="Refund rate" value="1.2%" delta={0.2} upIsGood={false} />              // ↑ +20% (red)
+<MetricCard label="Team" value="42" delta="+3 people" />                                  // string, shown as is
+```
+
+- A **number** `delta` is a fraction: `0.125` shows as `+12.5%`, formatted for the user's locale.
+  Change it with `deltaFormat` (any `Intl.NumberFormat` options).
+- A **string** `delta` is shown as is. A leading `+` or `-` sets the arrow.
+- `upIsGood={false}` flips the colours for metrics where an increase is bad.
+- The arrow is announced to screen readers ("Up", "Down"), so colour isn't the only signal.
+
+## Formatting values
+
+`value` is a `ReactNode`: format it yourself so it matches the rest of your app.
+
+```tsx
+const money = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+<MetricCard label="Revenue" value={money.format(revenue)} />
+```
+
+## Links, menus and loading
+
+<ComponentPreview name="widgets/metric-card/states" align="start" />
+
+- `render={<Link href="/orders" />}` makes the whole card a link (with hover and focus styles).
+- `action` adds a control in the corner, e.g. a `DropdownMenu`. (Not with `render`, because a link
+  can't contain a button.)
+- `loading` shows a skeleton in place of the value and sets `aria-busy`.
+
+## Layout
+
+`MetricGrid` fits as many equal columns as there's room for. Set `minCardWidth` (default `14rem`)
+to control when it wraps.
+
+## `MetricDelta` on its own
+
+The coloured trend is exported for tables and lists:
+
+```tsx
+<MetricDelta delta={-0.04} upIsGood={false} />
+```
+
+`getTrend`, `getSentiment` and `formatDelta` are exported too. They have no React code, so they
+work anywhere.
+
+## API Reference
+
+<ApiTable components={['MetricCard', 'MetricGrid']} />

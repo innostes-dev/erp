@@ -1,0 +1,32 @@
+---
+title: Sparkline
+description: A tiny trend line for cards and table cells.
+icon: Activity
+status: Stable
+summary: Pure SVG, no chart library, server-safe.
+---
+
+<ComponentPreview name="widgets/sparkline/basic" />
+
+## Import
+
+```tsx
+import { Sparkline } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Sparkline data={[12, 18, 15, 22, 28]} tone="success" label="Orders, last 5 days, rising" />
+```
+
+- It fills the width of its container; set the height with `height` (default 40px).
+- `area={false}` draws only the line, which suits table cells.
+- Without `label` it's decorative and hidden from screen readers. Add a `label` when the trend
+  carries information that isn't written next to it.
+
+For full charts with axes and tooltips, use the chart components (coming next).
+
+## API Reference
+
+<ApiTable components={['Sparkline']} />

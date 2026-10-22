@@ -1,0 +1,41 @@
+---
+title: Page Header
+description: The top of an admin page.
+icon: Heading
+status: Stable
+summary: Breadcrumb, title, description and page actions, responsive by default.
+---
+
+<ComponentPreview name="layout/page-header/basic" />
+
+## Import
+
+```tsx
+import { PageHeader } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<PageHeader
+  breadcrumb={<Breadcrumb>…</Breadcrumb>}
+  title="Orders"
+  description="Track and fulfil customer orders."
+  actions={
+    <>
+      <Button variant="outline">Export</Button>
+      <Button>New order</Button>
+    </>
+  }
+/>
+```
+
+Put the primary action last. On small screens the actions wrap under the title.
+
+## Accessibility
+
+- `title` renders the page's `<h1>`. Use one `PageHeader` per page.
+
+## API Reference
+
+<ApiTable components={['PageHeader']} />

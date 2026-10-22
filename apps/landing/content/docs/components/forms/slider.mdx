@@ -1,0 +1,43 @@
+---
+title: Slider
+description: Pick a number or a range by dragging.
+icon: SlidersHorizontal
+status: Stable
+summary: Single values and ranges, keyboard support, form submission.
+---
+
+<ComponentPreview name="forms/slider/basic" />
+
+## Import
+
+```tsx
+import { Slider } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Slider defaultValue={40} aria-label="Volume" />
+
+// A range: pass an array
+<Slider
+  value={range}
+  onValueChange={setRange}
+  min={0}
+  max={1000}
+  step={10}
+  thumbLabels={['Minimum price', 'Maximum price']}
+/>
+```
+
+Show the selected value next to the slider when exact numbers matter, or use a
+[Number Field](/ui/docs/components/forms/number-field) instead.
+
+## Accessibility
+
+- Each thumb is a `role="slider"` with `aria-valuenow`. Arrow keys step; Page Up/Down step by `largeStep`.
+- Ranges need `thumbLabels` so each thumb has its own name.
+
+## API Reference
+
+<ApiTable components={['Slider']} baseUi="slider" />

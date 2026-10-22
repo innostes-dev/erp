@@ -1,0 +1,81 @@
+---
+title: Sidebar
+description: The app shell for admin panels.
+icon: PanelLeft
+status: Beta
+summary: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips and a keyboard shortcut.
+---
+
+<ComponentPreview name="layout/sidebar/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarInset,
+  useSidebar,
+} from '@innostes/ui';
+```
+
+## Layout
+
+```tsx title="app/(admin)/layout.tsx"
+<SidebarProvider>
+  <Sidebar>
+    <SidebarHeader>{/* logo, workspace switcher */}</SidebarHeader>
+    <SidebarContent>
+      <SidebarGroup>
+        <SidebarGroupLabel>Sales</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              icon={<ShoppingCartIcon />}
+              isActive={pathname.startsWith('/orders')}
+              render={<Link href="/orders" />}
+            >
+              Orders
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    </SidebarContent>
+    <SidebarFooter>{/* user menu */}</SidebarFooter>
+  </Sidebar>
+  <SidebarInset>
+    <header><SidebarTrigger /></header>
+    <main>{children}</main>
+  </SidebarInset>
+</SidebarProvider>
+```
+
+## Behaviour
+
+- **Desktop**: expanded (256px) or collapsed to icons (56px). Collapsed items show their label in a
+  tooltip.
+- **Mobile** (below 768px, set with `mobileQuery`): the sidebar becomes a slide-in panel that
+  closes when an item is chosen.
+- **Shortcut**: Ctrl/⌘ + B toggles it (`keyboardShortcut`, or `null` to turn off).
+- **Persist** the choice by controlling `open` / `onOpenChange` and saving it, e.g. in a cookie,
+  so the server renders the right state.
+
+`useSidebar()` gives any component inside the provider `open`, `toggle`, `isMobile` and setters.
+
+## Accessibility
+
+- The sidebar is a `<nav>` landmark (label it with `label`). The active item has `aria-current="page"`.
+- `SidebarTrigger` reports `aria-expanded`.
+
+## API Reference
+
+<ApiTable components={['SidebarProvider', 'Sidebar', 'SidebarMenuButton', 'SidebarTrigger']} />

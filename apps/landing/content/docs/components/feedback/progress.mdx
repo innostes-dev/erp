@@ -1,0 +1,33 @@
+---
+title: Progress
+description: Shows how far a task has progressed.
+icon: Loader
+status: Stable
+summary: Determinate and indeterminate bars with an optional label and value.
+---
+
+<ComponentPreview name="feedback/progress/basic" />
+
+## Import
+
+```tsx
+import { Progress } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Progress value={uploaded} max={total} label="Uploading invoices" showValue />
+<Progress value={null} aria-label="Loading data" />  {/* indeterminate */}
+```
+
+Use `Progress` for tasks that finish. For a level within a range (storage, quota), use
+[Meter](/ui/docs/components/feedback/meter).
+
+## Accessibility
+
+- `role="progressbar"` with `aria-valuenow`. Without a visible `label`, set `aria-label`.
+
+## API Reference
+
+<ApiTable components={['Progress']} baseUi="progress" />

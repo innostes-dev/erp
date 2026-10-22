@@ -1,0 +1,40 @@
+---
+title: Toggle
+description: A button that is either on or off.
+icon: ToggleLeft
+status: Stable
+summary: Two-state button for formatting, favourites and view options.
+---
+
+<ComponentPreview name="actions/toggle/basic" />
+
+## Import
+
+```tsx
+import { Toggle } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+// Uncontrolled
+<Toggle aria-label="Bold" defaultPressed><BoldIcon /></Toggle>
+
+// Controlled
+const [starred, setStarred] = useState(false);
+<Toggle pressed={starred} onPressedChange={setStarred} aria-label="Star">
+  <StarIcon />
+</Toggle>
+```
+
+Use `Toggle` for state that applies immediately and is shown by the button itself.
+For settings in a form, use [Switch](/ui/docs/components/forms/switch).
+
+## Accessibility
+
+- Exposes `aria-pressed`, so screen readers announce "pressed" / "not pressed".
+- Icon-only toggles need an `aria-label`.
+
+## API Reference
+
+<ApiTable components={['Toggle']} baseUi="toggle" />

@@ -1,0 +1,36 @@
+---
+title: Meter
+description: A measurement within a known range.
+icon: Gauge
+status: Stable
+summary: Storage, seats or quota usage, with tone colours for limits.
+---
+
+<ComponentPreview name="feedback/meter/basic" />
+
+## Import
+
+```tsx
+import { Meter } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Meter
+  value={used}
+  max={limit}
+  label="Seats"
+  tone={used / limit > 0.9 ? 'destructive' : used / limit > 0.75 ? 'warning' : 'primary'}
+/>
+```
+
+`format` takes `Intl.NumberFormat` options, e.g. `{ style: 'percent' }` with `max={1}`.
+
+## Accessibility
+
+- `role="meter"` with `aria-valuenow`, `aria-valuemin` and `aria-valuemax`.
+
+## API Reference
+
+<ApiTable components={['Meter']} baseUi="meter" />

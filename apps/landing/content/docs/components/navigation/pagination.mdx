@@ -1,0 +1,44 @@
+---
+title: Pagination
+description: Page navigation for tables and lists.
+icon: ChevronsLeftRight
+status: Stable
+summary: Controlled, translatable, with a stable width as you page.
+---
+
+<ComponentPreview name="navigation/pagination/basic" />
+
+## Import
+
+```tsx
+import { Pagination, getPaginationRange } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+const [page, setPage] = useState(1);
+
+<Pagination page={page} pageCount={Math.ceil(total / pageSize)} onPageChange={setPage} />
+```
+
+- The number of buttons stays the same as you move, so the controls don't jump under the pointer.
+- `labels` translates "Previous", "Next" and the page names.
+
+## Custom pagination UI
+
+`getPaginationRange` returns the items to show (numbers and ellipses), so you can build any layout
+on the same logic. It has no React code, so it also works on the server.
+
+```ts
+getPaginationRange({ page: 6, pageCount: 20 });
+// → [1, 'ellipsis-start', 5, 6, 7, 'ellipsis-end', 20]
+```
+
+## Accessibility
+
+- `<nav aria-label="Pagination">`; the current page has `aria-current="page"`; every button is labelled.
+
+## API Reference
+
+<ApiTable components={['Pagination']} />

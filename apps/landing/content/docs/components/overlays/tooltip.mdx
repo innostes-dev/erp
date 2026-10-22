@@ -1,0 +1,39 @@
+---
+title: Tooltip
+description: A short label on hover and focus.
+icon: MessageCircle
+status: Stable
+summary: Names icon buttons and shows shortcuts. Shared delay across a toolbar.
+---
+
+<ComponentPreview name="overlays/tooltip/basic" />
+
+## Import
+
+```tsx
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Tooltip>
+  <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Archive" />}>
+    <ArchiveIcon />
+  </TooltipTrigger>
+  <TooltipContent>Archive</TooltipContent>
+</Tooltip>
+```
+
+Wrap your app in `TooltipProvider` once. After the first tooltip opens, moving to the next trigger
+shows it instantly, which makes toolbars feel fast.
+
+## Accessibility
+
+- Opens on hover and keyboard focus; Escape closes it.
+- Tooltips are not reachable on touch devices and are skipped by some screen readers. The trigger
+  still needs its own `aria-label`, and tooltips must never hold essential information.
+
+## API Reference
+
+<ApiTable components={['TooltipContent', 'TooltipProvider']} baseUi="tooltip" />

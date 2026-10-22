@@ -1,0 +1,29 @@
+---
+title: Empty State
+description: What to show when there's nothing to show.
+icon: Inbox
+status: Stable
+summary: Icon, title, explanation and next actions for empty lists and searches.
+---
+
+<ComponentPreview name="data-display/empty-state/basic" />
+
+## Import
+
+```tsx
+import { EmptyState } from '@innostes/ui';
+```
+
+## Usage
+
+Say what's empty, why, and what to do next:
+
+- **First use**: "No invoices yet" + "Create invoice".
+- **No results**: "No orders match ‘acme’" + "Clear filters".
+- **No access**: explain who can grant it.
+
+Pass it to `DataTable` as `emptyState` for empty tables.
+
+## API Reference
+
+<ApiTable components={['EmptyState']} />

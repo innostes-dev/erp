@@ -1,0 +1,58 @@
+---
+title: web-app
+description: The innostes application front end.
+icon: Boxes
+status: Beta
+summary: React 19 single-page app, built with Vite.
+install: pnpm nx serve web-app
+---
+
+<Callout type="info">
+  `web-app` still contains the starter screen from the Nx generator. Application features will live here.
+</Callout>
+
+## Tasks
+
+The tasks come from `vite.config.mts` (inferred by the Nx Vite plugin):
+
+| Command | What it does |
+| --- | --- |
+| `pnpm nx serve web-app` | Dev server on http://localhost:4200 |
+| `pnpm nx build web-app` | Production build into `apps/web-app/dist` |
+| `pnpm nx preview web-app` | Serve the production build on http://localhost:4300 |
+| `pnpm nx typecheck web-app` | Type-check |
+
+## Structure
+
+<Files>
+  <Folder name="apps/web-app" defaultOpen>
+    <Folder name="src" defaultOpen>
+      <Folder name="app">
+        <File name="app.tsx" />
+      </Folder>
+      <File name="main.tsx" />
+      <File name="styles.css" />
+    </Folder>
+    <File name="index.html" />
+    <File name="vite.config.mts" />
+  </Folder>
+</Files>
+
+## Using the design system
+
+Add the package and its styles:
+
+```bash
+pnpm add @innostes/ui@workspace:* --filter @innostes/web-app
+```
+
+```ts title="src/main.tsx"
+import '@innostes/ui/styles.css';
+```
+
+```tsx
+import { Button } from '@innostes/ui';
+```
+
+If you add Tailwind CSS to the app, import `@innostes/ui/tailwind.css` instead, so the components
+share the app's theme. See [innostes UI installation](/ui/docs/installation).

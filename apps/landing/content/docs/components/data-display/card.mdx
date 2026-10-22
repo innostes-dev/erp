@@ -1,0 +1,44 @@
+---
+title: Card
+description: A surface that groups related content.
+icon: SquareStack
+status: Stable
+summary: Header with title, description and actions, plus content and footer areas.
+---
+
+<ComponentPreview name="data-display/card/basic" />
+
+## Import
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+  CardFooter,
+} from '@innostes/ui';
+```
+
+## Anatomy
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle />
+    <CardDescription />
+    <CardAction />   {/* aligned to the top end of the header */}
+  </CardHeader>
+  <CardContent />
+  <CardFooter />
+</Card>
+```
+
+`CardTitle` renders a `<div>`. Put an `<h2>`/`<h3>` inside when the card title belongs in the
+page's heading outline.
+
+## API Reference
+
+All parts take the props of a `<div>`.
