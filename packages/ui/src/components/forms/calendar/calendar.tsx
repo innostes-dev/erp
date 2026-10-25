@@ -473,7 +473,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
                                 selected || (inRange && !!range.to) || undefined
                               }
                               className={cn(
-                                'relative size-9 p-0 text-center',
+                                'relative size-9 p-0 text-center pointer-coarse:size-10',
                                 inRange && !outside && 'bg-primary/10',
                                 inRange &&
                                   isSameDay(
@@ -510,7 +510,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
                                 }
                                 onMouseEnter={() => isRange && setHovered(date)}
                                 className={cn(
-                                  'inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-sm tabular-nums transition-colors outline-none',
+                                  'inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-sm tabular-nums transition-colors outline-none pointer-coarse:size-10',
                                   'hover:bg-accent hover:text-accent-foreground',
                                   'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring',
                                   outside && 'text-muted-foreground/60',

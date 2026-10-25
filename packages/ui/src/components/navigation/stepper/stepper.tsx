@@ -2,6 +2,7 @@
 
 import { forwardRef, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
+import type { SlotClassNames } from '../../../lib/slots';
 import { CheckIcon, XIcon } from '../../../lib/icons';
 
 /** The state of one step. Derived from `currentStep` unless set on the step. */
@@ -18,6 +19,9 @@ export interface StepperStep {
   /** Icon shown instead of the step number. */
   icon?: ReactNode;
 }
+
+/** Inner parts of a `Stepper`, for `classNames`. */
+export type StepperSlot = 'list' | 'item' | 'marker' | 'title' | 'description' | 'connector';
 
 export interface StepperProps extends Omit<ComponentProps<'nav'>, 'onChange'> {
   /** The steps, in order. */
@@ -38,6 +42,8 @@ export interface StepperProps extends Omit<ComponentProps<'nav'>, 'onChange'> {
   labelPlacement?: 'bottom' | 'end';
   /** Marker size. @default 'md' */
   size?: 'sm' | 'md';
+  /** Classes for inner parts. */
+  classNames?: SlotClassNames<StepperSlot>;
   /** Accessible name. @default 'Progress' */
   'aria-label'?: string;
 }
@@ -67,6 +73,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
     labelPlacement = 'bottom',
     size = 'md',
     className,
+    classNames,
     'aria-label': ariaLabel = 'Progress',
     ...props
   },
@@ -81,10 +88,10 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
       aria-label={ariaLabel}
       data-slot="stepper"
       data-orientation={orientation}
-      className={className}
+      className={cn(!vertical && '@container', className)}
       {...props}
     >
-      <ol className={cn('flex', vertical ? 'flex-col' : 'w-full items-start')}>
+      <ol className={cn('flex', vertical ? 'flex-col' : 'w-full items-start', classNames?.list)}>
         {steps.map((step, index) => {
           const status: StepStatus =
             step.status ??
@@ -110,6 +117,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
                 status === 'error' &&
                   'border-destructive bg-destructive text-destructive-foreground',
                 "[&_svg:not([class*='size-'])]:size-4",
+                classNames?.marker,
               )}
             >
               {status === 'complete' ? (
@@ -134,12 +142,21 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
                   status === 'current' && 'text-primary',
                   status === 'upcoming' && 'text-foreground/80',
                   status === 'error' && 'text-destructive',
+                  // On narrow containers only the current step's title stays visible.
+                  !vertical && status !== 'current' && '@max-xl:sr-only',
+                  classNames?.title,
                 )}
               >
                 {step.title}
               </span>
               {step.description && (
-                <span className="text-xs text-muted-foreground">
+                <span
+                  className={cn(
+                    'text-xs text-muted-foreground',
+                    !vertical && '@max-3xl:hidden',
+                    classNames?.description,
+                  )}
+                >
                   {step.description}
                 </span>
               )}
@@ -164,6 +181,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
                   : stacked
                     ? 'start-[calc(50%+var(--marker)/2+0.5rem)] end-[calc(-50%+var(--marker)/2+0.5rem)] top-[calc(var(--marker)/2-1px)] h-0.5'
                     : 'start-[calc(var(--marker)+0.5rem)] end-2 top-[calc(var(--marker)/2-1px)] h-0.5',
+                classNames?.connector,
               )}
             />
           );
@@ -180,6 +198,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
                 'relative flex',
                 vertical ? 'min-h-16 pb-6 last:pb-0' : 'flex-1',
                 !vertical && isLast && !stacked && 'flex-none',
+                classNames?.item,
               )}
             >
               {connector}

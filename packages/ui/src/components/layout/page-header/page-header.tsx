@@ -1,5 +1,9 @@
 import { forwardRef, type ComponentProps, ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
+import type { SlotClassNames } from '../../../lib/slots';
+
+/** Inner parts of a `PageHeader`, for `classNames`. */
+export type PageHeaderSlot = 'title' | 'description' | 'actions';
 
 export interface PageHeaderProps extends Omit<
   ComponentProps<'header'>,
@@ -13,6 +17,8 @@ export interface PageHeaderProps extends Omit<
   breadcrumb?: ReactNode;
   /** Page-level actions, e.g. "Export" and "New order". Primary action last. */
   actions?: ReactNode;
+  /** Classes for inner parts. */
+  classNames?: SlotClassNames<PageHeaderSlot>;
 }
 
 /**
@@ -29,7 +35,7 @@ export interface PageHeaderProps extends Omit<
  */
 export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
   function PageHeader(
-    { className, title, description, breadcrumb, actions, children, ...props },
+    { className, title, description, breadcrumb, actions, classNames, children, ...props },
     ref,
   ) {
     return (
@@ -42,15 +48,26 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
         {breadcrumb}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 flex-col gap-1">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h1
+              data-slot="page-header-title"
+              className={cn('text-heading font-semibold tracking-tight text-foreground', classNames?.title)}
+            >
               {title}
             </h1>
             {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
+              <p
+                data-slot="page-header-description"
+                className={cn('text-sm text-muted-foreground', classNames?.description)}
+              >
+                {description}
+              </p>
             )}
           </div>
           {actions && (
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <div
+              data-slot="page-header-actions"
+              className={cn('flex shrink-0 flex-wrap items-center gap-2', classNames?.actions)}
+            >
               {actions}
             </div>
           )}

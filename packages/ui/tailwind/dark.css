@@ -57,4 +57,15 @@
   --color-chart-8: oklch(70.4% 0.04 256.788); /* slate-400 */
 
   --color-overlay: rgb(0 0 0 / 0.6);
+
+  --color-sidebar: oklch(21% 0.006 285.885); /* zinc-900 */
+  --color-sidebar-foreground: oklch(87.1% 0.006 286.286); /* zinc-300 */
+  --color-sidebar-muted-foreground: oklch(70.5% 0.015 286.067); /* zinc-400 */
+  --color-sidebar-accent: oklch(27.4% 0.006 286.033); /* zinc-800 */
+  --color-sidebar-accent-foreground: oklch(98.5% 0 0);
+  --color-sidebar-primary: oklch(70.7% 0.165 254.624); /* blue-400 */
+  --color-sidebar-primary-foreground: oklch(14.1% 0.005 285.823);
+  --color-sidebar-primary-soft: oklch(62.3% 0.214 259.815 / 0.15);
+  --color-sidebar-border: oklch(100% 0 0 / 0.1);
+  --color-sidebar-ring: oklch(62.3% 0.214 259.815);
 }

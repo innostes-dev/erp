@@ -38,8 +38,8 @@ export const buttonVariants = cva(
       },
       /** Height, padding and font size: 32, 40 and 48px. */
       size: {
-        sm: 'h-8 px-3 text-sm',
-        md: 'h-10 px-4 text-sm',
+        sm: 'h-8 px-3 text-sm pointer-coarse:h-10',
+        md: 'h-10 px-4 text-sm pointer-coarse:h-11',
         lg: 'h-12 px-6 text-base',
       },
       /** Square button for a single icon. */
@@ -48,8 +48,8 @@ export const buttonVariants = cva(
       fullWidth: { true: 'w-full', false: '' },
     },
     compoundVariants: [
-      { iconOnly: true, size: 'sm', class: 'w-8' },
-      { iconOnly: true, size: 'md', class: 'w-10' },
+      { iconOnly: true, size: 'sm', class: 'w-8 pointer-coarse:w-10' },
+      { iconOnly: true, size: 'md', class: 'w-10 pointer-coarse:w-11' },
       { iconOnly: true, size: 'lg', class: 'w-12' },
     ],
     defaultVariants: {

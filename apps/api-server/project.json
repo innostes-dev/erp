@@ -19,7 +19,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/api-server",
-        "command": "(test -f .venv/bin/python && .venv/bin/python -m fastapi dev app/main.py --port 8000) || (.venv/Scripts/python -m fastapi dev app/main.py --port 8000)"
+        "command": "node serve.js"
       }
     }
   }

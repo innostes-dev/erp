@@ -18,8 +18,8 @@ export const toggleVariants = cva(
         outline: 'border border-input bg-background shadow-xs',
       },
       size: {
-        sm: 'h-8 min-w-8 px-2',
-        md: 'h-10 min-w-10 px-2.5',
+        sm: 'h-8 min-w-8 px-2 pointer-coarse:h-10 pointer-coarse:min-w-10',
+        md: 'h-10 min-w-10 px-2.5 pointer-coarse:h-11 pointer-coarse:min-w-11',
         lg: 'h-12 min-w-12 px-3',
       },
     },

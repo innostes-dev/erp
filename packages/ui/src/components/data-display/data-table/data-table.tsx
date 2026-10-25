@@ -9,6 +9,7 @@ import {
   type Ref,
 } from 'react';
 import { cn } from '../../../lib/cn';
+import type { SlotClassNames } from '../../../lib/slots';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -40,6 +41,11 @@ export interface DataTableColumn<TRow> {
   /** Header content. */
   header: ReactNode;
   /**
+   * Plain-text column name, used as the cell label in `responsive="stack"` mode.
+   * @default `header` when it's a string, otherwise `id`
+   */
+  label?: string;
+  /**
    * Returns the raw value of this column for a row. Used for sorting, and rendered as text
    * when there's no `cell`.
    */
@@ -57,6 +63,9 @@ export interface DataTableColumn<TRow> {
   /** Extra classes for this column's header. */
   headerClassName?: string;
 }
+
+/** Inner parts of a `DataTable`, for `classNames`. */
+export type DataTableSlot = 'wrapper' | 'table' | 'header' | 'headerCell' | 'row' | 'cell' | 'footer';
 
 export interface DataTableProps<TRow> {
   /** The rows to show. With client-side pagination, pass all rows. */
@@ -112,9 +121,24 @@ export interface DataTableProps<TRow> {
   'aria-label'?: string;
   /** Keep the header visible while the body scrolls (give the table a max height). */
   stickyHeader?: boolean;
+  /**
+   * On narrow containers: `scroll` keeps the table and scrolls sideways; `stack` turns each row into
+   * a card of label/value pairs (container query, so it follows the table's own width).
+   * @default 'scroll'
+   */
+  responsive?: 'scroll' | 'stack';
+  /** Classes for inner parts. */
+  classNames?: SlotClassNames<DataTableSlot>;
   /** Class for the outer wrapper. */
   className?: string;
 }
+
+// "stack" mode: below a 42rem-wide container, rows become cards of label/value pairs.
+const stackRow =
+  '@max-2xl:block @max-2xl:rounded-lg @max-2xl:border @max-2xl:border-border @max-2xl:bg-card @max-2xl:p-2 @max-2xl:last:border-b';
+const stackCell =
+  '@max-2xl:flex @max-2xl:items-center @max-2xl:justify-between @max-2xl:gap-4 @max-2xl:px-2 @max-2xl:py-1.5 @max-2xl:text-end @max-2xl:whitespace-normal ' +
+  '@max-2xl:before:shrink-0 @max-2xl:before:text-start @max-2xl:before:text-xs @max-2xl:before:font-medium @max-2xl:before:text-muted-foreground @max-2xl:before:content-[attr(data-label)]';
 
 const alignClass = {
   start: 'text-start',
@@ -166,6 +190,8 @@ function DataTableImpl<TRow>(
     onRowClick,
     'aria-label': ariaLabel,
     stickyHeader = false,
+    responsive = 'scroll',
+    classNames,
     className,
   }: DataTableProps<TRow>,
   ref: ForwardedRef<HTMLDivElement>,
@@ -235,6 +261,7 @@ function DataTableImpl<TRow>(
   }
 
   const columnCount = columns.length + (selectable ? 1 : 0);
+  const stack = responsive === 'stack';
   const rangeStart = total === 0 ? 0 : (currentPage - 1) * (pageSize ?? 0) + 1;
   const rangeEnd = paginated ? Math.min(currentPage * pageSize, total) : total;
 
@@ -242,12 +269,17 @@ function DataTableImpl<TRow>(
     <div
       ref={ref}
       data-slot="data-table"
-      className={cn('flex flex-col gap-3', className)}
+      data-responsive={responsive}
+      className={cn('@container flex flex-col gap-3', className)}
     >
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div
+        data-slot="data-table-wrapper"
+        className={cn('overflow-hidden rounded-lg border border-border', stack && '@max-2xl:border-0', classNames?.wrapper)}
+      >
         <Table
           aria-label={ariaLabel}
           aria-busy={loading || undefined}
+          className={cn(stack && '@max-2xl:block', classNames?.table)}
           containerClassName={cn(
             stickyHeader && 'max-h-[inherit] overflow-auto',
           )}
@@ -256,6 +288,8 @@ function DataTableImpl<TRow>(
             className={cn(
               'bg-muted/50',
               stickyHeader && 'sticky top-0 z-10 bg-muted',
+              stack && '@max-2xl:sr-only',
+              classNames?.header,
             )}
           >
             <TableRow className="hover:bg-transparent">
@@ -286,6 +320,7 @@ function DataTableImpl<TRow>(
                     style={column.width ? { width: column.width } : undefined}
                     className={cn(
                       alignClass[column.align ?? 'start'],
+                      classNames?.headerCell,
                       column.headerClassName,
                     )}
                   >
@@ -318,7 +353,7 @@ function DataTableImpl<TRow>(
               })}
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className={cn(stack && '@max-2xl:flex @max-2xl:flex-col @max-2xl:gap-2')}>
             {loading ? (
               Array.from({ length: loadingRowCount }, (_, i) => (
                 <TableRow key={`loading-${i}`} className="hover:bg-transparent">
@@ -352,10 +387,14 @@ function DataTableImpl<TRow>(
                     key={id}
                     data-state={isSelected ? 'selected' : undefined}
                     onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={cn(onRowClick && 'cursor-pointer')}
+                    className={cn(onRowClick && 'cursor-pointer', stack && stackRow, classNames?.row)}
                   >
                     {selectable && (
-                      <TableCell onClick={(e) => e.stopPropagation()}>
+                      <TableCell
+                        data-label="Select"
+                        className={cn(stack && stackCell, classNames?.cell)}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Checkbox
                           aria-label="Select row"
                           checked={isSelected}
@@ -366,9 +405,12 @@ function DataTableImpl<TRow>(
                     {columns.map((column) => (
                       <TableCell
                         key={column.id}
+                        data-label={column.label ?? (typeof column.header === 'string' ? column.header : column.id)}
                         className={cn(
                           alignClass[column.align ?? 'start'],
                           column.align === 'end' && 'tabular-nums',
+                          stack && stackCell,
+                          classNames?.cell,
                           column.className,
                         )}
                       >
@@ -386,7 +428,10 @@ function DataTableImpl<TRow>(
       </div>
 
       {(paginated || (selectable && selected.length > 0)) && (
-        <div className="flex flex-col items-center justify-between gap-3 text-sm text-muted-foreground sm:flex-row">
+        <div
+          data-slot="data-table-footer"
+          className={cn('flex flex-col items-center justify-between gap-3 text-sm text-muted-foreground @md:flex-row', classNames?.footer)}
+        >
           <div aria-live="polite">
             {selectable && selected.length > 0
               ? `${selected.length} selected`

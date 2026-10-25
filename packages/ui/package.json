@@ -15,6 +15,12 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./charts": {
+      "@innostes/source": "./src/charts/index.ts",
+      "types": "./dist/charts/index.d.ts",
+      "import": "./dist/charts/index.js",
+      "default": "./dist/charts/index.js"
+    },
     "./tailwind.css": "./tailwind/tailwind.css",
     "./theme.css": "./tailwind/theme.css",
     "./dark.css": "./tailwind/dark.css",
@@ -43,10 +49,14 @@
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
     "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0",
-    "tailwindcss": "^4.0.0"
+    "tailwindcss": "^4.0.0",
+    "recharts": "^2.15.0 || ^3.0.0"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
+      "optional": true
+    },
+    "recharts": {
       "optional": true
     }
   },

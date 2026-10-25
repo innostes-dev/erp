@@ -14,7 +14,7 @@ import { globSync } from 'node:fs';
 import docgen from 'react-docgen-typescript';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const files = ['src/components/**/*.tsx', 'src/widgets/**/*.tsx']
+const files = ['src/components/**/*.tsx', 'src/widgets/**/*.tsx', 'src/charts/**/*.tsx']
   .flatMap((pattern) => globSync(pattern, { cwd: root }))
   .filter((file) => !file.endsWith('.test.tsx'))
   .map((file) => join(root, file));
@@ -39,14 +39,15 @@ for (const doc of parser.parse(files)) {
   const source = readFileSync(doc.filePath, 'utf8');
   let name = doc.displayName;
   // Generic components are written as `XImpl` and exported as `X = forwardRef(XImpl)`.
-  const alias = new RegExp(`export const (\w+) = forwardRef\(${name}\)`).exec(source);
+  // String.raw keeps the backslashes, so \w and \( reach the RegExp intact.
+  const alias = new RegExp(String.raw`export const (\w+) = forwardRef\(${name}\)`).exec(source);
   if (alias) name = alias[1];
-  else if (!new RegExp(`export (function|const) ${name}(?![\w$])`).test(source)) continue;
+  else if (!new RegExp(String.raw`export (function|const) ${name}(?![\w$])`).test(source)) continue;
   const file = relative(root, doc.filePath).split(sep).join('/');
   components[name] = {
     description: doc.description,
     file,
-    category: file.split('/')[1] === 'widgets' ? 'widgets' : file.split('/')[2],
+    category: ['widgets', 'charts'].includes(file.split('/')[1]) ? file.split('/')[1] : file.split('/')[2],
     props: Object.fromEntries(
       Object.entries(doc.props)
         .sort(([a], [b]) => a.localeCompare(b))

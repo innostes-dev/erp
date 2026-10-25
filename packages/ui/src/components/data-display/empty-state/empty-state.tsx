@@ -1,5 +1,9 @@
 import { forwardRef, type ComponentProps, ReactNode } from 'react';
 import { cn } from '../../../lib/cn';
+import type { SlotClassNames } from '../../../lib/slots';
+
+/** Inner parts of an `EmptyState`, for `classNames`. */
+export type EmptyStateSlot = 'icon' | 'title' | 'description' | 'actions';
 
 export interface EmptyStateProps extends Omit<ComponentProps<'div'>, 'title'> {
   /** Illustration or icon shown above the title. */
@@ -10,6 +14,8 @@ export interface EmptyStateProps extends Omit<ComponentProps<'div'>, 'title'> {
   description?: ReactNode;
   /** Primary and secondary actions, e.g. a "Create invoice" button. */
   actions?: ReactNode;
+  /** Classes for inner parts. */
+  classNames?: SlotClassNames<EmptyStateSlot>;
 }
 
 /**
@@ -26,7 +32,7 @@ export interface EmptyStateProps extends Omit<ComponentProps<'div'>, 'title'> {
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
   function EmptyState(
-    { className, icon, title, description, actions, children, ...props },
+    { className, icon, title, description, actions, classNames, children, ...props },
     ref,
   ) {
     return (
@@ -34,7 +40,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         ref={ref}
         data-slot="empty-state"
         className={cn(
-          'flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border p-10 text-center',
+          'flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border p-6 text-center sm:p-10',
           className,
         )}
         {...props}
@@ -42,7 +48,10 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         {icon && (
           <div
             data-slot="empty-state-icon"
-            className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground [&_svg:not([class*='size-'])]:size-6"
+            className={cn(
+              "flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground [&_svg:not([class*='size-'])]:size-6",
+              classNames?.icon,
+            )}
           >
             {icon}
           </div>
@@ -50,14 +59,14 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         <div className="flex max-w-sm flex-col gap-1.5">
           <h3
             data-slot="empty-state-title"
-            className="text-base font-semibold text-foreground"
+            className={cn('text-subheading font-semibold text-foreground', classNames?.title)}
           >
             {title}
           </h3>
           {description && (
             <p
               data-slot="empty-state-description"
-              className="text-sm text-muted-foreground"
+              className={cn('text-sm text-muted-foreground', classNames?.description)}
             >
               {description}
             </p>
@@ -66,7 +75,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         {actions && (
           <div
             data-slot="empty-state-actions"
-            className="flex flex-wrap items-center justify-center gap-2"
+            className={cn('flex flex-wrap items-center justify-center gap-2', classNames?.actions)}
           >
             {actions}
           </div>

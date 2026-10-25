@@ -22,11 +22,14 @@
       "@base-ui/react": ["./node_modules/@base-ui/react/index.d.ts"],
       "@base-ui/react/*": ["./node_modules/@base-ui/react/*"],
       "@testing-library/react": ["./node_modules/@testing-library/react"],
-      "@innostes/ui": ["../../packages/ui/dist/index.d.ts"]
+      "@innostes/ui": ["../../packages/ui/dist/index.d.ts"],
+      "@innostes/ui/charts": ["../../packages/ui/dist/charts/index.d.ts"],
+      "recharts": ["./node_modules/recharts"]
     }
   },
   "include": [
     "../../packages/ui/src/components/**/*.test.tsx",
-    "../../packages/ui/src/widgets/**/*.test.tsx"
+    "../../packages/ui/src/widgets/**/*.test.tsx",
+    "../../packages/ui/src/charts/**/*.test.tsx"
   ]
 }

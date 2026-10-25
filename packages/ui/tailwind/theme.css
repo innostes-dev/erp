@@ -63,6 +63,34 @@
   /* Dimmed layer behind dialogs and drawers */
   --color-overlay: rgb(0 0 0 / 0.4);
 
+  /*
+   * App shell (Sidebar, AppRail, TopBar). Separate from card/accent so a dark or brand-coloured
+   * sidebar doesn't change cards and menus.
+   */
+  --color-sidebar: var(--color-white);
+  --color-sidebar-foreground: var(--color-zinc-700);
+  --color-sidebar-muted-foreground: var(--color-zinc-500);
+  --color-sidebar-accent: var(--color-zinc-100);
+  --color-sidebar-accent-foreground: var(--color-zinc-900);
+  --color-sidebar-primary: var(--color-blue-600);
+  --color-sidebar-primary-foreground: var(--color-white);
+  --color-sidebar-primary-soft: var(--color-blue-50);
+  --color-sidebar-border: var(--color-zinc-200);
+  --color-sidebar-ring: var(--color-blue-500);
+
+  /*
+   * Fluid type: grows smoothly from phones to large screens, in rem so it still respects the
+   * user's browser font size. Use as text-heading, text-subheading, text-metric, text-display.
+   */
+  --text-display: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
+  --text-display--line-height: 1.15;
+  --text-heading: clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);
+  --text-heading--line-height: 1.2;
+  --text-subheading: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  --text-subheading--line-height: 1.4;
+  --text-metric: clamp(1.375rem, 1.15rem + 0.9vw, 1.875rem);
+  --text-metric--line-height: 1.15;
+
   /* Motion: sliding bar for indeterminate progress */
   --animate-indeterminate: innostes-indeterminate 1.4s ease-in-out infinite;
 

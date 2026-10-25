@@ -41,7 +41,8 @@ export default defineConfig(() => ({
     emptyOutDir: true,
     reportCompressedSize: true,
     lib: {
-      entry: 'src/index.ts',
+      // Two entry points: the main package, and the optional charts (needs recharts).
+      entry: ['src/index.ts', 'src/charts/index.ts'],
       formats: ['es' as const],
     },
     rolldownOptions: {
@@ -52,6 +53,8 @@ export default defineConfig(() => ({
         'clsx',
         'tailwind-merge',
         'class-variance-authority',
+        /^recharts(\/.*)?$/,
+        'react-is',
       ],
       output: {
         // One file per source module: tree-shakable, and each file keeps its own
@@ -66,7 +69,10 @@ export default defineConfig(() => ({
   resolve: {
     // Tests import the public entry, like a consumer would. Here it maps to the source;
     // tests/ui-react18 maps it to the built package on React 18.
-    alias: { '@innostes/ui': path.join(import.meta.dirname, 'src/index.ts') },
+    alias: [
+      { find: /^@innostes\/ui$/, replacement: path.join(import.meta.dirname, 'src/index.ts') },
+      { find: /^@innostes\/ui\/charts$/, replacement: path.join(import.meta.dirname, 'src/charts/index.ts') },
+    ],
   },
   test: {
     name: 'ui',

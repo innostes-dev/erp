@@ -9,6 +9,7 @@ import {
 import { useRender } from '@base-ui/react/use-render';
 import { mergeProps } from '@base-ui/react/merge-props';
 import { cn } from '../../lib/cn';
+import type { SlotClassNames } from '../../lib/slots';
 import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from '../../lib/icons';
 import {
   IconTile,
@@ -27,6 +28,9 @@ export type MetricCardVariant =
   | 'comparison'
   | 'split'
   | 'accent';
+
+/** Inner parts of a `MetricCard`, for `classNames`. */
+export type MetricCardSlot = 'label' | 'value' | 'delta' | 'comparison' | 'icon' | 'progress' | 'items' | 'footer' | 'action';
 
 /** One sub-value of the `split` variant. */
 export interface MetricCardItem {
@@ -91,6 +95,8 @@ export interface MetricCardProps extends Omit<
   footer?: ReactNode;
   /** Show a skeleton instead of the value. */
   loading?: boolean;
+  /** Classes for inner parts. Each part also has a `data-slot` (e.g. `metric-card-value`). */
+  classNames?: SlotClassNames<MetricCardSlot>;
   /**
    * Make the whole card a link or button, e.g. `render={<a href="/employees" />}` or your router's
    * `<Link>`. Adds hover and focus styles.
@@ -215,6 +221,7 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
       loading = false,
       render,
       className,
+      classNames,
       ...props
     },
     ref,
@@ -227,13 +234,19 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
           upIsGood={upIsGood}
           format={deltaFormat}
           locale={locale}
+          className={classNames?.delta}
         />
       ) : null;
     const deltaLine = (deltaNode || comparison) && (
       <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs">
         {deltaNode}
         {comparison && (
-          <span className="text-muted-foreground">{comparison}</span>
+          <span
+            data-slot="metric-card-comparison"
+            className={cn('text-muted-foreground', classNames?.comparison)}
+          >
+            {comparison}
+          </span>
         )}
       </div>
     );
@@ -241,19 +254,31 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
       <Skeleton className="h-7 w-24" />
     ) : (
       <div
+        data-slot="metric-card-value"
         className={cn(
           'font-semibold tracking-tight tabular-nums',
-          variant === 'compact' ? 'text-xl' : 'text-2xl',
+          // Fluid: grows with the viewport, in rem so it respects the user's font size.
+          variant === 'compact' ? 'text-xl' : 'text-metric',
+          classNames?.value,
         )}
       >
         {value}
       </div>
     );
     const labelNode = (
-      <div className="text-sm font-medium text-muted-foreground">{label}</div>
+      <div
+        data-slot="metric-card-label"
+        className={cn('text-sm font-medium text-muted-foreground', classNames?.label)}
+      >
+        {label}
+      </div>
     );
     const tile = icon && (
-      <IconTile tone={tone} size={variant === 'compact' ? 'sm' : 'md'}>
+      <IconTile
+        tone={tone}
+        size={variant === 'compact' ? 'sm' : 'md'}
+        className={classNames?.icon}
+      >
         {icon}
       </IconTile>
     );
@@ -315,7 +340,8 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
               aria-valuemax={100}
               aria-valuenow={Math.round(pct * 100)}
               aria-label={typeof label === 'string' ? label : undefined}
-              className="h-2 overflow-hidden rounded-full bg-muted"
+              data-slot="metric-card-progress"
+              className={cn('h-2 overflow-hidden rounded-full bg-muted', classNames?.progress)}
             >
               <div
                 className={cn(
@@ -354,7 +380,7 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
               </div>
               {previous && (
                 <div className="flex flex-col gap-0.5 ps-4">
-                  <div className="text-2xl font-semibold tracking-tight text-muted-foreground tabular-nums">
+                  <div className="text-metric font-semibold tracking-tight text-muted-foreground tabular-nums">
                     {previous.value}
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -378,7 +404,10 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
               {tile}
             </div>
             {items && items.length > 0 && (
-              <dl className="grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-3 border-t border-border pt-3">
+              <dl
+                data-slot="metric-card-items"
+                className={cn('grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-3 border-t border-border pt-3', classNames?.items)}
+              >
                 {items.map((item, i) => (
                   <div key={i} className="flex flex-col gap-0.5">
                     <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -443,11 +472,14 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
           children: (
             <>
               {action && !interactive && (
-                <div className="absolute end-3 top-3">{action}</div>
+                <div className={cn('absolute end-3 top-3', classNames?.action)}>{action}</div>
               )}
               {content}
               {footer && (
-                <div className="border-t border-border pt-3 text-xs text-muted-foreground">
+                <div
+                  data-slot="metric-card-footer"
+                  className={cn('border-t border-border pt-3 text-xs text-muted-foreground', classNames?.footer)}
+                >
                   {footer}
                 </div>
               )}

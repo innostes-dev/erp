@@ -13,3 +13,5 @@ export * from './components/navigation';
 export * from './components/layout';
 export * from './widgets';
 export { cn } from './lib/cn';
+export { formatRelativeTime } from './lib/relative-time';
+export type { SlotClassNames } from './lib/slots';

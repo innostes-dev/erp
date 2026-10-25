@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { cn } from '../../lib/cn';
+import type { SlotClassNames } from '../../lib/slots';
 import { ArrowDownIcon, CircleAlertIcon, InboxIcon } from '../../lib/icons';
 import { useId } from '../../lib/use-id';
 import { Skeleton } from '../../components/feedback/skeleton/skeleton';
@@ -24,6 +25,9 @@ export interface WidgetCardViewAll {
   /** Label, for translation. @default 'View all' */
   label?: ReactNode;
 }
+
+/** Inner parts of a `WidgetCard`, for `classNames`. */
+export type WidgetCardSlot = 'header' | 'title' | 'description' | 'count' | 'actions' | 'body' | 'footer';
 
 export interface WidgetCardProps extends Omit<
   ComponentProps<'section'>,
@@ -64,6 +68,8 @@ export interface WidgetCardProps extends Omit<
   padding?: 'default' | 'none';
   /** Heading level of the title, to fit the page outline. @default 2 */
   headingLevel?: 2 | 3 | 4;
+  /** Classes for inner parts. Each part also has a `data-slot` (e.g. `widget-card-header`). */
+  classNames?: SlotClassNames<WidgetCardSlot>;
 }
 
 /**
@@ -104,6 +110,7 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
       emptyState,
       padding = 'default',
       headingLevel = 2,
+      classNames,
       children,
       ...props
     },
@@ -178,18 +185,23 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
         )}
         {...props}
       >
-        <header className="flex items-start gap-3 px-5 pt-5 pb-4">
+        <header
+          data-slot="widget-card-header"
+          className={cn('flex flex-wrap items-start gap-x-3 gap-y-2 px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4', classNames?.header)}
+        >
           {icon && <span className="flex shrink-0">{icon}</span>}
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex min-w-[min(12rem,100%)] flex-1 flex-col gap-0.5">
             <div className="flex items-center gap-2">
               <Heading
                 id={titleId}
-                className="truncate text-base font-semibold"
+                data-slot="widget-card-title"
+                className={cn('truncate text-subheading font-semibold', classNames?.title)}
               >
                 {title}
               </Heading>
               {count !== undefined && count > 0 && (
                 <span
+                  data-slot="widget-card-count"
                   className={cn(
                     'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums',
                     countTone === 'destructive' &&
@@ -197,6 +209,7 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
                     countTone === 'primary' &&
                       'bg-primary text-primary-foreground',
                     countTone === 'neutral' && 'bg-muted text-muted-foreground',
+                    classNames?.count,
                   )}
                 >
                   {count > 99 ? '99+' : count}
@@ -204,11 +217,19 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
               )}
             </div>
             {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
+              <p
+                data-slot="widget-card-description"
+                className={cn('text-sm text-muted-foreground', classNames?.description)}
+              >
+                {description}
+              </p>
             )}
           </div>
           {(actions || viewAll) && (
-            <div className="flex shrink-0 items-center gap-2">
+            <div
+              data-slot="widget-card-actions"
+              className={cn('flex shrink-0 flex-wrap items-center gap-2', classNames?.actions)}
+            >
               {actions}
               {viewAll &&
                 (viewAll.render && isValidElement(viewAll.render) ? (
@@ -241,7 +262,8 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
           data-slot="widget-card-body"
           className={cn(
             'min-w-0 flex-1',
-            padding === 'default' ? 'px-5 pb-5' : 'pb-1',
+            padding === 'default' ? 'px-4 pb-4 sm:px-5 sm:pb-5' : 'pb-1',
+            classNames?.body,
           )}
         >
           {body}
@@ -249,7 +271,7 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
         {footer && (
           <footer
             data-slot="widget-card-footer"
-            className="border-t border-border px-5 py-3 text-sm text-muted-foreground"
+            className={cn('border-t border-border px-4 py-3 text-sm text-muted-foreground sm:px-5', classNames?.footer)}
           >
             {footer}
           </footer>
