@@ -8,16 +8,18 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/api-server",
-        "commands": ["python -m venv .venv", ".venv/Scripts/python -m pip install -r requirements.txt"],
+        "commands": [
+          "python3 -m venv .venv || python -m venv .venv",
+          "(test -f .venv/bin/pip && .venv/bin/pip install -r requirements.txt) || (.venv/Scripts/python -m pip install -r requirements.txt)"
+        ],
         "parallel": false
       }
     },
     "serve": {
       "executor": "nx:run-commands",
-      "continuous": true,
       "options": {
         "cwd": "apps/api-server",
-        "command": ".venv/Scripts/python -m fastapi dev app/main.py --port 8000"
+        "command": "(test -f .venv/bin/python && .venv/bin/python -m fastapi dev app/main.py --port 8000) || (.venv/Scripts/python -m fastapi dev app/main.py --port 8000)"
       }
     }
   }
