@@ -10,6 +10,20 @@
         "cwd": "kernel",
         "command": "(test -f ../apps/api-server/.venv/bin/python && ../apps/api-server/.venv/bin/python -m unittest discover -s tests -p 'test_*.py') || python3 -m unittest discover -s tests -p 'test_*.py'"
       }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "kernel",
+        "command": "(test -f ../apps/api-server/.venv/bin/alembic && ../apps/api-server/.venv/bin/alembic -c alembic.ini upgrade head) || alembic -c alembic.ini upgrade head"
+      }
+    },
+    "migration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "kernel",
+        "command": "(test -f ../apps/api-server/.venv/bin/alembic && ../apps/api-server/.venv/bin/alembic -c alembic.ini revision --autogenerate) || alembic -c alembic.ini revision --autogenerate"
+      }
     }
   }
 }
