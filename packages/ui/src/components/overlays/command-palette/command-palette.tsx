@@ -149,7 +149,7 @@ export const CommandPalette = forwardRef<HTMLDivElement, CommandPaletteProps>(fu
   }, [open]);
   useEffect(() => {
     if (!activeItem) return;
-    const node = listRef.current?.querySelector<HTMLElement>(`[id="${optionId(activeItem)}"]`);
+    const node = document.getElementById(optionId(activeItem));
     node?.scrollIntoView?.({ block: 'nearest' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeItem]);

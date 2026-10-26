@@ -159,8 +159,8 @@ describe('AppSwitcher', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: 'Switch application, current: HRMS' }));
     const list = await screen.findByRole('list');
-    expect(within(list).getByRole('button', { name: /HRMS/ })).toHaveAttribute('aria-current', 'true');
-    await userEvent.click(within(list).getByRole('button', { name: /ERP/ }));
+    expect(within(list).getByRole('button', { name: /^HRMS/ })).toHaveAttribute('aria-current', 'true');
+    await userEvent.click(within(list).getByRole('button', { name: /^ERP/ }));
     expect(onValueChange).toHaveBeenCalledWith('erp');
   });
 });

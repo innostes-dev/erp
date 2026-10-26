@@ -44,11 +44,11 @@ describe('EntityList', () => {
 
 describe('ActivityFeed', () => {
   it('groups by day with machine-readable times', () => {
-    const now = new Date();
+    const now = new Date("2026-10-26T12:00:00Z");
     const { container } = render(
       <ActivityFeed
         groupByDay
-        locale="en"
+        locale="en" now={now}
         items={[
           { id: '1', title: 'New employee joined', time: now },
           { id: '2', title: 'Document uploaded', time: new Date(now.getTime() - 24 * 3_600_000) },
