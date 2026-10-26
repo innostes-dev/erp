@@ -1,4 +1,4 @@
-"""Enterprise Configuration for Innostes ERP.
+"""Enterprise Configuration for Innostes ERP Kernel.
 
 Manages application and PostgreSQL settings with automated .env file discovery,
 environment variable precedence, type validation, connection pool limits, and credential masking.
@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
 
-from app.core.config.env import find_env_files, parse_env_file
+from kernel.config.env import find_env_files, parse_env_file
 
 
 class PostgresSettings(BaseModel):

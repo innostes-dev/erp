@@ -1,28 +1,36 @@
-"""Environment Discovery and Parsing Utility."""
+"""Environment Discovery and Parsing Utility for Innostes ERP Kernel."""
 
 from pathlib import Path
 
 
 def find_env_files() -> list[Path]:
     """Find candidate .env files in app directory, parent directories, and current working directory."""
+    current_file = Path(__file__).resolve()
+    repo_root = current_file.parents[2] if len(current_file.parents) > 2 else current_file.parent
+
     candidates = [
-        # App-specific .env (apps/api-server/.env)
-        Path(__file__).resolve().parents[3] / ".env",
-        Path(__file__).resolve().parents[3] / ".env.local",
-        # Current working directory .env
+        # Working directory .env
         Path.cwd() / ".env",
         Path.cwd() / ".env.local",
-        # Repository root .env (if different from cwd)
-        Path(__file__).resolve().parents[5] / ".env"
-        if len(Path(__file__).resolve().parents) > 5
-        else None,
+        # Kernel package .env
+        current_file.parents[1] / ".env" if len(current_file.parents) > 1 else None,
+        current_file.parents[1] / ".env.local" if len(current_file.parents) > 1 else None,
+        # API server app .env
+        repo_root / "apps" / "api-server" / ".env",
+        repo_root / "apps" / "api-server" / ".env.local",
+        # Repository root .env
+        repo_root / ".env",
+        repo_root / ".env.local",
     ]
-    seen = set()
+
+    seen: set[Path] = set()
     valid_paths: list[Path] = []
     for candidate in candidates:
-        if candidate and candidate.is_file() and candidate.resolve() not in seen:
-            seen.add(candidate.resolve())
-            valid_paths.append(candidate)
+        if candidate and candidate.is_file():
+            resolved = candidate.resolve()
+            if resolved not in seen:
+                seen.add(resolved)
+                valid_paths.append(candidate)
     return valid_paths
 
 

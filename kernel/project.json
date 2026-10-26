@@ -1,0 +1,15 @@
+{
+  "name": "kernel",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "kernel",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "kernel",
+        "command": "(test -f ../apps/api-server/.venv/bin/python && ../apps/api-server/.venv/bin/python -m unittest discover -s tests -p 'test_*.py') || python3 -m unittest discover -s tests -p 'test_*.py'"
+      }
+    }
+  }
+}

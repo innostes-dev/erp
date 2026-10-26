@@ -49,6 +49,10 @@ class BaseModel(Base):
         nullable=False,
     )
 
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("id", uuid.uuid4())
+        super().__init__(**kwargs)
+
     def to_dict(self) -> dict[str, Any]:
         """Convert model column attributes into a plain dictionary."""
         result: dict[str, Any] = {}

@@ -81,3 +81,12 @@ opencode.json
 vite.config.*.timestamp*
 
 vitest.config.*.timestamp*
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/

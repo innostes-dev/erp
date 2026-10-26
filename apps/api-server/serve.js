@@ -7,11 +7,18 @@ const pythonExe = path.join(__dirname, '.venv', isWin ? 'Scripts' : 'bin', isWin
 const port = process.env.PORT || '8001';
 const args = ['-m', 'fastapi', 'dev', 'app/main.py', '--port', port, ...process.argv.slice(2)];
 
+const repoRoot = path.resolve(__dirname, '../..');
+const pythonPathParts = [repoRoot, __dirname];
+if (process.env.PYTHONPATH) {
+  pythonPathParts.push(process.env.PYTHONPATH);
+}
+
 const child = spawn(pythonExe, args, {
   cwd: __dirname,
   stdio: 'inherit',
   env: {
     ...process.env,
+    PYTHONPATH: pythonPathParts.join(path.delimiter),
     PYTHONUTF8: '1',
     PYTHONIOENCODING: 'utf-8',
   },

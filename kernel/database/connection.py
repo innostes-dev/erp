@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import AsyncAdaptedQueuePool
 
-from app.core.config import get_settings
+from kernel.config import get_settings
 
 settings = get_settings()
 
@@ -48,9 +48,16 @@ async def ping_db(timeout: float = 3.0) -> dict[str, Any]:
 
     try:
         start_time = time.perf_counter()
-        async with asyncio.timeout(timeout):
+
+        async def _ping() -> None:
             async with engine.connect() as conn:
                 await conn.execute(text("SELECT 1"))
+
+        if hasattr(asyncio, "timeout"):
+            async with asyncio.timeout(timeout):
+                await _ping()
+        else:
+            await asyncio.wait_for(_ping(), timeout=timeout)
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0
         return {
