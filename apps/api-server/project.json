@@ -9,7 +9,7 @@
       "options": {
         "cwd": "apps/api-server",
         "commands": [
-          "(which uv >/dev/null 2>&1 && uv venv .venv && uv pip install -r requirements.txt --python .venv/bin/python) || (python3 -m venv .venv || python -m venv .venv; (test -f .venv/bin/pip && .venv/bin/pip install -r requirements.txt) || (.venv/Scripts/python -m pip install -r requirements.txt))"
+          "(which uv >/dev/null 2>&1 && uv venv --allow-existing .venv && uv pip install -r requirements.txt --python .venv/bin/python) || (python3 -m venv .venv || python -m venv .venv; (test -f .venv/bin/pip && .venv/bin/pip install -r requirements.txt) || (.venv/Scripts/python -m pip install -r requirements.txt))"
         ],
         "parallel": false
       }

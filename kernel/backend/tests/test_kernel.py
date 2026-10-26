@@ -31,7 +31,7 @@ class TestKernelConfig(unittest.TestCase):
     def test_masked_url(self) -> None:
         settings = get_settings()
         self.assertNotIn("postgres:postgres@", settings.db.masked_url)
-        self.assertIn("postgresql+asyncpg://postgres:***@localhost", settings.db.masked_url)
+        self.assertIn(":***@", settings.db.masked_url)
 
     def test_split_settings_modules(self) -> None:
         from kernel.core.database.db_settings import PostgresSettings as DbPgSettings

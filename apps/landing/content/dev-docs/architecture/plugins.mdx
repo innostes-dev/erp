@@ -45,7 +45,7 @@ One package can register several modules (the kernel will register `tenancy`, `i
 `apps/api-server/requirements.txt` lists every backend plug-in:
 
 ```text title="apps/api-server/requirements.txt"
--e ../../kernel/backend --config-settings editable_mode=compat
+-e ../../kernel/backend
 fastapi[standard]>=0.115
 ```
 
@@ -56,8 +56,6 @@ pnpm nx run api-server:install
 ```
 
 - `-e` installs in **editable** mode: code changes are picked up without reinstalling.
-- `editable_mode=compat` puts the package's folder on Python's path. Without it, running Python from
-  the repository root would find the empty top-level `kernel/` folder instead of the real package.
 - Reinstall only when you **add a plug-in** or **change its `pyproject.toml`** (new dependency, new entry point).
 
 ### How the engine loads it
