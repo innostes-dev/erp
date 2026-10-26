@@ -57,6 +57,29 @@ class PostgresSettings(BaseModel):
         return self.async_url.render_as_string(hide_password=True)
 
 
+class SecuritySettings(BaseModel):
+    """Enterprise Security & JWT Configuration."""
+
+    jwt_secret_key: SecretStr = Field(
+        default=SecretStr("insecure-dev-secret-key-change-in-production-min32chars"),
+        description="Secret key used for signing and verifying JWT tokens",
+    )
+    jwt_algorithm: str = Field(
+        default="HS256",
+        description="JWT cryptographic signing algorithm",
+    )
+    access_token_expire_minutes: int = Field(
+        default=30,
+        ge=1,
+        description="Access token lifespan in minutes",
+    )
+    refresh_token_expire_days: int = Field(
+        default=7,
+        ge=1,
+        description="Refresh token lifespan in days",
+    )
+
+
 class Settings(BaseSettings):
     """Central Application & Infrastructure Settings."""
 
@@ -65,6 +88,7 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False)
 
     db: PostgresSettings = Field(default_factory=PostgresSettings)
+    security: SecuritySettings = Field(default_factory=SecuritySettings)
 
     model_config = SettingsConfigDict(
         extra="ignore",
@@ -121,6 +145,16 @@ class Settings(BaseSettings):
         if "DB_ECHO_SQL" in merged_env:
             db_kwargs["echo_sql"] = merged_env["DB_ECHO_SQL"].lower() in ("true", "1", "yes")
 
+        security_kwargs: dict[str, Any] = {}
+        if "JWT_SECRET_KEY" in merged_env:
+            security_kwargs["jwt_secret_key"] = SecretStr(merged_env["JWT_SECRET_KEY"])
+        if "JWT_ALGORITHM" in merged_env:
+            security_kwargs["jwt_algorithm"] = merged_env["JWT_ALGORITHM"]
+        if "ACCESS_TOKEN_EXPIRE_MINUTES" in merged_env:
+            security_kwargs["access_token_expire_minutes"] = int(merged_env["ACCESS_TOKEN_EXPIRE_MINUTES"])
+        if "REFRESH_TOKEN_EXPIRE_DAYS" in merged_env:
+            security_kwargs["refresh_token_expire_days"] = int(merged_env["REFRESH_TOKEN_EXPIRE_DAYS"])
+
         app_kwargs: dict[str, Any] = {}
         if "APP_NAME" in merged_env:
             app_kwargs["app_name"] = merged_env["APP_NAME"]
@@ -131,6 +165,8 @@ class Settings(BaseSettings):
 
         if db_kwargs:
             app_kwargs["db"] = PostgresSettings(**db_kwargs)
+        if security_kwargs:
+            app_kwargs["security"] = SecuritySettings(**security_kwargs)
 
         return cls(**app_kwargs)
 
