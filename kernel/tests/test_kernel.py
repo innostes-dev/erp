@@ -47,6 +47,36 @@ class TestKernelConfig(unittest.TestCase):
         self.assertEqual(custom_db.host, "db.custom.net")
         self.assertEqual(custom_db.port, 5433)
 
+    def test_database_uri_precedence(self) -> None:
+        from kernel.database.db_settings import PostgresSettings
+        from pydantic import SecretStr
+
+        # If URI is given, it takes precedence over individual host/port
+        settings = PostgresSettings(
+            uri=SecretStr("postgresql://admin:secret123@prod-db.internal:5439/enterprise_db"),
+            host="ignored-localhost",
+            port=5432,
+        )
+        url = settings.async_url
+        self.assertEqual(url.drivername, "postgresql+asyncpg")
+        self.assertEqual(url.host, "prod-db.internal")
+        self.assertEqual(url.port, 5439)
+        self.assertEqual(url.database, "enterprise_db")
+        self.assertEqual(url.username, "admin")
+        self.assertNotIn("secret123", settings.masked_url)
+
+    def test_database_uri_from_env(self) -> None:
+        from kernel.database.db_settings import PostgresSettings
+
+        env = {
+            "DATABASE_URL": "postgresql://envuser:envpass@remote-host:5433/env_db",
+            "DB_HOST": "ignored-host",
+        }
+        settings = PostgresSettings.from_env(env)
+        self.assertEqual(settings.async_url.host, "remote-host")
+        self.assertEqual(settings.async_url.database, "env_db")
+        self.assertEqual(settings.async_url.drivername, "postgresql+asyncpg")
+
 
 class TestKernelDatabase(unittest.TestCase):
     """Test kernel database abstractions."""
