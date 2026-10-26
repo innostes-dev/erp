@@ -25,6 +25,7 @@ from kernel.security.jwt import (
 )
 from kernel.security.password import hash_password, verify_password
 from kernel.security.schemas import TokenPair, TokenPayload, TokenType
+from kernel.security.security_settings import SecuritySettings
 
 __all__ = [
     # Password
@@ -38,10 +39,11 @@ __all__ = [
     "decode_token",
     "verify_token",
     "parse_token_payload",
-    # Schemas
+    # Schemas & Settings
     "TokenType",
     "TokenPair",
     "TokenPayload",
+    "SecuritySettings",
     # Exceptions
     "SecurityError",
     "TokenError",

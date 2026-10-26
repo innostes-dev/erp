@@ -2,12 +2,14 @@
 
 from kernel.database.base import POSTGRES_NAMING_CONVENTION, Base, BaseModel
 from kernel.database.connection import close_db, engine, ping_db
+from kernel.database.db_settings import PostgresSettings
 from kernel.database.session import AsyncSessionLocal, get_db
 
 __all__ = [
     "Base",
     "BaseModel",
     "POSTGRES_NAMING_CONVENTION",
+    "PostgresSettings",
     "engine",
     "AsyncSessionLocal",
     "get_db",
