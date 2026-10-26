@@ -2,7 +2,14 @@
   "name": "@innostes/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:backend": "nx serve api-server",
+    "start:web-app": "nx serve web-app",
+    "start:landing": "nx dev landing",
+    "dev:backend": "nx serve api-server",
+    "dev:web-app": "nx serve web-app",
+    "dev:landing": "nx dev landing"
+  },
   "private": true,
   "dependencies": {
     "react": "^19.0.0",
