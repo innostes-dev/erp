@@ -8,36 +8,53 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.pool import AsyncAdaptedQueuePool
 
-from kernel.config import get_settings
+_engine: AsyncEngine | None = None
 
-settings = get_settings()
 
-engine: AsyncEngine = create_async_engine(
-    url=settings.db.async_url,
-    poolclass=AsyncAdaptedQueuePool,
-    pool_size=settings.db.pool_size,
-    max_overflow=settings.db.max_overflow,
-    pool_timeout=settings.db.pool_timeout,
-    pool_recycle=settings.db.pool_recycle,
-    pool_pre_ping=settings.db.pool_pre_ping,
-    echo=settings.db.echo_sql,
-    connect_args={
-        "server_settings": {
-            "application_name": "erp-api-server",
-            "timezone": "UTC",
-            "search_path": settings.db.schema_name,
-        }
-    },
-)
+def get_engine() -> AsyncEngine:
+    """Return the cached async database engine instance, creating it on first access."""
+    global _engine
+    if _engine is None:
+        from kernel.config import get_settings
+
+        settings = get_settings()
+        _engine = create_async_engine(
+            url=settings.db.async_url,
+            poolclass=AsyncAdaptedQueuePool,
+            pool_size=settings.db.pool_size,
+            max_overflow=settings.db.max_overflow,
+            pool_timeout=settings.db.pool_timeout,
+            pool_recycle=settings.db.pool_recycle,
+            pool_pre_ping=settings.db.pool_pre_ping,
+            echo=settings.db.echo_sql,
+            connect_args={
+                "server_settings": {
+                    "application_name": "erp-api-server",
+                    "timezone": "UTC",
+                    "search_path": settings.db.schema_name,
+                }
+            },
+        )
+    return _engine
+
+
+def __getattr__(name: str) -> Any:
+    if name == "engine":
+        return get_engine()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 async def close_db() -> None:
     """Gracefully dispose connection pool on application shutdown."""
-    await engine.dispose()
+    global _engine
+    if _engine is not None:
+        await _engine.dispose()
+        _engine = None
 
 
 async def ping_db(timeout: float = 3.0) -> dict[str, Any]:
     """Execute 'SELECT 1' to verify connection and report pool health."""
+    engine = get_engine()
     pool = engine.pool
     pool_stats = {
         "size": pool.size(),

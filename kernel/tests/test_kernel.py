@@ -41,21 +41,11 @@ class TestKernelConfig(unittest.TestCase):
         self.assertIn("postgresql+asyncpg://postgres:***@localhost", settings.db.masked_url)
 
     def test_split_settings_modules(self) -> None:
-        from kernel.config.db_settings import PostgresSettings as CfgPgSettings
         from kernel.database.db_settings import PostgresSettings as DbPgSettings
-        from kernel.config.security_settings import SecuritySettings as CfgSecSettings
-        from kernel.security.security_settings import SecuritySettings as SecSecSettings
 
-        self.assertIs(CfgPgSettings, DbPgSettings)
-        self.assertIs(CfgSecSettings, SecSecSettings)
-
-        custom_db = CfgPgSettings.from_env({"DB_HOST": "db.custom.net", "DB_PORT": "5433"})
+        custom_db = DbPgSettings.from_env({"DB_HOST": "db.custom.net", "DB_PORT": "5433"})
         self.assertEqual(custom_db.host, "db.custom.net")
         self.assertEqual(custom_db.port, 5433)
-
-        custom_sec = CfgSecSettings.from_env({"JWT_ALGORITHM": "HS384", "ACCESS_TOKEN_EXPIRE_MINUTES": "60"})
-        self.assertEqual(custom_sec.jwt_algorithm, "HS384")
-        self.assertEqual(custom_sec.access_token_expire_minutes, 60)
 
 
 class TestKernelDatabase(unittest.TestCase):

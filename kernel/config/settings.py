@@ -1,46 +1,37 @@
-"""Enterprise Configuration Loader for Innostes ERP Kernel.
-
-Discovers .env files, aggregates domain-specific modular settings (database, security, etc.),
-and exposes the cached singleton Settings instance.
-"""
+"""Application Settings Loader."""
 
 from functools import lru_cache
 import os
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from kernel.config.db_settings import PostgresSettings
 from kernel.config.env import find_env_files, parse_env_file
-from kernel.config.security_settings import SecuritySettings
+from kernel.database.db_settings import PostgresSettings
 
 
 class Settings(BaseSettings):
-    """Central Application & Infrastructure Settings."""
+    """Central Application Settings."""
 
     app_name: str = Field(default="Innostes ERP API")
     app_env: str = Field(default="development")
     debug: bool = Field(default=False)
 
-    db: PostgresSettings = Field(default_factory=PostgresSettings)
-    security: SecuritySettings = Field(default_factory=SecuritySettings)
+    # JWT Settings
+    jwt_secret_key: SecretStr = Field(default=SecretStr("insecure-dev-secret-key-change-in-production"))
+    jwt_algorithm: str = Field(default="HS256")
+    access_token_expire_minutes: int = Field(default=30)
+    refresh_token_expire_days: int = Field(default=7)
 
-    model_config = SettingsConfigDict(
-        extra="ignore",
-    )
+    # Database Settings from database/db_settings.py
+    db: PostgresSettings = Field(default_factory=PostgresSettings)
+
+    model_config = SettingsConfigDict(extra="ignore")
 
     @classmethod
     def load(cls) -> "Settings":
-        """Load settings from discovered .env files and os.environ.
-
-        Priority order (highest to lowest):
-        1. System environment variables (os.environ)
-        2. .env.local file
-        3. .env file
-        4. Class defaults
-        """
-        # Collect merged environment dictionary from discovered .env files
+        """Load settings from discovered .env files and environment variables."""
         merged_env: dict[str, str] = {}
         for env_path in find_env_files():
             file_vars = parse_env_file(env_path)
@@ -48,7 +39,6 @@ class Settings(BaseSettings):
                 if k not in merged_env:
                     merged_env[k] = v
 
-        # System environment variables take top priority
         for k, v in os.environ.items():
             merged_env[k] = v
 
@@ -59,10 +49,17 @@ class Settings(BaseSettings):
             app_kwargs["app_env"] = merged_env["APP_ENV"]
         if "APP_DEBUG" in merged_env:
             app_kwargs["debug"] = merged_env["APP_DEBUG"].lower() in ("true", "1", "yes")
+        if "JWT_SECRET_KEY" in merged_env:
+            app_kwargs["jwt_secret_key"] = SecretStr(merged_env["JWT_SECRET_KEY"])
+        if "JWT_ALGORITHM" in merged_env:
+            app_kwargs["jwt_algorithm"] = merged_env["JWT_ALGORITHM"]
+        if "ACCESS_TOKEN_EXPIRE_MINUTES" in merged_env:
+            app_kwargs["access_token_expire_minutes"] = int(merged_env["ACCESS_TOKEN_EXPIRE_MINUTES"])
+        if "REFRESH_TOKEN_EXPIRE_DAYS" in merged_env:
+            app_kwargs["refresh_token_expire_days"] = int(merged_env["REFRESH_TOKEN_EXPIRE_DAYS"])
 
-        # Delegate parsing to domain-specific setting modules
+        # Load database settings from database/db_settings.py
         app_kwargs["db"] = PostgresSettings.from_env(merged_env)
-        app_kwargs["security"] = SecuritySettings.from_env(merged_env)
 
         return cls(**app_kwargs)
 
