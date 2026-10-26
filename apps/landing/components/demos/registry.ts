@@ -3,6 +3,10 @@ import type { ComponentType } from 'react';
 import Demo_actions_button_group_basic_tsx from './actions/button-group/basic';
 import Demo_actions_toggle_group_basic_tsx from './actions/toggle-group/basic';
 import Demo_actions_toggle_basic_tsx from './actions/toggle/basic';
+import Demo_charts_cartesian_area_tsx from './charts/cartesian/area';
+import Demo_charts_cartesian_bar_tsx from './charts/cartesian/bar';
+import Demo_charts_cartesian_line_tsx from './charts/cartesian/line';
+import Demo_charts_donut_basic_tsx from './charts/donut/basic';
 import Demo_data_display_avatar_basic_tsx from './data-display/avatar/basic';
 import Demo_data_display_badge_basic_tsx from './data-display/badge/basic';
 import Demo_data_display_card_basic_tsx from './data-display/card/basic';
@@ -75,6 +79,10 @@ export const demos: Record<string, ComponentType> = {
   'actions/button-group/basic': Demo_actions_button_group_basic_tsx,
   'actions/toggle-group/basic': Demo_actions_toggle_group_basic_tsx,
   'actions/toggle/basic': Demo_actions_toggle_basic_tsx,
+  'charts/cartesian/area': Demo_charts_cartesian_area_tsx,
+  'charts/cartesian/bar': Demo_charts_cartesian_bar_tsx,
+  'charts/cartesian/line': Demo_charts_cartesian_line_tsx,
+  'charts/donut/basic': Demo_charts_donut_basic_tsx,
   'data-display/avatar/basic': Demo_data_display_avatar_basic_tsx,
   'data-display/badge/basic': Demo_data_display_badge_basic_tsx,
   'data-display/card/basic': Demo_data_display_card_basic_tsx,

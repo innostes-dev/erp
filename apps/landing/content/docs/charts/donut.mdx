@@ -1,0 +1,49 @@
+---
+title: Donut Chart
+description: A Donut chart for visualizing proportions with a prominent center metric.
+---
+
+Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
+
+## Installation
+
+As with all charts, `DonutChart` requires Recharts as a peer dependency.
+
+**Important Version Guidance:**
+- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
+- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
+
+## Import
+
+Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+
+```tsx
+import { DonutChart } from '@innostes/ui/charts';
+```
+
+## Accessibility
+
+Just like Cartesian charts, the `DonutChart` automatically renders an accessible, visually-hidden `<table>` containing the raw data and percentage shares. This allows screen readers to navigate the data easily. The `aria-label` prop is required and is used to name this hidden table.
+
+## Center Metric
+
+The `DonutChart` supports a distinct API for displaying a prominent metric in the center of the ring via the `centerValue` and `centerLabel` props. This is ideal for highlighting the primary takeaway of the chart (e.g., total volume, overall percentage).
+
+## Props Overview
+
+- **`data`**: An array of slices to render, each defined as `{ key: string, label: string, value: number, color?: ChartColor }`.
+- **`valueFormatter`**: Optional function to format the values displayed in tooltips and the accessible table.
+- **`locale`**: Optional locale string for number formatting in the accessible table.
+- **`aria-label`**: Required string to name the underlying hidden data table.
+
+## Theming
+
+Slices can be colored automatically using the `chart-1` to `chart-8` categorical tokens, or you can assign specific semantic tones like `success`, `destructive`, or `warning` to individual slices via the `color` property in the data objects.
+
+## Usage
+
+<ComponentPreview name="charts/donut/basic" />
+
+## API
+
+<ApiTable components={['DonutChart']} />
