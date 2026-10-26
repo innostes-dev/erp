@@ -2,24 +2,35 @@
 title: Dashboard
 description: A complete admin page built only with innostes UI.
 icon: LayoutDashboard
-summary: Sidebar, page header, KPI stats, a data table and usage meters, all working together.
+summary: An HRMS dashboard bringing together the Sidebar, AppRail, TopBar, MetricCards, charts, and dashboard widgets.
 full: true
 ---
 
-<ComponentPreview name="examples/dashboard" align="start" className="p-0 sm:p-0" />
+<ComponentPreview
+  name="examples/dashboard"
+  align="start"
+  className="p-0 sm:p-0"
+/>
 
 ## What's in it
 
-| Part | Components |
-| --- | --- |
-| App shell | `SidebarProvider`, `Sidebar`, `SidebarMenuButton`, `SidebarTrigger`, `SidebarInset` |
-| Header | `PageHeader`, `Breadcrumb`, `Button`, `Avatar` |
-| Period switch | `Tabs` (pills) |
-| KPIs | `Stat` |
-| Orders | `DataTable`, `Badge` |
-| Plan usage | `Card`, `Meter` |
-| Feedback | `toast` |
+This flagship example combines our layout and widget components into a responsive HRMS application layout, matching our reference dashboard composition.
 
-Open the **Code** tab to copy the full page. Collapse the sidebar with the button in the header
-or Ctrl/⌘ + B. The layout responds to its container (CSS container queries), so it adapts
-wherever you place it.
+| Part                     | Components                                                                                                                                                                                                                  |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Global Navigation**    | [`AppRail`](/docs/components/layout/app-rail) on the far left with `AppRailItem`                                                                                                                                            |
+| **Workspace Navigation** | [`SidebarProvider`](/docs/components/layout/sidebar), `Sidebar` (icon collapsible), `SidebarMenu`                                                                                                                           |
+| **Top Header**           | [`TopBar`](/docs/components/layout/top-bar) with [`AppSwitcher`](/docs/components/widgets/app-switcher), [`NotificationBell`](/docs/components/widgets/notifications), and [`UserMenu`](/docs/components/widgets/user-menu) |
+| **Content Area**         | `SidebarInset` containing the main content                                                                                                                                                                                  |
+| **Welcome**              | [`WelcomeBanner`](/docs/components/widgets/welcome-banner)                                                                                                                                                                  |
+| **KPIs**                 | [`MetricCard`](/docs/components/widgets/metric-card) and `MetricGrid`                                                                                                                                                       |
+| **Data Viz**             | [`BarChart`](/docs/components/charts/bar-chart) in a [`WidgetCard`](/docs/components/widgets/widget-card)                                                                                                                   |
+| **Dashboard Widgets**    | [`QuickActions`](/docs/components/widgets/quick-actions), [`EntityList`](/docs/components/widgets/entity-list), [`ActivityFeed`](/docs/components/widgets/activity-feed)                                                    |
+
+### Responsive Behavior
+
+Open the **Code** tab to copy the full page. The layout responds to its container and viewport widths:
+
+- At narrower widths, the `AppRail` collapses or hides.
+- The `Sidebar` collapses to an icon rail or goes off-canvas automatically.
+- Dashboard widgets like the `BarChart` and `MetricCard`s stack vertically using grid layout and container queries (`@container`).
