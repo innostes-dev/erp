@@ -1,0 +1,68 @@
+---
+title: Cartesian Charts
+description: Bar, Line, and Area charts for visualizing categorical data series.
+---
+
+Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
+
+## Installation
+
+Charts are built on top of [Recharts](https://recharts.org/). You must install it as a peer dependency alongside `@innostes/ui`.
+
+**Important Version Guidance:**
+Due to a transitive peer dependency conflict, you must match the Recharts version to your React version:
+- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
+- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
+
+```bash
+# For React 18 / 19
+pnpm add recharts@^3.0.0
+
+# For React 17
+pnpm add recharts@^2.15.0
+```
+
+## Import
+
+Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+
+```tsx
+import { BarChart, LineChart, AreaChart } from '@innostes/ui/charts';
+```
+
+## Accessibility
+
+A core differentiator of our chart components is their built-in accessibility. Every chart renders an accessible, visually-hidden `<table>` alongside the visual SVG representation (via the internal `ChartFrame` wrapper).
+
+This means screen reader users are not presented with an opaque graphic. Instead, they can navigate the actual tabular data using standard table commands, providing a significantly superior, first-class experience for assistive technology. The `aria-label` prop you provide is used to name this hidden table.
+
+## Props Overview
+
+- **`data`**: An array of objects representing your dataset.
+- **`categoryKey`**: The key in your data objects that represents the categories along the X-axis (e.g., `'month'`, `'quarter'`).
+- **`series`**: An array of objects defining which keys from the data to plot, shaped as `{ key: string, label: string }`. The `label` is used in legends and tooltips.
+- **`valueFormatter`**: An optional function to format the numeric values (e.g., adding currency symbols) for tooltips and axes.
+- **`locale`**: Passed to handle localization formatting within the accessible table and tooltips.
+- **`aria-label`**: Required string to name the underlying hidden data table for screen readers.
+
+## Theming & Interactions
+
+Colors are automatically assigned from the `chart-1` to `chart-8` categorical tokens defined in `theme.css` and `dark.css`. You can also override colors per series using these tokens or semantic tones (e.g., `success`, `destructive`).
+
+Legends are fully interactive out-of-the-box. Clicking a legend entry toggles the visibility of that data series. If a chart contains only a single series, the legend is automatically hidden to save space and reduce clutter.
+
+## Bar Chart
+
+<ComponentPreview name="charts/cartesian/bar" />
+
+## Line Chart
+
+<ComponentPreview name="charts/cartesian/line" />
+
+## Area Chart
+
+<ComponentPreview name="charts/cartesian/area" />
+
+## API
+
+<ApiTable components={['BarChart', 'LineChart', 'AreaChart']} />
