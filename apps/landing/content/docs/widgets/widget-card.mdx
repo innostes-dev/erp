@@ -47,6 +47,10 @@ const { data, isLoading, error, refetch } = usePendingActions();
 - `headingLevel` (default `h2`) keeps the page outline correct.
 - Loading sets `aria-busy`; errors use `role="alert"`.
 
+## Customization
+
+Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/conventions#customization) for the full customization model.
+
 ## API Reference
 
 <ApiTable components={['WidgetCard']} />

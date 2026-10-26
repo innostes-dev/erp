@@ -16,6 +16,106 @@ import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@innostes/ui'
 
 Everything is exported from the package root. Imports are tree-shaken: you only ship what you use.
 
+
+## Customization
+
+innostes UI provides several mechanisms for customization, from global theming to pinpoint overrides.
+
+### 1. Design tokens
+
+Design tokens are CSS custom properties defined in `packages/ui/tailwind/theme.css`. Changing a token re-themes every component that uses it automatically across both light and dark modes.
+
+```css
+/* Change the primary colour and fluid type scale globally */
+@theme {
+  --color-primary: var(--color-indigo-600);
+  --text-display: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+}
+```
+
+### 2. CSS variables for sizing
+
+Certain dimensions are exposed as CSS variables rather than semantic tokens. This allows you to set them via component props or override them in CSS.
+
+```tsx
+// Set via prop (writes the CSS variable inline)
+<SidebarProvider width="20rem">
+  <Sidebar />
+</SidebarProvider>
+```
+
+```css
+/* Or override globally in your CSS */
+:root {
+  --sidebar-width: 20rem;
+  --sidebar-width-icon: 4rem;
+  --sidebar-width-mobile: min(20rem, 85vw);
+  --app-rail-width: 5rem;
+  --top-bar-height: 4.5rem;
+}
+```
+
+### 3. `className`
+
+Like any React component, the plain `className` prop acts as a Tailwind escape hatch on the component's root element. It is merged using `tailwind-merge`, so your classes win over internal defaults.
+
+```tsx
+<Button className="rounded-full shadow-lg">Save</Button>
+```
+
+### 4. `classNames` (multi-part overrides)
+
+For complex components with multiple parts, the `classNames` prop (using `SlotClassNames<Slot>`) allows you to override styles for specific internal slots.
+
+Every styled element carries a `data-slot` attribute. Values passed to `classNames` are merged last, resolving conflicts via Tailwind.
+
+```tsx
+<MetricCard
+  label="Revenue"
+  value="$12,000"
+  classNames={{
+    root: 'border-blue-200',
+    value: 'text-blue-700 font-serif'
+  }}
+/>
+```
+
+The following components support the `classNames` prop:
+`ActionList`, `ActivityFeed`, `AppSwitcher`, `CommandPalette`, `DataTable`, `DonutChart`, `EmptyState`, `EntityList`, `MetricCard`, `Notifications`, `PageHeader`, `QuickActions`, `Stepper`, `UserMenu`, `WelcomeBanner`, `WidgetCard`.
+
+### 5. `render` prop (polymorphism)
+
+Via Base UI's `useRender`/`mergeProps`, you can swap the underlying element or component entirely while keeping the component's behavior and ARIA attributes intact.
+
+```tsx
+// Renders the button as a Next.js Link
+<Button render={<Link href="/settings" />} nativeButton={false}>
+  Settings
+</Button>
+```
+
+## Responsiveness
+
+### 1. Fluid typography
+
+Instead of fixed sizes or viewport breakpoints, innostes UI uses `clamp()`-based fluid typography for smooth scaling.
+
+```css
+/* Fluid type automatically scales based on viewport width */
+--text-heading: clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);
+```
+
+### 2. Container queries
+
+For component-level responsiveness, innostes UI relies on CSS container queries (`@container`, `@max-*`) rather than viewport breakpoints. This is crucial because components often live inside sidebars or panels and need to respond to their *available space*, not the overall screen size.
+
+```tsx
+// DataTable switches to stack mode based on its container's width, not the screen width
+<DataTable responsive="stack" data={data} columns={columns} />
+```
+
+Components utilizing container queries include `DataTable`, `Stepper`, and `WelcomeBanner`.
+
 ## Controlled and uncontrolled
 
 Every stateful component works both ways, using React's naming:
