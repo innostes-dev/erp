@@ -4,6 +4,7 @@ from typing import Any
 from kernel.database.base import POSTGRES_NAMING_CONVENTION, Base, BaseModel
 from kernel.database.connection import close_db, ping_db
 from kernel.database.db_settings import PostgresSettings
+from kernel.database.migrations import apply_migrations, auto_migrate
 from kernel.database.session import get_db
 
 __all__ = [
@@ -16,6 +17,8 @@ __all__ = [
     "get_db",
     "close_db",
     "ping_db",
+    "apply_migrations",
+    "auto_migrate",
 ]
 
 

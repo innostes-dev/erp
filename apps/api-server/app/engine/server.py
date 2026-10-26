@@ -29,7 +29,12 @@ class ServerEngine:
 
     @asynccontextmanager
     async def _lifespan(self, app: FastAPI) -> AsyncGenerator[None, None]:
-        """Engine lifespan managing module startup hooks and kernel DB pool shutdown."""
+        """Engine lifespan managing migrations, module startup hooks, and kernel DB pool shutdown."""
+        # Run database migrations if enabled
+        if self.settings.auto_migrate:
+            from kernel.database.migrations import auto_migrate
+            await auto_migrate()
+
         # Execute module startup hooks
         for module in self.registry.list_modules():
             await module.on_startup(app)

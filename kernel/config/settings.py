@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     app_name: str = Field(default="Innostes ERP API")
     app_env: str = Field(default="development")
     debug: bool = Field(default=False)
+    auto_migrate: bool = Field(default=False, description="Run database migrations automatically on startup")
 
     # JWT Settings
     jwt_secret_key: SecretStr = Field(default=SecretStr("insecure-dev-secret-key-change-in-production"))
@@ -49,6 +50,8 @@ class Settings(BaseSettings):
             app_kwargs["app_env"] = merged_env["APP_ENV"]
         if "APP_DEBUG" in merged_env:
             app_kwargs["debug"] = merged_env["APP_DEBUG"].lower() in ("true", "1", "yes")
+        if "AUTO_MIGRATE" in merged_env:
+            app_kwargs["auto_migrate"] = merged_env["AUTO_MIGRATE"].lower() in ("true", "1", "yes")
         if "JWT_SECRET_KEY" in merged_env:
             app_kwargs["jwt_secret_key"] = SecretStr(merged_env["JWT_SECRET_KEY"])
         if "JWT_ALGORITHM" in merged_env:
