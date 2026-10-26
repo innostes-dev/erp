@@ -2,8 +2,8 @@
 title: Sidebar
 description: The app shell for admin panels.
 icon: PanelLeft
-status: Beta
-summary: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips and a keyboard shortcut.
+status: Stable
+summary: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and a keyboard shortcut.
 ---
 
 <ComponentPreview name="layout/sidebar/basic" align="start" className="p-4 sm:p-4" />
@@ -17,12 +17,20 @@ import {
   SidebarHeader,
   SidebarContent,
   SidebarFooter,
+  SidebarSeparator,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarGroupAction,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarTrigger,
+  SidebarRail,
   SidebarInset,
   useSidebar,
 } from '@innostes/ui';
@@ -61,15 +69,49 @@ import {
 
 ## Behaviour
 
-- **Desktop**: expanded (256px) or collapsed to icons (56px). Collapsed items show their label in a
-  tooltip.
-- **Mobile** (below 768px, set with `mobileQuery`): the sidebar becomes a slide-in panel that
-  closes when an item is chosen.
+- **Desktop**: expanded (256px) or collapsed to icons (56px). Collapsed items show their label in a tooltip.
+- **Mobile** (below 768px, set with `mobileQuery`): the sidebar becomes a slide-in panel that closes when an item is chosen.
 - **Shortcut**: Ctrl/⌘ + B toggles it (`keyboardShortcut`, or `null` to turn off).
-- **Persist** the choice by controlling `open` / `onOpenChange` and saving it, e.g. in a cookie,
-  so the server renders the right state.
+- **Persist** the choice by controlling `open` / `onOpenChange` and saving it, e.g. in a cookie, so the server renders the right state.
 
 `useSidebar()` gives any component inside the provider `open`, `toggle`, `isMobile` and setters.
+
+## Custom Width
+
+You can customize the width of the sidebar when expanded, collapsed to icons, and on mobile. These props map directly to `--sidebar-width`, `--sidebar-width-icon`, and `--sidebar-width-mobile` CSS variables.
+
+<ComponentPreview name="layout/sidebar/width" align="start" className="p-4 sm:p-4" />
+
+## Variants
+
+The sidebar comes in three visual variants: `sidebar` (classic full-height side navigation), `floating` (a floating panel distinct from the edge), and `inset` (a sidebar that wraps the content area with a rounded border).
+
+<ComponentPreview name="layout/sidebar/variants" align="start" className="p-4 sm:p-4" />
+
+## Submenus
+
+For deeper navigation structures, use `SidebarMenuSub`, `SidebarMenuSubItem`, and `SidebarMenuSubButton` inside a `SidebarMenuItem`.
+
+<ComponentPreview name="layout/sidebar/nav-submenu" align="start" className="p-4 sm:p-4" />
+
+## Theming the sidebar
+
+The sidebar is built with its own set of CSS variables (tokens) independent from the rest of the application. This allows you to give the app shell a distinct look (like a dark sidebar in a light app) without affecting standard components.
+
+To theme the sidebar, override the `--color-sidebar*` tokens in your CSS.
+
+```css
+@theme {
+  --color-sidebar: var(--color-slate-900);
+  --color-sidebar-foreground: var(--color-slate-50);
+  --color-sidebar-primary: var(--color-blue-500);
+  --color-sidebar-primary-foreground: var(--color-white);
+  --color-sidebar-accent: var(--color-slate-800);
+  --color-sidebar-accent-foreground: var(--color-slate-50);
+  --color-sidebar-border: var(--color-slate-800);
+  --color-sidebar-ring: var(--color-blue-500);
+}
+```
 
 ## Accessibility
 
@@ -78,4 +120,4 @@ import {
 
 ## API Reference
 
-<ApiTable components={['SidebarProvider', 'Sidebar', 'SidebarMenuButton', 'SidebarTrigger']} />
+<ApiTable components={['SidebarProvider', 'Sidebar', 'SidebarHeader', 'SidebarContent', 'SidebarFooter', 'SidebarSeparator', 'SidebarGroup', 'SidebarGroupLabel', 'SidebarGroupAction', 'SidebarMenu', 'SidebarMenuItem', 'SidebarMenuButton', 'SidebarMenuAction', 'SidebarMenuBadge', 'SidebarMenuSub', 'SidebarMenuSubItem', 'SidebarMenuSubButton', 'SidebarTrigger', 'SidebarRail', 'SidebarInset']} />

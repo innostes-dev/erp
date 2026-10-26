@@ -38,11 +38,16 @@ import Demo_forms_select_basic_tsx from './forms/select/basic';
 import Demo_forms_slider_basic_tsx from './forms/slider/basic';
 import Demo_forms_switch_basic_tsx from './forms/switch/basic';
 import Demo_forms_textarea_basic_tsx from './forms/textarea/basic';
+import Demo_layout_app_rail_basic_tsx from './layout/app-rail/basic';
 import Demo_layout_form_layout_basic_tsx from './layout/form-layout/basic';
 import Demo_layout_page_header_basic_tsx from './layout/page-header/basic';
 import Demo_layout_scroll_area_basic_tsx from './layout/scroll-area/basic';
 import Demo_layout_separator_basic_tsx from './layout/separator/basic';
 import Demo_layout_sidebar_basic_tsx from './layout/sidebar/basic';
+import Demo_layout_sidebar_nav_submenu_tsx from './layout/sidebar/nav-submenu';
+import Demo_layout_sidebar_variants_tsx from './layout/sidebar/variants';
+import Demo_layout_sidebar_width_tsx from './layout/sidebar/width';
+import Demo_layout_top_bar_basic_tsx from './layout/top-bar/basic';
 import Demo_navigation_accordion_basic_tsx from './navigation/accordion/basic';
 import Demo_navigation_breadcrumb_basic_tsx from './navigation/breadcrumb/basic';
 import Demo_navigation_collapsible_basic_tsx from './navigation/collapsible/basic';
@@ -51,15 +56,19 @@ import Demo_navigation_stepper_basic_tsx from './navigation/stepper/basic';
 import Demo_navigation_stepper_vertical_tsx from './navigation/stepper/vertical';
 import Demo_navigation_tabs_basic_tsx from './navigation/tabs/basic';
 import Demo_overlays_alert_dialog_basic_tsx from './overlays/alert-dialog/basic';
+import Demo_overlays_command_palette_basic_tsx from './overlays/command-palette/basic';
 import Demo_overlays_context_menu_basic_tsx from './overlays/context-menu/basic';
 import Demo_overlays_dialog_basic_tsx from './overlays/dialog/basic';
 import Demo_overlays_dropdown_menu_basic_tsx from './overlays/dropdown-menu/basic';
 import Demo_overlays_popover_basic_tsx from './overlays/popover/basic';
 import Demo_overlays_sheet_basic_tsx from './overlays/sheet/basic';
 import Demo_overlays_tooltip_basic_tsx from './overlays/tooltip/basic';
+import Demo_widgets_app_switcher_basic_tsx from './widgets/app-switcher/basic';
 import Demo_widgets_metric_card_states_tsx from './widgets/metric-card/states';
 import Demo_widgets_metric_card_variants_tsx from './widgets/metric-card/variants';
+import Demo_widgets_notification_bell_basic_tsx from './widgets/notification-bell/basic';
 import Demo_widgets_sparkline_basic_tsx from './widgets/sparkline/basic';
+import Demo_widgets_user_menu_basic_tsx from './widgets/user-menu/basic';
 import Demo_widgets_widget_card_basic_tsx from './widgets/widget-card/basic';
 
 export const demos: Record<string, ComponentType> = {
@@ -101,11 +110,16 @@ export const demos: Record<string, ComponentType> = {
   'forms/slider/basic': Demo_forms_slider_basic_tsx,
   'forms/switch/basic': Demo_forms_switch_basic_tsx,
   'forms/textarea/basic': Demo_forms_textarea_basic_tsx,
+  'layout/app-rail/basic': Demo_layout_app_rail_basic_tsx,
   'layout/form-layout/basic': Demo_layout_form_layout_basic_tsx,
   'layout/page-header/basic': Demo_layout_page_header_basic_tsx,
   'layout/scroll-area/basic': Demo_layout_scroll_area_basic_tsx,
   'layout/separator/basic': Demo_layout_separator_basic_tsx,
   'layout/sidebar/basic': Demo_layout_sidebar_basic_tsx,
+  'layout/sidebar/nav-submenu': Demo_layout_sidebar_nav_submenu_tsx,
+  'layout/sidebar/variants': Demo_layout_sidebar_variants_tsx,
+  'layout/sidebar/width': Demo_layout_sidebar_width_tsx,
+  'layout/top-bar/basic': Demo_layout_top_bar_basic_tsx,
   'navigation/accordion/basic': Demo_navigation_accordion_basic_tsx,
   'navigation/breadcrumb/basic': Demo_navigation_breadcrumb_basic_tsx,
   'navigation/collapsible/basic': Demo_navigation_collapsible_basic_tsx,
@@ -114,14 +128,18 @@ export const demos: Record<string, ComponentType> = {
   'navigation/stepper/vertical': Demo_navigation_stepper_vertical_tsx,
   'navigation/tabs/basic': Demo_navigation_tabs_basic_tsx,
   'overlays/alert-dialog/basic': Demo_overlays_alert_dialog_basic_tsx,
+  'overlays/command-palette/basic': Demo_overlays_command_palette_basic_tsx,
   'overlays/context-menu/basic': Demo_overlays_context_menu_basic_tsx,
   'overlays/dialog/basic': Demo_overlays_dialog_basic_tsx,
   'overlays/dropdown-menu/basic': Demo_overlays_dropdown_menu_basic_tsx,
   'overlays/popover/basic': Demo_overlays_popover_basic_tsx,
   'overlays/sheet/basic': Demo_overlays_sheet_basic_tsx,
   'overlays/tooltip/basic': Demo_overlays_tooltip_basic_tsx,
+  'widgets/app-switcher/basic': Demo_widgets_app_switcher_basic_tsx,
   'widgets/metric-card/states': Demo_widgets_metric_card_states_tsx,
   'widgets/metric-card/variants': Demo_widgets_metric_card_variants_tsx,
+  'widgets/notification-bell/basic': Demo_widgets_notification_bell_basic_tsx,
   'widgets/sparkline/basic': Demo_widgets_sparkline_basic_tsx,
+  'widgets/user-menu/basic': Demo_widgets_user_menu_basic_tsx,
   'widgets/widget-card/basic': Demo_widgets_widget_card_basic_tsx,
 };

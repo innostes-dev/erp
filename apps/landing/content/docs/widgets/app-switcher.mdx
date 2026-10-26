@@ -1,0 +1,67 @@
+---
+title: App Switcher
+description: A popover for moving between top-level modules or tools.
+icon: LayoutGrid
+status: Stable
+summary: A rich popover menu designed for the ECOSYSTEM module launcher, featuring grouped apps, descriptions, icons, and built-in search functionality.
+---
+
+<ComponentPreview name="widgets/app-switcher/basic" align="center" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import { AppSwitcher } from '@innostes/ui';
+```
+
+## Usage
+
+The `AppSwitcher` is primarily used in the top bar as a way to navigate between large, distinct parts of an ecosystem (e.g., switching from the HRMS module to the ERP module).
+
+It accepts an array of `sections`, where each section contains a list of `apps`.
+
+```tsx
+function TopNavigation() {
+  const sections = [
+    {
+      label: 'Modules',
+      apps: [
+        {
+          id: 'erp',
+          name: 'ERP',
+          description: 'Business operations',
+          icon: <BuildingIcon />,
+          tone: 'chart-1',
+          href: '/erp'
+        },
+        {
+          id: 'hrms',
+          name: 'HRMS',
+          description: 'People & HR',
+          icon: <UsersIcon />,
+          tone: 'chart-3',
+          href: '/hrms'
+        },
+      ]
+    },
+  ];
+
+  return <AppSwitcher value="hrms" sections={sections} />;
+}
+```
+
+### Routing
+
+You can handle navigation in three ways:
+
+1. Provide an `href` to each app. The item will render as an `<a>` tag.
+2. Provide a `render` element (e.g., `render={<Link href="/hrms" />}`). The component will merge its props into your custom link component.
+3. Use the controlled `value` and `onValueChange` props to navigate programmatically when an app is selected.
+
+### Search
+
+The component automatically includes a search input if there are more than 6 applications provided across all sections. You can manually force it to show or hide by setting the `searchable` boolean prop.
+
+## API Reference
+
+<ApiTable components={['AppSwitcher']} />

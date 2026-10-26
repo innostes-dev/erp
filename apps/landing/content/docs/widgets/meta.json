@@ -3,6 +3,9 @@
   "pages": [
     "metric-card",
     "widget-card",
-    "sparkline"
+    "sparkline",
+    "app-switcher",
+    "notification-bell",
+    "user-menu"
   ]
 }

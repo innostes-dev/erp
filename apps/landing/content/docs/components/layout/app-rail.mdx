@@ -1,0 +1,72 @@
+---
+title: App Rail
+description: A narrow vertical strip of icon links for module switching.
+icon: EllipsisVertical
+status: Stable
+summary: Used alongside a sidebar to navigate between top-level areas or modules in complex applications, featuring active states, tooltips, and badges.
+---
+
+<ComponentPreview name="layout/app-rail/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  AppRail,
+  AppRailItem,
+  AppRailHeader,
+  AppRailFooter,
+  AppRailSeparator,
+} from '@innostes/ui';
+```
+
+## Usage
+
+The `AppRail` is designed to be placed before a `Sidebar` inside a `SidebarProvider`. It provides the first level of navigation (e.g. switching between entire apps like ERP, HRMS, CRM), while the `Sidebar` provides the second level (the pages within that app).
+
+```tsx
+<SidebarProvider>
+  <AppRail>
+    <AppRailHeader>
+      <Logo />
+    </AppRailHeader>
+
+    <AppRailItem
+      icon={<HomeIcon />}
+      label="Home"
+      isActive
+      render={<Link href="/" />}
+    />
+    <AppRailItem
+      icon={<UsersIcon />}
+      label="HRMS"
+      render={<Link href="/hrms" />}
+    />
+
+    <AppRailSeparator />
+
+    <AppRailFooter>
+      <AppRailItem icon={<SettingsIcon />} label="Settings" />
+    </AppRailFooter>
+  </AppRail>
+
+  <Sidebar>
+    {/* Sidebar content for the active module */}
+  </Sidebar>
+  <SidebarInset>
+    {/* Main content */}
+  </SidebarInset>
+</SidebarProvider>
+```
+
+### Responsive behavior
+
+The `AppRail` is hidden by default on small screens (below `md`). On mobile, the `Sidebar` takes over as a slide-in panel. For a consistent experience on mobile, you should typically include the same top-level links inside the mobile version of your navigation (e.g. within a top bar or at the bottom/top of the mobile sidebar).
+
+### Label display
+
+By default, the `label` passed to `AppRailItem` acts as its accessible name and is displayed in a tooltip when the user hovers over the item. If you prefer to show the text beneath the icon constantly, set `showLabel={true}`.
+
+## API Reference
+
+<ApiTable components={['AppRail', 'AppRailItem', 'AppRailHeader', 'AppRailFooter', 'AppRailSeparator']} />
