@@ -20,7 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 ENV PYTHONPATH="/workspace:/workspace/apps/api-server"
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8001
 
-EXPOSE 8001
-
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["sh", "-c", "python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

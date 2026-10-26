@@ -4,15 +4,15 @@ services:
     container_name: erp-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: erp_dev
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-erp_dev}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d erp_dev"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-erp_dev}"]
       interval: 3s
       timeout: 3s
       retries: 5
@@ -24,12 +24,15 @@ services:
     container_name: erp-api-server
     restart: unless-stopped
     ports:
-      - "8001:8001"
+      - "${PORT:-8001}:${PORT:-8001}"
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/erp_dev
-      AUTO_MIGRATE: "true"
-      APP_ENV: development
-      PORT: "8001"
+      PORT: ${PORT:-8001}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-erp_dev}}
+      AUTO_MIGRATE: ${AUTO_MIGRATE:-true}
+      APP_ENV: ${APP_ENV:-development}
+      APP_NAME: ${APP_NAME:-Innostes ERP API}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-insecure-dev-secret-key-change-in-production}
     depends_on:
       db:
         condition: service_healthy

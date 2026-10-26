@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     app_name: str = Field(default="Innostes ERP API")
     app_env: str = Field(default="development")
+    port: int = Field(default=8001, ge=1, le=65535, description="API server port")
     debug: bool = Field(default=False)
     auto_migrate: bool = Field(default=False, description="Run database migrations automatically on startup")
 
@@ -48,6 +49,8 @@ class Settings(BaseSettings):
             app_kwargs["app_name"] = merged_env["APP_NAME"]
         if "APP_ENV" in merged_env:
             app_kwargs["app_env"] = merged_env["APP_ENV"]
+        if "PORT" in merged_env:
+            app_kwargs["port"] = int(merged_env["PORT"])
         if "APP_DEBUG" in merged_env:
             app_kwargs["debug"] = merged_env["APP_DEBUG"].lower() in ("true", "1", "yes")
         if "AUTO_MIGRATE" in merged_env:
