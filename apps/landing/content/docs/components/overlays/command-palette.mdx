@@ -1,0 +1,79 @@
+---
+title: Command Palette
+description: A searchable list of commands and navigation options.
+icon: Command
+status: Stable
+summary: A global command palette triggered by a keyboard shortcut (e.g. ⌘K) to quickly navigate and execute actions across the application.
+---
+
+<ComponentPreview name="overlays/command-palette/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import { CommandPalette, CommandItem, CommandGroup } from '@innostes/ui';
+```
+
+## Usage
+
+The `CommandPalette` component is a global, floating search overlay designed to help users quickly find pages or perform actions. It includes built-in keyboard shortcut handling and accessible listbox navigation.
+
+Pass an array of grouped items using the `groups` prop. Each item must specify an `id`, `label`, and an `onSelect` callback.
+
+```tsx
+function App() {
+  const groups = [
+    {
+      heading: 'Pages',
+      items: [
+        {
+          id: 'orders',
+          label: 'Orders',
+          icon: <CartIcon />,
+          onSelect: () => router.push('/orders')
+        },
+        // ...
+      ]
+    },
+    {
+      heading: 'Actions',
+      items: [
+        {
+          id: 'new-invoice',
+          label: 'Create invoice',
+          shortcut: 'C I',
+          onSelect: createInvoice
+        },
+        // ...
+      ]
+    },
+  ];
+
+  return <CommandPalette groups={groups} />;
+}
+```
+
+### Keyboard Shortcuts
+
+By default, the command palette listens for `Ctrl + K` or `⌘ + K` to open. You can change this behavior by setting the `hotkey` prop to a different character, or pass `null` to disable the built-in shortcut and manage opening state yourself.
+
+### Custom Filtering
+
+The component automatically filters items based on a case- and accent-insensitive search against the item's `label`, `description`, and `keywords`.
+
+If you need a more advanced filtering algorithm, you can provide a custom `filter` function:
+
+```tsx
+<CommandPalette
+  groups={groups}
+  filter={(item, query) => customMatch(item.label, query)}
+/>
+```
+
+### Advanced Styling
+
+You can deeply customize the internal parts of the palette using the `classNames` prop, targeting slots like `popup`, `input`, `list`, `groupHeading`, `item`, `empty`, and `footer`.
+
+## API Reference
+
+<ApiTable components={['CommandPalette']} />

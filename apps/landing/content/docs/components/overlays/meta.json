@@ -1,4 +1,13 @@
 {
   "title": "Overlays",
-  "pages": ["dialog", "alert-dialog", "sheet", "popover", "tooltip", "dropdown-menu", "context-menu"]
+  "pages": [
+    "dialog",
+    "alert-dialog",
+    "sheet",
+    "popover",
+    "tooltip",
+    "dropdown-menu",
+    "context-menu",
+    "command-palette"
+  ]
 }

@@ -5,6 +5,8 @@
     "page-header",
     "form-layout",
     "separator",
-    "scroll-area"
+    "scroll-area",
+    "app-rail",
+    "top-bar"
   ]
 }

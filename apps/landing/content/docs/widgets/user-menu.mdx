@@ -1,0 +1,47 @@
+---
+title: User Menu
+description: The signed-in user's avatar and name, opening a menu.
+icon: CircleUser
+status: Stable
+summary: A user profile button that opens a dropdown menu. Typically used in the top bar or sidebar footer to access profile settings and sign out.
+---
+
+<ComponentPreview name="widgets/user-menu/basic" align="center" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import { UserMenu } from '@innostes/ui';
+```
+
+## Usage
+
+The `UserMenu` provides a consistent trigger showing the user's avatar and details. It wraps a dropdown menu, so you can pass standard `DropdownMenuItem` components as children.
+
+```tsx
+function AppHeader() {
+  return (
+    <UserMenu
+      name="Arun Kumar"
+      subtitle="Acme Corp"
+      email="arun@acme.com"
+      avatarSrc={user.photoUrl}
+    >
+      <DropdownMenuItem>Profile</DropdownMenuItem>
+      <DropdownMenuItem>Settings</DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem variant="destructive" onClick={signOut}>
+        Sign out
+      </DropdownMenuItem>
+    </UserMenu>
+  );
+}
+```
+
+### Avatar fallback
+
+If `avatarSrc` is not provided, the component automatically generates initials based on the `name` prop (e.g., "Arun Kumar" -> "AK"). You can override this behavior by explicitly passing an `initials` string.
+
+## API Reference
+
+<ApiTable components={['UserMenu']} />

@@ -1,0 +1,61 @@
+---
+title: Top Bar
+description: The main application header.
+icon: LayoutPanelTop
+status: Stable
+summary: A responsive top navigation bar with slots for branding, search, and actions.
+---
+
+<ComponentPreview name="layout/top-bar/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  TopBar,
+  TopBarStart,
+  TopBarCenter,
+  TopBarEnd,
+} from '@innostes/ui';
+```
+
+## Usage
+
+The `TopBar` is designed to be the primary header of your application, usually containing the app switcher/logo, global search, notifications, and user profile.
+
+Layout is controlled through three semantic slots:
+- `TopBarStart`: Aligned to the start, containing branding or a `SidebarTrigger`.
+- `TopBarCenter`: Takes up the remaining space and shrinks first. Ideal for global search.
+- `TopBarEnd`: Aligned to the end, containing actions, notifications, and the `UserMenu`.
+
+```tsx
+<TopBar sticky blur>
+  <TopBarStart>
+    <SidebarTrigger />
+    <AppSwitcher sections={...} />
+  </TopBarStart>
+
+  <TopBarCenter>
+    <SearchInput placeholder="Search..." />
+  </TopBarCenter>
+
+  <TopBarEnd>
+    <NotificationBell items={...} />
+    <UserMenu name="John Doe" />
+  </TopBarEnd>
+</TopBar>
+```
+
+### Height Customization
+
+The default height is `4rem` (64px). You can customize it by overriding the `--top-bar-height` CSS variable.
+
+```css
+.my-custom-top-bar {
+  --top-bar-height: 3.5rem;
+}
+```
+
+## API Reference
+
+<ApiTable components={['TopBar', 'TopBarStart', 'TopBarCenter', 'TopBarEnd']} />
