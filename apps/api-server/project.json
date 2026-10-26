@@ -25,7 +25,14 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/api-server",
-        "command": ".venv/bin/python -m unittest discover -s tests -p 'test_*.py'"
+        "command": "node scripts/venv-python.js -m unittest discover -s tests -p \"test_*.py\""
+      }
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api-server",
+        "command": "node scripts/export-openapi.js"
       }
     }
   }

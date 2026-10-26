@@ -1,0 +1,120 @@
+---
+title: Overview
+description: Two engines, many plug-ins. How the innostes ERP is put together.
+icon: Workflow
+---
+
+innostes ERP is built from **two engines** and **plug-ins** that add features to them. The engines
+contain no business features of their own. Everything a user sees, from tenants to invoices,
+comes from a plug-in.
+
+```text
+             ┌──────────────────────┐        ┌──────────────────────┐
+             │   apps/web-app       │  HTTP  │   apps/api-server    │
+             │   UI engine          │ ─────► │   backend engine     │
+             │   (React + Vite)     │        │   (FastAPI)          │
+             └──────────▲───────────┘        └──────────▲───────────┘
+                        │ loads frontend parts          │ loads backend parts
+        ┌───────────────┴───────────────┬───────────────┴───────────────┐
+        │                               │                               │
+ ┌──────┴────────┐               ┌──────┴────────┐               ┌──────┴────────┐
+ │ kernel        │               │ module: sales │               │ module: hr    │  ...
+ │ backend/      │               │ backend/      │               │ backend/      │
+ │ frontend/     │               │ frontend/     │               │ frontend/     │
+ └───────────────┘               └───────────────┘               └───────────────┘
+```
+
+## The engines
+
+| Engine | Folder | Job |
+| --- | --- | --- |
+| Backend engine | `apps/api-server` | Starts FastAPI, runs migrations, finds every installed backend plug-in and mounts its routes, serves `/health` and the API docs. |
+| UI engine | `apps/web-app` | Starts the React app, the app shell (sidebar, top bar), routing and login, and renders the pages that frontend plug-ins provide. |
+
+An engine is plumbing. If you are about to write a table, an endpoint or a page **inside an engine**,
+it belongs in a plug-in instead.
+
+## Plug-ins
+
+A plug-in is a self-contained feature area with a backend part and a frontend part:
+
+<Files>
+  <Folder name="<plug-in>" defaultOpen>
+    <Folder name="backend">
+      <File name="pyproject.toml" />
+      <Folder name="<python package>" />
+      <Folder name="migrations" />
+      <Folder name="tests" />
+    </Folder>
+    <Folder name="frontend">
+      <File name="package.json" />
+      <Folder name="src" />
+    </Folder>
+  </Folder>
+</Files>
+
+- The **backend** part is a Python package. The backend engine installs it and loads it automatically.
+- The **frontend** part is a pnpm workspace package. The UI engine depends on it and renders its pages.
+
+The **kernel** is the first plug-in. It holds what every other plug-in needs: shared
+infrastructure (`core`) and platform features such as tenancy. ERP business modules (sales,
+inventory, HR, …) are plug-ins too, with the same layout.
+
+See [Plug-ins](/docs/architecture/plugins) for how loading works and [Kernel](/docs/architecture/kernel)
+for what the kernel provides.
+
+<Callout type="info" title="Status">
+  The kernel is in place on both sides. `kernel/backend` (setup and tenancy) is loaded by `api-server`.
+  `kernel/frontend` (`@innostes/kernel`, with the setup wizard) is rendered by `web-app`. Still to
+  come: a page loader in `web-app` so plug-ins can register their own pages and menu entries.
+</Callout>
+
+## Dependency rules
+
+These rules keep plug-ins independent. Breaking them creates import cycles and makes features
+impossible to remove.
+
+1. **Engines know nothing about specific plug-ins.** They discover plug-ins and never import one
+   by name.
+2. **Plug-ins never import an engine.** `kernel` must not import from `apps/api-server`.
+3. **Every plug-in may depend on the kernel. The kernel depends on no plug-in.**
+4. **Business modules don't import each other's internals.** If `sales` needs a customer, it imports
+   from the other module's public package (`from crm import Customer`), never from
+   `crm.services.customer_service`.
+5. **Inside the kernel, features follow a fixed order**: `core` ← `tenancy` ← `identity` ← `access`.
+   A feature may import from the features to its left, never to its right.
+
+## How a request flows
+
+1. `web-app` calls `POST /tenants` with the user's access token.
+2. **CORS** lets the browser call the API from web-app's address (`CORS_ORIGINS`).
+3. The **setup lock** checks the system is installed. Until [first-run setup](/docs/architecture/setup)
+   is done, it answers `503` with `code: "setup_required"` and the request goes no further.
+4. `api-server` routes it to the router that the **tenancy** plug-in mounted.
+5. The router validates the body with a **schema**, gets the user's id from the token, and calls the **service**.
+6. The service writes through the **model**, filling `created_by` / `updated_by` automatically. If a
+   business rule fails it raises an HTTP error class (e.g. `SlugTakenError`), and one shared handler
+   turns that into `{"detail", "code"}` with the right status.
+7. The `get_db` dependency commits the transaction and the response goes back as the read schema.
+
+Before a fresh install can serve requests, it must be set up once. See [First-run Setup](/docs/architecture/setup).
+
+## Repository layout
+
+<Files>
+  <Folder name="apps" defaultOpen>
+    <Folder name="api-server" />
+    <Folder name="web-app" />
+    <Folder name="landing" />
+  </Folder>
+  <Folder name="kernel" defaultOpen>
+    <Folder name="backend" />
+    <Folder name="frontend" />
+  </Folder>
+  <Folder name="modules">
+    <Folder name="(future ERP modules)" />
+  </Folder>
+  <Folder name="packages">
+    <Folder name="ui" />
+  </Folder>
+</Files>

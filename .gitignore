@@ -97,3 +97,6 @@ __pycache__/
 .env.local
 !.env.example
 
+
+# Runtime files of the kernel backend (e.g. the generated first-run setup token)
+kernel/backend/var/

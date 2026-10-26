@@ -15,10 +15,13 @@ live in one repository, share one lockfile, and are built and tested with the sa
     Public website and documentation (this site). Next.js + Fumadocs.
   </Card>
   <Card icon={<Boxes />} title="web-app" href="/docs/apps/web-app">
-    The innostes application front end. React + Vite.
+    The UI engine. React + Vite. Renders the pages that frontend plug-ins provide.
   </Card>
   <Card icon={<Server />} title="api-server" href="/docs/apps/api-server">
-    Backend API. Python + FastAPI.
+    The backend engine. Python + FastAPI. Loads backend plug-ins.
+  </Card>
+  <Card icon={<Cpu />} title="kernel" href="/docs/architecture/kernel">
+    The shared foundation plug-in: database, security, base classes, tenancy.
   </Card>
   <Card icon={<Layers />} title="@innostes/ui" href="/docs/packages/ui">
     The design system. React components on Base UI and Tailwind CSS, published to npm.
@@ -44,5 +47,11 @@ live in one repository, share one lockfile, and are built and tested with the sa
   </Card>
   <Card icon={<GitBranch />} title="Project Structure" href="/docs/project-structure">
     Where things live and why.
+  </Card>
+  <Card icon={<Workflow />} title="Architecture" href="/docs/architecture/overview">
+    Two engines and the plug-ins that add every feature.
+  </Card>
+  <Card icon={<Plug />} title="Building a Feature" href="/docs/guides/building-a-feature">
+    The step-by-step process and the definition of done.
   </Card>
 </Cards>

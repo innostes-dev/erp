@@ -27,6 +27,18 @@ icon: FolderTree
       <File name="requirements.txt" />
     </Folder>
   </Folder>
+  <Folder name="kernel" defaultOpen>
+    <Folder name="backend">
+      <Folder name="kernel" />
+      <Folder name="migrations" />
+      <Folder name="tests" />
+      <File name="pyproject.toml" />
+    </Folder>
+    <Folder name="frontend">
+      <Folder name="src" />
+      <File name="package.json" />
+    </Folder>
+  </Folder>
   <Folder name="packages" defaultOpen>
     <Folder name="ui">
       <Folder name="src" />
@@ -46,10 +58,11 @@ icon: FolderTree
 
 | Path | What it is |
 | --- | --- |
-| `apps/` | Deployable applications. Apps can depend on packages, never on other apps. |
+| `apps/` | Deployable applications. `api-server` and `web-app` are the two **engines**; `landing` is the website and docs. Apps can depend on packages, never on other apps. |
+| `kernel/` | The first **plug-in**: shared foundation for all ERP modules, with a `backend/` (Python) and a `frontend/` (React) part. See [Kernel](/docs/architecture/kernel). |
 | `packages/` | Shared, reusable code. Can be published to npm. |
 | `nx.json` | Nx settings: plugins, task defaults and release config. |
-| `pnpm-workspace.yaml` | Which folders are workspace packages (`apps/*`, `packages/*`) and which install scripts may run. |
+| `pnpm-workspace.yaml` | Which folders are workspace packages (`apps/*`, `packages/*`, `kernel/*`) and which install scripts may run. |
 | `tsconfig.base.json` | TypeScript settings shared by every project. |
 | `tsconfig.json` | Project references, kept up to date by `nx sync`. |
 
@@ -76,6 +89,8 @@ Nx reads these links to build the dependency graph. When you run `pnpm nx build 
 
 ## What's not in git
 
-Build output (`dist/`, `.next/`), `node_modules/`, the Nx cache and the API's `.venv/` are ignored.
+Build output (`dist/`, `.next/`), `node_modules/`, the Nx cache and the API's `.venv/` are ignored,
+as are `.env` files (only `.env.example` is committed) and `kernel/backend/var/` (runtime files such as
+the generated setup token). `.dockerignore` keeps the same files out of Docker images.
 AI assistant folders (`.claude/`, `.cursor/`, `AGENTS.md`, …) are also ignored, so each developer
 can keep their own setup. `pnpm-lock.yaml` **is** committed.

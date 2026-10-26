@@ -9,14 +9,17 @@ import {
   Accessibility,
   BookOpen,
   Boxes,
+  Cpu,
   GitBranch,
   Layers,
   Package,
   Palette,
+  Plug,
   Rocket,
   Server,
   Terminal,
   Wind,
+  Workflow,
 } from 'lucide-react';
 import { Preview, PreviewRow, UsageGrid } from './docs/preview';
 import { ComponentPreview } from './docs/component-preview';
@@ -66,14 +69,17 @@ export function getMDXComponents(components?: MDXComponents) {
     Accessibility,
     BookOpen,
     Boxes,
+    Cpu,
     GitBranch,
     Layers,
     Package,
     Palette,
+    Plug,
     Rocket,
     Server,
     Terminal,
     Wind,
+    Workflow,
     ...components,
   } satisfies MDXComponents;
 }

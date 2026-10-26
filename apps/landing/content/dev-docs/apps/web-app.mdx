@@ -7,9 +7,27 @@ summary: React 19 single-page app, built with Vite.
 install: pnpm nx serve web-app
 ---
 
-<Callout type="info">
-  `web-app` still contains the starter screen from the Nx generator. Application features will live here.
-</Callout>
+`web-app` is the **UI engine**. It provides the app shell, routing and login, and renders the pages
+that plug-ins (the kernel and ERP modules) provide. Feature pages don't live here. See
+[Architecture](/docs/architecture/overview).
+
+On startup it points the API client at the backend and wraps the app in `<SetupGate>` from
+`@innostes/kernel`. A fresh install shows the [setup wizard](/docs/architecture/setup); after setup,
+the app renders. The app itself is still a placeholder. Registering pages from plug-ins is planned. See
+[Plug-ins](/docs/architecture/plugins#frontend-plug-ins).
+
+```tsx title="src/main.tsx"
+configureApi({ baseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:8001' });
+
+root.render(
+  <SetupGate>
+    <App />
+  </SetupGate>,
+);
+```
+
+Copy `apps/web-app/.env.example` to `.env` to change the API address (`VITE_API_URL`). The API
+must allow web-app's address in `CORS_ORIGINS` (default: `http://localhost:4200` and `http://127.0.0.1:4200`).
 
 ## Tasks
 
@@ -21,6 +39,16 @@ The tasks come from `vite.config.mts` (inferred by the Nx Vite plugin):
 | `pnpm nx build web-app` | Production build into `apps/web-app/dist` |
 | `pnpm nx preview web-app` | Serve the production build on http://localhost:4300 |
 | `pnpm nx typecheck web-app` | Type-check |
+
+## Workspace packages are used from source
+
+`vite.config.mts` adds the `@innostes/source` export condition, so `@innostes/ui` and
+`@innostes/kernel` are compiled straight from their `src/` folders:
+
+- `serve` and `build` don't build those packages first.
+- Edits to the UI library or the kernel frontend hot-reload in the running app.
+- `src/styles.css` has an `@source` line for each package so Tailwind finds their classes. Add one
+  for every new frontend plug-in.
 
 ## Structure
 

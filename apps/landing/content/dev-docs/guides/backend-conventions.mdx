@@ -1,0 +1,187 @@
+---
+title: Backend Conventions
+description: The rules for naming, APIs, errors, code documentation and API documentation in the Python backend.
+icon: ScrollText
+---
+
+These conventions apply to every backend plug-in. They are what reviewers check.
+
+## Naming
+
+| Thing | Convention | Example |
+| --- | --- | --- |
+| Table | plural, snake_case | `tenants`, `role_permissions` |
+| Model class | singular, PascalCase | `Tenant` |
+| Schemas | `<Model>Create`, `<Model>Update`, `<Model>Read` | `TenantCreate` |
+| Service | `<Model>Service` in `services/<model>_service.py` | `TenantService` |
+| URL | plural, kebab-case | `/tenants`, `/role-permissions` |
+| `operation_id` | `<resource>_<action>` | `tenants_create`, `tenants_list` |
+| API docs tag | the feature, Title Case | `Tenancy` |
+| Module `name` | the feature, lowercase | `tenancy` |
+
+## Layers
+
+| Layer | Does | Never |
+| --- | --- | --- |
+| Router | Validates input, gets the current user, calls the service | Contains business rules or queries, or maps errors to status codes |
+| Service | Business rules, queries, writes; raises service errors | Raises `HTTPException` or uses status codes |
+| Model | Columns and relationships | Contains logic beyond small helpers |
+| Schema | The shape of request and response bodies | Is used as a database object |
+
+## REST endpoints
+
+| Action | Method and path | Success |
+| --- | --- | --- |
+| Create | `POST /things` | `201`, the created record |
+| List | `GET /things?offset=&limit=&include_deleted=` | `200`, `Page` |
+| Get | `GET /things/{id}` | `200` |
+| Update | `PATCH /things/{id}`, partial | `200` |
+| Delete | `DELETE /things/{id}`, soft delete | `200`, the deleted record |
+| Restore | `POST /things/{id}/restore` | `200` |
+
+- IDs are UUIDs. Timestamps are ISO 8601 in UTC.
+- Lists are paginated with `offset` and `limit` (maximum 200) and return `{items, total, offset, limit}`, newest first.
+- Use `PATCH` for updates. Clients send only the fields that change.
+
+## Errors
+
+**Never write a status code as a number.** Each error declares its status once, as a
+`fastapi.status` constant, and everything else uses it.
+
+Services and routers raise the HTTP errors in `kernel.core.services`. There is **one class for every
+4xx and 5xx status**, named after the status (`ForbiddenError`, `TooManyRequestsError`,
+`BadGatewayError`, …). The 4xx classes inherit `ClientError`, the 5xx classes `ServerError`, and both
+inherit `ServiceError`.
+
+The ones you'll use most:
+
+| Error | Status constant | Use for |
+| --- | --- | --- |
+| `BadRequestError` | `status.HTTP_400_BAD_REQUEST` | Invalid request that the schema can't catch |
+| `UnauthorizedError` | `status.HTTP_401_UNAUTHORIZED` | Not logged in or bad token. Sends `WWW-Authenticate: Bearer` |
+| `ForbiddenError` | `status.HTTP_403_FORBIDDEN` | Logged in, but not allowed |
+| `NotFoundError` | `status.HTTP_404_NOT_FOUND` | Record doesn't exist or is soft-deleted |
+| `ConflictError` | `status.HTTP_409_CONFLICT` | Clashes with existing data (duplicate slug, already installed) |
+| `GoneError` | `status.HTTP_410_GONE` | Permanently removed |
+| `PreconditionFailedError` | `status.HTTP_412_PRECONDITION_FAILED` | Stale version on update (optimistic locking) |
+| `UnprocessableContentError` | `status.HTTP_422_UNPROCESSABLE_CONTENT` | Breaks a business rule |
+| `LockedError` | `status.HTTP_423_LOCKED` | Record is locked (e.g. a closed accounting period) |
+| `TooManyRequestsError` | `status.HTTP_429_TOO_MANY_REQUESTS` | Rate limit. `retry_after=` sends `Retry-After` |
+| `InternalServerError` | `status.HTTP_500_INTERNAL_SERVER_ERROR` | Unexpected failure |
+| `NotImplementedServiceError` | `status.HTTP_501_NOT_IMPLEMENTED` | Not built yet (the name avoids Python's built-in `NotImplementedError`) |
+| `BadGatewayError` / `GatewayTimeoutError` | `502` / `504` constants | An external service failed or timed out |
+| `ServiceUnavailableError` | `status.HTTP_503_SERVICE_UNAVAILABLE` | A dependency (database) is down. `retry_after=` sends `Retry-After` |
+
+The full list is in `kernel/backend/kernel/core/services/errors.py`.
+
+- **The message is optional.** `raise ForbiddenError()` uses the class description; pass a message
+  for something more specific: `raise ForbiddenError("Only admins can delete tenants")`.
+- **Extra response headers:** `headers={...}`.
+- **Look up a class by status:** `ERRORS_BY_STATUS[status.HTTP_404_NOT_FOUND]` or
+  `error_for_status(code)`, for example when passing on an upstream service's error.
+
+Each feature subclasses these with a clear name and message:
+
+```py title="tenancy/services/tenant_service.py"
+class SlugTakenError(ConflictError):
+    def __init__(self, slug: str) -> None:
+        super().__init__(f"Slug '{slug}' is already in use")
+```
+
+- **One shared handler** (`kernel.core.http.register_error_handlers`, registered by the API server)
+  turns any service error into `{"detail": "<message>"}` with that error's status. Routers have no
+  `try/except` and no `HTTPException`.
+- **Document errors by class**: `responses=error_responses(TenantNotFoundError, SlugTakenError)`. The
+  status codes and descriptions come from the classes, so they can't drift. For a status with no
+  error class, pass the constant: `error_responses(status.HTTP_401_UNAUTHORIZED)`.
+- **Need a new status?** Add a subclass of `ServiceError` with its own `status_code` and `description`
+  in `kernel/core/services/errors.py`.
+- **Validation errors** (`status.HTTP_422_UNPROCESSABLE_CONTENT`) are produced by FastAPI automatically.
+- **Tests** compare against the constants: `self.assertEqual(res.status_code, status.HTTP_409_CONFLICT)`.
+  A test that builds its own `FastAPI()` app must call `register_error_handlers(app)`.
+- **Frontend**: compare `ApiError.status` with `HttpStatus` from `@innostes/kernel`
+  (`error.status === HttpStatus.CONFLICT`).
+
+## Database
+
+- Every model inherits `BaseModel`. See [common columns](/docs/architecture/kernel#common-columns).
+- Never delete rows through the API. Use `soft_delete`.
+- Services `flush()` and never `commit()`. One request is one transaction.
+- Every schema change goes through a reviewed Alembic migration. Never edit a migration that has
+  already been merged; add a new one.
+
+## Code documentation
+
+Every module, class and public function gets a **Google-style docstring**:
+
+```py
+async def get(self, id: uuid.UUID, include_deleted: bool = False) -> ModelT | None:
+    """Fetch one record by id.
+
+    Args:
+        id: Record id.
+        include_deleted: If True, a soft-deleted record can be returned.
+
+    Returns:
+        The record, or None if it does not exist.
+    """
+```
+
+- First line: what it does, in one sentence.
+- `Args:`, `Returns:` and `Raises:` when they apply. Model and schema classes list their fields under `Attributes:`.
+- Explain **why** when the code alone can't. Don't restate the code.
+- Use type hints on every function.
+
+## API documentation
+
+The API docs are generated from the code. Each running engine serves:
+
+| URL | What |
+| --- | --- |
+| http://localhost:8001/docs | Swagger UI: browse and try endpoints |
+| http://localhost:8001/redoc | ReDoc: readable reference |
+| http://localhost:8001/openapi.json | Raw OpenAPI spec |
+
+`pnpm nx run api-server:openapi` writes the spec to `apps/api-server/openapi.json` without starting
+the server, for example to generate a frontend client.
+
+To keep the docs complete:
+
+1. **Route decorator**: set `summary`, `response_description`, `operation_id` and
+   `responses=error_responses(<error classes>)`.
+2. **Endpoint docstring**: the text **before `\f`** is the public description in the API docs. The
+   text **after `\f`** (`Args:` / `Returns:` / `Raises:`) is for developers and hidden from the API docs.
+3. **Schemas**: give every field a `Field(description=..., examples=[...])`, and give read schemas a full
+   example in `model_config["json_schema_extra"]`.
+4. **Module**: describe each router tag in `openapi_tags`.
+5. **Parameters**: give `Query(...)` and `Path(...)` a `description`.
+
+```py
+@router.get(
+    "/{tenant_id}",
+    response_model=TenantRead,
+    summary="Get a tenant",
+    response_description="The tenant.",
+    responses=error_responses(TenantNotFoundError),
+    operation_id="tenants_get",
+)
+async def get_tenant(tenant_id: uuid.UUID = TenantId, service: TenantService = Depends(get_service)) -> Tenant:
+    """Get one tenant by id. Soft-deleted tenants return 404.
+    \f
+    Args:
+        tenant_id: Tenant id from the URL.
+        service: Injected tenant service.
+
+    Raises:
+        TenantNotFoundError: Not found (404).
+    """
+```
+
+Each feature's tests include a check that fails when an endpoint is missing a summary, a description
+or its 404 response.
+
+## Tests
+
+- Tests live in the plug-in's `tests/` folder, one file per feature: `test_<feature>.py`.
+- Unit tests don't need a database. Mock the session for services, and override `get_service` for routers.
+- Run them through Nx: `pnpm nx test kernel-backend`, `pnpm nx test api-server`.

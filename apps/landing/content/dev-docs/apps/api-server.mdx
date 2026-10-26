@@ -1,63 +1,133 @@
 ---
 title: api-server
-description: The innostes backend API.
+description: The backend engine. Runs FastAPI and loads every backend plug-in.
 icon: Server
 status: Beta
-summary: Python FastAPI service, run through Nx like every other app.
+summary: Python FastAPI engine, run through Nx like every other app.
 install: pnpm nx serve api-server
 ---
+
+`api-server` is the **backend engine**. It doesn't own any tables or business endpoints. It starts
+FastAPI, finds every installed backend plug-in (the kernel, ERP modules), mounts their routes and
+serves health checks and API docs. See [Architecture](/docs/architecture/overview).
 
 ## Setup
 
 The API uses its own Python virtual environment in `apps/api-server/.venv`.
 
 ```bash
-pnpm nx run api-server:install   # create .venv and install requirements.txt
-pnpm nx serve api-server         # http://localhost:8000
+pnpm nx run api-server:install   # create .venv, install requirements.txt (includes the plug-ins)
+pnpm nx serve api-server         # http://localhost:8001
 ```
 
-FastAPI serves interactive API docs at http://localhost:8000/docs.
+Settings come from `.env` files (repository root or `apps/api-server/`) and environment variables.
 
-<Callout type="warn" title="Windows paths">
-  The Nx tasks in `apps/api-server/project.json` call `.venv/Scripts/python`, which is the Windows
-  layout. On macOS and Linux the path is `.venv/bin/python`. Update `project.json` before running it there.
-</Callout>
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `PORT` | `8001` | Port the server listens on |
+| `DATABASE_URL` | — | Postgres URL. Takes precedence over the `DB_*` variables |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | `localhost`, `5432`, `postgres`, `postgres`, `erp_dev` | Postgres connection |
+| `AUTO_MIGRATE` | `false` | Apply kernel migrations on startup. Not needed for a fresh install: setup runs them |
+| `CORS_ORIGINS` | `http://localhost:4200,http://127.0.0.1:4200` | Comma-separated browser origins allowed to call the API (the web-app URL) |
+| `SETUP_ENABLED` | `true` | Allow first-run setup through the web wizard. Set `false` in production (command-line setup only) |
+| `SETUP_TOKEN` | generated | One-time token for the web wizard. If unset, one is generated and printed in the log |
+| `SETUP_TOKEN_FILE` | `kernel/backend/var/setup-token` | Where the generated token is kept until setup completes |
+| `SETUP_ORG_NAME`, `SETUP_ORG_SLUG`, ... | | Used by `python -m kernel.setup install --from-env` |
+| `JWT_SECRET_KEY` | dev value | Secret for signing tokens. **Always set in production** |
+| `APP_ENV`, `APP_NAME`, `APP_VERSION`, `APP_DEBUG` | | Shown in `/` and the API docs |
+
+## API docs
+
+| URL | What |
+| --- | --- |
+| http://localhost:8001/docs | Swagger UI: browse and try endpoints |
+| http://localhost:8001/redoc | ReDoc: readable reference |
+| http://localhost:8001/openapi.json | Raw OpenAPI spec |
+
+```bash
+pnpm nx run api-server:openapi   # write apps/api-server/openapi.json without starting the server
+```
 
 ## Endpoints
 
+The engine's own endpoints. Everything else comes from plug-ins.
+
 | Method | Path | Returns |
 | --- | --- | --- |
-| `GET` | `/` | `{"message": "Hello from api-server"}` |
-| `GET` | `/health` | `{"status": "ok"}` |
+| `GET` | `/` | Service name, environment, status and the loaded modules |
+| `GET` | `/health` | API, database and per-module health. `200` if the database responds, `503` otherwise |
+
+Currently loaded plug-ins:
+
+| Module | Package | Endpoints |
+| --- | --- | --- |
+| `setup` | `kernel` | `/setup/status`, `/setup/checks`, `/setup`, plus the `setup_required` lock (see [First-run Setup](/docs/architecture/setup)) |
+| `tenancy` | `kernel` | `/tenants` (see `kernel/backend/kernel/tenancy/README.md`) |
+
+## How plug-ins are loaded
+
+```py title="app/main.py"
+engine = ServerEngine(settings=settings)
+loader = ModuleLoader(engine.registry)
+loader.discover()          # every package registered under "innostes.modules"
+app = engine.create_app()
+```
+
+To add a plug-in, list it in `requirements.txt` and reinstall. Nothing in `app/` changes. See
+[Plug-ins](/docs/architecture/plugins).
 
 ## Structure
 
 <Files>
   <Folder name="apps/api-server" defaultOpen>
     <Folder name="app" defaultOpen>
-      <File name="__init__.py" />
+      <Folder name="engine" defaultOpen>
+        <File name="server.py" />
+        <File name="loader.py" />
+      </Folder>
       <File name="main.py" />
     </Folder>
+    <Folder name="scripts">
+      <File name="export_openapi.py" />
+      <File name="venv-python.js" />
+    </Folder>
+    <Folder name="tests" />
+    <File name="Dockerfile" />
     <File name="project.json" />
-    <File name="pyproject.toml" />
     <File name="requirements.txt" />
+    <File name="serve.js" />
   </Folder>
 </Files>
 
+| File | Purpose |
+| --- | --- |
+| `app/engine/server.py` | `ServerEngine`: builds the FastAPI app, lifecycle, `/` and `/health`, API docs settings |
+| `app/engine/loader.py` | `ModuleLoader`: finds plug-ins through entry points |
+| `app/main.py` | Entry point: creates the engine, discovers plug-ins, exposes `app` |
+| `scripts/venv-python.js` | Runs the `.venv` Python on any OS; used by the Nx tasks |
+
+## Tasks
+
+| Command | What it does |
+| --- | --- |
+| `pnpm nx run api-server:install` | Create `.venv` and install dependencies and plug-ins |
+| `pnpm nx serve api-server` | Dev server with reload on http://localhost:8001 |
+| `pnpm nx test api-server` | Engine tests |
+| `pnpm nx run api-server:openapi` | Export the OpenAPI spec |
+
 ## Adding a Python package
 
-Add it to `requirements.txt` (and `pyproject.toml`), then reinstall:
+A package needed by a **plug-in** goes in that plug-in's `pyproject.toml` (`dependencies`). A package
+needed by the **engine itself** goes in `apps/api-server/requirements.txt`. Then reinstall:
 
 ```bash
 pnpm nx run api-server:install
 ```
 
-## Adding an endpoint
+## Docker
 
-```py title="app/main.py"
-@app.get("/items/{item_id}")
-def read_item(item_id: int) -> dict[str, int]:
-    return {"item_id": item_id}
+```bash
+docker compose up --build    # Postgres + api-server on http://localhost:8001
 ```
 
-The dev server reloads on save.
+The image installs the plug-ins from `kernel/backend` (and later module folders) the same way as local development.

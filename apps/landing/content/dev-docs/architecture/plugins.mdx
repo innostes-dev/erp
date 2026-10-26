@@ -1,0 +1,135 @@
+---
+title: Plug-ins
+description: How a plug-in is packaged and how the engines find it.
+icon: Plug
+---
+
+Engines never import a plug-in by name. A plug-in **registers itself**, and the engine loads every
+registered plug-in at startup. Adding a feature therefore never means editing an engine.
+
+## Backend plug-ins
+
+A backend plug-in is a normal Python package with its own `pyproject.toml`. It registers its
+module object in the `innostes.modules` **entry-point group**:
+
+```toml title="kernel/backend/pyproject.toml"
+[project]
+name = "kernel"
+version = "0.1.0"
+
+[project.entry-points."innostes.modules"]
+tenancy = "kernel.tenancy:module"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kernel*"]
+```
+
+`kernel.tenancy:module` points to an instance of `BaseModule`:
+
+```py title="kernel/backend/kernel/tenancy/__init__.py"
+class TenancyModule(BaseModule):
+    name = "tenancy"
+    version = "0.1.0"
+    router = router                       # FastAPI routes to mount
+    openapi_tags = [{"name": "Tenancy", "description": "..."}]   # API docs section
+
+module = TenancyModule()
+```
+
+One package can register several modules (the kernel will register `tenancy`, `identity`,
+`access`, …), one entry-point line each.
+
+### Installing it into the engine
+
+`apps/api-server/requirements.txt` lists every backend plug-in:
+
+```text title="apps/api-server/requirements.txt"
+-e ../../kernel/backend --config-settings editable_mode=compat
+fastapi[standard]>=0.115
+```
+
+Then reinstall:
+
+```bash
+pnpm nx run api-server:install
+```
+
+- `-e` installs in **editable** mode: code changes are picked up without reinstalling.
+- `editable_mode=compat` puts the package's folder on Python's path. Without it, running Python from
+  the repository root would find the empty top-level `kernel/` folder instead of the real package.
+- Reinstall only when you **add a plug-in** or **change its `pyproject.toml`** (new dependency, new entry point).
+
+### How the engine loads it
+
+At startup, `apps/api-server/app/main.py` calls:
+
+```py title="apps/api-server/app/main.py"
+loader = ModuleLoader(engine.registry)
+loader.discover()       # loads every "innostes.modules" entry point
+app = engine.create_app()
+```
+
+For each registered module the engine:
+
+1. mounts `module.router`,
+2. adds `module.openapi_tags` to the API docs,
+3. calls `on_startup` / `on_shutdown`,
+4. includes `health_check()` in `/health`.
+
+A plug-in that fails to import is logged and skipped, so one broken module can't take the whole API
+down. `GET /` lists the modules that were loaded.
+
+<Callout type="warn" title="Import names must be unique">
+  Every backend plug-in needs its own top-level Python package name (`kernel`, `sales`, `hr`, …).
+  Two plug-ins with the same package name will overwrite each other.
+</Callout>
+
+### The `BaseModule` contract
+
+| Member | Required | Purpose |
+| --- | --- | --- |
+| `name` | yes | Unique id, shown in `/` and `/health` |
+| `version` | yes | Module version |
+| `description` | no | Short summary |
+| `router` | no | `APIRouter` mounted by the engine |
+| `openapi_tags` | with a router | Describes each router tag in the API docs |
+| `configure(app)` | no | Runs while the app is built, before routes are mounted. Use it to add middleware |
+| `on_startup(app)` | no | Runs when the server starts |
+| `on_shutdown(app)` | no | Runs when the server stops |
+| `health_check()` | no | Returns `{"status": "HEALTHY" \| "UNHEALTHY", ...}` |
+
+## Frontend plug-ins
+
+Each plug-in's `frontend/` is a pnpm workspace package. The first one exists: **`@innostes/kernel`**
+in `kernel/frontend`.
+
+<Files>
+  <Folder name="kernel/frontend" defaultOpen>
+    <Folder name="src" defaultOpen>
+      <Folder name="core">
+        <File name="api/client.ts" />
+      </Folder>
+      <Folder name="setup" />
+      <File name="index.ts" />
+    </Folder>
+    <File name="package.json" />
+    <File name="tsconfig.lib.json" />
+  </Folder>
+</Files>
+
+- **Source-only**: `exports` points at `src/index.ts` and there is no build step. Vite compiles it as part of web-app.
+- **Wired in like any workspace package**: web-app lists it as `"@innostes/kernel": "workspace:*"`,
+  and `pnpm-workspace.yaml` includes `kernel/*`.
+- **Tailwind must scan it**: the pages use Tailwind classes, so web-app's `styles.css` has
+  `@source '../../../kernel/frontend/src'`. Add a line like that for every frontend plug-in.
+- **API calls go through the shared client**: use `apiRequest` from `@innostes/kernel`. web-app sets the address once with
+  `configureApi({ baseUrl: import.meta.env.VITE_API_URL })`.
+
+Today web-app uses the kernel directly (`<SetupGate>`). The next step, still planned, is page registration:
+
+- Each frontend plug-in exports a manifest: its pages (routes), sidebar entries and required permissions.
+- `apps/web-app` depends on the packages with `workspace:*` and builds its router and navigation from
+  the manifests, the same way `api-server` builds its API from `BaseModule`s.
+- Pages are built with `@innostes/ui` and call the backend through the shared API client in
+  `kernel/frontend` (`core`).

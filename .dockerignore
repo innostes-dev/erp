@@ -1,8 +1,17 @@
-node_modules/
-.venv/
-__pycache__/
-*.py[cod]
+# Keep build contexts small and free of secrets/local state (applies at any depth).
+**/node_modules/
+**/.venv/
+**/__pycache__/
+**/*.py[cod]
+**/dist/
+**/.next/
+**/.nx/
 .git/
-dist/
-.next/
 tmp/
+
+# Secrets and runtime files must never be baked into an image
+**/.env
+**/.env.*
+!**/.env.example
+# e.g. kernel/backend/var/setup-token (generated first-run setup token)
+**/var/

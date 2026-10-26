@@ -1,0 +1,24 @@
+{
+  "name": "@innostes/kernel",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Kernel frontend plug-in: API client and platform pages (setup, tenancy, ...) rendered by apps/web-app.",
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@innostes/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "@innostes/ui": "workspace:*",
+    "lucide-react": "^1.60.0",
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "nx": {
+    "name": "kernel-frontend"
+  }
+}

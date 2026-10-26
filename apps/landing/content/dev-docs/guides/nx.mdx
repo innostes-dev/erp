@@ -22,7 +22,8 @@ pnpm nx run-many -t build typecheck -p ui landing   # several tasks, some projec
 | --- | --- |
 | `web-app`, `ui` | **Inferred** from `vite.config.mts` by `@nx/vite/plugin` |
 | `landing` | `scripts` in `package.json`, with options under `nx.targets` |
-| `api-server` | `targets` in `project.json` |
+| `api-server`, `kernel-backend` | `targets` in `project.json` (Python, run through `apps/api-server/scripts/venv-python.js`) |
+| `kernel-frontend` | `typecheck` inferred from `tsconfig.json` (source-only package, no build) |
 
 See a project's tasks with `pnpm nx show project <name>`.
 

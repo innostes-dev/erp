@@ -1,2 +1,2 @@
--e ../../kernel
-fastapi[standard]>=0.115
+-e ../../kernel/backend --config-settings editable_mode=compat
+fastapi[standard]>=0.158

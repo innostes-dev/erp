@@ -1,1 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+@import '@innostes/ui/tailwind.css';
+@import '@innostes/ui/dark.css';
+
+/* Let Tailwind find the classes used by workspace packages (read from source, see vite.config.mts). */
+@source '../../../packages/ui/src';
+@source '../../../kernel/frontend/src';

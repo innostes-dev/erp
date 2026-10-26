@@ -37,11 +37,15 @@ This installs packages for every app and package in the workspace.
 
 ### Set up the API (optional)
 
-The API runs in its own Python virtual environment. Create it and install its packages once:
+The API runs in its own Python virtual environment. Create it and install its packages, including
+the kernel and every other backend plug-in, once:
 
 ```bash
 pnpm nx run api-server:install
 ```
+
+Copy `.env.example` to `.env` at the repository root and set your database connection
+(`DATABASE_URL` or `DB_HOST`, `DB_USER`, …). `docker compose up db` starts a local Postgres.
 
 </Step>
 <Step>
@@ -54,10 +58,40 @@ Each app runs on its own port:
 | --- | --- | --- |
 | landing (website + docs) | `pnpm nx dev landing` | http://localhost:3000 |
 | web-app | `pnpm nx serve web-app` | http://localhost:4200 |
-| api-server | `pnpm nx serve api-server` | http://localhost:8000 (API docs at `/docs`) |
+| api-server | `pnpm nx serve api-server` | http://localhost:8001 (API docs at `/docs`) |
 
-Use one terminal per app. `pnpm nx dev landing` builds `@innostes/ui` first, so the website always
-uses the latest components.
+To run the ERP locally (API + web-app together) use one command:
+
+```bash
+pnpm dev   # api-server on :8001 and web-app on :4200
+```
+
+<Callout type="warn" title="Port 4200 already used by another project?">
+  If another dev server (e.g. an Angular app) also uses port 4200, `localhost:4200` may open that app
+  instead. Open **http://127.0.0.1:4200**, or stop the other server.
+</Callout>
+
+Or use one terminal per app. web-app reads `@innostes/ui` and `@innostes/kernel` straight from their
+source, so it starts in about a second, with nothing to build first, and edits to those packages
+hot-reload. `pnpm nx dev landing` builds `@innostes/ui` first, so the website always uses the latest
+components.
+
+</Step>
+<Step>
+
+### Set the system up (first run only)
+
+A fresh database has to be installed once. Until then the API answers `503 setup_required`, and
+web-app shows the setup wizard. Either:
+
+- **Web**: open web-app. The wizard asks for a **setup token**, printed in the api-server terminal
+  ("FIRST-RUN SETUP REQUIRED"). You can also print it with `pnpm nx run kernel-backend:setup -- token`.
+- **Command line**:
+  ```bash
+  pnpm nx run kernel-backend:setup -- install --name "Acme" --slug acme
+  ```
+
+See [First-run Setup](/docs/architecture/setup) for details and how to reset it.
 
 </Step>
 <Step>

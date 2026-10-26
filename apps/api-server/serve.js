@@ -7,8 +7,9 @@ const pythonExe = path.join(__dirname, '.venv', isWin ? 'Scripts' : 'bin', isWin
 const port = process.env.PORT || '8001';
 const args = ['-m', 'fastapi', 'dev', 'app/main.py', '--port', port, ...process.argv.slice(2)];
 
-const repoRoot = path.resolve(__dirname, '../..');
-const pythonPathParts = [repoRoot, __dirname];
+// Plug-in modules (kernel, ERP modules) are pip-installed into .venv, so only
+// this app's own folder needs to be on PYTHONPATH.
+const pythonPathParts = [__dirname];
 if (process.env.PYTHONPATH) {
   pythonPathParts.push(process.env.PYTHONPATH);
 }

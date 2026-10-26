@@ -170,7 +170,33 @@ importers:
         specifier: ^8.5.31
         version: 8.5.31
 
-  apps/web-app: {}
+  apps/web-app:
+    dependencies:
+      '@innostes/kernel':
+        specifier: workspace:*
+        version: link:../../kernel/frontend
+      '@innostes/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      lucide-react:
+        specifier: ^1.60.0
+        version: 1.60.0(@types/react@19.3.0)(react@19.3.1)
+    devDependencies:
+      '@tailwindcss/postcss':
+        specifier: ^4.3.3
+        version: 4.3.3
+
+  kernel/frontend:
+    dependencies:
+      '@innostes/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      lucide-react:
+        specifier: ^1.60.0
+        version: 1.60.0(@types/react@19.3.0)(react@19.3.1)
+      react:
+        specifier: ^18.0.0 || ^19.0.0
+        version: 19.3.1
 
   packages/ui:
     dependencies:

@@ -1,0 +1,302 @@
+---
+title: Building a Feature
+description: The step-by-step process for adding a backend feature, using tenancy as the worked example.
+icon: ListChecks
+---
+
+Every feature is built the same way, in the same order. Follow these steps and the checklist at the
+end, and your feature will look like every other feature in the codebase.
+
+The example adds a **roles** feature to the kernel. For an ERP module, replace
+`kernel/backend/kernel/` with that module's backend package.
+
+<Steps>
+<Step>
+
+### Decide where it lives
+
+| If the feature is… | Put it in |
+| --- | --- |
+| Needed by every module (users, roles, audit, settings) | The kernel: `kernel/backend/kernel/<feature>/` |
+| A business area (sales, inventory, HR) | Its own plug-in: `<module>/backend/<package>/` |
+| Plumbing (logging, CORS, auth middleware) | The engine, rarely. Ask first. |
+
+Check the [dependency rules](/docs/architecture/overview#dependency-rules): your feature may import
+from `core` and the features below it, never the other way round.
+
+</Step>
+<Step>
+
+### Create the folders
+
+```text
+kernel/backend/kernel/access/
+├── __init__.py
+├── models/
+│   ├── __init__.py
+│   └── role.py
+├── schemas/
+│   ├── __init__.py
+│   └── role.py
+├── services/
+│   ├── __init__.py
+│   └── role_service.py
+└── router.py
+```
+
+</Step>
+<Step>
+
+### Model: only your own columns
+
+```py title="models/role.py"
+"""Role table."""
+
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from kernel.core.database import BaseModel
+
+
+class Role(BaseModel):
+    """A named set of permissions (table `roles`).
+
+    Attributes:
+        name: Display name, e.g. "Accountant".
+    """
+
+    __tablename__ = "roles"
+
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+```
+
+Don't redeclare `id`, the timestamps or the `*_by` / `deleted_*` columns. `BaseModel` adds them.
+Table names are plural snake_case.
+
+Then make Alembic see it:
+
+```py title="kernel/backend/kernel/models.py"
+from kernel.tenancy.models import *  # noqa: F401,F403
+from kernel.access.models import *  # noqa: F401,F403
+```
+
+</Step>
+<Step>
+
+### Schemas: create, update, read
+
+```py title="schemas/role.py"
+from pydantic import Field
+
+from kernel.core.schemas import AuditReadSchema, BaseSchema
+
+
+class RoleCreate(BaseSchema):
+    """Body for creating a role."""
+
+    name: str = Field(min_length=1, max_length=100, description="Display name.", examples=["Accountant"])
+
+
+class RoleUpdate(BaseSchema):
+    """Body for updating a role. Send only the fields you want to change."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=100, description="Display name.")
+
+
+class RoleRead(AuditReadSchema):
+    """A role as returned by the API."""
+
+    name: str = Field(description="Display name.")
+```
+
+- `Create` has the required fields. `Update` makes every field optional. `Read` inherits `AuditReadSchema`.
+- Every field gets a `description`. These show up in the API docs.
+
+</Step>
+<Step>
+
+### Service: business rules
+
+```py title="services/role_service.py"
+from kernel.core.services import BaseService
+from kernel.access.models import Role
+
+
+class RoleService(BaseService[Role]):
+    """Operations on roles."""
+
+    model = Role
+```
+
+CRUD, soft delete and the audit columns come from `BaseService`. Add methods or override existing
+ones only for real business rules, such as "role names are unique per tenant".
+
+</Step>
+<Step>
+
+### Router: thin endpoints
+
+Copy the shape of `kernel/tenancy/router.py`. Endpoints only validate input and call the service.
+Business logic goes in the service. Errors are raised as service errors (e.g. a `RoleNotFoundError(NotFoundError)`),
+never as status numbers. See [Errors](/docs/guides/backend-conventions#errors).
+
+```py title="router.py"
+router = APIRouter(prefix="/roles", tags=["Access"])
+
+
+@router.post(
+    "",
+    response_model=RoleRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a role",
+    response_description="The created role.",
+    operation_id="roles_create",
+)
+async def create_role(
+    body: RoleCreate,
+    service: RoleService = Depends(get_service),
+    actor_id: uuid.UUID | None = Depends(get_actor_id),
+) -> Role:
+    """Create a role.
+    \f
+    Args:
+        body: Role fields.
+        service: Injected role service.
+        actor_id: Id of the calling user, or None.
+
+    Returns:
+        The new role.
+    """
+    return await service.create(body, actor_id)
+```
+
+See [Backend Conventions](/docs/guides/backend-conventions#api-documentation) for the documentation rules.
+
+</Step>
+<Step>
+
+### Module: plug it in
+
+```py title="__init__.py"
+"""Access feature: roles and permissions."""
+
+from kernel.core.module import BaseModule
+from kernel.access.models import Role
+from kernel.access.router import router
+from kernel.access.schemas import RoleCreate, RoleRead, RoleUpdate
+from kernel.access.services import RoleService
+
+
+class AccessModule(BaseModule):
+    """Plugs roles and permissions into the API server."""
+
+    name = "access"
+    version = "0.1.0"
+    router = router
+    openapi_tags = [{"name": "Access", "description": "Roles and permissions."}]
+
+
+module = AccessModule()
+
+__all__ = ["Role", "RoleCreate", "RoleUpdate", "RoleRead", "RoleService", "AccessModule", "module"]
+```
+
+Register it in the package's `pyproject.toml`, then reinstall so the engine finds it:
+
+```toml title="kernel/backend/pyproject.toml"
+[project.entry-points."innostes.modules"]
+tenancy = "kernel.tenancy:module"
+access = "kernel.access:module"
+```
+
+```bash
+pnpm nx run api-server:install
+```
+
+No change in `apps/api-server` is needed.
+
+</Step>
+<Step>
+
+### Migration
+
+```bash
+pnpm nx run kernel-backend:migration -- -m "create roles"
+```
+
+Open the new file in `kernel/backend/migrations/versions/` and check it. It should create exactly
+your table with the common columns, and nothing else. Then apply it:
+
+```bash
+pnpm nx run kernel-backend:migrate
+```
+
+</Step>
+<Step>
+
+### Tests
+
+Add `kernel/backend/tests/test_<feature>.py`. Use `kernel/backend/tests/test_tenancy.py` as the template. At minimum, cover:
+
+- the table's columns,
+- the service: create sets `created_by`, update changes only the fields that were sent, soft delete,
+- each endpoint's success and error responses, compared with `fastapi.status` constants (override `get_service`,
+  and call `register_error_handlers(app)` on the test app; no database needed),
+- the API docs: every endpoint has a summary, a description and its error responses.
+
+```bash
+pnpm nx test kernel-backend
+pnpm nx test api-server
+```
+
+</Step>
+<Step>
+
+### Frontend (if the feature has screens)
+
+Add a folder with the same name in the plug-in's `frontend/src`, mirroring the backend:
+
+```text
+kernel/frontend/src/access/
+â”œâ”€â”€ api.ts      # calls: apiRequest('/roles', ...)
+â”œâ”€â”€ types.ts    # Role, RoleCreate ... matching the backend schemas
+â”œâ”€â”€ RolesPage.tsx
+â””â”€â”€ index.ts    # public exports
+```
+
+- Call the API through `apiRequest` from `core/api/client.ts`. Check errors with `HttpStatus` /
+  error codes, never raw numbers.
+- Build screens with `@innostes/ui` components.
+- Export the feature from `src/index.ts`.
+- Until the web-app page loader exists, render the page from `apps/web-app` directly.
+
+```bash
+pnpm nx typecheck kernel-frontend web-app
+```
+
+</Step>
+<Step>
+
+### Docs
+
+- Add `README.md` in the feature folder: the tables, the endpoints and a usage example.
+- If you changed the architecture or a convention, update these developer docs too.
+- Run the API and check that your section in http://localhost:8001/docs reads well.
+
+</Step>
+</Steps>
+
+## Definition of done
+
+A feature is ready for review when:
+
+- [ ] It follows the standard layout: `models/`, `schemas/`, `services/`, `router.py` and `__init__.py`.
+- [ ] The model only declares its own columns and is imported in `models.py`.
+- [ ] A migration exists, has been read, and runs on a clean database.
+- [ ] Every module, class and public function has a docstring.
+- [ ] Every endpoint has `summary`, `response_description`, `operation_id` and `error_responses(<error classes>)`.
+- [ ] No status code is written as a number. Use service error classes and `fastapi.status` constants.
+- [ ] Every schema field has a `description`.
+- [ ] The module is registered under `innostes.modules` and shows up in `GET /`.
+- [ ] Tests pass for `kernel-backend` and `api-server`.
+- [ ] The feature has a README, and the developer docs are updated if anything structural changed.

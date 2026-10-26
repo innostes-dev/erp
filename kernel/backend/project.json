@@ -1,0 +1,36 @@
+{
+  "name": "kernel-backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "kernel/backend/kernel",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "kernel/backend",
+        "command": "node ../../apps/api-server/scripts/venv-python.js -m unittest discover -s tests -p \"test_*.py\""
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "kernel/backend",
+        "command": "node ../../apps/api-server/scripts/venv-python.js -m alembic -c alembic.ini upgrade head"
+      }
+    },
+    "migration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "kernel/backend",
+        "command": "node ../../apps/api-server/scripts/venv-python.js -m alembic -c alembic.ini revision --autogenerate"
+      }
+    },
+    "setup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "kernel/backend",
+        "command": "node ../../apps/api-server/scripts/venv-python.js -m kernel.setup"
+      }
+    }
+  }
+}

@@ -1,0 +1,1255 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Innostes ERP API",
+    "description": "\nBackend API for **Innostes ERP**.\n\n### Conventions\n* **Ids** are UUIDs.\n* **Timestamps** are ISO 8601 in UTC.\n* Every record has `id`, `created_at`, `created_by`, `updated_at`,\n  `updated_by`, `deleted_at` and `deleted_by`.\n* **Delete is a soft delete**: the record is hidden, not removed, and can be\n  restored. Lists hide deleted records unless `include_deleted=true`.\n* **Pagination**: list endpoints take `offset` and `limit` and return\n  `{items, total, offset, limit}`.\n* **Errors** return `{\"detail\": \"...\"}`; validation errors (422) return a\n  list of field problems.\n\n### Authentication\nSend `Authorization: Bearer <access token>`. For now the token is optional\nand only used to record who made a change.\n",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "Service info",
+        "description": "Service name, environment, status and the list of loaded modules.",
+        "operationId": "system_root",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response System Root"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Observability"
+        ],
+        "summary": "Health check",
+        "description": "Report API, database and per-module health.\n\nReturns **200** with `status: \"pass\"` when the database responds,\notherwise **503** with `status: \"fail\"`.",
+        "operationId": "system_health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response System Health"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database is unreachable"
+          }
+        }
+      }
+    },
+    "/setup/status": {
+      "get": {
+        "tags": [
+          "Setup"
+        ],
+        "summary": "Get setup status",
+        "description": "Tell the UI whether to show the setup wizard. Reveals nothing else.\n\nReturns **503** if the database can't be reached: the setup state is\nunknown then, so the UI must not show the wizard.",
+        "operationId": "setup_status",
+        "responses": {
+          "200": {
+            "description": "Whether the system is installed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupStatus"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required service (e.g. the database) is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setup/checks": {
+      "get": {
+        "tags": [
+          "Setup"
+        ],
+        "summary": "Run pre-install checks",
+        "description": "Check the database before installing. Requires the `X-Setup-Token` header.\n\nThe wizard also uses it to verify the token. Returns **404** once setup is\ncomplete or when web setup is disabled.",
+        "operationId": "setup_checks",
+        "responses": {
+          "200": {
+            "description": "Database connectivity and pending migrations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupChecks"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required service (e.g. the database) is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SetupToken": []
+          }
+        ]
+      }
+    },
+    "/setup": {
+      "post": {
+        "tags": [
+          "Setup"
+        ],
+        "summary": "Run first-run setup",
+        "description": "Install the system: create the database tables and the first organisation.\n\nRequires the `X-Setup-Token` header. Works **only once**: afterwards this\nroute returns **404**, as if it never existed.",
+        "operationId": "setup_run",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "What setup created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required service (e.g. the database) is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SetupToken": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tenants": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Create a tenant",
+        "description": "Create a new tenant (customer organisation).\n\nIf a valid bearer token is sent, its user is recorded in `created_by`\nand `updated_by`. Returns **409** if the slug is already used.",
+        "operationId": "tenants_create",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "List tenants",
+        "description": "List tenants with pagination, newest first.\n\nSoft-deleted tenants are hidden unless `include_deleted=true`.",
+        "operationId": "tenants_list",
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of tenants to skip.",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of tenants to skip."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Maximum tenants to return (1-200).",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum tenants to return (1-200)."
+          },
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Also return soft-deleted tenants.",
+              "default": false,
+              "title": "Include Deleted"
+            },
+            "description": "Also return soft-deleted tenants."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of tenants, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_TenantRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/{tenant_id}": {
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Get a tenant",
+        "description": "Get one tenant by id. Soft-deleted tenants return 404.",
+        "operationId": "tenants_get",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id of the tenant.",
+              "title": "Tenant Id"
+            },
+            "description": "Id of the tenant."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Update a tenant",
+        "description": "Change a tenant. Only the fields you send are updated.\n\nThe calling user (from the bearer token) is recorded in `updated_by`.\nSoft-deleted tenants return 404; restore them first.",
+        "operationId": "tenants_update",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id of the tenant.",
+              "title": "Tenant Id"
+            },
+            "description": "Id of the tenant."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Delete a tenant (soft delete)",
+        "description": "Soft-delete a tenant: it is hidden from lists but kept in the database.\n\nSets `deleted_at` and `deleted_by`. Undo with\n`POST /tenants/{tenant_id}/restore`.",
+        "operationId": "tenants_delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id of the tenant.",
+              "title": "Tenant Id"
+            },
+            "description": "Id of the tenant."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tenant, now marked as deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/{tenant_id}/restore": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Restore a deleted tenant",
+        "description": "Bring back a soft-deleted tenant.\n\nClears `deleted_at` and `deleted_by`. Calling it on an active tenant\nis harmless.",
+        "operationId": "tenants_restore",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id of the tenant.",
+              "title": "Tenant Id"
+            },
+            "description": "Id of the tenant."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tenant, active again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse",
+        "description": "Body returned for handled errors, e.g. a not-found or conflict error.\n\nAttributes:\n    detail: Human-readable error message.\n    code: Machine-readable error id, only for some errors (e.g. \"setup_required\").",
+        "examples": [
+          {
+            "detail": "Tenant not found"
+          }
+        ]
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Page_TenantRead_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TenantRead"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Records on this page."
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Number of matching records across all pages."
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset",
+            "description": "How many records were skipped."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Limit",
+            "description": "Maximum records per page."
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "title": "Page[TenantRead]"
+      },
+      "SetupChecks": {
+        "properties": {
+          "database_connected": {
+            "type": "boolean",
+            "title": "Database Connected",
+            "description": "True when the database is reachable."
+          },
+          "migrations_pending": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Migrations Pending",
+            "description": "Number of database migrations setup will apply."
+          }
+        },
+        "type": "object",
+        "required": [
+          "database_connected",
+          "migrations_pending"
+        ],
+        "title": "SetupChecks",
+        "description": "Pre-install diagnostics, only for holders of the setup token.",
+        "examples": [
+          {
+            "database_connected": true,
+            "migrations_pending": 2
+          }
+        ]
+      },
+      "SetupRequest": {
+        "properties": {
+          "organization": {
+            "$ref": "#/components/schemas/TenantCreate",
+            "description": "The first organisation (tenant) to create."
+          }
+        },
+        "type": "object",
+        "required": [
+          "organization"
+        ],
+        "title": "SetupRequest",
+        "description": "Everything collected by the setup wizard.",
+        "examples": [
+          {
+            "organization": {
+              "country": "IN",
+              "date_format": "DD/MM/YYYY",
+              "language": "en-IN",
+              "name": "Acme Corporation",
+              "slug": "acme",
+              "timezone": "Asia/Kolkata"
+            }
+          }
+        ]
+      },
+      "SetupResult": {
+        "properties": {
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRead",
+            "description": "The organisation created during setup."
+          },
+          "installed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Installed At",
+            "description": "When setup was completed (UTC)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "tenant",
+          "installed_at"
+        ],
+        "title": "SetupResult",
+        "description": "What setup created."
+      },
+      "SetupStatus": {
+        "properties": {
+          "installed": {
+            "type": "boolean",
+            "title": "Installed",
+            "description": "True once first-run setup has been completed."
+          }
+        },
+        "type": "object",
+        "required": [
+          "installed"
+        ],
+        "title": "SetupStatus",
+        "description": "Public answer to \"does the UI need to show setup?\". Nothing else is revealed.",
+        "examples": [
+          {
+            "installed": false
+          },
+          {
+            "installed": true
+          }
+        ]
+      },
+      "TenantCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Display name of the organisation.",
+            "examples": [
+              "Acme Corporation"
+            ]
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 63,
+            "minLength": 1,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "title": "Slug",
+            "description": "Short unique id used in URLs: lowercase letters, digits and dashes (e.g. `acme`).",
+            "examples": [
+              "acme"
+            ]
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "examples": [
+              "IN"
+            ]
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA time zone name.",
+            "examples": [
+              "Asia/Kolkata"
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "BCP 47 language tag for the default language.",
+            "examples": [
+              "en-IN"
+            ]
+          },
+          "date_format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Format",
+            "description": "Preferred date format.",
+            "examples": [
+              "DD/MM/YYYY"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "TenantCreate",
+        "description": "Body for creating a tenant.",
+        "examples": [
+          {
+            "country": "IN",
+            "date_format": "DD/MM/YYYY",
+            "language": "en-IN",
+            "name": "Acme Corporation",
+            "slug": "acme",
+            "timezone": "Asia/Kolkata"
+          }
+        ]
+      },
+      "TenantRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique id of the record."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "When the record was created (UTC)."
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By",
+            "description": "User who created the record. Null for system actions."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At",
+            "description": "When the record was last changed (UTC)."
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By",
+            "description": "User who last changed the record. Null for system actions."
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At",
+            "description": "When the record was soft-deleted. Null if active."
+          },
+          "deleted_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted By",
+            "description": "User who soft-deleted the record. Null if active."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Display name of the organisation."
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Short unique id used in URLs: lowercase letters, digits and dashes (e.g. `acme`)."
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "ISO 3166-1 alpha-2 country code."
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA time zone name."
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "BCP 47 language tag for the default language."
+          },
+          "date_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Format",
+            "description": "Preferred date format."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "name",
+          "slug"
+        ],
+        "title": "TenantRead",
+        "description": "A tenant as returned by the API (includes the common record fields).",
+        "examples": [
+          {
+            "country": "IN",
+            "created_at": "2026-10-26T10:15:00Z",
+            "created_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c",
+            "date_format": "DD/MM/YYYY",
+            "id": "3f6c1a52-8d5e-4b8e-9c1a-2f6d3e7b9a10",
+            "language": "en-IN",
+            "name": "Acme Corporation",
+            "slug": "acme",
+            "timezone": "Asia/Kolkata",
+            "updated_at": "2026-10-26T10:15:00Z",
+            "updated_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c"
+          }
+        ]
+      },
+      "TenantUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Display name of the organisation."
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63,
+                "minLength": 1,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug",
+            "description": "Short unique id used in URLs: lowercase letters, digits and dashes (e.g. `acme`)."
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "ISO 3166-1 alpha-2 country code."
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA time zone name."
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "BCP 47 language tag for the default language."
+          },
+          "date_format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Format",
+            "description": "Preferred date format."
+          }
+        },
+        "type": "object",
+        "title": "TenantUpdate",
+        "description": "Body for updating a tenant. Send only the fields you want to change.",
+        "examples": [
+          {
+            "name": "Acme Corp Ltd"
+          }
+        ]
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "SetupToken": {
+        "type": "apiKey",
+        "description": "One-time setup token: printed in the API server log on first start, or SETUP_TOKEN in .env.",
+        "in": "header",
+        "name": "X-Setup-Token"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "description": "JWT access token. Optional for now; used to record who made a change.",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "General",
+      "description": "Service identity."
+    },
+    {
+      "name": "Observability",
+      "description": "Health checks for load balancers and monitoring."
+    },
+    {
+      "name": "Setup",
+      "description": "First-run installation. `GET /setup/status` tells the UI whether to show the setup wizard. `GET /setup/checks` and `POST /setup` require the `X-Setup-Token` header (printed in the server log on first start) and return 404 once setup is complete. Until then, other routes return 503 with `code: setup_required`."
+    },
+    {
+      "name": "Tenancy",
+      "description": "Tenants are the customer organisations using the ERP. Every business record belongs to a tenant. Deleting a tenant is a soft delete and can be undone with *restore*."
+    }
+  ]
+}

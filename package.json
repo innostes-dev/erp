@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "dev": "nx run-many -t serve -p api-server web-app --outputStyle=stream",
     "start:backend": "nx serve api-server",
     "start:web-app": "nx serve web-app",
     "start:landing": "nx dev landing",

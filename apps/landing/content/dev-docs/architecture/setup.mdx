@@ -1,0 +1,128 @@
+---
+title: First-run Setup
+description: How a fresh install is set up once, securely, from the command line or a token-protected wizard.
+icon: Wand
+---
+
+A fresh innostes install has an empty database. It must be **installed once**: setup creates the
+tables and the first organization. That can happen two ways:
+
+| Way | For | Protection |
+| --- | --- | --- |
+| **Command line**: `python -m kernel.setup install ...` | Servers, Docker, Kubernetes, CI | Needs shell access to the server |
+| **Web wizard** at `/setup` in web-app | A person setting up interactively | One-time **setup token** from the server |
+
+After setup, the setup actions are gone: their routes answer **404**, as if they never existed.
+
+## Security layers
+
+1. **Setup token.** The web wizard must send `X-Setup-Token`. On first start the API generates a
+   random 256-bit token, saves it to `kernel/backend/var/setup-token` (gitignored) and prints it in
+   its log. Alternatively, set `SETUP_TOKEN` in `.env`. Only someone with access to the server can
+   read it. Wrong guesses are limited per client to 10 per 15 minutes (`429` with `Retry-After`).
+2. **Routes disappear after install.** `GET /setup/checks` and `POST /setup` return 404 once installed,
+   and the token is not even checked. The generated token file is deleted.
+3. **Web setup can be switched off.** `SETUP_ENABLED=false` makes the setup actions always 404, so setup
+   is command-line only. **Recommended for production.**
+4. **The API is locked until setup.** Until installed, every route except `/setup/*`, `/`, `/health` and
+   the API docs answers `503` with `"code": "setup_required"`, so nothing runs against a half-installed
+   database.
+5. **The wizard is its own bundle.** web-app lazy-loads it, so normal users never download it.
+
+## Endpoints
+
+| Endpoint | Auth | Before install | After install |
+| --- | --- | --- | --- |
+| `GET /setup/status` | none | `{"installed": false}` | `{"installed": true}` |
+| `GET /setup/checks` | `X-Setup-Token` | `{"database_connected", "migrations_pending"}` | 404 |
+| `POST /setup` | `X-Setup-Token` | 201, creates the organization | 404 |
+| any other route | normal | 503 `setup_required` | normal |
+
+`/setup/status` reveals only the installed flag. If the database can't be reached, every one of these
+answers **503** `database_unavailable`. It never says "not installed", because with no database the
+answer is unknown. This prevents a database outage on a live system from showing everyone the setup wizard.
+
+## Command-line install
+
+Run from `kernel/backend` (or through Nx), against the database in `.env`:
+
+```bash
+python -m kernel.setup status
+python -m kernel.setup install --name "Acme Corporation" --slug acme \
+  --country IN --timezone Asia/Kolkata --language en-IN --date-format DD/MM/YYYY
+python -m kernel.setup install --from-env     # reads SETUP_ORG_NAME, SETUP_ORG_SLUG, ...
+python -m kernel.setup token                  # print the web-setup token
+
+pnpm nx run kernel-backend:setup -- install --from-env
+```
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | Done |
+| `1` | Already installed (safe to ignore in scripts) |
+| `2` | Invalid input (e.g. bad slug) |
+| `3` | Database unavailable |
+
+`--from-env` reads the `SETUP_ORG_*` variables from the environment or the same `.env` files the API
+uses. In Docker / Kubernetes (e.g. a one-off job or init container), pass them as environment variables.
+`.env` files are not copied into images:
+
+```bash
+docker compose run --rm \n  -e SETUP_ORG_NAME="Acme Corporation" -e SETUP_ORG_SLUG=acme \n  api-server python -m kernel.setup install --from-env
+```
+
+## Web install
+
+1. Start the API. Its log shows:
+   ```text
+   FIRST-RUN SETUP REQUIRED
+   Open the web app and enter this setup token:
+       Z3YZWvRD0AmKXtPLRodu...
+   ```
+2. Open web-app. `SetupGate` sees `{"installed": false}` and loads the wizard at `/setup`.
+3. **Verify**: paste the token. It is checked via `/setup/checks` and kept only in memory, never stored.
+4. **Organization**, **Database**, **Review**, then **Install**.
+5. Done: the token file is deleted, the setup routes return 404, and the app opens.
+
+## Production checklist
+
+- [ ] Install with the command line (or set `SETUP_TOKEN` and finish the wizard right after deploying).
+- [ ] Set `SETUP_ENABLED=false` after installing.
+- [ ] Don't share or commit the token. `kernel/backend/var/` is gitignored and excluded from Docker images (`.dockerignore`).
+- [ ] Running **more than one API replica**? Each one generates its own token, so set `SETUP_TOKEN`
+      (the same value everywhere) or use the command line.
+- [ ] Behind a reverse proxy, the attempt limiter sees the proxy's address. Run the API with
+      `--proxy-headers` (uvicorn) so it sees real client addresses.
+
+## Code
+
+| Part | Location |
+| --- | --- |
+| Routes and their guards | `kernel/backend/kernel/setup/router.py`, `dependencies.py` |
+| `setup_required` middleware | `kernel/backend/kernel/setup/middleware.py` (added through `BaseModule.configure`) |
+| Token and attempt limiter | `kernel/backend/kernel/setup/services/token.py` |
+| Install-state cache | `kernel/backend/kernel/setup/services/state.py` |
+| Install logic | `kernel/backend/kernel/setup/services/setup_service.py` |
+| Command line | `kernel/backend/kernel/setup/__main__.py` |
+| Wizard and gate | `kernel/frontend/src/setup/` (`SetupGate`, `SetupWizard`) |
+| Migration | `kernel/backend/migrations/versions/0002_setup_and_tenant_profile.py` |
+
+What decides "installed" is the single-row `installation` table. The database allows only one row,
+so two setups at the same moment can't both succeed: the second gets 409. Deleting tenants can never
+reopen setup.
+
+### Adding a step later
+
+The administrator account will be the next step:
+- add it to `STEPS` in `SetupWizard.tsx` (before Review);
+- add an `administrator` field to `SetupRequest`;
+- add the matching command-line flags in `__main__.py`;
+- create the user in `SetupService.install`, in the same transaction.
+
+## Resetting setup in development
+
+```sql
+DELETE FROM installation;
+```
+
+Then restart the API, so it generates and prints a new token. Never do this on a real installation.

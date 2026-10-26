@@ -7,6 +7,9 @@
       "path": "./apps/web-app"
     },
     {
+      "path": "./kernel/frontend"
+    },
+    {
       "path": "./packages/ui"
     }
   ],
