@@ -46,6 +46,8 @@ export interface ActivityFeedProps extends Omit<ComponentProps<'div'>, 'children
   labels?: { today?: string; yesterday?: string };
   /** Shown when there are no events. @default 'No activity yet.' */
   emptyText?: ReactNode;
+  /** Date to use as "today" for relative times. @default new Date() */
+  now?: Date;
   /** Classes for inner parts. */
   classNames?: SlotClassNames<ActivityFeedSlot>;
 }
@@ -73,7 +75,7 @@ export const ActivityFeed = forwardRef<HTMLDivElement, ActivityFeedProps>(functi
 ) {
   const groups = useMemo(() => {
     if (!groupByDay) return [{ key: 'all', label: null as string | null, items }];
-    const today = startOfDay(new Date());
+    const today = startOfDay(props.now ?? new Date());
     const yesterday = addDays(today, -1);
     const dayFormat = new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'short', day: 'numeric' });
     const map = new Map<string, { key: string; label: string | null; items: ActivityItem[] }>();
@@ -139,7 +141,7 @@ export const ActivityFeed = forwardRef<HTMLDivElement, ActivityFeedProps>(functi
                       {item.time && (
                         <span data-slot="activity-feed-time" className={cn('shrink-0 text-xs text-muted-foreground', classNames?.time)}>
                           {item.time instanceof Date ? (
-                            <time dateTime={item.time.toISOString()}>{formatRelativeTime(item.time, { locale })}</time>
+                            <time dateTime={item.time.toISOString()}>{formatRelativeTime(item.time, { locale, now: props.now })}</time>
                           ) : (
                             item.time
                           )}
