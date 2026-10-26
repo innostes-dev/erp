@@ -6,7 +6,8 @@ from typing import Any
 
 from fastapi import FastAPI, Response, status
 
-from app.kernel import close_db, get_settings, ping_db
+from app.core.config import get_settings
+from app.core.database import close_db, ping_db
 
 settings = get_settings()
 
