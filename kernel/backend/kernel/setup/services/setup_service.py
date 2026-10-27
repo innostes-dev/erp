@@ -1,5 +1,6 @@
 """First-run setup: detect whether the system is installed and install it once."""
 
+from datetime import datetime, timezone
 import logging
 import uuid
 
@@ -18,6 +19,14 @@ from kernel.core.services import (
 from kernel.setup.models import Installation
 from kernel.setup.schemas import SetupChecks, SetupRequest, SetupResult, SetupStatus
 from kernel.tenancy import TenantRead, TenantService
+from kernel.tenancy.models.tenant_member import TenantMember, TenantMemberStatus
+from kernel.user.schemas import UserRead
+from kernel.user.services import (
+    RBACService,
+    UserService,
+    seed_default_permissions_and_roles,
+    seed_default_tenant_settings,
+)
 
 logger = logging.getLogger("kernel.setup")
 
@@ -207,12 +216,67 @@ class SetupService:
         await run_migrations()
 
         try:
+            # 1. Create tenant
             tenant = await TenantService(self.session).create(data.organization, actor_id)
+
+            # 2. Create super admin user
+            user_svc = UserService()
+            admin_user = await user_svc.create_user(
+                session=self.session,
+                data=data.admin,
+                is_super_admin=True,
+            )
+
+            # 3. Associate admin with tenant as active member
+            member = TenantMember(
+                tenant_id=tenant.id,
+                user_id=admin_user.id,
+                status=TenantMemberStatus.ACTIVE,
+                joined_at=datetime.now(timezone.utc),
+            )
+            self.session.add(member)
+
+            # 4. Seed system RBAC permissions and default roles
+            roles = await seed_default_permissions_and_roles(self.session)
+
+            # 5. Assign roles: global super_admin & tenant owner
+            rbac_svc = RBACService()
+            if "super_admin" in roles:
+                await rbac_svc.assign_role_to_user(
+                    session=self.session,
+                    user_id=admin_user.id,
+                    role_id=roles["super_admin"].id,
+                    tenant_id=None,
+                    assigned_by=admin_user.id,
+                )
+            if "owner" in roles:
+                await rbac_svc.assign_role_to_user(
+                    session=self.session,
+                    user_id=admin_user.id,
+                    role_id=roles["owner"].id,
+                    tenant_id=tenant.id,
+                    assigned_by=admin_user.id,
+                )
+
+            # 6. Seed tenant modular settings (branding, auth, localization)
+            branding_dict = data.branding.model_dump() if data.branding else None
+            await seed_default_tenant_settings(
+                session=self.session,
+                tenant_id=tenant.id,
+                organization_name=tenant.name,
+                branding_input=branding_dict,
+                timezone=tenant.timezone or "UTC",
+                language=tenant.language or "en-US",
+                date_format=tenant.date_format or "YYYY-MM-DD",
+            )
+
+            # 7. Record installation singleton row
+            effective_actor = actor_id or admin_user.id
             installation = Installation(
                 app_version=self.app_version,
                 default_tenant_id=tenant.id,
-                created_by=actor_id,
-                updated_by=actor_id,
+                created_by=effective_actor,
+                updated_by=effective_actor,
             )
             self.session.add(installation)
             await self.session.flush()
@@ -221,8 +285,9 @@ class SetupService:
             raise AlreadyInstalledError() from exc
         await self.session.refresh(installation)
 
-        logger.info("First-run setup completed for tenant %r", tenant.slug)
+        logger.info("First-run setup completed for tenant %r with admin %r", tenant.slug, data.admin.email)
         return SetupResult(
             tenant=TenantRead.model_validate(tenant),
+            admin=user_svc.to_user_read(admin_user),
             installed_at=installation.created_at,
         )

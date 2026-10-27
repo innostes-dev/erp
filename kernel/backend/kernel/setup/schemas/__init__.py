@@ -1,3 +1,15 @@
-from kernel.setup.schemas.setup import SetupChecks, SetupRequest, SetupResult, SetupStatus
+from kernel.setup.schemas.setup import (
+    SetupBrandingInput,
+    SetupChecks,
+    SetupRequest,
+    SetupResult,
+    SetupStatus,
+)
 
-__all__ = ["SetupStatus", "SetupChecks", "SetupRequest", "SetupResult"]
+__all__ = [
+    "SetupStatus",
+    "SetupChecks",
+    "SetupBrandingInput",
+    "SetupRequest",
+    "SetupResult",
+]

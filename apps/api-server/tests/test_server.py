@@ -44,6 +44,14 @@ class TestServerEngine(unittest.TestCase):
         self.assertIn("service", data)
         self.assertIn("modules", data)
 
+    def test_config_endpoint(self) -> None:
+        res = self.client.get("/config")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        data = res.json()
+        self.assertIn("service", data)
+        self.assertIn("version", data)
+        self.assertIn("environment", data)
+
     def test_health_endpoint(self) -> None:
         # DB may not be running locally, so status is either pass (200) or fail (503)
         res = self.client.get("/health")

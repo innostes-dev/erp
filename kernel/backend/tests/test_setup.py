@@ -28,6 +28,7 @@ from kernel.setup import (
 from kernel.setup.router import get_service
 from kernel.setup.services import attempt_limiter, install_state
 from kernel.tenancy import SlugTakenError, Tenant, TenantRead
+from kernel.user import User
 
 ORG = {
     "name": "Acme Corporation",
@@ -105,10 +106,16 @@ class TestSetupInstall(unittest.IsolatedAsyncioTestCase):
         migrate.assert_awaited_once()
         self.assertEqual(result.tenant.slug, "acme")
         added = [c.args[0] for c in service.session.add.call_args_list]
-        self.assertEqual([type(o) for o in added], [Tenant, Installation])
-        tenant, installation = added
+        added_types = [type(o) for o in added]
+        self.assertIn(Tenant, added_types)
+        self.assertIn(Installation, added_types)
+        self.assertIn(User, added_types)
+        tenant = next(o for o in added if isinstance(o, Tenant))
+        installation = next(o for o in added if isinstance(o, Installation))
+        admin_user = next(o for o in added if isinstance(o, User))
         self.assertEqual(installation.default_tenant_id, tenant.id)
         self.assertEqual(installation.app_version, "0.1.0")
+        self.assertTrue(admin_user.is_super_admin)
 
     async def test_install_with_database_down(self) -> None:
         service = make_service(db_ok=False)

@@ -3,6 +3,13 @@
  * (kernel/backend/kernel/setup/schemas, kernel/backend/kernel/tenancy/schemas).
  */
 
+/** `GET /config` (public application metadata). */
+export interface AppConfig {
+  service: string;
+  version: string;
+  environment: string;
+}
+
 /** `GET /setup/status` (public). */
 export interface SetupStatus {
   installed: boolean;
@@ -24,9 +31,27 @@ export interface OrganizationInput {
   date_format?: string | null;
 }
 
+/** Administrator user credentials collected by the wizard (`AdminUserInput`). */
+export interface AdminUserInput {
+  first_name: string;
+  last_name?: string | null;
+  email: string;
+  password: string;
+  mobile?: string | null;
+}
+
+/** Branding & theme customization (`SetupBrandingInput`). */
+export interface SetupBrandingInput {
+  theme: 'light' | 'dark' | 'system';
+  primary_color: string;
+  logo_url?: string | null;
+}
+
 /** `POST /setup` body. */
 export interface SetupRequest {
   organization: OrganizationInput;
+  admin: AdminUserInput;
+  branding?: SetupBrandingInput | null;
 }
 
 /** A tenant as returned by the API (`TenantRead`). */
@@ -40,8 +65,20 @@ export interface Tenant extends OrganizationInput {
   deleted_by: string | null;
 }
 
+/** Root administrator account created during setup (`UserRead`). */
+export interface CreatedAdmin {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  email: string;
+  mobile: string | null;
+  status: string;
+  is_super_admin: boolean;
+}
+
 /** `POST /setup` response. */
 export interface SetupResult {
   tenant: Tenant;
+  admin?: CreatedAdmin | null;
   installed_at: string;
 }

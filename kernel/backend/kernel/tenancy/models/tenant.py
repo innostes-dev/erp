@@ -1,7 +1,7 @@
 """Tenant table."""
 
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from kernel.core.database import BaseModel
 
@@ -30,3 +30,6 @@ class Tenant(BaseModel):
     timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)
     language: Mapped[str | None] = mapped_column(String(16), nullable=True)
     date_format: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+    members = relationship("TenantMember", back_populates="tenant", cascade="all, delete-orphan")
+    settings = relationship("TenantSetting", back_populates="tenant", cascade="all, delete-orphan")

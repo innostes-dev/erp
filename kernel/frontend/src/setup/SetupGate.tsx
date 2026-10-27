@@ -1,10 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useState, type ReactNode } from 'react';
-import { Alert, AlertDescription, AlertTitle, Button, Spinner } from '@innostes/ui';
+import { Alert, AlertDescription, AlertTitle, Button } from '@innostes/ui';
 import { RefreshCw } from 'lucide-react';
 
 import { ApiError } from '../core/api/client';
 import { HttpStatus } from '../core/api/http-status';
-import { getSetupStatus } from './api';
+import { getAppConfig, isSetupRequired } from './api';
+import { SetupLoader } from './SetupLoader';
 
 // Loaded only when setup is needed: normal users never download the wizard.
 const SetupWizard = lazy(() => import('./SetupWizard'));
@@ -17,15 +18,6 @@ type GateState =
   | { kind: 'error'; message: string; databaseDown: boolean }
   | { kind: 'setup' }
   | { kind: 'ready' };
-
-/** Full-page spinner. */
-function Loading() {
-  return (
-    <div className="flex min-h-svh items-center justify-center">
-      <Spinner className="size-6 text-primary" label="Loading" />
-    </div>
-  );
-}
 
 /** Replace the current URL without a page reload (no router needed). */
 function replacePath(path: string) {
@@ -40,11 +32,10 @@ export interface SetupGateProps {
 /**
  * Shows the setup wizard on a fresh install and the app afterwards.
  *
- * - Not installed: renders the wizard at `/setup`, whatever URL was opened.
- * - Database unreachable (`HttpStatus.SERVICE_UNAVAILABLE`): shows an error with a retry button, never the
- *   wizard, because the setup state is unknown.
- * - Installed: renders `children`. Opening `/setup` redirects to `/`, so the
- *   setup page can never be reached again (the API refuses it too, with `HttpStatus.CONFLICT`).
+ * - Bootstrapping: Calls `/config` while showing a professional animated full-page loader.
+ * - Not installed: `/config` returns 503 `setup_required`, rendering the wizard at `/setup`.
+ * - Installed: `/config` returns 200 OK, rendering `children`.
+ * - Database unreachable (`HttpStatus.SERVICE_UNAVAILABLE`): shows an error with a retry button.
  *
  * @example
  * <SetupGate>
@@ -57,9 +48,13 @@ export function SetupGate({ children }: SetupGateProps) {
   const load = useCallback(async () => {
     setState({ kind: 'loading' });
     try {
-      const status = await getSetupStatus();
-      setState(status.installed ? { kind: 'ready' } : { kind: 'setup' });
+      await getAppConfig();
+      setState({ kind: 'ready' });
     } catch (e) {
+      if (isSetupRequired(e)) {
+        setState({ kind: 'setup' });
+        return;
+      }
       setState({
         kind: 'error',
         message: e instanceof Error ? e.message : String(e),
@@ -77,7 +72,9 @@ export function SetupGate({ children }: SetupGateProps) {
     if (state.kind === 'ready' && window.location.pathname.startsWith(SETUP_PATH)) replacePath('/');
   }, [state.kind]);
 
-  if (state.kind === 'loading') return <Loading />;
+  if (state.kind === 'loading') {
+    return <SetupLoader />;
+  }
 
   if (state.kind === 'error') {
     return (
@@ -109,7 +106,7 @@ export function SetupGate({ children }: SetupGateProps) {
 
   if (state.kind === 'setup') {
     return (
-      <Suspense fallback={<Loading />}>
+      <Suspense fallback={<SetupLoader message="Loading setup wizard..." />}>
         <SetupWizard onComplete={() => setState({ kind: 'ready' })} />
       </Suspense>
     );

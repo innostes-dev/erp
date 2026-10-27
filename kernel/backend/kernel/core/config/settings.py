@@ -50,6 +50,34 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=30)
     refresh_token_expire_days: int = Field(default=7)
 
+    # Auth Security Policies & Expirations
+    frontend_url: str = Field(default="http://localhost:4200", description="Frontend base URL for password reset links")
+    password_reset_token_expire_minutes: int = Field(default=60, description="Reset link validity in minutes")
+    temp_password_expire_hours: int = Field(default=24, description="Temporary password validity in hours")
+    max_failed_login_attempts: int = Field(default=5, description="Failed attempts before temporary lockout")
+    account_lockout_minutes: int = Field(default=15, description="Duration of brute-force lockout")
+
+    # Email & SMTP Settings
+    smtp_host: str | None = Field(default=None, description="SMTP host (None = console logger in dev)")
+    smtp_port: int = Field(default=587, description="SMTP port (587 for STARTTLS, 465 for SSL)")
+    smtp_username: str | None = Field(default=None, description="SMTP auth username")
+    smtp_password: SecretStr | None = Field(default=None, description="SMTP auth password")
+    smtp_from: str = Field(default="Innostes ERP <noreply@innostes.com>", description="Sender address")
+    smtp_use_tls: bool = Field(default=True, description="Enable STARTTLS for SMTP")
+
+    # Envelope Encryption & Key Rotation Settings
+    encryption_current_key_version: int = Field(default=1, description="Active key version used for new encryptions")
+    encryption_keys: dict[int, SecretStr] = Field(
+        default_factory=lambda: {
+            1: SecretStr("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef")
+        },
+        description="Keyring mapping version int -> 32-byte hex/base64 key",
+    )
+    blind_index_pepper: SecretStr = Field(
+        default=SecretStr("fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"),
+        description="Secret HMAC pepper for blind indexes",
+    )
+
     # Database Settings from database/db_settings.py
     db: PostgresSettings = Field(default_factory=PostgresSettings)
 

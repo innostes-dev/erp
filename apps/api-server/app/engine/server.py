@@ -159,6 +159,20 @@ class ServerEngine:
             }
 
         @app.get(
+            "/config",
+            tags=["General"],
+            summary="Application configuration",
+            operation_id="system_config",
+        )
+        def config() -> dict[str, Any]:
+            """Public configuration and app metadata for frontend bootstrapping."""
+            return {
+                "service": self.settings.app_name,
+                "version": self.settings.app_version,
+                "environment": self.settings.app_env,
+            }
+
+        @app.get(
             "/health",
             tags=["Observability"],
             summary="Health check",

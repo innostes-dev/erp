@@ -52,6 +52,15 @@ ENV_FIELDS = {
 }
 """Organisation field -> environment variable used by `install --from-env`."""
 
+ENV_ADMIN_FIELDS = {
+    "first_name": "SETUP_ADMIN_FIRST_NAME",
+    "last_name": "SETUP_ADMIN_LAST_NAME",
+    "email": "SETUP_ADMIN_EMAIL",
+    "password": "SETUP_ADMIN_PASSWORD",
+    "mobile": "SETUP_ADMIN_MOBILE",
+}
+"""Admin field -> environment variable used by `install --from-env`."""
+
 
 def build_parser() -> argparse.ArgumentParser:
     """Create the argument parser for the installer."""
@@ -69,6 +78,11 @@ def build_parser() -> argparse.ArgumentParser:
     install.add_argument("--timezone", help="IANA time zone, e.g. Asia/Kolkata.")
     install.add_argument("--language", help="Language tag, e.g. en-IN.")
     install.add_argument("--date-format", dest="date_format", help="Date format, e.g. DD/MM/YYYY.")
+    install.add_argument("--admin-first-name", help="Super Admin first name.")
+    install.add_argument("--admin-last-name", help="Super Admin last name.")
+    install.add_argument("--admin-email", help="Super Admin email.")
+    install.add_argument("--admin-password", help="Super Admin password.")
+    install.add_argument("--admin-mobile", help="Super Admin mobile phone.")
     return parser
 
 
@@ -86,6 +100,24 @@ def organization_from_args(args: argparse.Namespace, env: Mapping[str, str]) -> 
     if args.from_env:
         values.update({field: env[var] for field, var in ENV_FIELDS.items() if env.get(var)})
     values.update({field: getattr(args, field) for field in ENV_FIELDS if getattr(args, field, None)})
+    return values
+
+
+def admin_from_args(args: argparse.Namespace, env: Mapping[str, str]) -> dict[str, str]:
+    """Collect admin user fields from flags or environment with defaults."""
+    values: dict[str, str] = {
+        "first_name": "Admin",
+        "email": "admin@example.com",
+        "password": "InnostesAdmin123!",
+    }
+    for field, var in ENV_ADMIN_FIELDS.items():
+        if env.get(var):
+            values[field] = env[var]
+    for field in ["admin_first_name", "admin_last_name", "admin_email", "admin_password", "admin_mobile"]:
+        val = getattr(args, field, None)
+        if val is not None:
+            clean_field = field.removeprefix("admin_")
+            values[clean_field] = val
     return values
 
 
@@ -146,7 +178,10 @@ def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None
         return _run(_status())
 
     try:
-        request = SetupRequest(organization=organization_from_args(args, env))
+        request = SetupRequest(
+            organization=organization_from_args(args, env),
+            admin=admin_from_args(args, env),
+        )
     except ValidationError as exc:
         print("Invalid organisation details:", file=sys.stderr)
         for err in exc.errors():

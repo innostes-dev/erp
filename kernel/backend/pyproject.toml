@@ -16,12 +16,16 @@ dependencies = [
     "asyncpg>=0.29.0",
     "alembic>=1.13.0",
     "pyjwt>=2.8.0",
+    "cryptography>=42.0.0",
+    "bcrypt>=4.0.0",
 ]
 
 # Plug-ins loaded automatically by apps/api-server (see ModuleLoader.discover).
 [project.entry-points."innostes.modules"]
 setup = "kernel.setup:module"
 tenancy = "kernel.tenancy:module"
+user = "kernel.user:module"
+auth = "kernel.auth:module"
 
 [tool.setuptools.packages.find]
 where = ["."]

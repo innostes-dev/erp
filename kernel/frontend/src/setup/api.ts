@@ -1,5 +1,5 @@
 import { ApiError, apiRequest } from '../core/api/client';
-import type { SetupChecks, SetupRequest, SetupResult, SetupStatus } from './types';
+import type { AppConfig, SetupChecks, SetupRequest, SetupResult, SetupStatus } from './types';
 
 /** Header that carries the one-time setup token. */
 export const SETUP_TOKEN_HEADER = 'X-Setup-Token';
@@ -17,6 +17,14 @@ export const SetupErrorCode = {
 /** True if an API call failed because the system isn't set up yet. */
 export function isSetupRequired(error: unknown): boolean {
   return error instanceof ApiError && error.code === SetupErrorCode.SETUP_REQUIRED;
+}
+
+/**
+ * Fetch application metadata/config.
+ * Intercepted with 503 `setup_required` if setup has not been completed.
+ */
+export function getAppConfig(): Promise<AppConfig> {
+  return apiRequest<AppConfig>('/config');
 }
 
 /** Public: is the system installed? (Reveals nothing else.) */
