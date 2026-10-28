@@ -78,3 +78,21 @@ export function Example() {}
 ````
 
 Add `tab="pnpm"` to several blocks in a row to show them as tabs.
+
+## Quality gates
+
+Documentation is verified by automated checks in CI before any changes merge:
+
+```sh
+pnpm nx run landing:docs-check
+```
+
+The gate checks:
+
+- **Links**: every internal link and `#anchor` resolves to a real page and heading.
+- **Demos**: every demo exists, is rendered in docs, and imports only sanctioned packages.
+- **Sidebar**: all pages are registered in `meta.json`.
+- **MDX safety**: unescaped curly braces in prose are flagged.
+- **Prose standards**: no marketing buzzwords, emoji, exclamation marks, or placeholder names.
+- **Coverage & API tables**: all public exports are documented or explicit allowlisted in `docs-coverage-allowlist.json`.
+

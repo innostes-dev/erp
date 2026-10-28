@@ -62,3 +62,32 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none for prompt 01 (findings are inputs for downstream prompts 02–19).
 - Non-blocking: 37 catalogued findings in `AUDIT.md` (`LIB-001` through `DEV-003`).
+
+
+## 02 – Quality gates – 2026-10-29
+
+**Summary**: Implemented deterministic documentation quality gates under `apps/landing/scripts/checks/` and configured the Nx target `landing:docs-check` wired into CI. All 6 enforced gates pass cleanly with zero errors. Fixed mechanical defects in dashboard links (DOC-001), tag-input MDX curly braces, and change-log Lucide icon (DOC-016).
+**Changed**:
+- Created `apps/landing/scripts/checks/` (`check-links.mjs`, `check-demos.mjs`, `check-sidebar.mjs`, `check-mdx-safety.mjs`, `check-consistency.mjs`, `check-prose.mjs`, `check-frontmatter.mjs`, `check-coverage.mjs`, `check-api-tables.mjs`, `check-template.mjs`, `run-all.mjs`, `docs-coverage-allowlist.json`, `README.md`).
+- Added `docs-check` target to `apps/landing/package.json`.
+- Added `docs-check` to `.github/workflows/ci.yml`.
+- Documented quality gates in `apps/landing/content/dev-docs/guides/writing-docs.mdx`.
+- Fixed 13 broken links in `apps/landing/content/docs/examples/dashboard.mdx` (DOC-001).
+- Fixed unescaped curly braces in `apps/landing/content/docs/components/forms/tag-input.mdx`.
+- Fixed unrecognized Lucide icon in `apps/landing/content/docs/widgets/change-log.mdx` (DOC-016).
+**API changes**: none.
+**Decisions**:
+- Enforced gates must exit non-zero on any violation in local runs and CI.
+- Report-mode gates output quantitative defect counts and will be flipped to enforce in prompts 12 and 17.
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.09s)
+- `pnpm nx build landing --skip-nx-cache`: PASS (30s)
+- Report-mode counts recorded to drive to zero:
+  - Incomplete frontmatter: 8
+  - Exported symbols lacking ApiTable/allowlist: 80
+  - ApiTable entries with 0 props: 69
+  - Template structure & casing defects: 369
+  - American spelling occurrences: 21
+**Open issues**:
+- Blocking: none.
+- Non-blocking: AUDIT items mapped to prompts 03–19.

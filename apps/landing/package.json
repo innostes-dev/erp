@@ -8,11 +8,22 @@
     "build": "node scripts/generate-demo-registry.mjs && next build",
     "start": "next start --port 3000",
     "typecheck": "node scripts/generate-demo-registry.mjs && next typegen && tsc --noEmit",
+    "docs-check": "node scripts/checks/run-all.mjs",
     "demos": "node scripts/generate-demo-registry.mjs"
   },
   "nx": {
     "name": "landing",
     "targets": {
+      "docs-check": {
+        "dependsOn": [
+          "^build"
+        ],
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "node scripts/checks/run-all.mjs",
+          "cwd": "apps/landing"
+        }
+      },
       "dev": {
         "dependsOn": [
           "^build"
