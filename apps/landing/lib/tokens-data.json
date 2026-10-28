@@ -1,0 +1,749 @@
+{
+  "generatedAt": "2026-10-28T22:09:37.836Z",
+  "categories": [
+    {
+      "role": "Surfaces",
+      "description": "Foundation canvas and container layers for cards, modals, and popovers.",
+      "tokens": [
+        "--color-background",
+        "--color-foreground",
+        "--color-card",
+        "--color-card-foreground",
+        "--color-popover",
+        "--color-popover-foreground"
+      ]
+    },
+    {
+      "role": "Actions",
+      "description": "Interactive buttons, active toggles, links, and selectable states.",
+      "tokens": [
+        "--color-primary",
+        "--color-primary-hover",
+        "--color-primary-foreground",
+        "--color-secondary",
+        "--color-secondary-hover",
+        "--color-secondary-foreground"
+      ]
+    },
+    {
+      "role": "Subtle UI",
+      "description": "Secondary accents, muted indicators, ghost hover fills, and subdued text.",
+      "tokens": [
+        "--color-muted",
+        "--color-muted-foreground",
+        "--color-accent",
+        "--color-accent-foreground"
+      ]
+    },
+    {
+      "role": "Status",
+      "description": "Semantic state indicators for destructive alerts, success confirmation, warning banners, and informational callouts.",
+      "tokens": [
+        "--color-destructive",
+        "--color-destructive-hover",
+        "--color-destructive-foreground",
+        "--color-success",
+        "--color-success-foreground",
+        "--color-warning",
+        "--color-warning-foreground",
+        "--color-info",
+        "--color-info-foreground"
+      ]
+    },
+    {
+      "role": "Lines & Focus",
+      "description": "Structural component borders, form input dividers, and keyboard focus rings.",
+      "tokens": [
+        "--color-border",
+        "--color-input",
+        "--color-ring",
+        "--color-overlay"
+      ]
+    },
+    {
+      "role": "App Shell",
+      "description": "Navigation chrome, collapsible sidebars, application rails, and top bars.",
+      "tokens": [
+        "--color-sidebar",
+        "--color-sidebar-foreground",
+        "--color-sidebar-muted-foreground",
+        "--color-sidebar-accent",
+        "--color-sidebar-accent-foreground",
+        "--color-sidebar-primary",
+        "--color-sidebar-primary-foreground",
+        "--color-sidebar-border",
+        "--color-sidebar-ring"
+      ]
+    },
+    {
+      "role": "Data Visualisation",
+      "description": "Categorical series palette optimized for chart sequences, gauges, and sparklines.",
+      "tokens": [
+        "--color-chart-1",
+        "--color-chart-2",
+        "--color-chart-3",
+        "--color-chart-4",
+        "--color-chart-5",
+        "--color-chart-6",
+        "--color-chart-7",
+        "--color-chart-8"
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "name": "--color-background",
+      "shortName": "background",
+      "category": "Surfaces",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(14.1% 0.005 285.823)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(14.1% 0.005 285.823)"
+    },
+    {
+      "name": "--color-foreground",
+      "shortName": "foreground",
+      "category": "Surfaces",
+      "lightValue": "oklch(14.1% 0.005 285.823)",
+      "darkValue": "oklch(98.5% 0 0)",
+      "lightRaw": "var(--color-zinc-950)",
+      "darkRaw": "oklch(98.5% 0 0)"
+    },
+    {
+      "name": "--color-card",
+      "shortName": "card",
+      "category": "Surfaces",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(21% 0.006 285.885)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(21% 0.006 285.885)"
+    },
+    {
+      "name": "--color-card-foreground",
+      "shortName": "card-foreground",
+      "category": "Surfaces",
+      "lightValue": "oklch(14.1% 0.005 285.823)",
+      "darkValue": "oklch(98.5% 0 0)",
+      "lightRaw": "var(--color-zinc-950)",
+      "darkRaw": "oklch(98.5% 0 0)"
+    },
+    {
+      "name": "--color-popover",
+      "shortName": "popover",
+      "category": "Surfaces",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(21% 0.006 285.885)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(21% 0.006 285.885)"
+    },
+    {
+      "name": "--color-popover-foreground",
+      "shortName": "popover-foreground",
+      "category": "Surfaces",
+      "lightValue": "oklch(14.1% 0.005 285.823)",
+      "darkValue": "oklch(98.5% 0 0)",
+      "lightRaw": "var(--color-zinc-950)",
+      "darkRaw": "oklch(98.5% 0 0)"
+    },
+    {
+      "name": "--color-primary",
+      "shortName": "primary",
+      "category": "Actions",
+      "lightValue": "oklch(54.6% 0.245 262.881)",
+      "darkValue": "oklch(70.7% 0.165 254.624)",
+      "lightRaw": "var(--color-blue-600)",
+      "darkRaw": "oklch(70.7% 0.165 254.624)"
+    },
+    {
+      "name": "--color-primary-hover",
+      "shortName": "primary-hover",
+      "category": "Actions",
+      "lightValue": "oklch(48.8% 0.243 264.376)",
+      "darkValue": "oklch(76% 0.14 254.624)",
+      "lightRaw": "var(--color-blue-700)",
+      "darkRaw": "oklch(76% 0.14 254.624)"
+    },
+    {
+      "name": "--color-primary-foreground",
+      "shortName": "primary-foreground",
+      "category": "Actions",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(14.1% 0.005 285.823)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(14.1% 0.005 285.823)"
+    },
+    {
+      "name": "--color-secondary",
+      "shortName": "secondary",
+      "category": "Actions",
+      "lightValue": "oklch(96.7% 0.003 264.542)",
+      "darkValue": "oklch(27.4% 0.006 286.033)",
+      "lightRaw": "var(--color-zinc-100)",
+      "darkRaw": "oklch(27.4% 0.006 286.033)"
+    },
+    {
+      "name": "--color-secondary-hover",
+      "shortName": "secondary-hover",
+      "category": "Actions",
+      "lightValue": "oklch(92% 0.004 286.32)",
+      "darkValue": "oklch(37% 0.013 285.805)",
+      "lightRaw": "var(--color-zinc-200)",
+      "darkRaw": "oklch(37% 0.013 285.805)"
+    },
+    {
+      "name": "--color-secondary-foreground",
+      "shortName": "secondary-foreground",
+      "category": "Actions",
+      "lightValue": "oklch(21% 0.006 285.885)",
+      "darkValue": "oklch(98.5% 0 0)",
+      "lightRaw": "var(--color-zinc-900)",
+      "darkRaw": "oklch(98.5% 0 0)"
+    },
+    {
+      "name": "--color-muted",
+      "shortName": "muted",
+      "category": "Subtle UI",
+      "lightValue": "oklch(96.7% 0.003 264.542)",
+      "darkValue": "oklch(27.4% 0.006 286.033)",
+      "lightRaw": "var(--color-zinc-100)",
+      "darkRaw": "oklch(27.4% 0.006 286.033)"
+    },
+    {
+      "name": "--color-muted-foreground",
+      "shortName": "muted-foreground",
+      "category": "Subtle UI",
+      "lightValue": "oklch(44.2% 0.017 285.786)",
+      "darkValue": "oklch(70.5% 0.015 286.067)",
+      "lightRaw": "var(--color-zinc-600)",
+      "darkRaw": "oklch(70.5% 0.015 286.067)"
+    },
+    {
+      "name": "--color-accent",
+      "shortName": "accent",
+      "category": "Subtle UI",
+      "lightValue": "oklch(96.7% 0.003 264.542)",
+      "darkValue": "oklch(27.4% 0.006 286.033)",
+      "lightRaw": "var(--color-zinc-100)",
+      "darkRaw": "oklch(27.4% 0.006 286.033)"
+    },
+    {
+      "name": "--color-accent-foreground",
+      "shortName": "accent-foreground",
+      "category": "Subtle UI",
+      "lightValue": "oklch(21% 0.006 285.885)",
+      "darkValue": "oklch(98.5% 0 0)",
+      "lightRaw": "var(--color-zinc-900)",
+      "darkRaw": "oklch(98.5% 0 0)"
+    },
+    {
+      "name": "--color-destructive",
+      "shortName": "destructive",
+      "category": "Status",
+      "lightValue": "oklch(57.7% 0.245 27.325)",
+      "darkValue": "oklch(57.7% 0.245 27.325)",
+      "lightRaw": "var(--color-red-600)",
+      "darkRaw": "oklch(57.7% 0.245 27.325)"
+    },
+    {
+      "name": "--color-destructive-hover",
+      "shortName": "destructive-hover",
+      "category": "Status",
+      "lightValue": "oklch(50.5% 0.213 27.518)",
+      "darkValue": "oklch(50.5% 0.213 27.518)",
+      "lightRaw": "var(--color-red-700)",
+      "darkRaw": "oklch(50.5% 0.213 27.518)"
+    },
+    {
+      "name": "--color-destructive-foreground",
+      "shortName": "destructive-foreground",
+      "category": "Status",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(100% 0 0)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(100% 0 0)"
+    },
+    {
+      "name": "--color-success",
+      "shortName": "success",
+      "category": "Status",
+      "lightValue": "oklch(50.8% 0.144 164.215)",
+      "darkValue": "oklch(69.6% 0.17 162.48)",
+      "lightRaw": "var(--color-emerald-700)",
+      "darkRaw": "oklch(69.6% 0.17 162.48)"
+    },
+    {
+      "name": "--color-success-foreground",
+      "shortName": "success-foreground",
+      "category": "Status",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(16.2% 0.02 166)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(16.2% 0.02 166)"
+    },
+    {
+      "name": "--color-warning",
+      "shortName": "warning",
+      "category": "Status",
+      "lightValue": "oklch(76.9% 0.188 70.08)",
+      "darkValue": "oklch(76.9% 0.188 70.08)",
+      "lightRaw": "var(--color-amber-500)",
+      "darkRaw": "oklch(76.9% 0.188 70.08)"
+    },
+    {
+      "name": "--color-warning-foreground",
+      "shortName": "warning-foreground",
+      "category": "Status",
+      "lightValue": "oklch(27.9% 0.077 45.635)",
+      "darkValue": "oklch(27.9% 0.077 45.635)",
+      "lightRaw": "var(--color-amber-950)",
+      "darkRaw": "oklch(27.9% 0.077 45.635)"
+    },
+    {
+      "name": "--color-info",
+      "shortName": "info",
+      "category": "Status",
+      "lightValue": "oklch(50% 0.134 242.749)",
+      "darkValue": "oklch(68.5% 0.169 237.323)",
+      "lightRaw": "var(--color-sky-700)",
+      "darkRaw": "oklch(68.5% 0.169 237.323)"
+    },
+    {
+      "name": "--color-info-foreground",
+      "shortName": "info-foreground",
+      "category": "Status",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(17.8% 0.034 243.657)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(17.8% 0.034 243.657)"
+    },
+    {
+      "name": "--color-border",
+      "shortName": "border",
+      "category": "Lines & Focus",
+      "lightValue": "oklch(92% 0.004 286.32)",
+      "darkValue": "oklch(100% 0 0 / 0.1)",
+      "lightRaw": "var(--color-zinc-200)",
+      "darkRaw": "oklch(100% 0 0 / 0.1)"
+    },
+    {
+      "name": "--color-input",
+      "shortName": "input",
+      "category": "Lines & Focus",
+      "lightValue": "oklch(87.1% 0.006 286.286)",
+      "darkValue": "oklch(100% 0 0 / 0.15)",
+      "lightRaw": "var(--color-zinc-300)",
+      "darkRaw": "oklch(100% 0 0 / 0.15)"
+    },
+    {
+      "name": "--color-ring",
+      "shortName": "ring",
+      "category": "Lines & Focus",
+      "lightValue": "oklch(62.3% 0.214 259.815)",
+      "darkValue": "oklch(62.3% 0.214 259.815)",
+      "lightRaw": "var(--color-blue-500)",
+      "darkRaw": "oklch(62.3% 0.214 259.815)"
+    },
+    {
+      "name": "--color-overlay",
+      "shortName": "overlay",
+      "category": "Lines & Focus",
+      "lightValue": "oklch(0% 0 0 / 0.4)",
+      "darkValue": "rgb(0 0 0 / 0.6)",
+      "lightRaw": "rgb(0 0 0 / 0.4)",
+      "darkRaw": "rgb(0 0 0 / 0.6)"
+    },
+    {
+      "name": "--color-sidebar",
+      "shortName": "sidebar",
+      "category": "App Shell",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(21% 0.006 285.885)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(21% 0.006 285.885)"
+    },
+    {
+      "name": "--color-sidebar-foreground",
+      "shortName": "sidebar-foreground",
+      "category": "App Shell",
+      "lightValue": "oklch(37% 0.013 285.805)",
+      "darkValue": "oklch(87.1% 0.006 286.286)",
+      "lightRaw": "var(--color-zinc-700)",
+      "darkRaw": "oklch(87.1% 0.006 286.286)"
+    },
+    {
+      "name": "--color-sidebar-muted-foreground",
+      "shortName": "sidebar-muted-foreground",
+      "category": "App Shell",
+      "lightValue": "oklch(44.2% 0.017 285.786)",
+      "darkValue": "oklch(70.5% 0.015 286.067)",
+      "lightRaw": "var(--color-zinc-600)",
+      "darkRaw": "oklch(70.5% 0.015 286.067)"
+    },
+    {
+      "name": "--color-sidebar-accent",
+      "shortName": "sidebar-accent",
+      "category": "App Shell",
+      "lightValue": "oklch(96.7% 0.003 264.542)",
+      "darkValue": "oklch(27.4% 0.006 286.033)",
+      "lightRaw": "var(--color-zinc-100)",
+      "darkRaw": "oklch(27.4% 0.006 286.033)"
+    },
+    {
+      "name": "--color-sidebar-accent-foreground",
+      "shortName": "sidebar-accent-foreground",
+      "category": "App Shell",
+      "lightValue": "oklch(21% 0.006 285.885)",
+      "darkValue": "oklch(98.5% 0 0)",
+      "lightRaw": "var(--color-zinc-900)",
+      "darkRaw": "oklch(98.5% 0 0)"
+    },
+    {
+      "name": "--color-sidebar-primary",
+      "shortName": "sidebar-primary",
+      "category": "App Shell",
+      "lightValue": "oklch(54.6% 0.245 262.881)",
+      "darkValue": "oklch(70.7% 0.165 254.624)",
+      "lightRaw": "var(--color-blue-600)",
+      "darkRaw": "oklch(70.7% 0.165 254.624)"
+    },
+    {
+      "name": "--color-sidebar-primary-foreground",
+      "shortName": "sidebar-primary-foreground",
+      "category": "App Shell",
+      "lightValue": "oklch(100% 0 0)",
+      "darkValue": "oklch(14.1% 0.005 285.823)",
+      "lightRaw": "var(--color-white)",
+      "darkRaw": "oklch(14.1% 0.005 285.823)"
+    },
+    {
+      "name": "--color-sidebar-border",
+      "shortName": "sidebar-border",
+      "category": "App Shell",
+      "lightValue": "oklch(92% 0.004 286.32)",
+      "darkValue": "oklch(100% 0 0 / 0.1)",
+      "lightRaw": "var(--color-zinc-200)",
+      "darkRaw": "oklch(100% 0 0 / 0.1)"
+    },
+    {
+      "name": "--color-sidebar-ring",
+      "shortName": "sidebar-ring",
+      "category": "App Shell",
+      "lightValue": "oklch(62.3% 0.214 259.815)",
+      "darkValue": "oklch(62.3% 0.214 259.815)",
+      "lightRaw": "var(--color-blue-500)",
+      "darkRaw": "oklch(62.3% 0.214 259.815)"
+    },
+    {
+      "name": "--color-chart-1",
+      "shortName": "chart-1",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(54.6% 0.245 262.881)",
+      "darkValue": "oklch(62.3% 0.214 259.815)",
+      "lightRaw": "var(--color-blue-600)",
+      "darkRaw": "oklch(62.3% 0.214 259.815)"
+    },
+    {
+      "name": "--color-chart-2",
+      "shortName": "chart-2",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(60.6% 0.25 292.717)",
+      "darkValue": "oklch(70.2% 0.183 293.541)",
+      "lightRaw": "var(--color-violet-500)",
+      "darkRaw": "oklch(70.2% 0.183 293.541)"
+    },
+    {
+      "name": "--color-chart-3",
+      "shortName": "chart-3",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(69.6% 0.17 162.48)",
+      "darkValue": "oklch(76.5% 0.177 163.223)",
+      "lightRaw": "var(--color-emerald-500)",
+      "darkRaw": "oklch(76.5% 0.177 163.223)"
+    },
+    {
+      "name": "--color-chart-4",
+      "shortName": "chart-4",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(76.9% 0.188 70.08)",
+      "darkValue": "oklch(82.8% 0.189 84.429)",
+      "lightRaw": "var(--color-amber-500)",
+      "darkRaw": "oklch(82.8% 0.189 84.429)"
+    },
+    {
+      "name": "--color-chart-5",
+      "shortName": "chart-5",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(64.5% 0.246 16.439)",
+      "darkValue": "oklch(71.2% 0.194 13.428)",
+      "lightRaw": "var(--color-rose-500)",
+      "darkRaw": "oklch(71.2% 0.194 13.428)"
+    },
+    {
+      "name": "--color-chart-6",
+      "shortName": "chart-6",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(71.5% 0.143 215.221)",
+      "darkValue": "oklch(78.9% 0.154 211.53)",
+      "lightRaw": "var(--color-cyan-500)",
+      "darkRaw": "oklch(78.9% 0.154 211.53)"
+    },
+    {
+      "name": "--color-chart-7",
+      "shortName": "chart-7",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(70.5% 0.213 47.604)",
+      "darkValue": "oklch(75% 0.183 55.934)",
+      "lightRaw": "var(--color-orange-500)",
+      "darkRaw": "oklch(75% 0.183 55.934)"
+    },
+    {
+      "name": "--color-chart-8",
+      "shortName": "chart-8",
+      "category": "Data Visualisation",
+      "lightValue": "oklch(55.4% 0.046 257.417)",
+      "darkValue": "oklch(70.4% 0.04 256.788)",
+      "lightRaw": "var(--color-slate-500)",
+      "darkRaw": "oklch(70.4% 0.04 256.788)"
+    }
+  ],
+  "contrastPairs": [
+    {
+      "name": "Body text on background",
+      "textToken": "--color-foreground",
+      "bgToken": "--color-background",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 19.89,
+        "formatted": "19.89:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 19.05,
+        "formatted": "19.05:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Card text on card surface",
+      "textToken": "--color-card-foreground",
+      "bgToken": "--color-card",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 19.89,
+        "formatted": "19.89:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 16.98,
+        "formatted": "16.98:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Primary button label on primary",
+      "textToken": "--color-primary-foreground",
+      "bgToken": "--color-primary",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 5.26,
+        "formatted": "5.26:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 7.54,
+        "formatted": "7.54:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Secondary button label on secondary",
+      "textToken": "--color-secondary-foreground",
+      "bgToken": "--color-secondary",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 16.11,
+        "formatted": "16.11:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 14.26,
+        "formatted": "14.26:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Muted text on muted container",
+      "textToken": "--color-muted-foreground",
+      "bgToken": "--color-muted",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 7.02,
+        "formatted": "7.02:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 5.66,
+        "formatted": "5.66:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Muted text on page background",
+      "textToken": "--color-muted-foreground",
+      "bgToken": "--color-background",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 7.73,
+        "formatted": "7.73:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 7.56,
+        "formatted": "7.56:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Accent text on accent surface",
+      "textToken": "--color-accent-foreground",
+      "bgToken": "--color-accent",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 16.11,
+        "formatted": "16.11:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 14.26,
+        "formatted": "14.26:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Destructive label on destructive fill",
+      "textToken": "--color-destructive-foreground",
+      "bgToken": "--color-destructive",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 4.76,
+        "formatted": "4.76:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 4.76,
+        "formatted": "4.76:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Success text on success fill",
+      "textToken": "--color-success-foreground",
+      "bgToken": "--color-success",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 5.15,
+        "formatted": "5.15:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 7.83,
+        "formatted": "7.83:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Warning text on warning fill",
+      "textToken": "--color-warning-foreground",
+      "bgToken": "--color-warning",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 6.99,
+        "formatted": "6.99:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 6.99,
+        "formatted": "6.99:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Info text on info fill",
+      "textToken": "--color-info-foreground",
+      "bgToken": "--color-info",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 5.85,
+        "formatted": "5.85:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 6.94,
+        "formatted": "6.94:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Sidebar item text on sidebar",
+      "textToken": "--color-sidebar-foreground",
+      "bgToken": "--color-sidebar",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 10.46,
+        "formatted": "10.46:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 11.99,
+        "formatted": "11.99:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Sidebar muted text on sidebar",
+      "textToken": "--color-sidebar-muted-foreground",
+      "bgToken": "--color-sidebar",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 7.73,
+        "formatted": "7.73:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 6.74,
+        "formatted": "6.74:1",
+        "pass": true
+      }
+    },
+    {
+      "name": "Sidebar primary active item label",
+      "textToken": "--color-sidebar-primary-foreground",
+      "bgToken": "--color-sidebar-primary",
+      "requirement": "WCAG AA Normal Text (>= 4.5:1)",
+      "minRatio": 4.5,
+      "light": {
+        "ratio": 5.26,
+        "formatted": "5.26:1",
+        "pass": true
+      },
+      "dark": {
+        "ratio": 7.54,
+        "formatted": "7.54:1",
+        "pass": true
+      }
+    }
+  ]
+}

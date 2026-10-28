@@ -24,6 +24,9 @@ src/
     layout/         Sidebar, PageHeader, Separator, ScrollArea
     <category>/index.ts       re-exports the category
     <category>/<name>/<name>.tsx
+  widgets/          AppSwitcher, ChangeLog, KanbanBoard, MetricCard, NotificationBell, PermissionMatrix, Sparkline, UserMenu, WidgetCard
+  charts/           CartesianCharts, DonutChart (data visualisation built on Recharts)
+  editor/           RichTextEditor (rich text document authoring built on Tiptap)
   lib/              cn, mergeClassName, shared styles, internal icons and hooks
   test/setup.ts     jsdom polyfills and jest-dom matchers
   index.ts          public entry: re-exports every category

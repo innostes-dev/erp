@@ -275,3 +275,42 @@ drop, which doesn't work on touch screens.
 - Blocking: none.
 - Non-blocking: remaining items in `AUDIT.md` for prompts 08–19.
 
+
+## 08 – Foundations and getting started – 2026-10-29
+
+**Summary**: Completely overhauled getting started, design foundations, theming, and accessibility documentation. Hardened design token contrast across light and dark modes in `theme.css` and `dark.css` (LIB-004), achieving 100% WCAG 2.2 AA pass across all 14 semantic pairings. Built build-time token reference and contrast table generation script. Replaced stale component table with dynamic `<ComponentIndex />` frontmatter reader (DOC-002). Added live interactive ERP hero example (`<HeroDemo />`). Authored complete framework integration guides for Next.js App Router and Vite React, both verified via real temporary scratch app builds in `/tmp` and cleaned up. Rewrote API conventions (DOC-009) removing internal repository paths and duplicate composition sections. Expanded accessibility statement (DOC-008) and design foundations (Colour, Typography, Spacing, Icons, Motion).
+
+**Changed**:
+- `packages/ui/tailwind/theme.css`: adjusted `--color-muted-foreground` and `--color-sidebar-muted-foreground` to `zinc-600` (contrast > 6.9:1), `--color-success` to `emerald-700` (contrast 5.15:1), and `--color-info` to `sky-700` (contrast 5.85:1).
+- `packages/ui/tailwind/dark.css`: adjusted dark `--color-primary` to `blue-400` with `zinc-950` foreground (contrast 7.54:1), `--color-destructive` to `red-600` (contrast 4.76:1), and `--color-info-foreground` to `sky-950` (contrast 6.94:1).
+- `packages/ui/src/components/feedback/progress/progress.tsx`: added `motion-reduce:transition-none` and `motion-reduce:data-indeterminate:animate-none` for `prefers-reduced-motion` compliance.
+- `apps/landing/scripts/generate-tokens-data.mjs`: new build-time script parsing `theme.css` and `dark.css`, computing relative luminance, contrast ratios, and emitting `apps/landing/lib/tokens-data.json`.
+- `apps/landing/components/docs/token-reference.tsx`: generated token reference table grouped by semantic role with light/dark values and live swatches.
+- `apps/landing/components/docs/contrast-table.tsx`: generated contrast table validating all 14 semantic pairings against WCAG 2.2 AA.
+- `apps/landing/components/docs/component-index.tsx`: dynamic component table reading source frontmatter, displaying categories, stability badges, and entry points.
+- `apps/landing/components/docs/hero-demo.tsx`: live Northwind Traders purchase order approval hero demo.
+- `apps/landing/content/docs/index.mdx`: full rewrite with Northwind Traders context, core guarantees linked to policies, entry point matrix, and `<ComponentIndex />`.
+- `apps/landing/content/docs/installation.mdx`: full rewrite with exact version requirements, package manager tabs, style pipelines, providers, peer dependency guidance for Recharts on React 17, and troubleshooting.
+- `apps/landing/content/docs/frameworks/nextjs.mdx`: complete App Router guide with RSC boundaries, `next-themes` setup, hydration protection, and Server Component example.
+- `apps/landing/content/docs/frameworks/vite.mdx`: complete Vite React guide with `@tailwindcss/vite` and standalone CSS options, theme switcher, and dispatch station demo.
+- `apps/landing/content/docs/theming.mdx`: full rewrite with OKLCH explanation, overrides, scoped themes, multi-tenant theming, and `<TokenReference />`.
+- `apps/landing/content/docs/foundations/`: complete rewrites of `colour.mdx` (with `<ContrastTable />`), `dark-mode.mdx` (class vs data-theme, next-themes, testing), `typography.mdx` (fluid clamp tokens, tabular nums), `spacing.mdx` (4px rhythm, density modes, container queries), `icons.mdx` (lucide-react, sizing, aria-hidden, icon-only buttons), and `motion.mdx` (duration scale, reduced motion).
+- `apps/landing/content/docs/accessibility.mdx`: full rewrite with WCAG 2.2 AA target, library guarantees vs application responsibilities, testing matrix, and problem reporting.
+- `apps/landing/content/docs/resources/conventions.mdx`: full rewrite without duplication, composition with `render` prop, controlled/uncontrolled state, event details, styling layers, sizes, internationalisation, RTL, and zero repo-internal paths.
+- `packages/ui/CONTRIBUTING.md` & `apps/landing/content/dev-docs/packages/ui.mdx`: added `src/widgets`, `src/charts`, and `src/editor` entries (DEV-001, DEV-002).
+
+**Scratch Build Verifications**:
+- Vite React scratch build: Created temporary app in `/tmp`, installed dependencies (`react@19`, `@innostes/ui`), compiled with `vite build` in 2.05s (879 modules transformed), verified zero errors, cleaned up directory.
+- Next.js App Router scratch build: Created temporary app in `/tmp`, configured `next.config.mjs` with `transpilePackages: ["@innostes/ui"]`, compiled with `next build` in Next.js 15.2.1, generated all 4 static pages, verified zero errors, cleaned up directory.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.12s, all 6 enforced quality gates green)
+- `pnpm nx build landing --skip-nx-cache`: PASS (136 static pages compiled cleanly)
+- `pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache`: PASS (31 test files, 244 tests, 238 components compiled)
+- `pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache`: PASS (React 17 & 18 test & typecheck suites green)
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 09 (Actions and forms component doc pages overhaul).
+
+

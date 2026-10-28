@@ -3,23 +3,23 @@
 > A production-grade design system and React component library engineered for enterprise ERP, HRMS, and CRM platforms. Accessible, WCAG 2.2 AA compliant, and localized.
 
 ## Core Documentation
-- [Accessibility](https://innostes.com/ui/docs/accessibility): Accessibility conformance standards, keyboard models, and assistive technology support.
-- [Colour](https://innostes.com/ui/docs/foundations/colour): OKLCH semantic palette, contrast tokens, and functional roles.
-- [Dark mode](https://innostes.com/ui/docs/foundations/dark-mode): Dark theme implementation, token inversion, and hydration strategies.
-- [Icons](https://innostes.com/ui/docs/foundations/icons): Iconography principles, Lucide icon integration, and accessibility conventions.
-- [Motion](https://innostes.com/ui/docs/foundations/motion): Transition durations, easing curves, and reduced-motion accessibility.
-- [Spacing and layout](https://innostes.com/ui/docs/foundations/spacing): 4px spatial rhythm, density modes, and responsive layout primitives.
+- [Accessibility Statement](https://innostes.com/ui/docs/accessibility): WCAG 2.2 Level AA conformance, component guarantees, developer responsibilities, and assistive technology testing.
+- [Colour](https://innostes.com/ui/docs/foundations/colour): OKLCH semantic palette, contrast tokens, functional roles, and verified WCAG 2.2 AA contrast ratios.
+- [Dark Mode](https://innostes.com/ui/docs/foundations/dark-mode): Implement dark mode across applications using class-based or data-attribute activation, next-themes, and hydration safeguards.
+- [Icons](https://innostes.com/ui/docs/foundations/icons): Iconography standards, Lucide React integration, sizing rules inside components, and accessibility requirements.
+- [Motion](https://innostes.com/ui/docs/foundations/motion): Transition durations, easing curves, and prefers-reduced-motion accessibility standards.
+- [Spacing and Layout](https://innostes.com/ui/docs/foundations/spacing): 4px base spatial rhythm, density modes, container queries, and responsive layout primitives.
 - [Status legend](https://innostes.com/ui/docs/foundations/status-legend): Stability tiers and readiness criteria for components in @innostes/ui.
-- [Typography](https://innostes.com/ui/docs/foundations/typography): Type scale, font stacks, and typographic hierarchy for enterprise data density.
-- [Next.js](https://innostes.com/ui/docs/frameworks/nextjs): Integration guide for Next.js App Router, React Server Components, and styling.
-- [Vite](https://innostes.com/ui/docs/frameworks/vite): Integration guide for Vite React projects with Tailwind CSS.
-- [Introduction](https://innostes.com/ui/docs): Accessible React components for admin interfaces, built on Base UI and Tailwind CSS.
-- [Installation](https://innostes.com/ui/docs/installation): Add innostes UI to a React app in a few minutes.
+- [Typography](https://innostes.com/ui/docs/foundations/typography): Typography scale, fluid type tokens, font stacks, and tabular numeric rules for enterprise ERP interfaces.
+- [Next.js App Router](https://innostes.com/ui/docs/frameworks/nextjs): Complete integration guide for Next.js App Router, Server Components, dark mode with next-themes, and styling.
+- [Vite React](https://innostes.com/ui/docs/frameworks/vite): Complete integration guide for Vite React projects with Tailwind CSS v4, TypeScript, and dark mode.
+- [Introduction](https://innostes.com/ui/docs): Enterprise UI component library for ERP and operations systems, built on Base UI and Tailwind CSS.
+- [Installation](https://innostes.com/ui/docs/installation): Install @innostes/ui, configure stylesheets, set up providers, and verify your build.
 - [Application shell](https://innostes.com/ui/docs/patterns/app-shell): Composable layout scaffolding for multi-tenant enterprise dashboards.
 - [Complex forms](https://innostes.com/ui/docs/patterns/complex-forms): Architecture for multi-section data entry, validation, and unsaved changes.
 - [Data management](https://innostes.com/ui/docs/patterns/data-management): Patterns for enterprise data tables, batch actions, and filtering.
 - [Patterns](https://innostes.com/ui/docs/patterns/index): Reusable composition recipes for enterprise application architectures.
-- [Theming](https://innostes.com/ui/docs/theming): Change colours once in your Tailwind theme and every component follows.
+- [Theming & Design Tokens](https://innostes.com/ui/docs/theming): Semantic design token architecture, OKLCH colour system, theme overrides, multi-tenant scoping, and generated token reference.
 
 ## Components
 - [Button Group](https://innostes.com/ui/docs/components/actions/button-group) [Stable]: Merges borders and corners of adjacent buttons, horizontally or vertically.
@@ -115,7 +115,7 @@
 ## Resources and Governance
 - [Changelog](https://innostes.com/ui/docs/resources/changelog): Release history, bug fixes, enhancements, and breaking change records for @innostes/ui.
 - [Contributing](https://innostes.com/ui/docs/resources/contributing): Development guidelines, code standards, and PR submission workflows.
-- [API Conventions](https://innostes.com/ui/docs/resources/conventions): The rules every innostes UI component follows, so you can guess the API.
+- [API Conventions](https://innostes.com/ui/docs/resources/conventions): Core architectural principles, state models, polymorphic composition, and styling conventions across @innostes/ui.
 - [FAQ](https://innostes.com/ui/docs/resources/faq): Frequently asked questions regarding @innostes/ui installation, theming, and usage.
 - [Resources](https://innostes.com/ui/docs/resources/index): Architecture conventions, changelogs, migration guides, and support policies.
 - [Migration guides](https://innostes.com/ui/docs/resources/migration): Upgrade instructions and breaking change migrations between major versions.

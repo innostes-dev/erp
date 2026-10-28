@@ -1,25 +1,100 @@
 ---
-title: Next.js
-description: Integration guide for Next.js App Router, React Server Components, and styling.
+title: Next.js App Router
+description: Complete integration guide for Next.js App Router, Server Components, dark mode with next-themes, and styling.
 ---
 
-# Next.js
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-`@innostes/ui` integrates cleanly with Next.js 15 and 16 App Router. Because the library uses modern Base UI primitives with client-side interactive state, components declare `'use client'` where necessary, enabling composition inside React Server Components.
+`@innostes/ui` is engineered to work directly with Next.js App Router. Interactive primitives ship with `'use client'` directives at their entry boundaries, allowing developers to import them into React Server Components (RSCs) without additional wrappers.
 
-## Setup
+## Architectural boundaries
 
-Install `@innostes/ui` alongside required styling dependencies:
+When developing with Next.js App Router, understand how `@innostes/ui` components interact with the server/client boundary:
 
-```bash
-npm install @innostes/ui lucide-react clsx tailwind-merge
+1. **Direct RSC composition**: Interactive components such as `Button`, `DataTable`, `Dialog`, and `Tabs` declare `'use client'` internally. You can import and render them directly inside server-rendered `page.tsx` or `layout.tsx` files.
+2. **Server-side utilities**: Pure helper functions including `cn()`, `formatDate()`, and variant factories (`buttonVariants()`, `badgeVariants()`) contain no DOM or browser dependencies and execute safely in Server Components, Route Handlers, and Server Actions.
+3. **Event handlers & state**: Passing callbacks (such as `onClick`, `onValueChange`, or `onSubmit`) across the server-to-client boundary requires defining that sub-tree inside a client component (`'use client'`).
+
+## Step-by-step setup
+
+<Steps>
+<Step>
+
+### Install dependencies
+
+Install `@innostes/ui` alongside `next-themes` and `lucide-react`:
+
+```bash tab="pnpm"
+pnpm add @innostes/ui next-themes lucide-react
 ```
 
-Import the stylesheet in your root layout:
+```bash tab="npm"
+npm install @innostes/ui next-themes lucide-react
+```
 
-```tsx
-// app/layout.tsx
-import '@innostes/ui/styles.css';
+```bash tab="yarn"
+yarn add @innostes/ui next-themes lucide-react
+```
+
+```bash tab="bun"
+bun add @innostes/ui next-themes lucide-react
+```
+
+</Step>
+<Step>
+
+### Configure stylesheet imports
+
+In your Next.js application global stylesheet, import Tailwind CSS followed by the `@innostes/ui` design tokens:
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css";
+```
+
+</Step>
+<Step>
+
+### Create the ThemeProvider wrapper
+
+Because `next-themes` requires React context, create a client wrapper component:
+
+```tsx title="components/theme-provider.tsx"
+'use client';
+
+import * as React from 'react';
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+```
+
+</Step>
+<Step>
+
+### Assemble the root layout
+
+Configure your `app/layout.tsx` with hydration protection, theme switching, and global UI providers:
+
+```tsx title="app/layout.tsx"
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { Toaster, TooltipProvider } from '@innostes/ui';
+import { ThemeProvider } from '@/components/theme-provider';
+import './globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'Northwind Traders ERP',
+  description: 'Operations management portal for Northwind Traders Pvt Ltd',
+};
 
 export default function RootLayout({
   children,
@@ -27,11 +102,126 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider delayDuration={200}>
+            {children}
+            <Toaster position="bottom-end" />
+          </TooltipProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
 ```
 
-Components that wrap client events (such as `Button`, `Dialog`, or `Select`) can be imported directly into server components or nested within interactive client wrappers.
+> [!NOTE]
+> `suppressHydrationWarning` on `<html>` prevents React from reporting mismatches caused by `next-themes` injecting the active theme class (`class="dark"`) prior to client hydration.
+
+</Step>
+<Step>
+
+### Build a theme toggle button
+
+Create an accessible theme toggle that switches between light, dark, and system modes:
+
+```tsx title="components/theme-toggle.tsx"
+'use client';
+
+import * as React from 'react';
+import { useTheme } from 'next-themes';
+import { Button } from '@innostes/ui';
+import { Moon, Sun } from 'lucide-react';
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <Button variant="outline" size="sm" aria-label="Toggle colour theme" disabled />;
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      aria-label="Toggle colour theme"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+    >
+      {theme === 'dark' ? (
+        <Sun className="size-4 me-1.5 text-amber-500" />
+      ) : (
+        <Moon className="size-4 me-1.5 text-blue-600" />
+      )}
+      <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+    </Button>
+  );
+}
+```
+
+</Step>
+<Step>
+
+### Render a Server Component page
+
+Compose library components directly within your server-rendered home page:
+
+```tsx title="app/page.tsx"
+import { Button } from '@innostes/ui';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { ArrowRight, Package } from 'lucide-react';
+import Link from 'next/link';
+
+export default async function HomePage() {
+  // Server-side data fetching runs safely
+  const organisation = 'Northwind Traders Pvt Ltd';
+  const openOrdersCount = 42;
+
+  return (
+    <main className="min-h-screen p-8 max-w-5xl mx-auto space-y-6">
+      <header className="flex items-center justify-between border-b border-border pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{organisation}</h1>
+          <p className="text-sm text-muted-foreground">Bengaluru Distribution Hub</p>
+        </div>
+        <ThemeToggle />
+      </header>
+
+      <section className="rounded-xl border border-border bg-card p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+            <Package className="size-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Active Fulfilment Queue</h2>
+            <p className="text-xs text-muted-foreground">{openOrdersCount} purchase orders awaiting clearance</p>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Button
+            variant="primary"
+            render={<Link href="/orders" />}
+          >
+            Review orders
+            <ArrowRight className="size-4 ms-1.5" />
+          </Button>
+        </div>
+      </section>
+    </main>
+  );
+}
+```
+
+</Step>
+</Steps>

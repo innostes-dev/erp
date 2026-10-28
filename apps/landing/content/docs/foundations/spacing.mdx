@@ -1,20 +1,80 @@
 ---
-title: Spacing and layout
-description: 4px spatial rhythm, density modes, and responsive layout primitives.
+title: Spacing and Layout
+description: 4px base spatial rhythm, density modes, container queries, and responsive layout primitives.
 ---
 
-# Spacing and layout
+`@innostes/ui` constructs layouts using a **4-pixel base grid**. Consistent spatial intervals eliminate visual clutter, guarantee optical balance, and establish clear structural hierarchies across complex ERP workflows.
 
-Consistent spatial rhythm prevents visual clutter and establishes structural relationships between interface elements. innostes UI adopts a 4px base increment across padding, margin, gap, and dimension tokens.
+## The 4px spacing scale
 
-## Spatial grid
+All margin, padding, gap, and component dimension values increment in multiples of 4 pixels:
 
-Spatial values follow a linear 4px progression aligned with standard Tailwind CSS spacing utilities:
+| Token / Class | Pixels | Rem equivalent | Primary usage |
+| :--- | :--- | :--- | :--- |
+| `0.5` | 2px | 0.125rem | Hairline borders, sub-pixel alignment offsets |
+| `1` | 4px | 0.25rem | Gap between button icons and text labels, inline badge padding |
+| `1.5` | 6px | 0.375rem | Compact menu item vertical padding |
+| `2` | 8px | 0.5rem | Button vertical padding (small), form label margins |
+| `2.5` | 10px | 0.625rem | Standard input vertical padding |
+| `3` | 12px | 0.75rem | Standard button horizontal padding, table cell vertical padding |
+| `4` | 16px | 1.0rem | Standard card internal padding, dialog gutters, component gaps |
+| `6` | 24px | 1.5rem | Page section margins, large modal gutters |
+| `8` | 32px | 2.0rem | Dashboard grid column gaps, page header margins |
+| `12` | 48px | 3.0rem | Top-level view gutters on desktop screens |
 
-- `1` (4px): Micro-spacing between icon glyphs and adjacent inline text.
-- `2` (8px): Compact padding inside buttons, badges, and grouped controls.
-- `3` (12px): Default internal padding for form inputs and table cells.
-- `4` (16px): Card padding, dialog gutters, and standard component gaps.
-- `6` (24px) to `8` (32px): Layout section margins and page header separation.
+## Density modes
 
-Components accommodate both standard and compact density modes, allowing operators to adjust data density according to screen resolution and task requirements.
+Enterprise ERP operators frequently switch between high-density review screens (e.g. reviewing 500 purchase order lines) and standard operational forms. `@innostes/ui` supports density adaptation across data display and form primitives:
+
+| Density mode | Table row height | Input height | Button padding | Recommended context |
+| :--- | :--- | :--- | :--- | :--- |
+| **Compact** | 32px | 32px (`size="sm"`) | `py-1 px-2.5` | Data audit grids, split-pane inspection panels |
+| **Default** | 44px | 40px (`size="md"`) | `py-2 px-3.5` | Standard operations forms, purchase order authoring |
+| **Comfortable** | 56px | 48px (`size="lg"`) | `py-3 px-5` | Touch-screen warehouse terminals, welcome wizards |
+
+```tsx title="Example: Compact vs Default Table Rows"
+// Compact data grid for invoice auditing
+<Table className="text-xs">
+  <TableRow className="h-8">
+    <TableCell className="py-1 px-2.5 font-mono">INV-8901</TableCell>
+    <TableCell className="py-1 px-2.5">₹45,000.00</TableCell>
+  </TableRow>
+</Table>
+```
+
+## Container queries
+
+In modular dashboards, components are frequently placed into variable-width containers (such as resizable `SplitPane` panels, collapsing sidebars, or multi-column card grids). Relying on viewport media queries (`@media (min-width: ...)`) causes components to render poorly when housed inside a narrow panel on a wide screen.
+
+`@innostes/ui` leverages CSS Container Queries (`@container`) across composite widgets:
+
+```tsx title="components/order-summary-card.tsx"
+export function OrderSummaryCard() {
+  return (
+    // Declare container context on wrapper
+    <div className="@container rounded-xl border border-border bg-card p-4">
+      {/* Stack vertically in narrow slots, switch to row when container exceeds 380px */}
+      <div className="flex flex-col @[380px]:flex-row @[380px]:items-center @[380px]:justify-between gap-3">
+        <div>
+          <span className="text-xs text-muted-foreground">Order PO-2026-0881</span>
+          <div className="text-lg font-semibold text-foreground">₹1,45,280.00</div>
+        </div>
+        <button className="w-full @[380px]:w-auto text-xs py-1.5 px-3 rounded bg-primary text-primary-foreground">
+          View details
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+## Core layout primitives
+
+| Component | Responsibility | Documentation link |
+| :--- | :--- | :--- |
+| `Sidebar` | Multi-level collapsible navigation panel supporting fixed, floating, and mini rail modes | [Sidebar docs](/ui/docs/components/layout/sidebar) |
+| `AppRail` | Ultra-compact vertical icon rail for switching top-level enterprise modules | [App Rail docs](/ui/docs/components/layout/app-rail) |
+| `TopBar` | Global application header with search, notifications, tenant switcher, and user menu | [Top Bar docs](/ui/docs/components/layout/top-bar) |
+| `PageHeader` | Standardised title banner with breadcrumbs, descriptions, and action triggers | [Page Header docs](/ui/docs/components/layout/page-header) |
+| `SplitPane` | Resizable multi-column workspace with keyboard collapse and state persistence | [Split Pane docs](/ui/docs/components/layout/split-pane) |
+| `ScrollArea` | Custom cross-browser scrollbar container that preserves keyboard accessibility | [Scroll Area docs](/ui/docs/components/layout/scroll-area) |

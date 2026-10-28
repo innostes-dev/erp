@@ -1,50 +1,84 @@
 ---
 title: Introduction
-description: Accessible React components for admin interfaces, built on Base UI and Tailwind CSS.
+description: Enterprise UI component library for ERP and operations systems, built on Base UI and Tailwind CSS.
 icon: BookOpen
 ---
 
-innostes UI is the component library behind every innostes product. It gives you everything an admin
-panel needs (forms, tables, dialogs, navigation and an app shell), with one consistent API and
-your own theme.
+import { Accessibility, Palette, Terminal, Layers, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { HeroDemo } from '@/components/docs/hero-demo';
+import { ComponentIndex } from '@/components/docs/component-index';
 
-<ComponentPreview name="examples/dashboard" align="start" className="p-0 sm:p-0" />
+`@innostes/ui` is an enterprise component library engineered specifically for back-office applications, enterprise resource planning (ERP) consoles, and high-density operations dashboards.
 
-## Why innostes UI
+Designed to meet the demands of operations teams such as Northwind Traders Pvt Ltd, the library provides keyboard-first interaction models, strict type safety, predictable state composition, and full token-based styling.
+
+<HeroDemo />
+
+## Core guarantees
+
+Every component in `@innostes/ui` is governed by explicit architectural policies verified through automated regression suites:
 
 <Cards>
-  <Card icon={<Accessibility />} title="Accessible by default" href="/ui/docs/resources/conventions#accessibility">
-    Built on Base UI: keyboard support, focus management and ARIA follow WAI-ARIA, and every
-    component is tested for it.
+  <Card icon={<Accessibility />} title="WCAG 2.2 AA Conformance" href="/ui/docs/accessibility">
+    All interactive primitives satisfy WCAG 2.2 Level AA requirements, including 4.5:1 text contrast, visible keyboard focus indicators, and screen-reader announcements.
   </Card>
-  <Card icon={<Palette />} title="Your theme, everywhere" href="/ui/docs/theming">
-    Semantic design tokens with Tailwind defaults. Change a token once and every component follows,
-    including dark mode.
+  <Card icon={<Layers />} title="React 17, 18, and 19 Support" href="/ui/docs/resources/versioning">
+    Tested continuously across React 17.0.2, React 18.3.1, and React 19.0.0 without legacy lifecycle warnings or runtime hook incompatibilities.
   </Card>
-  <Card icon={<Wind />} title="With or without Tailwind" href="/ui/docs/installation">
-    Tailwind apps share their theme with the components. Other apps import one stylesheet.
+  <Card icon={<ShieldCheck />} title="Strict Semantic Versioning" href="/ui/docs/resources/versioning">
+    Zero breaking API changes within a major release. Deprecations provide at least one full minor cycle warning with migration pathways.
   </Card>
-  <Card icon={<Terminal />} title="Made for developers" href="/ui/docs/resources/conventions">
-    Typed props with TSDoc, controlled or uncontrolled state, `render` composition, and `className`
-    that always wins.
+  <Card icon={<Terminal />} title="Permissive MIT Licence" href="/ui/docs/resources/faq">
+    Distributed under the MIT licence for unrestricted commercial use across internal enterprise tools and customer-facing portals.
   </Card>
 </Cards>
 
-## Components
+## Architectural foundation
 
-| Category | Components |
-| --- | --- |
-| **Actions** | [Button](/ui/docs/components/actions/button), [Button Group](/ui/docs/components/actions/button-group), [Toggle](/ui/docs/components/actions/toggle), [Toggle Group](/ui/docs/components/actions/toggle-group) |
-| **Forms** | [Field & Form](/ui/docs/components/forms/field), [Input](/ui/docs/components/forms/input), [Textarea](/ui/docs/components/forms/textarea), [Checkbox](/ui/docs/components/forms/checkbox), [Radio Group](/ui/docs/components/forms/radio-group), [Switch](/ui/docs/components/forms/switch), [Select](/ui/docs/components/forms/select), [Combobox](/ui/docs/components/forms/combobox), [Number Field](/ui/docs/components/forms/number-field), [Slider](/ui/docs/components/forms/slider) |
-| **Data display** | [Data Table](/ui/docs/components/data-display/data-table), [Table](/ui/docs/components/data-display/table), [Card](/ui/docs/components/data-display/card), [Stat](/ui/docs/components/data-display/stat), [Badge](/ui/docs/components/data-display/badge), [Avatar](/ui/docs/components/data-display/avatar), [Empty State](/ui/docs/components/data-display/empty-state), [Kbd](/ui/docs/components/data-display/kbd) |
-| **Feedback** | [Alert](/ui/docs/components/feedback/alert), [Toast](/ui/docs/components/feedback/toast), [Progress](/ui/docs/components/feedback/progress), [Meter](/ui/docs/components/feedback/meter), [Skeleton](/ui/docs/components/feedback/skeleton), [Spinner](/ui/docs/components/feedback/spinner) |
-| **Overlays** | [Dialog](/ui/docs/components/overlays/dialog), [Alert Dialog](/ui/docs/components/overlays/alert-dialog), [Sheet](/ui/docs/components/overlays/sheet), [Popover](/ui/docs/components/overlays/popover), [Tooltip](/ui/docs/components/overlays/tooltip), [Dropdown Menu](/ui/docs/components/overlays/dropdown-menu), [Context Menu](/ui/docs/components/overlays/context-menu) |
-| **Navigation** | [Tabs](/ui/docs/components/navigation/tabs), [Breadcrumb](/ui/docs/components/navigation/breadcrumb), [Pagination](/ui/docs/components/navigation/pagination), [Accordion](/ui/docs/components/navigation/accordion), [Collapsible](/ui/docs/components/navigation/collapsible) |
-| **Layout** | [Sidebar](/ui/docs/components/layout/sidebar), [Page Header](/ui/docs/components/layout/page-header), [Separator](/ui/docs/components/layout/separator), [Scroll Area](/ui/docs/components/layout/scroll-area) |
+`@innostes/ui` combines unstyled accessible primitives with token-driven design:
+
+- **Base UI primitives**: Dropdowns, dialogs, popovers, and form fields rely on Base UI for focus trapping, keyboard navigation, and ARIA state management.
+- **Tailwind CSS design tokens**: Every colour, spacing increment, and typography rule maps to semantic CSS custom properties defined in OKLCH colour space.
+- **Render prop composition**: Clean component substitution using the `render` prop pattern without invalid DOM nesting or ref-forwarding errors.
+- **Zero runtime CSS injection**: Styles compile ahead of time through PostCSS and Tailwind, eliminating hydration mismatches and runtime CSS-in-JS overhead.
+
+## Package entry points
+
+The library is organised into four distinct entry points to keep application bundles minimal:
+
+```
+@innostes/ui          -> Core UI primitives, forms, data display, and overlays
+@innostes/ui/widgets  -> Administrative cards, kanban boards, and audit feeds
+@innostes/ui/charts   -> Data visualisation components (requires Recharts)
+@innostes/ui/editor   -> Rich text document editing (requires Tiptap)
+```
+
+| Entry point | Typical use cases | Peer dependencies |
+| :--- | :--- | :--- |
+| `@innostes/ui` | Buttons, tables, modals, form inputs, navigation layouts | React, React DOM, Lucide React |
+| `@innostes/ui/widgets` | `MetricCard`, `KanbanBoard`, `PermissionMatrix`, `ChangeLog` | None beyond `@innostes/ui` |
+| `@innostes/ui/charts` | `CartesianCharts` (bar, line, area), `DonutChart` | `recharts` (>= 2.12.0) |
+| `@innostes/ui/editor` | `RichTextEditor`, formatting toolbars, document authoring | `@tiptap/react`, `@tiptap/pm` |
+
+## Component index
+
+The table below is generated directly from source frontmatter and tracks current stability tiers across all categories:
+
+<ComponentIndex />
 
 ## Next steps
 
 <Cards>
-  <Card title="Installation" href="/ui/docs/installation" />
-  <Card title="API Conventions" href="/ui/docs/resources/conventions" />
+  <Card title="Installation guide" href="/ui/docs/installation">
+    Install the package, configure your style pipeline, and register essential providers.
+  </Card>
+  <Card title="Design foundations" href="/ui/docs/foundations/colour">
+    Explore the OKLCH semantic colour palette, verified contrast ratios, and typography scale.
+  </Card>
+  <Card title="API conventions" href="/ui/docs/resources/conventions">
+    Learn the composition model, `render` prop rules, event detail typing, and slot styling.
+  </Card>
+  <Card title="Next.js integration" href="/ui/docs/frameworks/nextjs">
+    Set up Server Component boundaries, theme persistence, and hydration protection in Next.js App Router.
+  </Card>
 </Cards>

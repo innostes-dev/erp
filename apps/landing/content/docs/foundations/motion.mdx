@@ -1,14 +1,56 @@
 ---
 title: Motion
-description: Transition durations, easing curves, and reduced-motion accessibility.
+description: Transition durations, easing curves, and prefers-reduced-motion accessibility standards.
 ---
 
-# Motion
+Motion in `@innostes/ui` is functional, understated, and swift. Animation serves exclusively to orient operators during spatial state transitions—such as expanding accordion panels, opening dialog overlays, sliding drawers, and displaying toast notifications.
 
-Motion in innostes UI is functional, understated, and swift. Animation serves exclusively to orient operators during spatial state transitions—such as expanding accordion panels, opening dialog overlays, and displaying toast notifications.
+In high-density ERP and logistics environments, excessive decorative animation introduces cognitive friction. Every motion token is bounded by strict duration ceilings.
 
-## Animation principles
+## Duration scale
 
-- **Duration**: Micro-interactions complete within 150ms to 200ms. Structural layout changes and large overlay entrances finish within 250ms to prevent perceptible lag.
-- **Easing**: Natural decelerate curves (`cubic-bezier(0, 0, 0.2, 1)`) govern entrance animations, whilst accelerate curves govern dismissals.
-- **Reduced motion**: Every animated component respects the user's `prefers-reduced-motion: reduce` system preference by replacing motion with immediate opacity fades or zero-duration transitions.
+The design system standardises on four deterministic duration tokens:
+
+| Token / Utility | Milliseconds | Recommended application |
+| :--- | :--- | :--- |
+| `duration-75` | 75ms | Micro-feedback (button active depress, toggle knob shift) |
+| `duration-150` | 150ms | Tooltip reveals, dropdown menu item hover fills, checkbox checkmarks |
+| `duration-200` | 200ms | Sidebar width collapse (`Sidebar`), dropdown popup scale entrances |
+| `duration-300` | 300ms | Modal dialog entrances (`Dialog`), sheet drawer slide-ins (`Sheet`), accordion panel reveal |
+
+Transitions exceeding 300ms are strictly avoided to ensure interface responsiveness across operational terminals at Northwind Traders.
+
+## Easing curves
+
+Natural physics curves govern component transitions:
+
+```css
+/* Entrances: Natural decelerate curve (swift entry, gentle settle) */
+--ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+/* Standard transitions: Smooth symmetric curve */
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* Exits and dismissals: Quick accelerate curve */
+--ease-in: cubic-bezier(0.4, 0, 1, 1);
+```
+
+## Reduced-motion behaviour
+
+For operators with vestibular motion disorders or sensory sensitivities, continuous animation or sudden spatial displacement can cause dizziness and discomfort.
+
+`@innostes/ui` respects the user's `prefers-reduced-motion` operating system setting across all components:
+
+- **Skeleton**: Replaces continuous pulsing (`animate-pulse`) with a static muted background fill via `motion-reduce:animate-none`.
+- **Sidebar**: Collapses width instantly without transition tweening using `motion-reduce:transition-none`.
+- **Progress**: Disables continuous indeterminate bar sweeps via `motion-reduce:data-indeterminate:animate-none`.
+- **Dialogs & Sheets**: Replaces slide-and-scale physics with an instantaneous opacity fade.
+
+### Testing reduced motion
+
+To verify reduced-motion compliance in development:
+
+1. Open Chrome DevTools or Firefox Developer Tools.
+2. Open the Rendering drawer (`Ctrl+Shift+P` / `Cmd+Shift+P` -> type "Rendering").
+3. Set **Emulate CSS media feature prefers-reduced-motion** to `prefers-reduced-motion: reduce`.
+4. Trigger sidebars, dialogs, and progress bars: confirm that physical movement is replaced with instantaneous state changes.

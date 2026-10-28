@@ -1,184 +1,167 @@
 ---
 title: API Conventions
-description: The rules every innostes UI component follows, so you can guess the API.
+description: Core architectural principles, state models, polymorphic composition, and styling conventions across @innostes/ui.
 icon: Ruler
 ---
 
-Learn these once and every component works the way you expect.
+`@innostes/ui` adheres to strict architectural conventions across all primitives. Learning these conventions allows developers to predict prop names, event payloads, composition patterns, and styling hooks across the entire design system.
 
-## Composition
+## Composition & exports
 
-Components with several parts are **flat named exports**, not namespaces:
+All components are exported as flat, named exports from the package entry points. Primitives with multiple child slots (such as `Dialog`, `Select`, or `Tabs`) are imported individually rather than accessed via namespaces:
 
 ```tsx
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@innostes/ui';
+import { MetricCard } from '@innostes/ui/widgets';
+import { CartesianCharts } from '@innostes/ui/charts';
 ```
 
-Everything is exported from the package root. Imports are tree-shaken: you only ship what you use.
+All exports are fully tree-shakeable: your bundler includes only the code for components your application imports.
 
+## Controlled & uncontrolled state
 
-## Customization
+Every stateful primitive supports both uncontrolled and controlled operation using standard React naming conventions:
 
-innostes UI provides several mechanisms for customization, from global theming to pinpoint overrides.
+| Uncontrolled prop | Controlled prop | Change callback | Event details payload |
+| :--- | :--- | :--- | :--- |
+| `defaultValue` | `value` | `onValueChange(value, eventDetails)` | `{ reason?: string; event: Event }` |
+| `defaultOpen` | `open` | `onOpenChange(open, eventDetails)` | `{ reason?: string; event: Event }` |
+| `defaultChecked` | `checked` | `onCheckedChange(checked, eventDetails)` | `{ event: Event }` |
+| `defaultPressed` | `pressed` | `onPressedChange(pressed, eventDetails)` | `{ event: Event }` |
 
-### 1. Design tokens
+### Event details pattern
 
-Design tokens are CSS custom properties defined in `packages/ui/tailwind/theme.css`. Changing a token re-themes every component that uses it automatically across both light and dark modes.
-
-```css
-/* Change the primary colour and fluid type scale globally */
-@theme {
-  --color-primary: var(--color-indigo-600);
-  --text-display: clamp(2rem, 1.5rem + 2.5vw, 3rem);
-}
-```
-
-### 2. CSS variables for sizing
-
-Certain dimensions are exposed as CSS variables rather than semantic tokens. This allows you to set them via component props or override them in CSS.
+Callbacks pass the updated value as the first argument, followed by an optional `eventDetails` object indicating the origin trigger (e.g. keyboard escape vs pointer click):
 
 ```tsx
-// Set via prop (writes the CSS variable inline)
-<SidebarProvider width="20rem">
-  <Sidebar />
-</SidebarProvider>
+<Dialog
+  open={isOpen}
+  onOpenChange={(nextOpen, details) => {
+    if (!nextOpen && details?.reason === 'outside-press') {
+      // Prevent closing when user clicks outside modal
+      return;
+    }
+    setIsOpen(nextOpen);
+  }}
+>
+  {/* Modal contents */}
+</Dialog>
 ```
 
-```css
-/* Or override globally in your CSS */
-:root {
-  --sidebar-width: 20rem;
-  --sidebar-width-icon: 4rem;
-  --sidebar-width-mobile: min(20rem, 85vw);
-  --app-rail-width: 5rem;
-  --top-bar-height: 4.5rem;
-}
-```
+## Polymorphism with the `render` prop
 
-### 3. `className`
-
-Like any React component, the plain `className` prop acts as a Tailwind escape hatch on the component's root element. It is merged using `tailwind-merge`, so your classes win over internal defaults.
+`@innostes/ui` avoids the legacy Radix `asChild` pattern. Instead, primitives built on Base UI utilize the **`render` prop** pattern. This merges accessibility attributes, focus handlers, and class names directly into the custom child element:
 
 ```tsx
-<Button className="rounded-full shadow-lg">Save</Button>
+import Link from 'next/link';
+import { Button } from '@innostes/ui';
+
+// Compose an accessible button that renders as a Next.js client link
+<Button
+  variant="primary"
+  nativeButton={false}
+  render={<Link href="/orders/PO-2026-0881" />}
+>
+  View purchase order
+</Button>
 ```
 
-### 4. `classNames` (multi-part overrides)
+When delegating button rendering to a link element (`<a>`), specify `nativeButton={false}` so the component does not emit an invalid HTML `<button>` inside an anchor.
 
-For complex components with multiple parts, the `classNames` prop (using `SlotClassNames<Slot>`) allows you to override styles for specific internal slots.
+## Customisation
 
-Every styled element carries a `data-slot` attribute. Values passed to `classNames` are merged last, resolving conflicts via Tailwind.
+`@innostes/ui` provides four distinct layers for styling overrides:
+
+### 1. The `className` prop
+
+The `className` prop applies to the component root. Passed classes are merged through `tailwind-merge`, ensuring that user-provided utilities override internal defaults:
+
+```tsx
+<Button className="w-full justify-start font-mono">
+  PO-2026-0881
+</Button>
+```
+
+On interactive primitives, `className` can also accept a function receiving the current component state:
+
+```tsx
+<Button className={({ disabled }) => (disabled ? 'opacity-40 cursor-not-allowed' : '')}>
+  Submit order
+</Button>
+```
+
+### 2. Multi-part styling with `classNames`
+
+Composite widgets and complex data display components provide a `classNames` prop accepting a map of slot names to utility strings:
 
 ```tsx
 <MetricCard
-  label="Revenue"
-  value="$12,000"
+  label="Total Procurement"
+  value="₹1,45,280.00"
   classNames={{
-    root: 'border-blue-200',
-    value: 'text-blue-700 font-serif'
+    root: 'border-blue-500/30 bg-blue-50/10',
+    label: 'text-blue-700 dark:text-blue-400 font-semibold',
+    value: 'font-mono text-2xl tracking-tight',
   }}
 />
 ```
 
-The following components support the `classNames` prop:
-`ActionList`, `ActivityFeed`, `AppSwitcher`, `CommandPalette`, `DataTable`, `DonutChart`, `EmptyState`, `EntityList`, `MetricCard`, `Notifications`, `PageHeader`, `QuickActions`, `Stepper`, `UserMenu`, `WelcomeBanner`, `WidgetCard`.
+### 3. The `data-slot` attribute
 
-### 5. `render` prop (polymorphism)
-
-Via Base UI's `useRender`/`mergeProps`, you can swap the underlying element or component entirely while keeping the component's behavior and ARIA attributes intact.
-
-```tsx
-// Renders the button as a Next.js Link
-<Button render={<Link href="/settings" />} nativeButton={false}>
-  Settings
-</Button>
-```
-
-## Responsiveness
-
-### 1. Fluid typography
-
-Instead of fixed sizes or viewport breakpoints, innostes UI uses `clamp()`-based fluid typography for smooth scaling.
+Every internal element emits a deterministic `data-slot` attribute (e.g. `data-slot="dialog-content"`, `data-slot="card-header"`). You can target child slots from parent stylesheets or container selectors:
 
 ```css
-/* Fluid type automatically scales based on viewport width */
---text-heading: clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);
+/* Customise all metric card values inside a financial summary section */
+.finance-overview [data-slot="metric-card-value"] {
+  font-family: var(--font-mono);
+  color: var(--color-emerald-700);
+}
 ```
 
-### 2. Container queries
+### 4. Interactive state attributes
 
-For component-level responsiveness, innostes UI relies on CSS container queries (`@container`, `@max-*`) rather than viewport breakpoints. This is crucial because components often live inside sidebars or panels and need to respond to their *available space*, not the overall screen size.
+Primitives expose interactive state via HTML `data-*` attributes (`data-state="open"`, `data-checked`, `data-disabled`, `data-highlighted`, `data-invalid`). You can style these states using Tailwind CSS variants:
 
 ```tsx
-// DataTable switches to stack mode based on its container's width, not the screen width
-<DataTable responsive="stack" data={data} columns={columns} />
+<div className="border-border data-invalid:border-destructive data-invalid:ring-destructive">
+  {/* Field contents */}
+</div>
 ```
 
-Components utilizing container queries include `DataTable`, `Stepper`, and `WelcomeBanner`.
+### 5. Server-safe variant helpers
 
-## Controlled and uncontrolled
-
-Every stateful component works both ways, using React's naming:
-
-| Uncontrolled | Controlled | Callback |
-| --- | --- | --- |
-| `defaultValue` | `value` | `onValueChange` |
-| `defaultOpen` | `open` | `onOpenChange` |
-| `defaultChecked` | `checked` | `onCheckedChange` |
-| `defaultPressed` | `pressed` | `onPressedChange` |
-
-Callbacks receive the new value first, then an `eventDetails` object (with `reason` and `event`).
-
-## Styling
-
-- **`className`** is merged with `tailwind-merge`, so your classes win over ours.
-  On interactive parts it can also be a function of the component state:
-  `className={({ disabled }) => (disabled ? 'opacity-30' : undefined)}`.
-- **`data-slot`** names every part (`data-slot="dialog-content"`), so you can target parts from CSS
-  or a parent: `[&_[data-slot=card-title]]:text-lg`.
-- **State attributes** come from Base UI: `data-open`, `data-checked`, `data-disabled`,
-  `data-highlighted`, `data-invalid`, … Style states with Tailwind's `data-*:` variants.
-- **Variant helpers** (`buttonVariants`, `badgeVariants`, `inputVariants`, `toggleVariants`) give you
-  the classes without the component, e.g. for router links. They're server-safe.
-
-## Rendering another element
-
-Parts built on Base UI take a `render` prop to change the element or compose with your own:
+Every styled component exports its underlying class-variance-authority helper function (e.g. `buttonVariants()`, `badgeVariants()`, `inputVariants()`). These functions are pure JavaScript and execute safely on the server:
 
 ```tsx
-<Button render={<Link href="/orders" />} nativeButton={false}>Orders</Button>
-<DialogTrigger render={<Button variant="outline" />}>Edit</DialogTrigger>
+import { buttonVariants } from '@innostes/ui';
+
+// Generate button styles for standard HTML or external router links
+const linkClasses = buttonVariants({ variant: 'outline', size: 'sm' });
 ```
 
-Our props and handlers are merged into the element you pass.
+## Ref forwarding
 
-## Refs
+Every component wraps its DOM root in React's `forwardRef`. Refs point directly to native DOM elements (`HTMLButtonElement`, `HTMLDivElement`, `HTMLInputElement`), allowing direct integration with form management libraries (such as React Hook Form) across React 17, React 18, and React 19.
 
-Every component forwards `ref` to its root element with `forwardRef`, so refs work the same on
-React 17, 18 and 19.
+## Server Components & client boundaries
 
-## Server Components
+- **Interactive components** declare `'use client'` at their file headers. You can import them directly into Server Components in Next.js App Router without manual wrappers.
+- **Pure helpers** (`cn()`, `formatDate()`, `buttonVariants()`, `badgeVariants()`) do not import browser-specific APIs and execute on both client and server.
 
-Interactive components ship with `"use client"`, so you can import them into Server Components.
-Pure helpers (`cn`, `buttonVariants`, `getPaginationRange`, …) don't, and work on the server.
+## Standard size scale
 
-## Sizes
+Interactive controls share a unified size scale so adjacent controls align in toolbars and data tables:
 
-Controls share one size scale so they line up in a row:
+| Size | Height | Recommended application |
+| :--- | :--- | :--- |
+| `sm` | 32px | High-density audit grids, compact filter bars, table pagination |
+| `md` | 40px | Standard forms, default modal actions, primary toolbars |
+| `lg` | 48px | Mobile ERP terminals, high-consequence confirmation dialogs |
 
-| Size | Height | Use |
-| --- | --- | --- |
-| `sm` | 32px | Dense tables, toolbars |
-| `md` | 40px | Default |
-| `lg` | 48px | Marketing pages, touch-first screens |
+## Internationalisation & RTL support
 
-## Accessibility
+All customer-facing text is customizable to support enterprise multi-language requirements. Rather than hardcoding English strings, components expose override props:
 
-- Keyboard support and ARIA come from Base UI, which follows the WAI-ARIA Authoring Practices.
-- Icon-only controls require an `aria-label`. The docs for each component list what you must provide.
-- Every component is tested for its roles and keyboard behaviour.
-
-## Versioning
-
-innostes UI follows [semantic versioning](https://semver.org). Breaking changes only happen in major
-versions and are listed in the changelog with a migration note.
+- `closeLabel`: Dialog, Alert, Sheet dismissal labels (defaults to `"Close"`).
+- `labels`: Component-specific string maps (e.g. `labels={{ previousPage: 'Previous', nextPage: 'Next' }}` on `Pagination`).
+- **Logical CSS properties**: Styles use CSS logical properties (`margin-inline-end`, `inset-inline-start`, `border-inline-start`) instead of physical directions (`left`, `right`, `mr-`, `ml-`). Wrap the application in `<DirectionProvider direction="rtl">` for Arabic, Hebrew, or Urdu localization.

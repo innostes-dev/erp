@@ -1,14 +1,90 @@
 ---
 title: Icons
-description: Iconography principles, Lucide icon integration, and accessibility conventions.
+description: Iconography standards, Lucide React integration, sizing rules inside components, and accessibility requirements.
 ---
 
-# Icons
+`@innostes/ui` standardises on [`lucide-react`](https://lucide.dev) for interface iconography. Lucide icons provide consistent 24px bounding boxes, balanced optical weights (2px default stroke), and clean geometric curves that pair naturally with the typography scale.
 
-Icons in innostes UI provide immediate visual cues alongside textual labels. The design system standardises on the Lucide icon library, ensuring consistent stroke weights, optical alignment, and predictable bounding boxes across all components.
+## Recommended package
 
-## Guidelines
+Install `lucide-react` in your project:
 
-- **Textual accompaniment**: Icons that trigger interactive operations must include visible text or an explicit `aria-label` for assistive technologies.
-- **Decorative iconography**: Icons that accompany descriptive text should receive `aria-hidden="true"` to prevent duplicate screen reader announcements.
-- **Sizing standards**: Standard icon sizes align with typographic scale: `size-3.5` (14px) for compact tags, `size-4` (16px) for standard buttons and inputs, and `size-5` (20px) for navigation items.
+```bash
+pnpm add lucide-react
+```
+
+## Sizing standards inside components
+
+Icons inside `@innostes/ui` primitives should match the surrounding font metrics. Use Tailwind's `size-*` utility classes to constrain both width and height simultaneously:
+
+| Component context | Recommended size | Tailwind utility | Example pairing |
+| :--- | :--- | :--- | :--- |
+| Badges, compact chips, table tags | 14px × 14px | `size-3.5` | `<CheckCircle2 className="size-3.5 me-1" />` |
+| Standard buttons (`size="md"`), form inputs | 16px × 16px | `size-4` | `<Search className="size-4 me-1.5" />` |
+| Large buttons (`size="lg"`), dialog headers | 20px × 20px | `size-5` | `<Download className="size-5 me-2" />` |
+| Application rail items, widget header icons | 24px × 24px | `size-6` | `<Building2 className="size-6 text-primary" />` |
+
+## Optical alignment and RTL spacing
+
+To preserve bidirectional text support (Left-to-Right and Right-to-Left), never use physical margin utilities like `mr-*` or `ml-*` on icons. Use CSS logical inline margins:
+
+```tsx
+// Leading icon: Margin inline end
+<Button variant="primary">
+  <CheckCircle2 className="size-4 me-1.5" />
+  <span>Approve purchase order</span>
+</Button>
+
+// Trailing icon: Margin inline start
+<Button variant="outline">
+  <span>Review delivery schedule</span>
+  <ChevronRight className="size-4 ms-1.5" />
+</Button>
+```
+
+In Left-to-Right layouts, `me-1.5` outputs `margin-right: 0.375rem`. In Right-to-Left layouts (e.g. Arabic or Hebrew), it automatically flips to `margin-left: 0.375rem`.
+
+## Accessibility requirements
+
+### Decorative icons
+
+When an icon accompanies descriptive text (such as "Download invoice PDF" next to a file icon), the icon is purely decorative. Lucide React components include `aria-hidden="true"` by default. Ensure custom SVGs also declare `aria-hidden="true"` so screen readers do not announce redundant symbols:
+
+```tsx
+// Correct: Screen reader announces only "Download invoice"
+<Button variant="outline">
+  <FileDown className="size-4 me-1.5" aria-hidden="true" />
+  <span>Download invoice</span>
+</Button>
+```
+
+### Icon-only buttons
+
+When rendering a button that contains only an icon (such as a close cross, edit pencil, or notification bell), assistive technologies cannot infer the action from visual glyphs.
+
+You **must** provide a descriptive `aria-label` or an accessible visually hidden label:
+
+```tsx
+// Required: aria-label clarifies the action for screen-reader users
+<Button
+  variant="ghost"
+  size="icon"
+  aria-label="Delete line item 14 from purchase order"
+  onClick={handleDelete}
+>
+  <Trash2 className="size-4 text-destructive" />
+</Button>
+```
+
+Alternatively, wrap tooltip components around icon buttons to provide both visual hovering cues and assistive hints:
+
+```tsx
+<Tooltip>
+  <TooltipTrigger render={
+    <Button variant="ghost" size="icon" aria-label="Export ledger to Excel">
+      <FileSpreadsheet className="size-4" />
+    </Button>
+  } />
+  <TooltipContent>Export ledger to Excel (.xlsx)</TooltipContent>
+</Tooltip>
+```

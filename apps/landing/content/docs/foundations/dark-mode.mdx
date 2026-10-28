@@ -1,14 +1,143 @@
 ---
-title: Dark mode
-description: Dark theme implementation, token inversion, and hydration strategies.
+title: Dark Mode
+description: Implement dark mode across applications using class-based or data-attribute activation, next-themes, and hydration safeguards.
 ---
 
-# Dark mode
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-innostes UI provides native dark mode support across every component, chart, and widget. Theme switching relies on CSS class toggling (`.dark`) or data attributes (`data-theme="dark"`), updating OKLCH token variables without triggering component re-renders.
+`@innostes/ui` includes native dark mode styling for every component, widget, chart, and modal primitive. Theme switching works without JavaScript state recalculations: toggling an ancestor CSS class or attribute remaps the underlying CSS custom properties instantly.
 
-## Implementation overview
+## How to enable dark mode
 
-Dark mode tokens are defined in `packages/ui/tailwind/dark.css`. When the `.dark` class is applied to the root `<html>` or container element, CSS custom properties are remapped to appropriate dark-variant values.
+Import the dark stylesheet in your application CSS entry point directly after the base tokens:
 
-In Next.js applications, theme synchronization is managed using `next-themes`, ensuring zero flash of unstyled content (FOUC) during client-side hydration.
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css";
+```
+
+`@innostes/ui/dark.css` registers rules targeting either the `.dark` class or the `[data-theme='dark']` attribute on any ancestor (typically the root `<html>` element):
+
+```css
+/* Activated automatically by dark.css */
+.dark,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-background: oklch(14.1% 0.005 285.823);
+  --color-foreground: oklch(98.5% 0 0);
+  /* Remaining semantic token remaps */
+}
+```
+
+## Strategy: Class vs Data-Attribute
+
+`@innostes/ui` supports both conventions identically:
+
+| Strategy | Activation selector | Best suited for |
+| :--- | :--- | :--- |
+| **Class strategy** (recommended) | `<html class="dark">` | Standard Tailwind CSS workflows and `next-themes` default mode |
+| **Data attribute strategy** | `<html data-theme="dark">` | Multi-theme applications (e.g. `data-theme="high-contrast"`) |
+
+## Integration with next-themes
+
+In Next.js applications, use `next-themes` to manage theme preference, system synchronization, and local storage persistence.
+
+```tsx title="components/theme-provider.tsx"
+'use client';
+
+import * as React from 'react';
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
+}
+```
+
+## Avoiding flash of the wrong theme
+
+A common issue in server-rendered applications is Flash of Unstyled Theme (FOUT), where a user with a dark mode preference briefly sees a blinding white screen before client hydration.
+
+To prevent FOUT:
+
+1. **Add `suppressHydrationWarning`**: Always add this prop to the `<html>` tag in your root layout. This tells React to ignore differences between the server-rendered HTML and client-injected theme classes.
+2. **Use `disableTransitionOnChange`**: When switching themes, temporarily disable CSS transitions to prevent color property interpolation flickers across buttons and borders.
+3. **Vanilla / Vite blocking script**: For client-side Single Page Applications without `next-themes`, place a tiny synchronous script inside the `<head>` tag of `index.html`:
+
+```html title="index.html"
+<head>
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+</head>
+```
+
+## How to test dark mode
+
+### Unit testing with Vitest and Testing Library
+
+Verify that components respond correctly when the dark mode class is applied to the container:
+
+```tsx title="src/components/theme.test.tsx"
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { Button } from '@innostes/ui';
+
+describe('Dark mode rendering', () => {
+  beforeEach(() => {
+    document.documentElement.classList.add('dark');
+  });
+
+  afterEach(() => {
+    document.documentElement.classList.remove('dark');
+  });
+
+  it('renders primary button under dark theme class', () => {
+    render(<Button variant="primary">Approve PO</Button>);
+    const button = screen.getByRole('button', { name: 'Approve PO' });
+    expect(button).toBeInTheDocument();
+    expect(document.documentElement).toHaveClass('dark');
+  });
+});
+```
+
+### End-to-end testing with Playwright
+
+Test dark theme visual rendering and token contrast using Playwright's color scheme emulation:
+
+```ts title="tests/theme.spec.ts"
+import { test, expect } from '@playwright/test';
+
+test.describe('Dark theme operations portal', () => {
+  test.use({ colorScheme: 'dark' });
+
+  test('displays dark background and correct token contrast', async ({ page }) => {
+    await page.goto('/dashboard');
+    const html = page.locator('html');
+    await expect(html).toHaveClass(/dark/);
+
+    const body = page.locator('body');
+    await expect(body).toHaveCSS('background-color', 'rgb(9, 9, 11)');
+  });
+});
+```

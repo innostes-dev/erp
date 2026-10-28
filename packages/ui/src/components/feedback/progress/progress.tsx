@@ -91,7 +91,7 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>(
           </BaseProgress.Value>
         )}
         <BaseProgress.Track className="col-span-2 h-2 overflow-hidden rounded-full bg-muted">
-          <BaseProgress.Indicator className="block h-full rounded-full bg-primary transition-[width] duration-300 data-indeterminate:w-1/3 data-indeterminate:animate-indeterminate" />
+          <BaseProgress.Indicator className="block h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none data-indeterminate:w-1/3 data-indeterminate:animate-indeterminate motion-reduce:data-indeterminate:animate-none" />
         </BaseProgress.Track>
       </BaseProgress.Root>
     );

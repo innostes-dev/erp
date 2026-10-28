@@ -1,34 +1,77 @@
 ---
-title: Accessibility
-description: Accessibility conformance standards, keyboard models, and assistive technology support.
+title: Accessibility Statement
+description: WCAG 2.2 Level AA conformance, component guarantees, developer responsibilities, and assistive technology testing.
 ---
 
-# Accessibility
+`@innostes/ui` is committed to delivering accessible software for all enterprise operators. Every component in the library is built and tested to conform to the **Web Content Accessibility Guidelines (WCAG) 2.2 Level AA** standard.
 
-innostes UI components conform to the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA standard. Designed for enterprise ERP and back-office applications at Northwind Traders Pvt Ltd, every primitive is engineered so that operators relying on screen readers, keyboard navigation, or high-contrast display modes complete tasks without friction.
+Whether an operator at Northwind Traders Pvt Ltd navigates via keyboard shortcuts, relies on screen readers (such as NVDA or VoiceOver), uses voice control, or enables high-contrast display modes, all workflows must remain fully functional and efficient.
 
-## Standards and conformance
+## Conformance target
 
-The component library targets WCAG 2.2 AA conformance across four core principles:
+The design system targets **WCAG 2.2 Level AA** across all four principles:
 
-- **Perceivable**: Text contrast ratios meet or exceed 4.5:1 for normal text and 3:1 for large text and non-text user interface components. Visual state indicators are never conveyed solely through colour.
-- **Operable**: All interactive elements are fully operable through the keyboard. Focus order preserves logical reading sequence, and modal containers trap keyboard focus whilst active.
-- **Understandable**: Form inputs require explicit labelling, contextual error descriptions link programmatically via `aria-describedby`, and validation failures announce dynamically via ARIA live regions.
-- **Resilient**: Markup relies on semantic HTML and WAI-ARIA 1.2 authoring patterns, ensuring compatibility across desktop browsers and assistive tools.
+1. **Perceivable**: Text and graphical elements satisfy minimum contrast ratios (≥ 4.5:1 for normal text, ≥ 3.0:1 for large text and UI components). Visual status is never communicated solely through colour.
+2. **Operable**: All interactive elements are reachable and operable via standard keyboard sequences. Focus order matches reading order, focus indicators are clearly visible, and modal overlays trap focus securely without keyboard traps.
+3. **Understandable**: Controls provide predictable state updates, clear textual error associations via `aria-describedby`, and consistent interaction patterns across forms and dialogs.
+4. **Resilient**: Components rely on semantic HTML5 primitives and WAI-ARIA 1.2 specifications, ensuring compatibility across modern browsers and assistive technologies.
 
-## Keyboard interaction model
+## What the library guarantees
 
-Components follow standard WAI-ARIA design patterns:
+When you use `@innostes/ui` primitives, the library automatically handles:
 
-- `Tab` and `Shift + Tab` navigate between interactive component boundaries.
-- Arrow keys manage roving tabindex within composite controls such as menus, tabs, radio groups, and tree views.
-- `Escape` dismisses floating overlays, popovers, context menus, and dialogs, restoring focus to the triggering element.
-- `Space` and `Enter` activate buttons and toggle selection states.
+- **Focus trapping and restoration**: Dialogs, sheets, and alert modals trap keyboard focus within the container and restore focus to the triggering element upon dismissal.
+- **Roving tabindex**: Multi-item composite widgets (such as `Tabs`, `RadioGroup`, `DropdownMenu`, `TreeView`, and `ToggleGroup`) manage `tabIndex={0}` and `tabIndex={-1}` automatically, enabling direct arrow-key navigation.
+- **ARIA attributes and live regions**: Tooltips, progress bars, toasts, and alerts emit proper ARIA roles (`role="alert"`, `role="status"`, `aria-live="polite"`).
+- **Verified token contrast**: Base design tokens in `theme.css` and `dark.css` are validated at build time to satisfy WCAG AA contrast minimums.
+- **Motion reduction**: Animations automatically disable or simplify when the user enables `prefers-reduced-motion: reduce`.
 
-## Testing and verification
+## What the application team must do
 
-Accessibility is verified through automated and manual testing pipelines:
+Accessibility is a shared responsibility between the library and the consuming application. Application developers must ensure:
 
-1. **Automated audits**: Axe-core and Vitest DOM testing run on every commit to detect missing ARIA attributes, invalid roles, and landmark omissions.
-2. **Keyboard audits**: Full focus-trap, tab order, and shortcut verifications run across composite widgets.
-3. **Screen reader verification**: Manual testing with NVDA on Windows and VoiceOver on macOS across Chrome, Firefox, and Safari.
+| Developer responsibility | Correct implementation | Why it matters |
+| :--- | :--- | :--- |
+| **Labels for icon-only buttons** | `<Button size="icon" aria-label="Delete order PO-881">` | Screen readers cannot interpret SVG glyphs without accessible names |
+| **Form error linkage** | Use `<Field>` and `<FieldError>` | Associates error text programmatically with inputs via `aria-describedby` |
+| **Heading hierarchy** | Use logical `<h1>` to `<h6>` levels | Screen reader users browse pages by jumping across heading structures |
+| **Colour redundancy** | Pair warning badges with an icon | Red-green colour-blind operators cannot rely solely on hue shifts |
+| **Table column headers** | Provide `<th>` headers with `scope="col"` | Allows screen readers to announce column context when traversing cells |
+| **Alternative text** | Provide descriptive `alt` text on images | Screen readers announce image context for visual assets |
+
+## Testing methods
+
+Our quality assurance pipeline tests accessibility through multiple layers of verification:
+
+1. **Automated component audits**: Unit tests run `axe-core` assertions across component render states to detect missing ARIA attributes, orphan labels, or invalid roles before code merges.
+2. **Deterministic contrast validation**: A build-time check (`landing:docs-check`) parses all theme tokens and calculates relative luminance to prevent contrast regressions.
+3. **Automated browser crawl**: A Playwright crawler audits documentation pages and interactive showcases for focusability, keyboard loops, and landmark semantics.
+4. **Manual assistive technology testing**: Regular manual testing verifies auditory announcements and keyboard flows.
+
+## Assistive technology testing matrix
+
+We test `@innostes/ui` against the following screen-reader and browser pairings:
+
+| Screen reader | Operating system | Tested browsers | Conformance status |
+| :--- | :--- | :--- | :--- |
+| **VoiceOver** | macOS (Sequoia / Sonoma) | Safari, Google Chrome | Fully verified in continuous QA |
+| **NVDA** | Windows 11 | Mozilla Firefox, Google Chrome | Fully verified in continuous QA |
+| **TalkBack** | Android 14 | Chrome Mobile | Verified for mobile ERP layouts |
+| **JAWS** | Windows 11 | Edge, Chrome | Scheduled on enterprise roadmap |
+| **Orca** | Linux (Ubuntu / Debian) | Firefox | Scheduled on enterprise roadmap |
+
+## Known issues and continuous hardening
+
+We maintain an active audit tracker (`AUDIT.md`) documenting accessibility improvements:
+
+- **LIB-003**: Customisable internationalisation strings across all ERP widgets (`DataTable`, `TreeView`, `KanbanBoard`) to eliminate hardcoded English text.
+- **LIB-004**: Token contrast adjustments across light and dark mode tokens to ensure 100% WCAG AA compliance across all semantic pairings.
+- **LIB-007**: Migration from physical directional CSS classes to logical bidirectional properties (`inset-inline-start`, `margin-inline-end`) for full RTL language accessibility.
+
+## Reporting an accessibility problem
+
+If you discover an accessibility barrier or an unannounced state in any `@innostes/ui` component:
+
+1. Open an issue on our repository describing the component, the expected vs actual behaviour, and the assistive technology used (including version numbers).
+2. Or contact our accessibility working group directly at `accessibility@innostes.com`.
+3. Critical accessibility defects affecting production applications are prioritised as S1 bugs in accordance with our governance policy.

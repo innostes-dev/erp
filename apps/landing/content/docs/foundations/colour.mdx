@@ -1,21 +1,42 @@
 ---
 title: Colour
-description: OKLCH semantic palette, contrast tokens, and functional roles.
+description: OKLCH semantic palette, contrast tokens, functional roles, and verified WCAG 2.2 AA contrast ratios.
 ---
 
-# Colour
+import { ContrastTable } from '@/components/docs/contrast-table';
 
-The innostes UI design system employs a semantic colour architecture formulated in the OKLCH colour space. OKLCH guarantees perceptual uniformity across shades, ensuring predictable contrast ratios and consistent luminance across light and dark display modes.
+The `@innostes/ui` colour system is engineered for enterprise ERP operations where clarity, data hierarchy, and visual ergonomics are paramount. Formulated in the **OKLCH colour space**, our palette guarantees perceptual uniformity across shades, ensuring predictable contrast ratios and consistent luminance across light and dark display modes.
 
 ## Semantic architecture
 
-Rather than binding visual elements directly to raw hex values, the library exposes functional tokens mapped to operational roles:
+Components reference functional colour tokens rather than raw hex codes. Every token represents an operational role:
 
-- `primary`: Core interactive triggers, selected states, and brand emphasis.
-- `secondary`: Supporting interface elements, subtle hover backgrounds, and secondary actions.
-- `muted`: Low-emphasis surfaces, disabled borders, and secondary typography.
-- `accent`: Interactive callouts, active navigation items, and highlighted records.
-- `destructive`: Error banners, irreversible deletions, and critical alert indicators.
-- `success`, `warning`, `info`: Contextual status indicators for transactional data tables and badges.
+| Role | Intended application | Primary pairing |
+| :--- | :--- | :--- |
+| `background` / `foreground` | Root viewport canvas and primary body typography | Default page canvas |
+| `card` / `card-foreground` | Contained surfaces, data tables, side panels, and modal windows | Layered elevation |
+| `popover` / `popover-foreground` | Transient floating overlays, dropdown menus, and tooltips | Elevated z-index layer |
+| `primary` / `primary-foreground` | High-priority interactive triggers, primary form submissions | Brand action |
+| `secondary` / `secondary-foreground` | Alternative action triggers, filter chips, and pill toggles | Muted action |
+| `muted` / `muted-foreground` | Table column headers, field helper notes, and deactivated fills | Tertiary context |
+| `accent` / `accent-foreground` | Highlighted table rows, active navigation items, and list hovers | Interactive feedback |
+| `destructive` / `destructive-foreground` | Irreversible operations, voiding invoices, cancellation alerts | Critical risk |
+| `success` / `success-foreground` | Approved purchase orders, paid status indicators, successful syncs | Positive confirmation |
+| `warning` / `warning-foreground` | Overdue shipments, pending review alerts, stock reorder warnings | Attention required |
+| `info` / `info-foreground` | Informational callouts, carrier transit updates, system advisories | Neutral context |
 
-Detailed token swatches, dark mode mappings, and contrast ratio validation tables are maintained in `packages/ui/tailwind/theme.css`.
+## Accessibility & contrast guarantees
+
+Under WCAG 2.2 Level AA:
+- **Normal text** (under 18pt or bold under 14pt) requires a minimum contrast ratio of **4.5:1** against its background.
+- **Large text** (18pt+ or bold 14pt+) and graphical user interface components require a minimum contrast ratio of **3.0:1**.
+
+The table below is computed at build time from `packages/ui/tailwind/theme.css` and `packages/ui/tailwind/dark.css`. Every token pairing satisfies the 4.5:1 normal text standard in both light and dark themes:
+
+<ContrastTable />
+
+## Guidelines for colour application
+
+1. **Never convey meaning through colour alone**: When indicating status (e.g. an unpaid invoice or failed dispatch), always pair the semantic colour token with text or an icon (such as an alert triangle or checkmark) so colour-blind operators at Northwind Traders can distinguish states immediately.
+2. **Preserve token pairing**: Always use a background token with its corresponding foreground counterpart (e.g. `bg-primary text-primary-foreground` or `bg-destructive text-destructive-foreground`). Never mix mismatched tokens like `text-white` on `bg-warning`.
+3. **Reserve destructive for high-consequence operations**: Do not use `destructive` for optional cancel buttons. Reserve red fills for permanent deletions, invoice voiding, or warehouse order cancellations.

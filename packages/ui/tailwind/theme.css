@@ -27,7 +27,7 @@
 
   /* Subtle UI: muted text/backgrounds, and the hover/highlight colour for items */
   --color-muted: var(--color-zinc-100);
-  --color-muted-foreground: var(--color-zinc-500);
+  --color-muted-foreground: var(--color-zinc-600);
   --color-accent: var(--color-zinc-100);
   --color-accent-foreground: var(--color-zinc-900);
 
@@ -35,11 +35,11 @@
   --color-destructive: var(--color-red-600);
   --color-destructive-hover: var(--color-red-700);
   --color-destructive-foreground: var(--color-white);
-  --color-success: var(--color-emerald-600);
+  --color-success: var(--color-emerald-700);
   --color-success-foreground: var(--color-white);
   --color-warning: var(--color-amber-500);
   --color-warning-foreground: var(--color-amber-950);
-  --color-info: var(--color-sky-600);
+  --color-info: var(--color-sky-700);
   --color-info-foreground: var(--color-white);
 
   /* Lines and focus */
@@ -69,7 +69,7 @@
    */
   --color-sidebar: var(--color-white);
   --color-sidebar-foreground: var(--color-zinc-700);
-  --color-sidebar-muted-foreground: var(--color-zinc-500);
+  --color-sidebar-muted-foreground: var(--color-zinc-600);
   --color-sidebar-accent: var(--color-zinc-100);
   --color-sidebar-accent-foreground: var(--color-zinc-900);
   --color-sidebar-primary: var(--color-blue-600);

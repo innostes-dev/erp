@@ -1,34 +1,207 @@
 ---
-title: Vite
-description: Integration guide for Vite React projects with Tailwind CSS.
+title: Vite React
+description: Complete integration guide for Vite React projects with Tailwind CSS v4, TypeScript, and dark mode.
 ---
 
-# Vite
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-Vite provides a lightning-fast build environment for Single Page Applications (SPAs). `@innostes/ui` ships with pre-bundled ES modules and CSS entry points designed for instant hot-module reloading in Vite.
+`@innostes/ui` ships with standard ECMAScript modules (ESM) and precompiled CSS files that integrate directly with Vite React applications.
 
-## Setup
+## Prerequisites
 
-Create or configure your Vite project with React and TypeScript:
+Initialize a standard Vite React TypeScript application if you do not have an existing workspace:
 
 ```bash
-npm install @innostes/ui lucide-react clsx tailwind-merge
+pnpm create vite northwind-portal --template react-ts
+cd northwind-portal
 ```
 
-Include the global stylesheet in your main entry point:
+## Step-by-step setup
 
-```tsx
-// src/main.tsx
+<Steps>
+<Step>
+
+### Install dependencies
+
+Install `@innostes/ui` alongside `lucide-react`:
+
+```bash tab="pnpm"
+pnpm add @innostes/ui lucide-react
+```
+
+```bash tab="npm"
+npm install @innostes/ui lucide-react
+```
+
+```bash tab="yarn"
+yarn add @innostes/ui lucide-react
+```
+
+```bash tab="bun"
+bun add @innostes/ui lucide-react
+```
+
+</Step>
+<Step>
+
+### Configure Tailwind CSS or static styles
+
+Choose the style pipeline that matches your Vite project configuration:
+
+<Tabs items={['Tailwind CSS v4 (Vite plugin)', 'Standard CSS (Without Tailwind)']}>
+<Tab value="Tailwind CSS v4 (Vite plugin)">
+
+Install `@tailwindcss/vite` and configure `vite.config.ts`:
+
+```bash
+pnpm add -D @tailwindcss/vite tailwindcss
+```
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+});
+```
+
+Then import Tailwind and `@innostes/ui` tokens in `src/index.css`:
+
+```css title="src/index.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css";
+```
+
+</Tab>
+<Tab value="Standard CSS (Without Tailwind)">
+
+If your project does not use Tailwind CSS, import the standalone compiled stylesheet in `src/main.tsx`:
+
+```tsx title="src/main.tsx"
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css';
+```
+
+This imports all token variables and component utility classes without injecting a global CSS reset.
+
+</Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+### Mount root providers
+
+In `src/main.tsx`, wrap the application in `TooltipProvider` and register `Toaster`:
+
+```tsx title="src/main.tsx"
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import '@innostes/ui/styles.css';
+import { TooltipProvider, Toaster, DirectionProvider } from '@innostes/ui';
+import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <DirectionProvider direction="ltr">
+      <TooltipProvider delayDuration={200}>
+        <App />
+        <Toaster position="bottom-end" />
+      </TooltipProvider>
+    </DirectionProvider>
+  </React.StrictMode>,
 );
 ```
 
-When building with Tailwind CSS v4, reference `@innostes/ui/tailwind` in your primary CSS entry to inherit all OKLCH design tokens.
+</Step>
+<Step>
+
+### Create a theme switcher helper
+
+In a Single Page Application without a framework router, toggle dark mode by manipulating the `dark` class on `document.documentElement`:
+
+```tsx title="src/lib/theme.ts"
+export function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  return isDark;
+}
+
+export function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && prefersDark)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+```
+
+</Step>
+<Step>
+
+### Build your application view
+
+Compose components in `src/App.tsx`:
+
+```tsx title="src/App.tsx"
+import React, { useEffect, useState } from 'react';
+import { Button, toast } from '@innostes/ui';
+import { toggleDarkMode, initTheme } from './lib/theme';
+import { Moon, Sun, ShoppingCart } from 'lucide-react';
+
+export default function App() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    initTheme();
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  const handleToggle = () => {
+    const next = toggleDarkMode();
+    setIsDark(next);
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground p-8">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <header className="flex items-center justify-between border-b border-border pb-4">
+          <div>
+            <h1 className="text-xl font-bold">Northwind Traders • Dispatch Station</h1>
+            <p className="text-xs text-muted-foreground">Whitefield Depot, Bengaluru</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleToggle}>
+            {isDark ? <Sun className="size-4 me-1.5" /> : <Moon className="size-4 me-1.5" />}
+            {isDark ? 'Light mode' : 'Dark mode'}
+          </Button>
+        </header>
+
+        <main className="rounded-xl border border-border bg-card p-6 space-y-4">
+          <h2 className="text-sm font-semibold">Dispatch Consignment #DISP-9021</h2>
+          <p className="text-xs text-muted-foreground">
+            3 items packed and ready for carrier collection by Blue Dart Express.
+          </p>
+          <div className="pt-2">
+            <Button
+              variant="primary"
+              onClick={() => toast.success('Consignment DISP-9021 dispatched')}
+            >
+              <ShoppingCart className="size-4 me-1.5" />
+              Confirm dispatch
+            </Button>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+</Step>
+</Steps>

@@ -1,21 +1,28 @@
 ---
 title: Installation
-description: Add innostes UI to a React app in a few minutes.
+description: Install @innostes/ui, configure stylesheets, set up providers, and verify your build.
 icon: Download
 install: pnpm add @innostes/ui
 ---
 
 ## Requirements
 
-- React 17, 18 or 19 (and the matching React DOM). The test suite runs on all three.
-- Tailwind CSS v4 (optional, recommended)
+Ensure your environment satisfies the following baseline peer dependencies before installing `@innostes/ui`:
 
-`@base-ui/react`, `class-variance-authority`, `clsx` and `tailwind-merge` are installed with the package.
+| Dependency | Required version | Verification command |
+| :--- | :--- | :--- |
+| `react` | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` | `node -p "require('react/package.json').version"` |
+| `react-dom` | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` | `node -p "require('react-dom/package.json').version"` |
+| `tailwindcss` | `^4.0.0` (recommended) or `^3.4.0` | `npx tailwindcss --version` |
+
+The core primitives from `@base-ui/react`, alongside `clsx`, `tailwind-merge`, and `class-variance-authority`, are bundled with the package and do not require separate installation.
 
 <Steps>
 <Step>
 
 ### Install the package
+
+Install `@innostes/ui` using your preferred package manager:
 
 ```bash tab="pnpm"
 pnpm add @innostes/ui
@@ -29,34 +36,71 @@ npm install @innostes/ui
 yarn add @innostes/ui
 ```
 
+```bash tab="bun"
+bun add @innostes/ui
+```
+
 </Step>
 <Step>
 
-### Add the styles
+### Configure optional peer dependencies
 
-<Tabs items={['With Tailwind CSS', 'Without Tailwind CSS']}>
-<Tab value="With Tailwind CSS">
+If your application consumes the charts or rich text editor entry points, install the respective peer packages:
 
-Import the package after Tailwind in your main CSS file. Components then use **your** theme, and
-Tailwind only generates the classes the components actually use.
+<Tabs items={['Charts (@innostes/ui/charts)', 'Editor (@innostes/ui/editor)']}>
+<Tab value="Charts (@innostes/ui/charts)">
 
-```css title="app/globals.css"
-@import 'tailwindcss';
-@import '@innostes/ui/tailwind.css';
-@import '@innostes/ui/dark.css'; /* optional dark theme */
+The charts entry point is built upon `recharts`. Install `recharts` version 2.12.0 or higher:
+
+```bash tab="pnpm"
+pnpm add recharts@^2.12.0
 ```
+
+```bash tab="npm"
+npm install recharts@^2.12.0
+```
+
+```bash tab="yarn"
+yarn add recharts@^2.12.0
+```
+
+```bash tab="bun"
+bun add recharts@^2.12.0
+```
+
+> [!IMPORTANT]
+> **React 17 guidance for Recharts**: `recharts` v2 declares `react: "^16.0.0 || ^17.0.0 || ^18.0.0"`. When working in a React 17 environment with npm 7+, strict peer dependency resolution may flag secondary transitive packages. If you encounter an `ERESOLVE unable to resolve dependency tree` warning, install with `--legacy-peer-deps` or add an override to your `package.json`:
+>
+> ```json title="package.json"
+> {
+>   "pnpm": {
+>     "overrides": {
+>       "recharts": "^2.12.0"
+>     }
+>   }
+> }
+> ```
 
 </Tab>
-<Tab value="Without Tailwind CSS">
+<Tab value="Editor (@innostes/ui/editor)">
 
-Import the precompiled stylesheet once, in your app entry.
+The rich text editor is built upon Tiptap. Install the core editor dependencies:
 
-```ts title="main.tsx"
-import '@innostes/ui/styles.css';
-import '@innostes/ui/dark.css'; // optional dark theme
+```bash tab="pnpm"
+pnpm add @tiptap/react @tiptap/pm @tiptap/starter-kit
 ```
 
-It uses the default theme and contains no CSS reset, so it won't restyle the rest of your app.
+```bash tab="npm"
+npm install @tiptap/react @tiptap/pm @tiptap/starter-kit
+```
+
+```bash tab="yarn"
+yarn add @tiptap/react @tiptap/pm @tiptap/starter-kit
+```
+
+```bash tab="bun"
+bun add @tiptap/react @tiptap/pm @tiptap/starter-kit
+```
 
 </Tab>
 </Tabs>
@@ -64,51 +108,169 @@ It uses the default theme and contains no CSS reset, so it won't restyle the res
 </Step>
 <Step>
 
-### Add the providers
+### Import stylesheets
 
-Mount `Toaster` once to show [toasts](/ui/docs/components/feedback/toast), and wrap the app in
-`TooltipProvider` so tooltips share their delay.
+Configure the design token layers in your application styling pipeline. Choose the approach matching your build setup:
+
+<Tabs items={['Tailwind CSS v4', 'Tailwind CSS v3', 'Without Tailwind CSS']}>
+<Tab value="Tailwind CSS v4">
+
+Import the `@innostes/ui` token layers directly after your `@import "tailwindcss";` directive:
+
+```css title="app/global.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css"; /* Optional dark theme support */
+```
+
+Because `@innostes/ui/tailwind.css` declares token defaults via `@theme default`, any custom tokens defined in your project's `@theme` block will take precedence.
+
+</Tab>
+<Tab value="Tailwind CSS v3">
+
+Add the `@innostes/ui` compiled distribution files to the Tailwind `content` array so utility classes are not purged:
+
+```js title="tailwind.config.js"
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@innostes/ui/dist/**/*.{js,mjs}'
+  ],
+  darkMode: ['class', '[data-theme="dark"]'],
+  plugins: []
+};
+```
+
+Then import the precompiled stylesheet in your CSS entry point:
+
+```css title="src/index.css"
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "@innostes/ui/styles.css";
+@import "@innostes/ui/dark.css";
+```
+
+</Tab>
+<Tab value="Without Tailwind CSS">
+
+For non-Tailwind applications (such as vanilla Vite or Create React App setups), import the standalone compiled stylesheet:
+
+```tsx title="src/main.tsx"
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css'; // Optional dark theme
+
+ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
+```
+
+This standalone stylesheet contains all component utilities and OKLCH variable definitions without resetting global typography or breaking foreign styles.
+
+</Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+### Mount root providers
+
+Add `Toaster` for global notification management and `TooltipProvider` for shared tooltip delay coordination. If your application supports Right-to-Left (RTL) scripts such as Arabic or Hebrew, wrap the tree in `DirectionProvider`:
 
 ```tsx title="app/layout.tsx"
-import { Toaster, TooltipProvider } from '@innostes/ui';
+import { Toaster, TooltipProvider, DirectionProvider } from '@innostes/ui';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster />
+        <DirectionProvider direction="ltr">
+          <TooltipProvider delayDuration={300}>
+            {children}
+            <Toaster position="bottom-end" />
+          </TooltipProvider>
+        </DirectionProvider>
       </body>
     </html>
   );
 }
 ```
 
-Popups render in a portal at the end of `<body>`. If your root element creates its own stacking
-context, add `isolation: isolate` to it so popups always appear on top.
-
 </Step>
 <Step>
 
-### Use a component
+### Verify the installation
 
-```tsx
+Confirm your setup by rendering a test component. Create a minimal view with an interactive button:
+
+```tsx title="src/App.tsx"
 import { Button, toast } from '@innostes/ui';
 
-export function SaveButton() {
-  return <Button onClick={() => toast.success('Saved')}>Save</Button>;
+export default function App() {
+  return (
+    <div className="p-8 space-y-4">
+      <h1 className="text-xl font-semibold">Northwind Traders Portal</h1>
+      <Button
+        variant="primary"
+        onClick={() => toast.success('Purchase order PO-2026-0881 approved')}
+      >
+        Approve purchase order
+      </Button>
+    </div>
+  );
 }
 ```
+
+**You should see**: A styled blue button with focus rings on keyboard tab navigation. Clicking the button emits a toast notification at the bottom-end corner of your viewport.
 
 </Step>
 </Steps>
 
-## Next.js
+## Troubleshooting common issues
 
-Interactive components ship with `"use client"`, so you can import them straight into Server
-Components. Helpers like `cn()` and `buttonVariants()` work on the server too.
+### Duplicate React instances
 
-## TypeScript
+If you encounter errors such as `Invalid hook call` or `Cannot read properties of null (reading 'useMemo')`, your package manager may have installed duplicate copies of `react` or `react-dom`.
 
-Types ship with the package. Every prop has TSDoc, so your editor shows descriptions and defaults
-on hover.
+**Resolution**: Enforce single-instance resolution in your root `package.json`:
+
+```json title="package.json"
+{
+  "pnpm": {
+    "overrides": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  }
+}
+```
+
+For npm, use the `overrides` field; for Yarn, use `resolutions`.
+
+### Component styles not applied
+
+If components render with unstyled default browser inputs or raw HTML buttons:
+
+1. Verify that `@import "@innostes/ui/tailwind.css";` or `@import "@innostes/ui/styles.css";` is present in your global stylesheet.
+2. In Tailwind v3, confirm that `'./node_modules/@innostes/ui/dist/**/*.{js,mjs}'` is included in your `tailwind.config.js` `content` glob list.
+3. Ensure the CSS import occurs after `@import "tailwindcss";` so that semantic CSS variables override default values.
+
+### Popups rendering behind layout elements
+
+Dropdowns, tooltips, dialogs, and sheets render via a Base UI Portal mounted at `document.body`. If an ancestor element in your DOM tree defines a custom CSS stacking context (`transform`, `filter`, `perspective`, or `opacity < 1`), popups may appear beneath surrounding UI layers.
+
+**Resolution**: Add `isolation: isolate` to the ancestor element, or avoid `overflow: hidden` on parent containers enclosing portal targets.
+
+### SSR hydration warnings
+
+When using dark mode attributes (`class="dark"` or `data-theme="dark"`), browser extensions or pre-render scripts modifying the `<html>` element can trigger React hydration warnings.
+
+**Resolution**: Add `suppressHydrationWarning` to your `<html>` opening tag in `app/layout.tsx`:
+
+```tsx
+<html lang="en" suppressHydrationWarning>
+```
+
+This prevents React from reporting mismatches when theme attributes are populated before JavaScript execution.

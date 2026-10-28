@@ -1,19 +1,69 @@
 ---
 title: Typography
-description: Type scale, font stacks, and typographic hierarchy for enterprise data density.
+description: Typography scale, fluid type tokens, font stacks, and tabular numeric rules for enterprise ERP interfaces.
 ---
 
-# Typography
+The typographic scale in `@innostes/ui` balances compact information density with prolonged reading ergonomics. Designed for accounting ledgers, purchase order data grids, and inventory consoles at Northwind Traders Pvt Ltd, typography rules prioritise structural alignment and immediate legibility.
 
-Typographic scale in innostes UI balances high information density with sustained reading comfort. Designed for enterprise data grids, accounting ledgers, and operational dashboards at Northwind Traders Pvt Ltd, the typographic hierarchy prioritises tabular alignment and clear legibility.
+## Font families
 
-## Type scale
+The design system standardises on two primary font stacks:
 
-The type scale maps to CSS custom properties defined in the root stylesheet:
+| Stack | Font family specification | Intended usage |
+| :--- | :--- | :--- |
+| `font-sans` | `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` | Interface labels, navigation items, dialog titles, and general prose |
+| `font-mono` | `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace` | Monetary figures, invoice identifiers, tracking codes, and code snippets |
 
-- `text-xs` (12px): Metadata timestamps, badge labels, and compact table captions.
-- `text-sm` (14px): Standard enterprise body text, input fields, and data grid cells.
-- `text-base` (16px): Document body copy, modal subtitles, and standard card headers.
-- `text-lg` to `text-2xl` (18px–24px): Section titles, metric card values, and page headings.
+## Fluid type tokens
 
-The primary system font stack leverages modern geometric system typefaces with automatic fallback to Inter and Segoe UI, paired with monospace font stacks optimized for tabular numeric data.
+For responsive dashboards that adapt across mobile terminals and widescreen warehouse wall displays, `@innostes/ui` defines responsive fluid type tokens calculated using CSS `clamp()` in `packages/ui/tailwind/theme.css`:
+
+| Utility class | CSS clamp definition | Line height | Recommended application |
+| :--- | :--- | :--- | :--- |
+| `text-display` | `clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem)` | 1.15 | Main hero headers, marketing showcase titles, welcome screen banners |
+| `text-heading` | `clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem)` | 1.20 | Page headers (`PageHeader`), modal dialog titles, main section divides |
+| `text-subheading` | `clamp(1rem, 0.95rem + 0.2vw, 1.125rem)` | 1.40 | Card titles, subsection dividers, drawer titles |
+| `text-metric` | `clamp(1.375rem, 1.15rem + 0.9vw, 1.875rem)` | 1.15 | Key performance indicators (`MetricCard`), total invoice balances |
+
+### Fluid typography example
+
+```tsx
+export function WarehouseHeader() {
+  return (
+    <div className="space-y-1">
+      <h1 className="text-heading font-bold text-foreground">
+        Whitefield Central Logistics Depot
+      </h1>
+      <p className="text-subheading text-muted-foreground">
+        Active shipment processing and pallet clearance console
+      </p>
+    </div>
+  );
+}
+```
+
+## Static typographic scale
+
+For dense tabular displays, inputs, and form fields where deterministic line height is required for pixel alignment:
+
+| Class | Font size | Line height | Tracking | Primary usage |
+| :--- | :--- | :--- | :--- | :--- |
+| `text-xs` | 0.75rem (12px) | 1rem (16px) | Normal | Badge text, helper descriptions, table captions, timestamps |
+| `text-sm` | 0.875rem (14px) | 1.25rem (20px) | Normal | Standard enterprise body, form inputs, button labels, grid cells |
+| `text-base` | 1.0rem (16px) | 1.5rem (24px) | Normal | Reading prose, long-form documentation, modal body paragraphs |
+| `text-lg` | 1.125rem (18px) | 1.75rem (28px) | Tight | Secondary widget titles, summary card headlines |
+| `text-xl` | 1.25rem (20px) | 1.75rem (28px) | Tight | Drawer drawer headers, intermediate statistics |
+| `text-2xl` | 1.5rem (24px) | 2.0rem (32px) | Tight | Top-level summary banners, dashboard metrics |
+
+## Tabular figures in financial tables
+
+In accounting tables, invoice summaries, and financial reports, non-monospaced numbers cause columns of currency figures to jitter vertically because the digit `1` occupies less horizontal width than `8`.
+
+Always apply `font-mono` or `tabular-nums` when presenting numerical totals or currency values:
+
+```tsx
+// Correct: Columns remain strictly aligned across rows
+<td className="text-right font-mono text-sm text-foreground">
+  ₹1,45,280.00
+</td>
+```

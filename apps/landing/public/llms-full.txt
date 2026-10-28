@@ -4,39 +4,82 @@ Generated for AI assistants and offline reference.
 
 ---
 
-## Accessibility (https://innostes.com/ui/docs/accessibility)
+## Accessibility Statement (https://innostes.com/ui/docs/accessibility)
 
-Accessibility conformance standards, keyboard models, and assistive technology support.
+WCAG 2.2 Level AA conformance, component guarantees, developer responsibilities, and assistive technology testing.
 
-# Accessibility
+`@innostes/ui` is committed to delivering accessible software for all enterprise operators. Every component in the library is built and tested to conform to the **Web Content Accessibility Guidelines (WCAG) 2.2 Level AA** standard.
 
-innostes UI components conform to the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA standard. Designed for enterprise ERP and back-office applications at Northwind Traders Pvt Ltd, every primitive is engineered so that operators relying on screen readers, keyboard navigation, or high-contrast display modes complete tasks without friction.
+Whether an operator at Northwind Traders Pvt Ltd navigates via keyboard shortcuts, relies on screen readers (such as NVDA or VoiceOver), uses voice control, or enables high-contrast display modes, all workflows must remain fully functional and efficient.
 
-## Standards and conformance
+## Conformance target
 
-The component library targets WCAG 2.2 AA conformance across four core principles:
+The design system targets **WCAG 2.2 Level AA** across all four principles:
 
-- **Perceivable**: Text contrast ratios meet or exceed 4.5:1 for normal text and 3:1 for large text and non-text user interface components. Visual state indicators are never conveyed solely through colour.
-- **Operable**: All interactive elements are fully operable through the keyboard. Focus order preserves logical reading sequence, and modal containers trap keyboard focus whilst active.
-- **Understandable**: Form inputs require explicit labelling, contextual error descriptions link programmatically via `aria-describedby`, and validation failures announce dynamically via ARIA live regions.
-- **Resilient**: Markup relies on semantic HTML and WAI-ARIA 1.2 authoring patterns, ensuring compatibility across desktop browsers and assistive tools.
+1. **Perceivable**: Text and graphical elements satisfy minimum contrast ratios (≥ 4.5:1 for normal text, ≥ 3.0:1 for large text and UI components). Visual status is never communicated solely through colour.
+2. **Operable**: All interactive elements are reachable and operable via standard keyboard sequences. Focus order matches reading order, focus indicators are clearly visible, and modal overlays trap focus securely without keyboard traps.
+3. **Understandable**: Controls provide predictable state updates, clear textual error associations via `aria-describedby`, and consistent interaction patterns across forms and dialogs.
+4. **Resilient**: Components rely on semantic HTML5 primitives and WAI-ARIA 1.2 specifications, ensuring compatibility across modern browsers and assistive technologies.
 
-## Keyboard interaction model
+## What the library guarantees
 
-Components follow standard WAI-ARIA design patterns:
+When you use `@innostes/ui` primitives, the library automatically handles:
 
-- `Tab` and `Shift + Tab` navigate between interactive component boundaries.
-- Arrow keys manage roving tabindex within composite controls such as menus, tabs, radio groups, and tree views.
-- `Escape` dismisses floating overlays, popovers, context menus, and dialogs, restoring focus to the triggering element.
-- `Space` and `Enter` activate buttons and toggle selection states.
+- **Focus trapping and restoration**: Dialogs, sheets, and alert modals trap keyboard focus within the container and restore focus to the triggering element upon dismissal.
+- **Roving tabindex**: Multi-item composite widgets (such as `Tabs`, `RadioGroup`, `DropdownMenu`, `TreeView`, and `ToggleGroup`) manage `tabIndex={0}` and `tabIndex={-1}` automatically, enabling direct arrow-key navigation.
+- **ARIA attributes and live regions**: Tooltips, progress bars, toasts, and alerts emit proper ARIA roles (`role="alert"`, `role="status"`, `aria-live="polite"`).
+- **Verified token contrast**: Base design tokens in `theme.css` and `dark.css` are validated at build time to satisfy WCAG AA contrast minimums.
+- **Motion reduction**: Animations automatically disable or simplify when the user enables `prefers-reduced-motion: reduce`.
 
-## Testing and verification
+## What the application team must do
 
-Accessibility is verified through automated and manual testing pipelines:
+Accessibility is a shared responsibility between the library and the consuming application. Application developers must ensure:
 
-1. **Automated audits**: Axe-core and Vitest DOM testing run on every commit to detect missing ARIA attributes, invalid roles, and landmark omissions.
-2. **Keyboard audits**: Full focus-trap, tab order, and shortcut verifications run across composite widgets.
-3. **Screen reader verification**: Manual testing with NVDA on Windows and VoiceOver on macOS across Chrome, Firefox, and Safari.
+| Developer responsibility | Correct implementation | Why it matters |
+| :--- | :--- | :--- |
+| **Labels for icon-only buttons** | `<Button size="icon" aria-label="Delete order PO-881">` | Screen readers cannot interpret SVG glyphs without accessible names |
+| **Form error linkage** | Use `<Field>` and `<FieldError>` | Associates error text programmatically with inputs via `aria-describedby` |
+| **Heading hierarchy** | Use logical `<h1>` to `<h6>` levels | Screen reader users browse pages by jumping across heading structures |
+| **Colour redundancy** | Pair warning badges with an icon | Red-green colour-blind operators cannot rely solely on hue shifts |
+| **Table column headers** | Provide `<th>` headers with `scope="col"` | Allows screen readers to announce column context when traversing cells |
+| **Alternative text** | Provide descriptive `alt` text on images | Screen readers announce image context for visual assets |
+
+## Testing methods
+
+Our quality assurance pipeline tests accessibility through multiple layers of verification:
+
+1. **Automated component audits**: Unit tests run `axe-core` assertions across component render states to detect missing ARIA attributes, orphan labels, or invalid roles before code merges.
+2. **Deterministic contrast validation**: A build-time check (`landing:docs-check`) parses all theme tokens and calculates relative luminance to prevent contrast regressions.
+3. **Automated browser crawl**: A Playwright crawler audits documentation pages and interactive showcases for focusability, keyboard loops, and landmark semantics.
+4. **Manual assistive technology testing**: Regular manual testing verifies auditory announcements and keyboard flows.
+
+## Assistive technology testing matrix
+
+We test `@innostes/ui` against the following screen-reader and browser pairings:
+
+| Screen reader | Operating system | Tested browsers | Conformance status |
+| :--- | :--- | :--- | :--- |
+| **VoiceOver** | macOS (Sequoia / Sonoma) | Safari, Google Chrome | Fully verified in continuous QA |
+| **NVDA** | Windows 11 | Mozilla Firefox, Google Chrome | Fully verified in continuous QA |
+| **TalkBack** | Android 14 | Chrome Mobile | Verified for mobile ERP layouts |
+| **JAWS** | Windows 11 | Edge, Chrome | Scheduled on enterprise roadmap |
+| **Orca** | Linux (Ubuntu / Debian) | Firefox | Scheduled on enterprise roadmap |
+
+## Known issues and continuous hardening
+
+We maintain an active audit tracker (`AUDIT.md`) documenting accessibility improvements:
+
+- **LIB-003**: Customisable internationalisation strings across all ERP widgets (`DataTable`, `TreeView`, `KanbanBoard`) to eliminate hardcoded English text.
+- **LIB-004**: Token contrast adjustments across light and dark mode tokens to ensure 100% WCAG AA compliance across all semantic pairings.
+- **LIB-007**: Migration from physical directional CSS classes to logical bidirectional properties (`inset-inline-start`, `margin-inline-end`) for full RTL language accessibility.
+
+## Reporting an accessibility problem
+
+If you discover an accessibility barrier or an unannounced state in any `@innostes/ui` component:
+
+1. Open an issue on our repository describing the component, the expected vs actual behaviour, and the assistive technology used (including version numbers).
+2. Or contact our accessibility working group directly at `accessibility@innostes.com`.
+3. Critical accessibility defects affecting production applications are prioritised as S1 bugs in accordance with our governance policy.
 
 ---
 
@@ -3305,11 +3348,7 @@ shows it instantly, which makes toolbars feel fast.
 
 An HRMS dashboard bringing together the Sidebar, AppRail, TopBar, MetricCards, charts, and dashboard widgets.
 
-<ComponentPreview
-  name="examples/dashboard"
-  align="start"
-  className="p-0 sm:p-0"
-/>
+<ComponentPreview name="examples/dashboard" align="start" className="p-0 sm:p-0" />
 
 ## What's in it
 
@@ -3360,94 +3399,422 @@ are announced. The layout uses container queries, so it adapts to wherever it's 
 
 ## Colour (https://innostes.com/ui/docs/foundations/colour)
 
-OKLCH semantic palette, contrast tokens, and functional roles.
+OKLCH semantic palette, contrast tokens, functional roles, and verified WCAG 2.2 AA contrast ratios.
 
-# Colour
+import { ContrastTable } from '@/components/docs/contrast-table';
 
-The innostes UI design system employs a semantic colour architecture formulated in the OKLCH colour space. OKLCH guarantees perceptual uniformity across shades, ensuring predictable contrast ratios and consistent luminance across light and dark display modes.
+The `@innostes/ui` colour system is engineered for enterprise ERP operations where clarity, data hierarchy, and visual ergonomics are paramount. Formulated in the **OKLCH colour space**, our palette guarantees perceptual uniformity across shades, ensuring predictable contrast ratios and consistent luminance across light and dark display modes.
 
 ## Semantic architecture
 
-Rather than binding visual elements directly to raw hex values, the library exposes functional tokens mapped to operational roles:
+Components reference functional colour tokens rather than raw hex codes. Every token represents an operational role:
 
-- `primary`: Core interactive triggers, selected states, and brand emphasis.
-- `secondary`: Supporting interface elements, subtle hover backgrounds, and secondary actions.
-- `muted`: Low-emphasis surfaces, disabled borders, and secondary typography.
-- `accent`: Interactive callouts, active navigation items, and highlighted records.
-- `destructive`: Error banners, irreversible deletions, and critical alert indicators.
-- `success`, `warning`, `info`: Contextual status indicators for transactional data tables and badges.
+| Role | Intended application | Primary pairing |
+| :--- | :--- | :--- |
+| `background` / `foreground` | Root viewport canvas and primary body typography | Default page canvas |
+| `card` / `card-foreground` | Contained surfaces, data tables, side panels, and modal windows | Layered elevation |
+| `popover` / `popover-foreground` | Transient floating overlays, dropdown menus, and tooltips | Elevated z-index layer |
+| `primary` / `primary-foreground` | High-priority interactive triggers, primary form submissions | Brand action |
+| `secondary` / `secondary-foreground` | Alternative action triggers, filter chips, and pill toggles | Muted action |
+| `muted` / `muted-foreground` | Table column headers, field helper notes, and deactivated fills | Tertiary context |
+| `accent` / `accent-foreground` | Highlighted table rows, active navigation items, and list hovers | Interactive feedback |
+| `destructive` / `destructive-foreground` | Irreversible operations, voiding invoices, cancellation alerts | Critical risk |
+| `success` / `success-foreground` | Approved purchase orders, paid status indicators, successful syncs | Positive confirmation |
+| `warning` / `warning-foreground` | Overdue shipments, pending review alerts, stock reorder warnings | Attention required |
+| `info` / `info-foreground` | Informational callouts, carrier transit updates, system advisories | Neutral context |
 
-Detailed token swatches, dark mode mappings, and contrast ratio validation tables are maintained in `packages/ui/tailwind/theme.css`.
+## Accessibility & contrast guarantees
+
+Under WCAG 2.2 Level AA:
+- **Normal text** (under 18pt or bold under 14pt) requires a minimum contrast ratio of **4.5:1** against its background.
+- **Large text** (18pt+ or bold 14pt+) and graphical user interface components require a minimum contrast ratio of **3.0:1**.
+
+The table below is computed at build time from `packages/ui/tailwind/theme.css` and `packages/ui/tailwind/dark.css`. Every token pairing satisfies the 4.5:1 normal text standard in both light and dark themes:
+
+<ContrastTable />
+
+## Guidelines for colour application
+
+1. **Never convey meaning through colour alone**: When indicating status (e.g. an unpaid invoice or failed dispatch), always pair the semantic colour token with text or an icon (such as an alert triangle or checkmark) so colour-blind operators at Northwind Traders can distinguish states immediately.
+2. **Preserve token pairing**: Always use a background token with its corresponding foreground counterpart (e.g. `bg-primary text-primary-foreground` or `bg-destructive text-destructive-foreground`). Never mix mismatched tokens like `text-white` on `bg-warning`.
+3. **Reserve destructive for high-consequence operations**: Do not use `destructive` for optional cancel buttons. Reserve red fills for permanent deletions, invoice voiding, or warehouse order cancellations.
 
 ---
 
-## Dark mode (https://innostes.com/ui/docs/foundations/dark-mode)
+## Dark Mode (https://innostes.com/ui/docs/foundations/dark-mode)
 
-Dark theme implementation, token inversion, and hydration strategies.
+Implement dark mode across applications using class-based or data-attribute activation, next-themes, and hydration safeguards.
 
-# Dark mode
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-innostes UI provides native dark mode support across every component, chart, and widget. Theme switching relies on CSS class toggling (`.dark`) or data attributes (`data-theme="dark"`), updating OKLCH token variables without triggering component re-renders.
+`@innostes/ui` includes native dark mode styling for every component, widget, chart, and modal primitive. Theme switching works without JavaScript state recalculations: toggling an ancestor CSS class or attribute remaps the underlying CSS custom properties instantly.
 
-## Implementation overview
+## How to enable dark mode
 
-Dark mode tokens are defined in `packages/ui/tailwind/dark.css`. When the `.dark` class is applied to the root `<html>` or container element, CSS custom properties are remapped to appropriate dark-variant values.
+Import the dark stylesheet in your application CSS entry point directly after the base tokens:
 
-In Next.js applications, theme synchronization is managed using `next-themes`, ensuring zero flash of unstyled content (FOUC) during client-side hydration.
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css";
+```
+
+`@innostes/ui/dark.css` registers rules targeting either the `.dark` class or the `[data-theme='dark']` attribute on any ancestor (typically the root `<html>` element):
+
+```css
+/* Activated automatically by dark.css */
+.dark,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --color-background: oklch(14.1% 0.005 285.823);
+  --color-foreground: oklch(98.5% 0 0);
+  /* Remaining semantic token remaps */
+}
+```
+
+## Strategy: Class vs Data-Attribute
+
+`@innostes/ui` supports both conventions identically:
+
+| Strategy | Activation selector | Best suited for |
+| :--- | :--- | :--- |
+| **Class strategy** (recommended) | `<html class="dark">` | Standard Tailwind CSS workflows and `next-themes` default mode |
+| **Data attribute strategy** | `<html data-theme="dark">` | Multi-theme applications (e.g. `data-theme="high-contrast"`) |
+
+## Integration with next-themes
+
+In Next.js applications, use `next-themes` to manage theme preference, system synchronization, and local storage persistence.
+
+```tsx title="components/theme-provider.tsx"
+'use client';
+
+import * as React from 'react';
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
+}
+```
+
+## Avoiding flash of the wrong theme
+
+A common issue in server-rendered applications is Flash of Unstyled Theme (FOUT), where a user with a dark mode preference briefly sees a blinding white screen before client hydration.
+
+To prevent FOUT:
+
+1. **Add `suppressHydrationWarning`**: Always add this prop to the `<html>` tag in your root layout. This tells React to ignore differences between the server-rendered HTML and client-injected theme classes.
+2. **Use `disableTransitionOnChange`**: When switching themes, temporarily disable CSS transitions to prevent color property interpolation flickers across buttons and borders.
+3. **Vanilla / Vite blocking script**: For client-side Single Page Applications without `next-themes`, place a tiny synchronous script inside the `<head>` tag of `index.html`:
+
+```html title="index.html"
+<head>
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+</head>
+```
+
+## How to test dark mode
+
+### Unit testing with Vitest and Testing Library
+
+Verify that components respond correctly when the dark mode class is applied to the container:
+
+```tsx title="src/components/theme.test.tsx"
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { Button } from '@innostes/ui';
+
+describe('Dark mode rendering', () => {
+  beforeEach(() => {
+    document.documentElement.classList.add('dark');
+  });
+
+  afterEach(() => {
+    document.documentElement.classList.remove('dark');
+  });
+
+  it('renders primary button under dark theme class', () => {
+    render(<Button variant="primary">Approve PO</Button>);
+    const button = screen.getByRole('button', { name: 'Approve PO' });
+    expect(button).toBeInTheDocument();
+    expect(document.documentElement).toHaveClass('dark');
+  });
+});
+```
+
+### End-to-end testing with Playwright
+
+Test dark theme visual rendering and token contrast using Playwright's color scheme emulation:
+
+```ts title="tests/theme.spec.ts"
+import { test, expect } from '@playwright/test';
+
+test.describe('Dark theme operations portal', () => {
+  test.use({ colorScheme: 'dark' });
+
+  test('displays dark background and correct token contrast', async ({ page }) => {
+    await page.goto('/dashboard');
+    const html = page.locator('html');
+    await expect(html).toHaveClass(/dark/);
+
+    const body = page.locator('body');
+    await expect(body).toHaveCSS('background-color', 'rgb(9, 9, 11)');
+  });
+});
+```
 
 ---
 
 ## Icons (https://innostes.com/ui/docs/foundations/icons)
 
-Iconography principles, Lucide icon integration, and accessibility conventions.
+Iconography standards, Lucide React integration, sizing rules inside components, and accessibility requirements.
 
-# Icons
+`@innostes/ui` standardises on [`lucide-react`](https://lucide.dev) for interface iconography. Lucide icons provide consistent 24px bounding boxes, balanced optical weights (2px default stroke), and clean geometric curves that pair naturally with the typography scale.
 
-Icons in innostes UI provide immediate visual cues alongside textual labels. The design system standardises on the Lucide icon library, ensuring consistent stroke weights, optical alignment, and predictable bounding boxes across all components.
+## Recommended package
 
-## Guidelines
+Install `lucide-react` in your project:
 
-- **Textual accompaniment**: Icons that trigger interactive operations must include visible text or an explicit `aria-label` for assistive technologies.
-- **Decorative iconography**: Icons that accompany descriptive text should receive `aria-hidden="true"` to prevent duplicate screen reader announcements.
-- **Sizing standards**: Standard icon sizes align with typographic scale: `size-3.5` (14px) for compact tags, `size-4` (16px) for standard buttons and inputs, and `size-5` (20px) for navigation items.
+```bash
+pnpm add lucide-react
+```
+
+## Sizing standards inside components
+
+Icons inside `@innostes/ui` primitives should match the surrounding font metrics. Use Tailwind's `size-*` utility classes to constrain both width and height simultaneously:
+
+| Component context | Recommended size | Tailwind utility | Example pairing |
+| :--- | :--- | :--- | :--- |
+| Badges, compact chips, table tags | 14px × 14px | `size-3.5` | `<CheckCircle2 className="size-3.5 me-1" />` |
+| Standard buttons (`size="md"`), form inputs | 16px × 16px | `size-4` | `<Search className="size-4 me-1.5" />` |
+| Large buttons (`size="lg"`), dialog headers | 20px × 20px | `size-5` | `<Download className="size-5 me-2" />` |
+| Application rail items, widget header icons | 24px × 24px | `size-6` | `<Building2 className="size-6 text-primary" />` |
+
+## Optical alignment and RTL spacing
+
+To preserve bidirectional text support (Left-to-Right and Right-to-Left), never use physical margin utilities like `mr-*` or `ml-*` on icons. Use CSS logical inline margins:
+
+```tsx
+// Leading icon: Margin inline end
+<Button variant="primary">
+  <CheckCircle2 className="size-4 me-1.5" />
+  <span>Approve purchase order</span>
+</Button>
+
+// Trailing icon: Margin inline start
+<Button variant="outline">
+  <span>Review delivery schedule</span>
+  <ChevronRight className="size-4 ms-1.5" />
+</Button>
+```
+
+In Left-to-Right layouts, `me-1.5` outputs `margin-right: 0.375rem`. In Right-to-Left layouts (e.g. Arabic or Hebrew), it automatically flips to `margin-left: 0.375rem`.
+
+## Accessibility requirements
+
+### Decorative icons
+
+When an icon accompanies descriptive text (such as "Download invoice PDF" next to a file icon), the icon is purely decorative. Lucide React components include `aria-hidden="true"` by default. Ensure custom SVGs also declare `aria-hidden="true"` so screen readers do not announce redundant symbols:
+
+```tsx
+// Correct: Screen reader announces only "Download invoice"
+<Button variant="outline">
+  <FileDown className="size-4 me-1.5" aria-hidden="true" />
+  <span>Download invoice</span>
+</Button>
+```
+
+### Icon-only buttons
+
+When rendering a button that contains only an icon (such as a close cross, edit pencil, or notification bell), assistive technologies cannot infer the action from visual glyphs.
+
+You **must** provide a descriptive `aria-label` or an accessible visually hidden label:
+
+```tsx
+// Required: aria-label clarifies the action for screen-reader users
+<Button
+  variant="ghost"
+  size="icon"
+  aria-label="Delete line item 14 from purchase order"
+  onClick={handleDelete}
+>
+  <Trash2 className="size-4 text-destructive" />
+</Button>
+```
+
+Alternatively, wrap tooltip components around icon buttons to provide both visual hovering cues and assistive hints:
+
+```tsx
+<Tooltip>
+  <TooltipTrigger render={
+    <Button variant="ghost" size="icon" aria-label="Export ledger to Excel">
+      <FileSpreadsheet className="size-4" />
+    </Button>
+  } />
+  <TooltipContent>Export ledger to Excel (.xlsx)</TooltipContent>
+</Tooltip>
+```
 
 ---
 
 ## Motion (https://innostes.com/ui/docs/foundations/motion)
 
-Transition durations, easing curves, and reduced-motion accessibility.
+Transition durations, easing curves, and prefers-reduced-motion accessibility standards.
 
-# Motion
+Motion in `@innostes/ui` is functional, understated, and swift. Animation serves exclusively to orient operators during spatial state transitions—such as expanding accordion panels, opening dialog overlays, sliding drawers, and displaying toast notifications.
 
-Motion in innostes UI is functional, understated, and swift. Animation serves exclusively to orient operators during spatial state transitions—such as expanding accordion panels, opening dialog overlays, and displaying toast notifications.
+In high-density ERP and logistics environments, excessive decorative animation introduces cognitive friction. Every motion token is bounded by strict duration ceilings.
 
-## Animation principles
+## Duration scale
 
-- **Duration**: Micro-interactions complete within 150ms to 200ms. Structural layout changes and large overlay entrances finish within 250ms to prevent perceptible lag.
-- **Easing**: Natural decelerate curves (`cubic-bezier(0, 0, 0.2, 1)`) govern entrance animations, whilst accelerate curves govern dismissals.
-- **Reduced motion**: Every animated component respects the user's `prefers-reduced-motion: reduce` system preference by replacing motion with immediate opacity fades or zero-duration transitions.
+The design system standardises on four deterministic duration tokens:
+
+| Token / Utility | Milliseconds | Recommended application |
+| :--- | :--- | :--- |
+| `duration-75` | 75ms | Micro-feedback (button active depress, toggle knob shift) |
+| `duration-150` | 150ms | Tooltip reveals, dropdown menu item hover fills, checkbox checkmarks |
+| `duration-200` | 200ms | Sidebar width collapse (`Sidebar`), dropdown popup scale entrances |
+| `duration-300` | 300ms | Modal dialog entrances (`Dialog`), sheet drawer slide-ins (`Sheet`), accordion panel reveal |
+
+Transitions exceeding 300ms are strictly avoided to ensure interface responsiveness across operational terminals at Northwind Traders.
+
+## Easing curves
+
+Natural physics curves govern component transitions:
+
+```css
+/* Entrances: Natural decelerate curve (swift entry, gentle settle) */
+--ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+/* Standard transitions: Smooth symmetric curve */
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* Exits and dismissals: Quick accelerate curve */
+--ease-in: cubic-bezier(0.4, 0, 1, 1);
+```
+
+## Reduced-motion behaviour
+
+For operators with vestibular motion disorders or sensory sensitivities, continuous animation or sudden spatial displacement can cause dizziness and discomfort.
+
+`@innostes/ui` respects the user's `prefers-reduced-motion` operating system setting across all components:
+
+- **Skeleton**: Replaces continuous pulsing (`animate-pulse`) with a static muted background fill via `motion-reduce:animate-none`.
+- **Sidebar**: Collapses width instantly without transition tweening using `motion-reduce:transition-none`.
+- **Progress**: Disables continuous indeterminate bar sweeps via `motion-reduce:data-indeterminate:animate-none`.
+- **Dialogs & Sheets**: Replaces slide-and-scale physics with an instantaneous opacity fade.
+
+### Testing reduced motion
+
+To verify reduced-motion compliance in development:
+
+1. Open Chrome DevTools or Firefox Developer Tools.
+2. Open the Rendering drawer (`Ctrl+Shift+P` / `Cmd+Shift+P` -> type "Rendering").
+3. Set **Emulate CSS media feature prefers-reduced-motion** to `prefers-reduced-motion: reduce`.
+4. Trigger sidebars, dialogs, and progress bars: confirm that physical movement is replaced with instantaneous state changes.
 
 ---
 
-## Spacing and layout (https://innostes.com/ui/docs/foundations/spacing)
+## Spacing and Layout (https://innostes.com/ui/docs/foundations/spacing)
 
-4px spatial rhythm, density modes, and responsive layout primitives.
+4px base spatial rhythm, density modes, container queries, and responsive layout primitives.
 
-# Spacing and layout
+`@innostes/ui` constructs layouts using a **4-pixel base grid**. Consistent spatial intervals eliminate visual clutter, guarantee optical balance, and establish clear structural hierarchies across complex ERP workflows.
 
-Consistent spatial rhythm prevents visual clutter and establishes structural relationships between interface elements. innostes UI adopts a 4px base increment across padding, margin, gap, and dimension tokens.
+## The 4px spacing scale
 
-## Spatial grid
+All margin, padding, gap, and component dimension values increment in multiples of 4 pixels:
 
-Spatial values follow a linear 4px progression aligned with standard Tailwind CSS spacing utilities:
+| Token / Class | Pixels | Rem equivalent | Primary usage |
+| :--- | :--- | :--- | :--- |
+| `0.5` | 2px | 0.125rem | Hairline borders, sub-pixel alignment offsets |
+| `1` | 4px | 0.25rem | Gap between button icons and text labels, inline badge padding |
+| `1.5` | 6px | 0.375rem | Compact menu item vertical padding |
+| `2` | 8px | 0.5rem | Button vertical padding (small), form label margins |
+| `2.5` | 10px | 0.625rem | Standard input vertical padding |
+| `3` | 12px | 0.75rem | Standard button horizontal padding, table cell vertical padding |
+| `4` | 16px | 1.0rem | Standard card internal padding, dialog gutters, component gaps |
+| `6` | 24px | 1.5rem | Page section margins, large modal gutters |
+| `8` | 32px | 2.0rem | Dashboard grid column gaps, page header margins |
+| `12` | 48px | 3.0rem | Top-level view gutters on desktop screens |
 
-- `1` (4px): Micro-spacing between icon glyphs and adjacent inline text.
-- `2` (8px): Compact padding inside buttons, badges, and grouped controls.
-- `3` (12px): Default internal padding for form inputs and table cells.
-- `4` (16px): Card padding, dialog gutters, and standard component gaps.
-- `6` (24px) to `8` (32px): Layout section margins and page header separation.
+## Density modes
 
-Components accommodate both standard and compact density modes, allowing operators to adjust data density according to screen resolution and task requirements.
+Enterprise ERP operators frequently switch between high-density review screens (e.g. reviewing 500 purchase order lines) and standard operational forms. `@innostes/ui` supports density adaptation across data display and form primitives:
+
+| Density mode | Table row height | Input height | Button padding | Recommended context |
+| :--- | :--- | :--- | :--- | :--- |
+| **Compact** | 32px | 32px (`size="sm"`) | `py-1 px-2.5` | Data audit grids, split-pane inspection panels |
+| **Default** | 44px | 40px (`size="md"`) | `py-2 px-3.5` | Standard operations forms, purchase order authoring |
+| **Comfortable** | 56px | 48px (`size="lg"`) | `py-3 px-5` | Touch-screen warehouse terminals, welcome wizards |
+
+```tsx title="Example: Compact vs Default Table Rows"
+// Compact data grid for invoice auditing
+<Table className="text-xs">
+  <TableRow className="h-8">
+    <TableCell className="py-1 px-2.5 font-mono">INV-8901</TableCell>
+    <TableCell className="py-1 px-2.5">₹45,000.00</TableCell>
+  </TableRow>
+</Table>
+```
+
+## Container queries
+
+In modular dashboards, components are frequently placed into variable-width containers (such as resizable `SplitPane` panels, collapsing sidebars, or multi-column card grids). Relying on viewport media queries (`@media (min-width: ...)`) causes components to render poorly when housed inside a narrow panel on a wide screen.
+
+`@innostes/ui` leverages CSS Container Queries (`@container`) across composite widgets:
+
+```tsx title="components/order-summary-card.tsx"
+export function OrderSummaryCard() {
+  return (
+    // Declare container context on wrapper
+    <div className="@container rounded-xl border border-border bg-card p-4">
+      {/* Stack vertically in narrow slots, switch to row when container exceeds 380px */}
+      <div className="flex flex-col @[380px]:flex-row @[380px]:items-center @[380px]:justify-between gap-3">
+        <div>
+          <span className="text-xs text-muted-foreground">Order PO-2026-0881</span>
+          <div className="text-lg font-semibold text-foreground">₹1,45,280.00</div>
+        </div>
+        <button className="w-full @[380px]:w-auto text-xs py-1.5 px-3 rounded bg-primary text-primary-foreground">
+          View details
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+## Core layout primitives
+
+| Component | Responsibility | Documentation link |
+| :--- | :--- | :--- |
+| `Sidebar` | Multi-level collapsible navigation panel supporting fixed, floating, and mini rail modes | [Sidebar docs](/ui/docs/components/layout/sidebar) |
+| `AppRail` | Ultra-compact vertical icon rail for switching top-level enterprise modules | [App Rail docs](/ui/docs/components/layout/app-rail) |
+| `TopBar` | Global application header with search, notifications, tenant switcher, and user menu | [Top Bar docs](/ui/docs/components/layout/top-bar) |
+| `PageHeader` | Standardised title banner with breadcrumbs, descriptions, and action triggers | [Page Header docs](/ui/docs/components/layout/page-header) |
+| `SplitPane` | Resizable multi-column workspace with keyboard collapse and state persistence | [Split Pane docs](/ui/docs/components/layout/split-pane) |
+| `ScrollArea` | Custom cross-browser scrollbar container that preserves keyboard accessibility | [Scroll Area docs](/ui/docs/components/layout/scroll-area) |
 
 ---
 
@@ -3497,46 +3864,171 @@ A component graduates from Beta to Stable only when meeting all of the following
 
 ## Typography (https://innostes.com/ui/docs/foundations/typography)
 
-Type scale, font stacks, and typographic hierarchy for enterprise data density.
+Typography scale, fluid type tokens, font stacks, and tabular numeric rules for enterprise ERP interfaces.
 
-# Typography
+The typographic scale in `@innostes/ui` balances compact information density with prolonged reading ergonomics. Designed for accounting ledgers, purchase order data grids, and inventory consoles at Northwind Traders Pvt Ltd, typography rules prioritise structural alignment and immediate legibility.
 
-Typographic scale in innostes UI balances high information density with sustained reading comfort. Designed for enterprise data grids, accounting ledgers, and operational dashboards at Northwind Traders Pvt Ltd, the typographic hierarchy prioritises tabular alignment and clear legibility.
+## Font families
 
-## Type scale
+The design system standardises on two primary font stacks:
 
-The type scale maps to CSS custom properties defined in the root stylesheet:
+| Stack | Font family specification | Intended usage |
+| :--- | :--- | :--- |
+| `font-sans` | `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` | Interface labels, navigation items, dialog titles, and general prose |
+| `font-mono` | `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace` | Monetary figures, invoice identifiers, tracking codes, and code snippets |
 
-- `text-xs` (12px): Metadata timestamps, badge labels, and compact table captions.
-- `text-sm` (14px): Standard enterprise body text, input fields, and data grid cells.
-- `text-base` (16px): Document body copy, modal subtitles, and standard card headers.
-- `text-lg` to `text-2xl` (18px–24px): Section titles, metric card values, and page headings.
+## Fluid type tokens
 
-The primary system font stack leverages modern geometric system typefaces with automatic fallback to Inter and Segoe UI, paired with monospace font stacks optimized for tabular numeric data.
+For responsive dashboards that adapt across mobile terminals and widescreen warehouse wall displays, `@innostes/ui` defines responsive fluid type tokens calculated using CSS `clamp()` in `packages/ui/tailwind/theme.css`:
+
+| Utility class | CSS clamp definition | Line height | Recommended application |
+| :--- | :--- | :--- | :--- |
+| `text-display` | `clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem)` | 1.15 | Main hero headers, marketing showcase titles, welcome screen banners |
+| `text-heading` | `clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem)` | 1.20 | Page headers (`PageHeader`), modal dialog titles, main section divides |
+| `text-subheading` | `clamp(1rem, 0.95rem + 0.2vw, 1.125rem)` | 1.40 | Card titles, subsection dividers, drawer titles |
+| `text-metric` | `clamp(1.375rem, 1.15rem + 0.9vw, 1.875rem)` | 1.15 | Key performance indicators (`MetricCard`), total invoice balances |
+
+### Fluid typography example
+
+```tsx
+export function WarehouseHeader() {
+  return (
+    <div className="space-y-1">
+      <h1 className="text-heading font-bold text-foreground">
+        Whitefield Central Logistics Depot
+      </h1>
+      <p className="text-subheading text-muted-foreground">
+        Active shipment processing and pallet clearance console
+      </p>
+    </div>
+  );
+}
+```
+
+## Static typographic scale
+
+For dense tabular displays, inputs, and form fields where deterministic line height is required for pixel alignment:
+
+| Class | Font size | Line height | Tracking | Primary usage |
+| :--- | :--- | :--- | :--- | :--- |
+| `text-xs` | 0.75rem (12px) | 1rem (16px) | Normal | Badge text, helper descriptions, table captions, timestamps |
+| `text-sm` | 0.875rem (14px) | 1.25rem (20px) | Normal | Standard enterprise body, form inputs, button labels, grid cells |
+| `text-base` | 1.0rem (16px) | 1.5rem (24px) | Normal | Reading prose, long-form documentation, modal body paragraphs |
+| `text-lg` | 1.125rem (18px) | 1.75rem (28px) | Tight | Secondary widget titles, summary card headlines |
+| `text-xl` | 1.25rem (20px) | 1.75rem (28px) | Tight | Drawer drawer headers, intermediate statistics |
+| `text-2xl` | 1.5rem (24px) | 2.0rem (32px) | Tight | Top-level summary banners, dashboard metrics |
+
+## Tabular figures in financial tables
+
+In accounting tables, invoice summaries, and financial reports, non-monospaced numbers cause columns of currency figures to jitter vertically because the digit `1` occupies less horizontal width than `8`.
+
+Always apply `font-mono` or `tabular-nums` when presenting numerical totals or currency values:
+
+```tsx
+// Correct: Columns remain strictly aligned across rows
+<td className="text-right font-mono text-sm text-foreground">
+  ₹1,45,280.00
+</td>
+```
 
 ---
 
-## Next.js (https://innostes.com/ui/docs/frameworks/nextjs)
+## Next.js App Router (https://innostes.com/ui/docs/frameworks/nextjs)
 
-Integration guide for Next.js App Router, React Server Components, and styling.
+Complete integration guide for Next.js App Router, Server Components, dark mode with next-themes, and styling.
 
-# Next.js
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-`@innostes/ui` integrates cleanly with Next.js 15 and 16 App Router. Because the library uses modern Base UI primitives with client-side interactive state, components declare `'use client'` where necessary, enabling composition inside React Server Components.
+`@innostes/ui` is engineered to work directly with Next.js App Router. Interactive primitives ship with `'use client'` directives at their entry boundaries, allowing developers to import them into React Server Components (RSCs) without additional wrappers.
 
-## Setup
+## Architectural boundaries
 
-Install `@innostes/ui` alongside required styling dependencies:
+When developing with Next.js App Router, understand how `@innostes/ui` components interact with the server/client boundary:
 
-```bash
-npm install @innostes/ui lucide-react clsx tailwind-merge
+1. **Direct RSC composition**: Interactive components such as `Button`, `DataTable`, `Dialog`, and `Tabs` declare `'use client'` internally. You can import and render them directly inside server-rendered `page.tsx` or `layout.tsx` files.
+2. **Server-side utilities**: Pure helper functions including `cn()`, `formatDate()`, and variant factories (`buttonVariants()`, `badgeVariants()`) contain no DOM or browser dependencies and execute safely in Server Components, Route Handlers, and Server Actions.
+3. **Event handlers & state**: Passing callbacks (such as `onClick`, `onValueChange`, or `onSubmit`) across the server-to-client boundary requires defining that sub-tree inside a client component (`'use client'`).
+
+## Step-by-step setup
+
+<Steps>
+<Step>
+
+### Install dependencies
+
+Install `@innostes/ui` alongside `next-themes` and `lucide-react`:
+
+```bash tab="pnpm"
+pnpm add @innostes/ui next-themes lucide-react
 ```
 
-Import the stylesheet in your root layout:
+```bash tab="npm"
+npm install @innostes/ui next-themes lucide-react
+```
 
-```tsx
-// app/layout.tsx
-import '@innostes/ui/styles.css';
+```bash tab="yarn"
+yarn add @innostes/ui next-themes lucide-react
+```
+
+```bash tab="bun"
+bun add @innostes/ui next-themes lucide-react
+```
+
+</Step>
+<Step>
+
+### Configure stylesheet imports
+
+In your Next.js application global stylesheet, import Tailwind CSS followed by the `@innostes/ui` design tokens:
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css";
+```
+
+</Step>
+<Step>
+
+### Create the ThemeProvider wrapper
+
+Because `next-themes` requires React context, create a client wrapper component:
+
+```tsx title="components/theme-provider.tsx"
+'use client';
+
+import * as React from 'react';
+import { ThemeProvider as NextThemesProvider } from 'next-themes';
+
+export function ThemeProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider>) {
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+}
+```
+
+</Step>
+<Step>
+
+### Assemble the root layout
+
+Configure your `app/layout.tsx` with hydration protection, theme switching, and global UI providers:
+
+```tsx title="app/layout.tsx"
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { Toaster, TooltipProvider } from '@innostes/ui';
+import { ThemeProvider } from '@/components/theme-provider';
+import './globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'Northwind Traders ERP',
+  description: 'Operations management portal for Northwind Traders Pvt Ltd',
+};
 
 export default function RootLayout({
   children,
@@ -3544,119 +4036,448 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider delayDuration={200}>
+            {children}
+            <Toaster position="bottom-end" />
+          </TooltipProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
 ```
 
-Components that wrap client events (such as `Button`, `Dialog`, or `Select`) can be imported directly into server components or nested within interactive client wrappers.
+> [!NOTE]
+> `suppressHydrationWarning` on `<html>` prevents React from reporting mismatches caused by `next-themes` injecting the active theme class (`class="dark"`) prior to client hydration.
+
+</Step>
+<Step>
+
+### Build a theme toggle button
+
+Create an accessible theme toggle that switches between light, dark, and system modes:
+
+```tsx title="components/theme-toggle.tsx"
+'use client';
+
+import * as React from 'react';
+import { useTheme } from 'next-themes';
+import { Button } from '@innostes/ui';
+import { Moon, Sun } from 'lucide-react';
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <Button variant="outline" size="sm" aria-label="Toggle colour theme" disabled />;
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      aria-label="Toggle colour theme"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+    >
+      {theme === 'dark' ? (
+        <Sun className="size-4 me-1.5 text-amber-500" />
+      ) : (
+        <Moon className="size-4 me-1.5 text-blue-600" />
+      )}
+      <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+    </Button>
+  );
+}
+```
+
+</Step>
+<Step>
+
+### Render a Server Component page
+
+Compose library components directly within your server-rendered home page:
+
+```tsx title="app/page.tsx"
+import { Button } from '@innostes/ui';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { ArrowRight, Package } from 'lucide-react';
+import Link from 'next/link';
+
+export default async function HomePage() {
+  // Server-side data fetching runs safely
+  const organisation = 'Northwind Traders Pvt Ltd';
+  const openOrdersCount = 42;
+
+  return (
+    <main className="min-h-screen p-8 max-w-5xl mx-auto space-y-6">
+      <header className="flex items-center justify-between border-b border-border pb-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{organisation}</h1>
+          <p className="text-sm text-muted-foreground">Bengaluru Distribution Hub</p>
+        </div>
+        <ThemeToggle />
+      </header>
+
+      <section className="rounded-xl border border-border bg-card p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
+            <Package className="size-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Active Fulfilment Queue</h2>
+            <p className="text-xs text-muted-foreground">{openOrdersCount} purchase orders awaiting clearance</p>
+          </div>
+        </div>
+
+        <div className="pt-2">
+          <Button
+            variant="primary"
+            render={<Link href="/orders" />}
+          >
+            Review orders
+            <ArrowRight className="size-4 ms-1.5" />
+          </Button>
+        </div>
+      </section>
+    </main>
+  );
+}
+```
+
+</Step>
+</Steps>
 
 ---
 
-## Vite (https://innostes.com/ui/docs/frameworks/vite)
+## Vite React (https://innostes.com/ui/docs/frameworks/vite)
 
-Integration guide for Vite React projects with Tailwind CSS.
+Complete integration guide for Vite React projects with Tailwind CSS v4, TypeScript, and dark mode.
 
-# Vite
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-Vite provides a lightning-fast build environment for Single Page Applications (SPAs). `@innostes/ui` ships with pre-bundled ES modules and CSS entry points designed for instant hot-module reloading in Vite.
+`@innostes/ui` ships with standard ECMAScript modules (ESM) and precompiled CSS files that integrate directly with Vite React applications.
 
-## Setup
+## Prerequisites
 
-Create or configure your Vite project with React and TypeScript:
+Initialize a standard Vite React TypeScript application if you do not have an existing workspace:
 
 ```bash
-npm install @innostes/ui lucide-react clsx tailwind-merge
+pnpm create vite northwind-portal --template react-ts
+cd northwind-portal
 ```
 
-Include the global stylesheet in your main entry point:
+## Step-by-step setup
 
-```tsx
-// src/main.tsx
+<Steps>
+<Step>
+
+### Install dependencies
+
+Install `@innostes/ui` alongside `lucide-react`:
+
+```bash tab="pnpm"
+pnpm add @innostes/ui lucide-react
+```
+
+```bash tab="npm"
+npm install @innostes/ui lucide-react
+```
+
+```bash tab="yarn"
+yarn add @innostes/ui lucide-react
+```
+
+```bash tab="bun"
+bun add @innostes/ui lucide-react
+```
+
+</Step>
+<Step>
+
+### Configure Tailwind CSS or static styles
+
+Choose the style pipeline that matches your Vite project configuration:
+
+<Tabs items={['Tailwind CSS v4 (Vite plugin)', 'Standard CSS (Without Tailwind)']}>
+<Tab value="Tailwind CSS v4 (Vite plugin)">
+
+Install `@tailwindcss/vite` and configure `vite.config.ts`:
+
+```bash
+pnpm add -D @tailwindcss/vite tailwindcss
+```
+
+```ts title="vite.config.ts"
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+});
+```
+
+Then import Tailwind and `@innostes/ui` tokens in `src/index.css`:
+
+```css title="src/index.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css";
+```
+
+</Tab>
+<Tab value="Standard CSS (Without Tailwind)">
+
+If your project does not use Tailwind CSS, import the standalone compiled stylesheet in `src/main.tsx`:
+
+```tsx title="src/main.tsx"
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css';
+```
+
+This imports all token variables and component utility classes without injecting a global CSS reset.
+
+</Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+### Mount root providers
+
+In `src/main.tsx`, wrap the application in `TooltipProvider` and register `Toaster`:
+
+```tsx title="src/main.tsx"
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import '@innostes/ui/styles.css';
+import { TooltipProvider, Toaster, DirectionProvider } from '@innostes/ui';
+import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <DirectionProvider direction="ltr">
+      <TooltipProvider delayDuration={200}>
+        <App />
+        <Toaster position="bottom-end" />
+      </TooltipProvider>
+    </DirectionProvider>
+  </React.StrictMode>,
 );
 ```
 
-When building with Tailwind CSS v4, reference `@innostes/ui/tailwind` in your primary CSS entry to inherit all OKLCH design tokens.
+</Step>
+<Step>
+
+### Create a theme switcher helper
+
+In a Single Page Application without a framework router, toggle dark mode by manipulating the `dark` class on `document.documentElement`:
+
+```tsx title="src/lib/theme.ts"
+export function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  return isDark;
+}
+
+export function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && prefersDark)) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+```
+
+</Step>
+<Step>
+
+### Build your application view
+
+Compose components in `src/App.tsx`:
+
+```tsx title="src/App.tsx"
+import React, { useEffect, useState } from 'react';
+import { Button, toast } from '@innostes/ui';
+import { toggleDarkMode, initTheme } from './lib/theme';
+import { Moon, Sun, ShoppingCart } from 'lucide-react';
+
+export default function App() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    initTheme();
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  const handleToggle = () => {
+    const next = toggleDarkMode();
+    setIsDark(next);
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground p-8">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <header className="flex items-center justify-between border-b border-border pb-4">
+          <div>
+            <h1 className="text-xl font-bold">Northwind Traders • Dispatch Station</h1>
+            <p className="text-xs text-muted-foreground">Whitefield Depot, Bengaluru</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleToggle}>
+            {isDark ? <Sun className="size-4 me-1.5" /> : <Moon className="size-4 me-1.5" />}
+            {isDark ? 'Light mode' : 'Dark mode'}
+          </Button>
+        </header>
+
+        <main className="rounded-xl border border-border bg-card p-6 space-y-4">
+          <h2 className="text-sm font-semibold">Dispatch Consignment #DISP-9021</h2>
+          <p className="text-xs text-muted-foreground">
+            3 items packed and ready for carrier collection by Blue Dart Express.
+          </p>
+          <div className="pt-2">
+            <Button
+              variant="primary"
+              onClick={() => toast.success('Consignment DISP-9021 dispatched')}
+            >
+              <ShoppingCart className="size-4 me-1.5" />
+              Confirm dispatch
+            </Button>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+```
+
+</Step>
+</Steps>
 
 ---
 
 ## Introduction (https://innostes.com/ui/docs)
 
-Accessible React components for admin interfaces, built on Base UI and Tailwind CSS.
+Enterprise UI component library for ERP and operations systems, built on Base UI and Tailwind CSS.
 
-innostes UI is the component library behind every innostes product. It gives you everything an admin
-panel needs (forms, tables, dialogs, navigation and an app shell), with one consistent API and
-your own theme.
+import { Accessibility, Palette, Terminal, Layers, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { HeroDemo } from '@/components/docs/hero-demo';
+import { ComponentIndex } from '@/components/docs/component-index';
 
-<ComponentPreview name="examples/dashboard" align="start" className="p-0 sm:p-0" />
+`@innostes/ui` is an enterprise component library engineered specifically for back-office applications, enterprise resource planning (ERP) consoles, and high-density operations dashboards.
 
-## Why innostes UI
+Designed to meet the demands of operations teams such as Northwind Traders Pvt Ltd, the library provides keyboard-first interaction models, strict type safety, predictable state composition, and full token-based styling.
+
+<HeroDemo />
+
+## Core guarantees
+
+Every component in `@innostes/ui` is governed by explicit architectural policies verified through automated regression suites:
 
 <Cards>
-  <Card icon={<Accessibility />} title="Accessible by default" href="/ui/docs/resources/conventions#accessibility">
-    Built on Base UI: keyboard support, focus management and ARIA follow WAI-ARIA, and every
-    component is tested for it.
+  <Card icon={<Accessibility />} title="WCAG 2.2 AA Conformance" href="/ui/docs/accessibility">
+    All interactive primitives satisfy WCAG 2.2 Level AA requirements, including 4.5:1 text contrast, visible keyboard focus indicators, and screen-reader announcements.
   </Card>
-  <Card icon={<Palette />} title="Your theme, everywhere" href="/ui/docs/theming">
-    Semantic design tokens with Tailwind defaults. Change a token once and every component follows,
-    including dark mode.
+  <Card icon={<Layers />} title="React 17, 18, and 19 Support" href="/ui/docs/resources/versioning">
+    Tested continuously across React 17.0.2, React 18.3.1, and React 19.0.0 without legacy lifecycle warnings or runtime hook incompatibilities.
   </Card>
-  <Card icon={<Wind />} title="With or without Tailwind" href="/ui/docs/installation">
-    Tailwind apps share their theme with the components. Other apps import one stylesheet.
+  <Card icon={<ShieldCheck />} title="Strict Semantic Versioning" href="/ui/docs/resources/versioning">
+    Zero breaking API changes within a major release. Deprecations provide at least one full minor cycle warning with migration pathways.
   </Card>
-  <Card icon={<Terminal />} title="Made for developers" href="/ui/docs/resources/conventions">
-    Typed props with TSDoc, controlled or uncontrolled state, `render` composition, and `className`
-    that always wins.
+  <Card icon={<Terminal />} title="Permissive MIT Licence" href="/ui/docs/resources/faq">
+    Distributed under the MIT licence for unrestricted commercial use across internal enterprise tools and customer-facing portals.
   </Card>
 </Cards>
 
-## Components
+## Architectural foundation
 
-| Category | Components |
-| --- | --- |
-| **Actions** | [Button](/ui/docs/components/actions/button), [Button Group](/ui/docs/components/actions/button-group), [Toggle](/ui/docs/components/actions/toggle), [Toggle Group](/ui/docs/components/actions/toggle-group) |
-| **Forms** | [Field & Form](/ui/docs/components/forms/field), [Input](/ui/docs/components/forms/input), [Textarea](/ui/docs/components/forms/textarea), [Checkbox](/ui/docs/components/forms/checkbox), [Radio Group](/ui/docs/components/forms/radio-group), [Switch](/ui/docs/components/forms/switch), [Select](/ui/docs/components/forms/select), [Combobox](/ui/docs/components/forms/combobox), [Number Field](/ui/docs/components/forms/number-field), [Slider](/ui/docs/components/forms/slider) |
-| **Data display** | [Data Table](/ui/docs/components/data-display/data-table), [Table](/ui/docs/components/data-display/table), [Card](/ui/docs/components/data-display/card), [Stat](/ui/docs/components/data-display/stat), [Badge](/ui/docs/components/data-display/badge), [Avatar](/ui/docs/components/data-display/avatar), [Empty State](/ui/docs/components/data-display/empty-state), [Kbd](/ui/docs/components/data-display/kbd) |
-| **Feedback** | [Alert](/ui/docs/components/feedback/alert), [Toast](/ui/docs/components/feedback/toast), [Progress](/ui/docs/components/feedback/progress), [Meter](/ui/docs/components/feedback/meter), [Skeleton](/ui/docs/components/feedback/skeleton), [Spinner](/ui/docs/components/feedback/spinner) |
-| **Overlays** | [Dialog](/ui/docs/components/overlays/dialog), [Alert Dialog](/ui/docs/components/overlays/alert-dialog), [Sheet](/ui/docs/components/overlays/sheet), [Popover](/ui/docs/components/overlays/popover), [Tooltip](/ui/docs/components/overlays/tooltip), [Dropdown Menu](/ui/docs/components/overlays/dropdown-menu), [Context Menu](/ui/docs/components/overlays/context-menu) |
-| **Navigation** | [Tabs](/ui/docs/components/navigation/tabs), [Breadcrumb](/ui/docs/components/navigation/breadcrumb), [Pagination](/ui/docs/components/navigation/pagination), [Accordion](/ui/docs/components/navigation/accordion), [Collapsible](/ui/docs/components/navigation/collapsible) |
-| **Layout** | [Sidebar](/ui/docs/components/layout/sidebar), [Page Header](/ui/docs/components/layout/page-header), [Separator](/ui/docs/components/layout/separator), [Scroll Area](/ui/docs/components/layout/scroll-area) |
+`@innostes/ui` combines unstyled accessible primitives with token-driven design:
+
+- **Base UI primitives**: Dropdowns, dialogs, popovers, and form fields rely on Base UI for focus trapping, keyboard navigation, and ARIA state management.
+- **Tailwind CSS design tokens**: Every colour, spacing increment, and typography rule maps to semantic CSS custom properties defined in OKLCH colour space.
+- **Render prop composition**: Clean component substitution using the `render` prop pattern without invalid DOM nesting or ref-forwarding errors.
+- **Zero runtime CSS injection**: Styles compile ahead of time through PostCSS and Tailwind, eliminating hydration mismatches and runtime CSS-in-JS overhead.
+
+## Package entry points
+
+The library is organised into four distinct entry points to keep application bundles minimal:
+
+```
+@innostes/ui          -> Core UI primitives, forms, data display, and overlays
+@innostes/ui/widgets  -> Administrative cards, kanban boards, and audit feeds
+@innostes/ui/charts   -> Data visualisation components (requires Recharts)
+@innostes/ui/editor   -> Rich text document editing (requires Tiptap)
+```
+
+| Entry point | Typical use cases | Peer dependencies |
+| :--- | :--- | :--- |
+| `@innostes/ui` | Buttons, tables, modals, form inputs, navigation layouts | React, React DOM, Lucide React |
+| `@innostes/ui/widgets` | `MetricCard`, `KanbanBoard`, `PermissionMatrix`, `ChangeLog` | None beyond `@innostes/ui` |
+| `@innostes/ui/charts` | `CartesianCharts` (bar, line, area), `DonutChart` | `recharts` (>= 2.12.0) |
+| `@innostes/ui/editor` | `RichTextEditor`, formatting toolbars, document authoring | `@tiptap/react`, `@tiptap/pm` |
+
+## Component index
+
+The table below is generated directly from source frontmatter and tracks current stability tiers across all categories:
+
+<ComponentIndex />
 
 ## Next steps
 
 <Cards>
-  <Card title="Installation" href="/ui/docs/installation" />
-  <Card title="API Conventions" href="/ui/docs/resources/conventions" />
+  <Card title="Installation guide" href="/ui/docs/installation">
+    Install the package, configure your style pipeline, and register essential providers.
+  </Card>
+  <Card title="Design foundations" href="/ui/docs/foundations/colour">
+    Explore the OKLCH semantic colour palette, verified contrast ratios, and typography scale.
+  </Card>
+  <Card title="API conventions" href="/ui/docs/resources/conventions">
+    Learn the composition model, `render` prop rules, event detail typing, and slot styling.
+  </Card>
+  <Card title="Next.js integration" href="/ui/docs/frameworks/nextjs">
+    Set up Server Component boundaries, theme persistence, and hydration protection in Next.js App Router.
+  </Card>
 </Cards>
 
 ---
 
 ## Installation (https://innostes.com/ui/docs/installation)
 
-Add innostes UI to a React app in a few minutes.
+Install @innostes/ui, configure stylesheets, set up providers, and verify your build.
 
 ## Requirements
 
-- React 17, 18 or 19 (and the matching React DOM). The test suite runs on all three.
-- Tailwind CSS v4 (optional, recommended)
+Ensure your environment satisfies the following baseline peer dependencies before installing `@innostes/ui`:
 
-`@base-ui/react`, `class-variance-authority`, `clsx` and `tailwind-merge` are installed with the package.
+| Dependency | Required version | Verification command |
+| :--- | :--- | :--- |
+| `react` | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` | `node -p "require('react/package.json').version"` |
+| `react-dom` | `^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0` | `node -p "require('react-dom/package.json').version"` |
+| `tailwindcss` | `^4.0.0` (recommended) or `^3.4.0` | `npx tailwindcss --version` |
+
+The core primitives from `@base-ui/react`, alongside `clsx`, `tailwind-merge`, and `class-variance-authority`, are bundled with the package and do not require separate installation.
 
 <Steps>
 <Step>
 
 ### Install the package
+
+Install `@innostes/ui` using your preferred package manager:
 
 ```bash tab="pnpm"
 pnpm add @innostes/ui
@@ -3670,34 +4491,71 @@ npm install @innostes/ui
 yarn add @innostes/ui
 ```
 
+```bash tab="bun"
+bun add @innostes/ui
+```
+
 </Step>
 <Step>
 
-### Add the styles
+### Configure optional peer dependencies
 
-<Tabs items={['With Tailwind CSS', 'Without Tailwind CSS']}>
-<Tab value="With Tailwind CSS">
+If your application consumes the charts or rich text editor entry points, install the respective peer packages:
 
-Import the package after Tailwind in your main CSS file. Components then use **your** theme, and
-Tailwind only generates the classes the components actually use.
+<Tabs items={['Charts (@innostes/ui/charts)', 'Editor (@innostes/ui/editor)']}>
+<Tab value="Charts (@innostes/ui/charts)">
 
-```css title="app/globals.css"
-@import 'tailwindcss';
-@import '@innostes/ui/tailwind.css';
-@import '@innostes/ui/dark.css'; /* optional dark theme */
+The charts entry point is built upon `recharts`. Install `recharts` version 2.12.0 or higher:
+
+```bash tab="pnpm"
+pnpm add recharts@^2.12.0
 ```
+
+```bash tab="npm"
+npm install recharts@^2.12.0
+```
+
+```bash tab="yarn"
+yarn add recharts@^2.12.0
+```
+
+```bash tab="bun"
+bun add recharts@^2.12.0
+```
+
+> [!IMPORTANT]
+> **React 17 guidance for Recharts**: `recharts` v2 declares `react: "^16.0.0 || ^17.0.0 || ^18.0.0"`. When working in a React 17 environment with npm 7+, strict peer dependency resolution may flag secondary transitive packages. If you encounter an `ERESOLVE unable to resolve dependency tree` warning, install with `--legacy-peer-deps` or add an override to your `package.json`:
+>
+> ```json title="package.json"
+> {
+>   "pnpm": {
+>     "overrides": {
+>       "recharts": "^2.12.0"
+>     }
+>   }
+> }
+> ```
 
 </Tab>
-<Tab value="Without Tailwind CSS">
+<Tab value="Editor (@innostes/ui/editor)">
 
-Import the precompiled stylesheet once, in your app entry.
+The rich text editor is built upon Tiptap. Install the core editor dependencies:
 
-```ts title="main.tsx"
-import '@innostes/ui/styles.css';
-import '@innostes/ui/dark.css'; // optional dark theme
+```bash tab="pnpm"
+pnpm add @tiptap/react @tiptap/pm @tiptap/starter-kit
 ```
 
-It uses the default theme and contains no CSS reset, so it won't restyle the rest of your app.
+```bash tab="npm"
+npm install @tiptap/react @tiptap/pm @tiptap/starter-kit
+```
+
+```bash tab="yarn"
+yarn add @tiptap/react @tiptap/pm @tiptap/starter-kit
+```
+
+```bash tab="bun"
+bun add @tiptap/react @tiptap/pm @tiptap/starter-kit
+```
 
 </Tab>
 </Tabs>
@@ -3705,54 +4563,172 @@ It uses the default theme and contains no CSS reset, so it won't restyle the res
 </Step>
 <Step>
 
-### Add the providers
+### Import stylesheets
 
-Mount `Toaster` once to show [toasts](/ui/docs/components/feedback/toast), and wrap the app in
-`TooltipProvider` so tooltips share their delay.
+Configure the design token layers in your application styling pipeline. Choose the approach matching your build setup:
+
+<Tabs items={['Tailwind CSS v4', 'Tailwind CSS v3', 'Without Tailwind CSS']}>
+<Tab value="Tailwind CSS v4">
+
+Import the `@innostes/ui` token layers directly after your `@import "tailwindcss";` directive:
+
+```css title="app/global.css"
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css"; /* Optional dark theme support */
+```
+
+Because `@innostes/ui/tailwind.css` declares token defaults via `@theme default`, any custom tokens defined in your project's `@theme` block will take precedence.
+
+</Tab>
+<Tab value="Tailwind CSS v3">
+
+Add the `@innostes/ui` compiled distribution files to the Tailwind `content` array so utility classes are not purged:
+
+```js title="tailwind.config.js"
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@innostes/ui/dist/**/*.{js,mjs}'
+  ],
+  darkMode: ['class', '[data-theme="dark"]'],
+  plugins: []
+};
+```
+
+Then import the precompiled stylesheet in your CSS entry point:
+
+```css title="src/index.css"
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "@innostes/ui/styles.css";
+@import "@innostes/ui/dark.css";
+```
+
+</Tab>
+<Tab value="Without Tailwind CSS">
+
+For non-Tailwind applications (such as vanilla Vite or Create React App setups), import the standalone compiled stylesheet:
+
+```tsx title="src/main.tsx"
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css'; // Optional dark theme
+
+ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
+```
+
+This standalone stylesheet contains all component utilities and OKLCH variable definitions without resetting global typography or breaking foreign styles.
+
+</Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+### Mount root providers
+
+Add `Toaster` for global notification management and `TooltipProvider` for shared tooltip delay coordination. If your application supports Right-to-Left (RTL) scripts such as Arabic or Hebrew, wrap the tree in `DirectionProvider`:
 
 ```tsx title="app/layout.tsx"
-import { Toaster, TooltipProvider } from '@innostes/ui';
+import { Toaster, TooltipProvider, DirectionProvider } from '@innostes/ui';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster />
+        <DirectionProvider direction="ltr">
+          <TooltipProvider delayDuration={300}>
+            {children}
+            <Toaster position="bottom-end" />
+          </TooltipProvider>
+        </DirectionProvider>
       </body>
     </html>
   );
 }
 ```
 
-Popups render in a portal at the end of `<body>`. If your root element creates its own stacking
-context, add `isolation: isolate` to it so popups always appear on top.
-
 </Step>
 <Step>
 
-### Use a component
+### Verify the installation
 
-```tsx
+Confirm your setup by rendering a test component. Create a minimal view with an interactive button:
+
+```tsx title="src/App.tsx"
 import { Button, toast } from '@innostes/ui';
 
-export function SaveButton() {
-  return <Button onClick={() => toast.success('Saved')}>Save</Button>;
+export default function App() {
+  return (
+    <div className="p-8 space-y-4">
+      <h1 className="text-xl font-semibold">Northwind Traders Portal</h1>
+      <Button
+        variant="primary"
+        onClick={() => toast.success('Purchase order PO-2026-0881 approved')}
+      >
+        Approve purchase order
+      </Button>
+    </div>
+  );
 }
 ```
+
+**You should see**: A styled blue button with focus rings on keyboard tab navigation. Clicking the button emits a toast notification at the bottom-end corner of your viewport.
 
 </Step>
 </Steps>
 
-## Next.js
+## Troubleshooting common issues
 
-Interactive components ship with `"use client"`, so you can import them straight into Server
-Components. Helpers like `cn()` and `buttonVariants()` work on the server too.
+### Duplicate React instances
 
-## TypeScript
+If you encounter errors such as `Invalid hook call` or `Cannot read properties of null (reading 'useMemo')`, your package manager may have installed duplicate copies of `react` or `react-dom`.
 
-Types ship with the package. Every prop has TSDoc, so your editor shows descriptions and defaults
-on hover.
+**Resolution**: Enforce single-instance resolution in your root `package.json`:
+
+```json title="package.json"
+{
+  "pnpm": {
+    "overrides": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  }
+}
+```
+
+For npm, use the `overrides` field; for Yarn, use `resolutions`.
+
+### Component styles not applied
+
+If components render with unstyled default browser inputs or raw HTML buttons:
+
+1. Verify that `@import "@innostes/ui/tailwind.css";` or `@import "@innostes/ui/styles.css";` is present in your global stylesheet.
+2. In Tailwind v3, confirm that `'./node_modules/@innostes/ui/dist/**/*.{js,mjs}'` is included in your `tailwind.config.js` `content` glob list.
+3. Ensure the CSS import occurs after `@import "tailwindcss";` so that semantic CSS variables override default values.
+
+### Popups rendering behind layout elements
+
+Dropdowns, tooltips, dialogs, and sheets render via a Base UI Portal mounted at `document.body`. If an ancestor element in your DOM tree defines a custom CSS stacking context (`transform`, `filter`, `perspective`, or `opacity < 1`), popups may appear beneath surrounding UI layers.
+
+**Resolution**: Add `isolation: isolate` to the ancestor element, or avoid `overflow: hidden` on parent containers enclosing portal targets.
+
+### SSR hydration warnings
+
+When using dark mode attributes (`class="dark"` or `data-theme="dark"`), browser extensions or pre-render scripts modifying the `<html>` element can trigger React hydration warnings.
+
+**Resolution**: Add `suppressHydrationWarning` to your `<html>` opening tag in `app/layout.tsx`:
+
+```tsx
+<html lang="en" suppressHydrationWarning>
+```
+
+This prevents React from reporting mismatches when theme attributes are populated before JavaScript execution.
 
 ---
 
@@ -3865,186 +4841,169 @@ Contributions to `@innostes/ui` are welcome from engineering teams across Northw
 
 ## API Conventions (https://innostes.com/ui/docs/resources/conventions)
 
-The rules every innostes UI component follows, so you can guess the API.
+Core architectural principles, state models, polymorphic composition, and styling conventions across @innostes/ui.
 
-Learn these once and every component works the way you expect.
+`@innostes/ui` adheres to strict architectural conventions across all primitives. Learning these conventions allows developers to predict prop names, event payloads, composition patterns, and styling hooks across the entire design system.
 
-## Composition
+## Composition & exports
 
-Components with several parts are **flat named exports**, not namespaces:
+All components are exported as flat, named exports from the package entry points. Primitives with multiple child slots (such as `Dialog`, `Select`, or `Tabs`) are imported individually rather than accessed via namespaces:
 
 ```tsx
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@innostes/ui';
+import { MetricCard } from '@innostes/ui/widgets';
+import { CartesianCharts } from '@innostes/ui/charts';
 ```
 
-Everything is exported from the package root. Imports are tree-shaken: you only ship what you use.
+All exports are fully tree-shakeable: your bundler includes only the code for components your application imports.
 
+## Controlled & uncontrolled state
 
-## Customization
+Every stateful primitive supports both uncontrolled and controlled operation using standard React naming conventions:
 
-innostes UI provides several mechanisms for customization, from global theming to pinpoint overrides.
+| Uncontrolled prop | Controlled prop | Change callback | Event details payload |
+| :--- | :--- | :--- | :--- |
+| `defaultValue` | `value` | `onValueChange(value, eventDetails)` | `{ reason?: string; event: Event }` |
+| `defaultOpen` | `open` | `onOpenChange(open, eventDetails)` | `{ reason?: string; event: Event }` |
+| `defaultChecked` | `checked` | `onCheckedChange(checked, eventDetails)` | `{ event: Event }` |
+| `defaultPressed` | `pressed` | `onPressedChange(pressed, eventDetails)` | `{ event: Event }` |
 
-### 1. Design tokens
+### Event details pattern
 
-Design tokens are CSS custom properties defined in `packages/ui/tailwind/theme.css`. Changing a token re-themes every component that uses it automatically across both light and dark modes.
-
-```css
-/* Change the primary colour and fluid type scale globally */
-@theme {
-  --color-primary: var(--color-indigo-600);
-  --text-display: clamp(2rem, 1.5rem + 2.5vw, 3rem);
-}
-```
-
-### 2. CSS variables for sizing
-
-Certain dimensions are exposed as CSS variables rather than semantic tokens. This allows you to set them via component props or override them in CSS.
+Callbacks pass the updated value as the first argument, followed by an optional `eventDetails` object indicating the origin trigger (e.g. keyboard escape vs pointer click):
 
 ```tsx
-// Set via prop (writes the CSS variable inline)
-<SidebarProvider width="20rem">
-  <Sidebar />
-</SidebarProvider>
+<Dialog
+  open={isOpen}
+  onOpenChange={(nextOpen, details) => {
+    if (!nextOpen && details?.reason === 'outside-press') {
+      // Prevent closing when user clicks outside modal
+      return;
+    }
+    setIsOpen(nextOpen);
+  }}
+>
+  {/* Modal contents */}
+</Dialog>
 ```
 
-```css
-/* Or override globally in your CSS */
-:root {
-  --sidebar-width: 20rem;
-  --sidebar-width-icon: 4rem;
-  --sidebar-width-mobile: min(20rem, 85vw);
-  --app-rail-width: 5rem;
-  --top-bar-height: 4.5rem;
-}
-```
+## Polymorphism with the `render` prop
 
-### 3. `className`
-
-Like any React component, the plain `className` prop acts as a Tailwind escape hatch on the component's root element. It is merged using `tailwind-merge`, so your classes win over internal defaults.
+`@innostes/ui` avoids the legacy Radix `asChild` pattern. Instead, primitives built on Base UI utilize the **`render` prop** pattern. This merges accessibility attributes, focus handlers, and class names directly into the custom child element:
 
 ```tsx
-<Button className="rounded-full shadow-lg">Save</Button>
+import Link from 'next/link';
+import { Button } from '@innostes/ui';
+
+// Compose an accessible button that renders as a Next.js client link
+<Button
+  variant="primary"
+  nativeButton={false}
+  render={<Link href="/orders/PO-2026-0881" />}
+>
+  View purchase order
+</Button>
 ```
 
-### 4. `classNames` (multi-part overrides)
+When delegating button rendering to a link element (`<a>`), specify `nativeButton={false}` so the component does not emit an invalid HTML `<button>` inside an anchor.
 
-For complex components with multiple parts, the `classNames` prop (using `SlotClassNames<Slot>`) allows you to override styles for specific internal slots.
+## Customisation
 
-Every styled element carries a `data-slot` attribute. Values passed to `classNames` are merged last, resolving conflicts via Tailwind.
+`@innostes/ui` provides four distinct layers for styling overrides:
+
+### 1. The `className` prop
+
+The `className` prop applies to the component root. Passed classes are merged through `tailwind-merge`, ensuring that user-provided utilities override internal defaults:
+
+```tsx
+<Button className="w-full justify-start font-mono">
+  PO-2026-0881
+</Button>
+```
+
+On interactive primitives, `className` can also accept a function receiving the current component state:
+
+```tsx
+<Button className={({ disabled }) => (disabled ? 'opacity-40 cursor-not-allowed' : '')}>
+  Submit order
+</Button>
+```
+
+### 2. Multi-part styling with `classNames`
+
+Composite widgets and complex data display components provide a `classNames` prop accepting a map of slot names to utility strings:
 
 ```tsx
 <MetricCard
-  label="Revenue"
-  value="$12,000"
+  label="Total Procurement"
+  value="₹1,45,280.00"
   classNames={{
-    root: 'border-blue-200',
-    value: 'text-blue-700 font-serif'
+    root: 'border-blue-500/30 bg-blue-50/10',
+    label: 'text-blue-700 dark:text-blue-400 font-semibold',
+    value: 'font-mono text-2xl tracking-tight',
   }}
 />
 ```
 
-The following components support the `classNames` prop:
-`ActionList`, `ActivityFeed`, `AppSwitcher`, `CommandPalette`, `DataTable`, `DonutChart`, `EmptyState`, `EntityList`, `MetricCard`, `Notifications`, `PageHeader`, `QuickActions`, `Stepper`, `UserMenu`, `WelcomeBanner`, `WidgetCard`.
+### 3. The `data-slot` attribute
 
-### 5. `render` prop (polymorphism)
-
-Via Base UI's `useRender`/`mergeProps`, you can swap the underlying element or component entirely while keeping the component's behavior and ARIA attributes intact.
-
-```tsx
-// Renders the button as a Next.js Link
-<Button render={<Link href="/settings" />} nativeButton={false}>
-  Settings
-</Button>
-```
-
-## Responsiveness
-
-### 1. Fluid typography
-
-Instead of fixed sizes or viewport breakpoints, innostes UI uses `clamp()`-based fluid typography for smooth scaling.
+Every internal element emits a deterministic `data-slot` attribute (e.g. `data-slot="dialog-content"`, `data-slot="card-header"`). You can target child slots from parent stylesheets or container selectors:
 
 ```css
-/* Fluid type automatically scales based on viewport width */
---text-heading: clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);
+/* Customise all metric card values inside a financial summary section */
+.finance-overview [data-slot="metric-card-value"] {
+  font-family: var(--font-mono);
+  color: var(--color-emerald-700);
+}
 ```
 
-### 2. Container queries
+### 4. Interactive state attributes
 
-For component-level responsiveness, innostes UI relies on CSS container queries (`@container`, `@max-*`) rather than viewport breakpoints. This is crucial because components often live inside sidebars or panels and need to respond to their *available space*, not the overall screen size.
+Primitives expose interactive state via HTML `data-*` attributes (`data-state="open"`, `data-checked`, `data-disabled`, `data-highlighted`, `data-invalid`). You can style these states using Tailwind CSS variants:
 
 ```tsx
-// DataTable switches to stack mode based on its container's width, not the screen width
-<DataTable responsive="stack" data={data} columns={columns} />
+<div className="border-border data-invalid:border-destructive data-invalid:ring-destructive">
+  {/* Field contents */}
+</div>
 ```
 
-Components utilizing container queries include `DataTable`, `Stepper`, and `WelcomeBanner`.
+### 5. Server-safe variant helpers
 
-## Controlled and uncontrolled
-
-Every stateful component works both ways, using React's naming:
-
-| Uncontrolled | Controlled | Callback |
-| --- | --- | --- |
-| `defaultValue` | `value` | `onValueChange` |
-| `defaultOpen` | `open` | `onOpenChange` |
-| `defaultChecked` | `checked` | `onCheckedChange` |
-| `defaultPressed` | `pressed` | `onPressedChange` |
-
-Callbacks receive the new value first, then an `eventDetails` object (with `reason` and `event`).
-
-## Styling
-
-- **`className`** is merged with `tailwind-merge`, so your classes win over ours.
-  On interactive parts it can also be a function of the component state:
-  `className={({ disabled }) => (disabled ? 'opacity-30' : undefined)}`.
-- **`data-slot`** names every part (`data-slot="dialog-content"`), so you can target parts from CSS
-  or a parent: `[&_[data-slot=card-title]]:text-lg`.
-- **State attributes** come from Base UI: `data-open`, `data-checked`, `data-disabled`,
-  `data-highlighted`, `data-invalid`, … Style states with Tailwind's `data-*:` variants.
-- **Variant helpers** (`buttonVariants`, `badgeVariants`, `inputVariants`, `toggleVariants`) give you
-  the classes without the component, e.g. for router links. They're server-safe.
-
-## Rendering another element
-
-Parts built on Base UI take a `render` prop to change the element or compose with your own:
+Every styled component exports its underlying class-variance-authority helper function (e.g. `buttonVariants()`, `badgeVariants()`, `inputVariants()`). These functions are pure JavaScript and execute safely on the server:
 
 ```tsx
-<Button render={<Link href="/orders" />} nativeButton={false}>Orders</Button>
-<DialogTrigger render={<Button variant="outline" />}>Edit</DialogTrigger>
+import { buttonVariants } from '@innostes/ui';
+
+// Generate button styles for standard HTML or external router links
+const linkClasses = buttonVariants({ variant: 'outline', size: 'sm' });
 ```
 
-Our props and handlers are merged into the element you pass.
+## Ref forwarding
 
-## Refs
+Every component wraps its DOM root in React's `forwardRef`. Refs point directly to native DOM elements (`HTMLButtonElement`, `HTMLDivElement`, `HTMLInputElement`), allowing direct integration with form management libraries (such as React Hook Form) across React 17, React 18, and React 19.
 
-Every component forwards `ref` to its root element with `forwardRef`, so refs work the same on
-React 17, 18 and 19.
+## Server Components & client boundaries
 
-## Server Components
+- **Interactive components** declare `'use client'` at their file headers. You can import them directly into Server Components in Next.js App Router without manual wrappers.
+- **Pure helpers** (`cn()`, `formatDate()`, `buttonVariants()`, `badgeVariants()`) do not import browser-specific APIs and execute on both client and server.
 
-Interactive components ship with `"use client"`, so you can import them into Server Components.
-Pure helpers (`cn`, `buttonVariants`, `getPaginationRange`, …) don't, and work on the server.
+## Standard size scale
 
-## Sizes
+Interactive controls share a unified size scale so adjacent controls align in toolbars and data tables:
 
-Controls share one size scale so they line up in a row:
+| Size | Height | Recommended application |
+| :--- | :--- | :--- |
+| `sm` | 32px | High-density audit grids, compact filter bars, table pagination |
+| `md` | 40px | Standard forms, default modal actions, primary toolbars |
+| `lg` | 48px | Mobile ERP terminals, high-consequence confirmation dialogs |
 
-| Size | Height | Use |
-| --- | --- | --- |
-| `sm` | 32px | Dense tables, toolbars |
-| `md` | 40px | Default |
-| `lg` | 48px | Marketing pages, touch-first screens |
+## Internationalisation & RTL support
 
-## Accessibility
+All customer-facing text is customizable to support enterprise multi-language requirements. Rather than hardcoding English strings, components expose override props:
 
-- Keyboard support and ARIA come from Base UI, which follows the WAI-ARIA Authoring Practices.
-- Icon-only controls require an `aria-label`. The docs for each component list what you must provide.
-- Every component is tested for its roles and keyboard behaviour.
-
-## Versioning
-
-innostes UI follows [semantic versioning](https://semver.org). Breaking changes only happen in major
-versions and are listed in the changelog with a migration note.
+- `closeLabel`: Dialog, Alert, Sheet dismissal labels (defaults to `"Close"`).
+- `labels`: Component-specific string maps (e.g. `labels={{ previousPage: 'Previous', nextPage: 'Next' }}` on `Pagination`).
+- **Logical CSS properties**: Styles use CSS logical properties (`margin-inline-end`, `inset-inline-start`, `border-inline-start`) instead of physical directions (`left`, `right`, `mr-`, `ml-`). Wrap the application in `<DirectionProvider direction="rtl">` for Arabic, Hebrew, or Urdu localization.
 
 ---
 
@@ -4158,86 +5117,165 @@ The library supports modern evergreen desktop and mobile browsers:
 
 ---
 
-## Theming (https://innostes.com/ui/docs/theming)
+## Theming & Design Tokens (https://innostes.com/ui/docs/theming)
 
-Change colours once in your Tailwind theme and every component follows.
+Semantic design token architecture, OKLCH colour system, theme overrides, multi-tenant scoping, and generated token reference.
 
-Components are styled with **semantic tokens** such as `bg-primary`, `text-muted-foreground` or
-`border-border`. Each token is a CSS variable with a default from Tailwind's palette.
+import { TokenReference } from '@/components/docs/token-reference';
+import { ThemingDemo } from '@/components/docs/button-demos';
+
+`@innostes/ui` styles every primitive through **semantic design tokens**. Instead of scattering arbitrary hex codes or hardcoded utility classes across markup, components reference role-based CSS custom properties such as `bg-primary`, `text-muted-foreground`, and `border-border`.
 
 <ThemingDemo />
 
-## Override tokens
+## How tokens work
 
-With Tailwind, set any token in your `@theme` block. Anything you leave out keeps its default.
+The design token system operates on three foundational principles:
+
+1. **Role-based abstraction**: Tokens represent functional interface roles (`card`, `primary`, `destructive`, `muted`) rather than literal colours. Swapping a primary action colour requires changing one variable.
+2. **Foreground pairing**: Every container or surface token has a strictly coupled foreground counterpart (`primary-foreground`, `card-foreground`, `destructive-foreground`) guaranteed to satisfy WCAG 2.2 AA contrast ratios.
+3. **Perceptual uniformity with OKLCH**: Dark mode and theme overrides use the OKLCH colour model (`oklch(L C H)`), ensuring linear lightness transitions without unpredictable perceived brightness shifts across different hues.
+
+## Overriding tokens
+
+### Tailwind CSS v4
+
+In Tailwind v4, declare custom tokens inside your `@theme` block. Because `@innostes/ui/tailwind.css` marks defaults with `@theme default`, any rule defined in your application stylesheet takes precedence:
 
 ```css title="app/globals.css"
-@import 'tailwindcss';
-@import '@innostes/ui/tailwind.css';
+@import "tailwindcss";
+@import "@innostes/ui/tailwind.css";
+@import "@innostes/ui/dark.css";
 
 @theme {
-  --color-primary: var(--color-emerald-600);
-  --color-primary-hover: var(--color-emerald-700);
-  --radius-md: 0.75rem;
+  /* Override primary action to forest emerald */
+  --color-primary: oklch(50.8% 0.144 164.215);
+  --color-primary-hover: oklch(43.5% 0.138 164.5);
+  --color-primary-foreground: oklch(100% 0 0);
+
+  /* Adjust border rounding */
+  --radius-md: 0.5rem;
 }
 ```
 
-Because defaults point at Tailwind's palette (`--color-primary` is `--color-blue-600`), changing
-your palette also changes the components.
+### Tailwind CSS v3
 
-Without Tailwind, set the same CSS variables on `:root`:
+For Tailwind v3, map the CSS custom properties inside your `tailwind.config.js`:
 
-```css
+```js title="tailwind.config.js"
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: 'var(--color-primary)',
+          hover: 'var(--color-primary-hover)',
+          foreground: 'var(--color-primary-foreground)',
+        },
+      },
+    },
+  },
+};
+```
+
+### Without Tailwind CSS
+
+When using plain CSS, override variables on `:root` or a scoped selector:
+
+```css title="styles/theme.css"
 :root {
-  --color-primary: #16a34a;
-  --color-primary-hover: #15803d;
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-primary-foreground: #ffffff;
 }
 ```
-
-## Dark mode
-
-Import the dark theme. It switches on under a `.dark` class or `data-theme="dark"` on any ancestor,
-usually `<html>`, which is what `next-themes` and most theme switchers set.
-
-```css
-@import '@innostes/ui/dark.css';
-```
-
-To customise it, override tokens inside your own `.dark` block after the import.
 
 ## Scoped themes
 
-Tokens are plain CSS variables, so you can re-theme a part of the page, e.g. a white-label area:
+Because tokens are standard CSS custom properties, you can scope different themes to specific DOM branches without affecting the rest of the application:
 
-```tsx
-<section style={{ '--color-primary': 'var(--color-violet-600)' } as React.CSSProperties}>
-  <Button>Uses violet</Button>
-</section>
+```css title="app/globals.css"
+/* Scoped finance sub-ledger theme */
+.theme-finance {
+  --color-primary: oklch(50.8% 0.144 164.215);
+  --color-primary-hover: oklch(43.5% 0.138 164.5);
+  --color-primary-foreground: oklch(100% 0 0);
+  --color-card: oklch(98% 0.01 160);
+}
 ```
 
-## Tokens
+Apply the class to any enclosing element:
 
-| Token | Default | Used for |
-| --- | --- | --- |
-| `background` / `foreground` | white / zinc-950 | Page surface and text |
-| `card` / `card-foreground` | white / zinc-950 | Cards, tables, sidebar |
-| `popover` / `popover-foreground` | white / zinc-950 | Menus, dialogs, popovers, toasts |
-| `primary` (`-hover`, `-foreground`) | blue-600 (blue-700, white) | Main actions, selection, focus |
-| `secondary` (`-hover`, `-foreground`) | zinc-100 (zinc-200, zinc-900) | Secondary actions |
-| `muted` / `muted-foreground` | zinc-100 / zinc-500 | Subtle backgrounds, help text |
-| `accent` / `accent-foreground` | zinc-100 / zinc-900 | Hovered and highlighted items |
-| `destructive` (`-hover`, `-foreground`) | red-600 (red-700, white) | Dangerous actions, errors |
-| `success` / `success-foreground` | emerald-600 / white | Positive status |
-| `warning` / `warning-foreground` | amber-500 / amber-950 | Caution status |
-| `info` / `info-foreground` | sky-600 / white | Neutral status |
-| `border` | zinc-200 | Dividers and outlines |
-| `input` | zinc-300 | Form control borders |
-| `ring` | blue-500 | Focus outlines |
-| `overlay` | black / 40% | Backdrop behind dialogs |
+```tsx title="app/finance/page.tsx"
+import { Button, Card } from '@innostes/ui';
 
-Each token is a colour variable: `--color-<token>`, used as `bg-<token>`, `text-<token>`,
-`border-<token>` and so on. Sizes, radius and fonts use Tailwind's standard tokens
-(`--spacing`, `--radius-md`, `--text-sm`, …).
+export function FinanceSection() {
+  return (
+    <div className="theme-finance p-6">
+      <Card>
+        <p className="text-sm">Northwind Traders Accounting Module</p>
+        <Button variant="primary">Generate Balance Sheet</Button>
+      </Card>
+    </div>
+  );
+}
+```
+
+## White-label & multi-tenant theming
+
+In multi-tenant ERP deployments, different subsidiaries or client organisations require distinct branding. Implement this by dynamically injecting tenant-specific CSS variables at runtime:
+
+```tsx title="components/tenant-provider.tsx"
+import * as React from 'react';
+
+interface TenantTheme {
+  primary: string;
+  primaryHover: string;
+  primaryForeground: string;
+}
+
+const TENANT_THEMES: Record<string, TenantTheme> = {
+  'northwind-bengaluru': {
+    primary: 'oklch(54.6% 0.245 262.881)', // Blue
+    primaryHover: 'oklch(48.8% 0.243 264.376)',
+    primaryForeground: 'oklch(100% 0 0)',
+  },
+  'western-logistics': {
+    primary: 'oklch(50.8% 0.144 164.215)', // Emerald
+    primaryHover: 'oklch(43.5% 0.138 164.5)',
+    primaryForeground: 'oklch(100% 0 0)',
+  },
+};
+
+export function TenantProvider({
+  tenantId,
+  children,
+}: {
+  tenantId: string;
+  children: React.ReactNode;
+}) {
+  const theme = TENANT_THEMES[tenantId] || TENANT_THEMES['northwind-bengaluru'];
+
+  const style = {
+    '--color-primary': theme.primary,
+    '--color-primary-hover': theme.primaryHover,
+    '--color-primary-foreground': theme.primaryForeground,
+  } as React.CSSProperties;
+
+  return (
+    <div data-tenant={tenantId} style={style}>
+      {children}
+    </div>
+  );
+}
+```
+
+## Complete token reference
+
+The table below is generated directly from `theme.css` and `dark.css` at build time, displaying the light theme OKLCH value, dark theme OKLCH value, and an interactive swatch for every semantic token:
+
+<TokenReference />
 
 ---
 
@@ -4507,7 +5545,7 @@ work anywhere.
 
 ## Customization
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customization) for the full customization model.
+Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
 
 ## API Reference
 
@@ -4648,7 +5686,7 @@ For full charts with axes and tooltips, use the chart components (coming next).
 
 ## Customization
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customization) for the full customization model.
+Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
 
 ## API Reference
 
@@ -4749,7 +5787,7 @@ const { data, isLoading, error, refetch } = usePendingActions();
 
 ## Customization
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customization) for the full customization model.
+Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
 
 ## API Reference
 

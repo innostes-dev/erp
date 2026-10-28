@@ -33,6 +33,10 @@ import { Anatomy } from './docs/anatomy';
 import { StatusBadge } from './docs/status-badge';
 import { Since } from './docs/since';
 import { CategoryGrid } from './docs/category-grid';
+import { TokenReference } from './docs/token-reference';
+import { ContrastTable } from './docs/contrast-table';
+import { ComponentIndex } from './docs/component-index';
+import { HeroDemo } from './docs/hero-demo';
 import {
   AsLinkDemo,
   ButtonShowcase,
@@ -73,6 +77,10 @@ export function getMDXComponents(components?: MDXComponents) {
     StatusBadge,
     Since,
     CategoryGrid,
+    TokenReference,
+    ContrastTable,
+    ComponentIndex,
+    HeroDemo,
     ButtonShowcase,
     VariantCards,
     SizesDemo,

@@ -38,6 +38,9 @@ Components are grouped by what they're for:
         <Folder name="navigation" />
         <Folder name="layout" />
       </Folder>
+      <Folder name="widgets" />
+      <Folder name="charts" />
+      <Folder name="editor" />
       <Folder name="lib" />
       <Folder name="test" />
       <File name="index.ts" />
@@ -58,6 +61,8 @@ Components are grouped by what they're for:
 
 Each component lives in `src/components/<category>/<name>/<name>.tsx`, is re-exported by
 `src/components/<category>/index.ts`, and every category is re-exported by `src/index.ts`.
+Dedicated entry points house specialized composite suites: `src/widgets` (`@innostes/ui/widgets`),
+`src/charts` (`@innostes/ui/charts`), and `src/editor` (`@innostes/ui/editor`).
 Tests sit next to the code (`*.test.tsx`).
 
 | Path | Purpose |
