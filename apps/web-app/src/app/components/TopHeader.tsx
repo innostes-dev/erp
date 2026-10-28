@@ -122,6 +122,9 @@ export function TopHeader() {
           <DropdownMenuItem onClick={() => navigate('/plugins')}>
             Manage Plugins
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/administration')}>
+            API Keys & Tokens
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => void logout(false)}>
             Sign out

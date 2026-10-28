@@ -8,26 +8,53 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from kernel.auth.services import AccountSuspendedError, InvalidTokenError
+from kernel.auth.services import AccountSuspendedError, ApiKeyService, InvalidTokenError
 from kernel.core.database import get_db
 from kernel.core.security.jwt import decode_token
 from kernel.user.models.user import User, UserStatus
 from kernel.user.services import RBACService, UserService
 
 _bearer_scheme = HTTPBearer(
-    auto_error=True,
+    auto_error=False,
     scheme_name="BearerAuth",
-    description="JWT Bearer access token issued by POST /auth/login.",
+    description="JWT Bearer access token or Personal API Key (inno_live_...) issued by POST /auth/login or /auth/api-keys.",
 )
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     session: AsyncSession = Depends(get_db),
     user_service: UserService = Depends(lambda: UserService()),
+    api_key_service: ApiKeyService = Depends(lambda: ApiKeyService()),
 ) -> User:
-    """Validate JWT access token and return active User instance."""
-    raw_token = credentials.credentials
+    """Validate JWT access token, HttpOnly cookie, or API key and return active User instance."""
+    raw_token: str | None = None
+
+    if credentials and credentials.credentials:
+        raw_token = credentials.credentials
+    elif "access_token" in request.cookies:
+        raw_token = request.cookies.get("access_token")
+
+    if not raw_token:
+        raise InvalidTokenError("Authentication token or API key required.")
+
+    # 1. API Key Authentication (inno_live_...)
+    if raw_token.startswith("inno_live_"):
+        api_key = await api_key_service.verify_api_key(session, raw_token)
+        if not api_key:
+            raise InvalidTokenError("Invalid, expired, or revoked API key.")
+
+        user = await user_service.get_by_id(session, api_key.user_id)
+        if not user or user.status != UserStatus.ACTIVE or user.is_blocked:
+            raise AccountSuspendedError()
+
+        # Attach api_key and tenant_id to request state for downstream checks
+        request.state.api_key = api_key
+        request.state.tenant_id = api_key.tenant_id
+        return user
+
+    # 2. JWT Access Token Authentication
     try:
         payload = decode_token(raw_token)
     except jwt.ExpiredSignatureError:
@@ -81,6 +108,15 @@ def require_permission(
         session: AsyncSession = Depends(get_db),
         rbac_service: RBACService = Depends(lambda: RBACService()),
     ) -> User:
+        # If authenticated via API Key, verify scope grants access
+        api_key = getattr(request.state, "api_key", None)
+        if api_key:
+            scopes = api_key.scopes or []
+            if "*" not in scopes and permission_code not in scopes:
+                from kernel.core.services import ForbiddenError
+                raise ForbiddenError(f"API key does not have required scope '{permission_code}'.")
+            return current_user
+
         tenant_id_header = request.headers.get(tenant_header_name)
         tenant_id: uuid.UUID | None = None
         if tenant_id_header:

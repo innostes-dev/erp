@@ -62,3 +62,29 @@ export interface ChangePasswordPayload {
 export interface MessageResponse {
   message: string;
 }
+
+export interface CreateApiKeyPayload {
+  name: string;
+  expires_in_days?: number | null;
+  scopes?: string[];
+}
+
+export interface ApiKeyItem {
+  id: string;
+  name: string;
+  key_prefix: string;
+  scopes: string[];
+  expires_at: string | null;
+  last_used_at: string | null;
+  is_revoked: boolean;
+  created_at: string;
+}
+
+export interface ApiKeyCreatedResponse extends ApiKeyItem {
+  raw_key: string;
+}
+
+export interface ApiKeyListResponse {
+  items: ApiKeyItem[];
+}
+

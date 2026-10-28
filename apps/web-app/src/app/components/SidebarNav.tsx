@@ -30,6 +30,7 @@ export function SidebarNav() {
   const isHome = path === '/';
   const isModules = path.startsWith('/modules');
   const isPlugins = path.startsWith('/plugins');
+  const isAdmin = path.startsWith('/administration');
 
   return (
     <Sidebar className="border-r border-border bg-sidebar select-none">
@@ -122,8 +123,9 @@ export function SidebarNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
-              icon={<Settings className="size-4 text-muted-foreground" />}
-              onClick={() => {}}
+              isActive={isAdmin}
+              icon={<Settings className="size-4" />}
+              onClick={() => navigate('/administration')}
             >
               Administration
             </SidebarMenuButton>

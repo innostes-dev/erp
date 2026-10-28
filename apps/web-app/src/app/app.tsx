@@ -10,6 +10,7 @@ import { ModulesManagerPage } from './components/ModulesManagerPage';
 import { PluginsManagerPage } from './components/PluginsManagerPage';
 import { ModuleShellLayout } from './components/ModuleShellLayout';
 import { PluginShellLayout } from './components/PluginShellLayout';
+import { ApiKeysManager } from './components/ApiKeysManager';
 
 function AppRouter() {
   const { path } = useNavigation();
@@ -42,6 +43,8 @@ function AppRouter() {
               <ModulesManagerPage />
             ) : path === '/plugins' ? (
               <PluginsManagerPage />
+            ) : path.startsWith('/administration') || path === '/api-keys' ? (
+              <ApiKeysManager />
             ) : (
               <EcosystemHome />
             )}

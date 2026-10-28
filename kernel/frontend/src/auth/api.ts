@@ -4,7 +4,11 @@
 
 import { apiRequest } from '../core/api/client';
 import type {
+  ApiKeyCreatedResponse,
+  ApiKeyItem,
+  ApiKeyListResponse,
   ChangePasswordPayload,
+  CreateApiKeyPayload,
   ForgotPasswordPayload,
   ForgotPasswordResponse,
   LoginPayload,
@@ -109,3 +113,32 @@ export async function getMe(token?: string): Promise<UserSummary> {
     headers: bearer ? { Authorization: `Bearer ${bearer}` } : {},
   });
 }
+
+/** List all API keys for tenant. */
+export async function listApiKeys(): Promise<ApiKeyListResponse> {
+  const bearer = getStoredAccessToken();
+  return apiRequest<ApiKeyListResponse>('/auth/api-keys', {
+    method: 'GET',
+    headers: bearer ? { Authorization: `Bearer ${bearer}` } : {},
+  });
+}
+
+/** Generate a new API key. */
+export async function createApiKey(payload: CreateApiKeyPayload): Promise<ApiKeyCreatedResponse> {
+  const bearer = getStoredAccessToken();
+  return apiRequest<ApiKeyCreatedResponse>('/auth/api-keys', {
+    method: 'POST',
+    headers: bearer ? { Authorization: `Bearer ${bearer}` } : {},
+    body: payload,
+  });
+}
+
+/** Revoke an API key. */
+export async function revokeApiKey(keyId: string): Promise<ApiKeyItem> {
+  const bearer = getStoredAccessToken();
+  return apiRequest<ApiKeyItem>(`/auth/api-keys/${keyId}`, {
+    method: 'DELETE',
+    headers: bearer ? { Authorization: `Bearer ${bearer}` } : {},
+  });
+}
+

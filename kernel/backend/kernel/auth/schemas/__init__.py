@@ -1,5 +1,11 @@
 """Authentication Schemas Export."""
 
+from kernel.auth.schemas.api_key import (
+    ApiKeyCreatedResponse,
+    ApiKeyListResponse,
+    ApiKeyRead,
+    CreateApiKeyRequest,
+)
 from kernel.auth.schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
@@ -14,6 +20,10 @@ from kernel.auth.schemas.auth import (
 )
 
 __all__ = [
+    "ApiKeyCreatedResponse",
+    "ApiKeyListResponse",
+    "ApiKeyRead",
+    "CreateApiKeyRequest",
     "LoginRequest",
     "TokenResponse",
     "RefreshTokenRequest",

@@ -87,7 +87,7 @@
           "Authentication"
         ],
         "summary": "Authenticate and issue tokens",
-        "description": "Authenticates credentials, evaluates device trust, and issues short-lived JWT and single-use refresh token.",
+        "description": "Authenticates credentials, evaluates device trust, issues JWT/refresh tokens, and sets secure HttpOnly cookies.",
         "operationId": "login_auth_login_post",
         "requestBody": {
           "content": {
@@ -149,7 +149,7 @@
           "Authentication"
         ],
         "summary": "Rotate refresh token",
-        "description": "Rotates a single-use refresh token, detecting reuse attempts, and returns fresh tokens.",
+        "description": "Rotates a single-use refresh token, detecting reuse attempts, and returns fresh tokens & updated cookies.",
         "operationId": "refresh_token_auth_refresh_post",
         "requestBody": {
           "content": {
@@ -252,8 +252,8 @@
         "tags": [
           "Authentication"
         ],
-        "summary": "Reset password with email link token",
-        "description": "Consumes single-use signed reset token, checks SOC 2 password history, and sets new password.",
+        "summary": "Reset password via single-use token",
+        "description": "Consumes single-use reset token and assigns new password with SOC 2 historical reuse prevention.",
         "operationId": "reset_password_auth_reset_password_post",
         "requestBody": {
           "content": {
@@ -382,7 +382,7 @@
           "Authentication"
         ],
         "summary": "Revoke session tokens",
-        "description": "Revokes current session refresh token or all active sessions across all devices.",
+        "description": "Revokes current session refresh token or all active sessions across all devices, and clears cookies.",
         "operationId": "logout_auth_logout_post",
         "requestBody": {
           "content": {
@@ -448,6 +448,127 @@
             "BearerAuth": []
           }
         ]
+      }
+    },
+    "/auth/api-keys": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "List tenant API keys",
+        "description": "Lists all personal access tokens and programmatic API keys for the current organization.",
+        "operationId": "list_api_keys_auth_api_keys_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyListResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Generate API key",
+        "description": "Generates a cryptographically secure, high-entropy API key. Raw secret is returned once and cannot be retrieved again.",
+        "operationId": "create_api_key_auth_api_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiKeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyCreatedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/api-keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Revoke API key",
+        "description": "Immediately and permanently revokes an API key, preventing any future programmatic access.",
+        "operationId": "revoke_api_key_auth_api_keys__key_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/crm/info": {
@@ -1547,6 +1668,172 @@
         "title": "AdminUserInput",
         "description": "Administrator credentials and profile collected during first-run setup."
       },
+      "ApiKeyCreatedResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "is_revoked": {
+            "type": "boolean",
+            "title": "Is Revoked"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "raw_key": {
+            "type": "string",
+            "title": "Raw Key",
+            "description": "The plaintext secret API token (e.g. inno_live_...). Copy this immediately as it cannot be recovered.",
+            "examples": [
+              "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "scopes",
+          "expires_at",
+          "last_used_at",
+          "is_revoked",
+          "created_at",
+          "raw_key"
+        ],
+        "title": "ApiKeyCreatedResponse",
+        "description": "Returned exclusively on key creation. The raw_key will never be shown again."
+      },
+      "ApiKeyListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyRead"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ApiKeyListResponse",
+        "description": "List of all API keys for tenant."
+      },
+      "ApiKeyRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "is_revoked": {
+            "type": "boolean",
+            "title": "Is Revoked"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "scopes",
+          "expires_at",
+          "last_used_at",
+          "is_revoked",
+          "created_at"
+        ],
+        "title": "ApiKeyRead",
+        "description": "Safe public representation of an API key without secret hash."
+      },
       "ApiLoggerInfoResponse": {
         "properties": {
           "id": {
@@ -1619,6 +1906,51 @@
         ],
         "title": "ChangePasswordRequest",
         "description": "Authenticated request to update credentials (or complete first-login reset)."
+      },
+      "CreateApiKeyRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Descriptive identifier for the API key",
+            "examples": [
+              "Zapier CRM Sync"
+            ]
+          },
+          "expires_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Days",
+            "description": "Lifespan in days. None for perpetual."
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "Authorized permission scopes, e.g. ['hrms:read', 'crm:write'] or ['*']",
+            "default": [
+              "*"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateApiKeyRequest",
+        "description": "Payload to generate a new API key."
       },
       "CrmInfoResponse": {
         "properties": {

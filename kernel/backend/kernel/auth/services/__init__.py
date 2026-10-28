@@ -1,5 +1,6 @@
 """Authentication Services Export."""
 
+from kernel.auth.services.api_key_service import ApiKeyService
 from kernel.auth.services.auth_service import (
     AccountLockedError,
     AccountSuspendedError,
@@ -20,6 +21,7 @@ from kernel.auth.services.email_service import (
 )
 
 __all__ = [
+    "ApiKeyService",
     "AuthService",
     "EmailService",
     "InMemoryEmailService",
