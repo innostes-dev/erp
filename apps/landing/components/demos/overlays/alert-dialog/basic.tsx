@@ -12,22 +12,21 @@ import {
   Button,
   toast,
 } from '@innostes/ui';
-import { Trash2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 export default function AlertDialogDemo() {
   return (
     <AlertDialog>
       <AlertDialogTrigger
-        render={<Button variant="destructive" startIcon={<Trash2 />} />}
+        render={<Button variant="destructive" startIcon={<AlertTriangle />} />}
       >
-        Delete customer
+        Void tax invoice
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Acme Corp?</AlertDialogTitle>
+          <AlertDialogTitle>Void tax invoice INV-2026-081?</AlertDialogTitle>
           <AlertDialogDescription>
-            This removes the customer, their 42 orders and all invoices. This
-            can&apos;t be undone.
+            This action cannot be undone. Voiding will reverse ₹89,400 in accounts receivable, cancel the registered GST e-way bill, and emit a credit note.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -36,9 +35,9 @@ export default function AlertDialogDemo() {
           </AlertDialogClose>
           <AlertDialogClose
             render={<Button variant="destructive" />}
-            onClick={() => toast.success('Customer deleted')}
+            onClick={() => toast.success('Tax invoice INV-2026-081 voided and credit note generated')}
           >
-            Delete customer
+            Void invoice
           </AlertDialogClose>
         </AlertDialogFooter>
       </AlertDialogContent>

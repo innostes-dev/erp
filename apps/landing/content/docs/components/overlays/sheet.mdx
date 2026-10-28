@@ -1,9 +1,9 @@
 ---
 title: Sheet
-description: A panel that slides in from a screen edge.
+description: Slide-over drawer panel emerging from a screen boundary for record details, filter bars, and contextual sub-tasks.
 icon: PanelRight
 status: Stable
-summary: For filters, record details and edit forms next to a list. Slides from any side, RTL-aware.
+summary: Drawer overlay supporting four directional edges, RTL-aware logical sides, scrollable body containers, and master-detail responsiveness.
 ---
 
 <ComponentPreview name="overlays/sheet/basic" />
@@ -21,31 +21,216 @@ import {
   SheetBody,
   SheetFooter,
   SheetClose,
+  type SheetProps,
+  type SheetContentProps,
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Sheet` when an operator needs to inspect extensive record metadata or adjust complex filters while preserving their visual anchor on the underlying page:
+
+- Filtering dense transactional tables (date ranges, warehouse zones, item statuses).
+- Displaying purchase order audit logs, delivery manifests, and approval histories.
+- Providing mobile-responsive detail panes when desktop views use a side-by-side [SplitPane](/ui/docs/components/layout/split-pane).
+
+When choosing overlay surfaces:
+- Use `Sheet` when content has substantial vertical length or acts as a supplementary inspection panel beside an active list.
+- Use [Dialog](/ui/docs/components/overlays/dialog) for concise, centered creation forms that require the user's undivided attention.
+- Use [Popover](/ui/docs/components/overlays/popover) for lightweight interactive menus anchored directly to a button.
+- Refer to the [Overlay decision guide](/ui/docs/components/overlays#overlay-decision-guide) for full details.
+
+## Examples
+
+### Basic drawer with filters
+
+Wrap content in `SheetHeader`, `SheetBody` (which scrolls automatically when contents exceed screen height), and `SheetFooter`:
 
 ```tsx
-<Sheet>
-  <SheetTrigger render={<Button variant="outline" />}>Filters</SheetTrigger>
-  <SheetContent side="right">
-    <SheetHeader>
-      <SheetTitle>Filters</SheetTitle>
-    </SheetHeader>
-    <SheetBody>…</SheetBody>   {/* scrolls when content is long */}
-    <SheetFooter>…</SheetFooter>
-  </SheetContent>
-</Sheet>
+'use client';
+
+import { useState } from 'react';
+import {
+  Button,
+  Field,
+  FieldLabel,
+  Input,
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@innostes/ui';
+import { Filter } from 'lucide-react';
+
+export function OrderFiltersDrawer() {
+  return (
+    <Sheet>
+      <SheetTrigger render={<Button variant="outline" startIcon={<Filter />} />}>
+        Filters
+      </SheetTrigger>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>Filter purchase orders</SheetTitle>
+          <SheetDescription>
+            Refine orders by vendor, delivery date, or warehouse depot.
+          </SheetDescription>
+        </SheetHeader>
+        <SheetBody className="flex flex-col gap-4 py-4">
+          <Field name="poNumber">
+            <FieldLabel>PO identifier</FieldLabel>
+            <Input placeholder="e.g. PO-8410" />
+          </Field>
+        </SheetBody>
+        <SheetFooter>
+          <SheetClose render={<Button variant="outline" />}>Reset</SheetClose>
+          <Button type="button">Apply filters</Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
 ```
 
-`side` is `right` (default), `left`, `top` or `bottom`. Left and right flip in right-to-left layouts.
+### Responsive master-detail: Sheet on mobile versus SplitPane on desktop
+
+In enterprise applications, master-detail interfaces should adapt to available viewport real estate. On wide desktop monitors (`>= 1024px`), render a persistent [SplitPane](/ui/docs/components/layout/split-pane) with list and details side-by-side. On mobile devices, render the list full-width and slide the detail inspection view over the screen via a `Sheet`:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody, SplitPane } from '@innostes/ui';
+
+export function ResponsiveMasterDetail({ orders, isDesktop }) {
+  const [activeOrder, setActiveOrder] = useState(null);
+
+  if (isDesktop) {
+    return (
+      <SplitPane defaultSizes={[60, 40]} minSizes={[400, 320]}>
+        <div>{/* Orders table */}</div>
+        <div>{activeOrder && <OrderInspection order={activeOrder} />}</div>
+      </SplitPane>
+    );
+  }
+
+  return (
+    <>
+      <div>{/* Mobile orders list */}</div>
+      <Sheet open={Boolean(activeOrder)} onOpenChange={(open) => !open && setActiveOrder(null)}>
+        <SheetContent side="end">
+          <SheetHeader>
+            <SheetTitle>Order #{activeOrder?.id}</SheetTitle>
+          </SheetHeader>
+          <SheetBody>
+            {activeOrder && <OrderInspection order={activeOrder} />}
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+```
+
+### Sliding sides and logical orientation
+
+`SheetContent` accepts `side="top"`, `side="bottom"`, `side="left"`, or `side="right"`. For internationalized applications, use logical values `side="start"` and `side="end"` which automatically reverse sliding directions in right-to-left (RTL) locales:
+
+```tsx
+<SheetContent side="end">
+  {/* Slides from right in LTR; slides from left in RTL */}
+</SheetContent>
+```
+
+### Long scrollable body content
+
+`SheetBody` is pre-styled with `flex-1 overflow-y-auto`, ensuring long forms or audit trails scroll smoothly while header and footer remain pinned in position:
+
+```tsx
+<SheetContent side="right">
+  <SheetHeader>
+    <SheetTitle>Consignment audit trail</SheetTitle>
+  </SheetHeader>
+  <SheetBody className="p-6">
+    {/* 50+ activity log entries scroll here */}
+  </SheetBody>
+  <SheetFooter>
+    <SheetClose render={<Button />}>Done</SheetClose>
+  </SheetFooter>
+</SheetContent>
+```
 
 ## Accessibility
 
-Same as [Dialog](/ui/docs/components/overlays/dialog): focus is trapped, Escape closes, and the
-title labels the panel.
+`Sheet` is built on Base UI Dialog primitives (`@base-ui/react/dialog`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['SheetContent', 'SheetTitle', 'SheetDescription']} baseUi="dialog" />
+<KeyboardTable
+  entries={[
+    { key: 'Escape', action: 'Dismisses the slide-over sheet and returns focus to the triggering element.' },
+    { key: 'Tab', action: 'Cycles focus through interactive elements within the sheet container without escaping to background content.' },
+  ]}
+/>
+
+### Focus trapping and restoration
+
+- Upon opening, focus shifts to the first focusable element inside `SheetContent`.
+- All background page content is marked `inert`, blocking pointer and keyboard navigation outside the drawer.
+- Upon dismissal, focus returns to the `SheetTrigger` button.
+
+### Screen readers
+
+- Screen readers announce the drawer title via `SheetTitle` (`aria-labelledby`).
+- The close button includes an accessible label (`closeLabel="Close"` by default).
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Sheet for deep secondary inspection panels (such as item audit histories or extensive filter sidebars).',
+    code: `<SheetContent side="end"><SheetBody>{auditLogs}</SheetBody></SheetContent>`,
+  }}
+  dont={{
+    description: 'Do not use Sheet for high-stakes destructive confirmations like "Delete company" (use AlertDialog).',
+    code: `<Sheet><SheetTitle>Delete account?</SheetTitle></Sheet>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use logical sides (start / end) to ensure drawers slide from the correct margin in both LTR and RTL reading directions.',
+    code: `<SheetContent side="end" />`,
+  }}
+  dont={{
+    description: 'Do not hardcode physical side="right" when internationalizing for RTL languages (Arabic, Hebrew, Urdu).',
+    code: `<SheetContent side="right" />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Sheet',
+    'SheetTrigger',
+    'SheetContent',
+    'SheetHeader',
+    'SheetTitle',
+    'SheetDescription',
+    'SheetBody',
+    'SheetFooter',
+    'SheetClose',
+  ]}
+  baseUi="dialog"
+/>
+
+## Related
+
+- [Dialog](/ui/docs/components/overlays/dialog) — Centered modal window for focused forms.
+- [SplitPane](/ui/docs/components/layout/split-pane) — Desktop side-by-side pane container.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal contextual dropdown.

@@ -1,9 +1,9 @@
 ---
 title: Dropdown Menu
-description: A list of actions opened from a button.
+description: A list of actions and options opened from a button.
 icon: ListCollapse
 status: Stable
-summary: Groups, shortcuts, checkbox and radio items, submenus and destructive actions.
+summary: Groups, keyboard shortcuts, checkbox and radio items, submenus, and destructive row actions.
 ---
 
 <ComponentPreview name="overlays/dropdown-menu/basic" />
@@ -26,35 +26,190 @@ import {
   DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@innostes/ui';
 ```
 
-## Row actions
+## When to use
 
-The most common admin pattern: a "⋯" button per table row.
+Use `DropdownMenu` when presenting a compact list of distinct commands, navigations, or configuration toggles from a single trigger:
+
+- **Data table row actions**: Consolidating View, Edit, Duplicate, Export, and Delete under a single action button.
+- **Header account menus**: Switching user profiles, navigating to billing, or initiating sign-out.
+- **View customisation menus**: Toggling visible columns or grouping dimensions.
+
+**Do not use DropdownMenu for:**
+- Selectable form values that update an input field — use [Select](/ui/docs/components/forms/select).
+- Arbitrary interactive form fields or multi-step controls — use [Popover](/ui/docs/components/overlays/popover).
+- Direct right-click pointer menus — use [ContextMenu](/ui/docs/components/overlays/context-menu).
+
+## Examples
+
+### Row actions in enterprise tables
+
+The standard ERP pattern: a `⋯` action button per purchase order row:
 
 ```tsx
 <DropdownMenu>
-  <DropdownMenuTrigger render={<Button variant="ghost" size="sm" iconOnly aria-label={`Actions for ${order.id}`} />}>
+  <DropdownMenuTrigger
+    render={
+      <Button
+        variant="ghost"
+        size="sm"
+        iconOnly
+        aria-label="Actions for PO-2026-081"
+      />
+    }
+  >
     <MoreHorizontalIcon />
   </DropdownMenuTrigger>
   <DropdownMenuContent align="end">
-    <DropdownMenuItem onClick={() => open(order)}>View</DropdownMenuItem>
+    <DropdownMenuItem onClick={() => router.push('/purchases/PO-2026-081')}>
+      View order
+      <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
+    </DropdownMenuItem>
+    <DropdownMenuItem onClick={duplicateOrder}>
+      Duplicate line
+    </DropdownMenuItem>
     <DropdownMenuSeparator />
-    <DropdownMenuItem variant="destructive" onClick={() => refund(order)}>Refund</DropdownMenuItem>
+    <DropdownMenuItem variant="destructive" onClick={openCancelDialog}>
+      Cancel PO
+    </DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>
 ```
 
-## Submenus
+### Submenus for hierarchical actions
 
-Put a `DropdownMenuSubTrigger` and a `DropdownMenuContent` inside `DropdownMenuSub`.
+Nested submenus allow deep hierarchies without cluttering the top-level menu:
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger render={<Button variant="outline" />}>
+    Export options
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuItem onClick={exportPdf}>PDF Document</DropdownMenuItem>
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>Spreadsheet</DropdownMenuSubTrigger>
+      <DropdownMenuSubContent>
+        <DropdownMenuItem onClick={exportCsv}>CSV (UTF-8)</DropdownMenuItem>
+        <DropdownMenuItem onClick={exportXlsx}>Excel Workbook (.xlsx)</DropdownMenuItem>
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+### Checkbox and radio items
+
+Selectable items preserve toggle state for filter criteria and view modes:
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger render={<Button variant="outline" />}>
+    View settings
+  </DropdownMenuTrigger>
+  <DropdownMenuContent className="w-56">
+    <DropdownMenuGroup>
+      <DropdownMenuGroupLabel>Columns</DropdownMenuGroupLabel>
+      <DropdownMenuCheckboxItem
+        checked={showGst}
+        onCheckedChange={setShowGst}
+      >
+        Show GST breakdown
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuCheckboxItem
+        checked={showHsn}
+        onCheckedChange={setShowHsn}
+      >
+        Show HSN codes
+      </DropdownMenuCheckboxItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuGroup>
+      <DropdownMenuGroupLabel>Density</DropdownMenuGroupLabel>
+      <DropdownMenuRadioGroup value={density} onValueChange={setDensity}>
+        <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="comfortable">Comfortable</DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </DropdownMenuGroup>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
 
 ## Accessibility
 
-- Arrow keys move between items, type-ahead jumps to an item, Enter/Space activates, Escape closes.
-- `DropdownMenuShortcut` is a visual hint only; register the keyboard shortcut yourself.
+`DropdownMenu` is built on Base UI Menu primitives (`@base-ui/react/menu`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['DropdownMenuContent', 'DropdownMenuItem', 'DropdownMenuShortcut']} baseUi="menu" />
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space / DownArrow', action: 'Opens the menu and focuses the first enabled menu item.' },
+    { key: 'DownArrow / UpArrow', action: 'Cycles focus between menu items, skipping disabled options.' },
+    { key: 'RightArrow', action: 'Opens a submenu when focused on a DropdownMenuSubTrigger.' },
+    { key: 'LeftArrow / Escape', action: 'Closes a submenu and restores focus to its parent trigger.' },
+    { key: 'Enter / Space', action: 'Activates the focused item and dismisses the menu.' },
+    { key: 'Escape', action: 'Dismisses the open menu and restores focus to the trigger button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The trigger element receives `aria-haspopup="menu"` and dynamic `aria-expanded`.
+- The menu popup container has `role="menu"`.
+- Menu items receive `role="menuitem"`, `role="menuitemcheckbox"`, or `role="menuitemradio"` with `aria-checked` states.
+- Disabled items receive `aria-disabled="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use variant="destructive" for irreversible actions like deleting orders or voiding invoices.',
+    code: `<DropdownMenuItem variant="destructive">Delete vendor</DropdownMenuItem>`,
+  }}
+  dont={{
+    description: 'Do not hide destructive actions with normal styling in a menu full of safe operations.',
+    code: `<DropdownMenuItem>Delete vendor</DropdownMenuItem>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an accessible label on the trigger button, especially when using an icon-only "⋯" trigger.',
+    code: `<Button iconOnly aria-label="Order actions"><MoreHorizontal /></Button>`,
+  }}
+  dont={{
+    description: 'Do not render trigger buttons with only an icon and no accessible name.',
+    code: `<Button iconOnly><MoreHorizontal /></Button>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'DropdownMenu',
+    'DropdownMenuTrigger',
+    'DropdownMenuContent',
+    'DropdownMenuItem',
+    'DropdownMenuLinkItem',
+    'DropdownMenuCheckboxItem',
+    'DropdownMenuRadioGroup',
+    'DropdownMenuRadioItem',
+    'DropdownMenuGroup',
+    'DropdownMenuGroupLabel',
+    'DropdownMenuSeparator',
+    'DropdownMenuShortcut',
+    'DropdownMenuSub',
+    'DropdownMenuSubTrigger',
+  ]}
+  baseUi="menu"
+/>
+
+## Related
+
+- [ContextMenu](/ui/docs/components/overlays/context-menu) — Pointer-anchored menu opened via right-click or long-press.
+- [Select](/ui/docs/components/forms/select) — Single and multi-option selection for forms.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal container for arbitrary interactive panels.

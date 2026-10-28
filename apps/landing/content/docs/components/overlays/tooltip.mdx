@@ -1,9 +1,9 @@
 ---
 title: Tooltip
-description: A short label on hover and focus.
+description: A short label shown on hover and keyboard focus.
 icon: MessageCircle
 status: Stable
-summary: Names icon buttons and shows shortcuts. Shared delay across a toolbar.
+summary: Names icon buttons and shows shortcut hints with shared warm-up delay across toolbars.
 ---
 
 <ComponentPreview name="overlays/tooltip/basic" />
@@ -11,29 +11,134 @@ summary: Names icon buttons and shows shortcuts. Shared delay across a toolbar.
 ## Import
 
 ```tsx
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@innostes/ui';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Tooltip` to clarify icon-only buttons or provide supplementary keyboard shortcut cues without cluttering the main user interface:
+
+- **Icon-only toolbar controls**: Editing tools, table row shortcuts, or status indicators.
+- **Truncated text hint**: Revealing full text when enterprise table cells truncate customer or vendor names.
+- **Keyboard shortcut reminders**: Showing `⌘S` or `⌘K` alongside standard actions.
+
+**Do not use Tooltip for:**
+- Interactive content such as links or forms — use [Popover](/ui/docs/components/overlays/popover).
+- Essential instructional information that touch-device users must read to complete a task.
+- Lengthy multi-paragraph explanations — use an inline helper text or [Alert](/ui/docs/components/feedback/alert).
+
+## Examples
+
+### Basic usage
+
+Providing an accessible name for an icon button:
 
 ```tsx
 <Tooltip>
-  <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Archive" />}>
+  <TooltipTrigger
+    render={<Button iconOnly variant="ghost" aria-label="Archive purchase order" />}
+  >
     <ArchiveIcon />
   </TooltipTrigger>
-  <TooltipContent>Archive</TooltipContent>
+  <TooltipContent>Archive purchase order</TooltipContent>
 </Tooltip>
 ```
 
-Wrap your app in `TooltipProvider` once. After the first tooltip opens, moving to the next trigger
-shows it instantly, which makes toolbars feel fast.
+### Shared delay with TooltipProvider
+
+Wrap your application root or toolbar in `TooltipProvider`. After the initial delay timer fires for the first tooltip, hovering over subsequent triggers displays their tooltips immediately without waiting:
+
+```tsx
+<TooltipProvider delay={300}>
+  <div className="flex gap-1 rounded-md border p-1">
+    <Tooltip>
+      <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Bold text" />}>
+        <BoldIcon />
+      </TooltipTrigger>
+      <TooltipContent>Bold (⌘B)</TooltipContent>
+    </Tooltip>
+    <Tooltip>
+      <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Italic text" />}>
+        <ItalicIcon />
+      </TooltipTrigger>
+      <TooltipContent>Italic (⌘I)</TooltipContent>
+    </Tooltip>
+  </div>
+</TooltipProvider>
+```
+
+### Position and alignment
+
+Tooltips can position along `top`, `bottom`, `left`, or `right` margins, and will flip dynamically to stay within the visible screen area:
+
+```tsx
+<TooltipContent side="bottom" align="center" sideOffset={6}>
+  Export GST report (CSV)
+</TooltipContent>
+```
 
 ## Accessibility
 
-- Opens on hover and keyboard focus; Escape closes it.
-- Tooltips are not reachable on touch devices and are skipped by some screen readers. The trigger
-  still needs its own `aria-label`, and tooltips must never hold essential information.
+`Tooltip` is built on Base UI Tooltip primitives (`@base-ui/react/tooltip`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['TooltipContent', 'TooltipProvider']} baseUi="tooltip" />
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus to the trigger button, which reveals the tooltip after delay.' },
+    { key: 'Escape', action: 'Immediately dismisses the active tooltip without moving keyboard focus away.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- For icon-only buttons, always ensure the trigger element possesses an `aria-label`.
+- `Tooltip` automatically associates the tooltip content with the trigger via `aria-describedby` when opened.
+- Tooltips are not reachable on pure touch screen devices without focus emulation; essential business instructions must never be sequestered in a tooltip.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Ensure icon-only buttons have an explicit aria-label in addition to the tooltip for screen readers.',
+    code: `<TooltipTrigger render={<Button iconOnly aria-label="Delete line" />}>`,
+  }}
+  dont={{
+    description: 'Do not rely on the tooltip alone as the only accessible label for an icon button.',
+    code: `<TooltipTrigger render={<Button iconOnly />}>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Keep tooltip text concise (1–4 words) describing the action or shortcut.',
+    code: `<TooltipContent>Export invoice (⌘E)</TooltipContent>`,
+  }}
+  dont={{
+    description: 'Do not place complex forms, links, or interactive elements inside a tooltip.',
+    code: `<TooltipContent><a href="/docs">Read more in documentation</a></TooltipContent>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Tooltip',
+    'TooltipTrigger',
+    'TooltipContent',
+    'TooltipProvider',
+  ]}
+  baseUi="tooltip"
+/>
+
+## Related
+
+- [Popover](/ui/docs/components/overlays/popover) — Rich interactive floating panel for forms and mini-dialogs.
+- [Button](/ui/docs/components/actions/button) — Interactive button component frequently wrapped by tooltips.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Contextual action list opened by clicking.

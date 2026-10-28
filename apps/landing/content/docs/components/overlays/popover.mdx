@@ -1,9 +1,9 @@
 ---
 title: Popover
-description: Interactive content anchored to a trigger.
+description: Interactive floating content anchored to a trigger.
 icon: MessageSquare
 status: Stable
-summary: Small forms, share panels and pickers that float next to their trigger.
+summary: Small forms, share panels, and pickers that float next to their trigger without blocking background content.
 ---
 
 <ComponentPreview name="overlays/popover/basic" />
@@ -21,16 +21,142 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-`side`, `align` and `sideOffset` on `PopoverContent` position it; it flips automatically when
-there's no room. For plain hints, use [Tooltip](/ui/docs/components/overlays/tooltip).
+Use `Popover` for rich, interactive controls anchored to a specific button or control that need to open in-place without navigating away:
+
+- **Quick configuration panels**: Filter presets, column toggles, or inline item tagging in ERP records.
+- **Share links or copyable details**: Sharing purchase orders, consignment links, or invoice tracking URLs.
+- **Embedded mini-forms**: Adjusting order line quantities or applying prompt coupon codes.
+
+**Do not use Popover for:**
+- Short, non-interactive hover labels — use [Tooltip](/ui/docs/components/overlays/tooltip).
+- Linear action menus or commands — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- Critical workflows that require strict modality or large layout space — use [Dialog](/ui/docs/components/overlays/dialog) or [Sheet](/ui/docs/components/overlays/sheet).
+
+## Examples
+
+### Basic usage
+
+A popover anchored to a share button providing an ERP purchase order link:
+
+```tsx
+<Popover>
+  <PopoverTrigger render={<Button variant="outline" startIcon={<Share2 />} />}>
+    Share
+  </PopoverTrigger>
+  <PopoverContent align="start" className="w-80">
+    <PopoverTitle>Share order</PopoverTitle>
+    <PopoverDescription>
+      Anyone with the link can view this purchase order.
+    </PopoverDescription>
+    <div className="mt-3 flex gap-2">
+      <Input size="sm" readOnly value="https://erp.northwind.in/orders/PO-2026-081" />
+      <Button size="sm" variant="secondary">Copy</Button>
+    </div>
+  </PopoverContent>
+</Popover>
+```
+
+### Positioning and alignments
+
+`PopoverContent` accepts `side` (`top`, `bottom`, `left`, `right`) and `align` (`start`, `center`, `end`). The popover automatically flips when close to viewport edges:
+
+```tsx
+<PopoverContent side="right" align="start" sideOffset={8}>
+  <PopoverTitle>Delivery note details</PopoverTitle>
+  <PopoverDescription>Dispatched via Blue Dart Express, Bengaluru hub.</PopoverDescription>
+</PopoverContent>
+```
+
+### Mini-form inside popover
+
+Wrap interactive controls in a popover with an explicit `PopoverClose` button:
+
+```tsx
+<Popover>
+  <PopoverTrigger render={<Button variant="outline" size="sm" />}>
+    Adjust allocation
+  </PopoverTrigger>
+  <PopoverContent className="w-72">
+    <PopoverTitle>Stock allocation</PopoverTitle>
+    <PopoverDescription>Update reserved inventory units.</PopoverDescription>
+    <div className="mt-3 flex flex-col gap-3">
+      <Field name="units">
+        <FieldLabel>Units reserved</FieldLabel>
+        <Input type="number" defaultValue={250} />
+      </Field>
+      <div className="flex justify-end gap-2">
+        <PopoverClose render={<Button size="sm" variant="outline" />}>
+          Cancel
+        </PopoverClose>
+        <Button size="sm">Save</Button>
+      </div>
+    </div>
+  </PopoverContent>
+</Popover>
+```
 
 ## Accessibility
 
-- The trigger has `aria-expanded`. Focus moves into the popover and returns on close.
-- Escape and outside click close it.
+`Popover` is built on Base UI Popover primitives (`@base-ui/react/popover`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['PopoverContent', 'PopoverTitle', 'PopoverDescription']} baseUi="popover" />
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens or toggles the popover from the trigger button.' },
+    { key: 'Tab', action: 'Moves focus to the first focusable element inside the popover content.' },
+    { key: 'Escape', action: 'Dismisses the popover and restores focus to the trigger element.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The `PopoverTrigger` receives `aria-haspopup="dialog"` and `aria-expanded="true | false"`.
+- When opened, focus shifts into the popover, and the popover container links to `PopoverTitle` and `PopoverDescription` via `aria-labelledby` and `aria-describedby`.
+- Clicking outside or pressing `Escape` dismisses the popover and returns focus to the trigger.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an explicit dismiss or action button when hosting input fields inside a popover.',
+    code: `<PopoverClose render={<Button variant="outline">Cancel</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not place primary destructive actions inside a popover without modal confirmation.',
+    code: `<Popover><Button variant="destructive">Delete ERP database</Button></Popover>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use Tooltip instead of Popover when simply providing an accessible label for an icon button.',
+    code: `<Tooltip><TooltipTrigger>{icon}</TooltipTrigger><TooltipContent>Download PDF</TooltipContent></Tooltip>`,
+  }}
+  dont={{
+    description: 'Do not use Popover to show read-only one-word tooltips on hover.',
+    code: `<Popover><PopoverTrigger>{icon}</PopoverTrigger><PopoverContent>Help</PopoverContent></Popover>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Popover',
+    'PopoverTrigger',
+    'PopoverContent',
+    'PopoverTitle',
+    'PopoverDescription',
+    'PopoverClose',
+  ]}
+  baseUi="popover"
+/>
+
+## Related
+
+- [Tooltip](/ui/docs/components/overlays/tooltip) — Non-interactive short label on hover or keyboard focus.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — List of actions and menu options anchored to a button.
+- [Dialog](/ui/docs/components/overlays/dialog) — Modal window for complex workflows and forms.

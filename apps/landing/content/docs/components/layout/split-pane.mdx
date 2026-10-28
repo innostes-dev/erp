@@ -1,9 +1,9 @@
 ---
 title: Split Pane
-description: Two resizable panes for master-detail screens.
+description: Two resizable panes for master-detail inspection views.
 icon: Columns2
 status: Beta
-summary: A list beside its detail, with a draggable, keyboard-resizable divider.
+summary: Draggable, keyboard-accessible split canvas with percentage-based bounds, collapse thresholds, and double-click reset.
 ---
 
 <ComponentPreview name="layout/split-pane/basic" />
@@ -11,34 +11,150 @@ summary: A list beside its detail, with a draggable, keyboard-resizable divider.
 ## Import
 
 ```tsx
-import { SplitPane } from '@innostes/ui';
+import { SplitPane, type SplitPaneProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass exactly two children and give the pane a height.
+Use `SplitPane` for desktop master-detail views where operators need continuous access to both a list and its details:
+
+- **Purchase order inspection**: Orders list on the left, line-item inspector on the right.
+- **Logistics consignment tracking**: Consignment manifest beside live map tracking or warehouse logs.
+- **Code or payload comparison**: Side-by-side JSON comparison of ERP webhook payloads.
+
+**Do not use SplitPane for:**
+- Mobile screens — viewports below `768px` lack sufficient width; render the detail view inside a [Sheet](/ui/docs/components/overlays/sheet) instead.
+- Simple multi-column forms — use [FormGrid](/ui/docs/components/layout/form-layout).
+- Tabbed perspectives of the same entity — use [Tabs](/ui/docs/components/navigation/tabs).
+
+## Examples
+
+### Basic usage with default sizing and constraints
+
+Pass exactly two child elements and give the container a defined height:
 
 ```tsx
-<SplitPane defaultSize={35} minSize={20} maxSize={60} className="h-[calc(100dvh-8rem)]">
-  <OrderList />
-  <OrderDetail />
+<SplitPane
+  defaultSize={35}
+  minSize={20}
+  maxSize={60}
+  className="h-[calc(100dvh-8rem)] rounded-lg border"
+>
+  <div className="overflow-y-auto p-4 border-r">
+    {/* Master list of purchase orders */}
+  </div>
+  <div className="overflow-y-auto p-6">
+    {/* Detail inspection view */}
+  </div>
 </SplitPane>
 ```
 
-- `size` and the limits are percentages of the first pane. Control it with `size` / `onSizeChange`, e.g. to save the user's layout.
-- `orientation="vertical"` stacks the panes.
-- Double-clicking the divider restores `defaultSize`.
-- On small screens, consider rendering the detail in a `Sheet` instead.
+### Responsive pattern: SplitPane on desktop, Sheet on mobile
+
+A canonical ERP master-detail pattern that switches gracefully between split panes and slide-over drawers:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { SplitPane, Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody, useMediaQuery } from '@innostes/ui';
+
+export function MasterDetailOrders({ orders }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const activeOrder = orders.find((o) => o.id === selectedId);
+
+  if (isDesktop) {
+    return (
+      <SplitPane defaultSize={40} minSize={25} maxSize={65} className="h-full">
+        <OrderList orders={orders} onSelect={setSelectedId} selectedId={selectedId} />
+        <OrderDetail order={activeOrder} />
+      </SplitPane>
+    );
+  }
+
+  return (
+    <>
+      <OrderList orders={orders} onSelect={setSelectedId} selectedId={selectedId} />
+      <Sheet open={Boolean(activeOrder)} onOpenChange={(open) => !open && setSelectedId(null)}>
+        <SheetContent side="end">
+          <SheetHeader>
+            <SheetTitle>Order #{activeOrder?.id}</SheetTitle>
+          </SheetHeader>
+          <SheetBody>
+            <OrderDetail order={activeOrder} />
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+```
+
+### Vertical orientation
+
+Stack panes vertically by specifying `orientation="vertical"`:
+
+```tsx
+<SplitPane orientation="vertical" defaultSize={60} className="h-96">
+  <div className="p-4">{/* Top pane: Query editor */}</div>
+  <div className="p-4">{/* Bottom pane: Execution results */}</div>
+</SplitPane>
+```
 
 ## Accessibility
 
-The divider is a focusable `separator` with its value and range, and `aria-controls` pointing at the first pane.
+`SplitPane` implements the WAI-ARIA Window Splitter pattern.
 
-| Key | Action |
-| --- | --- |
-| Left / Right (Up / Down when stacked) | Resize by `step` (Shift: 4×) |
-| Home / End | Smallest / largest size |
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  entries={[
+    { key: 'LeftArrow / RightArrow', action: 'Resizes horizontal panes by the step increment (2% by default).' },
+    { key: 'UpArrow / DownArrow', action: 'Resizes vertical panes by the step increment.' },
+    { key: 'Shift + Arrow keys', action: 'Resizes panes at 4× standard speed (8% per press).' },
+    { key: 'Home', action: 'Jumps directly to the minimum allowed pane size (minSize).' },
+    { key: 'End', action: 'Jumps directly to the maximum allowed pane size (maxSize).' },
+    { key: 'Enter / Double Click', action: 'Resets the pane divider to its initial defaultSize position.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The divider handle renders with `role="separator"` and `tabIndex={0}`.
+- It supplies `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` representing the percentage width of the primary pane.
+- `aria-controls` explicitly references the identifier of the primary resizing pane.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Enforce reasonable minSize and maxSize constraints so neither pane collapses into an illegible sliver.',
+    code: `<SplitPane minSize={20} maxSize={70} />`,
+  }}
+  dont={{
+    description: 'Do not allow panes to resize freely from 0% to 100% without bounds.',
+    code: `<SplitPane minSize={0} maxSize={100} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Switch to a Sheet overlay drawer on mobile viewports below 768px.',
+    code: `{isDesktop ? <SplitPane /> : <Sheet />}`,
+  }}
+  dont={{
+    description: 'Do not render two-column split panes on narrow mobile smartphones.',
+    code: `<div className="w-[320px]"><SplitPane /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['SplitPane']} />
+
+## Related
+
+- [Sheet](/ui/docs/components/overlays/sheet) — Slide-over drawer used for responsive mobile master-detail views.
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component frequently placed in the primary pane.
+- [ScrollArea](/ui/docs/components/layout/scroll-area) — Independent scrolling container for individual pane contents.

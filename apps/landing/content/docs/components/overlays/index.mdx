@@ -1,8 +1,8 @@
 ---
 title: Overlays
-description: Modal dialogs, sheets, popovers, tooltips, and command menus.
+description: Modal dialogs, sheets, popovers, tooltips, dropdown menus, and command palettes.
 status: Stable
-summary: Layered interface elements that appear above base page content for focused interactions.
+summary: Layered interface elements with detailed decision matrix, focus management guarantees, and mobile responsiveness.
 ---
 
 import { CategoryGrid } from '@/components/docs/category-grid';
@@ -15,8 +15,32 @@ Overlays present supplementary workflows, context-sensitive details, and decisio
 
 <CategoryGrid category="components/overlays" />
 
-## Usage guidelines
+## Overlay decision guide
 
-- **Modality**: Use `Dialog` or `AlertDialog` when operator confirmation or focused data entry is mandatory before proceeding. Use `Sheet` for wide inspection panels and edit drawers.
-- **Focus management**: Overlays automatically trap focus when opened, restore focus to the triggering element upon dismissal, and close on Escape key navigation.
-- **Progressive disclosure**: Reserve `Tooltip` for non-essential keyboard hints and iconography descriptions. Use `Popover` for rich interactive menus and filters.
+Use this decision matrix to select the appropriate overlay component:
+
+| Component | Modality | Focus behavior | Mobile behavior | Ideal scenario |
+| --- | --- | --- | --- | --- |
+| **[Dialog](/ui/docs/components/overlays/dialog)** | Modal (backdrop) | Trapped; restored to trigger on close | Centered modal (or bottom sheet) | Multi-field creation forms, detailed entity edits, complex configuration. |
+| **[AlertDialog](/ui/docs/components/overlays/alert-dialog)** | Strict modal (no backdrop click) | Trapped; focuses cancel button | Centered alert dialog | Irreversible destructive actions (voiding invoices, deleting vendors). |
+| **[Sheet](/ui/docs/components/overlays/sheet)** | Modal or non-modal | Trapped if modal; side drawer | Full-width slide-over drawer | Audit inspection trails, record side-panels, mobile filter drawers. |
+| **[Popover](/ui/docs/components/overlays/popover)** | Non-modal (or light dismiss) | Tab navigation inside popup | Repositioned within viewport bounds | Rich interactive controls (date pickers, filter builders, color swatches). |
+| **[DropdownMenu](/ui/docs/components/overlays/dropdown-menu)** | Non-modal menu | Arrow key navigation; roving focus | Touch-friendly menu items | Action lists, table row action menus ("View", "Download", "Refund"). |
+| **[ContextMenu](/ui/docs/components/overlays/context-menu)** | Non-modal context menu | Arrow key navigation; roving focus | Replaced by row action button | Right-click shortcuts on table rows or desktop canvas nodes. |
+| **[Tooltip](/ui/docs/components/overlays/tooltip)** | Non-modal informational | Never traps focus; hover / focus only | Hidden on touch (use long-press or tap) | Explanations for icon-only buttons, keyboard hotkey reminders. |
+| **[CommandPalette](/ui/docs/components/overlays/command-palette)** | Modal search / launcher | Trapped inside search input | Full-screen mobile search modal | Global navigation (`⌘K`), quick entity lookups, workflow shortcuts. |
+
+## Architectural rules for overlays
+
+### 1. Nesting overlays
+- **Permitted**: Opening an `AlertDialog` confirmation from within a `Dialog` (e.g. "Discard unsaved changes?"). Base UI and the design system properly manage the stacking context and trap focus in the topmost active modal.
+- **Avoid**: Opening a `Dialog` from another `Dialog`. Prefer multi-step [Stepper](/ui/docs/components/navigation/stepper) wizards or full-page routing.
+- **Dropdown menus inside dialogs**: Completely supported. Tooltips, popovers, and dropdown menus automatically port outside the dialog container using standard React portals into `document.body`.
+
+### 2. Focus management
+- **Trap focus**: All modal overlays (`Dialog`, `AlertDialog`, `Sheet`, `CommandPalette`) lock focus inside their container. Users cannot tab outside into the background document.
+- **Restoration**: Closing an overlay via Escape, cancel buttons, or backdrop clicks always restores keyboard focus to the triggering element.
+- **Initial focus**: Destructive alert dialogs focus the safe "Cancel" action first to prevent accidental confirmation by hitting Enter.
+
+### 3. Mobile responsiveness
+- Viewport width ceilings: On small screens (`< 640px`), full-width `Sheet` drawers or bottom-sliding dialog sheets provide superior ergonomics compared to cramped desktop popups.

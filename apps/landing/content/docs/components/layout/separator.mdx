@@ -1,9 +1,9 @@
 ---
 title: Separator
-description: A thin line between content.
+description: A thin divider between distinct sections or controls.
 icon: Minus
 status: Stable
-summary: Horizontal or vertical, announced as a separator.
+summary: Horizontal or vertical divider with semantic separator semantics and RTL logical layout support.
 ---
 
 <ComponentPreview name="layout/separator/basic" />
@@ -14,6 +14,97 @@ summary: Horizontal or vertical, announced as a separator.
 import { Separator } from '@innostes/ui';
 ```
 
-## API Reference
+## When to use
+
+Use `Separator` to establish clear visual boundaries between distinct functional areas:
+
+- **Form and section dividers**: Breaking up long configuration panels into readable chunks.
+- **Toolbar dividers**: Separating button groups (e.g. text formatting vs clipboard actions).
+- **Detail card segments**: Separating customer metadata from order financial totals.
+
+**Do not use Separator for:**
+- Purely decorative lines with no semantic division — use CSS borders.
+- Spacing between consecutive table rows — use table row borders.
+- Top-level page borders — rely on layout containers like `PageHeader` and `TopBar`.
+
+## Examples
+
+### Horizontal card divider
+
+Separating enterprise entity headers from summary line items:
+
+```tsx
+<div className="rounded-lg border p-6">
+  <div className="space-y-1">
+    <h4 className="text-sm font-semibold">Northwind Traders Pvt Ltd</h4>
+    <p className="text-xs text-muted-foreground">Bengaluru Central Hub · GSTIN 29ABCDE1234F1Z5</p>
+  </div>
+  <Separator className="my-4" />
+  <div className="flex justify-between text-sm">
+    <span>Active purchase orders</span>
+    <span className="font-semibold">₹4,28,900</span>
+  </div>
+</div>
+```
+
+### Vertical divider inside button toolbars
+
+Set `orientation="vertical"` to separate interactive clusters:
+
+```tsx
+<div className="flex h-9 items-center gap-2 rounded-md border p-1">
+  <Button size="sm" variant="ghost" iconOnly aria-label="Bold"><BoldIcon /></Button>
+  <Button size="sm" variant="ghost" iconOnly aria-label="Italic"><ItalicIcon /></Button>
+  <Separator orientation="vertical" className="h-4" />
+  <Button size="sm" variant="ghost" iconOnly aria-label="Align left"><AlignLeftIcon /></Button>
+  <Button size="sm" variant="ghost" iconOnly aria-label="Align center"><AlignCenterIcon /></Button>
+</div>
+```
+
+## Accessibility
+
+`Separator` is built on Base UI Separator primitives (`@base-ui/react/separator`).
+
+### Keyboard navigation
+
+Separators are non-focusable elements skipped by keyboard tab loops.
+
+### ARIA attributes
+
+- Renders with `role="separator"`.
+- Sets `aria-orientation="horizontal"` (default) or `aria-orientation="vertical"`.
+- When used purely for cosmetic decoration without structural meaning, pass `decorative={true}` to render `role="none"` and hide it from screen readers.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Separator to delineate distinct semantic clusters of actions or form sections.',
+    code: `<Separator className="my-6" />`,
+  }}
+  dont={{
+    description: 'Do not insert dozens of separators where whitespace alone provides sufficient visual breathing room.',
+    code: `<><Field /><Separator /><Field /><Separator /><Field /></>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Set orientation="vertical" when placing separators between inline items in a horizontal row.',
+    code: `<div className="flex items-center"><Item /><Separator orientation="vertical" className="h-4" /><Item /></div>`,
+  }}
+  dont={{
+    description: 'Do not rely on standard unstyled horizontal separators inside flex row layouts.',
+    code: `<div className="flex"><Item /><Separator /><Item /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Separator']} baseUi="separator" />
+
+## Related
+
+- [FormLayout](/ui/docs/components/layout/form-layout) — Structured form container using section separators.
+- [Card](/ui/docs/components/data-display/card) — Card container frequently segmented by separators.
+- [TopBar](/ui/docs/components/layout/top-bar) — Header bar featuring inline separators.

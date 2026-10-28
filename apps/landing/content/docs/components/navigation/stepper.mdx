@@ -1,9 +1,9 @@
 ---
 title: Stepper
-description: Progress through a multi-step flow.
+description: Progress indicator for multi-step workflows.
 icon: ListOrdered
 status: Stable
-summary: Horizontal or vertical, with descriptions, error states and clickable completed steps.
+summary: Horizontal or vertical multi-step indicator with validation status, step descriptions, and clickable navigation.
 ---
 
 <ComponentPreview name="navigation/stepper/basic" />
@@ -11,34 +11,132 @@ summary: Horizontal or vertical, with descriptions, error states and clickable c
 ## Import
 
 ```tsx
-import { Stepper, type StepperStep } from '@innostes/ui';
+import { Stepper, type StepperStep, type StepStatus } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Stepper` when guiding users through a sequential multi-stage process where order matters:
+
+- **Purchase order creation**: 1. Supplier details → 2. Line items & GST → 3. Shipping & delivery → 4. Review & confirmation.
+- **Vendor onboarding wizard**: Company profile, GSTIN & PAN verification, bank mandate, document upload.
+- **Physical goods consignment**: Order booked → Picked & packed → In transit → Delivered.
+
+**Do not use Stepper for:**
+- Unordered or freely navigable content sections — use [Tabs](/ui/docs/components/navigation/tabs).
+- Simple progress percentages (e.g. 64% complete) without discrete steps — use [Progress](/ui/docs/components/feedback/progress).
+- Page-by-page table navigation — use [Pagination](/ui/docs/components/navigation/pagination).
+
+## Examples
+
+### Horizontal stepper with interactive step clicking
+
+Allowing users to return to completed steps to revise information:
 
 ```tsx
-const [step, setStep] = useState(0);
+const steps: StepperStep[] = [
+  { title: 'Vendor details', description: 'Bengaluru Spices' },
+  { title: 'Items & tax', description: 'HSN 0908 cardamom lines' },
+  { title: 'Logistics', description: 'Transport & E-Way' },
+  { title: 'Review', description: 'Final verification' },
+];
 
-<Stepper steps={steps} currentStep={step} onStepClick={setStep} />
+const [currentStep, setCurrentStep] = useState(1);
+
+<Stepper
+  steps={steps}
+  currentStep={currentStep}
+  onStepClick={(index) => {
+    // Only allow navigating back to completed steps
+    if (index < currentStep) setCurrentStep(index);
+  }}
+/>
 ```
 
-- Steps before `currentStep` are complete. Set `status: 'error'` on a step to flag a problem.
-- With `onStepClick`, completed steps become buttons, so users can go back but not skip ahead.
-- `labelPlacement="end"` puts titles next to the markers for a more compact horizontal stepper.
+### Vertical stepper for consignment tracking
 
-## Vertical
-
-For order tracking, import jobs and long flows:
+Vertical layout suits long audit histories and mobile screen sizes:
 
 <ComponentPreview name="navigation/stepper/vertical" />
 
+```tsx
+const dispatchSteps: StepperStep[] = [
+  { title: 'Order placed', description: 'PO-2026-081 approved by Priya Sharma' },
+  { title: 'Quality check passed', description: 'Inspected at Bengaluru Hub' },
+  { title: 'Dispatched via Blue Dart', description: 'AWB 4910291481' },
+  { title: 'Delivered', description: 'Pending destination sign-off' },
+];
+
+<Stepper
+  orientation="vertical"
+  steps={dispatchSteps}
+  currentStep={2}
+/>
+```
+
+### Error states in steps
+
+Flag steps that require user remediation:
+
+```tsx
+const stepsWithErrors: StepperStep[] = [
+  { title: 'Company profile', status: 'complete' },
+  { title: 'GSTIN verification', status: 'error', description: 'Invalid GSTIN checksum' },
+  { title: 'Bank account', status: 'upcoming' },
+];
+
+<Stepper steps={stepsWithErrors} currentStep={1} />
+```
+
 ## Accessibility
 
-- A `<nav aria-label="Progress">` with an ordered list; the current step has `aria-current="step"`.
-- Completed and failed steps are announced ("completed", "has errors"), not shown by colour only.
+`Stepper` implements semantic ordered navigation for multi-step procedures.
 
-See the [Setup Wizard example](/ui/docs/examples/setup-wizard) for a full flow.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus to clickable completed step markers.' },
+    { key: 'Enter / Space', action: 'Navigates back to the selected step.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container element is a `<nav aria-label="Progress">` enclosing an `<ol>`.
+- The current step has `aria-current="step"`.
+- Completed and errored steps have accessible announcements via hidden helper labels (e.g. `(completed)`, `(has errors)`), ensuring screen reader users do not miss step statuses that rely on colour.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Allow users to click previously completed steps to review or edit earlier entries.',
+    code: `<Stepper steps={steps} currentStep={2} onStepClick={setCurrentStep} />`,
+  }}
+  dont={{
+    description: 'Do not allow users to skip ahead to incomplete upcoming steps before validation passes.',
+    code: `<Stepper steps={steps} currentStep={0} onStepClick={(i) => setCurrentStep(i)} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the vertical orientation for mobile responsive layouts and long activity logs.',
+    code: `<Stepper orientation="vertical" steps={steps} currentStep={step} />`,
+  }}
+  dont={{
+    description: 'Do not cram 6+ horizontal steps onto narrow mobile viewports.',
+    code: `<div className="w-[320px]"><Stepper steps={sixSteps} /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Stepper']} />
+
+## Related
+
+- [Tabs](/ui/docs/components/navigation/tabs) — Switch between parallel sections without enforced order.
+- [Progress](/ui/docs/components/feedback/progress) — Continuous completion bar for deterministic tasks.
+- [FormLayout](/ui/docs/components/layout/form-layout) — Layout container for enterprise multi-step form steps.

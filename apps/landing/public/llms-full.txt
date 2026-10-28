@@ -6730,7 +6730,7 @@ When used inside `<Field>`, validation errors trigger error rings and ARIA live 
 
 ## App Rail (https://innostes.com/ui/docs/components/layout/app-rail)
 
-Used alongside a sidebar to navigate between top-level areas or modules in complex applications, featuring active states, tooltips, and badges.
+Compact module navigation rail with active states, accessible tooltips, and badges for enterprise multi-app suites.
 
 <ComponentPreview name="layout/app-rail/basic" align="start" className="p-4 sm:p-4" />
 
@@ -6746,62 +6746,166 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `AppRail` is designed to be placed before a `Sidebar` inside a `SidebarProvider`. It provides the first level of navigation (e.g. switching between entire apps like ERP, HRMS, CRM), while the `Sidebar` provides the second level (the pages within that app).
+Use `AppRail` when building two-tier enterprise navigation suites:
+
+- **Multi-module ERP platforms**: Fast switching between Procurement, Inventory, Finance, and HRMS.
+- **Persistent workspace switcher**: Keeping global shortcuts reachable regardless of current deep view.
+- **High-density desktop apps**: Minimising horizontal space loss while retaining full-screen module switching.
+
+**Do not use AppRail for:**
+- Single-purpose applications with fewer than 5 total pages — use a standard [Sidebar](/ui/docs/components/layout/sidebar).
+- Page-level content tabs — use [Tabs](/ui/docs/components/navigation/tabs).
+- Mobile screens — `AppRail` hides automatically below the `md` breakpoint, where `Sidebar` assumes mobile navigation duties.
+
+## Examples
+
+### Two-tier navigation shell
+
+Composing `AppRail` alongside `Sidebar` inside `SidebarProvider`:
 
 ```tsx
-<SidebarProvider>
-  <AppRail>
-    <AppRailHeader>
-      <Logo />
-    </AppRailHeader>
+import Link from 'next/link';
+import {
+  SidebarProvider,
+  AppRail,
+  AppRailHeader,
+  AppRailItem,
+  AppRailFooter,
+  Sidebar,
+  SidebarInset,
+} from '@innostes/ui';
+import { Package, ShoppingCart, Landmark, Users } from 'lucide-react';
 
-    <AppRailItem
-      icon={<HomeIcon />}
-      label="Home"
-      isActive
-      render={<Link href="/" />}
-    />
-    <AppRailItem
-      icon={<UsersIcon />}
-      label="HRMS"
-      render={<Link href="/hrms" />}
-    />
+export function ErpShell({ children }) {
+  return (
+    <SidebarProvider>
+      <AppRail label="ERP modules">
+        <AppRailHeader>
+          <div className="size-8 rounded bg-primary font-bold text-primary-foreground flex items-center justify-center">
+            N
+          </div>
+        </AppRailHeader>
 
-    <AppRailSeparator />
+        <AppRailItem
+          icon={<ShoppingCart />}
+          label="Procurement"
+          isActive
+          render={<Link href="/procurement" />}
+        />
+        <AppRailItem
+          icon={<Package />}
+          label="Inventory"
+          badge={12}
+          render={<Link href="/inventory" />}
+        />
+        <AppRailItem
+          icon={<Landmark />}
+          label="Finance & GST"
+          render={<Link href="/finance" />}
+        />
 
-    <AppRailFooter>
-      <AppRailItem icon={<SettingsIcon />} label="Settings" />
-    </AppRailFooter>
-  </AppRail>
+        <AppRailFooter>
+          <AppRailItem
+            icon={<Users />}
+            label="Employees"
+            render={<Link href="/hrms" />}
+          />
+        </AppRailFooter>
+      </AppRail>
 
-  <Sidebar>
-    {/* Sidebar content for the active module */}
-  </Sidebar>
-  <SidebarInset>
-    {/* Main content */}
-  </SidebarInset>
-</SidebarProvider>
+      <Sidebar>
+        {/* Secondary navigation for Procurement */}
+      </Sidebar>
+
+      <SidebarInset>
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
 ```
 
-### Responsive behavior
+### With badges and tooltips
 
-The `AppRail` is hidden by default on small screens (below `md`). On mobile, the `Sidebar` takes over as a slide-in panel. For a consistent experience on mobile, you should typically include the same top-level links inside the mobile version of your navigation (e.g. within a top bar or at the bottom/top of the mobile sidebar).
+Each `AppRailItem` automatically renders an accessible tooltip when hovered or focused, displaying the item's label and notification badge count:
 
-### Label display
+```tsx
+<AppRailItem
+  icon={<Bell />}
+  label="Approvals"
+  badge={3}
+  render={<Link href="/approvals" />}
+/>
+```
 
-By default, the `label` passed to `AppRailItem` acts as its accessible name and is displayed in a tooltip when the user hovers over the item. If you prefer to show the text beneath the icon constantly, set `showLabel={true}`.
+## Accessibility
 
-## API Reference
+`AppRail` renders semantic HTML5 navigation landmarks.
 
-<ApiTable components={['AppRail', 'AppRailItem', 'AppRailHeader', 'AppRailFooter', 'AppRailSeparator']} />
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive module items.' },
+    { key: 'Enter / Space', action: 'Activates the focused module link or trigger.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as `<nav aria-label="Apps">` (customisable via the `label` prop).
+- Active items receive `aria-current="page"`.
+- If an item includes a numerical badge, the count is included in accessible label computations for screen readers.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always supply a clear text label for each AppRailItem so tooltips and screen reader names are complete.',
+    code: `<AppRailItem icon={<Box />} label="Inventory" />`,
+  }}
+  dont={{
+    description: 'Do not omit the label prop on icon-only rail items.',
+    code: `<AppRailItem icon={<Box />} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the render prop with your framework router Link (e.g. Next.js Link) for fast client-side transitions.',
+    code: `<AppRailItem render={<Link href="/finance" />} label="Finance" />`,
+  }}
+  dont={{
+    description: 'Do not nest native anchor tags inside interactive button triggers.',
+    code: `<AppRailItem><a href="/finance">Finance</a></AppRailItem>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'AppRail',
+    'AppRailItem',
+    'AppRailHeader',
+    'AppRailFooter',
+    'AppRailSeparator',
+  ]}
+/>
+
+## Related
+
+- [Sidebar](/ui/docs/components/layout/sidebar) — Application sidebar supporting hierarchical trees, groups, and mobile drawers.
+- [TopBar](/ui/docs/components/layout/top-bar) — Top application navigation bar.
+- [Tooltip](/ui/docs/components/overlays/tooltip) — Floating hint used internally by AppRailItem.
 
 ---
 
 ## Form Layout (https://innostes.com/ui/docs/components/layout/form-layout)
 
-FormGrid, FormSection and FormActions. Responsive to the space they're in, not the screen.
+Container-query powered grids (FormGrid), titled sections (FormSection), and persistent action bars (FormActions).
 
 <ComponentPreview name="layout/form-layout/basic" align="start" />
 
@@ -6811,34 +6915,127 @@ FormGrid, FormSection and FormActions. Responsive to the space they're in, not t
 import { FormGrid, FormSection, FormActions } from '@innostes/ui';
 ```
 
-## FormGrid
+## When to use
 
-Places fields in 1–4 columns. Make a field span the row with `className="col-span-full"`.
+Use `FormLayout` primitives to establish clean, predictable field spacing across diverse layout environments:
+
+- **Full-page forms**: Vendor onboarding, purchase order creation, or product catalogue entries.
+- **Side drawer forms**: Edit forms inside [Sheet](/ui/docs/components/overlays/sheet).
+- **Modal forms**: Quick entry dialogues inside [Dialog](/ui/docs/components/overlays/dialog).
+
+Because `FormGrid` uses CSS **container queries** rather than viewport media queries, the grid automatically adapts to the actual width of its container (page, drawer, or modal) without needing custom responsive breakpoint classes.
+
+## Examples
+
+### Responsive FormGrid with column spans
+
+Organise form fields into 1, 2, 3, or 4 adaptive columns:
 
 ```tsx
 <FormGrid columns={2}>
-  <Field>…</Field>
-  <Field>…</Field>
-  <Field className="col-span-full">…</Field>
+  <Field name="vendorName">
+    <FieldLabel>Vendor legal name</FieldLabel>
+    <Input defaultValue="Bengaluru Spices Pvt Ltd" />
+  </Field>
+  <Field name="gstin">
+    <FieldLabel>GSTIN</FieldLabel>
+    <Input defaultValue="29ABCDE1234F1Z5" />
+  </Field>
+  <Field name="address" className="col-span-full">
+    <FieldLabel>Registered warehouse address</FieldLabel>
+    <Textarea defaultValue="Plot 42, Electronic City Phase 1, Hosur Road, Bengaluru 560100" />
+  </Field>
 </FormGrid>
 ```
 
-It uses **container queries**: the columns follow the width of the form's container, so the
-same form works in a page, a sheet or a dialog.
+### FormSection: stacked versus aside
 
-## FormSection
+Use `layout="stacked"` (default) for dialogs and standard pages, or `layout="aside"` for settings screens where section titles sit on the left:
 
-A titled group of fields. `layout="aside"` puts the title on the left (settings pages);
-`layout="stacked"` (default) puts it above (wizards, dialogs).
+```tsx
+<FormSection
+  title="Statutory tax profiles"
+  description="Manage registered GSTIN identifiers and TDS rates."
+  layout="aside"
+>
+  <FormGrid columns={2}>
+    <Field name="pan">
+      <FieldLabel>Company PAN</FieldLabel>
+      <Input defaultValue="ABCDE1234F" />
+    </Field>
+    <Field name="tan">
+      <FieldLabel>Tax deduction account number (TAN)</FieldLabel>
+      <Input defaultValue="BLRA01234E" />
+    </Field>
+  </FormGrid>
+</FormSection>
+```
 
-## FormActions
+### FormActions with sticky positioning
 
-The button row at the end of a form. `align="between"` puts the first button at the start
-(Cancel / Back) and the rest at the end. `sticky` keeps it visible on long forms.
+`FormActions` aligns save and cancel buttons. Use `align="between"` to place the back/cancel button on the left and the primary submit button on the right:
 
-## API Reference
+```tsx
+<FormActions align="between" sticky>
+  <Button variant="outline">Cancel</Button>
+  <div className="flex gap-2">
+    <Button variant="secondary">Save as draft</Button>
+    <Button type="submit">Submit for approval</Button>
+  </div>
+</FormActions>
+```
+
+## Accessibility
+
+`FormLayout` primitives enforce structured visual hierarchy and standard DOM order.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Navigates sequentially through all input controls according to DOM order.' },
+    { key: 'Enter', action: 'Submits the form when focused inside a standard text input field.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- `FormSection` wraps fields in semantic `<section>` landmarks labelled by the section title.
+- `FormGrid` preserves natural reading and focus order, avoiding confusing CSS grid reordering.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use className="col-span-full" on textareas or long addresses that require full container width.',
+    code: `<Field className="col-span-full"><Textarea name="notes" /></Field>`,
+  }}
+  dont={{
+    description: 'Do not squeeze multi-line notes or long street addresses into narrow half-width columns.',
+    code: `<Field><Textarea name="notes" /></Field>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use sticky on FormActions when forms exceed the single screen viewport height.',
+    code: `<FormActions sticky><Button type="submit">Save</Button></FormActions>`,
+  }}
+  dont={{
+    description: 'Do not leave primary submit buttons hidden far below scroll boundaries without indication.',
+    code: `<div className="mt-80"><Button>Submit</Button></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['FormGrid', 'FormSection', 'FormActions']} />
+
+## Related
+
+- [Field](/ui/docs/components/forms/field) — Accessible form field container with label, description, and error message.
+- [Input](/ui/docs/components/forms/input) — Basic text input primitive.
+- [PageHeader](/ui/docs/components/layout/page-header) — Page header for high-level action buttons.
 
 ---
 
@@ -6850,23 +7047,169 @@ import { CategoryGrid } from '@/components/docs/category-grid';
 
 # Layout
 
-Layout components define the structural scaffold for Northwind Traders Pvt Ltd's applications. They orchestrate viewports, responsive sidebars, persistent headers, and split-pane inspection canvases to support complex enterprise workflows.
+Layout components define the structural scaffold for Northwind Traders Pvt Ltd's ERP applications. They orchestrate viewports, responsive sidebars, persistent headers, and split-pane inspection canvases to support complex enterprise workflows.
 
 ## Components
 
 <CategoryGrid category="components/layout" />
 
-## Usage guidelines
+## App shell composition
 
-- **Application Shell**: Combine `AppRail`, `Sidebar`, `TopBar`, and `PageHeader` to create structured, responsive application frames.
-- **Scroll containment**: Use `ScrollArea` for customized, accessible scrollable regions rather than unstyled browser overflow bars.
-- **Form layouts**: Structure form controls using `FormLayout` to enforce standard vertical rhythm and responsive column wrapping.
+The application shell unites five core primitives: `SkipLink`, `AppRail`, `Sidebar`, `TopBar`, and `PageHeader`. Together, they provide a reliable, keyboard-navigable enterprise structure with fluid mobile adaptations.
+
+### Full layout example
+
+Here is how the components assemble into a complete Next.js root layout:
+
+```tsx
+// app/(erp)/layout.tsx
+import Link from 'next/link';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarInset,
+  AppRail,
+  AppRailHeader,
+  AppRailItem,
+  TopBar,
+  TopBarStart,
+  TopBarCenter,
+  TopBarEnd,
+  SkipLink,
+} from '@innostes/ui';
+import { ShoppingCart, Package, Users, Search } from 'lucide-react';
+
+export default function ErpAppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <SkipLink targetId="main-content">Skip to main content</SkipLink>
+      <SidebarProvider>
+        {/* Tier 1: Global module switcher (hidden on small viewports) */}
+        <AppRail label="ERP modules">
+          <AppRailHeader>
+            <div className="size-8 rounded bg-primary font-bold text-primary-foreground flex items-center justify-center">
+              N
+            </div>
+          </AppRailHeader>
+          <AppRailItem
+            icon={<ShoppingCart />}
+            label="Purchases"
+            isActive
+            render={<Link href="/purchases" />}
+          />
+          <AppRailItem
+            icon={<Package />}
+            label="Inventory"
+            render={<Link href="/inventory" />}
+          />
+        </AppRail>
+
+        {/* Tier 2: Module-specific navigation tree */}
+        <Sidebar>
+          <SidebarHeader>
+            <div className="font-semibold text-sm px-2 py-3">Procurement Hub</div>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Purchasing</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton render={<Link href="/purchases/orders" />}>
+                    Purchase orders
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton render={<Link href="/purchases/vendors" />}>
+                    Vendor directory
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+
+        {/* Content canvas */}
+        <SidebarInset>
+          <TopBar sticky blur>
+            <TopBarStart>
+              <SidebarTrigger />
+            </TopBarStart>
+            <TopBarCenter>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Search className="size-4" />
+                <span>Search records... (⌘K)</span>
+              </div>
+            </TopBarCenter>
+            <TopBarEnd>
+              <div className="text-sm font-medium">Priya Sharma</div>
+            </TopBarEnd>
+          </TopBar>
+
+          <main id="main-content" className="flex-1 p-6">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </>
+  );
+}
+```
+
+### CSS variables and sizing tokens
+
+The app shell exposes CSS custom properties to govern structural widths and heights. You can override them globally in your Tailwind CSS theme or inline on `SidebarProvider`:
+
+| Token | Default | Purpose |
+| :--- | :--- | :--- |
+| `--sidebar-width` | `16rem` (`256px`) | Width of the desktop sidebar when expanded. |
+| `--sidebar-width-icon` | `3.5rem` (`56px`) | Width of the desktop sidebar when collapsed to icon rail. |
+| `--sidebar-width-mobile` | `18rem` (`288px`) | Width of the slide-over drawer on mobile devices. |
+| `--app-rail-width` | `4.5rem` (`72px`) | Width of the optional primary module rail. |
+| `--top-bar-height` | `4rem` (`64px`) | Height of the persistent top application header. |
+
+### Mobile behaviour and responsive transitions
+
+1. **Breakpoints**: Below `768px` (`md`), `AppRail` hides automatically, and `Sidebar` transforms from a fixed column into an off-canvas slide-over drawer.
+2. **Backdrop overlay**: When opened via `SidebarTrigger`, a backdrop prevents background interaction and dims page content.
+3. **Automatic dismissal**: Navigating to any route by clicking a `SidebarMenuButton` closes the mobile drawer immediately, keeping user flows uninterrupted.
+4. **Escape key & inert**: While the mobile drawer is open, background DOM elements are marked `inert`, and pressing `Escape` dismisses the drawer, returning keyboard focus to the trigger.
+
+### Skip link implementation
+
+Accessibility standards require that keyboard and screen reader operators can bypass repetitive top navigation bars and jump straight to the primary work area:
+
+- Place `<SkipLink targetId="main-content">Skip to main content</SkipLink>` at the very top of your root layout.
+- Ensure the primary `<main>` element has matching `id="main-content"`.
+- When focused via `Tab`, the skip link transitions smoothly into view from off-screen and receives focus.
+
+### Router integration via render prop
+
+All navigation links (`SidebarMenuButton`, `SidebarMenuSubButton`, `AppRailItem`, `BreadcrumbLink`) provide a `render` prop. Pass your framework's router link component (e.g. Next.js `Link`) directly:
+
+```tsx
+<SidebarMenuButton
+  render={<Link href="/invoices" />}
+  isActive={pathname.startsWith('/invoices')}
+>
+  Invoices
+</SidebarMenuButton>
+```
+
+This prevents hard browser page refreshes, guarantees fast client-side transitions, and preserves accessibility attributes without invalid HTML DOM nesting.
 
 ---
 
 ## Page Header (https://innostes.com/ui/docs/components/layout/page-header)
 
-Breadcrumb, title, description and page actions, responsive by default.
+Standardized page header bringing together breadcrumb, h1 title, status badges, and primary actions.
 
 <ComponentPreview name="layout/page-header/basic" />
 
@@ -6876,37 +7219,125 @@ Breadcrumb, title, description and page actions, responsive by default.
 import { PageHeader } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `PageHeader` at the top of every internal administrative view:
+
+- **Record detail pages**: Purchase order `PO-2026-081`, Customer account `Acme Corp`, or Tax invoice `INV-2026-081`.
+- **List and catalogue dashboards**: Warehouses, inventory catalogues, or statutory reports.
+- **Settings subpages**: Security preferences, GST profiles, or team roles.
+
+**Do not use PageHeader for:**
+- Global application-level headers (with tenant switcher, global search, and user avatar) — use [TopBar](/ui/docs/components/layout/top-bar).
+- In-page card section titles — use [Card](/ui/docs/components/data-display/card) or standard heading elements.
+- Dialog and modal window titles — use `DialogHeader` and `DialogTitle`.
+
+## Examples
+
+### Basic usage with breadcrumb and actions
+
+Render breadcrumbs, page title, description, and primary action buttons:
 
 ```tsx
 <PageHeader
-  breadcrumb={<Breadcrumb>…</Breadcrumb>}
-  title="Orders"
-  description="Track and fulfil customer orders."
+  breadcrumb={
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/purchases">Purchases</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>PO-2026-081</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  }
+  title="Purchase order PO-2026-081"
+  description="Bengaluru Spices Pvt Ltd · Created on 24 Oct 2026 by Priya Sharma"
   actions={
-    <>
-      <Button variant="outline">Export</Button>
-      <Button>New order</Button>
-    </>
+    <div className="flex items-center gap-2">
+      <Button variant="outline">Download PDF</Button>
+      <Button>Approve order</Button>
+    </div>
   }
 />
 ```
 
-Put the primary action last. On small screens the actions wrap under the title.
+### With status badge in title
+
+Pass React nodes to `title` to pair headings with live status chips:
+
+```tsx
+<PageHeader
+  title={
+    <div className="flex items-center gap-3">
+      <span>Tax invoice INV-2026-081</span>
+      <Badge variant="success">E-Way Bill Generated</Badge>
+    </div>
+  }
+  description="GST Tax Invoice · Total value ₹89,400"
+  actions={<Button variant="destructive">Void invoice</Button>}
+/>
+```
 
 ## Accessibility
 
-- `title` renders the page's `<h1>`. Use one `PageHeader` per page.
+`PageHeader` provides unambiguous document heading landmarks.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between breadcrumb links and header action buttons.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as a semantic `<header>` landmark.
+- The `title` prop renders the unique primary `<h1>` heading for the page.
+- Action buttons remain in logical DOM order so screen reader users encounter contextual breadcrumbs, title, description, and actions in sequence.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Place the primary affirmative call-to-action last in the actions container.',
+    code: `<PageHeader actions={<><Button variant="outline">Export</Button><Button>New order</Button></>} />`,
+  }}
+  dont={{
+    description: 'Do not render multiple PageHeader components on the same view.',
+    code: `<><PageHeader title="One" /><PageHeader title="Two" /></>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Keep the description prop concise, focusing on key entity context or status metadata.',
+    code: `<PageHeader description="Karnataka division · Validated GSTIN" />`,
+  }}
+  dont={{
+    description: 'Do not dump multi-paragraph instructional documentation into the description slot.',
+    code: `<PageHeader description="Here is a very long paragraph that explains the complete 40-step statutory history..." />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['PageHeader']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar with search and navigation slots.
+- [Breadcrumb](/ui/docs/components/navigation/breadcrumb) — Navigation path rendered inside PageHeader.
+- [Button](/ui/docs/components/actions/button) — Action button component used for page actions.
 
 ---
 
 ## Scroll Area (https://innostes.com/ui/docs/components/layout/scroll-area)
 
-Native scrolling and keyboard support, styled scrollbars on every platform.
+Native momentum scrolling, keyboard accessibility, and styled auto-hiding scrollbars across all operating systems.
 
 <ComponentPreview name="layout/scroll-area/basic" />
 
@@ -6916,20 +7347,116 @@ Native scrolling and keyboard support, styled scrollbars on every platform.
 import { ScrollArea } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Give it a height or max-height. `scrollbars` is `vertical` (default), `horizontal` or `both`.
-Padding for the content goes on `viewportClassName`.
+Use `ScrollArea` when a region must scroll independently without relying on divergent OS-native scrollbar styling:
 
-## API Reference
+- **Audit trails and activity logs**: Displaying long chronological timelines in sidebars or cards.
+- **Data drawers and sheets**: Ensuring vertical scrolling inside `SheetBody` or dialog viewports.
+- **Wide horizontal tables or code blocks**: Providing clean horizontal scroll tracking without bulky browser bars.
+
+**Do not use ScrollArea for:**
+- The primary window body scroll — allow the browser window to scroll naturally.
+- Small fixed-size cards where content easily fits without truncation.
+- Infinite lists requiring virtual DOM rendering — use a virtualised data grid.
+
+## Examples
+
+### Vertical scrollable audit feed
+
+Giving the container a bounded height or max-height:
+
+```tsx
+<ScrollArea className="h-72 rounded-md border p-4">
+  <div className="space-y-4">
+    <h4 className="text-sm font-semibold">ERP audit log (PO-2026-081)</h4>
+    {auditLogs.map((log) => (
+      <div key={log.id} className="text-sm border-b pb-2">
+        <p className="font-medium text-foreground">{log.action}</p>
+        <p className="text-xs text-muted-foreground">{log.actor} · {log.timestamp}</p>
+      </div>
+    ))}
+  </div>
+</ScrollArea>
+```
+
+### Horizontal scrolling for wide datasets
+
+Set `scrollbars="horizontal"` or `scrollbars="both"` when hosting wide data grids or timeline bars:
+
+```tsx
+<ScrollArea scrollbars="horizontal" className="w-full rounded-md border">
+  <div className="flex w-max gap-4 p-4">
+    {warehouses.map((wh) => (
+      <Card key={wh.id} className="w-64 shrink-0">
+        <CardHeader>
+          <CardTitle>{wh.name}</CardTitle>
+          <CardDescription>{wh.location}</CardDescription>
+        </CardHeader>
+      </Card>
+    ))}
+  </div>
+</ScrollArea>
+```
+
+## Accessibility
+
+`ScrollArea` is built on Base UI ScrollArea primitives (`@base-ui/react/scroll-area`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'PageDown / DownArrow', action: 'Scrolls the viewport content downwards when the scroll area is focused.' },
+    { key: 'PageUp / UpArrow', action: 'Scrolls the viewport content upwards when the scroll area is focused.' },
+    { key: 'Home / End', action: 'Jumps directly to the very start or end of the scrollable region.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The scroll area maintains standard native scrolling mechanics, ensuring assistive technologies can navigate child nodes sequentially.
+- Scrollbar thumbs hide visually when inactive but expand upon pointer hover to offer a clear drag target.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an explicit height or maxHeight class on ScrollArea so the scroll boundaries are established.',
+    code: `<ScrollArea className="h-64">{items}</ScrollArea>`,
+  }}
+  dont={{
+    description: 'Do not render ScrollArea without height constraints, allowing it to expand infinitely without scrolling.',
+    code: `<ScrollArea>{infiniteItems}</ScrollArea>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use viewportClassName when inner padding is needed, keeping scrollbars pinned to the outer edges.',
+    code: `<ScrollArea viewportClassName="p-4">{content}</ScrollArea>`,
+  }}
+  dont={{
+    description: 'Do not place large padding directly on the outer container if it offsets the scrollbar track awkwardly.',
+    code: `<ScrollArea className="p-8">{content}</ScrollArea>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['ScrollArea']} baseUi="scroll-area" />
+
+## Related
+
+- [Sheet](/ui/docs/components/overlays/sheet) — Slide-over drawer component utilising scrollable body areas.
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component with horizontal overflow handling.
+- [Card](/ui/docs/components/data-display/card) — Card container frequently hosting scrollable lists.
 
 ---
 
 ## Separator (https://innostes.com/ui/docs/components/layout/separator)
 
-Horizontal or vertical, announced as a separator.
+Horizontal or vertical divider with semantic separator semantics and RTL logical layout support.
 
 <ComponentPreview name="layout/separator/basic" />
 
@@ -6939,15 +7466,106 @@ Horizontal or vertical, announced as a separator.
 import { Separator } from '@innostes/ui';
 ```
 
-## API Reference
+## When to use
+
+Use `Separator` to establish clear visual boundaries between distinct functional areas:
+
+- **Form and section dividers**: Breaking up long configuration panels into readable chunks.
+- **Toolbar dividers**: Separating button groups (e.g. text formatting vs clipboard actions).
+- **Detail card segments**: Separating customer metadata from order financial totals.
+
+**Do not use Separator for:**
+- Purely decorative lines with no semantic division — use CSS borders.
+- Spacing between consecutive table rows — use table row borders.
+- Top-level page borders — rely on layout containers like `PageHeader` and `TopBar`.
+
+## Examples
+
+### Horizontal card divider
+
+Separating enterprise entity headers from summary line items:
+
+```tsx
+<div className="rounded-lg border p-6">
+  <div className="space-y-1">
+    <h4 className="text-sm font-semibold">Northwind Traders Pvt Ltd</h4>
+    <p className="text-xs text-muted-foreground">Bengaluru Central Hub · GSTIN 29ABCDE1234F1Z5</p>
+  </div>
+  <Separator className="my-4" />
+  <div className="flex justify-between text-sm">
+    <span>Active purchase orders</span>
+    <span className="font-semibold">₹4,28,900</span>
+  </div>
+</div>
+```
+
+### Vertical divider inside button toolbars
+
+Set `orientation="vertical"` to separate interactive clusters:
+
+```tsx
+<div className="flex h-9 items-center gap-2 rounded-md border p-1">
+  <Button size="sm" variant="ghost" iconOnly aria-label="Bold"><BoldIcon /></Button>
+  <Button size="sm" variant="ghost" iconOnly aria-label="Italic"><ItalicIcon /></Button>
+  <Separator orientation="vertical" className="h-4" />
+  <Button size="sm" variant="ghost" iconOnly aria-label="Align left"><AlignLeftIcon /></Button>
+  <Button size="sm" variant="ghost" iconOnly aria-label="Align center"><AlignCenterIcon /></Button>
+</div>
+```
+
+## Accessibility
+
+`Separator` is built on Base UI Separator primitives (`@base-ui/react/separator`).
+
+### Keyboard navigation
+
+Separators are non-focusable elements skipped by keyboard tab loops.
+
+### ARIA attributes
+
+- Renders with `role="separator"`.
+- Sets `aria-orientation="horizontal"` (default) or `aria-orientation="vertical"`.
+- When used purely for cosmetic decoration without structural meaning, pass `decorative={true}` to render `role="none"` and hide it from screen readers.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Separator to delineate distinct semantic clusters of actions or form sections.',
+    code: `<Separator className="my-6" />`,
+  }}
+  dont={{
+    description: 'Do not insert dozens of separators where whitespace alone provides sufficient visual breathing room.',
+    code: `<><Field /><Separator /><Field /><Separator /><Field /></>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Set orientation="vertical" when placing separators between inline items in a horizontal row.',
+    code: `<div className="flex items-center"><Item /><Separator orientation="vertical" className="h-4" /><Item /></div>`,
+  }}
+  dont={{
+    description: 'Do not rely on standard unstyled horizontal separators inside flex row layouts.',
+    code: `<div className="flex"><Item /><Separator /><Item /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Separator']} baseUi="separator" />
+
+## Related
+
+- [FormLayout](/ui/docs/components/layout/form-layout) — Structured form container using section separators.
+- [Card](/ui/docs/components/data-display/card) — Card container frequently segmented by separators.
+- [TopBar](/ui/docs/components/layout/top-bar) — Header bar featuring inline separators.
 
 ---
 
 ## Sidebar (https://innostes.com/ui/docs/components/layout/sidebar)
 
-Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and a keyboard shortcut.
+Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and keyboard shortcut (⌘B).
 
 <ComponentPreview name="layout/sidebar/basic" align="start" className="p-4 sm:p-4" />
 
@@ -6979,69 +7597,166 @@ import {
 } from '@innostes/ui';
 ```
 
-## Layout
+## When to use
 
-```tsx title="app/(admin)/layout.tsx"
-<SidebarProvider>
-  <Sidebar>
-    <SidebarHeader>{/* logo, workspace switcher */}</SidebarHeader>
-    <SidebarContent>
-      <SidebarGroup>
-        <SidebarGroupLabel>Sales</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              icon={<ShoppingCartIcon />}
-              isActive={pathname.startsWith('/orders')}
-              render={<Link href="/orders" />}
-            >
-              Orders
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
-    </SidebarContent>
-    <SidebarFooter>{/* user menu */}</SidebarFooter>
-  </Sidebar>
-  <SidebarInset>
-    <header><SidebarTrigger /></header>
-    <main>{children}</main>
-  </SidebarInset>
-</SidebarProvider>
+Use `Sidebar` as the primary navigation backbone of administrative and enterprise applications:
+
+- **ERP application shell**: Multi-level navigation across Procurement, Warehousing, Invoicing, and Master Data.
+- **Hierarchical menu structures**: Submenus grouping purchase orders, vendor master, and goods received notes.
+- **Responsive administrative layouts**: Desktop sidebars that cleanly switch to mobile slide-over drawers below 768px.
+
+**Do not use Sidebar for:**
+- Isolated page-level filters — use [Sheet](/ui/docs/components/overlays/sheet) or inline filter cards.
+- Horizontal category tabs — use [Tabs](/ui/docs/components/navigation/tabs).
+- Single-page marketing websites — use standard top headers.
+
+## Examples
+
+### Basic application shell composition
+
+Compose `SidebarProvider`, `Sidebar`, `TopBar`, and `SidebarInset` into an accessible layout with router integration:
+
+```tsx
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarInset,
+  TopBar,
+} from '@innostes/ui';
+import { ShoppingCart, Package, FileText } from 'lucide-react';
+
+export function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  return (
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader>
+          <div className="flex items-center gap-2 px-2 py-3 font-semibold text-sm">
+            <span className="size-6 rounded bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs">
+              N
+            </span>
+            Northwind Traders
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Procurement</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  icon={<ShoppingCart className="size-4" />}
+                  isActive={pathname.startsWith('/purchases')}
+                  render={<Link href="/purchases" />}
+                >
+                  Purchase orders
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  icon={<Package className="size-4" />}
+                  isActive={pathname.startsWith('/inventory')}
+                  render={<Link href="/inventory" />}
+                >
+                  Inventory stock
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter>
+          {/* User profile and sign-out */}
+        </SidebarFooter>
+      </Sidebar>
+
+      <SidebarInset>
+        <TopBar>
+          <SidebarTrigger />
+        </TopBar>
+        <main className="p-6">
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
 ```
 
-## Behaviour
+### Collapsible behavior and keyboard shortcuts
 
-- **Desktop**: expanded (256px) or collapsed to icons (56px). Collapsed items show their label in a tooltip.
-- **Mobile** (below 768px, set with `mobileQuery`): the sidebar becomes a slide-in panel that closes when an item is chosen.
-- **Shortcut**: Ctrl/⌘ + B toggles it (`keyboardShortcut`, or `null` to turn off).
-- **Persist** the choice by controlling `open` / `onOpenChange` and saving it, e.g. in a cookie, so the server renders the right state.
+- **Desktop state**: Expands to standard width (default `256px`) or collapses into an icon rail (default `56px`). In icon mode, hovering or focusing any menu item displays its title via an accessible tooltip.
+- **Mobile drawer**: Below `768px` (customisable via `mobileQuery`), the sidebar automatically switches to a slide-in modal drawer. Selecting any item automatically closes the drawer.
+- **Global hotkey**: Pressing `Ctrl + B` or `⌘ + B` toggles the sidebar open or closed. Disable by setting `keyboardShortcut={null}`.
+- **State hook**: `useSidebar()` gives any descendant component access to `{ open, setOpen, toggle, isMobile, openMobile, setOpenMobile }`.
 
-`useSidebar()` gives any component inside the provider `open`, `toggle`, `isMobile` and setters.
+### Custom sizing and CSS variables
 
-## Custom Width
-
-You can customize the width of the sidebar when expanded, collapsed to icons, and on mobile. These props map directly to `--sidebar-width`, `--sidebar-width-icon`, and `--sidebar-width-mobile` CSS variables.
+Adjust sizing variables on `SidebarProvider` or via standard CSS properties:
 
 <ComponentPreview name="layout/sidebar/width" align="start" className="p-4 sm:p-4" />
 
-## Variants
+```tsx
+<SidebarProvider
+  style={
+    {
+      '--sidebar-width': '18rem',
+      '--sidebar-width-icon': '4rem',
+      '--sidebar-width-mobile': '20rem',
+    } as React.CSSProperties
+  }
+>
+  <Sidebar>...</Sidebar>
+</SidebarProvider>
+```
 
-The sidebar comes in three visual variants: `sidebar` (classic full-height side navigation), `floating` (a floating panel distinct from the edge), and `inset` (a sidebar that wraps the content area with a rounded border).
+### Visual variants
+
+The sidebar supports `sidebar` (classic full-height navigation), `floating` (a floating surface inset from edges), and `inset` (a sidebar wrapping the inner content with a rounded border):
 
 <ComponentPreview name="layout/sidebar/variants" align="start" className="p-4 sm:p-4" />
 
-## Submenus
+### Hierarchical submenus
 
-For deeper navigation structures, use `SidebarMenuSub`, `SidebarMenuSubItem`, and `SidebarMenuSubButton` inside a `SidebarMenuItem`.
+Use `SidebarMenuSub` for nested multi-level trees:
 
 <ComponentPreview name="layout/sidebar/nav-submenu" align="start" className="p-4 sm:p-4" />
 
-## Theming the sidebar
+```tsx
+<SidebarMenuItem>
+  <SidebarMenuButton icon={<FileText />}>
+    Invoicing & GST
+  </SidebarMenuButton>
+  <SidebarMenuSub>
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton render={<Link href="/invoices/tax" />}>
+        Tax invoices
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton render={<Link href="/invoices/e-way" />}>
+        E-Way bills
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  </SidebarMenuSub>
+</SidebarMenuItem>
+```
 
-The sidebar is built with its own set of CSS variables (tokens) independent from the rest of the application. This allows you to give the app shell a distinct look (like a dark sidebar in a light app) without affecting standard components.
+### Theming the sidebar
 
-To theme the sidebar, override the `--color-sidebar*` tokens in your CSS.
+The sidebar consumes dedicated CSS colour tokens, allowing a distinct brand surface (e.g. dark navy sidebar inside a light neutral application) without conflicting with page background tokens:
 
 ```css
 @theme {
@@ -7058,61 +7773,246 @@ To theme the sidebar, override the `--color-sidebar*` tokens in your CSS.
 
 ## Accessibility
 
-- The sidebar is a `<nav>` landmark (label it with `label`). The active item has `aria-current="page"`.
-- `SidebarTrigger` reports `aria-expanded`.
+`Sidebar` implements WAI-ARIA Landmark and Disclosure specifications.
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['SidebarProvider', 'Sidebar', 'SidebarHeader', 'SidebarContent', 'SidebarFooter', 'SidebarSeparator', 'SidebarGroup', 'SidebarGroupLabel', 'SidebarGroupAction', 'SidebarMenu', 'SidebarMenuItem', 'SidebarMenuButton', 'SidebarMenuAction', 'SidebarMenuBadge', 'SidebarMenuSub', 'SidebarMenuSubItem', 'SidebarMenuSubButton', 'SidebarTrigger', 'SidebarRail', 'SidebarInset']} />
+<KeyboardTable
+  entries={[
+    { key: '⌘ + B / Ctrl + B', action: 'Toggles sidebar expansion on desktop or drawer visibility on mobile.' },
+    { key: 'Tab', action: 'Cycles sequentially through interactive sidebar menu links and triggers.' },
+    { key: 'Escape', action: 'Dismisses the open mobile drawer panel and restores focus to the trigger button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The sidebar root renders as `<nav aria-label="Sidebar">` (or custom `label`).
+- Active items receive `aria-current="page"`.
+- `SidebarTrigger` provides `aria-expanded="true | false"` and `aria-label="Toggle sidebar"`.
+- When in icon-collapsed mode, items render accessible tooltips to prevent icon ambiguity.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use the render prop with framework Link components (like Next.js Link) for fast client routing.',
+    code: `<SidebarMenuButton render={<Link href="/inventory" />}>Inventory</SidebarMenuButton>`,
+  }}
+  dont={{
+    description: 'Do not nest interactive <a> tags inside <button> elements.',
+    code: `<SidebarMenuButton><a href="/inventory">Inventory</a></SidebarMenuButton>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Persist the sidebar open state in browser cookies so Server Components render the correct initial state without layout shift.',
+    code: `<SidebarProvider defaultOpen={cookieOpen}>`,
+  }}
+  dont={{
+    description: 'Do not allow the sidebar to flash or jump width after hydration.',
+    code: `<SidebarProvider defaultOpen={false}>{/* jumps after mount */}</SidebarProvider>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'SidebarProvider',
+    'Sidebar',
+    'SidebarHeader',
+    'SidebarContent',
+    'SidebarFooter',
+    'SidebarSeparator',
+    'SidebarGroup',
+    'SidebarGroupLabel',
+    'SidebarGroupAction',
+    'SidebarMenu',
+    'SidebarMenuItem',
+    'SidebarMenuButton',
+    'SidebarMenuAction',
+    'SidebarMenuBadge',
+    'SidebarMenuSub',
+    'SidebarMenuSubItem',
+    'SidebarMenuSubButton',
+    'SidebarTrigger',
+    'SidebarRail',
+    'SidebarInset',
+  ]}
+/>
+
+## Related
+
+- [AppRail](/ui/docs/components/layout/app-rail) — Ultra-narrow module navigation rail placed alongside Sidebar.
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top navigation bar.
+- [PageHeader](/ui/docs/components/layout/page-header) — Page title and action header within the main content canvas.
 
 ---
 
 ## Split Pane (https://innostes.com/ui/docs/components/layout/split-pane)
 
-A list beside its detail, with a draggable, keyboard-resizable divider.
+Draggable, keyboard-accessible split canvas with percentage-based bounds, collapse thresholds, and double-click reset.
 
 <ComponentPreview name="layout/split-pane/basic" />
 
 ## Import
 
 ```tsx
-import { SplitPane } from '@innostes/ui';
+import { SplitPane, type SplitPaneProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass exactly two children and give the pane a height.
+Use `SplitPane` for desktop master-detail views where operators need continuous access to both a list and its details:
+
+- **Purchase order inspection**: Orders list on the left, line-item inspector on the right.
+- **Logistics consignment tracking**: Consignment manifest beside live map tracking or warehouse logs.
+- **Code or payload comparison**: Side-by-side JSON comparison of ERP webhook payloads.
+
+**Do not use SplitPane for:**
+- Mobile screens — viewports below `768px` lack sufficient width; render the detail view inside a [Sheet](/ui/docs/components/overlays/sheet) instead.
+- Simple multi-column forms — use [FormGrid](/ui/docs/components/layout/form-layout).
+- Tabbed perspectives of the same entity — use [Tabs](/ui/docs/components/navigation/tabs).
+
+## Examples
+
+### Basic usage with default sizing and constraints
+
+Pass exactly two child elements and give the container a defined height:
 
 ```tsx
-<SplitPane defaultSize={35} minSize={20} maxSize={60} className="h-[calc(100dvh-8rem)]">
-  <OrderList />
-  <OrderDetail />
+<SplitPane
+  defaultSize={35}
+  minSize={20}
+  maxSize={60}
+  className="h-[calc(100dvh-8rem)] rounded-lg border"
+>
+  <div className="overflow-y-auto p-4 border-r">
+    {/* Master list of purchase orders */}
+  </div>
+  <div className="overflow-y-auto p-6">
+    {/* Detail inspection view */}
+  </div>
 </SplitPane>
 ```
 
-- `size` and the limits are percentages of the first pane. Control it with `size` / `onSizeChange`, e.g. to save the user's layout.
-- `orientation="vertical"` stacks the panes.
-- Double-clicking the divider restores `defaultSize`.
-- On small screens, consider rendering the detail in a `Sheet` instead.
+### Responsive pattern: SplitPane on desktop, Sheet on mobile
+
+A canonical ERP master-detail pattern that switches gracefully between split panes and slide-over drawers:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { SplitPane, Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody, useMediaQuery } from '@innostes/ui';
+
+export function MasterDetailOrders({ orders }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const activeOrder = orders.find((o) => o.id === selectedId);
+
+  if (isDesktop) {
+    return (
+      <SplitPane defaultSize={40} minSize={25} maxSize={65} className="h-full">
+        <OrderList orders={orders} onSelect={setSelectedId} selectedId={selectedId} />
+        <OrderDetail order={activeOrder} />
+      </SplitPane>
+    );
+  }
+
+  return (
+    <>
+      <OrderList orders={orders} onSelect={setSelectedId} selectedId={selectedId} />
+      <Sheet open={Boolean(activeOrder)} onOpenChange={(open) => !open && setSelectedId(null)}>
+        <SheetContent side="end">
+          <SheetHeader>
+            <SheetTitle>Order #{activeOrder?.id}</SheetTitle>
+          </SheetHeader>
+          <SheetBody>
+            <OrderDetail order={activeOrder} />
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+```
+
+### Vertical orientation
+
+Stack panes vertically by specifying `orientation="vertical"`:
+
+```tsx
+<SplitPane orientation="vertical" defaultSize={60} className="h-96">
+  <div className="p-4">{/* Top pane: Query editor */}</div>
+  <div className="p-4">{/* Bottom pane: Execution results */}</div>
+</SplitPane>
+```
 
 ## Accessibility
 
-The divider is a focusable `separator` with its value and range, and `aria-controls` pointing at the first pane.
+`SplitPane` implements the WAI-ARIA Window Splitter pattern.
 
-| Key | Action |
-| --- | --- |
-| Left / Right (Up / Down when stacked) | Resize by `step` (Shift: 4×) |
-| Home / End | Smallest / largest size |
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  entries={[
+    { key: 'LeftArrow / RightArrow', action: 'Resizes horizontal panes by the step increment (2% by default).' },
+    { key: 'UpArrow / DownArrow', action: 'Resizes vertical panes by the step increment.' },
+    { key: 'Shift + Arrow keys', action: 'Resizes panes at 4× standard speed (8% per press).' },
+    { key: 'Home', action: 'Jumps directly to the minimum allowed pane size (minSize).' },
+    { key: 'End', action: 'Jumps directly to the maximum allowed pane size (maxSize).' },
+    { key: 'Enter / Double Click', action: 'Resets the pane divider to its initial defaultSize position.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The divider handle renders with `role="separator"` and `tabIndex={0}`.
+- It supplies `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` representing the percentage width of the primary pane.
+- `aria-controls` explicitly references the identifier of the primary resizing pane.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Enforce reasonable minSize and maxSize constraints so neither pane collapses into an illegible sliver.',
+    code: `<SplitPane minSize={20} maxSize={70} />`,
+  }}
+  dont={{
+    description: 'Do not allow panes to resize freely from 0% to 100% without bounds.',
+    code: `<SplitPane minSize={0} maxSize={100} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Switch to a Sheet overlay drawer on mobile viewports below 768px.',
+    code: `{isDesktop ? <SplitPane /> : <Sheet />}`,
+  }}
+  dont={{
+    description: 'Do not render two-column split panes on narrow mobile smartphones.',
+    code: `<div className="w-[320px]"><SplitPane /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['SplitPane']} />
+
+## Related
+
+- [Sheet](/ui/docs/components/overlays/sheet) — Slide-over drawer used for responsive mobile master-detail views.
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component frequently placed in the primary pane.
+- [ScrollArea](/ui/docs/components/layout/scroll-area) — Independent scrolling container for individual pane contents.
 
 ---
 
 ## Top Bar (https://innostes.com/ui/docs/components/layout/top-bar)
 
-A responsive top navigation bar with slots for branding, search, and actions.
+Responsive application header with semantic slots (TopBarStart, TopBarCenter, TopBarEnd) and translucent blur support.
 
 <ComponentPreview name="layout/top-bar/basic" align="start" className="p-4 sm:p-4" />
 
@@ -7127,88 +8027,267 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `TopBar` is designed to be the primary header of your application, usually containing the app switcher/logo, global search, notifications, and user profile.
+Use `TopBar` as the persistent header across administrative and enterprise applications:
 
-Layout is controlled through three semantic slots:
-- `TopBarStart`: Aligned to the start, containing branding or a `SidebarTrigger`.
-- `TopBarCenter`: Takes up the remaining space and shrinks first. Ideal for global search.
-- `TopBarEnd`: Aligned to the end, containing actions, notifications, and the `UserMenu`.
+- **Application header**: Housing the organization logo, workspace switcher, and mobile sidebar trigger.
+- **Global search integration**: Providing a prominent trigger for [CommandPalette](/ui/docs/components/overlays/command-palette).
+- **Tenant and user profile tools**: Housing branch switchers (e.g. Bengaluru vs Mumbai), alert notifications, and user avatars.
+
+**Do not use TopBar for:**
+- In-page sub-headers with breadcrumbs and primary entity actions — use [PageHeader](/ui/docs/components/layout/page-header).
+- Local card headers — use [Card](/ui/docs/components/data-display/card).
+- Pure marketing navigation headers with multi-level megamenus.
+
+## Examples
+
+### Three-slot header composition
+
+Using `TopBarStart`, `TopBarCenter`, and `TopBarEnd`:
 
 ```tsx
 <TopBar sticky blur>
   <TopBarStart>
     <SidebarTrigger />
-    <AppSwitcher sections={...} />
+    <div className="flex items-center gap-2 font-semibold text-sm">
+      <span className="size-6 rounded bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs">
+        N
+      </span>
+      <span>Northwind Traders</span>
+    </div>
   </TopBarStart>
 
   <TopBarCenter>
-    <SearchInput placeholder="Search..." />
+    <Button
+      variant="outline"
+      size="sm"
+      className="w-full max-w-sm justify-between text-muted-foreground"
+      onClick={openSearch}
+    >
+      <span>Search invoices, POs, vendors...</span>
+      <kbd className="text-xs bg-muted border px-1.5 py-0.5 rounded">⌘K</kbd>
+    </Button>
   </TopBarCenter>
 
   <TopBarEnd>
-    <NotificationBell items={...} />
-    <UserMenu name="John Doe" />
+    <Button variant="ghost" size="sm" iconOnly aria-label="Notifications">
+      <BellIcon className="size-4" />
+    </Button>
+    <UserMenu name="Priya Sharma" email="priya.sharma@northwind.in" />
   </TopBarEnd>
 </TopBar>
 ```
 
-### Height Customization
+### Sticky positioning and backdrop blur
 
-The default height is `4rem` (64px). You can customize it by overriding the `--top-bar-height` CSS variable.
+`TopBar` sticks to the top of the viewport by default. Enable `blur` for a translucent frosted glass effect over scrolling content:
 
-```css
-.my-custom-top-bar {
-  --top-bar-height: 3.5rem;
-}
+```tsx
+<TopBar sticky blur className="border-b">
+  {/* Content blurred under header while scrolling */}
+</TopBar>
 ```
 
-## API Reference
+## Accessibility
 
-<ApiTable components={['TopBar', 'TopBarStart', 'TopBarCenter', 'TopBarEnd']} />
+`TopBar` implements semantic landmark navigation.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially across interactive controls inside Start, Center, and End slots.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as a `<header>` element with `data-slot="top-bar"`.
+- Buttons and search triggers inside `TopBar` maintain clear `aria-label` text for assistive devices.
+- Focus order flows naturally from left to right in LTR (and right to left in RTL).
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Place global command search in TopBarCenter, configured to shrink gracefully on smaller viewports.',
+    code: `<TopBarCenter><SearchTrigger /></TopBarCenter>`,
+  }}
+  dont={{
+    description: 'Do not overload TopBar with dozens of primary form buttons (use PageHeader or FormActions instead).',
+    code: `<TopBarEnd><Button>Save</Button><Button>Export</Button><Button>Audit</Button></TopBarEnd>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Include an accessible SidebarTrigger in TopBarStart so mobile users can easily open navigation.',
+    code: `<TopBarStart><SidebarTrigger /></TopBarStart>`,
+  }}
+  dont={{
+    description: 'Do not omit the mobile trigger, leaving mobile drawer navigation unreachable.',
+    code: `<TopBarStart>{/* No SidebarTrigger */}</TopBarStart>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'TopBar',
+    'TopBarStart',
+    'TopBarCenter',
+    'TopBarEnd',
+  ]}
+/>
+
+## Related
+
+- [Sidebar](/ui/docs/components/layout/sidebar) — Application sidebar navigated via TopBar triggers.
+- [PageHeader](/ui/docs/components/layout/page-header) — Record and list header placed underneath TopBar.
+- [CommandPalette](/ui/docs/components/overlays/command-palette) — Search palette triggered from TopBar search buttons.
 
 ---
 
 ## Accordion (https://innostes.com/ui/docs/components/navigation/accordion)
 
-One or many open sections, animated height, keyboard support.
+Single or multi-expanded collapsible sections with animated height transitions and keyboard support.
 
 <ComponentPreview name="navigation/accordion/basic" />
 
 ## Import
 
 ```tsx
-import { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from '@innostes/ui';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionPanel,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Accordion` to organize progressive disclosure content in vertically constrained spaces:
+
+- **Frequently asked questions (FAQs)**: Compliance and GST tax invoice questions.
+- **Grouped settings**: Collapsible sections for billing preferences, notifications, and permissions.
+- **Detailed record audit logs**: Expanding historical revisions on vendor profiles.
+
+**Do not use Accordion for:**
+- Primary application navigation across distinct URLs — use [Tabs](/ui/docs/components/navigation/tabs) or [Sidebar](/ui/docs/components/layout/sidebar).
+- A single isolated disclosure box like "Advanced options" — use [Collapsible](/ui/docs/components/navigation/collapsible).
+- Sequential multi-stage onboarding flows — use [Stepper](/ui/docs/components/navigation/stepper).
+
+## Examples
+
+### Basic usage with default open item
+
+An accordion for enterprise procurement terms:
 
 ```tsx
-<Accordion defaultValue={['billing']}>
-  <AccordionItem value="billing">
-    <AccordionTrigger>Billing</AccordionTrigger>
-    <AccordionPanel>…</AccordionPanel>
+<Accordion defaultValue={['gst-compliance']}>
+  <AccordionItem value="gst-compliance">
+    <AccordionTrigger>GST compliance and invoicing</AccordionTrigger>
+    <AccordionPanel>
+      Northwind Traders generates digital e-invoices with valid IRN numbers and dynamic QR codes for B2B transactions under Indian GST laws.
+    </AccordionPanel>
+  </AccordionItem>
+  <AccordionItem value="delivery-terms">
+    <AccordionTrigger>Delivery schedule and transit insurance</AccordionTrigger>
+    <AccordionPanel>
+      Consignments dispatched from our Bengaluru hub include full transit insurance under All Risks Marine clauses.
+    </AccordionPanel>
   </AccordionItem>
 </Accordion>
 ```
 
-Add `multiple` to allow several open sections. `value` is always an array.
+### Multiple expanded sections
+
+Set `multiple` to allow users to inspect multiple sections simultaneously:
+
+```tsx
+<Accordion multiple defaultValue={['summary', 'tax']}>
+  <AccordionItem value="summary">
+    <AccordionTrigger>Order summary</AccordionTrigger>
+    <AccordionPanel>PO-2026-081 created for ₹89,400 with 18% integrated GST.</AccordionPanel>
+  </AccordionItem>
+  <AccordionItem value="tax">
+    <AccordionTrigger>Tax breakdown</AccordionTrigger>
+    <AccordionPanel>CGST (9%): ₹6,818.64 | SGST (9%): ₹6,818.64</AccordionPanel>
+  </AccordionItem>
+</Accordion>
+```
 
 ## Accessibility
 
-- Triggers are buttons inside headings, with `aria-expanded` and `aria-controls`.
-- Arrow keys move between triggers.
+`Accordion` is built on Base UI Accordion primitives (`@base-ui/react/accordion`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['Accordion', 'AccordionItem', 'AccordionTrigger', 'AccordionPanel']} baseUi="accordion" />
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Expands or collapses the focused accordion trigger.' },
+    { key: 'DownArrow', action: 'Moves focus to the next accordion header trigger.' },
+    { key: 'UpArrow', action: 'Moves focus to the previous accordion header trigger.' },
+    { key: 'Home', action: 'Moves focus to the first accordion header trigger.' },
+    { key: 'End', action: 'Moves focus to the last accordion header trigger.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Each `AccordionTrigger` is rendered as an accessible button with `aria-expanded="true | false"` and `aria-controls` pointing to its panel id.
+- Each `AccordionPanel` receives `role="region"` and `aria-labelledby` referencing its trigger.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use clear, descriptive trigger headers that indicate the contents hidden inside.',
+    code: `<AccordionTrigger>Statutory GST information</AccordionTrigger>`,
+  }}
+  dont={{
+    description: 'Do not use vague trigger text that leaves users guessing what each panel contains.',
+    code: `<AccordionTrigger>More info</AccordionTrigger>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use multiple when users need to cross-reference details across multiple panels at once.',
+    code: `<Accordion multiple defaultValue={['items', 'taxes']} />`,
+  }}
+  dont={{
+    description: 'Do not force single expansion when users must frequently compare data across sections.',
+    code: `<Accordion defaultValue={['items']} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Accordion',
+    'AccordionItem',
+    'AccordionTrigger',
+    'AccordionPanel',
+  ]}
+  baseUi="accordion"
+/>
+
+## Related
+
+- [Collapsible](/ui/docs/components/navigation/collapsible) — Standalone disclosure container for a single section.
+- [Tabs](/ui/docs/components/navigation/tabs) — Switch between distinct views without stacking them vertically.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression indicator.
 
 ---
 
 ## Breadcrumb (https://innostes.com/ui/docs/components/navigation/breadcrumb)
 
-Links to each ancestor, a marked current page, and an ellipsis for long paths.
+Linear ancestral navigation with router integration, current-page indication, and ellipsis support for deep paths.
 
 <ComponentPreview name="navigation/breadcrumb/basic" />
 
@@ -7226,49 +8305,275 @@ import {
 } from '@innostes/ui';
 ```
 
-## With your router
+## When to use
 
-`BreadcrumbLink` renders an `<a>`. Pass `render` to use your router's link:
+Use `Breadcrumb` to establish hierarchical context within deep enterprise applications:
+
+- **Multi-tiered resource views**: `Purchasing > Vendors > Bengaluru Spices > Orders > PO-2026-081`.
+- **Complex nested configuration**: `Settings > Enterprise > Billing & Tax > GSTIN Profiles`.
+- **Catalogue and warehousing**: `Inventory > Raw Materials > Spices & Seasonings > Cardamom Grade A`.
+
+**Do not use Breadcrumb for:**
+- Flat top-level navigation — use [TopBar](/ui/docs/components/layout/top-bar) or [AppRail](/ui/docs/components/layout/app-rail).
+- Linear multi-step sequential tasks or wizards — use [Stepper](/ui/docs/components/navigation/stepper).
+- History-based browser back/forward pagination.
+
+## Examples
+
+### Integration with Next.js router
+
+`BreadcrumbLink` renders a semantic anchor tag (`<a>`). Use the `render` prop to pass Next.js `Link` for client-side transitions:
 
 ```tsx
 import Link from 'next/link';
 
-<BreadcrumbLink render={<Link href="/orders" />}>Orders</BreadcrumbLink>
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<Link href="/" />}>Dashboard</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<Link href="/purchases" />}>Purchases</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>PO-2026-081</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+### Deep hierarchies with ellipsis
+
+When path depths exceed four levels, collapse middle steps using `BreadcrumbEllipsis`:
+
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/inventory">Inventory</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbEllipsis />
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/inventory/warehouses/blr-01">Bengaluru Central Hub</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Aisle 4 Bay 12</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
 ```
 
 ## Accessibility
 
-- A `<nav aria-label="Breadcrumb">` containing an ordered list.
-- The current page has `aria-current="page"`; separators are hidden from screen readers.
+`Breadcrumb` renders semantic HTML5 navigation landmarks.
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['BreadcrumbLink']} />
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially along each breadcrumb link in ancestral order.' },
+    { key: 'Enter', action: 'Navigates to the focused breadcrumb link.' },
+  ]}
+/>
 
-The other parts take the props of their HTML element.
+### ARIA attributes
+
+- The container element is a `<nav aria-label="Breadcrumb">`.
+- The list uses `<ol>` and `<li>` elements, giving screen readers an accurate count of total path levels.
+- The current page indicator uses `<BreadcrumbPage>` which marks the element with `aria-current="page"`.
+- Separators render with `aria-hidden="true"` so assistive technologies ignore decorative divider symbols.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Mark the final item with BreadcrumbPage, rendering text rather than a redundant self-link.',
+    code: `<BreadcrumbItem><BreadcrumbPage>PO-2026-081</BreadcrumbPage></BreadcrumbItem>`,
+  }}
+  dont={{
+    description: 'Do not render the current active page as a clickable hyperlink that links to itself.',
+    code: `<BreadcrumbItem><BreadcrumbLink href="/current">PO-2026-081</BreadcrumbLink></BreadcrumbItem>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Keep breadcrumb labels short and consistent with page titles.',
+    code: `<BreadcrumbLink href="/purchases">Purchases</BreadcrumbLink>`,
+  }}
+  dont={{
+    description: 'Do not include entire verbose descriptions in breadcrumb links.',
+    code: `<BreadcrumbLink href="/purchases">Northwind Traders Purchase Order Management System</BreadcrumbLink>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Breadcrumb',
+    'BreadcrumbList',
+    'BreadcrumbItem',
+    'BreadcrumbLink',
+    'BreadcrumbPage',
+    'BreadcrumbSeparator',
+    'BreadcrumbEllipsis',
+  ]}
+/>
+
+## Related
+
+- [PageHeader](/ui/docs/components/layout/page-header) — Standard layout header containing breadcrumb, title, and actions.
+- [Pagination](/ui/docs/components/navigation/pagination) — Paginating through records within a single level.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression flow.
 
 ---
 
 ## Collapsible (https://innostes.com/ui/docs/components/navigation/collapsible)
 
-An unstyled disclosure with a height animation, for "advanced options" and similar.
+A flexible disclosure primitive for secondary form options, filter expansions, and collapsible detail cards.
 
 <ComponentPreview name="navigation/collapsible/basic" />
 
 ## Import
 
 ```tsx
-import { Collapsible, CollapsibleTrigger, CollapsiblePanel } from '@innostes/ui';
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsiblePanel,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The trigger gets `data-panel-open` while open; use it to rotate an icon
-(`group-data-panel-open:rotate-180`), as in the demo.
+Use `Collapsible` for isolated disclosures where a user might optionally need extra settings or secondary details:
 
-## API Reference
+- **Advanced form fields**: E-way bill vehicle numbers, GST exemption certificates, or dispatch notes.
+- **Filter drawers and panels**: Expanding extra facet filters on inventory search.
+- **Code snippet disclosures**: Showing generated JSON payloads or webhook logs.
 
-<ApiTable components={['Collapsible', 'CollapsibleTrigger', 'CollapsiblePanel']} baseUi="collapsible" />
+**Do not use Collapsible for:**
+- Stacked groups of mutually exclusive sections — use [Accordion](/ui/docs/components/navigation/accordion).
+- Top-level page tab switches — use [Tabs](/ui/docs/components/navigation/tabs).
+- Complex overlay modals — use [Dialog](/ui/docs/components/overlays/dialog).
+
+## Examples
+
+### Secondary form options
+
+Hiding advanced tax and compliance fields until requested by the procurement agent:
+
+```tsx
+<Collapsible>
+  <div className="flex items-center justify-between border-b pb-2">
+    <h4 className="text-sm font-semibold">Consignment details</h4>
+    <CollapsibleTrigger
+      render={
+        <Button variant="ghost" size="sm" className="group">
+          Advanced options
+          <ChevronDownIcon className="size-4 transition-transform duration-200 group-data-panel-open:rotate-180" />
+        </Button>
+      }
+    />
+  </div>
+  <CollapsiblePanel className="space-y-4 pt-4">
+    <Field name="vehicleNo">
+      <FieldLabel>E-Way bill vehicle number</FieldLabel>
+      <Input placeholder="KA-01-AB-1234" />
+    </Field>
+    <Field name="transporterId">
+      <FieldLabel>Transporter GSTIN / ID</FieldLabel>
+      <Input placeholder="29AAAAA0000A1Z5" />
+    </Field>
+  </CollapsiblePanel>
+</Collapsible>
+```
+
+### Controlled open state
+
+Manage the disclosure programmatically from external component state:
+
+```tsx
+const [isOpen, setIsOpen] = useState(false);
+
+<Collapsible open={isOpen} onOpenChange={setIsOpen}>
+  <div className="flex gap-2">
+    <Button onClick={() => setIsOpen((prev) => !prev)}>
+      {isOpen ? 'Hide raw audit logs' : 'View raw audit logs'}
+    </Button>
+  </div>
+  <CollapsiblePanel className="mt-4 rounded bg-muted p-4 font-mono text-xs">
+    {JSON.stringify(auditRecord, null, 2)}
+  </CollapsiblePanel>
+</Collapsible>
+```
+
+## Accessibility
+
+`Collapsible` is built on Base UI Collapsible primitives (`@base-ui/react/collapsible`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Toggles the collapsible panel open or closed when the trigger is focused.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The `CollapsibleTrigger` receives `aria-expanded="true | false"` and `aria-controls` referencing the panel id.
+- The trigger button receives `data-panel-open` when the panel is visible, enabling Tailwind group-hover or sibling animations.
+- The `CollapsiblePanel` receives `hidden` when closed, ensuring screen readers do not read collapsed content.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use CollapsibleTrigger with a clear label describing what is being toggled.',
+    code: `<CollapsibleTrigger render={<Button>Show GST details</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not hide required primary form fields behind a collapsed panel.',
+    code: `<CollapsiblePanel><Field required><Input name="totalAmount" /></Field></CollapsiblePanel>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Animate indicator chevrons with transition-transform and group-data-panel-open:rotate-180.',
+    code: `<ChevronDown className="transition-transform group-data-panel-open:rotate-180" />`,
+  }}
+  dont={{
+    description: 'Do not change the text label completely if it disorients screen readers without aria-live.',
+    code: `<CollapsibleTrigger>{open ? 'Close' : 'Open'}</CollapsibleTrigger>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Collapsible',
+    'CollapsibleTrigger',
+    'CollapsiblePanel',
+  ]}
+  baseUi="collapsible"
+/>
+
+## Related
+
+- [Accordion](/ui/docs/components/navigation/accordion) — Vertically stacked series of collapsible disclosure panels.
+- [FormLayout](/ui/docs/components/layout/form-layout) — Structured layout for complex forms with optional sections.
+- [Card](/ui/docs/components/data-display/card) — Card container often hosting collapsible details.
 
 ---
 
@@ -7296,93 +8601,281 @@ Navigation components establish information architecture and wayfinding across N
 
 ## Pagination (https://innostes.com/ui/docs/components/navigation/pagination)
 
-Controlled, translatable, with a stable width as you page.
+Controlled page navigation with stable button widths, boundary offsets, and server-side range calculation.
 
 <ComponentPreview name="navigation/pagination/basic" />
 
 ## Import
 
 ```tsx
-import { Pagination, getPaginationRange } from '@innostes/ui';
+import { Pagination, getPaginationRange, type PaginationProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Pagination` when dividing large datasets into discrete pages:
+
+- **Enterprise data tables**: Navigating through thousands of purchase orders, stock items, or ledger entries.
+- **Search result listings**: Paginated inventory queries or customer catalogues.
+- **Audit logs**: Stepping through historical system logs.
+
+**Do not use Pagination for:**
+- Infinite feed streams or chat conversations.
+- Multi-step wizards or checkout funnels — use [Stepper](/ui/docs/components/navigation/stepper).
+- Switching between distinct functional sections on a single screen — use [Tabs](/ui/docs/components/navigation/tabs).
+
+## Examples
+
+### Basic controlled pagination
+
+Managing the current page in component state:
 
 ```tsx
 const [page, setPage] = useState(1);
+const totalRecords = 480;
+const pageSize = 20;
+const pageCount = Math.ceil(totalRecords / pageSize);
 
-<Pagination page={page} pageCount={Math.ceil(total / pageSize)} onPageChange={setPage} />
+<Pagination
+  page={page}
+  pageCount={pageCount}
+  onPageChange={(nextPage) => {
+    setPage(nextPage);
+    fetchOrders({ page: nextPage, pageSize });
+  }}
+/>
 ```
 
-- The number of buttons stays the same as you move, so the controls don't jump under the pointer.
-- `labels` translates "Previous", "Next" and the page names.
+### Boundary and sibling counts
 
-## Custom pagination UI
+Adjust `boundaryCount` (pages anchored at the start and end) and `siblingCount` (pages surrounding the current page):
 
-`getPaginationRange` returns the items to show (numbers and ellipses), so you can build any layout
-on the same logic. It has no React code, so it also works on the server.
+```tsx
+<Pagination
+  page={page}
+  pageCount={50}
+  siblingCount={2}
+  boundaryCount={2}
+  onPageChange={setPage}
+/>
+```
+
+### Server-side range helper (`getPaginationRange`)
+
+`getPaginationRange` calculates the page numbers and ellipsis positions without importing React, making it ideal for Server Components or custom pagination renderers:
 
 ```ts
-getPaginationRange({ page: 6, pageCount: 20 });
-// → [1, 'ellipsis-start', 5, 6, 7, 'ellipsis-end', 20]
+import { getPaginationRange } from '@innostes/ui';
+
+const range = getPaginationRange({
+  page: 6,
+  pageCount: 20,
+  siblingCount: 1,
+  boundaryCount: 1,
+});
+// Output: [1, 'ellipsis-start', 5, 6, 7, 'ellipsis-end', 20]
 ```
 
 ## Accessibility
 
-- `<nav aria-label="Pagination">`; the current page has `aria-current="page"`; every button is labelled.
+`Pagination` implements the WAI-ARIA Navigation pattern.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between Previous, page number buttons, and Next.' },
+    { key: 'Enter / Space', action: 'Activates the focused page number or directional button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container is rendered as `<nav aria-label="Pagination">`.
+- The active page button has `aria-current="page"`.
+- Previous and Next buttons receive descriptive `aria-label` text via `labels.previous` and `labels.next`.
+- Ellipsis spans receive `aria-hidden="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep the number of visible buttons stable across page transitions to prevent layout shifts.',
+    code: `<Pagination page={page} pageCount={pageCount} onPageChange={setPage} />`,
+  }}
+  dont={{
+    description: 'Do not re-render dynamic layouts that shift the Next button position as the user clicks.',
+    code: `<div style={{ width: page * 20 }}>{buttons}</div>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Disable the Previous button on page 1 and the Next button on the final page.',
+    code: `<Pagination page={1} pageCount={10} onPageChange={setPage} />`,
+  }}
+  dont={{
+    description: 'Do not allow navigation past the first or last available page.',
+    code: `<button onClick={() => setPage(page - 1)}>Prev</button>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Pagination']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component frequently combined with pagination.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression flow.
+- [Tabs](/ui/docs/components/navigation/tabs) — Category switching without numerical paging.
 
 ---
 
 ## Stepper (https://innostes.com/ui/docs/components/navigation/stepper)
 
-Horizontal or vertical, with descriptions, error states and clickable completed steps.
+Horizontal or vertical multi-step indicator with validation status, step descriptions, and clickable navigation.
 
 <ComponentPreview name="navigation/stepper/basic" />
 
 ## Import
 
 ```tsx
-import { Stepper, type StepperStep } from '@innostes/ui';
+import { Stepper, type StepperStep, type StepStatus } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Stepper` when guiding users through a sequential multi-stage process where order matters:
+
+- **Purchase order creation**: 1. Supplier details → 2. Line items & GST → 3. Shipping & delivery → 4. Review & confirmation.
+- **Vendor onboarding wizard**: Company profile, GSTIN & PAN verification, bank mandate, document upload.
+- **Physical goods consignment**: Order booked → Picked & packed → In transit → Delivered.
+
+**Do not use Stepper for:**
+- Unordered or freely navigable content sections — use [Tabs](/ui/docs/components/navigation/tabs).
+- Simple progress percentages (e.g. 64% complete) without discrete steps — use [Progress](/ui/docs/components/feedback/progress).
+- Page-by-page table navigation — use [Pagination](/ui/docs/components/navigation/pagination).
+
+## Examples
+
+### Horizontal stepper with interactive step clicking
+
+Allowing users to return to completed steps to revise information:
 
 ```tsx
-const [step, setStep] = useState(0);
+const steps: StepperStep[] = [
+  { title: 'Vendor details', description: 'Bengaluru Spices' },
+  { title: 'Items & tax', description: 'HSN 0908 cardamom lines' },
+  { title: 'Logistics', description: 'Transport & E-Way' },
+  { title: 'Review', description: 'Final verification' },
+];
 
-<Stepper steps={steps} currentStep={step} onStepClick={setStep} />
+const [currentStep, setCurrentStep] = useState(1);
+
+<Stepper
+  steps={steps}
+  currentStep={currentStep}
+  onStepClick={(index) => {
+    // Only allow navigating back to completed steps
+    if (index < currentStep) setCurrentStep(index);
+  }}
+/>
 ```
 
-- Steps before `currentStep` are complete. Set `status: 'error'` on a step to flag a problem.
-- With `onStepClick`, completed steps become buttons, so users can go back but not skip ahead.
-- `labelPlacement="end"` puts titles next to the markers for a more compact horizontal stepper.
+### Vertical stepper for consignment tracking
 
-## Vertical
-
-For order tracking, import jobs and long flows:
+Vertical layout suits long audit histories and mobile screen sizes:
 
 <ComponentPreview name="navigation/stepper/vertical" />
 
+```tsx
+const dispatchSteps: StepperStep[] = [
+  { title: 'Order placed', description: 'PO-2026-081 approved by Priya Sharma' },
+  { title: 'Quality check passed', description: 'Inspected at Bengaluru Hub' },
+  { title: 'Dispatched via Blue Dart', description: 'AWB 4910291481' },
+  { title: 'Delivered', description: 'Pending destination sign-off' },
+];
+
+<Stepper
+  orientation="vertical"
+  steps={dispatchSteps}
+  currentStep={2}
+/>
+```
+
+### Error states in steps
+
+Flag steps that require user remediation:
+
+```tsx
+const stepsWithErrors: StepperStep[] = [
+  { title: 'Company profile', status: 'complete' },
+  { title: 'GSTIN verification', status: 'error', description: 'Invalid GSTIN checksum' },
+  { title: 'Bank account', status: 'upcoming' },
+];
+
+<Stepper steps={stepsWithErrors} currentStep={1} />
+```
+
 ## Accessibility
 
-- A `<nav aria-label="Progress">` with an ordered list; the current step has `aria-current="step"`.
-- Completed and failed steps are announced ("completed", "has errors"), not shown by colour only.
+`Stepper` implements semantic ordered navigation for multi-step procedures.
 
-See the [Setup Wizard example](/ui/docs/examples/setup-wizard) for a full flow.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus to clickable completed step markers.' },
+    { key: 'Enter / Space', action: 'Navigates back to the selected step.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container element is a `<nav aria-label="Progress">` enclosing an `<ol>`.
+- The current step has `aria-current="step"`.
+- Completed and errored steps have accessible announcements via hidden helper labels (e.g. `(completed)`, `(has errors)`), ensuring screen reader users do not miss step statuses that rely on colour.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Allow users to click previously completed steps to review or edit earlier entries.',
+    code: `<Stepper steps={steps} currentStep={2} onStepClick={setCurrentStep} />`,
+  }}
+  dont={{
+    description: 'Do not allow users to skip ahead to incomplete upcoming steps before validation passes.',
+    code: `<Stepper steps={steps} currentStep={0} onStepClick={(i) => setCurrentStep(i)} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the vertical orientation for mobile responsive layouts and long activity logs.',
+    code: `<Stepper orientation="vertical" steps={steps} currentStep={step} />`,
+  }}
+  dont={{
+    description: 'Do not cram 6+ horizontal steps onto narrow mobile viewports.',
+    code: `<div className="w-[320px]"><Stepper steps={sixSteps} /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Stepper']} />
+
+## Related
+
+- [Tabs](/ui/docs/components/navigation/tabs) — Switch between parallel sections without enforced order.
+- [Progress](/ui/docs/components/feedback/progress) — Continuous completion bar for deterministic tasks.
+- [FormLayout](/ui/docs/components/layout/form-layout) — Layout container for enterprise multi-step form steps.
 
 ---
 
 ## Tabs (https://innostes.com/ui/docs/components/navigation/tabs)
 
-Underline and pill styles with an animated indicator, horizontal or vertical.
+Underline and pill variants with animated active indicator, keyboard navigation, and vertical orientation support.
 
 <ComponentPreview name="navigation/tabs/basic" />
 
@@ -7392,37 +8885,149 @@ Underline and pill styles with an animated indicator, horizontal or vertical.
 import { Tabs, TabsList, TabsTab, TabsPanel } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Tabs` to present parallel views or alternate perspectives of the same core entity:
+
+- **Entity detail views**: Overview, Line Items, Documents, Audit Trail, and Invoices.
+- **Settings panels**: Account, Security, Billing, and Team Members.
+- **Reporting ranges**: Compact pill switches for Day, Week, Month, Quarter.
+
+**Do not use Tabs for:**
+- Sequential step-by-step wizards where order is strictly enforced — use [Stepper](/ui/docs/components/navigation/stepper).
+- Deep ancestral tree hierarchies — use [Breadcrumb](/ui/docs/components/navigation/breadcrumb).
+- Primary multi-page top-level navigation — use [AppRail](/ui/docs/components/layout/app-rail) or [Sidebar](/ui/docs/components/layout/sidebar).
+
+## Examples
+
+### Underline variant for page sections
+
+The standard underline tab strip with an animated active highlight bar:
 
 ```tsx
-<Tabs defaultValue="overview">
+<Tabs defaultValue="overview" variant="underline">
   <TabsList>
-    <TabsTab value="overview">Overview</TabsTab>
-    <TabsTab value="activity">Activity</TabsTab>
+    <TabsTab value="overview">Order overview</TabsTab>
+    <TabsTab value="items">Line items (14)</TabsTab>
+    <TabsTab value="shipping">Logistics & E-Way</TabsTab>
   </TabsList>
-  <TabsPanel value="overview">…</TabsPanel>
-  <TabsPanel value="activity">…</TabsPanel>
+  <TabsPanel value="overview">
+    <div className="py-4">Purchase order details for Bengaluru Spices.</div>
+  </TabsPanel>
+  <TabsPanel value="items">
+    <div className="py-4">Items table with HSN breakdown.</div>
+  </TabsPanel>
+  <TabsPanel value="shipping">
+    <div className="py-4">Tracking consignment via Blue Dart Express.</div>
+  </TabsPanel>
 </Tabs>
 ```
 
-- `variant="underline"` (default) for page sections; `variant="pills"` for compact switches,
-  like a date range above a chart.
-- To sync the tab with the URL, control it with `value` / `onValueChange`.
-- `orientation="vertical"` stacks the tabs for settings pages.
+### Pills variant for compact metric cards
+
+Use `variant="pills"` inside toolbars or card headers:
+
+```tsx
+<Tabs defaultValue="quarterly" variant="pills">
+  <TabsList>
+    <TabsTab value="monthly">Monthly</TabsTab>
+    <TabsTab value="quarterly">Quarterly</TabsTab>
+    <TabsTab value="annual">FY 2025-26</TabsTab>
+  </TabsList>
+  <TabsPanel value="monthly">{/* Monthly revenue chart */}</TabsPanel>
+  <TabsPanel value="quarterly">{/* Quarterly tax review */}</TabsPanel>
+  <TabsPanel value="annual">{/* Annual compliance statement */}</TabsPanel>
+</Tabs>
+```
+
+### Vertical orientation for settings sidebars
+
+Stack tabs vertically for wide screen settings dialogs or configuration layouts:
+
+```tsx
+<Tabs defaultValue="gst" orientation="vertical" className="w-full">
+  <TabsList className="w-64 border-r pr-4">
+    <TabsTab value="profile">Company profile</TabsTab>
+    <TabsTab value="gst">GSTIN & Taxes</TabsTab>
+    <TabsTab value="bank">Bank accounts</TabsTab>
+  </TabsList>
+  <div className="flex-1 pl-6">
+    <TabsPanel value="profile">Northwind Traders Pvt Ltd</TabsPanel>
+    <TabsPanel value="gst">State: Karnataka (29), GSTIN: 29ABCDE1234F1Z5</TabsPanel>
+    <TabsPanel value="bank">HDFC Bank, Bengaluru Koramangala Branch</TabsPanel>
+  </div>
+</Tabs>
+```
 
 ## Accessibility
 
-- Arrow keys move between tabs; the active panel is linked with `aria-controls`/`aria-labelledby`.
+`Tabs` is built on Base UI Tabs primitives (`@base-ui/react/tabs`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['Tabs', 'TabsList', 'TabsTab', 'TabsPanel']} baseUi="tabs" />
+<KeyboardTable
+  entries={[
+    { key: 'ArrowRight / ArrowDown', action: 'Moves focus and selection to the next tab.' },
+    { key: 'ArrowLeft / ArrowUp', action: 'Moves focus and selection to the previous tab.' },
+    { key: 'Home', action: 'Moves focus and selection to the first tab in the list.' },
+    { key: 'End', action: 'Moves focus and selection to the last tab in the list.' },
+    { key: 'Tab', action: 'Moves focus into the currently active tab panel.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The tab strip has `role="tablist"`.
+- Each tab trigger has `role="tab"` with `aria-selected="true | false"` and `aria-controls` pointing to its corresponding panel.
+- Each content panel has `role="tabpanel"` and `aria-labelledby` referencing its tab trigger.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep tab labels concise (1–3 words) so tab strips remain legible and avoid awkward wraps.',
+    code: `<TabsTab value="audit">Audit trail</TabsTab>`,
+  }}
+  dont={{
+    description: 'Do not use long sentences or paragraphs as tab labels.',
+    code: `<TabsTab value="audit">Click here to inspect full transaction history</TabsTab>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the pills variant for compact segmented controls inside toolbars and card headers.',
+    code: `<Tabs variant="pills"><TabsList><TabsTab value="day">Day</TabsTab></TabsList></Tabs>`,
+  }}
+  dont={{
+    description: 'Do not mix underline and pills styles arbitrarily on the same page.',
+    code: `<Tabs variant="underline"><Tabs variant="pills" /></Tabs>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Tabs',
+    'TabsList',
+    'TabsTab',
+    'TabsPanel',
+  ]}
+  baseUi="tabs"
+/>
+
+## Related
+
+- [Accordion](/ui/docs/components/navigation/accordion) — Stacked vertical disclosure panels.
+- [AppRail](/ui/docs/components/layout/app-rail) — Vertical navigation rail for primary application modules.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression flow.
 
 ---
 
 ## Alert Dialog (https://innostes.com/ui/docs/components/overlays/alert-dialog)
 
-A dialog that can't be dismissed by clicking outside; the user must choose.
+Strict modal confirmation dialog that disables backdrop light-dismiss, focuses the safe cancel action by default, and communicates consequences clearly.
 
 <ComponentPreview name="overlays/alert-dialog/basic" />
 
@@ -7438,70 +9043,361 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogClose,
+  type AlertDialogProps,
 } from '@innostes/ui';
 ```
 
-## Writing good confirmations
+## When to use
 
-- Title asks the question: "Delete Acme Corp?", not "Are you sure?".
-- Description states the consequence: what's lost, and whether it can be undone.
-- The confirm button repeats the action ("Delete customer"), not "OK".
+Use `AlertDialog` when an operator initiates an irreversible, high-consequence action that permanently deletes records or alters financial transactions:
+
+- Voiding verified tax invoices or reversing finalized journal entries.
+- Deleting customer profiles, vendor contracts, or warehouse location definitions.
+- Terminating active team credentials or revoking tenant API keys.
+
+When choosing overlay confirmation components:
+- Use `AlertDialog` (`role="alertdialog"`) for critical confirmations where an accidental click would result in data loss. Backdrop clicking is intentionally disabled.
+- Use [Dialog](/ui/docs/components/overlays/dialog) (`role="dialog"`) for standard multi-field data entry forms, where users can dismiss by clicking outside.
+- Use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) for reversible low-impact choices.
+- Refer to the [Overlay decision guide](/ui/docs/components/overlays#overlay-decision-guide) for detailed guidance.
+
+## Examples
+
+### Destructive confirmation
+
+Compose `AlertDialog` with `AlertDialogHeader`, `AlertDialogTitle`, `AlertDialogDescription`, and `AlertDialogFooter`. Use `AlertDialogClose` with `Button variant="destructive"` to handle confirmation:
+
+```tsx
+'use client';
+
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  Button,
+  toast,
+} from '@innostes/ui';
+
+export function DeleteVendorConfirmation({ vendorId, vendorName }) {
+  const handleDelete = () => {
+    // API deletion call
+    toast.success(`Vendor ${vendorName} removed.`);
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        Delete vendor
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete {vendorName}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. Removing this vendor will archive 48 purchase order line items and deactivate all linked procurement catalogs.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogClose render={<Button variant="outline" />}>
+            Cancel
+          </AlertDialogClose>
+          <AlertDialogClose
+            render={<Button variant="destructive" />}
+            onClick={handleDelete}
+          >
+            Delete vendor
+          </AlertDialogClose>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+```
+
+### Strict modality without light-dismiss
+
+Unlike standard dialogs, clicking the dimmed background backdrop does **not** close an `AlertDialog`. Operators must explicitly press the "Cancel" action or Escape key to dismiss:
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger render={<Button variant="outline" />}>Revoke license</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Revoke enterprise license?</AlertDialogTitle>
+      <AlertDialogDescription>
+        Active depot operators will immediately lose access to the dispatch terminal.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+      <AlertDialogClose render={<Button variant="destructive" />}>Revoke license</AlertDialogClose>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### Asynchronous deletion with progress feedback
+
+Combine `AlertDialog` with controlled open state and loading feedback during asynchronous API requests:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  Button,
+  toast,
+} from '@innostes/ui';
+
+export function AsyncVoidInvoice({ invoiceId }) {
+  const [open, setOpen] = useState(false);
+  const [isVoiding, setIsVoiding] = useState(false);
+
+  const handleVoid = async () => {
+    setIsVoiding(true);
+    try {
+      await fetch(`/api/v1/invoices/${invoiceId}/void`, { method: 'POST' });
+      setOpen(false);
+      toast.success(`Invoice ${invoiceId} voided`);
+    } catch {
+      toast.error('Failed to void invoice. Check e-invoicing gateway status.');
+    } finally {
+      setIsVoiding(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        Void invoice
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Void invoice {invoiceId}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action will reverse accounts receivable ledger entries and submit a credit memo to the GSTN portal.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogClose render={<Button variant="outline" disabled={isVoiding} />}>
+            Cancel
+          </AlertDialogClose>
+          <Button variant="destructive" loading={isVoiding} onClick={handleVoid}>
+            Confirm void
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+```
 
 ## Accessibility
 
-- `role="alertdialog"`, labelled by the title and described by the description.
-- Focus starts inside the dialog; Escape cancels.
+`AlertDialog` implements the W3C WAI-ARIA Alert Dialog design pattern via Base UI (`@base-ui/react/alert-dialog`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['AlertDialogContent', 'AlertDialogTitle', 'AlertDialogDescription']} baseUi="alert-dialog" />
+<KeyboardTable
+  entries={[
+    { key: 'Escape', action: 'Dismisses the alert dialog and restores focus to the trigger button.' },
+    { key: 'Tab', action: 'Cycles focus between the Cancel button and the confirming action button.' },
+    { key: 'Enter', action: 'Activates the currently focused button.' },
+  ]}
+/>
+
+### Initial safe focus
+
+When the alert dialog mounts, focus is automatically placed on the non-destructive **Cancel** action by default. This deliberate safeguard prevents operators who instinctively press Enter from accidentally executing an irreversible operation.
+
+### Screen readers (role="alertdialog")
+
+- `AlertDialogContent` carries `role="alertdialog"`. Assistive technologies announce both the title and the descriptive warning text immediately upon display.
+- Background content is marked `inert`, preventing virtual cursors from escaping the modal window.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Clearly describe the irreversible consequences in AlertDialogDescription (e.g., number of affected rows, financial reversals).',
+    code: `<AlertDialogDescription>\n  Reverses ₹42,000 in receivables and cancels the e-way bill.\n</AlertDialogDescription>`,
+  }}
+  dont={{
+    description: 'Do not use generic, unhelpful questions like "Are you sure?" without explaining the consequences.',
+    code: `<AlertDialogDescription>Are you sure you want to proceed?</AlertDialogDescription>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use explicit verbs on confirmation buttons matching the action (e.g. "Void invoice", "Delete customer").',
+    code: `<Button variant="destructive">Void invoice</Button>`,
+  }}
+  dont={{
+    description: 'Do not use vague "Yes" or "OK" buttons that require reading the title again to know what is happening.',
+    code: `<Button variant="destructive">OK</Button>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'AlertDialog',
+    'AlertDialogTrigger',
+    'AlertDialogContent',
+    'AlertDialogHeader',
+    'AlertDialogTitle',
+    'AlertDialogDescription',
+    'AlertDialogFooter',
+    'AlertDialogClose',
+  ]}
+  baseUi="alert-dialog"
+/>
+
+## Related
+
+- [Dialog](/ui/docs/components/overlays/dialog) — Standard modal dialog for forms and multi-field inputs.
+- [Button](/ui/docs/components/actions/button) — Action button with destructive styling.
+- [Toast](/ui/docs/components/feedback/toast) — Transient notification confirming completed actions.
 
 ---
 
 ## Command Palette (https://innostes.com/ui/docs/components/overlays/command-palette)
 
-A global command palette triggered by a keyboard shortcut (e.g. ⌘K) to quickly navigate and execute actions across the application.
+A global command overlay triggered by keyboard shortcut (⌘K) to quickly search records, navigate pages, and execute administrative actions.
 
 <ComponentPreview name="overlays/command-palette/basic" align="start" className="p-4 sm:p-4" />
 
 ## Import
 
 ```tsx
-import { CommandPalette, CommandItem, CommandGroup } from '@innostes/ui';
+import { CommandPalette, type CommandGroup, type CommandItem } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `CommandPalette` component is a global, floating search overlay designed to help users quickly find pages or perform actions. It includes built-in keyboard shortcut handling and accessible listbox navigation.
+Use `CommandPalette` as the central keyboard-driven interface for enterprise applications:
 
-Pass an array of grouped items using the `groups` prop. Each item must specify an `id`, `label`, and an `onSelect` callback.
+- **Global navigation**: Jumping across ERP modules (Purchase Orders, Tax Invoices, General Ledger, Vendors).
+- **Administrative actions**: Creating records, exporting reports, or toggling developer modes.
+- **Search and recent items**: Finding recently edited contracts or frequently accessed supplier files.
+
+**Do not use CommandPalette for:**
+- Standard dropdown action lists on a single row — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- Form field selection from a predefined enumeration — use [Select](/ui/docs/components/forms/select).
+- Complex workflows requiring multiple user inputs or validation — use [Dialog](/ui/docs/components/overlays/dialog).
+
+## Examples
+
+### Grouping and shortcuts
+
+Organise commands into logical categories such as Pages, Recent items, and Actions:
 
 ```tsx
-function App() {
-  const groups = [
+const groups: CommandGroup[] = [
+  {
+    heading: 'Recent items',
+    items: [
+      {
+        id: 'po-2026-081',
+        label: 'PO-2026-081 · Bengaluru Spices',
+        description: 'Updated 10 minutes ago · ₹89,400',
+        onSelect: () => router.push('/purchases/PO-2026-081'),
+      },
+    ],
+  },
+  {
+    heading: 'Quick actions',
+    items: [
+      {
+        id: 'new-po',
+        label: 'Create purchase order',
+        shortcut: 'C P',
+        keywords: ['procurement', 'buy', 'vendor'],
+        onSelect: () => router.push('/purchases/new'),
+      },
+      {
+        id: 'export-gst',
+        label: 'Generate GST return (GSTR-1)',
+        shortcut: 'G R',
+        keywords: ['tax', 'finance', 'invoices'],
+        onSelect: openGstExportDialog,
+      },
+    ],
+  },
+];
+
+<CommandPalette groups={groups} />
+```
+
+### Global shortcut configuration
+
+By default, the palette listens for `Ctrl + K` or `⌘ + K`. Customise the shortcut key with `hotkey="j"` or pass `hotkey={null}` to disable the automatic global listener and control visibility manually:
+
+```tsx
+// Custom hotkey ⌘J
+<CommandPalette hotkey="j" groups={groups} />
+
+// Manual trigger from top navigation bar button
+const [open, setOpen] = useState(false);
+
+<Button variant="outline" onClick={() => setOpen(true)}>
+  Search commands (⌘K)
+</Button>
+<CommandPalette
+  open={open}
+  onOpenChange={setOpen}
+  hotkey="k"
+  groups={groups}
+/>
+```
+
+### Dynamic search and recent items
+
+Combine static navigation items with dynamically updated recent items stored in local state or browser storage:
+
+```tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { CommandPalette, type CommandGroup } from '@innostes/ui';
+
+export function GlobalSearch() {
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('northwind_recent_records');
+    if (saved) setRecentIds(JSON.parse(saved));
+  }, []);
+
+  const groups: CommandGroup[] = [
     {
-      heading: 'Pages',
-      items: [
-        {
-          id: 'orders',
-          label: 'Orders',
-          icon: <CartIcon />,
-          onSelect: () => router.push('/orders')
-        },
-        // ...
-      ]
+      heading: 'Recent records',
+      items: recentIds.map((id) => ({
+        id,
+        label: `Record ${id}`,
+        onSelect: () => navigateToRecord(id),
+      })),
     },
     {
-      heading: 'Actions',
+      heading: 'Modules',
       items: [
-        {
-          id: 'new-invoice',
-          label: 'Create invoice',
-          shortcut: 'C I',
-          onSelect: createInvoice
-        },
-        // ...
-      ]
+        { id: 'inventory', label: 'Inventory & Warehousing', onSelect: () => router.push('/inventory') },
+        { id: 'billing', label: 'Invoices & E-Way Bills', onSelect: () => router.push('/billing') },
+      ],
     },
   ];
 
@@ -7509,36 +9405,67 @@ function App() {
 }
 ```
 
-### Keyboard Shortcuts
+## Accessibility
 
-By default, the command palette listens for `Ctrl + K` or `⌘ + K` to open. You can change this behavior by setting the `hotkey` prop to a different character, or pass `null` to disable the built-in shortcut and manage opening state yourself.
+`CommandPalette` implements the WAI-ARIA Combobox pattern anchored within a modal dialog (`@base-ui/react/dialog`).
 
-### Custom Filtering
+### Keyboard navigation
 
-The component automatically filters items based on a case- and accent-insensitive search against the item's `label`, `description`, and `keywords`.
-
-If you need a more advanced filtering algorithm, you can provide a custom `filter` function:
-
-```tsx
-<CommandPalette
-  groups={groups}
-  filter={(item, query) => customMatch(item.label, query)}
+<KeyboardTable
+  entries={[
+    { key: '⌘ + K / Ctrl + K', action: 'Toggles the command palette open or closed from anywhere in the app.' },
+    { key: 'DownArrow / UpArrow', action: 'Moves active selection through the filtered list of commands.' },
+    { key: 'Enter', action: 'Executes the active command and automatically dismisses the palette.' },
+    { key: 'Escape', action: 'Dismisses the command palette and restores focus to the previously focused element.' },
+  ]}
 />
-```
 
-### Advanced Styling
+### ARIA attributes
 
-You can deeply customize the internal parts of the palette using the `classNames` prop, targeting slots like `popup`, `input`, `list`, `groupHeading`, `item`, `empty`, and `footer`.
+- The search input element uses `role="combobox"`, `aria-expanded="true"`, and `aria-autocomplete="list"`.
+- `aria-activedescendant` tracks the focused option without removing keyboard focus from the search input, allowing continuous typing while navigating.
+- The results list uses `role="listbox"`, with individual entries having `role="option"` and `aria-selected="true | false"`.
+- Groups are marked with `role="group"` and reference their group headings via `aria-labelledby`.
 
-## API Reference
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide relevant keywords in item definitions so users can find commands using alternative search terms.',
+    code: `{ id: 'gstr', label: 'GST Returns', keywords: ['tax', 'compliance', 'hsn'] }`,
+  }}
+  dont={{
+    description: 'Do not overload the palette with hundreds of unfiltered records; keep initial lists focused and relevant.',
+    code: `{ heading: 'All 50,000 customers', items: allCustomers }`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Include visual shortcut badges (e.g. "C P") to teach users faster navigation combinations over time.',
+    code: `{ id: 'new-po', label: 'Create PO', shortcut: 'C P' }`,
+  }}
+  dont={{
+    description: 'Do not invent confusing or non-standard shortcut keys that conflict with native browser commands.',
+    code: `{ id: 'print', label: 'Print', shortcut: '⌘ W' }`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['CommandPalette']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar with search trigger button.
+- [Dialog](/ui/docs/components/overlays/dialog) — Modal window for focused multi-step workflows.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Trigger-anchored action lists for individual entities.
 
 ---
 
 ## Context Menu (https://innostes.com/ui/docs/components/overlays/context-menu)
 
-Same items as Dropdown Menu, positioned at the pointer.
+Pointer-anchored action menus supporting submenus, keyboard shortcuts, and toggle items.
 
 <ComponentPreview name="overlays/context-menu/basic" />
 
@@ -7552,29 +9479,147 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuShortcut,
-  // …and ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuSub, etc.
+  ContextMenuCheckboxItem,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Items are the same components as [Dropdown Menu](/ui/docs/components/overlays/dropdown-menu),
-exported with `ContextMenu*` names.
+Use `ContextMenu` to provide power-user contextual shortcuts directly where the user clicks or taps:
 
-<Callout type="warn">
-  Right-click is hard to discover and unavailable to some users. Make every action in a context menu
-  reachable another way too, e.g. a row actions button.
-</Callout>
+- **Enterprise data grid rows**: Quick access to edit, copy ID, duplicate, or inspect records.
+- **Tree view and file directories**: Renaming, moving, downloading, or archiving documents.
+- **Canvas or diagram editors**: Context-specific manipulation of nodes and edges.
 
-## API Reference
+**Do not use ContextMenu as the only way to perform an action.** Right-click gestures are invisible, undiscoverable for new users, and difficult to trigger on touch screens. Always provide a primary on-screen button or a [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) alongside it.
 
-<ApiTable components={['ContextMenuContent']} baseUi="context-menu" />
+## Examples
+
+### Table row contextual actions
+
+Allowing users to right-click an ERP table row for immediate options:
+
+```tsx
+<ContextMenu>
+  <ContextMenuTrigger className="flex items-center justify-between rounded border p-4">
+    <div>
+      <div className="font-medium">INV-2026-081 (Bengaluru Spices)</div>
+      <div className="text-sm text-muted-foreground">₹89,400 · Tax invoice</div>
+    </div>
+    <span className="text-xs text-muted-foreground">Right-click for options</span>
+  </ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem onClick={() => router.push('/invoices/INV-2026-081')}>
+      View details
+      <ContextMenuShortcut>⌘O</ContextMenuShortcut>
+    </ContextMenuItem>
+    <ContextMenuItem onClick={copyInvoiceNumber}>
+      Copy invoice number
+      <ContextMenuShortcut>⌘C</ContextMenuShortcut>
+    </ContextMenuItem>
+    <ContextMenuSeparator />
+    <ContextMenuItem variant="destructive" onClick={openVoidDialog}>
+      Void invoice
+    </ContextMenuItem>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+### Contextual submenus
+
+Organise deeper secondary actions using nested submenus:
+
+```tsx
+<ContextMenu>
+  <ContextMenuTrigger className="rounded-lg border border-dashed p-8 text-center text-sm">
+    Right-click here to view reporting options
+  </ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem onClick={refreshData}>Refresh data</ContextMenuItem>
+    <ContextMenuSub>
+      <ContextMenuSubTrigger>Export as</ContextMenuSubTrigger>
+      <ContextMenuSubContent>
+        <ContextMenuItem onClick={exportXlsx}>Excel spreadsheet (.xlsx)</ContextMenuItem>
+        <ContextMenuItem onClick={exportPdf}>PDF summary</ContextMenuItem>
+      </ContextMenuSubContent>
+    </ContextMenuSub>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+## Accessibility
+
+`ContextMenu` is built on Base UI Menu primitives (`@base-ui/react/menu`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Shift + F10 / Menu', action: 'Opens the context menu anchored to the currently focused trigger element.' },
+    { key: 'DownArrow / UpArrow', action: 'Cycles keyboard focus between menu items.' },
+    { key: 'RightArrow', action: 'Opens a submenu when focused on a sub-trigger item.' },
+    { key: 'LeftArrow / Escape', action: 'Closes a submenu and returns focus to its parent trigger item.' },
+    { key: 'Enter / Space', action: 'Executes the focused menu item and dismisses the context menu.' },
+    { key: 'Escape', action: 'Closes the context menu and restores focus to the trigger element.' },
+  ]}
+/>
+
+### Discovery and touch interfaces
+
+- Right-click is not discoverable through visual scanning alone. Every action exposed in a context menu must also be accessible via a visible UI element (such as a toolbar button or table row action menu).
+- Long-press support allows mobile browsers to trigger the context menu, but primary mobile workflows should rely on explicit touch buttons.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Ensure every action available in a context menu is also accessible via standard on-screen controls.',
+    code: `<><ContextMenuTrigger>{row}</ContextMenuTrigger><Button iconOnly><MoreHorizontal /></Button></>`,
+  }}
+  dont={{
+    description: 'Do not hide primary actions exclusively behind right-click context menus.',
+    code: `<ContextMenuTrigger>{row}</ContextMenuTrigger>{/* No visible button */}`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide keyboard shortcut indicators when the corresponding keyboard shortcuts are globally active.',
+    code: `<ContextMenuItem>Duplicate<ContextMenuShortcut>⌘D</ContextMenuShortcut></ContextMenuItem>`,
+  }}
+  dont={{
+    description: 'Do not list keyboard shortcuts that are not actually bound or functional in the current view.',
+    code: `<ContextMenuItem>Export<ContextMenuShortcut>Ctrl+Alt+Shift+E</ContextMenuShortcut></ContextMenuItem>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'ContextMenu',
+    'ContextMenuTrigger',
+    'ContextMenuContent',
+  ]}
+  baseUi="context-menu"
+/>
+
+## Related
+
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Standard button-triggered action menu.
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component frequently combined with row context menus.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal floating surface for interactive forms.
 
 ---
 
 ## Dialog (https://innostes.com/ui/docs/components/overlays/dialog)
 
-Focus trap, Escape and outside-click to close, nested dialogs, and five sizes.
+Modal dialog with automatic focus trapping, backdrop blur, Escape and outside-click dismissal, and five content size tiers.
 
 <ComponentPreview name="overlays/dialog/basic" />
 
@@ -7590,53 +9635,345 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
+  type DialogProps,
+  type DialogContentProps,
 } from '@innostes/ui';
 ```
 
-## Anatomy
+## When to use
+
+Use `Dialog` when an operator needs to complete a critical, self-contained sub-task without losing the context of their underlying workspace:
+
+- Editing entity records (updating vendor contact details, revising purchase order items).
+- Creating new ledger accounts, cost centres, or warehouse storage bins.
+- Providing focused administrative forms that require explicit submission or cancellation.
+
+When choosing overlay components:
+- Use `Dialog` for short, focused modal interactions and multi-field forms.
+- Use [Alert Dialog](/ui/docs/components/overlays/alert-dialog) when presenting irreversible destructive confirmation prompts ("Delete vendor", "Void transaction").
+- Use [Sheet](/ui/docs/components/overlays/sheet) for long edit forms, complex audit logs, or side inspection panels.
+- Refer to the [Overlay decision guide](/ui/docs/components/overlays#overlay-decision-guide) for full details.
+
+## Examples
+
+### Basic dialog with form
+
+Combine `Dialog` with `Form` and `Field`. Use the `render` prop on `DialogTrigger` and `DialogClose` to render `@innostes/ui` `Button` components:
 
 ```tsx
-<Dialog>
-  <DialogTrigger />
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle />
-      <DialogDescription />
-    </DialogHeader>
-    {/* content */}
-    <DialogFooter>
-      <DialogClose />
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+'use client';
+
+import { useState } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Field,
+  FieldLabel,
+  Form,
+  Input,
+  toast,
+} from '@innostes/ui';
+
+export function EditVendorDialog() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="outline" />}>
+        Edit vendor details
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit vendor details</DialogTitle>
+          <DialogDescription>
+            Update registered address and GSTIN for Tata Consumer Products.
+          </DialogDescription>
+        </DialogHeader>
+        <Form
+          onFormSubmit={() => {
+            setOpen(false);
+            toast.success('Vendor details updated successfully');
+          }}
+        >
+          <div className="flex flex-col gap-4 py-2">
+            <Field name="vendorName">
+              <FieldLabel>Legal entity name</FieldLabel>
+              <Input defaultValue="Tata Consumer Products Ltd" required />
+            </Field>
+          </div>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+            <Button type="submit">Save changes</Button>
+          </DialogFooter>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 ```
 
-## Usage
+### Preventing close during async save
 
-- Use `render` to make the trigger and close buttons our `Button`:
-  `<DialogTrigger render={<Button />}>Edit</DialogTrigger>`.
-- Control it with `open` / `onOpenChange` to close after an async save (see the demo).
-- `size` on `DialogContent`: `sm`, `md` (default), `lg`, `xl`, `full`.
-- Set `showCloseButton={false}` to hide the × button.
+To prevent accidental data loss or partial submissions, block dismissal while an asynchronous operation is saving:
 
-Use a dialog for short, focused tasks. For larger forms next to the content, a
-[Sheet](/ui/docs/components/overlays/sheet) keeps more context visible. To confirm destructive
-actions, use [Alert Dialog](/ui/docs/components/overlays/alert-dialog).
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button, Dialog, DialogContent, DialogTitle, toast } from '@innostes/ui';
+
+export function AsyncSafeDialog() {
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    // Prevent closing via backdrop click or Escape while async save is executing
+    if (saving) return;
+    setOpen(nextOpen);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveRecord();
+      setOpen(false);
+      toast.success('Record persisted.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {/* Dialog content with saving state on submit button */}
+    </Dialog>
+  );
+}
+```
+
+### Confirming unsaved changes
+
+When a user attempts to dismiss a dirty form, open a nested `AlertDialog` to confirm whether changes should be discarded:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@innostes/ui';
+
+export function DirtyCheckDialog() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  const handleDismissAttempt = () => {
+    if (isDirty) {
+      setConfirmOpen(true);
+    } else {
+      setDialogOpen(false);
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={dialogOpen} onOpenChange={(open) => !open ? handleDismissAttempt() : setDialogOpen(true)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit consignment notes</DialogTitle>
+          </DialogHeader>
+          {/* Form fields that set isDirty */}
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved edits. Closing will discard all modifications.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                setIsDirty(false);
+                setConfirmOpen(false);
+                setDialogOpen(false);
+              }}
+            >
+              Discard changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+```
+
+### Controlled opening from a data table
+
+Trigger a dialog programmatically from a row action inside [DataTable](/ui/docs/components/data-display/data-table):
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DataTable, Dialog, DialogContent, DialogHeader, DialogTitle, type DataTableColumn } from '@innostes/ui';
+
+interface OrderRow {
+  id: string;
+  total: number;
+}
+
+export function OrderTableWithModal() {
+  const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
+
+  const columns: DataTableColumn<OrderRow>[] = [
+    { id: 'id', header: 'Order', accessor: (r) => r.id },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: (order) => (
+        <button type="button" onClick={() => setSelectedOrder(order)} className="text-primary hover:underline text-sm font-medium">
+          Edit order
+        </button>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <DataTable
+        aria-label="Orders"
+        data={[{ id: 'PO-8410', total: 42000 }]}
+        columns={columns}
+        getRowId={(r) => r.id}
+      />
+
+      <Dialog open={Boolean(selectedOrder)} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit order {selectedOrder?.id}</DialogTitle>
+          </DialogHeader>
+          {/* Edit form */}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+```
+
+### Content sizes
+
+Set `size` on `DialogContent` to adjust maximum width: `sm` (384px), `md` (512px, default), `lg` (672px), `xl` (896px), and `full` (viewport width with 1rem margin):
+
+```tsx
+<DialogContent size="lg">
+  {/* Wide form layout */}
+</DialogContent>
+```
 
 ## Accessibility
 
-- Focus moves into the dialog on open and back to the trigger on close; Tab stays inside.
-- Labelled by `DialogTitle` and described by `DialogDescription`. Always include a title.
+`Dialog` implements the WAI-ARIA Modal Dialog Pattern via Base UI (`@base-ui/react/dialog`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['DialogContent', 'DialogTitle', 'DialogDescription', 'DialogHeader', 'DialogFooter']} baseUi="dialog" />
+<KeyboardTable
+  entries={[
+    { key: 'Escape', action: 'Dismisses the dialog and restores keyboard focus to the opening trigger button.' },
+    { key: 'Tab', action: 'Cycles focus forward through interactive elements inside the dialog; focus cannot leave the dialog.' },
+    { key: 'Shift + Tab', action: 'Cycles focus backward through interactive elements inside the dialog.' },
+  ]}
+/>
+
+### Focus trapping and restoration
+
+- When opened, focus moves to the first focusable control inside `DialogContent` (or an element with `autoFocus`).
+- Tab navigation is strictly trapped inside the dialog container; background elements are marked `inert` and excluded from the accessibility tree.
+- When closed, focus is automatically restored to the `DialogTrigger` element.
+
+### Screen readers
+
+- `DialogTitle` automatically provides the accessible name via `aria-labelledby`.
+- `DialogDescription` provides supplementary descriptive text via `aria-describedby`.
+- Always include `DialogTitle`; if a title should be visually hidden, use `<DialogTitle className="sr-only">`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always include DialogTitle and DialogDescription inside DialogHeader for screen reader context.',
+    code: `<DialogHeader>\n  <DialogTitle>Tax settings</DialogTitle>\n  <DialogDescription>Update GST filing rates.</DialogDescription>\n</DialogHeader>`,
+  }}
+  dont={{
+    description: 'Do not render a modal dialog without a DialogTitle element.',
+    code: `<DialogContent>\n  <form>...</form>\n</DialogContent> // Screen reader will not announce title`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide a clear Cancel button next to the primary action in DialogFooter.',
+    code: `<DialogFooter>\n  <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>\n  <Button type="submit">Save</Button>\n</DialogFooter>`,
+  }}
+  dont={{
+    description: 'Do not force operators to rely solely on the small top-right close icon or backdrop click to dismiss.',
+    code: `<DialogFooter><Button type="submit">Save</Button></DialogFooter>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Dialog',
+    'DialogTrigger',
+    'DialogContent',
+    'DialogHeader',
+    'DialogTitle',
+    'DialogDescription',
+    'DialogFooter',
+    'DialogClose',
+  ]}
+  baseUi="dialog"
+/>
+
+## Related
+
+- [Alert Dialog](/ui/docs/components/overlays/alert-dialog) — Strict confirmation modal for irreversible actions.
+- [Sheet](/ui/docs/components/overlays/sheet) — Slide-over drawer for wider inspection panels and multi-step forms.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal contextual dropdown surface.
 
 ---
 
 ## Dropdown Menu (https://innostes.com/ui/docs/components/overlays/dropdown-menu)
 
-Groups, shortcuts, checkbox and radio items, submenus and destructive actions.
+Groups, keyboard shortcuts, checkbox and radio items, submenus, and destructive row actions.
 
 <ComponentPreview name="overlays/dropdown-menu/basic" />
 
@@ -7658,44 +9995,199 @@ import {
   DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@innostes/ui';
 ```
 
-## Row actions
+## When to use
 
-The most common admin pattern: a "⋯" button per table row.
+Use `DropdownMenu` when presenting a compact list of distinct commands, navigations, or configuration toggles from a single trigger:
+
+- **Data table row actions**: Consolidating View, Edit, Duplicate, Export, and Delete under a single action button.
+- **Header account menus**: Switching user profiles, navigating to billing, or initiating sign-out.
+- **View customisation menus**: Toggling visible columns or grouping dimensions.
+
+**Do not use DropdownMenu for:**
+- Selectable form values that update an input field — use [Select](/ui/docs/components/forms/select).
+- Arbitrary interactive form fields or multi-step controls — use [Popover](/ui/docs/components/overlays/popover).
+- Direct right-click pointer menus — use [ContextMenu](/ui/docs/components/overlays/context-menu).
+
+## Examples
+
+### Row actions in enterprise tables
+
+The standard ERP pattern: a `⋯` action button per purchase order row:
 
 ```tsx
 <DropdownMenu>
-  <DropdownMenuTrigger render={<Button variant="ghost" size="sm" iconOnly aria-label={`Actions for ${order.id}`} />}>
+  <DropdownMenuTrigger
+    render={
+      <Button
+        variant="ghost"
+        size="sm"
+        iconOnly
+        aria-label="Actions for PO-2026-081"
+      />
+    }
+  >
     <MoreHorizontalIcon />
   </DropdownMenuTrigger>
   <DropdownMenuContent align="end">
-    <DropdownMenuItem onClick={() => open(order)}>View</DropdownMenuItem>
+    <DropdownMenuItem onClick={() => router.push('/purchases/PO-2026-081')}>
+      View order
+      <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
+    </DropdownMenuItem>
+    <DropdownMenuItem onClick={duplicateOrder}>
+      Duplicate line
+    </DropdownMenuItem>
     <DropdownMenuSeparator />
-    <DropdownMenuItem variant="destructive" onClick={() => refund(order)}>Refund</DropdownMenuItem>
+    <DropdownMenuItem variant="destructive" onClick={openCancelDialog}>
+      Cancel PO
+    </DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>
 ```
 
-## Submenus
+### Submenus for hierarchical actions
 
-Put a `DropdownMenuSubTrigger` and a `DropdownMenuContent` inside `DropdownMenuSub`.
+Nested submenus allow deep hierarchies without cluttering the top-level menu:
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger render={<Button variant="outline" />}>
+    Export options
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuItem onClick={exportPdf}>PDF Document</DropdownMenuItem>
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>Spreadsheet</DropdownMenuSubTrigger>
+      <DropdownMenuSubContent>
+        <DropdownMenuItem onClick={exportCsv}>CSV (UTF-8)</DropdownMenuItem>
+        <DropdownMenuItem onClick={exportXlsx}>Excel Workbook (.xlsx)</DropdownMenuItem>
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+### Checkbox and radio items
+
+Selectable items preserve toggle state for filter criteria and view modes:
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger render={<Button variant="outline" />}>
+    View settings
+  </DropdownMenuTrigger>
+  <DropdownMenuContent className="w-56">
+    <DropdownMenuGroup>
+      <DropdownMenuGroupLabel>Columns</DropdownMenuGroupLabel>
+      <DropdownMenuCheckboxItem
+        checked={showGst}
+        onCheckedChange={setShowGst}
+      >
+        Show GST breakdown
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuCheckboxItem
+        checked={showHsn}
+        onCheckedChange={setShowHsn}
+      >
+        Show HSN codes
+      </DropdownMenuCheckboxItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuGroup>
+      <DropdownMenuGroupLabel>Density</DropdownMenuGroupLabel>
+      <DropdownMenuRadioGroup value={density} onValueChange={setDensity}>
+        <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="comfortable">Comfortable</DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </DropdownMenuGroup>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
 
 ## Accessibility
 
-- Arrow keys move between items, type-ahead jumps to an item, Enter/Space activates, Escape closes.
-- `DropdownMenuShortcut` is a visual hint only; register the keyboard shortcut yourself.
+`DropdownMenu` is built on Base UI Menu primitives (`@base-ui/react/menu`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['DropdownMenuContent', 'DropdownMenuItem', 'DropdownMenuShortcut']} baseUi="menu" />
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space / DownArrow', action: 'Opens the menu and focuses the first enabled menu item.' },
+    { key: 'DownArrow / UpArrow', action: 'Cycles focus between menu items, skipping disabled options.' },
+    { key: 'RightArrow', action: 'Opens a submenu when focused on a DropdownMenuSubTrigger.' },
+    { key: 'LeftArrow / Escape', action: 'Closes a submenu and restores focus to its parent trigger.' },
+    { key: 'Enter / Space', action: 'Activates the focused item and dismisses the menu.' },
+    { key: 'Escape', action: 'Dismisses the open menu and restores focus to the trigger button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The trigger element receives `aria-haspopup="menu"` and dynamic `aria-expanded`.
+- The menu popup container has `role="menu"`.
+- Menu items receive `role="menuitem"`, `role="menuitemcheckbox"`, or `role="menuitemradio"` with `aria-checked` states.
+- Disabled items receive `aria-disabled="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use variant="destructive" for irreversible actions like deleting orders or voiding invoices.',
+    code: `<DropdownMenuItem variant="destructive">Delete vendor</DropdownMenuItem>`,
+  }}
+  dont={{
+    description: 'Do not hide destructive actions with normal styling in a menu full of safe operations.',
+    code: `<DropdownMenuItem>Delete vendor</DropdownMenuItem>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an accessible label on the trigger button, especially when using an icon-only "⋯" trigger.',
+    code: `<Button iconOnly aria-label="Order actions"><MoreHorizontal /></Button>`,
+  }}
+  dont={{
+    description: 'Do not render trigger buttons with only an icon and no accessible name.',
+    code: `<Button iconOnly><MoreHorizontal /></Button>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'DropdownMenu',
+    'DropdownMenuTrigger',
+    'DropdownMenuContent',
+    'DropdownMenuItem',
+    'DropdownMenuLinkItem',
+    'DropdownMenuCheckboxItem',
+    'DropdownMenuRadioGroup',
+    'DropdownMenuRadioItem',
+    'DropdownMenuGroup',
+    'DropdownMenuGroupLabel',
+    'DropdownMenuSeparator',
+    'DropdownMenuShortcut',
+    'DropdownMenuSub',
+    'DropdownMenuSubTrigger',
+  ]}
+  baseUi="menu"
+/>
+
+## Related
+
+- [ContextMenu](/ui/docs/components/overlays/context-menu) — Pointer-anchored menu opened via right-click or long-press.
+- [Select](/ui/docs/components/forms/select) — Single and multi-option selection for forms.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal container for arbitrary interactive panels.
 
 ---
 
 ## Overlays (https://innostes.com/ui/docs/components/overlays/index)
 
-Layered interface elements that appear above base page content for focused interactions.
+Layered interface elements with detailed decision matrix, focus management guarantees, and mobile responsiveness.
 
 import { CategoryGrid } from '@/components/docs/category-grid';
 
@@ -7707,17 +10199,41 @@ Overlays present supplementary workflows, context-sensitive details, and decisio
 
 <CategoryGrid category="components/overlays" />
 
-## Usage guidelines
+## Overlay decision guide
 
-- **Modality**: Use `Dialog` or `AlertDialog` when operator confirmation or focused data entry is mandatory before proceeding. Use `Sheet` for wide inspection panels and edit drawers.
-- **Focus management**: Overlays automatically trap focus when opened, restore focus to the triggering element upon dismissal, and close on Escape key navigation.
-- **Progressive disclosure**: Reserve `Tooltip` for non-essential keyboard hints and iconography descriptions. Use `Popover` for rich interactive menus and filters.
+Use this decision matrix to select the appropriate overlay component:
+
+| Component | Modality | Focus behavior | Mobile behavior | Ideal scenario |
+| --- | --- | --- | --- | --- |
+| **[Dialog](/ui/docs/components/overlays/dialog)** | Modal (backdrop) | Trapped; restored to trigger on close | Centered modal (or bottom sheet) | Multi-field creation forms, detailed entity edits, complex configuration. |
+| **[AlertDialog](/ui/docs/components/overlays/alert-dialog)** | Strict modal (no backdrop click) | Trapped; focuses cancel button | Centered alert dialog | Irreversible destructive actions (voiding invoices, deleting vendors). |
+| **[Sheet](/ui/docs/components/overlays/sheet)** | Modal or non-modal | Trapped if modal; side drawer | Full-width slide-over drawer | Audit inspection trails, record side-panels, mobile filter drawers. |
+| **[Popover](/ui/docs/components/overlays/popover)** | Non-modal (or light dismiss) | Tab navigation inside popup | Repositioned within viewport bounds | Rich interactive controls (date pickers, filter builders, color swatches). |
+| **[DropdownMenu](/ui/docs/components/overlays/dropdown-menu)** | Non-modal menu | Arrow key navigation; roving focus | Touch-friendly menu items | Action lists, table row action menus ("View", "Download", "Refund"). |
+| **[ContextMenu](/ui/docs/components/overlays/context-menu)** | Non-modal context menu | Arrow key navigation; roving focus | Replaced by row action button | Right-click shortcuts on table rows or desktop canvas nodes. |
+| **[Tooltip](/ui/docs/components/overlays/tooltip)** | Non-modal informational | Never traps focus; hover / focus only | Hidden on touch (use long-press or tap) | Explanations for icon-only buttons, keyboard hotkey reminders. |
+| **[CommandPalette](/ui/docs/components/overlays/command-palette)** | Modal search / launcher | Trapped inside search input | Full-screen mobile search modal | Global navigation (`⌘K`), quick entity lookups, workflow shortcuts. |
+
+## Architectural rules for overlays
+
+### 1. Nesting overlays
+- **Permitted**: Opening an `AlertDialog` confirmation from within a `Dialog` (e.g. "Discard unsaved changes?"). Base UI and the design system properly manage the stacking context and trap focus in the topmost active modal.
+- **Avoid**: Opening a `Dialog` from another `Dialog`. Prefer multi-step [Stepper](/ui/docs/components/navigation/stepper) wizards or full-page routing.
+- **Dropdown menus inside dialogs**: Completely supported. Tooltips, popovers, and dropdown menus automatically port outside the dialog container using standard React portals into `document.body`.
+
+### 2. Focus management
+- **Trap focus**: All modal overlays (`Dialog`, `AlertDialog`, `Sheet`, `CommandPalette`) lock focus inside their container. Users cannot tab outside into the background document.
+- **Restoration**: Closing an overlay via Escape, cancel buttons, or backdrop clicks always restores keyboard focus to the triggering element.
+- **Initial focus**: Destructive alert dialogs focus the safe "Cancel" action first to prevent accidental confirmation by hitting Enter.
+
+### 3. Mobile responsiveness
+- Viewport width ceilings: On small screens (`< 640px`), full-width `Sheet` drawers or bottom-sliding dialog sheets provide superior ergonomics compared to cramped desktop popups.
 
 ---
 
 ## Popover (https://innostes.com/ui/docs/components/overlays/popover)
 
-Small forms, share panels and pickers that float next to their trigger.
+Small forms, share panels, and pickers that float next to their trigger without blocking background content.
 
 <ComponentPreview name="overlays/popover/basic" />
 
@@ -7734,25 +10250,151 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-`side`, `align` and `sideOffset` on `PopoverContent` position it; it flips automatically when
-there's no room. For plain hints, use [Tooltip](/ui/docs/components/overlays/tooltip).
+Use `Popover` for rich, interactive controls anchored to a specific button or control that need to open in-place without navigating away:
+
+- **Quick configuration panels**: Filter presets, column toggles, or inline item tagging in ERP records.
+- **Share links or copyable details**: Sharing purchase orders, consignment links, or invoice tracking URLs.
+- **Embedded mini-forms**: Adjusting order line quantities or applying prompt coupon codes.
+
+**Do not use Popover for:**
+- Short, non-interactive hover labels — use [Tooltip](/ui/docs/components/overlays/tooltip).
+- Linear action menus or commands — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- Critical workflows that require strict modality or large layout space — use [Dialog](/ui/docs/components/overlays/dialog) or [Sheet](/ui/docs/components/overlays/sheet).
+
+## Examples
+
+### Basic usage
+
+A popover anchored to a share button providing an ERP purchase order link:
+
+```tsx
+<Popover>
+  <PopoverTrigger render={<Button variant="outline" startIcon={<Share2 />} />}>
+    Share
+  </PopoverTrigger>
+  <PopoverContent align="start" className="w-80">
+    <PopoverTitle>Share order</PopoverTitle>
+    <PopoverDescription>
+      Anyone with the link can view this purchase order.
+    </PopoverDescription>
+    <div className="mt-3 flex gap-2">
+      <Input size="sm" readOnly value="https://erp.northwind.in/orders/PO-2026-081" />
+      <Button size="sm" variant="secondary">Copy</Button>
+    </div>
+  </PopoverContent>
+</Popover>
+```
+
+### Positioning and alignments
+
+`PopoverContent` accepts `side` (`top`, `bottom`, `left`, `right`) and `align` (`start`, `center`, `end`). The popover automatically flips when close to viewport edges:
+
+```tsx
+<PopoverContent side="right" align="start" sideOffset={8}>
+  <PopoverTitle>Delivery note details</PopoverTitle>
+  <PopoverDescription>Dispatched via Blue Dart Express, Bengaluru hub.</PopoverDescription>
+</PopoverContent>
+```
+
+### Mini-form inside popover
+
+Wrap interactive controls in a popover with an explicit `PopoverClose` button:
+
+```tsx
+<Popover>
+  <PopoverTrigger render={<Button variant="outline" size="sm" />}>
+    Adjust allocation
+  </PopoverTrigger>
+  <PopoverContent className="w-72">
+    <PopoverTitle>Stock allocation</PopoverTitle>
+    <PopoverDescription>Update reserved inventory units.</PopoverDescription>
+    <div className="mt-3 flex flex-col gap-3">
+      <Field name="units">
+        <FieldLabel>Units reserved</FieldLabel>
+        <Input type="number" defaultValue={250} />
+      </Field>
+      <div className="flex justify-end gap-2">
+        <PopoverClose render={<Button size="sm" variant="outline" />}>
+          Cancel
+        </PopoverClose>
+        <Button size="sm">Save</Button>
+      </div>
+    </div>
+  </PopoverContent>
+</Popover>
+```
 
 ## Accessibility
 
-- The trigger has `aria-expanded`. Focus moves into the popover and returns on close.
-- Escape and outside click close it.
+`Popover` is built on Base UI Popover primitives (`@base-ui/react/popover`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['PopoverContent', 'PopoverTitle', 'PopoverDescription']} baseUi="popover" />
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens or toggles the popover from the trigger button.' },
+    { key: 'Tab', action: 'Moves focus to the first focusable element inside the popover content.' },
+    { key: 'Escape', action: 'Dismisses the popover and restores focus to the trigger element.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The `PopoverTrigger` receives `aria-haspopup="dialog"` and `aria-expanded="true | false"`.
+- When opened, focus shifts into the popover, and the popover container links to `PopoverTitle` and `PopoverDescription` via `aria-labelledby` and `aria-describedby`.
+- Clicking outside or pressing `Escape` dismisses the popover and returns focus to the trigger.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an explicit dismiss or action button when hosting input fields inside a popover.',
+    code: `<PopoverClose render={<Button variant="outline">Cancel</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not place primary destructive actions inside a popover without modal confirmation.',
+    code: `<Popover><Button variant="destructive">Delete ERP database</Button></Popover>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use Tooltip instead of Popover when simply providing an accessible label for an icon button.',
+    code: `<Tooltip><TooltipTrigger>{icon}</TooltipTrigger><TooltipContent>Download PDF</TooltipContent></Tooltip>`,
+  }}
+  dont={{
+    description: 'Do not use Popover to show read-only one-word tooltips on hover.',
+    code: `<Popover><PopoverTrigger>{icon}</PopoverTrigger><PopoverContent>Help</PopoverContent></Popover>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Popover',
+    'PopoverTrigger',
+    'PopoverContent',
+    'PopoverTitle',
+    'PopoverDescription',
+    'PopoverClose',
+  ]}
+  baseUi="popover"
+/>
+
+## Related
+
+- [Tooltip](/ui/docs/components/overlays/tooltip) — Non-interactive short label on hover or keyboard focus.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — List of actions and menu options anchored to a button.
+- [Dialog](/ui/docs/components/overlays/dialog) — Modal window for complex workflows and forms.
 
 ---
 
 ## Sheet (https://innostes.com/ui/docs/components/overlays/sheet)
 
-For filters, record details and edit forms next to a list. Slides from any side, RTL-aware.
+Drawer overlay supporting four directional edges, RTL-aware logical sides, scrollable body containers, and master-detail responsiveness.
 
 <ComponentPreview name="overlays/sheet/basic" />
 
@@ -7769,72 +10411,362 @@ import {
   SheetBody,
   SheetFooter,
   SheetClose,
+  type SheetProps,
+  type SheetContentProps,
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Sheet` when an operator needs to inspect extensive record metadata or adjust complex filters while preserving their visual anchor on the underlying page:
+
+- Filtering dense transactional tables (date ranges, warehouse zones, item statuses).
+- Displaying purchase order audit logs, delivery manifests, and approval histories.
+- Providing mobile-responsive detail panes when desktop views use a side-by-side [SplitPane](/ui/docs/components/layout/split-pane).
+
+When choosing overlay surfaces:
+- Use `Sheet` when content has substantial vertical length or acts as a supplementary inspection panel beside an active list.
+- Use [Dialog](/ui/docs/components/overlays/dialog) for concise, centered creation forms that require the user's undivided attention.
+- Use [Popover](/ui/docs/components/overlays/popover) for lightweight interactive menus anchored directly to a button.
+- Refer to the [Overlay decision guide](/ui/docs/components/overlays#overlay-decision-guide) for full details.
+
+## Examples
+
+### Basic drawer with filters
+
+Wrap content in `SheetHeader`, `SheetBody` (which scrolls automatically when contents exceed screen height), and `SheetFooter`:
 
 ```tsx
-<Sheet>
-  <SheetTrigger render={<Button variant="outline" />}>Filters</SheetTrigger>
-  <SheetContent side="right">
-    <SheetHeader>
-      <SheetTitle>Filters</SheetTitle>
-    </SheetHeader>
-    <SheetBody>…</SheetBody>   {/* scrolls when content is long */}
-    <SheetFooter>…</SheetFooter>
-  </SheetContent>
-</Sheet>
+'use client';
+
+import { useState } from 'react';
+import {
+  Button,
+  Field,
+  FieldLabel,
+  Input,
+  Sheet,
+  SheetBody,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@innostes/ui';
+import { Filter } from 'lucide-react';
+
+export function OrderFiltersDrawer() {
+  return (
+    <Sheet>
+      <SheetTrigger render={<Button variant="outline" startIcon={<Filter />} />}>
+        Filters
+      </SheetTrigger>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>Filter purchase orders</SheetTitle>
+          <SheetDescription>
+            Refine orders by vendor, delivery date, or warehouse depot.
+          </SheetDescription>
+        </SheetHeader>
+        <SheetBody className="flex flex-col gap-4 py-4">
+          <Field name="poNumber">
+            <FieldLabel>PO identifier</FieldLabel>
+            <Input placeholder="e.g. PO-8410" />
+          </Field>
+        </SheetBody>
+        <SheetFooter>
+          <SheetClose render={<Button variant="outline" />}>Reset</SheetClose>
+          <Button type="button">Apply filters</Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  );
+}
 ```
 
-`side` is `right` (default), `left`, `top` or `bottom`. Left and right flip in right-to-left layouts.
+### Responsive master-detail: Sheet on mobile versus SplitPane on desktop
+
+In enterprise applications, master-detail interfaces should adapt to available viewport real estate. On wide desktop monitors (`>= 1024px`), render a persistent [SplitPane](/ui/docs/components/layout/split-pane) with list and details side-by-side. On mobile devices, render the list full-width and slide the detail inspection view over the screen via a `Sheet`:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody, SplitPane } from '@innostes/ui';
+
+export function ResponsiveMasterDetail({ orders, isDesktop }) {
+  const [activeOrder, setActiveOrder] = useState(null);
+
+  if (isDesktop) {
+    return (
+      <SplitPane defaultSizes={[60, 40]} minSizes={[400, 320]}>
+        <div>{/* Orders table */}</div>
+        <div>{activeOrder && <OrderInspection order={activeOrder} />}</div>
+      </SplitPane>
+    );
+  }
+
+  return (
+    <>
+      <div>{/* Mobile orders list */}</div>
+      <Sheet open={Boolean(activeOrder)} onOpenChange={(open) => !open && setActiveOrder(null)}>
+        <SheetContent side="end">
+          <SheetHeader>
+            <SheetTitle>Order #{activeOrder?.id}</SheetTitle>
+          </SheetHeader>
+          <SheetBody>
+            {activeOrder && <OrderInspection order={activeOrder} />}
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}
+```
+
+### Sliding sides and logical orientation
+
+`SheetContent` accepts `side="top"`, `side="bottom"`, `side="left"`, or `side="right"`. For internationalized applications, use logical values `side="start"` and `side="end"` which automatically reverse sliding directions in right-to-left (RTL) locales:
+
+```tsx
+<SheetContent side="end">
+  {/* Slides from right in LTR; slides from left in RTL */}
+</SheetContent>
+```
+
+### Long scrollable body content
+
+`SheetBody` is pre-styled with `flex-1 overflow-y-auto`, ensuring long forms or audit trails scroll smoothly while header and footer remain pinned in position:
+
+```tsx
+<SheetContent side="right">
+  <SheetHeader>
+    <SheetTitle>Consignment audit trail</SheetTitle>
+  </SheetHeader>
+  <SheetBody className="p-6">
+    {/* 50+ activity log entries scroll here */}
+  </SheetBody>
+  <SheetFooter>
+    <SheetClose render={<Button />}>Done</SheetClose>
+  </SheetFooter>
+</SheetContent>
+```
 
 ## Accessibility
 
-Same as [Dialog](/ui/docs/components/overlays/dialog): focus is trapped, Escape closes, and the
-title labels the panel.
+`Sheet` is built on Base UI Dialog primitives (`@base-ui/react/dialog`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['SheetContent', 'SheetTitle', 'SheetDescription']} baseUi="dialog" />
+<KeyboardTable
+  entries={[
+    { key: 'Escape', action: 'Dismisses the slide-over sheet and returns focus to the triggering element.' },
+    { key: 'Tab', action: 'Cycles focus through interactive elements within the sheet container without escaping to background content.' },
+  ]}
+/>
+
+### Focus trapping and restoration
+
+- Upon opening, focus shifts to the first focusable element inside `SheetContent`.
+- All background page content is marked `inert`, blocking pointer and keyboard navigation outside the drawer.
+- Upon dismissal, focus returns to the `SheetTrigger` button.
+
+### Screen readers
+
+- Screen readers announce the drawer title via `SheetTitle` (`aria-labelledby`).
+- The close button includes an accessible label (`closeLabel="Close"` by default).
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Sheet for deep secondary inspection panels (such as item audit histories or extensive filter sidebars).',
+    code: `<SheetContent side="end"><SheetBody>{auditLogs}</SheetBody></SheetContent>`,
+  }}
+  dont={{
+    description: 'Do not use Sheet for high-stakes destructive confirmations like "Delete company" (use AlertDialog).',
+    code: `<Sheet><SheetTitle>Delete account?</SheetTitle></Sheet>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use logical sides (start / end) to ensure drawers slide from the correct margin in both LTR and RTL reading directions.',
+    code: `<SheetContent side="end" />`,
+  }}
+  dont={{
+    description: 'Do not hardcode physical side="right" when internationalizing for RTL languages (Arabic, Hebrew, Urdu).',
+    code: `<SheetContent side="right" />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Sheet',
+    'SheetTrigger',
+    'SheetContent',
+    'SheetHeader',
+    'SheetTitle',
+    'SheetDescription',
+    'SheetBody',
+    'SheetFooter',
+    'SheetClose',
+  ]}
+  baseUi="dialog"
+/>
+
+## Related
+
+- [Dialog](/ui/docs/components/overlays/dialog) — Centered modal window for focused forms.
+- [SplitPane](/ui/docs/components/layout/split-pane) — Desktop side-by-side pane container.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal contextual dropdown.
 
 ---
 
 ## Tooltip (https://innostes.com/ui/docs/components/overlays/tooltip)
 
-Names icon buttons and shows shortcuts. Shared delay across a toolbar.
+Names icon buttons and shows shortcut hints with shared warm-up delay across toolbars.
 
 <ComponentPreview name="overlays/tooltip/basic" />
 
 ## Import
 
 ```tsx
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@innostes/ui';
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Tooltip` to clarify icon-only buttons or provide supplementary keyboard shortcut cues without cluttering the main user interface:
+
+- **Icon-only toolbar controls**: Editing tools, table row shortcuts, or status indicators.
+- **Truncated text hint**: Revealing full text when enterprise table cells truncate customer or vendor names.
+- **Keyboard shortcut reminders**: Showing `⌘S` or `⌘K` alongside standard actions.
+
+**Do not use Tooltip for:**
+- Interactive content such as links or forms — use [Popover](/ui/docs/components/overlays/popover).
+- Essential instructional information that touch-device users must read to complete a task.
+- Lengthy multi-paragraph explanations — use an inline helper text or [Alert](/ui/docs/components/feedback/alert).
+
+## Examples
+
+### Basic usage
+
+Providing an accessible name for an icon button:
 
 ```tsx
 <Tooltip>
-  <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Archive" />}>
+  <TooltipTrigger
+    render={<Button iconOnly variant="ghost" aria-label="Archive purchase order" />}
+  >
     <ArchiveIcon />
   </TooltipTrigger>
-  <TooltipContent>Archive</TooltipContent>
+  <TooltipContent>Archive purchase order</TooltipContent>
 </Tooltip>
 ```
 
-Wrap your app in `TooltipProvider` once. After the first tooltip opens, moving to the next trigger
-shows it instantly, which makes toolbars feel fast.
+### Shared delay with TooltipProvider
+
+Wrap your application root or toolbar in `TooltipProvider`. After the initial delay timer fires for the first tooltip, hovering over subsequent triggers displays their tooltips immediately without waiting:
+
+```tsx
+<TooltipProvider delay={300}>
+  <div className="flex gap-1 rounded-md border p-1">
+    <Tooltip>
+      <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Bold text" />}>
+        <BoldIcon />
+      </TooltipTrigger>
+      <TooltipContent>Bold (⌘B)</TooltipContent>
+    </Tooltip>
+    <Tooltip>
+      <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Italic text" />}>
+        <ItalicIcon />
+      </TooltipTrigger>
+      <TooltipContent>Italic (⌘I)</TooltipContent>
+    </Tooltip>
+  </div>
+</TooltipProvider>
+```
+
+### Position and alignment
+
+Tooltips can position along `top`, `bottom`, `left`, or `right` margins, and will flip dynamically to stay within the visible screen area:
+
+```tsx
+<TooltipContent side="bottom" align="center" sideOffset={6}>
+  Export GST report (CSV)
+</TooltipContent>
+```
 
 ## Accessibility
 
-- Opens on hover and keyboard focus; Escape closes it.
-- Tooltips are not reachable on touch devices and are skipped by some screen readers. The trigger
-  still needs its own `aria-label`, and tooltips must never hold essential information.
+`Tooltip` is built on Base UI Tooltip primitives (`@base-ui/react/tooltip`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['TooltipContent', 'TooltipProvider']} baseUi="tooltip" />
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus to the trigger button, which reveals the tooltip after delay.' },
+    { key: 'Escape', action: 'Immediately dismisses the active tooltip without moving keyboard focus away.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- For icon-only buttons, always ensure the trigger element possesses an `aria-label`.
+- `Tooltip` automatically associates the tooltip content with the trigger via `aria-describedby` when opened.
+- Tooltips are not reachable on pure touch screen devices without focus emulation; essential business instructions must never be sequestered in a tooltip.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Ensure icon-only buttons have an explicit aria-label in addition to the tooltip for screen readers.',
+    code: `<TooltipTrigger render={<Button iconOnly aria-label="Delete line" />}>`,
+  }}
+  dont={{
+    description: 'Do not rely on the tooltip alone as the only accessible label for an icon button.',
+    code: `<TooltipTrigger render={<Button iconOnly />}>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Keep tooltip text concise (1–4 words) describing the action or shortcut.',
+    code: `<TooltipContent>Export invoice (⌘E)</TooltipContent>`,
+  }}
+  dont={{
+    description: 'Do not place complex forms, links, or interactive elements inside a tooltip.',
+    code: `<TooltipContent><a href="/docs">Read more in documentation</a></TooltipContent>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Tooltip',
+    'TooltipTrigger',
+    'TooltipContent',
+    'TooltipProvider',
+  ]}
+  baseUi="tooltip"
+/>
+
+## Related
+
+- [Popover](/ui/docs/components/overlays/popover) — Rich interactive floating panel for forms and mini-dialogs.
+- [Button](/ui/docs/components/actions/button) — Interactive button component frequently wrapped by tooltips.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Contextual action list opened by clicking.
 
 ---
 

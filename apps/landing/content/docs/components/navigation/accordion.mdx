@@ -1,9 +1,9 @@
 ---
 title: Accordion
-description: Stacked sections that expand and collapse.
+description: Vertically stacked disclosure panels that expand and collapse.
 icon: ListChevronsDownUp
 status: Stable
-summary: One or many open sections, animated height, keyboard support.
+summary: Single or multi-expanded collapsible sections with animated height transitions and keyboard support.
 ---
 
 <ComponentPreview name="navigation/accordion/basic" />
@@ -11,27 +11,126 @@ summary: One or many open sections, animated height, keyboard support.
 ## Import
 
 ```tsx
-import { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from '@innostes/ui';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionPanel,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Accordion` to organize progressive disclosure content in vertically constrained spaces:
+
+- **Frequently asked questions (FAQs)**: Compliance and GST tax invoice questions.
+- **Grouped settings**: Collapsible sections for billing preferences, notifications, and permissions.
+- **Detailed record audit logs**: Expanding historical revisions on vendor profiles.
+
+**Do not use Accordion for:**
+- Primary application navigation across distinct URLs — use [Tabs](/ui/docs/components/navigation/tabs) or [Sidebar](/ui/docs/components/layout/sidebar).
+- A single isolated disclosure box like "Advanced options" — use [Collapsible](/ui/docs/components/navigation/collapsible).
+- Sequential multi-stage onboarding flows — use [Stepper](/ui/docs/components/navigation/stepper).
+
+## Examples
+
+### Basic usage with default open item
+
+An accordion for enterprise procurement terms:
 
 ```tsx
-<Accordion defaultValue={['billing']}>
-  <AccordionItem value="billing">
-    <AccordionTrigger>Billing</AccordionTrigger>
-    <AccordionPanel>…</AccordionPanel>
+<Accordion defaultValue={['gst-compliance']}>
+  <AccordionItem value="gst-compliance">
+    <AccordionTrigger>GST compliance and invoicing</AccordionTrigger>
+    <AccordionPanel>
+      Northwind Traders generates digital e-invoices with valid IRN numbers and dynamic QR codes for B2B transactions under Indian GST laws.
+    </AccordionPanel>
+  </AccordionItem>
+  <AccordionItem value="delivery-terms">
+    <AccordionTrigger>Delivery schedule and transit insurance</AccordionTrigger>
+    <AccordionPanel>
+      Consignments dispatched from our Bengaluru hub include full transit insurance under All Risks Marine clauses.
+    </AccordionPanel>
   </AccordionItem>
 </Accordion>
 ```
 
-Add `multiple` to allow several open sections. `value` is always an array.
+### Multiple expanded sections
+
+Set `multiple` to allow users to inspect multiple sections simultaneously:
+
+```tsx
+<Accordion multiple defaultValue={['summary', 'tax']}>
+  <AccordionItem value="summary">
+    <AccordionTrigger>Order summary</AccordionTrigger>
+    <AccordionPanel>PO-2026-081 created for ₹89,400 with 18% integrated GST.</AccordionPanel>
+  </AccordionItem>
+  <AccordionItem value="tax">
+    <AccordionTrigger>Tax breakdown</AccordionTrigger>
+    <AccordionPanel>CGST (9%): ₹6,818.64 | SGST (9%): ₹6,818.64</AccordionPanel>
+  </AccordionItem>
+</Accordion>
+```
 
 ## Accessibility
 
-- Triggers are buttons inside headings, with `aria-expanded` and `aria-controls`.
-- Arrow keys move between triggers.
+`Accordion` is built on Base UI Accordion primitives (`@base-ui/react/accordion`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['Accordion', 'AccordionItem', 'AccordionTrigger', 'AccordionPanel']} baseUi="accordion" />
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Expands or collapses the focused accordion trigger.' },
+    { key: 'DownArrow', action: 'Moves focus to the next accordion header trigger.' },
+    { key: 'UpArrow', action: 'Moves focus to the previous accordion header trigger.' },
+    { key: 'Home', action: 'Moves focus to the first accordion header trigger.' },
+    { key: 'End', action: 'Moves focus to the last accordion header trigger.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Each `AccordionTrigger` is rendered as an accessible button with `aria-expanded="true | false"` and `aria-controls` pointing to its panel id.
+- Each `AccordionPanel` receives `role="region"` and `aria-labelledby` referencing its trigger.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use clear, descriptive trigger headers that indicate the contents hidden inside.',
+    code: `<AccordionTrigger>Statutory GST information</AccordionTrigger>`,
+  }}
+  dont={{
+    description: 'Do not use vague trigger text that leaves users guessing what each panel contains.',
+    code: `<AccordionTrigger>More info</AccordionTrigger>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use multiple when users need to cross-reference details across multiple panels at once.',
+    code: `<Accordion multiple defaultValue={['items', 'taxes']} />`,
+  }}
+  dont={{
+    description: 'Do not force single expansion when users must frequently compare data across sections.',
+    code: `<Accordion defaultValue={['items']} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Accordion',
+    'AccordionItem',
+    'AccordionTrigger',
+    'AccordionPanel',
+  ]}
+  baseUi="accordion"
+/>
+
+## Related
+
+- [Collapsible](/ui/docs/components/navigation/collapsible) — Standalone disclosure container for a single section.
+- [Tabs](/ui/docs/components/navigation/tabs) — Switch between distinct views without stacking them vertically.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression indicator.

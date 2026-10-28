@@ -1,9 +1,9 @@
 ---
 title: Context Menu
-description: A menu opened by right-click or long-press.
+description: A contextual action menu opened by right-click or long-press.
 icon: MousePointerClick
 status: Stable
-summary: Same items as Dropdown Menu, positioned at the pointer.
+summary: Pointer-anchored action menus supporting submenus, keyboard shortcuts, and toggle items.
 ---
 
 <ComponentPreview name="overlays/context-menu/basic" />
@@ -18,20 +18,138 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuShortcut,
-  // …and ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuSub, etc.
+  ContextMenuCheckboxItem,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Items are the same components as [Dropdown Menu](/ui/docs/components/overlays/dropdown-menu),
-exported with `ContextMenu*` names.
+Use `ContextMenu` to provide power-user contextual shortcuts directly where the user clicks or taps:
 
-<Callout type="warn">
-  Right-click is hard to discover and unavailable to some users. Make every action in a context menu
-  reachable another way too, e.g. a row actions button.
-</Callout>
+- **Enterprise data grid rows**: Quick access to edit, copy ID, duplicate, or inspect records.
+- **Tree view and file directories**: Renaming, moving, downloading, or archiving documents.
+- **Canvas or diagram editors**: Context-specific manipulation of nodes and edges.
 
-## API Reference
+**Do not use ContextMenu as the only way to perform an action.** Right-click gestures are invisible, undiscoverable for new users, and difficult to trigger on touch screens. Always provide a primary on-screen button or a [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) alongside it.
 
-<ApiTable components={['ContextMenuContent']} baseUi="context-menu" />
+## Examples
+
+### Table row contextual actions
+
+Allowing users to right-click an ERP table row for immediate options:
+
+```tsx
+<ContextMenu>
+  <ContextMenuTrigger className="flex items-center justify-between rounded border p-4">
+    <div>
+      <div className="font-medium">INV-2026-081 (Bengaluru Spices)</div>
+      <div className="text-sm text-muted-foreground">₹89,400 · Tax invoice</div>
+    </div>
+    <span className="text-xs text-muted-foreground">Right-click for options</span>
+  </ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem onClick={() => router.push('/invoices/INV-2026-081')}>
+      View details
+      <ContextMenuShortcut>⌘O</ContextMenuShortcut>
+    </ContextMenuItem>
+    <ContextMenuItem onClick={copyInvoiceNumber}>
+      Copy invoice number
+      <ContextMenuShortcut>⌘C</ContextMenuShortcut>
+    </ContextMenuItem>
+    <ContextMenuSeparator />
+    <ContextMenuItem variant="destructive" onClick={openVoidDialog}>
+      Void invoice
+    </ContextMenuItem>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+### Contextual submenus
+
+Organise deeper secondary actions using nested submenus:
+
+```tsx
+<ContextMenu>
+  <ContextMenuTrigger className="rounded-lg border border-dashed p-8 text-center text-sm">
+    Right-click here to view reporting options
+  </ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem onClick={refreshData}>Refresh data</ContextMenuItem>
+    <ContextMenuSub>
+      <ContextMenuSubTrigger>Export as</ContextMenuSubTrigger>
+      <ContextMenuSubContent>
+        <ContextMenuItem onClick={exportXlsx}>Excel spreadsheet (.xlsx)</ContextMenuItem>
+        <ContextMenuItem onClick={exportPdf}>PDF summary</ContextMenuItem>
+      </ContextMenuSubContent>
+    </ContextMenuSub>
+  </ContextMenuContent>
+</ContextMenu>
+```
+
+## Accessibility
+
+`ContextMenu` is built on Base UI Menu primitives (`@base-ui/react/menu`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Shift + F10 / Menu', action: 'Opens the context menu anchored to the currently focused trigger element.' },
+    { key: 'DownArrow / UpArrow', action: 'Cycles keyboard focus between menu items.' },
+    { key: 'RightArrow', action: 'Opens a submenu when focused on a sub-trigger item.' },
+    { key: 'LeftArrow / Escape', action: 'Closes a submenu and returns focus to its parent trigger item.' },
+    { key: 'Enter / Space', action: 'Executes the focused menu item and dismisses the context menu.' },
+    { key: 'Escape', action: 'Closes the context menu and restores focus to the trigger element.' },
+  ]}
+/>
+
+### Discovery and touch interfaces
+
+- Right-click is not discoverable through visual scanning alone. Every action exposed in a context menu must also be accessible via a visible UI element (such as a toolbar button or table row action menu).
+- Long-press support allows mobile browsers to trigger the context menu, but primary mobile workflows should rely on explicit touch buttons.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Ensure every action available in a context menu is also accessible via standard on-screen controls.',
+    code: `<><ContextMenuTrigger>{row}</ContextMenuTrigger><Button iconOnly><MoreHorizontal /></Button></>`,
+  }}
+  dont={{
+    description: 'Do not hide primary actions exclusively behind right-click context menus.',
+    code: `<ContextMenuTrigger>{row}</ContextMenuTrigger>{/* No visible button */}`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide keyboard shortcut indicators when the corresponding keyboard shortcuts are globally active.',
+    code: `<ContextMenuItem>Duplicate<ContextMenuShortcut>⌘D</ContextMenuShortcut></ContextMenuItem>`,
+  }}
+  dont={{
+    description: 'Do not list keyboard shortcuts that are not actually bound or functional in the current view.',
+    code: `<ContextMenuItem>Export<ContextMenuShortcut>Ctrl+Alt+Shift+E</ContextMenuShortcut></ContextMenuItem>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'ContextMenu',
+    'ContextMenuTrigger',
+    'ContextMenuContent',
+  ]}
+  baseUi="context-menu"
+/>
+
+## Related
+
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Standard button-triggered action menu.
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component frequently combined with row context menus.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal floating surface for interactive forms.

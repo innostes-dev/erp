@@ -367,3 +367,25 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: Prompt 11 (Component pages: overlays, navigation, and layout).
+
+
+## 11 – Component pages: overlays, navigation, and layout – 2026-10-29
+
+**Summary**: Overhauled all 22 overlay, navigation, and layout component documentation pages along with their category overview index pages. Added an extensive Overlay Decision Guide on `components/overlays/index.mdx` covering modality, dismiss triggers, focus management, mobile behavior, and nesting rules. Completely rewrote `dialog.mdx` with form submission, async save prevention, dirty check with nested `AlertDialog`, controlled row action triggering, and 5 size tiers. Rewrote `sheet.mdx` with responsive master-detail pattern (Sheet on mobile vs SplitPane on desktop) and RTL logical orientation. Rewrote `command-palette.mdx` with global shortcuts, group organization, dynamic search, and recent items. Expanded former stubs `separator.mdx`, `scroll-area.mdx`, and `collapsible.mdx` into full template-compliant pages. Authored a complete App Shell composition guide in `components/layout/index.mdx` detailing `AppRail`, `Sidebar`, `TopBar`, `PageHeader`, `SkipLink`, CSS sizing variables, mobile transitions, and Next.js router integration.
+
+**Changed**:
+- `apps/landing/components/demos/overlays/alert-dialog/basic.tsx`: updated to void tax invoice scenario with INR (`₹`) currency.
+- `apps/landing/components/demos/overlays/dialog/basic.tsx`: updated to procurement profile editor with async submission loading state.
+- `apps/landing/content/docs/components/overlays/`: rewrote `index.mdx`, `alert-dialog.mdx`, `dialog.mdx`, `sheet.mdx`, `popover.mdx`, `tooltip.mdx`, `dropdown-menu.mdx`, `context-menu.mdx`, and `command-palette.mdx`.
+- `apps/landing/content/docs/components/navigation/`: rewrote `accordion.mdx`, `breadcrumb.mdx`, `collapsible.mdx`, `pagination.mdx`, `stepper.mdx`, and `tabs.mdx`.
+- `apps/landing/content/docs/components/layout/`: rewrote `index.mdx`, `app-rail.mdx`, `form-layout.mdx`, `page-header.mdx`, `scroll-area.mdx`, `separator.mdx`, `sidebar.mdx`, `split-pane.mdx`, and `top-bar.mdx`.
+- Regenerated tokens, LLMs, and demo references via build pipeline.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.18s, all 6 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (136 static pages, `_not-found`, `sitemap.xml`, `robots.txt`, `api/og`, `api/search`).
+- `pnpm nx test ui-react17-tests` & `pnpm nx test ui-react18-tests`: PASS (27 test files, 218 tests passing each).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 12 (Component pages: widgets, charts, and editor).

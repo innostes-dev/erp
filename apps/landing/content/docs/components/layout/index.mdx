@@ -9,14 +9,160 @@ import { CategoryGrid } from '@/components/docs/category-grid';
 
 # Layout
 
-Layout components define the structural scaffold for Northwind Traders Pvt Ltd's applications. They orchestrate viewports, responsive sidebars, persistent headers, and split-pane inspection canvases to support complex enterprise workflows.
+Layout components define the structural scaffold for Northwind Traders Pvt Ltd's ERP applications. They orchestrate viewports, responsive sidebars, persistent headers, and split-pane inspection canvases to support complex enterprise workflows.
 
 ## Components
 
 <CategoryGrid category="components/layout" />
 
-## Usage guidelines
+## App shell composition
 
-- **Application Shell**: Combine `AppRail`, `Sidebar`, `TopBar`, and `PageHeader` to create structured, responsive application frames.
-- **Scroll containment**: Use `ScrollArea` for customized, accessible scrollable regions rather than unstyled browser overflow bars.
-- **Form layouts**: Structure form controls using `FormLayout` to enforce standard vertical rhythm and responsive column wrapping.
+The application shell unites five core primitives: `SkipLink`, `AppRail`, `Sidebar`, `TopBar`, and `PageHeader`. Together, they provide a reliable, keyboard-navigable enterprise structure with fluid mobile adaptations.
+
+### Full layout example
+
+Here is how the components assemble into a complete Next.js root layout:
+
+```tsx
+// app/(erp)/layout.tsx
+import Link from 'next/link';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarInset,
+  AppRail,
+  AppRailHeader,
+  AppRailItem,
+  TopBar,
+  TopBarStart,
+  TopBarCenter,
+  TopBarEnd,
+  SkipLink,
+} from '@innostes/ui';
+import { ShoppingCart, Package, Users, Search } from 'lucide-react';
+
+export default function ErpAppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <SkipLink targetId="main-content">Skip to main content</SkipLink>
+      <SidebarProvider>
+        {/* Tier 1: Global module switcher (hidden on small viewports) */}
+        <AppRail label="ERP modules">
+          <AppRailHeader>
+            <div className="size-8 rounded bg-primary font-bold text-primary-foreground flex items-center justify-center">
+              N
+            </div>
+          </AppRailHeader>
+          <AppRailItem
+            icon={<ShoppingCart />}
+            label="Purchases"
+            isActive
+            render={<Link href="/purchases" />}
+          />
+          <AppRailItem
+            icon={<Package />}
+            label="Inventory"
+            render={<Link href="/inventory" />}
+          />
+        </AppRail>
+
+        {/* Tier 2: Module-specific navigation tree */}
+        <Sidebar>
+          <SidebarHeader>
+            <div className="font-semibold text-sm px-2 py-3">Procurement Hub</div>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Purchasing</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton render={<Link href="/purchases/orders" />}>
+                    Purchase orders
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton render={<Link href="/purchases/vendors" />}>
+                    Vendor directory
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+
+        {/* Content canvas */}
+        <SidebarInset>
+          <TopBar sticky blur>
+            <TopBarStart>
+              <SidebarTrigger />
+            </TopBarStart>
+            <TopBarCenter>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Search className="size-4" />
+                <span>Search records... (⌘K)</span>
+              </div>
+            </TopBarCenter>
+            <TopBarEnd>
+              <div className="text-sm font-medium">Priya Sharma</div>
+            </TopBarEnd>
+          </TopBar>
+
+          <main id="main-content" className="flex-1 p-6">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </>
+  );
+}
+```
+
+### CSS variables and sizing tokens
+
+The app shell exposes CSS custom properties to govern structural widths and heights. You can override them globally in your Tailwind CSS theme or inline on `SidebarProvider`:
+
+| Token | Default | Purpose |
+| :--- | :--- | :--- |
+| `--sidebar-width` | `16rem` (`256px`) | Width of the desktop sidebar when expanded. |
+| `--sidebar-width-icon` | `3.5rem` (`56px`) | Width of the desktop sidebar when collapsed to icon rail. |
+| `--sidebar-width-mobile` | `18rem` (`288px`) | Width of the slide-over drawer on mobile devices. |
+| `--app-rail-width` | `4.5rem` (`72px`) | Width of the optional primary module rail. |
+| `--top-bar-height` | `4rem` (`64px`) | Height of the persistent top application header. |
+
+### Mobile behaviour and responsive transitions
+
+1. **Breakpoints**: Below `768px` (`md`), `AppRail` hides automatically, and `Sidebar` transforms from a fixed column into an off-canvas slide-over drawer.
+2. **Backdrop overlay**: When opened via `SidebarTrigger`, a backdrop prevents background interaction and dims page content.
+3. **Automatic dismissal**: Navigating to any route by clicking a `SidebarMenuButton` closes the mobile drawer immediately, keeping user flows uninterrupted.
+4. **Escape key & inert**: While the mobile drawer is open, background DOM elements are marked `inert`, and pressing `Escape` dismisses the drawer, returning keyboard focus to the trigger.
+
+### Skip link implementation
+
+Accessibility standards require that keyboard and screen reader operators can bypass repetitive top navigation bars and jump straight to the primary work area:
+
+- Place `<SkipLink targetId="main-content">Skip to main content</SkipLink>` at the very top of your root layout.
+- Ensure the primary `<main>` element has matching `id="main-content"`.
+- When focused via `Tab`, the skip link transitions smoothly into view from off-screen and receives focus.
+
+### Router integration via render prop
+
+All navigation links (`SidebarMenuButton`, `SidebarMenuSubButton`, `AppRailItem`, `BreadcrumbLink`) provide a `render` prop. Pass your framework's router link component (e.g. Next.js `Link`) directly:
+
+```tsx
+<SidebarMenuButton
+  render={<Link href="/invoices" />}
+  isActive={pathname.startsWith('/invoices')}
+>
+  Invoices
+</SidebarMenuButton>
+```
+
+This prevents hard browser page refreshes, guarantees fast client-side transitions, and preserves accessibility attributes without invalid HTML DOM nesting.

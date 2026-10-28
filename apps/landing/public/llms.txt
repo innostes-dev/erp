@@ -65,31 +65,31 @@
 - [Switch](https://innostes.com/ui/docs/components/forms/switch) [Stable]: Accessible binary switch primitive with animated thumb sliding, sizes, and instant state synchronization.
 - [Tag Input](https://innostes.com/ui/docs/components/forms/tag-input) [Beta]: Removable chip tag entry control supporting autocomplete suggestions, delimiter pasting, maximum bounds, and validation.
 - [Textarea](https://innostes.com/ui/docs/components/forms/textarea) [Stable]: Accessible multiline text input supporting field-sizing auto-resize, rows configuration, and automatic Field wiring.
-- [App Rail](https://innostes.com/ui/docs/components/layout/app-rail) [Stable]: Used alongside a sidebar to navigate between top-level areas or modules in complex applications, featuring active states, tooltips, and badges.
-- [Form Layout](https://innostes.com/ui/docs/components/layout/form-layout) [Stable]: FormGrid, FormSection and FormActions. Responsive to the space they're in, not the screen.
+- [App Rail](https://innostes.com/ui/docs/components/layout/app-rail) [Stable]: Compact module navigation rail with active states, accessible tooltips, and badges for enterprise multi-app suites.
+- [Form Layout](https://innostes.com/ui/docs/components/layout/form-layout) [Stable]: Container-query powered grids (FormGrid), titled sections (FormSection), and persistent action bars (FormActions).
 - [Layout](https://innostes.com/ui/docs/components/layout/index) [Stable]: Scaffolding primitives for responsive ERP application shells, navigation bars, and data panes.
-- [Page Header](https://innostes.com/ui/docs/components/layout/page-header) [Stable]: Breadcrumb, title, description and page actions, responsive by default.
-- [Scroll Area](https://innostes.com/ui/docs/components/layout/scroll-area) [Stable]: Native scrolling and keyboard support, styled scrollbars on every platform.
-- [Separator](https://innostes.com/ui/docs/components/layout/separator) [Stable]: Horizontal or vertical, announced as a separator.
-- [Sidebar](https://innostes.com/ui/docs/components/layout/sidebar) [Stable]: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and a keyboard shortcut.
-- [Split Pane](https://innostes.com/ui/docs/components/layout/split-pane) [Beta]: A list beside its detail, with a draggable, keyboard-resizable divider.
-- [Top Bar](https://innostes.com/ui/docs/components/layout/top-bar) [Stable]: A responsive top navigation bar with slots for branding, search, and actions.
-- [Accordion](https://innostes.com/ui/docs/components/navigation/accordion) [Stable]: One or many open sections, animated height, keyboard support.
-- [Breadcrumb](https://innostes.com/ui/docs/components/navigation/breadcrumb) [Stable]: Links to each ancestor, a marked current page, and an ellipsis for long paths.
-- [Collapsible](https://innostes.com/ui/docs/components/navigation/collapsible) [Stable]: An unstyled disclosure with a height animation, for "advanced options" and similar.
+- [Page Header](https://innostes.com/ui/docs/components/layout/page-header) [Stable]: Standardized page header bringing together breadcrumb, h1 title, status badges, and primary actions.
+- [Scroll Area](https://innostes.com/ui/docs/components/layout/scroll-area) [Stable]: Native momentum scrolling, keyboard accessibility, and styled auto-hiding scrollbars across all operating systems.
+- [Separator](https://innostes.com/ui/docs/components/layout/separator) [Stable]: Horizontal or vertical divider with semantic separator semantics and RTL logical layout support.
+- [Sidebar](https://innostes.com/ui/docs/components/layout/sidebar) [Stable]: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and keyboard shortcut (⌘B).
+- [Split Pane](https://innostes.com/ui/docs/components/layout/split-pane) [Beta]: Draggable, keyboard-accessible split canvas with percentage-based bounds, collapse thresholds, and double-click reset.
+- [Top Bar](https://innostes.com/ui/docs/components/layout/top-bar) [Stable]: Responsive application header with semantic slots (TopBarStart, TopBarCenter, TopBarEnd) and translucent blur support.
+- [Accordion](https://innostes.com/ui/docs/components/navigation/accordion) [Stable]: Single or multi-expanded collapsible sections with animated height transitions and keyboard support.
+- [Breadcrumb](https://innostes.com/ui/docs/components/navigation/breadcrumb) [Stable]: Linear ancestral navigation with router integration, current-page indication, and ellipsis support for deep paths.
+- [Collapsible](https://innostes.com/ui/docs/components/navigation/collapsible) [Stable]: A flexible disclosure primitive for secondary form options, filter expansions, and collapsible detail cards.
 - [Navigation](https://innostes.com/ui/docs/components/navigation/index) [Stable]: Structures and controls that guide operators through multi-step journeys and hierarchical data.
-- [Pagination](https://innostes.com/ui/docs/components/navigation/pagination) [Stable]: Controlled, translatable, with a stable width as you page.
-- [Stepper](https://innostes.com/ui/docs/components/navigation/stepper) [Stable]: Horizontal or vertical, with descriptions, error states and clickable completed steps.
-- [Tabs](https://innostes.com/ui/docs/components/navigation/tabs) [Stable]: Underline and pill styles with an animated indicator, horizontal or vertical.
-- [Alert Dialog](https://innostes.com/ui/docs/components/overlays/alert-dialog) [Stable]: A dialog that can't be dismissed by clicking outside; the user must choose.
-- [Command Palette](https://innostes.com/ui/docs/components/overlays/command-palette) [Stable]: A global command palette triggered by a keyboard shortcut (e.g. ⌘K) to quickly navigate and execute actions across the application.
-- [Context Menu](https://innostes.com/ui/docs/components/overlays/context-menu) [Stable]: Same items as Dropdown Menu, positioned at the pointer.
-- [Dialog](https://innostes.com/ui/docs/components/overlays/dialog) [Stable]: Focus trap, Escape and outside-click to close, nested dialogs, and five sizes.
-- [Dropdown Menu](https://innostes.com/ui/docs/components/overlays/dropdown-menu) [Stable]: Groups, shortcuts, checkbox and radio items, submenus and destructive actions.
-- [Overlays](https://innostes.com/ui/docs/components/overlays/index) [Stable]: Layered interface elements that appear above base page content for focused interactions.
-- [Popover](https://innostes.com/ui/docs/components/overlays/popover) [Stable]: Small forms, share panels and pickers that float next to their trigger.
-- [Sheet](https://innostes.com/ui/docs/components/overlays/sheet) [Stable]: For filters, record details and edit forms next to a list. Slides from any side, RTL-aware.
-- [Tooltip](https://innostes.com/ui/docs/components/overlays/tooltip) [Stable]: Names icon buttons and shows shortcuts. Shared delay across a toolbar.
+- [Pagination](https://innostes.com/ui/docs/components/navigation/pagination) [Stable]: Controlled page navigation with stable button widths, boundary offsets, and server-side range calculation.
+- [Stepper](https://innostes.com/ui/docs/components/navigation/stepper) [Stable]: Horizontal or vertical multi-step indicator with validation status, step descriptions, and clickable navigation.
+- [Tabs](https://innostes.com/ui/docs/components/navigation/tabs) [Stable]: Underline and pill variants with animated active indicator, keyboard navigation, and vertical orientation support.
+- [Alert Dialog](https://innostes.com/ui/docs/components/overlays/alert-dialog) [Stable]: Strict modal confirmation dialog that disables backdrop light-dismiss, focuses the safe cancel action by default, and communicates consequences clearly.
+- [Command Palette](https://innostes.com/ui/docs/components/overlays/command-palette) [Stable]: A global command overlay triggered by keyboard shortcut (⌘K) to quickly search records, navigate pages, and execute administrative actions.
+- [Context Menu](https://innostes.com/ui/docs/components/overlays/context-menu) [Stable]: Pointer-anchored action menus supporting submenus, keyboard shortcuts, and toggle items.
+- [Dialog](https://innostes.com/ui/docs/components/overlays/dialog) [Stable]: Modal dialog with automatic focus trapping, backdrop blur, Escape and outside-click dismissal, and five content size tiers.
+- [Dropdown Menu](https://innostes.com/ui/docs/components/overlays/dropdown-menu) [Stable]: Groups, keyboard shortcuts, checkbox and radio items, submenus, and destructive row actions.
+- [Overlays](https://innostes.com/ui/docs/components/overlays/index) [Stable]: Layered interface elements with detailed decision matrix, focus management guarantees, and mobile responsiveness.
+- [Popover](https://innostes.com/ui/docs/components/overlays/popover) [Stable]: Small forms, share panels, and pickers that float next to their trigger without blocking background content.
+- [Sheet](https://innostes.com/ui/docs/components/overlays/sheet) [Stable]: Drawer overlay supporting four directional edges, RTL-aware logical sides, scrollable body containers, and master-detail responsiveness.
+- [Tooltip](https://innostes.com/ui/docs/components/overlays/tooltip) [Stable]: Names icon buttons and shows shortcut hints with shared warm-up delay across toolbars.
 
 ## Widgets
 - [App Switcher](https://innostes.com/ui/docs/widgets/app-switcher) [Stable]: A rich popover menu designed for the ECOSYSTEM module launcher, featuring grouped apps, descriptions, icons, and built-in search functionality.

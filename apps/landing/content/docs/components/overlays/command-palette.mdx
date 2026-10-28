@@ -1,9 +1,9 @@
 ---
 title: Command Palette
-description: A searchable list of commands and navigation options.
+description: A searchable modal dialogue for global commands and fast navigation.
 icon: Command
 status: Stable
-summary: A global command palette triggered by a keyboard shortcut (e.g. ⌘K) to quickly navigate and execute actions across the application.
+summary: A global command overlay triggered by keyboard shortcut (⌘K) to quickly search records, navigate pages, and execute administrative actions.
 ---
 
 <ComponentPreview name="overlays/command-palette/basic" align="start" className="p-4 sm:p-4" />
@@ -11,41 +11,120 @@ summary: A global command palette triggered by a keyboard shortcut (e.g. ⌘K) t
 ## Import
 
 ```tsx
-import { CommandPalette, CommandItem, CommandGroup } from '@innostes/ui';
+import { CommandPalette, type CommandGroup, type CommandItem } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `CommandPalette` component is a global, floating search overlay designed to help users quickly find pages or perform actions. It includes built-in keyboard shortcut handling and accessible listbox navigation.
+Use `CommandPalette` as the central keyboard-driven interface for enterprise applications:
 
-Pass an array of grouped items using the `groups` prop. Each item must specify an `id`, `label`, and an `onSelect` callback.
+- **Global navigation**: Jumping across ERP modules (Purchase Orders, Tax Invoices, General Ledger, Vendors).
+- **Administrative actions**: Creating records, exporting reports, or toggling developer modes.
+- **Search and recent items**: Finding recently edited contracts or frequently accessed supplier files.
+
+**Do not use CommandPalette for:**
+- Standard dropdown action lists on a single row — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- Form field selection from a predefined enumeration — use [Select](/ui/docs/components/forms/select).
+- Complex workflows requiring multiple user inputs or validation — use [Dialog](/ui/docs/components/overlays/dialog).
+
+## Examples
+
+### Grouping and shortcuts
+
+Organise commands into logical categories such as Pages, Recent items, and Actions:
 
 ```tsx
-function App() {
-  const groups = [
+const groups: CommandGroup[] = [
+  {
+    heading: 'Recent items',
+    items: [
+      {
+        id: 'po-2026-081',
+        label: 'PO-2026-081 · Bengaluru Spices',
+        description: 'Updated 10 minutes ago · ₹89,400',
+        onSelect: () => router.push('/purchases/PO-2026-081'),
+      },
+    ],
+  },
+  {
+    heading: 'Quick actions',
+    items: [
+      {
+        id: 'new-po',
+        label: 'Create purchase order',
+        shortcut: 'C P',
+        keywords: ['procurement', 'buy', 'vendor'],
+        onSelect: () => router.push('/purchases/new'),
+      },
+      {
+        id: 'export-gst',
+        label: 'Generate GST return (GSTR-1)',
+        shortcut: 'G R',
+        keywords: ['tax', 'finance', 'invoices'],
+        onSelect: openGstExportDialog,
+      },
+    ],
+  },
+];
+
+<CommandPalette groups={groups} />
+```
+
+### Global shortcut configuration
+
+By default, the palette listens for `Ctrl + K` or `⌘ + K`. Customise the shortcut key with `hotkey="j"` or pass `hotkey={null}` to disable the automatic global listener and control visibility manually:
+
+```tsx
+// Custom hotkey ⌘J
+<CommandPalette hotkey="j" groups={groups} />
+
+// Manual trigger from top navigation bar button
+const [open, setOpen] = useState(false);
+
+<Button variant="outline" onClick={() => setOpen(true)}>
+  Search commands (⌘K)
+</Button>
+<CommandPalette
+  open={open}
+  onOpenChange={setOpen}
+  hotkey="k"
+  groups={groups}
+/>
+```
+
+### Dynamic search and recent items
+
+Combine static navigation items with dynamically updated recent items stored in local state or browser storage:
+
+```tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { CommandPalette, type CommandGroup } from '@innostes/ui';
+
+export function GlobalSearch() {
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('northwind_recent_records');
+    if (saved) setRecentIds(JSON.parse(saved));
+  }, []);
+
+  const groups: CommandGroup[] = [
     {
-      heading: 'Pages',
-      items: [
-        {
-          id: 'orders',
-          label: 'Orders',
-          icon: <CartIcon />,
-          onSelect: () => router.push('/orders')
-        },
-        // ...
-      ]
+      heading: 'Recent records',
+      items: recentIds.map((id) => ({
+        id,
+        label: `Record ${id}`,
+        onSelect: () => navigateToRecord(id),
+      })),
     },
     {
-      heading: 'Actions',
+      heading: 'Modules',
       items: [
-        {
-          id: 'new-invoice',
-          label: 'Create invoice',
-          shortcut: 'C I',
-          onSelect: createInvoice
-        },
-        // ...
-      ]
+        { id: 'inventory', label: 'Inventory & Warehousing', onSelect: () => router.push('/inventory') },
+        { id: 'billing', label: 'Invoices & E-Way Bills', onSelect: () => router.push('/billing') },
+      ],
     },
   ];
 
@@ -53,27 +132,58 @@ function App() {
 }
 ```
 
-### Keyboard Shortcuts
+## Accessibility
 
-By default, the command palette listens for `Ctrl + K` or `⌘ + K` to open. You can change this behavior by setting the `hotkey` prop to a different character, or pass `null` to disable the built-in shortcut and manage opening state yourself.
+`CommandPalette` implements the WAI-ARIA Combobox pattern anchored within a modal dialog (`@base-ui/react/dialog`).
 
-### Custom Filtering
+### Keyboard navigation
 
-The component automatically filters items based on a case- and accent-insensitive search against the item's `label`, `description`, and `keywords`.
-
-If you need a more advanced filtering algorithm, you can provide a custom `filter` function:
-
-```tsx
-<CommandPalette
-  groups={groups}
-  filter={(item, query) => customMatch(item.label, query)}
+<KeyboardTable
+  entries={[
+    { key: '⌘ + K / Ctrl + K', action: 'Toggles the command palette open or closed from anywhere in the app.' },
+    { key: 'DownArrow / UpArrow', action: 'Moves active selection through the filtered list of commands.' },
+    { key: 'Enter', action: 'Executes the active command and automatically dismisses the palette.' },
+    { key: 'Escape', action: 'Dismisses the command palette and restores focus to the previously focused element.' },
+  ]}
 />
-```
 
-### Advanced Styling
+### ARIA attributes
 
-You can deeply customize the internal parts of the palette using the `classNames` prop, targeting slots like `popup`, `input`, `list`, `groupHeading`, `item`, `empty`, and `footer`.
+- The search input element uses `role="combobox"`, `aria-expanded="true"`, and `aria-autocomplete="list"`.
+- `aria-activedescendant` tracks the focused option without removing keyboard focus from the search input, allowing continuous typing while navigating.
+- The results list uses `role="listbox"`, with individual entries having `role="option"` and `aria-selected="true | false"`.
+- Groups are marked with `role="group"` and reference their group headings via `aria-labelledby`.
 
-## API Reference
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide relevant keywords in item definitions so users can find commands using alternative search terms.',
+    code: `{ id: 'gstr', label: 'GST Returns', keywords: ['tax', 'compliance', 'hsn'] }`,
+  }}
+  dont={{
+    description: 'Do not overload the palette with hundreds of unfiltered records; keep initial lists focused and relevant.',
+    code: `{ heading: 'All 50,000 customers', items: allCustomers }`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Include visual shortcut badges (e.g. "C P") to teach users faster navigation combinations over time.',
+    code: `{ id: 'new-po', label: 'Create PO', shortcut: 'C P' }`,
+  }}
+  dont={{
+    description: 'Do not invent confusing or non-standard shortcut keys that conflict with native browser commands.',
+    code: `{ id: 'print', label: 'Print', shortcut: '⌘ W' }`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['CommandPalette']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar with search trigger button.
+- [Dialog](/ui/docs/components/overlays/dialog) — Modal window for focused multi-step workflows.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Trigger-anchored action lists for individual entities.

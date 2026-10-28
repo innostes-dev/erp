@@ -1,9 +1,9 @@
 ---
 title: Page Header
-description: The top of an admin page.
+description: Top-level header block for administrative and ERP record pages.
 icon: Heading
 status: Stable
-summary: Breadcrumb, title, description and page actions, responsive by default.
+summary: Standardized page header bringing together breadcrumb, h1 title, status badges, and primary actions.
 ---
 
 <ComponentPreview name="layout/page-header/basic" />
@@ -14,28 +14,116 @@ summary: Breadcrumb, title, description and page actions, responsive by default.
 import { PageHeader } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `PageHeader` at the top of every internal administrative view:
+
+- **Record detail pages**: Purchase order `PO-2026-081`, Customer account `Acme Corp`, or Tax invoice `INV-2026-081`.
+- **List and catalogue dashboards**: Warehouses, inventory catalogues, or statutory reports.
+- **Settings subpages**: Security preferences, GST profiles, or team roles.
+
+**Do not use PageHeader for:**
+- Global application-level headers (with tenant switcher, global search, and user avatar) — use [TopBar](/ui/docs/components/layout/top-bar).
+- In-page card section titles — use [Card](/ui/docs/components/data-display/card) or standard heading elements.
+- Dialog and modal window titles — use `DialogHeader` and `DialogTitle`.
+
+## Examples
+
+### Basic usage with breadcrumb and actions
+
+Render breadcrumbs, page title, description, and primary action buttons:
 
 ```tsx
 <PageHeader
-  breadcrumb={<Breadcrumb>…</Breadcrumb>}
-  title="Orders"
-  description="Track and fulfil customer orders."
+  breadcrumb={
+    <Breadcrumb>
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/purchases">Purchases</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>PO-2026-081</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
+  }
+  title="Purchase order PO-2026-081"
+  description="Bengaluru Spices Pvt Ltd · Created on 24 Oct 2026 by Priya Sharma"
   actions={
-    <>
-      <Button variant="outline">Export</Button>
-      <Button>New order</Button>
-    </>
+    <div className="flex items-center gap-2">
+      <Button variant="outline">Download PDF</Button>
+      <Button>Approve order</Button>
+    </div>
   }
 />
 ```
 
-Put the primary action last. On small screens the actions wrap under the title.
+### With status badge in title
+
+Pass React nodes to `title` to pair headings with live status chips:
+
+```tsx
+<PageHeader
+  title={
+    <div className="flex items-center gap-3">
+      <span>Tax invoice INV-2026-081</span>
+      <Badge variant="success">E-Way Bill Generated</Badge>
+    </div>
+  }
+  description="GST Tax Invoice · Total value ₹89,400"
+  actions={<Button variant="destructive">Void invoice</Button>}
+/>
+```
 
 ## Accessibility
 
-- `title` renders the page's `<h1>`. Use one `PageHeader` per page.
+`PageHeader` provides unambiguous document heading landmarks.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between breadcrumb links and header action buttons.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as a semantic `<header>` landmark.
+- The `title` prop renders the unique primary `<h1>` heading for the page.
+- Action buttons remain in logical DOM order so screen reader users encounter contextual breadcrumbs, title, description, and actions in sequence.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Place the primary affirmative call-to-action last in the actions container.',
+    code: `<PageHeader actions={<><Button variant="outline">Export</Button><Button>New order</Button></>} />`,
+  }}
+  dont={{
+    description: 'Do not render multiple PageHeader components on the same view.',
+    code: `<><PageHeader title="One" /><PageHeader title="Two" /></>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Keep the description prop concise, focusing on key entity context or status metadata.',
+    code: `<PageHeader description="Karnataka division · Validated GSTIN" />`,
+  }}
+  dont={{
+    description: 'Do not dump multi-paragraph instructional documentation into the description slot.',
+    code: `<PageHeader description="Here is a very long paragraph that explains the complete 40-step statutory history..." />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['PageHeader']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar with search and navigation slots.
+- [Breadcrumb](/ui/docs/components/navigation/breadcrumb) — Navigation path rendered inside PageHeader.
+- [Button](/ui/docs/components/actions/button) — Action button component used for page actions.

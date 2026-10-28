@@ -1,9 +1,9 @@
 ---
 title: Sidebar
-description: The app shell for admin panels.
+description: Collapsible application sidebar shell for enterprise navigation.
 icon: PanelLeft
 status: Stable
-summary: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and a keyboard shortcut.
+summary: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and keyboard shortcut (⌘B).
 ---
 
 <ComponentPreview name="layout/sidebar/basic" align="start" className="p-4 sm:p-4" />
@@ -36,69 +36,166 @@ import {
 } from '@innostes/ui';
 ```
 
-## Layout
+## When to use
 
-```tsx title="app/(admin)/layout.tsx"
-<SidebarProvider>
-  <Sidebar>
-    <SidebarHeader>{/* logo, workspace switcher */}</SidebarHeader>
-    <SidebarContent>
-      <SidebarGroup>
-        <SidebarGroupLabel>Sales</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              icon={<ShoppingCartIcon />}
-              isActive={pathname.startsWith('/orders')}
-              render={<Link href="/orders" />}
-            >
-              Orders
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
-    </SidebarContent>
-    <SidebarFooter>{/* user menu */}</SidebarFooter>
-  </Sidebar>
-  <SidebarInset>
-    <header><SidebarTrigger /></header>
-    <main>{children}</main>
-  </SidebarInset>
-</SidebarProvider>
+Use `Sidebar` as the primary navigation backbone of administrative and enterprise applications:
+
+- **ERP application shell**: Multi-level navigation across Procurement, Warehousing, Invoicing, and Master Data.
+- **Hierarchical menu structures**: Submenus grouping purchase orders, vendor master, and goods received notes.
+- **Responsive administrative layouts**: Desktop sidebars that cleanly switch to mobile slide-over drawers below 768px.
+
+**Do not use Sidebar for:**
+- Isolated page-level filters — use [Sheet](/ui/docs/components/overlays/sheet) or inline filter cards.
+- Horizontal category tabs — use [Tabs](/ui/docs/components/navigation/tabs).
+- Single-page marketing websites — use standard top headers.
+
+## Examples
+
+### Basic application shell composition
+
+Compose `SidebarProvider`, `Sidebar`, `TopBar`, and `SidebarInset` into an accessible layout with router integration:
+
+```tsx
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarInset,
+  TopBar,
+} from '@innostes/ui';
+import { ShoppingCart, Package, FileText } from 'lucide-react';
+
+export function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  return (
+    <SidebarProvider>
+      <Sidebar>
+        <SidebarHeader>
+          <div className="flex items-center gap-2 px-2 py-3 font-semibold text-sm">
+            <span className="size-6 rounded bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs">
+              N
+            </span>
+            Northwind Traders
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Procurement</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  icon={<ShoppingCart className="size-4" />}
+                  isActive={pathname.startsWith('/purchases')}
+                  render={<Link href="/purchases" />}
+                >
+                  Purchase orders
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  icon={<Package className="size-4" />}
+                  isActive={pathname.startsWith('/inventory')}
+                  render={<Link href="/inventory" />}
+                >
+                  Inventory stock
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter>
+          {/* User profile and sign-out */}
+        </SidebarFooter>
+      </Sidebar>
+
+      <SidebarInset>
+        <TopBar>
+          <SidebarTrigger />
+        </TopBar>
+        <main className="p-6">
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
 ```
 
-## Behaviour
+### Collapsible behavior and keyboard shortcuts
 
-- **Desktop**: expanded (256px) or collapsed to icons (56px). Collapsed items show their label in a tooltip.
-- **Mobile** (below 768px, set with `mobileQuery`): the sidebar becomes a slide-in panel that closes when an item is chosen.
-- **Shortcut**: Ctrl/⌘ + B toggles it (`keyboardShortcut`, or `null` to turn off).
-- **Persist** the choice by controlling `open` / `onOpenChange` and saving it, e.g. in a cookie, so the server renders the right state.
+- **Desktop state**: Expands to standard width (default `256px`) or collapses into an icon rail (default `56px`). In icon mode, hovering or focusing any menu item displays its title via an accessible tooltip.
+- **Mobile drawer**: Below `768px` (customisable via `mobileQuery`), the sidebar automatically switches to a slide-in modal drawer. Selecting any item automatically closes the drawer.
+- **Global hotkey**: Pressing `Ctrl + B` or `⌘ + B` toggles the sidebar open or closed. Disable by setting `keyboardShortcut={null}`.
+- **State hook**: `useSidebar()` gives any descendant component access to `{ open, setOpen, toggle, isMobile, openMobile, setOpenMobile }`.
 
-`useSidebar()` gives any component inside the provider `open`, `toggle`, `isMobile` and setters.
+### Custom sizing and CSS variables
 
-## Custom Width
-
-You can customize the width of the sidebar when expanded, collapsed to icons, and on mobile. These props map directly to `--sidebar-width`, `--sidebar-width-icon`, and `--sidebar-width-mobile` CSS variables.
+Adjust sizing variables on `SidebarProvider` or via standard CSS properties:
 
 <ComponentPreview name="layout/sidebar/width" align="start" className="p-4 sm:p-4" />
 
-## Variants
+```tsx
+<SidebarProvider
+  style={
+    {
+      '--sidebar-width': '18rem',
+      '--sidebar-width-icon': '4rem',
+      '--sidebar-width-mobile': '20rem',
+    } as React.CSSProperties
+  }
+>
+  <Sidebar>...</Sidebar>
+</SidebarProvider>
+```
 
-The sidebar comes in three visual variants: `sidebar` (classic full-height side navigation), `floating` (a floating panel distinct from the edge), and `inset` (a sidebar that wraps the content area with a rounded border).
+### Visual variants
+
+The sidebar supports `sidebar` (classic full-height navigation), `floating` (a floating surface inset from edges), and `inset` (a sidebar wrapping the inner content with a rounded border):
 
 <ComponentPreview name="layout/sidebar/variants" align="start" className="p-4 sm:p-4" />
 
-## Submenus
+### Hierarchical submenus
 
-For deeper navigation structures, use `SidebarMenuSub`, `SidebarMenuSubItem`, and `SidebarMenuSubButton` inside a `SidebarMenuItem`.
+Use `SidebarMenuSub` for nested multi-level trees:
 
 <ComponentPreview name="layout/sidebar/nav-submenu" align="start" className="p-4 sm:p-4" />
 
-## Theming the sidebar
+```tsx
+<SidebarMenuItem>
+  <SidebarMenuButton icon={<FileText />}>
+    Invoicing & GST
+  </SidebarMenuButton>
+  <SidebarMenuSub>
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton render={<Link href="/invoices/tax" />}>
+        Tax invoices
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton render={<Link href="/invoices/e-way" />}>
+        E-Way bills
+      </SidebarMenuSubButton>
+    </SidebarMenuSubItem>
+  </SidebarMenuSub>
+</SidebarMenuItem>
+```
 
-The sidebar is built with its own set of CSS variables (tokens) independent from the rest of the application. This allows you to give the app shell a distinct look (like a dark sidebar in a light app) without affecting standard components.
+### Theming the sidebar
 
-To theme the sidebar, override the `--color-sidebar*` tokens in your CSS.
+The sidebar consumes dedicated CSS colour tokens, allowing a distinct brand surface (e.g. dark navy sidebar inside a light neutral application) without conflicting with page background tokens:
 
 ```css
 @theme {
@@ -115,9 +212,78 @@ To theme the sidebar, override the `--color-sidebar*` tokens in your CSS.
 
 ## Accessibility
 
-- The sidebar is a `<nav>` landmark (label it with `label`). The active item has `aria-current="page"`.
-- `SidebarTrigger` reports `aria-expanded`.
+`Sidebar` implements WAI-ARIA Landmark and Disclosure specifications.
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['SidebarProvider', 'Sidebar', 'SidebarHeader', 'SidebarContent', 'SidebarFooter', 'SidebarSeparator', 'SidebarGroup', 'SidebarGroupLabel', 'SidebarGroupAction', 'SidebarMenu', 'SidebarMenuItem', 'SidebarMenuButton', 'SidebarMenuAction', 'SidebarMenuBadge', 'SidebarMenuSub', 'SidebarMenuSubItem', 'SidebarMenuSubButton', 'SidebarTrigger', 'SidebarRail', 'SidebarInset']} />
+<KeyboardTable
+  entries={[
+    { key: '⌘ + B / Ctrl + B', action: 'Toggles sidebar expansion on desktop or drawer visibility on mobile.' },
+    { key: 'Tab', action: 'Cycles sequentially through interactive sidebar menu links and triggers.' },
+    { key: 'Escape', action: 'Dismisses the open mobile drawer panel and restores focus to the trigger button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The sidebar root renders as `<nav aria-label="Sidebar">` (or custom `label`).
+- Active items receive `aria-current="page"`.
+- `SidebarTrigger` provides `aria-expanded="true | false"` and `aria-label="Toggle sidebar"`.
+- When in icon-collapsed mode, items render accessible tooltips to prevent icon ambiguity.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use the render prop with framework Link components (like Next.js Link) for fast client routing.',
+    code: `<SidebarMenuButton render={<Link href="/inventory" />}>Inventory</SidebarMenuButton>`,
+  }}
+  dont={{
+    description: 'Do not nest interactive <a> tags inside <button> elements.',
+    code: `<SidebarMenuButton><a href="/inventory">Inventory</a></SidebarMenuButton>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Persist the sidebar open state in browser cookies so Server Components render the correct initial state without layout shift.',
+    code: `<SidebarProvider defaultOpen={cookieOpen}>`,
+  }}
+  dont={{
+    description: 'Do not allow the sidebar to flash or jump width after hydration.',
+    code: `<SidebarProvider defaultOpen={false}>{/* jumps after mount */}</SidebarProvider>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'SidebarProvider',
+    'Sidebar',
+    'SidebarHeader',
+    'SidebarContent',
+    'SidebarFooter',
+    'SidebarSeparator',
+    'SidebarGroup',
+    'SidebarGroupLabel',
+    'SidebarGroupAction',
+    'SidebarMenu',
+    'SidebarMenuItem',
+    'SidebarMenuButton',
+    'SidebarMenuAction',
+    'SidebarMenuBadge',
+    'SidebarMenuSub',
+    'SidebarMenuSubItem',
+    'SidebarMenuSubButton',
+    'SidebarTrigger',
+    'SidebarRail',
+    'SidebarInset',
+  ]}
+/>
+
+## Related
+
+- [AppRail](/ui/docs/components/layout/app-rail) — Ultra-narrow module navigation rail placed alongside Sidebar.
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top navigation bar.
+- [PageHeader](/ui/docs/components/layout/page-header) — Page title and action header within the main content canvas.

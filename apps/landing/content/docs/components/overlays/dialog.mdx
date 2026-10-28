@@ -1,9 +1,9 @@
 ---
 title: Dialog
-description: A modal window for focused tasks.
+description: Modal window displayed over the primary page canvas for focused forms and administrative tasks.
 icon: AppWindow
 status: Stable
-summary: Focus trap, Escape and outside-click to close, nested dialogs, and five sizes.
+summary: Modal dialog with automatic focus trapping, backdrop blur, Escape and outside-click dismissal, and five content size tiers.
 ---
 
 <ComponentPreview name="overlays/dialog/basic" />
@@ -20,44 +20,336 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
+  type DialogProps,
+  type DialogContentProps,
 } from '@innostes/ui';
 ```
 
-## Anatomy
+## When to use
+
+Use `Dialog` when an operator needs to complete a critical, self-contained sub-task without losing the context of their underlying workspace:
+
+- Editing entity records (updating vendor contact details, revising purchase order items).
+- Creating new ledger accounts, cost centres, or warehouse storage bins.
+- Providing focused administrative forms that require explicit submission or cancellation.
+
+When choosing overlay components:
+- Use `Dialog` for short, focused modal interactions and multi-field forms.
+- Use [Alert Dialog](/ui/docs/components/overlays/alert-dialog) when presenting irreversible destructive confirmation prompts ("Delete vendor", "Void transaction").
+- Use [Sheet](/ui/docs/components/overlays/sheet) for long edit forms, complex audit logs, or side inspection panels.
+- Refer to the [Overlay decision guide](/ui/docs/components/overlays#overlay-decision-guide) for full details.
+
+## Examples
+
+### Basic dialog with form
+
+Combine `Dialog` with `Form` and `Field`. Use the `render` prop on `DialogTrigger` and `DialogClose` to render `@innostes/ui` `Button` components:
 
 ```tsx
-<Dialog>
-  <DialogTrigger />
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle />
-      <DialogDescription />
-    </DialogHeader>
-    {/* content */}
-    <DialogFooter>
-      <DialogClose />
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+'use client';
+
+import { useState } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Field,
+  FieldLabel,
+  Form,
+  Input,
+  toast,
+} from '@innostes/ui';
+
+export function EditVendorDialog() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button variant="outline" />}>
+        Edit vendor details
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit vendor details</DialogTitle>
+          <DialogDescription>
+            Update registered address and GSTIN for Tata Consumer Products.
+          </DialogDescription>
+        </DialogHeader>
+        <Form
+          onFormSubmit={() => {
+            setOpen(false);
+            toast.success('Vendor details updated successfully');
+          }}
+        >
+          <div className="flex flex-col gap-4 py-2">
+            <Field name="vendorName">
+              <FieldLabel>Legal entity name</FieldLabel>
+              <Input defaultValue="Tata Consumer Products Ltd" required />
+            </Field>
+          </div>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+            <Button type="submit">Save changes</Button>
+          </DialogFooter>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 ```
 
-## Usage
+### Preventing close during async save
 
-- Use `render` to make the trigger and close buttons our `Button`:
-  `<DialogTrigger render={<Button />}>Edit</DialogTrigger>`.
-- Control it with `open` / `onOpenChange` to close after an async save (see the demo).
-- `size` on `DialogContent`: `sm`, `md` (default), `lg`, `xl`, `full`.
-- Set `showCloseButton={false}` to hide the × button.
+To prevent accidental data loss or partial submissions, block dismissal while an asynchronous operation is saving:
 
-Use a dialog for short, focused tasks. For larger forms next to the content, a
-[Sheet](/ui/docs/components/overlays/sheet) keeps more context visible. To confirm destructive
-actions, use [Alert Dialog](/ui/docs/components/overlays/alert-dialog).
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button, Dialog, DialogContent, DialogTitle, toast } from '@innostes/ui';
+
+export function AsyncSafeDialog() {
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    // Prevent closing via backdrop click or Escape while async save is executing
+    if (saving) return;
+    setOpen(nextOpen);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await saveRecord();
+      setOpen(false);
+      toast.success('Record persisted.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {/* Dialog content with saving state on submit button */}
+    </Dialog>
+  );
+}
+```
+
+### Confirming unsaved changes
+
+When a user attempts to dismiss a dirty form, open a nested `AlertDialog` to confirm whether changes should be discarded:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@innostes/ui';
+
+export function DirtyCheckDialog() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+
+  const handleDismissAttempt = () => {
+    if (isDirty) {
+      setConfirmOpen(true);
+    } else {
+      setDialogOpen(false);
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={dialogOpen} onOpenChange={(open) => !open ? handleDismissAttempt() : setDialogOpen(true)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit consignment notes</DialogTitle>
+          </DialogHeader>
+          {/* Form fields that set isDirty */}
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved edits. Closing will discard all modifications.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                setIsDirty(false);
+                setConfirmOpen(false);
+                setDialogOpen(false);
+              }}
+            >
+              Discard changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+```
+
+### Controlled opening from a data table
+
+Trigger a dialog programmatically from a row action inside [DataTable](/ui/docs/components/data-display/data-table):
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DataTable, Dialog, DialogContent, DialogHeader, DialogTitle, type DataTableColumn } from '@innostes/ui';
+
+interface OrderRow {
+  id: string;
+  total: number;
+}
+
+export function OrderTableWithModal() {
+  const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
+
+  const columns: DataTableColumn<OrderRow>[] = [
+    { id: 'id', header: 'Order', accessor: (r) => r.id },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: (order) => (
+        <button type="button" onClick={() => setSelectedOrder(order)} className="text-primary hover:underline text-sm font-medium">
+          Edit order
+        </button>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <DataTable
+        aria-label="Orders"
+        data={[{ id: 'PO-8410', total: 42000 }]}
+        columns={columns}
+        getRowId={(r) => r.id}
+      />
+
+      <Dialog open={Boolean(selectedOrder)} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit order {selectedOrder?.id}</DialogTitle>
+          </DialogHeader>
+          {/* Edit form */}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+```
+
+### Content sizes
+
+Set `size` on `DialogContent` to adjust maximum width: `sm` (384px), `md` (512px, default), `lg` (672px), `xl` (896px), and `full` (viewport width with 1rem margin):
+
+```tsx
+<DialogContent size="lg">
+  {/* Wide form layout */}
+</DialogContent>
+```
 
 ## Accessibility
 
-- Focus moves into the dialog on open and back to the trigger on close; Tab stays inside.
-- Labelled by `DialogTitle` and described by `DialogDescription`. Always include a title.
+`Dialog` implements the WAI-ARIA Modal Dialog Pattern via Base UI (`@base-ui/react/dialog`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['DialogContent', 'DialogTitle', 'DialogDescription', 'DialogHeader', 'DialogFooter']} baseUi="dialog" />
+<KeyboardTable
+  entries={[
+    { key: 'Escape', action: 'Dismisses the dialog and restores keyboard focus to the opening trigger button.' },
+    { key: 'Tab', action: 'Cycles focus forward through interactive elements inside the dialog; focus cannot leave the dialog.' },
+    { key: 'Shift + Tab', action: 'Cycles focus backward through interactive elements inside the dialog.' },
+  ]}
+/>
+
+### Focus trapping and restoration
+
+- When opened, focus moves to the first focusable control inside `DialogContent` (or an element with `autoFocus`).
+- Tab navigation is strictly trapped inside the dialog container; background elements are marked `inert` and excluded from the accessibility tree.
+- When closed, focus is automatically restored to the `DialogTrigger` element.
+
+### Screen readers
+
+- `DialogTitle` automatically provides the accessible name via `aria-labelledby`.
+- `DialogDescription` provides supplementary descriptive text via `aria-describedby`.
+- Always include `DialogTitle`; if a title should be visually hidden, use `<DialogTitle className="sr-only">`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always include DialogTitle and DialogDescription inside DialogHeader for screen reader context.',
+    code: `<DialogHeader>\n  <DialogTitle>Tax settings</DialogTitle>\n  <DialogDescription>Update GST filing rates.</DialogDescription>\n</DialogHeader>`,
+  }}
+  dont={{
+    description: 'Do not render a modal dialog without a DialogTitle element.',
+    code: `<DialogContent>\n  <form>...</form>\n</DialogContent> // Screen reader will not announce title`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide a clear Cancel button next to the primary action in DialogFooter.',
+    code: `<DialogFooter>\n  <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>\n  <Button type="submit">Save</Button>\n</DialogFooter>`,
+  }}
+  dont={{
+    description: 'Do not force operators to rely solely on the small top-right close icon or backdrop click to dismiss.',
+    code: `<DialogFooter><Button type="submit">Save</Button></DialogFooter>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Dialog',
+    'DialogTrigger',
+    'DialogContent',
+    'DialogHeader',
+    'DialogTitle',
+    'DialogDescription',
+    'DialogFooter',
+    'DialogClose',
+  ]}
+  baseUi="dialog"
+/>
+
+## Related
+
+- [Alert Dialog](/ui/docs/components/overlays/alert-dialog) — Strict confirmation modal for irreversible actions.
+- [Sheet](/ui/docs/components/overlays/sheet) — Slide-over drawer for wider inspection panels and multi-step forms.
+- [Popover](/ui/docs/components/overlays/popover) — Non-modal contextual dropdown surface.

@@ -1,9 +1,9 @@
 ---
 title: Scroll Area
-description: A scroll container with consistent, thin scrollbars.
+description: Custom scrollable container with cross-platform consistent scrollbars.
 icon: ScrollText
 status: Stable
-summary: Native scrolling and keyboard support, styled scrollbars on every platform.
+summary: Native momentum scrolling, keyboard accessibility, and styled auto-hiding scrollbars across all operating systems.
 ---
 
 <ComponentPreview name="layout/scroll-area/basic" />
@@ -14,11 +14,107 @@ summary: Native scrolling and keyboard support, styled scrollbars on every platf
 import { ScrollArea } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Give it a height or max-height. `scrollbars` is `vertical` (default), `horizontal` or `both`.
-Padding for the content goes on `viewportClassName`.
+Use `ScrollArea` when a region must scroll independently without relying on divergent OS-native scrollbar styling:
 
-## API Reference
+- **Audit trails and activity logs**: Displaying long chronological timelines in sidebars or cards.
+- **Data drawers and sheets**: Ensuring vertical scrolling inside `SheetBody` or dialog viewports.
+- **Wide horizontal tables or code blocks**: Providing clean horizontal scroll tracking without bulky browser bars.
+
+**Do not use ScrollArea for:**
+- The primary window body scroll — allow the browser window to scroll naturally.
+- Small fixed-size cards where content easily fits without truncation.
+- Infinite lists requiring virtual DOM rendering — use a virtualised data grid.
+
+## Examples
+
+### Vertical scrollable audit feed
+
+Giving the container a bounded height or max-height:
+
+```tsx
+<ScrollArea className="h-72 rounded-md border p-4">
+  <div className="space-y-4">
+    <h4 className="text-sm font-semibold">ERP audit log (PO-2026-081)</h4>
+    {auditLogs.map((log) => (
+      <div key={log.id} className="text-sm border-b pb-2">
+        <p className="font-medium text-foreground">{log.action}</p>
+        <p className="text-xs text-muted-foreground">{log.actor} · {log.timestamp}</p>
+      </div>
+    ))}
+  </div>
+</ScrollArea>
+```
+
+### Horizontal scrolling for wide datasets
+
+Set `scrollbars="horizontal"` or `scrollbars="both"` when hosting wide data grids or timeline bars:
+
+```tsx
+<ScrollArea scrollbars="horizontal" className="w-full rounded-md border">
+  <div className="flex w-max gap-4 p-4">
+    {warehouses.map((wh) => (
+      <Card key={wh.id} className="w-64 shrink-0">
+        <CardHeader>
+          <CardTitle>{wh.name}</CardTitle>
+          <CardDescription>{wh.location}</CardDescription>
+        </CardHeader>
+      </Card>
+    ))}
+  </div>
+</ScrollArea>
+```
+
+## Accessibility
+
+`ScrollArea` is built on Base UI ScrollArea primitives (`@base-ui/react/scroll-area`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'PageDown / DownArrow', action: 'Scrolls the viewport content downwards when the scroll area is focused.' },
+    { key: 'PageUp / UpArrow', action: 'Scrolls the viewport content upwards when the scroll area is focused.' },
+    { key: 'Home / End', action: 'Jumps directly to the very start or end of the scrollable region.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The scroll area maintains standard native scrolling mechanics, ensuring assistive technologies can navigate child nodes sequentially.
+- Scrollbar thumbs hide visually when inactive but expand upon pointer hover to offer a clear drag target.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an explicit height or maxHeight class on ScrollArea so the scroll boundaries are established.',
+    code: `<ScrollArea className="h-64">{items}</ScrollArea>`,
+  }}
+  dont={{
+    description: 'Do not render ScrollArea without height constraints, allowing it to expand infinitely without scrolling.',
+    code: `<ScrollArea>{infiniteItems}</ScrollArea>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use viewportClassName when inner padding is needed, keeping scrollbars pinned to the outer edges.',
+    code: `<ScrollArea viewportClassName="p-4">{content}</ScrollArea>`,
+  }}
+  dont={{
+    description: 'Do not place large padding directly on the outer container if it offsets the scrollbar track awkwardly.',
+    code: `<ScrollArea className="p-8">{content}</ScrollArea>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['ScrollArea']} baseUi="scroll-area" />
+
+## Related
+
+- [Sheet](/ui/docs/components/overlays/sheet) — Slide-over drawer component utilising scrollable body areas.
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component with horizontal overflow handling.
+- [Card](/ui/docs/components/data-display/card) — Card container frequently hosting scrollable lists.

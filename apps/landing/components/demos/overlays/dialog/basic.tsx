@@ -20,38 +20,46 @@ import {
 
 export default function DialogDemo() {
   const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async () => {
+    setSaving(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setSaving(false);
+    setOpen(false);
+    toast.success('Procurement profile updated');
+  };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(next) => !saving && setOpen(next)}>
       <DialogTrigger render={<Button variant="outline" />}>
-        Edit profile
+        Edit procurement profile
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
+          <DialogTitle>Edit procurement profile</DialogTitle>
           <DialogDescription>
-            Changes are visible to everyone in your workspace.
+            Update buyer details for Northwind Traders Bengaluru division.
           </DialogDescription>
         </DialogHeader>
-        <Form
-          onFormSubmit={() => {
-            setOpen(false);
-            toast.success('Profile updated');
-          }}
-        >
-          <Field name="name">
-            <FieldLabel>Name</FieldLabel>
-            <Input defaultValue="Ada Lovelace" required />
-          </Field>
-          <Field name="title">
-            <FieldLabel>Job title</FieldLabel>
-            <Input defaultValue="Head of Engineering" />
-          </Field>
+        <Form onFormSubmit={handleSubmit}>
+          <div className="flex flex-col gap-4 py-2">
+            <Field name="name">
+              <FieldLabel>Buyer name</FieldLabel>
+              <Input defaultValue="Priya Sharma" required disabled={saving} />
+            </Field>
+            <Field name="department">
+              <FieldLabel>Department</FieldLabel>
+              <Input defaultValue="Supply Chain & Procurement" disabled={saving} />
+            </Field>
+          </div>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
+            <DialogClose render={<Button variant="outline" disabled={saving} />}>
               Cancel
             </DialogClose>
-            <Button type="submit">Save changes</Button>
+            <Button type="submit" loading={saving}>
+              Save changes
+            </Button>
           </DialogFooter>
         </Form>
       </DialogContent>

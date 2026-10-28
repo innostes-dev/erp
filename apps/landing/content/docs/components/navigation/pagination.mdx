@@ -1,9 +1,9 @@
 ---
 title: Pagination
-description: Page navigation for tables and lists.
+description: Page navigation controls for tables and long lists.
 icon: ChevronsLeftRight
 status: Stable
-summary: Controlled, translatable, with a stable width as you page.
+summary: Controlled page navigation with stable button widths, boundary offsets, and server-side range calculation.
 ---
 
 <ComponentPreview name="navigation/pagination/basic" />
@@ -11,34 +11,124 @@ summary: Controlled, translatable, with a stable width as you page.
 ## Import
 
 ```tsx
-import { Pagination, getPaginationRange } from '@innostes/ui';
+import { Pagination, getPaginationRange, type PaginationProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Pagination` when dividing large datasets into discrete pages:
+
+- **Enterprise data tables**: Navigating through thousands of purchase orders, stock items, or ledger entries.
+- **Search result listings**: Paginated inventory queries or customer catalogues.
+- **Audit logs**: Stepping through historical system logs.
+
+**Do not use Pagination for:**
+- Infinite feed streams or chat conversations.
+- Multi-step wizards or checkout funnels — use [Stepper](/ui/docs/components/navigation/stepper).
+- Switching between distinct functional sections on a single screen — use [Tabs](/ui/docs/components/navigation/tabs).
+
+## Examples
+
+### Basic controlled pagination
+
+Managing the current page in component state:
 
 ```tsx
 const [page, setPage] = useState(1);
+const totalRecords = 480;
+const pageSize = 20;
+const pageCount = Math.ceil(totalRecords / pageSize);
 
-<Pagination page={page} pageCount={Math.ceil(total / pageSize)} onPageChange={setPage} />
+<Pagination
+  page={page}
+  pageCount={pageCount}
+  onPageChange={(nextPage) => {
+    setPage(nextPage);
+    fetchOrders({ page: nextPage, pageSize });
+  }}
+/>
 ```
 
-- The number of buttons stays the same as you move, so the controls don't jump under the pointer.
-- `labels` translates "Previous", "Next" and the page names.
+### Boundary and sibling counts
 
-## Custom pagination UI
+Adjust `boundaryCount` (pages anchored at the start and end) and `siblingCount` (pages surrounding the current page):
 
-`getPaginationRange` returns the items to show (numbers and ellipses), so you can build any layout
-on the same logic. It has no React code, so it also works on the server.
+```tsx
+<Pagination
+  page={page}
+  pageCount={50}
+  siblingCount={2}
+  boundaryCount={2}
+  onPageChange={setPage}
+/>
+```
+
+### Server-side range helper (`getPaginationRange`)
+
+`getPaginationRange` calculates the page numbers and ellipsis positions without importing React, making it ideal for Server Components or custom pagination renderers:
 
 ```ts
-getPaginationRange({ page: 6, pageCount: 20 });
-// → [1, 'ellipsis-start', 5, 6, 7, 'ellipsis-end', 20]
+import { getPaginationRange } from '@innostes/ui';
+
+const range = getPaginationRange({
+  page: 6,
+  pageCount: 20,
+  siblingCount: 1,
+  boundaryCount: 1,
+});
+// Output: [1, 'ellipsis-start', 5, 6, 7, 'ellipsis-end', 20]
 ```
 
 ## Accessibility
 
-- `<nav aria-label="Pagination">`; the current page has `aria-current="page"`; every button is labelled.
+`Pagination` implements the WAI-ARIA Navigation pattern.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between Previous, page number buttons, and Next.' },
+    { key: 'Enter / Space', action: 'Activates the focused page number or directional button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container is rendered as `<nav aria-label="Pagination">`.
+- The active page button has `aria-current="page"`.
+- Previous and Next buttons receive descriptive `aria-label` text via `labels.previous` and `labels.next`.
+- Ellipsis spans receive `aria-hidden="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep the number of visible buttons stable across page transitions to prevent layout shifts.',
+    code: `<Pagination page={page} pageCount={pageCount} onPageChange={setPage} />`,
+  }}
+  dont={{
+    description: 'Do not re-render dynamic layouts that shift the Next button position as the user clicks.',
+    code: `<div style={{ width: page * 20 }}>{buttons}</div>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Disable the Previous button on page 1 and the Next button on the final page.',
+    code: `<Pagination page={1} pageCount={10} onPageChange={setPage} />`,
+  }}
+  dont={{
+    description: 'Do not allow navigation past the first or last available page.',
+    code: `<button onClick={() => setPage(page - 1)}>Prev</button>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Pagination']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component frequently combined with pagination.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression flow.
+- [Tabs](/ui/docs/components/navigation/tabs) — Category switching without numerical paging.

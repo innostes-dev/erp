@@ -1,9 +1,9 @@
 ---
 title: Collapsible
-description: Show and hide one section.
+description: Shows and hides an isolated section of content with smooth height animation.
 icon: FoldVertical
 status: Stable
-summary: An unstyled disclosure with a height animation, for "advanced options" and similar.
+summary: A flexible disclosure primitive for secondary form options, filter expansions, and collapsible detail cards.
 ---
 
 <ComponentPreview name="navigation/collapsible/basic" />
@@ -11,14 +11,132 @@ summary: An unstyled disclosure with a height animation, for "advanced options" 
 ## Import
 
 ```tsx
-import { Collapsible, CollapsibleTrigger, CollapsiblePanel } from '@innostes/ui';
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsiblePanel,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The trigger gets `data-panel-open` while open; use it to rotate an icon
-(`group-data-panel-open:rotate-180`), as in the demo.
+Use `Collapsible` for isolated disclosures where a user might optionally need extra settings or secondary details:
 
-## API Reference
+- **Advanced form fields**: E-way bill vehicle numbers, GST exemption certificates, or dispatch notes.
+- **Filter drawers and panels**: Expanding extra facet filters on inventory search.
+- **Code snippet disclosures**: Showing generated JSON payloads or webhook logs.
 
-<ApiTable components={['Collapsible', 'CollapsibleTrigger', 'CollapsiblePanel']} baseUi="collapsible" />
+**Do not use Collapsible for:**
+- Stacked groups of mutually exclusive sections — use [Accordion](/ui/docs/components/navigation/accordion).
+- Top-level page tab switches — use [Tabs](/ui/docs/components/navigation/tabs).
+- Complex overlay modals — use [Dialog](/ui/docs/components/overlays/dialog).
+
+## Examples
+
+### Secondary form options
+
+Hiding advanced tax and compliance fields until requested by the procurement agent:
+
+```tsx
+<Collapsible>
+  <div className="flex items-center justify-between border-b pb-2">
+    <h4 className="text-sm font-semibold">Consignment details</h4>
+    <CollapsibleTrigger
+      render={
+        <Button variant="ghost" size="sm" className="group">
+          Advanced options
+          <ChevronDownIcon className="size-4 transition-transform duration-200 group-data-panel-open:rotate-180" />
+        </Button>
+      }
+    />
+  </div>
+  <CollapsiblePanel className="space-y-4 pt-4">
+    <Field name="vehicleNo">
+      <FieldLabel>E-Way bill vehicle number</FieldLabel>
+      <Input placeholder="KA-01-AB-1234" />
+    </Field>
+    <Field name="transporterId">
+      <FieldLabel>Transporter GSTIN / ID</FieldLabel>
+      <Input placeholder="29AAAAA0000A1Z5" />
+    </Field>
+  </CollapsiblePanel>
+</Collapsible>
+```
+
+### Controlled open state
+
+Manage the disclosure programmatically from external component state:
+
+```tsx
+const [isOpen, setIsOpen] = useState(false);
+
+<Collapsible open={isOpen} onOpenChange={setIsOpen}>
+  <div className="flex gap-2">
+    <Button onClick={() => setIsOpen((prev) => !prev)}>
+      {isOpen ? 'Hide raw audit logs' : 'View raw audit logs'}
+    </Button>
+  </div>
+  <CollapsiblePanel className="mt-4 rounded bg-muted p-4 font-mono text-xs">
+    {JSON.stringify(auditRecord, null, 2)}
+  </CollapsiblePanel>
+</Collapsible>
+```
+
+## Accessibility
+
+`Collapsible` is built on Base UI Collapsible primitives (`@base-ui/react/collapsible`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Toggles the collapsible panel open or closed when the trigger is focused.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The `CollapsibleTrigger` receives `aria-expanded="true | false"` and `aria-controls` referencing the panel id.
+- The trigger button receives `data-panel-open` when the panel is visible, enabling Tailwind group-hover or sibling animations.
+- The `CollapsiblePanel` receives `hidden` when closed, ensuring screen readers do not read collapsed content.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use CollapsibleTrigger with a clear label describing what is being toggled.',
+    code: `<CollapsibleTrigger render={<Button>Show GST details</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not hide required primary form fields behind a collapsed panel.',
+    code: `<CollapsiblePanel><Field required><Input name="totalAmount" /></Field></CollapsiblePanel>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Animate indicator chevrons with transition-transform and group-data-panel-open:rotate-180.',
+    code: `<ChevronDown className="transition-transform group-data-panel-open:rotate-180" />`,
+  }}
+  dont={{
+    description: 'Do not change the text label completely if it disorients screen readers without aria-live.',
+    code: `<CollapsibleTrigger>{open ? 'Close' : 'Open'}</CollapsibleTrigger>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Collapsible',
+    'CollapsibleTrigger',
+    'CollapsiblePanel',
+  ]}
+  baseUi="collapsible"
+/>
+
+## Related
+
+- [Accordion](/ui/docs/components/navigation/accordion) — Vertically stacked series of collapsible disclosure panels.
+- [FormLayout](/ui/docs/components/layout/form-layout) — Structured layout for complex forms with optional sections.
+- [Card](/ui/docs/components/data-display/card) — Card container often hosting collapsible details.

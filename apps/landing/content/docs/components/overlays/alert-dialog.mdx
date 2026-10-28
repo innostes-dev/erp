@@ -1,9 +1,9 @@
 ---
 title: Alert Dialog
-description: Asks the user to confirm an important action.
-icon: ShieldAlert
+description: High-friction modal dialog for confirming irreversible or destructive actions.
+icon: TriangleAlert
 status: Stable
-summary: A dialog that can't be dismissed by clicking outside; the user must choose.
+summary: Strict modal confirmation dialog that disables backdrop light-dismiss, focuses the safe cancel action by default, and communicates consequences clearly.
 ---
 
 <ComponentPreview name="overlays/alert-dialog/basic" />
@@ -20,20 +20,232 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogClose,
+  type AlertDialogProps,
 } from '@innostes/ui';
 ```
 
-## Writing good confirmations
+## When to use
 
-- Title asks the question: "Delete Acme Corp?", not "Are you sure?".
-- Description states the consequence: what's lost, and whether it can be undone.
-- The confirm button repeats the action ("Delete customer"), not "OK".
+Use `AlertDialog` when an operator initiates an irreversible, high-consequence action that permanently deletes records or alters financial transactions:
+
+- Voiding verified tax invoices or reversing finalized journal entries.
+- Deleting customer profiles, vendor contracts, or warehouse location definitions.
+- Terminating active team credentials or revoking tenant API keys.
+
+When choosing overlay confirmation components:
+- Use `AlertDialog` (`role="alertdialog"`) for critical confirmations where an accidental click would result in data loss. Backdrop clicking is intentionally disabled.
+- Use [Dialog](/ui/docs/components/overlays/dialog) (`role="dialog"`) for standard multi-field data entry forms, where users can dismiss by clicking outside.
+- Use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) for reversible low-impact choices.
+- Refer to the [Overlay decision guide](/ui/docs/components/overlays#overlay-decision-guide) for detailed guidance.
+
+## Examples
+
+### Destructive confirmation
+
+Compose `AlertDialog` with `AlertDialogHeader`, `AlertDialogTitle`, `AlertDialogDescription`, and `AlertDialogFooter`. Use `AlertDialogClose` with `Button variant="destructive"` to handle confirmation:
+
+```tsx
+'use client';
+
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  Button,
+  toast,
+} from '@innostes/ui';
+
+export function DeleteVendorConfirmation({ vendorId, vendorName }) {
+  const handleDelete = () => {
+    // API deletion call
+    toast.success(`Vendor ${vendorName} removed.`);
+  };
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        Delete vendor
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete {vendorName}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. Removing this vendor will archive 48 purchase order line items and deactivate all linked procurement catalogs.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogClose render={<Button variant="outline" />}>
+            Cancel
+          </AlertDialogClose>
+          <AlertDialogClose
+            render={<Button variant="destructive" />}
+            onClick={handleDelete}
+          >
+            Delete vendor
+          </AlertDialogClose>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+```
+
+### Strict modality without light-dismiss
+
+Unlike standard dialogs, clicking the dimmed background backdrop does **not** close an `AlertDialog`. Operators must explicitly press the "Cancel" action or Escape key to dismiss:
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger render={<Button variant="outline" />}>Revoke license</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Revoke enterprise license?</AlertDialogTitle>
+      <AlertDialogDescription>
+        Active depot operators will immediately lose access to the dispatch terminal.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogClose render={<Button variant="outline" />}>Cancel</AlertDialogClose>
+      <AlertDialogClose render={<Button variant="destructive" />}>Revoke license</AlertDialogClose>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+### Asynchronous deletion with progress feedback
+
+Combine `AlertDialog` with controlled open state and loading feedback during asynchronous API requests:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  Button,
+  toast,
+} from '@innostes/ui';
+
+export function AsyncVoidInvoice({ invoiceId }) {
+  const [open, setOpen] = useState(false);
+  const [isVoiding, setIsVoiding] = useState(false);
+
+  const handleVoid = async () => {
+    setIsVoiding(true);
+    try {
+      await fetch(`/api/v1/invoices/${invoiceId}/void`, { method: 'POST' });
+      setOpen(false);
+      toast.success(`Invoice ${invoiceId} voided`);
+    } catch {
+      toast.error('Failed to void invoice. Check e-invoicing gateway status.');
+    } finally {
+      setIsVoiding(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger render={<Button variant="destructive" />}>
+        Void invoice
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Void invoice {invoiceId}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action will reverse accounts receivable ledger entries and submit a credit memo to the GSTN portal.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogClose render={<Button variant="outline" disabled={isVoiding} />}>
+            Cancel
+          </AlertDialogClose>
+          <Button variant="destructive" loading={isVoiding} onClick={handleVoid}>
+            Confirm void
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+```
 
 ## Accessibility
 
-- `role="alertdialog"`, labelled by the title and described by the description.
-- Focus starts inside the dialog; Escape cancels.
+`AlertDialog` implements the W3C WAI-ARIA Alert Dialog design pattern via Base UI (`@base-ui/react/alert-dialog`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['AlertDialogContent', 'AlertDialogTitle', 'AlertDialogDescription']} baseUi="alert-dialog" />
+<KeyboardTable
+  entries={[
+    { key: 'Escape', action: 'Dismisses the alert dialog and restores focus to the trigger button.' },
+    { key: 'Tab', action: 'Cycles focus between the Cancel button and the confirming action button.' },
+    { key: 'Enter', action: 'Activates the currently focused button.' },
+  ]}
+/>
+
+### Initial safe focus
+
+When the alert dialog mounts, focus is automatically placed on the non-destructive **Cancel** action by default. This deliberate safeguard prevents operators who instinctively press Enter from accidentally executing an irreversible operation.
+
+### Screen readers (role="alertdialog")
+
+- `AlertDialogContent` carries `role="alertdialog"`. Assistive technologies announce both the title and the descriptive warning text immediately upon display.
+- Background content is marked `inert`, preventing virtual cursors from escaping the modal window.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Clearly describe the irreversible consequences in AlertDialogDescription (e.g., number of affected rows, financial reversals).',
+    code: `<AlertDialogDescription>\n  Reverses ₹42,000 in receivables and cancels the e-way bill.\n</AlertDialogDescription>`,
+  }}
+  dont={{
+    description: 'Do not use generic, unhelpful questions like "Are you sure?" without explaining the consequences.',
+    code: `<AlertDialogDescription>Are you sure you want to proceed?</AlertDialogDescription>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use explicit verbs on confirmation buttons matching the action (e.g. "Void invoice", "Delete customer").',
+    code: `<Button variant="destructive">Void invoice</Button>`,
+  }}
+  dont={{
+    description: 'Do not use vague "Yes" or "OK" buttons that require reading the title again to know what is happening.',
+    code: `<Button variant="destructive">OK</Button>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'AlertDialog',
+    'AlertDialogTrigger',
+    'AlertDialogContent',
+    'AlertDialogHeader',
+    'AlertDialogTitle',
+    'AlertDialogDescription',
+    'AlertDialogFooter',
+    'AlertDialogClose',
+  ]}
+  baseUi="alert-dialog"
+/>
+
+## Related
+
+- [Dialog](/ui/docs/components/overlays/dialog) — Standard modal dialog for forms and multi-field inputs.
+- [Button](/ui/docs/components/actions/button) — Action button with destructive styling.
+- [Toast](/ui/docs/components/feedback/toast) — Transient notification confirming completed actions.

@@ -1,9 +1,9 @@
 ---
 title: App Rail
-description: A narrow vertical strip of icon links for module switching.
+description: A narrow vertical navigation strip for switching between high-level application modules.
 icon: EllipsisVertical
 status: Stable
-summary: Used alongside a sidebar to navigate between top-level areas or modules in complex applications, featuring active states, tooltips, and badges.
+summary: Compact module navigation rail with active states, accessible tooltips, and badges for enterprise multi-app suites.
 ---
 
 <ComponentPreview name="layout/app-rail/basic" align="start" className="p-4 sm:p-4" />
@@ -20,53 +20,157 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `AppRail` is designed to be placed before a `Sidebar` inside a `SidebarProvider`. It provides the first level of navigation (e.g. switching between entire apps like ERP, HRMS, CRM), while the `Sidebar` provides the second level (the pages within that app).
+Use `AppRail` when building two-tier enterprise navigation suites:
+
+- **Multi-module ERP platforms**: Fast switching between Procurement, Inventory, Finance, and HRMS.
+- **Persistent workspace switcher**: Keeping global shortcuts reachable regardless of current deep view.
+- **High-density desktop apps**: Minimising horizontal space loss while retaining full-screen module switching.
+
+**Do not use AppRail for:**
+- Single-purpose applications with fewer than 5 total pages — use a standard [Sidebar](/ui/docs/components/layout/sidebar).
+- Page-level content tabs — use [Tabs](/ui/docs/components/navigation/tabs).
+- Mobile screens — `AppRail` hides automatically below the `md` breakpoint, where `Sidebar` assumes mobile navigation duties.
+
+## Examples
+
+### Two-tier navigation shell
+
+Composing `AppRail` alongside `Sidebar` inside `SidebarProvider`:
 
 ```tsx
-<SidebarProvider>
-  <AppRail>
-    <AppRailHeader>
-      <Logo />
-    </AppRailHeader>
+import Link from 'next/link';
+import {
+  SidebarProvider,
+  AppRail,
+  AppRailHeader,
+  AppRailItem,
+  AppRailFooter,
+  Sidebar,
+  SidebarInset,
+} from '@innostes/ui';
+import { Package, ShoppingCart, Landmark, Users } from 'lucide-react';
 
-    <AppRailItem
-      icon={<HomeIcon />}
-      label="Home"
-      isActive
-      render={<Link href="/" />}
-    />
-    <AppRailItem
-      icon={<UsersIcon />}
-      label="HRMS"
-      render={<Link href="/hrms" />}
-    />
+export function ErpShell({ children }) {
+  return (
+    <SidebarProvider>
+      <AppRail label="ERP modules">
+        <AppRailHeader>
+          <div className="size-8 rounded bg-primary font-bold text-primary-foreground flex items-center justify-center">
+            N
+          </div>
+        </AppRailHeader>
 
-    <AppRailSeparator />
+        <AppRailItem
+          icon={<ShoppingCart />}
+          label="Procurement"
+          isActive
+          render={<Link href="/procurement" />}
+        />
+        <AppRailItem
+          icon={<Package />}
+          label="Inventory"
+          badge={12}
+          render={<Link href="/inventory" />}
+        />
+        <AppRailItem
+          icon={<Landmark />}
+          label="Finance & GST"
+          render={<Link href="/finance" />}
+        />
 
-    <AppRailFooter>
-      <AppRailItem icon={<SettingsIcon />} label="Settings" />
-    </AppRailFooter>
-  </AppRail>
+        <AppRailFooter>
+          <AppRailItem
+            icon={<Users />}
+            label="Employees"
+            render={<Link href="/hrms" />}
+          />
+        </AppRailFooter>
+      </AppRail>
 
-  <Sidebar>
-    {/* Sidebar content for the active module */}
-  </Sidebar>
-  <SidebarInset>
-    {/* Main content */}
-  </SidebarInset>
-</SidebarProvider>
+      <Sidebar>
+        {/* Secondary navigation for Procurement */}
+      </Sidebar>
+
+      <SidebarInset>
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
 ```
 
-### Responsive behavior
+### With badges and tooltips
 
-The `AppRail` is hidden by default on small screens (below `md`). On mobile, the `Sidebar` takes over as a slide-in panel. For a consistent experience on mobile, you should typically include the same top-level links inside the mobile version of your navigation (e.g. within a top bar or at the bottom/top of the mobile sidebar).
+Each `AppRailItem` automatically renders an accessible tooltip when hovered or focused, displaying the item's label and notification badge count:
 
-### Label display
+```tsx
+<AppRailItem
+  icon={<Bell />}
+  label="Approvals"
+  badge={3}
+  render={<Link href="/approvals" />}
+/>
+```
 
-By default, the `label` passed to `AppRailItem` acts as its accessible name and is displayed in a tooltip when the user hovers over the item. If you prefer to show the text beneath the icon constantly, set `showLabel={true}`.
+## Accessibility
 
-## API Reference
+`AppRail` renders semantic HTML5 navigation landmarks.
 
-<ApiTable components={['AppRail', 'AppRailItem', 'AppRailHeader', 'AppRailFooter', 'AppRailSeparator']} />
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive module items.' },
+    { key: 'Enter / Space', action: 'Activates the focused module link or trigger.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as `<nav aria-label="Apps">` (customisable via the `label` prop).
+- Active items receive `aria-current="page"`.
+- If an item includes a numerical badge, the count is included in accessible label computations for screen readers.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always supply a clear text label for each AppRailItem so tooltips and screen reader names are complete.',
+    code: `<AppRailItem icon={<Box />} label="Inventory" />`,
+  }}
+  dont={{
+    description: 'Do not omit the label prop on icon-only rail items.',
+    code: `<AppRailItem icon={<Box />} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the render prop with your framework router Link (e.g. Next.js Link) for fast client-side transitions.',
+    code: `<AppRailItem render={<Link href="/finance" />} label="Finance" />`,
+  }}
+  dont={{
+    description: 'Do not nest native anchor tags inside interactive button triggers.',
+    code: `<AppRailItem><a href="/finance">Finance</a></AppRailItem>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'AppRail',
+    'AppRailItem',
+    'AppRailHeader',
+    'AppRailFooter',
+    'AppRailSeparator',
+  ]}
+/>
+
+## Related
+
+- [Sidebar](/ui/docs/components/layout/sidebar) — Application sidebar supporting hierarchical trees, groups, and mobile drawers.
+- [TopBar](/ui/docs/components/layout/top-bar) — Top application navigation bar.
+- [Tooltip](/ui/docs/components/overlays/tooltip) — Floating hint used internally by AppRailItem.

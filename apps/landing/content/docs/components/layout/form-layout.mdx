@@ -1,9 +1,9 @@
 ---
 title: Form Layout
-description: Grids, sections and action bars for forms.
+description: Responsive grids, sections, and action bars for enterprise forms.
 icon: LayoutTemplate
 status: Stable
-summary: FormGrid, FormSection and FormActions. Responsive to the space they're in, not the screen.
+summary: Container-query powered grids (FormGrid), titled sections (FormSection), and persistent action bars (FormActions).
 ---
 
 <ComponentPreview name="layout/form-layout/basic" align="start" />
@@ -14,31 +14,124 @@ summary: FormGrid, FormSection and FormActions. Responsive to the space they're 
 import { FormGrid, FormSection, FormActions } from '@innostes/ui';
 ```
 
-## FormGrid
+## When to use
 
-Places fields in 1–4 columns. Make a field span the row with `className="col-span-full"`.
+Use `FormLayout` primitives to establish clean, predictable field spacing across diverse layout environments:
+
+- **Full-page forms**: Vendor onboarding, purchase order creation, or product catalogue entries.
+- **Side drawer forms**: Edit forms inside [Sheet](/ui/docs/components/overlays/sheet).
+- **Modal forms**: Quick entry dialogues inside [Dialog](/ui/docs/components/overlays/dialog).
+
+Because `FormGrid` uses CSS **container queries** rather than viewport media queries, the grid automatically adapts to the actual width of its container (page, drawer, or modal) without needing custom responsive breakpoint classes.
+
+## Examples
+
+### Responsive FormGrid with column spans
+
+Organise form fields into 1, 2, 3, or 4 adaptive columns:
 
 ```tsx
 <FormGrid columns={2}>
-  <Field>…</Field>
-  <Field>…</Field>
-  <Field className="col-span-full">…</Field>
+  <Field name="vendorName">
+    <FieldLabel>Vendor legal name</FieldLabel>
+    <Input defaultValue="Bengaluru Spices Pvt Ltd" />
+  </Field>
+  <Field name="gstin">
+    <FieldLabel>GSTIN</FieldLabel>
+    <Input defaultValue="29ABCDE1234F1Z5" />
+  </Field>
+  <Field name="address" className="col-span-full">
+    <FieldLabel>Registered warehouse address</FieldLabel>
+    <Textarea defaultValue="Plot 42, Electronic City Phase 1, Hosur Road, Bengaluru 560100" />
+  </Field>
 </FormGrid>
 ```
 
-It uses **container queries**: the columns follow the width of the form's container, so the
-same form works in a page, a sheet or a dialog.
+### FormSection: stacked versus aside
 
-## FormSection
+Use `layout="stacked"` (default) for dialogs and standard pages, or `layout="aside"` for settings screens where section titles sit on the left:
 
-A titled group of fields. `layout="aside"` puts the title on the left (settings pages);
-`layout="stacked"` (default) puts it above (wizards, dialogs).
+```tsx
+<FormSection
+  title="Statutory tax profiles"
+  description="Manage registered GSTIN identifiers and TDS rates."
+  layout="aside"
+>
+  <FormGrid columns={2}>
+    <Field name="pan">
+      <FieldLabel>Company PAN</FieldLabel>
+      <Input defaultValue="ABCDE1234F" />
+    </Field>
+    <Field name="tan">
+      <FieldLabel>Tax deduction account number (TAN)</FieldLabel>
+      <Input defaultValue="BLRA01234E" />
+    </Field>
+  </FormGrid>
+</FormSection>
+```
 
-## FormActions
+### FormActions with sticky positioning
 
-The button row at the end of a form. `align="between"` puts the first button at the start
-(Cancel / Back) and the rest at the end. `sticky` keeps it visible on long forms.
+`FormActions` aligns save and cancel buttons. Use `align="between"` to place the back/cancel button on the left and the primary submit button on the right:
 
-## API Reference
+```tsx
+<FormActions align="between" sticky>
+  <Button variant="outline">Cancel</Button>
+  <div className="flex gap-2">
+    <Button variant="secondary">Save as draft</Button>
+    <Button type="submit">Submit for approval</Button>
+  </div>
+</FormActions>
+```
+
+## Accessibility
+
+`FormLayout` primitives enforce structured visual hierarchy and standard DOM order.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Navigates sequentially through all input controls according to DOM order.' },
+    { key: 'Enter', action: 'Submits the form when focused inside a standard text input field.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- `FormSection` wraps fields in semantic `<section>` landmarks labelled by the section title.
+- `FormGrid` preserves natural reading and focus order, avoiding confusing CSS grid reordering.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use className="col-span-full" on textareas or long addresses that require full container width.',
+    code: `<Field className="col-span-full"><Textarea name="notes" /></Field>`,
+  }}
+  dont={{
+    description: 'Do not squeeze multi-line notes or long street addresses into narrow half-width columns.',
+    code: `<Field><Textarea name="notes" /></Field>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use sticky on FormActions when forms exceed the single screen viewport height.',
+    code: `<FormActions sticky><Button type="submit">Save</Button></FormActions>`,
+  }}
+  dont={{
+    description: 'Do not leave primary submit buttons hidden far below scroll boundaries without indication.',
+    code: `<div className="mt-80"><Button>Submit</Button></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['FormGrid', 'FormSection', 'FormActions']} />
+
+## Related
+
+- [Field](/ui/docs/components/forms/field) — Accessible form field container with label, description, and error message.
+- [Input](/ui/docs/components/forms/input) — Basic text input primitive.
+- [PageHeader](/ui/docs/components/layout/page-header) — Page header for high-level action buttons.

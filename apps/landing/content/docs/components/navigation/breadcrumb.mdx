@@ -1,9 +1,9 @@
 ---
 title: Breadcrumb
-description: Where the current page sits in the hierarchy.
+description: Shows where the current page sits within the application hierarchy.
 icon: ChevronsRight
 status: Stable
-summary: Links to each ancestor, a marked current page, and an ellipsis for long paths.
+summary: Linear ancestral navigation with router integration, current-page indication, and ellipsis support for deep paths.
 ---
 
 <ComponentPreview name="navigation/breadcrumb/basic" />
@@ -22,23 +22,131 @@ import {
 } from '@innostes/ui';
 ```
 
-## With your router
+## When to use
 
-`BreadcrumbLink` renders an `<a>`. Pass `render` to use your router's link:
+Use `Breadcrumb` to establish hierarchical context within deep enterprise applications:
+
+- **Multi-tiered resource views**: `Purchasing > Vendors > Bengaluru Spices > Orders > PO-2026-081`.
+- **Complex nested configuration**: `Settings > Enterprise > Billing & Tax > GSTIN Profiles`.
+- **Catalogue and warehousing**: `Inventory > Raw Materials > Spices & Seasonings > Cardamom Grade A`.
+
+**Do not use Breadcrumb for:**
+- Flat top-level navigation — use [TopBar](/ui/docs/components/layout/top-bar) or [AppRail](/ui/docs/components/layout/app-rail).
+- Linear multi-step sequential tasks or wizards — use [Stepper](/ui/docs/components/navigation/stepper).
+- History-based browser back/forward pagination.
+
+## Examples
+
+### Integration with Next.js router
+
+`BreadcrumbLink` renders a semantic anchor tag (`<a>`). Use the `render` prop to pass Next.js `Link` for client-side transitions:
 
 ```tsx
 import Link from 'next/link';
 
-<BreadcrumbLink render={<Link href="/orders" />}>Orders</BreadcrumbLink>
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<Link href="/" />}>Dashboard</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<Link href="/purchases" />}>Purchases</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>PO-2026-081</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
+
+### Deep hierarchies with ellipsis
+
+When path depths exceed four levels, collapse middle steps using `BreadcrumbEllipsis`:
+
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/inventory">Inventory</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbEllipsis />
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/inventory/warehouses/blr-01">Bengaluru Central Hub</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Aisle 4 Bay 12</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
 ```
 
 ## Accessibility
 
-- A `<nav aria-label="Breadcrumb">` containing an ordered list.
-- The current page has `aria-current="page"`; separators are hidden from screen readers.
+`Breadcrumb` renders semantic HTML5 navigation landmarks.
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['BreadcrumbLink']} />
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially along each breadcrumb link in ancestral order.' },
+    { key: 'Enter', action: 'Navigates to the focused breadcrumb link.' },
+  ]}
+/>
 
-The other parts take the props of their HTML element.
+### ARIA attributes
+
+- The container element is a `<nav aria-label="Breadcrumb">`.
+- The list uses `<ol>` and `<li>` elements, giving screen readers an accurate count of total path levels.
+- The current page indicator uses `<BreadcrumbPage>` which marks the element with `aria-current="page"`.
+- Separators render with `aria-hidden="true"` so assistive technologies ignore decorative divider symbols.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Mark the final item with BreadcrumbPage, rendering text rather than a redundant self-link.',
+    code: `<BreadcrumbItem><BreadcrumbPage>PO-2026-081</BreadcrumbPage></BreadcrumbItem>`,
+  }}
+  dont={{
+    description: 'Do not render the current active page as a clickable hyperlink that links to itself.',
+    code: `<BreadcrumbItem><BreadcrumbLink href="/current">PO-2026-081</BreadcrumbLink></BreadcrumbItem>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Keep breadcrumb labels short and consistent with page titles.',
+    code: `<BreadcrumbLink href="/purchases">Purchases</BreadcrumbLink>`,
+  }}
+  dont={{
+    description: 'Do not include entire verbose descriptions in breadcrumb links.',
+    code: `<BreadcrumbLink href="/purchases">Northwind Traders Purchase Order Management System</BreadcrumbLink>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Breadcrumb',
+    'BreadcrumbList',
+    'BreadcrumbItem',
+    'BreadcrumbLink',
+    'BreadcrumbPage',
+    'BreadcrumbSeparator',
+    'BreadcrumbEllipsis',
+  ]}
+/>
+
+## Related
+
+- [PageHeader](/ui/docs/components/layout/page-header) — Standard layout header containing breadcrumb, title, and actions.
+- [Pagination](/ui/docs/components/navigation/pagination) — Paginating through records within a single level.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression flow.

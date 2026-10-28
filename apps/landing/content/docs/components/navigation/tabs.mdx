@@ -1,9 +1,9 @@
 ---
 title: Tabs
-description: Switch between related panels in the same place.
+description: Switch between related panels in the same viewport.
 icon: PanelTop
 status: Stable
-summary: Underline and pill styles with an animated indicator, horizontal or vertical.
+summary: Underline and pill variants with animated active indicator, keyboard navigation, and vertical orientation support.
 ---
 
 <ComponentPreview name="navigation/tabs/basic" />
@@ -14,28 +14,140 @@ summary: Underline and pill styles with an animated indicator, horizontal or ver
 import { Tabs, TabsList, TabsTab, TabsPanel } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Tabs` to present parallel views or alternate perspectives of the same core entity:
+
+- **Entity detail views**: Overview, Line Items, Documents, Audit Trail, and Invoices.
+- **Settings panels**: Account, Security, Billing, and Team Members.
+- **Reporting ranges**: Compact pill switches for Day, Week, Month, Quarter.
+
+**Do not use Tabs for:**
+- Sequential step-by-step wizards where order is strictly enforced — use [Stepper](/ui/docs/components/navigation/stepper).
+- Deep ancestral tree hierarchies — use [Breadcrumb](/ui/docs/components/navigation/breadcrumb).
+- Primary multi-page top-level navigation — use [AppRail](/ui/docs/components/layout/app-rail) or [Sidebar](/ui/docs/components/layout/sidebar).
+
+## Examples
+
+### Underline variant for page sections
+
+The standard underline tab strip with an animated active highlight bar:
 
 ```tsx
-<Tabs defaultValue="overview">
+<Tabs defaultValue="overview" variant="underline">
   <TabsList>
-    <TabsTab value="overview">Overview</TabsTab>
-    <TabsTab value="activity">Activity</TabsTab>
+    <TabsTab value="overview">Order overview</TabsTab>
+    <TabsTab value="items">Line items (14)</TabsTab>
+    <TabsTab value="shipping">Logistics & E-Way</TabsTab>
   </TabsList>
-  <TabsPanel value="overview">…</TabsPanel>
-  <TabsPanel value="activity">…</TabsPanel>
+  <TabsPanel value="overview">
+    <div className="py-4">Purchase order details for Bengaluru Spices.</div>
+  </TabsPanel>
+  <TabsPanel value="items">
+    <div className="py-4">Items table with HSN breakdown.</div>
+  </TabsPanel>
+  <TabsPanel value="shipping">
+    <div className="py-4">Tracking consignment via Blue Dart Express.</div>
+  </TabsPanel>
 </Tabs>
 ```
 
-- `variant="underline"` (default) for page sections; `variant="pills"` for compact switches,
-  like a date range above a chart.
-- To sync the tab with the URL, control it with `value` / `onValueChange`.
-- `orientation="vertical"` stacks the tabs for settings pages.
+### Pills variant for compact metric cards
+
+Use `variant="pills"` inside toolbars or card headers:
+
+```tsx
+<Tabs defaultValue="quarterly" variant="pills">
+  <TabsList>
+    <TabsTab value="monthly">Monthly</TabsTab>
+    <TabsTab value="quarterly">Quarterly</TabsTab>
+    <TabsTab value="annual">FY 2025-26</TabsTab>
+  </TabsList>
+  <TabsPanel value="monthly">{/* Monthly revenue chart */}</TabsPanel>
+  <TabsPanel value="quarterly">{/* Quarterly tax review */}</TabsPanel>
+  <TabsPanel value="annual">{/* Annual compliance statement */}</TabsPanel>
+</Tabs>
+```
+
+### Vertical orientation for settings sidebars
+
+Stack tabs vertically for wide screen settings dialogs or configuration layouts:
+
+```tsx
+<Tabs defaultValue="gst" orientation="vertical" className="w-full">
+  <TabsList className="w-64 border-r pr-4">
+    <TabsTab value="profile">Company profile</TabsTab>
+    <TabsTab value="gst">GSTIN & Taxes</TabsTab>
+    <TabsTab value="bank">Bank accounts</TabsTab>
+  </TabsList>
+  <div className="flex-1 pl-6">
+    <TabsPanel value="profile">Northwind Traders Pvt Ltd</TabsPanel>
+    <TabsPanel value="gst">State: Karnataka (29), GSTIN: 29ABCDE1234F1Z5</TabsPanel>
+    <TabsPanel value="bank">HDFC Bank, Bengaluru Koramangala Branch</TabsPanel>
+  </div>
+</Tabs>
+```
 
 ## Accessibility
 
-- Arrow keys move between tabs; the active panel is linked with `aria-controls`/`aria-labelledby`.
+`Tabs` is built on Base UI Tabs primitives (`@base-ui/react/tabs`).
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['Tabs', 'TabsList', 'TabsTab', 'TabsPanel']} baseUi="tabs" />
+<KeyboardTable
+  entries={[
+    { key: 'ArrowRight / ArrowDown', action: 'Moves focus and selection to the next tab.' },
+    { key: 'ArrowLeft / ArrowUp', action: 'Moves focus and selection to the previous tab.' },
+    { key: 'Home', action: 'Moves focus and selection to the first tab in the list.' },
+    { key: 'End', action: 'Moves focus and selection to the last tab in the list.' },
+    { key: 'Tab', action: 'Moves focus into the currently active tab panel.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The tab strip has `role="tablist"`.
+- Each tab trigger has `role="tab"` with `aria-selected="true | false"` and `aria-controls` pointing to its corresponding panel.
+- Each content panel has `role="tabpanel"` and `aria-labelledby` referencing its tab trigger.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep tab labels concise (1–3 words) so tab strips remain legible and avoid awkward wraps.',
+    code: `<TabsTab value="audit">Audit trail</TabsTab>`,
+  }}
+  dont={{
+    description: 'Do not use long sentences or paragraphs as tab labels.',
+    code: `<TabsTab value="audit">Click here to inspect full transaction history</TabsTab>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the pills variant for compact segmented controls inside toolbars and card headers.',
+    code: `<Tabs variant="pills"><TabsList><TabsTab value="day">Day</TabsTab></TabsList></Tabs>`,
+  }}
+  dont={{
+    description: 'Do not mix underline and pills styles arbitrarily on the same page.',
+    code: `<Tabs variant="underline"><Tabs variant="pills" /></Tabs>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Tabs',
+    'TabsList',
+    'TabsTab',
+    'TabsPanel',
+  ]}
+  baseUi="tabs"
+/>
+
+## Related
+
+- [Accordion](/ui/docs/components/navigation/accordion) — Stacked vertical disclosure panels.
+- [AppRail](/ui/docs/components/layout/app-rail) — Vertical navigation rail for primary application modules.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression flow.
