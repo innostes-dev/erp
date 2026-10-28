@@ -7,7 +7,8 @@ import './global.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: { default: 'innostes', template: '%s | innostes' },
+  metadataBase: new URL('https://erp.innostes.com'),
+  title: { default: 'innostes', template: '%s – innostes UI' },
   description: 'innostes — and the innostes UI design system.',
 };
 

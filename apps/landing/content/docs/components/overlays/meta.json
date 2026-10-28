@@ -1,6 +1,7 @@
 {
   "title": "Overlays",
   "pages": [
+    "index",
     "dialog",
     "alert-dialog",
     "sheet",

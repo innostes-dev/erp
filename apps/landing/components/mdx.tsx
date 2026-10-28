@@ -26,6 +26,13 @@ import { ComponentPreview } from './docs/component-preview';
 import { ApiTable } from './docs/api-table';
 import { PageTabs } from './docs/page-tabs';
 import { ButtonPlayground } from './docs/button-playground';
+import { PropsPlayground } from './docs/props-playground';
+import { KeyboardTable } from './docs/keyboard-table';
+import { DoDont, Do, Dont } from './docs/do-dont';
+import { Anatomy } from './docs/anatomy';
+import { StatusBadge } from './docs/status-badge';
+import { Since } from './docs/since';
+import { CategoryGrid } from './docs/category-grid';
 import {
   AsLinkDemo,
   ButtonShowcase,
@@ -57,6 +64,15 @@ export function getMDXComponents(components?: MDXComponents) {
     UsageGrid,
     PageTabs,
     ButtonPlayground,
+    PropsPlayground,
+    KeyboardTable,
+    DoDont,
+    Do,
+    Dont,
+    Anatomy,
+    StatusBadge,
+    Since,
+    CategoryGrid,
     ButtonShowcase,
     VariantCards,
     SizesDemo,

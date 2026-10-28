@@ -1,6 +1,7 @@
 {
   "title": "Widgets",
   "pages": [
+    "index",
     "metric-card",
     "widget-card",
     "sparkline",

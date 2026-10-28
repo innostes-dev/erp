@@ -1,0 +1,22 @@
+---
+title: Feedback
+description: Status indicators, alerts, progress bars, and toast notifications.
+status: Stable
+summary: Components for communicating system status, background task progress, and operation outcomes.
+---
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Feedback
+
+Feedback components keep operators at Northwind Traders Pvt Ltd informed about task status, background processes, system health, and operational outcomes. They provide immediate, accessible status communication across the platform.
+
+## Components
+
+<CategoryGrid category="components/feedback" />
+
+## Usage guidelines
+
+- **Tone matching**: Use info for contextual guidance, success for completed operations, warning for non-blocking concerns, and destructive/error for failed tasks or critical disruptions.
+- **Duration**: Reserve persistent banners (`Alert`) for system-wide notices or section errors that require resolution. Use transient toasts (`Toast`) for operation confirmations.
+- **Accessibility**: All feedback components emit appropriate ARIA live regions (`polite` for progress/alerts, `assertive` for urgent errors) and support high-contrast mode tokens.

@@ -1,0 +1,22 @@
+---
+title: FAQ
+description: Frequently asked questions regarding @innostes/ui installation, theming, and usage.
+---
+
+# Frequently asked questions
+
+Common questions and answers regarding `@innostes/ui` integration and enterprise usage.
+
+## General
+
+### How does innostes UI differ from standard Tailwind component libraries?
+
+`@innostes/ui` is built directly on Base UI unstyled primitives, ensuring full WAI-ARIA compliance, roving focus management, and keyboard accessibility by default. Tailwind CSS v4 provides token-based styling rather than arbitrary utility classes.
+
+### Can I use innostes UI with React 17 or React 18?
+
+Yes. The package is thoroughly tested and verified across React 17, React 18, and React 19 runtimes using dedicated test matrices in our CI pipeline.
+
+### Does the library support dark mode?
+
+Yes. All components consume OKLCH semantic variables that dynamically adjust when toggling between `.light` and `.dark` class names or `data-theme` attributes on the root container.

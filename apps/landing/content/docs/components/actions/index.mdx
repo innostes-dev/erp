@@ -1,0 +1,22 @@
+---
+title: Actions
+description: Interactive triggers, buttons, and toggles for user-initiated workflows.
+status: Stable
+summary: Core interactive controls for submitting forms, triggering commands, and toggling states.
+---
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Actions
+
+Actions are the primary interactive building blocks across Northwind Traders Pvt Ltd's enterprise operations. They communicate intent, submit forms, open dialogs, and toggle feature states with clear visual feedback and full keyboard accessibility.
+
+## Components
+
+<CategoryGrid category="components/actions" />
+
+## Usage guidelines
+
+- **Hierarchy**: Use primary buttons for the main action on a screen (at most one primary action per view). Secondary and outline buttons accommodate alternative paths.
+- **Icon placement**: Use start icons for directional or verb cues (e.g. "Export", "Add item"). Use end icons for continuation cues (e.g. "Next", "View details").
+- **State indicators**: Always provide loading states for asynchronous API operations to prevent duplicate form submissions and maintain user certainty.

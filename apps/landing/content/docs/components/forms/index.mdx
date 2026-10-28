@@ -1,0 +1,22 @@
+---
+title: Forms
+description: Input fields, pickers, selectors, and validation controls for reliable data entry.
+status: Stable
+summary: Input fields, pickers, validation containers, and specialised editors for complex data entry.
+---
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Forms
+
+Enterprise applications rely heavily on accurate, structured data entry. innostes UI form components wrap Base UI primitives with consistent OKLCH styling, validation feedback, accessible labelling via `Field`, and localized formatting for dates, currencies, and numbers.
+
+## Components
+
+<CategoryGrid category="components/forms" />
+
+## Form design principles
+
+- **Always label inputs**: Wrap form controls with `<Field>` or provide explicit `aria-label`s for screen reader announcements.
+- **Validation feedback**: Display errors inline beneath the offending input using `<FieldError>`, and mark inputs with `invalid` to set appropriate ARIA attributes.
+- **Progressive enhancement**: Specialised controls like `DatePicker` and `LocaleSelect` fallback cleanly to standard inputs when necessary.

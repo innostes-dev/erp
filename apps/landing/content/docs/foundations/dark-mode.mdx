@@ -1,0 +1,14 @@
+---
+title: Dark mode
+description: Dark theme implementation, token inversion, and hydration strategies.
+---
+
+# Dark mode
+
+innostes UI provides native dark mode support across every component, chart, and widget. Theme switching relies on CSS class toggling (`.dark`) or data attributes (`data-theme="dark"`), updating OKLCH token variables without triggering component re-renders.
+
+## Implementation overview
+
+Dark mode tokens are defined in `packages/ui/tailwind/dark.css`. When the `.dark` class is applied to the root `<html>` or container element, CSS custom properties are remapped to appropriate dark-variant values.
+
+In Next.js applications, theme synchronization is managed using `next-themes`, ensuring zero flash of unstyled content (FOUC) during client-side hydration.

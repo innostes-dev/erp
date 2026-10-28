@@ -1,0 +1,13 @@
+{
+  "title": "Resources",
+  "pages": [
+    "index",
+    "conventions",
+    "changelog",
+    "versioning",
+    "migration",
+    "contributing",
+    "security",
+    "faq"
+  ]
+}

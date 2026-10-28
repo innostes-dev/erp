@@ -1,0 +1,22 @@
+---
+title: Data display
+description: Tables, trees, cards, badges, and empty states for visualizing enterprise records.
+status: Stable
+summary: Components for structured record presentation, hierarchies, and metric highlights.
+---
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Data display
+
+Data display components structure and present information with high information density, clear typographic hierarchy, and accessible markup. From high-throughput financial tables to hierarchical organizational trees, these components present Northwind Traders Pvt Ltd's operational data with clarity.
+
+## Components
+
+<CategoryGrid category="components/data-display" />
+
+## Best practices
+
+- **Data tables**: Prefer `DataTable` for complex administrative tables requiring client-side pagination, sorting, row selection, and column toggling.
+- **Empty states**: Always render an explicit `EmptyState` when collections, search queries, or filter combinations produce zero results.
+- **Status indicators**: Use semantic badges (`success`, `warning`, `destructive`) consistently across data rows to reflect item lifecycles.

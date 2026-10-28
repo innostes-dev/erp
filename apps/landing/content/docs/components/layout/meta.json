@@ -1,6 +1,7 @@
 {
   "title": "Layout",
   "pages": [
+    "index",
     "sidebar",
     "page-header",
     "form-layout",

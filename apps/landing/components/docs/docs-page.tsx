@@ -1,4 +1,4 @@
-import { DocsBody, DocsPage } from 'fumadocs-ui/layouts/notebook/page';
+import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -24,6 +24,13 @@ export function renderDocsPage(
       full={page.data.full}
       breadcrumb={{ includeRoot: { url: rootUrl }, includePage: true }}
       tableOfContent={{ style: 'clerk' }}
+      editOnGithub={{
+        owner: 'innostes',
+        repo: 'erp',
+        sha: 'main',
+        path: `apps/landing/content/${rootUrl === '/docs' ? 'dev-docs' : 'docs'}/${page.path}`,
+      }}
+      lastUpdate={new Date()}
     >
       <PageHeader
         title={page.data.title}
@@ -51,8 +58,38 @@ export function docsPageMetadata(
 ): Metadata {
   const page = source.getPage(slug);
   if (!page) notFound();
+  const title = `${page.data.title} – ${section}`;
+  const description = page.data.description;
+  const url = `https://innostes.com${page.url}`;
+
   return {
-    title: `${page.data.title} – ${section}`,
-    description: page.data.description,
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: section,
+      type: 'article',
+      images: [
+        {
+          url: `/api/og?title=${encodeURIComponent(page.data.title)}&section=${encodeURIComponent(section)}&description=${encodeURIComponent(description ?? '')}`,
+          width: 1200,
+          height: 630,
+          alt: page.data.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [
+        `/api/og?title=${encodeURIComponent(page.data.title)}&section=${encodeURIComponent(section)}`,
+      ],
+    },
   };
 }

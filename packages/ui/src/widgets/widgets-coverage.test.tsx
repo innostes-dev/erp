@@ -330,7 +330,7 @@ describe('Widgets coverage and benchmarks', () => {
             variant="split"
             label="Split Regional"
             value="850"
-            split={{ primary: { label: 'Online', value: '500' }, secondary: { label: 'In-store', value: '350' } }}
+            items={[{ label: 'Online', value: '500' }, { label: 'In-store', value: '350' }]}
           />
           <MetricCard
             loading
@@ -371,13 +371,13 @@ describe('Widgets coverage and benchmarks', () => {
           />
           <AppSwitcher
             searchable
-            currentApp="erp"
+            value="erp"
             sections={[
               {
-                title: 'Core Systems',
+                label: 'Core Systems',
                 apps: [
-                  { id: 'erp', name: 'ERP Finance', description: 'General ledger and AP/AR' },
-                  { id: 'hrms', name: 'HRMS People', description: 'Payroll and recruitment' },
+                  { id: 'erp', name: 'ERP Finance', description: 'General ledger and AP/AR', icon: <span data-testid="erp-icon" /> },
+                  { id: 'hrms', name: 'HRMS People', description: 'Payroll and recruitment', icon: <span data-testid="hrms-icon" /> },
                 ],
               },
             ]}

@@ -80,7 +80,7 @@ export const ChangeLog = forwardRef<HTMLDivElement, ChangeLogProps>(function Cha
 
   return (
     <ActivityFeed
-      ref={ref}
+      ref={ref as any}
       variant="timeline"
       emptyText={emptyText}
       data-slot="change-log"

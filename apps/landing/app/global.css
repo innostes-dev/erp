@@ -61,3 +61,22 @@ html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+@media print {
+  header,
+  nav,
+  aside,
+  [data-slot="toc"],
+  .fd-toc,
+  .fd-sidebar,
+  [role="tablist"],
+  button {
+    display: none !important;
+  }
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}

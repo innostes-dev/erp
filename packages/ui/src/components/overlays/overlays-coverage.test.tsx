@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   AlertDialog,
@@ -9,13 +9,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
   CommandPalette,
   type CommandGroup,
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
   Dialog,
   DialogClose,
   DialogContent,
@@ -23,14 +18,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   Sheet,
   SheetBody,
   SheetClose,
@@ -39,10 +26,6 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
 } from '@innostes/ui';
 
 describe('CommandPalette full functionality', () => {

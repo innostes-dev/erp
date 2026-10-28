@@ -1,0 +1,34 @@
+---
+title: Vite
+description: Integration guide for Vite React projects with Tailwind CSS.
+---
+
+# Vite
+
+Vite provides a lightning-fast build environment for Single Page Applications (SPAs). `@innostes/ui` ships with pre-bundled ES modules and CSS entry points designed for instant hot-module reloading in Vite.
+
+## Setup
+
+Create or configure your Vite project with React and TypeScript:
+
+```bash
+npm install @innostes/ui lucide-react clsx tailwind-merge
+```
+
+Include the global stylesheet in your main entry point:
+
+```tsx
+// src/main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import '@innostes/ui/styles.css';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+```
+
+When building with Tailwind CSS v4, reference `@innostes/ui/tailwind` in your primary CSS entry to inherit all OKLCH design tokens.

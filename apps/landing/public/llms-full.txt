@@ -1,0 +1,4758 @@
+# innostes UI - Complete Documentation
+
+Generated for AI assistants and offline reference.
+
+---
+
+## Accessibility (https://innostes.com/ui/docs/accessibility)
+
+Accessibility conformance standards, keyboard models, and assistive technology support.
+
+# Accessibility
+
+innostes UI components conform to the Web Content Accessibility Guidelines (WCAG) 2.2 Level AA standard. Designed for enterprise ERP and back-office applications at Northwind Traders Pvt Ltd, every primitive is engineered so that operators relying on screen readers, keyboard navigation, or high-contrast display modes complete tasks without friction.
+
+## Standards and conformance
+
+The component library targets WCAG 2.2 AA conformance across four core principles:
+
+- **Perceivable**: Text contrast ratios meet or exceed 4.5:1 for normal text and 3:1 for large text and non-text user interface components. Visual state indicators are never conveyed solely through colour.
+- **Operable**: All interactive elements are fully operable through the keyboard. Focus order preserves logical reading sequence, and modal containers trap keyboard focus whilst active.
+- **Understandable**: Form inputs require explicit labelling, contextual error descriptions link programmatically via `aria-describedby`, and validation failures announce dynamically via ARIA live regions.
+- **Resilient**: Markup relies on semantic HTML and WAI-ARIA 1.2 authoring patterns, ensuring compatibility across desktop browsers and assistive tools.
+
+## Keyboard interaction model
+
+Components follow standard WAI-ARIA design patterns:
+
+- `Tab` and `Shift + Tab` navigate between interactive component boundaries.
+- Arrow keys manage roving tabindex within composite controls such as menus, tabs, radio groups, and tree views.
+- `Escape` dismisses floating overlays, popovers, context menus, and dialogs, restoring focus to the triggering element.
+- `Space` and `Enter` activate buttons and toggle selection states.
+
+## Testing and verification
+
+Accessibility is verified through automated and manual testing pipelines:
+
+1. **Automated audits**: Axe-core and Vitest DOM testing run on every commit to detect missing ARIA attributes, invalid roles, and landmark omissions.
+2. **Keyboard audits**: Full focus-trap, tab order, and shortcut verifications run across composite widgets.
+3. **Screen reader verification**: Manual testing with NVDA on Windows and VoiceOver on macOS across Chrome, Firefox, and Safari.
+
+---
+
+## Cartesian Charts (https://innostes.com/ui/docs/charts/cartesian)
+
+Bar, Line, and Area charts for visualizing categorical data series.
+
+Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
+
+## Installation
+
+Charts are built on top of [Recharts](https://recharts.org/). You must install it as a peer dependency alongside `@innostes/ui`.
+
+**Important Version Guidance:**
+Due to a transitive peer dependency conflict, you must match the Recharts version to your React version:
+- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
+- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
+
+```bash
+# For React 18 / 19
+pnpm add recharts@^3.0.0
+
+# For React 17
+pnpm add recharts@^2.15.0
+```
+
+## Import
+
+Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+
+```tsx
+import { BarChart, LineChart, AreaChart } from '@innostes/ui/charts';
+```
+
+## Accessibility
+
+A core differentiator of our chart components is their built-in accessibility. Every chart renders an accessible, visually-hidden `<table>` alongside the visual SVG representation (via the internal `ChartFrame` wrapper).
+
+This means screen reader users are not presented with an opaque graphic. Instead, they can navigate the actual tabular data using standard table commands, providing a significantly superior, first-class experience for assistive technology. The `aria-label` prop you provide is used to name this hidden table.
+
+## Props Overview
+
+- **`data`**: An array of objects representing your dataset.
+- **`categoryKey`**: The key in your data objects that represents the categories along the X-axis (e.g., `'month'`, `'quarter'`).
+- **`series`**: An array of objects defining which keys from the data to plot, shaped as `{ key: string, label: string }`. The `label` is used in legends and tooltips.
+- **`valueFormatter`**: An optional function to format the numeric values (e.g., adding currency symbols) for tooltips and axes.
+- **`locale`**: Passed to handle localization formatting within the accessible table and tooltips.
+- **`aria-label`**: Required string to name the underlying hidden data table for screen readers.
+
+## Theming & Interactions
+
+Colors are automatically assigned from the `chart-1` to `chart-8` categorical tokens defined in `theme.css` and `dark.css`. You can also override colors per series using these tokens or semantic tones (e.g., `success`, `destructive`).
+
+Legends are fully interactive out-of-the-box. Clicking a legend entry toggles the visibility of that data series. If a chart contains only a single series, the legend is automatically hidden to save space and reduce clutter.
+
+## Bar Chart
+
+<ComponentPreview name="charts/cartesian/bar" />
+
+## Line Chart
+
+<ComponentPreview name="charts/cartesian/line" />
+
+## Area Chart
+
+<ComponentPreview name="charts/cartesian/area" />
+
+## API
+
+<ApiTable components={['BarChart', 'LineChart', 'AreaChart']} />
+
+---
+
+## Donut Chart (https://innostes.com/ui/docs/charts/donut)
+
+A Donut chart for visualizing proportions with a prominent center metric.
+
+Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
+
+## Installation
+
+As with all charts, `DonutChart` requires Recharts as a peer dependency.
+
+**Important Version Guidance:**
+- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
+- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
+
+## Import
+
+Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+
+```tsx
+import { DonutChart } from '@innostes/ui/charts';
+```
+
+## Accessibility
+
+Just like Cartesian charts, the `DonutChart` automatically renders an accessible, visually-hidden `<table>` containing the raw data and percentage shares. This allows screen readers to navigate the data easily. The `aria-label` prop is required and is used to name this hidden table.
+
+## Center Metric
+
+The `DonutChart` supports a distinct API for displaying a prominent metric in the center of the ring via the `centerValue` and `centerLabel` props. This is ideal for highlighting the primary takeaway of the chart (e.g., total volume, overall percentage).
+
+## Props Overview
+
+- **`data`**: An array of slices to render, each defined as `{ key: string, label: string, value: number, color?: ChartColor }`.
+- **`valueFormatter`**: Optional function to format the values displayed in tooltips and the accessible table.
+- **`locale`**: Optional locale string for number formatting in the accessible table.
+- **`aria-label`**: Required string to name the underlying hidden data table.
+
+## Theming
+
+Slices can be colored automatically using the `chart-1` to `chart-8` categorical tokens, or you can assign specific semantic tones like `success`, `destructive`, or `warning` to individual slices via the `color` property in the data objects.
+
+## Usage
+
+<ComponentPreview name="charts/donut/basic" />
+
+## API
+
+<ApiTable components={['DonutChart']} />
+
+---
+
+## Charts (https://innostes.com/ui/docs/charts/index)
+
+Accessible, theme-aware charting primitives for financial summaries and inventory analytics.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Charts
+
+Chart components deliver accessible, responsive data visualisations across Northwind Traders Pvt Ltd's executive dashboards and operational reports. Built on Recharts with semantic design tokens, they adapt automatically to light and dark themes.
+
+## Components
+
+<CategoryGrid category="charts" />
+
+## Usage guidelines
+
+- **Semantic colour assignment**: Use token-based palette colours rather than hardcoded hex codes to guarantee contrast in both light and dark themes.
+- **Data alternatives**: Always provide accessible data tables or summary text alongside charts to ensure full accessibility for screen reader operators.
+- **Formatters**: Use localized number and currency formatters (`Intl.NumberFormat`) for tooltip and axis ticks.
+
+---
+
+## Button Group (https://innostes.com/ui/docs/components/actions/button-group)
+
+Merges borders and corners of adjacent buttons, horizontally or vertically.
+
+<ComponentPreview name="actions/button-group/basic" />
+
+## Import
+
+```tsx
+import { Button, ButtonGroup } from '@innostes/ui';
+```
+
+## Usage
+
+Use a group for actions that belong together: a pager, a split button, or a set of views.
+For buttons that toggle state, use [Toggle Group](/ui/docs/components/actions/toggle-group) instead.
+
+```tsx
+<ButtonGroup aria-label="Pager">
+  <Button variant="outline">Previous</Button>
+  <Button variant="outline">Next</Button>
+</ButtonGroup>
+```
+
+## Accessibility
+
+- Renders `role="group"`. Give it an `aria-label` that describes the set.
+- Focus outlines stay on top of neighbouring buttons.
+
+## API Reference
+
+<ApiTable components={['ButtonGroup']} />
+
+---
+
+## Button (https://innostes.com/ui/docs/components/actions/button)
+
+A flexible button component with multiple variants, sizes, and states.
+
+<PageTabs
+  items={[
+    { label: 'Overview', href: 'preview' },
+    { label: 'Examples', href: 'examples' },
+    { label: 'API', href: 'api-reference' },
+    { label: 'Customization', href: 'theming' },
+    { label: 'Accessibility', href: 'accessibility' },
+  ]}
+/>
+
+## Preview
+
+Different variants, sizes and states of the button component.
+
+<ButtonShowcase />
+
+## Usage
+
+Import the Button component and use it in your application.
+
+<UsageGrid>
+
+```tsx title="example.tsx"
+import { Button } from '@innostes/ui';
+
+export function Example() {
+  return (
+    <Button variant="primary" size="md">
+      Click me
+    </Button>
+  );
+}
+```
+
+<ButtonPlayground />
+
+</UsageGrid>
+
+## Anatomy
+
+<Anatomy
+  slots={[
+    { name: 'root', description: 'The outer button element (native button or custom render element)', dataSlot: 'button' },
+    { name: 'spinner', description: 'Animated loading indicator rendered during active state', dataSlot: 'button-spinner' },
+    { name: 'start-icon', description: 'Leading icon slot aligned with typography', dataSlot: 'button-icon-start' },
+    { name: 'end-icon', description: 'Trailing icon slot aligned with typography', dataSlot: 'button-icon-end' },
+  ]}
+/>
+
+## Variants
+
+Use `variant` to change the visual style of the button.
+
+<VariantCards />
+
+```tsx
+<Button variant="primary">Primary</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="destructive">Destructive</Button>
+<Button variant="link">Link</Button>
+```
+
+## Sizes
+
+Use `size` to change the height and padding: `sm` (32px), `md` (40px, default) or `lg` (48px).
+
+<SizesDemo />
+
+```tsx
+<Button size="sm">Small</Button>
+<Button size="md">Medium</Button>
+<Button size="lg">Large</Button>
+```
+
+## With Icons
+
+Use `startIcon` and `endIcon` for icons next to the label. For a square button with only an icon,
+use `iconOnly` and always add an `aria-label`.
+
+<IconsDemo />
+
+```tsx
+<Button startIcon={<Plus />}>Add item</Button>
+<Button variant="outline" endIcon={<ArrowRight />}>Continue</Button>
+<Button variant="ghost" iconOnly aria-label="Close">
+  <X />
+</Button>
+```
+
+SVG icons are 16px by default. Give an icon a `size-*` class to change it.
+
+## Loading State
+
+`loading` shows a spinner and blocks clicks. The button stays focusable and announces
+`aria-busy`, so keyboard and screen reader users don't lose their place.
+Use `loadingText` to change the label while loading.
+
+<LoadingDemo />
+
+```tsx
+<Button loading>Save</Button>
+<Button loading loadingText="Saving…">Save</Button>
+```
+
+## Disabled State
+
+`disabled` blocks interaction. Add `focusableWhenDisabled` to keep the button in the tab order,
+for example when a tooltip explains why it's disabled.
+
+<DisabledDemo />
+
+```tsx
+<Button disabled>Disabled</Button>
+<Button disabled focusableWhenDisabled>Focusable when disabled</Button>
+```
+
+## Full Width
+
+`fullWidth` stretches the button to fill its container.
+
+<FullWidthDemo />
+
+```tsx
+<Button fullWidth>Sign in</Button>
+```
+
+## Examples
+
+### As a link
+
+Use `render` to output a different element while keeping the button styles and behaviour.
+Set `nativeButton={false}` when the element is not a `<button>`.
+
+<AsLinkDemo />
+
+```tsx
+<Button render={<a href="/pricing" />} nativeButton={false}>
+  See pricing
+</Button>
+```
+
+### With a router link
+
+`buttonVariants()` returns the button classes, so any element can look like a button.
+
+```tsx
+import Link from 'next/link';
+import { buttonVariants } from '@innostes/ui';
+
+<Link href="/dashboard" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+  Dashboard
+</Link>
+```
+
+### In a form
+
+Buttons default to `type="button"`, so they never submit a form by accident. Set `type="submit"` for the submit button.
+
+```tsx
+<form onSubmit={save}>
+  <Button type="submit" loading={isSaving}>Save</Button>
+  <Button variant="ghost" onClick={cancel}>Cancel</Button>
+</form>
+```
+
+## API Reference
+
+<ApiTable components={['Button']} baseUi="button" />
+
+
+### Data attributes
+
+| Attribute | When |
+| --- | --- |
+| `data-variant` | Always, with the variant name |
+| `data-disabled` | The button is disabled or loading |
+| `data-loading` | The button is loading |
+
+## Accessibility
+
+- Renders a native `<button>` with `type="button"` by default.
+- Built on [Base UI Button](https://base-ui.com/react/components/button): keyboard activation with
+  <kbd>Enter</kbd> and <kbd>Space</kbd>, and correct roles when rendered as another element.
+- Visible focus ring from the `--color-ring` token.
+- `loading` sets `aria-busy` and keeps focus, so the user isn't moved away.
+- Icon-only buttons need an `aria-label`. Icons inside buttons are hidden from screen readers.
+
+### Keyboard interaction
+
+<KeyboardTable
+  rows={[
+    [['Enter'], 'Activates the button and triggers its click handler.'],
+    [['Space'], 'Activates the button and triggers its click handler.'],
+  ]}
+/>
+
+## Guidelines
+
+<DoDont>
+  <Do caption="Use primary buttons for the main action on a screen, with at most one primary action per view.">
+    <Button variant="primary">Create order</Button>
+  </Do>
+  <Dont caption="Do not use multiple primary buttons in the same container.">
+    <div className="flex gap-2">
+      <Button variant="primary">Submit</Button>
+      <Button variant="primary">Save draft</Button>
+    </div>
+  </Dont>
+</DoDont>
+
+## Theming
+
+The button uses the `primary`, `secondary`, `muted`, `destructive`, `border` and `ring` tokens.
+Change them in your theme to restyle every button. See [Theming](/ui/docs/theming).
+
+```css
+@theme {
+  --color-primary: var(--color-violet-600);
+  --color-primary-hover: var(--color-violet-700);
+}
+```
+
+Or change one button with `className`:
+
+```tsx
+<Button className="rounded-full px-6">Rounded</Button>
+```
+
+---
+
+## Actions (https://innostes.com/ui/docs/components/actions/index)
+
+Core interactive controls for submitting forms, triggering commands, and toggling states.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Actions
+
+Actions are the primary interactive building blocks across Northwind Traders Pvt Ltd's enterprise operations. They communicate intent, submit forms, open dialogs, and toggle feature states with clear visual feedback and full keyboard accessibility.
+
+## Components
+
+<CategoryGrid category="components/actions" />
+
+## Usage guidelines
+
+- **Hierarchy**: Use primary buttons for the main action on a screen (at most one primary action per view). Secondary and outline buttons accommodate alternative paths.
+- **Icon placement**: Use start icons for directional or verb cues (e.g. "Export", "Add item"). Use end icons for continuation cues (e.g. "Next", "View details").
+- **State indicators**: Always provide loading states for asynchronous API operations to prevent duplicate form submissions and maintain user certainty.
+
+---
+
+## Toggle Group (https://innostes.com/ui/docs/components/actions/toggle-group)
+
+Single or multiple selection with roving focus and arrow-key navigation.
+
+<ComponentPreview name="actions/toggle-group/basic" />
+
+## Import
+
+```tsx
+import { ToggleGroup, ToggleGroupItem } from '@innostes/ui';
+```
+
+## Usage
+
+`value` is always an array of the pressed items' values. Add `multiple` to allow several.
+
+```tsx
+const [view, setView] = useState(['list']);
+
+<ToggleGroup value={view} onValueChange={setView} aria-label="View">
+  <ToggleGroupItem value="list">List</ToggleGroupItem>
+  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+</ToggleGroup>
+```
+
+`variant` and `size` set on the group apply to every item.
+
+## Accessibility
+
+- Arrow keys move focus between items; Tab leaves the group.
+- Each item exposes `aria-pressed`. Label the group with `aria-label`.
+
+## API Reference
+
+<ApiTable components={['ToggleGroup', 'ToggleGroupItem']} baseUi="toggle-group" />
+
+---
+
+## Toggle (https://innostes.com/ui/docs/components/actions/toggle)
+
+Two-state button for formatting, favourites and view options.
+
+<ComponentPreview name="actions/toggle/basic" />
+
+## Import
+
+```tsx
+import { Toggle } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+// Uncontrolled
+<Toggle aria-label="Bold" defaultPressed><BoldIcon /></Toggle>
+
+// Controlled
+const [starred, setStarred] = useState(false);
+<Toggle pressed={starred} onPressedChange={setStarred} aria-label="Star">
+  <StarIcon />
+</Toggle>
+```
+
+Use `Toggle` for state that applies immediately and is shown by the button itself.
+For settings in a form, use [Switch](/ui/docs/components/forms/switch).
+
+## Accessibility
+
+- Exposes `aria-pressed`, so screen readers announce "pressed" / "not pressed".
+- Icon-only toggles need an `aria-label`.
+
+## API Reference
+
+<ApiTable components={['Toggle']} baseUi="toggle" />
+
+---
+
+## Avatar (https://innostes.com/ui/docs/components/data-display/avatar)
+
+Image with initials fallback, four sizes, round or square, and stacked groups.
+
+<ComponentPreview name="data-display/avatar/basic" />
+
+## Import
+
+```tsx
+import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Avatar>
+  <AvatarImage src={user.photoUrl} alt="" />
+  <AvatarFallback>{initials(user.name)}</AvatarFallback>
+</Avatar>
+```
+
+The fallback shows while the image loads and if it fails. Use `delay` on `AvatarFallback` (ms) to
+avoid a flash of initials on fast connections.
+
+## Accessibility
+
+- When the person's name is shown next to the avatar, use `alt=""` so it isn't read twice.
+- `AvatarGroup` labels its "+N" counter (e.g. "2 more").
+
+## API Reference
+
+<ApiTable components={['Avatar', 'AvatarImage', 'AvatarFallback', 'AvatarGroup']} baseUi="avatar" />
+
+---
+
+## Badge (https://innostes.com/ui/docs/components/data-display/badge)
+
+Semantic colours for statuses, with an optional dot.
+
+<ComponentPreview name="data-display/badge/basic" />
+
+## Import
+
+```tsx
+import { Badge, badgeVariants } from '@innostes/ui';
+```
+
+## Usage
+
+Map your domain statuses to a variant once, and reuse it:
+
+```tsx
+const statusVariant = {
+  paid: 'success',
+  pending: 'warning',
+  overdue: 'destructive',
+  draft: 'info',
+} as const satisfies Record<InvoiceStatus, BadgeVariant>;
+
+<Badge variant={statusVariant[invoice.status]} dot>{invoice.status}</Badge>
+```
+
+Don't rely on colour alone: the text says what the status is.
+
+## API Reference
+
+<ApiTable components={['Badge']} />
+
+---
+
+## Card (https://innostes.com/ui/docs/components/data-display/card)
+
+Header with title, description and actions, plus content and footer areas.
+
+<ComponentPreview name="data-display/card/basic" />
+
+## Import
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+  CardFooter,
+} from '@innostes/ui';
+```
+
+## Anatomy
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle />
+    <CardDescription />
+    <CardAction />   {/* aligned to the top end of the header */}
+  </CardHeader>
+  <CardContent />
+  <CardFooter />
+</Card>
+```
+
+`CardTitle` renders a `<div>`. Put an `<h2>`/`<h3>` inside when the card title belongs in the
+page's heading outline.
+
+## API Reference
+
+All parts take the props of a `<div>`.
+
+---
+
+## Data Table (https://innostes.com/ui/docs/components/data-display/data-table)
+
+Sorting, row selection, pagination, loading and empty states. Client-side or server-side.
+
+<ComponentPreview name="data-display/data-table/basic" align="start" />
+
+## Import
+
+```tsx
+import { DataTable, type DataTableColumn, type SortState } from '@innostes/ui';
+```
+
+## Columns
+
+Columns are typed against your row type. `accessor` returns the raw value (used for sorting and
+as the default cell text); `cell` renders anything.
+
+```tsx
+const columns: DataTableColumn<Invoice>[] = [
+  { id: 'number', header: 'Invoice', accessor: (r) => r.number, sortable: true },
+  { id: 'status', header: 'Status', cell: (r) => <Badge variant={tone[r.status]}>{r.status}</Badge> },
+  {
+    id: 'amount',
+    header: 'Amount',
+    accessor: (r) => r.amount,
+    sortable: true,
+    align: 'end',
+    cell: (r) => money.format(r.amount),
+  },
+];
+
+<DataTable aria-label="Invoices" data={invoices} columns={columns} getRowId={(r) => r.id} />
+```
+
+Sorting is natural and locale-aware ("Item 2" before "Item 10"); dates and numbers sort by value;
+empty values always go last.
+
+## Selection, sorting and pagination
+
+Each piece of state can be uncontrolled (`defaultSort`, `defaultSelectedIds`, `defaultPage`) or
+controlled (`sort` + `onSortChange`, `selectedIds` + `onSelectedIdsChange`, `page` + `onPageChange`),
+so you can keep it in the URL or a store.
+
+```tsx
+<DataTable
+  aria-label="Orders"
+  data={orders}
+  columns={columns}
+  getRowId={(o) => o.id}
+  selectable
+  selectedIds={selected}
+  onSelectedIdsChange={setSelected}
+  defaultSort={{ columnId: 'date', direction: 'desc' }}
+  pageSize={20}
+/>
+```
+
+## Server-side data
+
+Turn on `manualSorting` and `manualPagination`, pass the current page of rows as `data`, and fetch
+in the change handlers. `totalCount` tells the table how many pages exist.
+
+```tsx
+const [sort, setSort] = useState<SortState | null>({ columnId: 'date', direction: 'desc' });
+const [page, setPage] = useState(1);
+const { data, isLoading } = useOrders({ sort, page, pageSize: 20 }); // your data hook
+
+<DataTable
+  aria-label="Orders"
+  data={data?.rows ?? []}
+  totalCount={data?.total}
+  columns={columns}
+  getRowId={(o) => o.id}
+  manualSorting
+  sort={sort}
+  onSortChange={setSort}
+  manualPagination
+  page={page}
+  onPageChange={setPage}
+  pageSize={20}
+  loading={isLoading}
+/>
+```
+
+## Loading and empty states
+
+<ComponentPreview name="data-display/data-table/loading" align="start" />
+
+## Accessibility
+
+- Real `<table>` markup with `aria-sort` on sortable headers and sort buttons inside them.
+- The table needs a name: pass `aria-label`.
+- Selection checkboxes are labelled; the selected count is announced politely.
+- `onRowClick` is for convenience only. Keep the same action reachable by keyboard (e.g. a link in
+  the first cell, or the row actions menu).
+
+## API Reference
+
+<ApiTable components={['DataTable']} />
+
+`DataTableColumn<TRow>` fields: `id`, `header`, `accessor`, `cell`, `sortable`, `align`, `width`,
+`className`, `headerClassName`. They're documented with TSDoc, so your editor shows them on hover.
+
+---
+
+## Empty State (https://innostes.com/ui/docs/components/data-display/empty-state)
+
+Icon, title, explanation and next actions for empty lists and searches.
+
+<ComponentPreview name="data-display/empty-state/basic" />
+
+## Import
+
+```tsx
+import { EmptyState } from '@innostes/ui';
+```
+
+## Usage
+
+Say what's empty, why, and what to do next:
+
+- **First use**: "No invoices yet" + "Create invoice".
+- **No results**: "No orders match ‘acme’" + "Clear filters".
+- **No access**: explain who can grant it.
+
+Pass it to `DataTable` as `emptyState` for empty tables.
+
+## API Reference
+
+<ApiTable components={['EmptyState']} />
+
+---
+
+## Icon Tile (https://innostes.com/ui/docs/components/data-display/icon-tile)
+
+14 colours, soft or solid, four sizes. Used by metric cards, lists and feature grids.
+
+<ComponentPreview name="data-display/icon-tile/basic" />
+
+## Import
+
+```tsx
+import { IconTile, type IconTileTone } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<IconTile tone="chart-2"><UsersIcon /></IconTile>
+<IconTile tone="success" variant="solid" shape="circle" size="sm"><CheckIcon /></IconTile>
+```
+
+- **Semantic tones** (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) carry meaning.
+- **Categorical tones** (`chart-1` … `chart-8`) tell items apart, e.g. one colour per module.
+  They're the same colours the charts use, so a module looks the same everywhere.
+- The tile is decorative (`aria-hidden`); put the meaning in the text next to it.
+
+## API Reference
+
+<ApiTable components={['IconTile']} />
+
+---
+
+## Data display (https://innostes.com/ui/docs/components/data-display/index)
+
+Components for structured record presentation, hierarchies, and metric highlights.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Data display
+
+Data display components structure and present information with high information density, clear typographic hierarchy, and accessible markup. From high-throughput financial tables to hierarchical organizational trees, these components present Northwind Traders Pvt Ltd's operational data with clarity.
+
+## Components
+
+<CategoryGrid category="components/data-display" />
+
+## Best practices
+
+- **Data tables**: Prefer `DataTable` for complex administrative tables requiring client-side pagination, sorting, row selection, and column toggling.
+- **Empty states**: Always render an explicit `EmptyState` when collections, search queries, or filter combinations produce zero results.
+- **Status indicators**: Use semantic badges (`success`, `warning`, `destructive`) consistently across data rows to reflect item lifecycles.
+
+---
+
+## Kbd (https://innostes.com/ui/docs/components/data-display/kbd)
+
+For shortcuts in tooltips, menus and help text.
+
+<ComponentPreview name="data-display/kbd/basic" />
+
+## Import
+
+```tsx
+import { Kbd } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Kbd>⌘</Kbd> <Kbd>K</Kbd>
+```
+
+Renders a native `<kbd>`, which screen readers treat as keyboard input.
+
+## API Reference
+
+`Kbd` takes the props of a `<kbd>` element.
+
+---
+
+## Stat (https://innostes.com/ui/docs/components/data-display/stat)
+
+Label, value and trend, with colours that know whether "up" is good.
+
+<ComponentPreview name="data-display/stat/basic" />
+
+## Import
+
+```tsx
+import { Stat } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Stat label="Revenue" value="€48,250" delta="+12.5%" helper="vs last month" />
+<Stat label="Churn" value="2.1%" delta="+0.4%" upIsGood={false} />
+```
+
+- `trend` is inferred from a leading `+` or `-` in `delta`; pass it explicitly when `delta` isn't a string.
+- Set `upIsGood={false}` for metrics where an increase is bad (churn, refunds, response time).
+- Format values yourself (e.g. with `Intl.NumberFormat`), so they match the user's locale.
+
+## API Reference
+
+<ApiTable components={['Stat']} />
+
+---
+
+## Table (https://innostes.com/ui/docs/components/data-display/table)
+
+Native table markup with consistent spacing, hover and selected rows, and horizontal scrolling.
+
+<ComponentPreview name="data-display/table/basic" />
+
+## Import
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from '@innostes/ui';
+```
+
+## Usage
+
+Use `Table` when you render rows yourself. For sorting, selection and pagination, use
+[Data Table](/ui/docs/components/data-display/data-table), which is built from these parts.
+
+- Right-align numbers with `className="text-end"` and use `tabular-nums` so digits line up.
+- Mark a selected row with `data-state="selected"`.
+
+## API Reference
+
+<ApiTable components={['Table']} />
+
+The other parts take the props of their HTML element (`thead`, `tbody`, `tr`, `th`, `td`, …).
+
+---
+
+## Tree View (https://innostes.com/ui/docs/components/data-display/tree-view)
+
+Departments, chart of accounts, categories and folders, with full WAI-ARIA tree keyboard support.
+
+<ComponentPreview name="data-display/tree-view/basic" />
+
+## Import
+
+```tsx
+import { TreeView, type TreeNode } from '@innostes/ui';
+```
+
+## Usage
+
+Pass nested `TreeNode`s. A node with `children` (even an empty array) can be expanded.
+
+```tsx
+const accounts: TreeNode[] = [
+  {
+    id: 'assets',
+    label: 'Assets',
+    children: [
+      { id: 'cash', label: 'Cash', meta: '₹4.2L' },
+      { id: 'ar', label: 'Accounts receivable', meta: '₹12.8L' },
+    ],
+  },
+];
+
+<TreeView
+  aria-label="Chart of accounts"
+  items={accounts}
+  expanded={expanded}
+  onExpandedChange={setExpanded}
+  selected={account}
+  onSelectedChange={setAccount}
+/>
+```
+
+- `icon` goes before the label, `meta` (a count, an amount) at the end.
+- `disabled` nodes can be focused but not selected.
+- For lazy loading, give a node `children: []`, load its children in `onExpandedChange`, then update `items`.
+
+## Keyboard
+
+| Key | Action |
+| --- | --- |
+| Up / Down | Previous / next visible node |
+| Right | Expand; if expanded, go to the first child |
+| Left | Collapse; if collapsed, go to the parent |
+| Home / End | First / last visible node |
+| Enter / Space | Select |
+| Letters | Jump to the next node starting with them |
+
+## API Reference
+
+<ApiTable components={['TreeView']} />
+
+---
+
+## Alert (https://innostes.com/ui/docs/components/feedback/alert)
+
+Info, success, warning and error messages with matching icons and live-region roles.
+
+<ComponentPreview name="feedback/alert/basic" />
+
+## Import
+
+```tsx
+import { Alert, AlertTitle, AlertDescription } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Alert variant="warning">
+  <AlertTitle>Your trial ends in 3 days</AlertTitle>
+  <AlertDescription>Add a payment method to keep your data.</AlertDescription>
+</Alert>
+```
+
+- Each variant has a default icon. Pass `icon={<MyIcon />}` to change it, or `icon={null}` to hide it.
+- Use an alert for messages tied to the page. For short-lived confirmations, use [Toast](/ui/docs/components/feedback/toast).
+
+## Accessibility
+
+- `destructive` and `warning` use `role="alert"` (announced immediately). Others use `role="status"`.
+  Override with `role` if needed.
+
+## API Reference
+
+<ApiTable components={['Alert']} />
+
+---
+
+## Gauge (https://innostes.com/ui/docs/components/feedback/gauge)
+
+KPI dials for budget use, capacity, SLA and quota, with value-based colours.
+
+<ComponentPreview name="feedback/gauge/basic" />
+
+## Import
+
+```tsx
+import { Gauge } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Gauge
+  value={82}
+  label="Budget used"
+  description="₹49L of ₹60L"
+  format={{ style: 'percent' }}
+  tone={(v) => (v > 90 ? 'destructive' : v > 75 ? 'warning' : 'success')}
+/>
+```
+
+- `min` and `max` set the range (default 0–100). `format` takes `Intl.NumberFormat` options.
+- Without `format`, or with `style: 'percent'`, the number shown is the share of the range (312 of 400 shows "78%"). Other formats, e.g. `{ style: 'currency', currency: 'INR' }`, apply to the value itself.
+- `tone` is a colour, or a function of the value for thresholds.
+- `size` sets the width (default `10rem`).
+- For a compact bar, use [Meter](/ui/docs/components/feedback/meter). For task progress, use [Progress](/ui/docs/components/feedback/progress).
+
+## Accessibility
+
+Built on Base UI's Meter: it has `role="meter"`, is named by `label` (or `aria-label`), and exposes the value and range. The arc is decorative.
+
+## API Reference
+
+<ApiTable components={['Gauge']} />
+
+---
+
+## Feedback (https://innostes.com/ui/docs/components/feedback/index)
+
+Components for communicating system status, background task progress, and operation outcomes.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Feedback
+
+Feedback components keep operators at Northwind Traders Pvt Ltd informed about task status, background processes, system health, and operational outcomes. They provide immediate, accessible status communication across the platform.
+
+## Components
+
+<CategoryGrid category="components/feedback" />
+
+## Usage guidelines
+
+- **Tone matching**: Use info for contextual guidance, success for completed operations, warning for non-blocking concerns, and destructive/error for failed tasks or critical disruptions.
+- **Duration**: Reserve persistent banners (`Alert`) for system-wide notices or section errors that require resolution. Use transient toasts (`Toast`) for operation confirmations.
+- **Accessibility**: All feedback components emit appropriate ARIA live regions (`polite` for progress/alerts, `assertive` for urgent errors) and support high-contrast mode tokens.
+
+---
+
+## Meter (https://innostes.com/ui/docs/components/feedback/meter)
+
+Storage, seats or quota usage, with tone colours for limits.
+
+<ComponentPreview name="feedback/meter/basic" />
+
+## Import
+
+```tsx
+import { Meter } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Meter
+  value={used}
+  max={limit}
+  label="Seats"
+  tone={used / limit > 0.9 ? 'destructive' : used / limit > 0.75 ? 'warning' : 'primary'}
+/>
+```
+
+`format` takes `Intl.NumberFormat` options, e.g. `{ style: 'percent' }` with `max={1}`.
+
+## Accessibility
+
+- `role="meter"` with `aria-valuenow`, `aria-valuemin` and `aria-valuemax`.
+
+## API Reference
+
+<ApiTable components={['Meter']} baseUi="meter" />
+
+---
+
+## Progress (https://innostes.com/ui/docs/components/feedback/progress)
+
+Determinate and indeterminate bars with an optional label and value.
+
+<ComponentPreview name="feedback/progress/basic" />
+
+## Import
+
+```tsx
+import { Progress } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Progress value={uploaded} max={total} label="Uploading invoices" showValue />
+<Progress value={null} aria-label="Loading data" />  {/* indeterminate */}
+```
+
+Use `Progress` for tasks that finish. For a level within a range (storage, quota), use
+[Meter](/ui/docs/components/feedback/meter).
+
+## Accessibility
+
+- `role="progressbar"` with `aria-valuenow`. Without a visible `label`, set `aria-label`.
+
+## API Reference
+
+<ApiTable components={['Progress']} baseUi="progress" />
+
+---
+
+## Skeleton (https://innostes.com/ui/docs/components/feedback/skeleton)
+
+Pulsing shapes sized with utility classes. Respects reduced motion.
+
+<ComponentPreview name="feedback/skeleton/basic" />
+
+## Import
+
+```tsx
+import { Skeleton } from '@innostes/ui';
+```
+
+## Usage
+
+Match the shape of the real content so the layout doesn't jump when it loads:
+
+```tsx
+<div aria-busy="true" aria-label="Loading profile" className="flex items-center gap-3">
+  <Skeleton className="size-10 rounded-full" />
+  <Skeleton className="h-4 w-40" />
+</div>
+```
+
+## Accessibility
+
+- Skeletons are hidden from screen readers. Mark the container with `aria-busy="true"`.
+- The pulse stops for users who prefer reduced motion.
+
+## API Reference
+
+`Skeleton` takes the props of a `<div>`.
+
+---
+
+## Spinner (https://innostes.com/ui/docs/components/feedback/spinner)
+
+Inherits the text colour; sized with utility classes.
+
+<ComponentPreview name="feedback/spinner/basic" />
+
+## Import
+
+```tsx
+import { Spinner } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Spinner />                                   {/* announced as "Loading" */}
+<Spinner className="size-6 text-primary" label="Loading orders" />
+<span><Spinner label={null} /> Syncing…</span> {/* text already says it */}
+```
+
+For buttons, use `<Button loading>` instead; it handles the spinner and the busy state.
+
+## API Reference
+
+<ApiTable components={['Spinner']} />
+
+---
+
+## Toast (https://innostes.com/ui/docs/components/feedback/toast)
+
+Success, error, warning, loading and promise toasts with actions, swipe to dismiss and a queue limit.
+
+<ComponentPreview name="feedback/toast/basic" />
+
+## Setup
+
+Mount `Toaster` once, near the root of your app:
+
+```tsx title="app/layout.tsx"
+import { Toaster } from '@innostes/ui';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <Toaster position="bottom-right" />
+      </body>
+    </html>
+  );
+}
+```
+
+## Usage
+
+`toast` works anywhere, including outside React (API clients, stores, event handlers):
+
+```tsx
+import { toast } from '@innostes/ui';
+
+toast('Order archived', { action: { label: 'Undo', onClick: restore } });
+toast.success('Invoice sent');
+toast.error('Could not save', { description: error.message });
+
+// Loading → success / error
+await toast.promise(saveOrder(), {
+  loading: 'Saving order…',
+  success: (order) => `${order.id} saved`,
+  error: (err) => `Failed: ${err.message}`,
+});
+
+// Manual control
+const id = toast.loading('Uploading…');
+toast.update(id, { title: 'Uploaded', type: 'success', timeout: 4000 });
+toast.dismiss(id);
+```
+
+## Accessibility
+
+- Toasts are announced politely; `error` toasts use high priority and are announced immediately.
+- Keyboard users can jump to the toasts with <kbd>F6</kbd>. Toasts pause while hovered or focused.
+- Toasts disappear, so don't put anything the user must act on only in a toast. Use an
+  [Alert](/ui/docs/components/feedback/alert) for that.
+
+## API Reference
+
+<ApiTable components={['Toaster']} baseUi="toast" />
+
+`toast(title, options)` options: `description`, `type`, `timeout` (ms, `0` = until dismissed),
+`priority`, `action` (`{ label, onClick }`) and `onClose`.
+
+---
+
+## Calendar (https://innostes.com/ui/docs/components/forms/calendar)
+
+Single and range modes, min/max and disabled days, one or two months, locale-aware, fully keyboard accessible.
+
+<ComponentPreview name="forms/calendar/basic" />
+
+## Import
+
+```tsx
+import { Calendar, type DateRange } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Calendar value={date} onValueChange={setDate} />
+<Calendar mode="range" numberOfMonths={2} value={range} onValueChange={setRange} />
+<Calendar isDateDisabled={(d) => d.getDay() === 0 || d.getDay() === 6} min={new Date()} />
+<Calendar captionLayout="dropdown" fromYear={1950} toYear={2010} />   {/* month & year selects */}
+```
+
+For a field that opens a calendar, use [Date Picker](/ui/docs/components/forms/date-picker).
+
+## Locale
+
+Month and weekday names come from `Intl` in the user's language. The first day of the week follows
+the locale (Monday for most of the world, Sunday for `en-US`); override it with `weekStartsOn`.
+Labels of the navigation buttons can be translated with `labels`.
+
+## Dates and time zones
+
+The calendar works with **local calendar days**: values are `Date` objects at local midnight.
+Convert to and from your API's format at the edges, e.g. with `toISOString().slice(0, 10)` or the
+`YYYY-MM-DD` value the date pickers submit.
+
+## Keyboard
+
+| Key | Action |
+| --- | --- |
+| Arrow keys | Previous / next day and week |
+| Home / End | Start / end of the week |
+| Page Up / Page Down | Previous / next month |
+| Shift + Page Up / Page Down | Previous / next year |
+| Enter / Space | Select the focused day |
+
+## Accessibility
+
+- Follows the WAI-ARIA date picker grid pattern: one tab stop, roving focus, `aria-selected`,
+  `aria-current="date"` for today, and full dates as labels ("Thursday, October 15, 2026").
+- Disabled days stay focusable (so keyboard users can move past them) and are marked `aria-disabled`.
+
+## API Reference
+
+<ApiTable components={['Calendar']} />
+
+---
+
+## Checkbox (https://innostes.com/ui/docs/components/forms/checkbox)
+
+Single checkboxes and groups with a "select all" parent.
+
+<ComponentPreview name="forms/checkbox/basic" />
+
+## Import
+
+```tsx
+import { Checkbox, CheckboxGroup } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<label className="flex items-center gap-2">
+  <Checkbox name="terms" required /> I accept the terms
+</label>
+
+// Controlled
+<Checkbox checked={value} onCheckedChange={setValue} aria-label="Select row" />
+
+// Indeterminate (e.g. "some rows selected")
+<Checkbox indeterminate aria-label="Select all" />
+```
+
+## Groups
+
+`CheckboxGroup` manages several checkboxes as one array value. Pass `allValues` and add a
+`parent` checkbox to get a working "select all" with the indeterminate state.
+
+<ComponentPreview name="forms/checkbox/group" />
+
+## Accessibility
+
+- Announced as a checkbox with `aria-checked` (`mixed` when indeterminate).
+- Space toggles it. Label every checkbox, by wrapping it in a `<label>` or with `aria-label`.
+
+## API Reference
+
+<ApiTable components={['Checkbox', 'CheckboxGroup']} baseUi="checkbox" />
+
+---
+
+## Combobox (https://innostes.com/ui/docs/components/forms/combobox)
+
+Type to filter, arrow keys to move, Enter to pick. For long lists like countries or customers.
+
+<ComponentPreview name="forms/combobox/basic" />
+
+## Import
+
+```tsx
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxGroupLabel,
+  ComboboxSeparator,
+} from '@innostes/ui';
+```
+
+## Usage
+
+Pass all options as `items`. `ComboboxList` takes a function and renders it for each item that
+matches the filter.
+
+```tsx
+<Combobox items={customers} itemToStringLabel={(c) => c.name}>
+  <ComboboxInput placeholder="Search customers…" aria-label="Customer" />
+  <ComboboxContent>
+    <ComboboxEmpty>No customer found.</ComboboxEmpty>
+    <ComboboxList>
+      {(customer: Customer) => (
+        <ComboboxItem key={customer.id} value={customer}>
+          {customer.name}
+        </ComboboxItem>
+      )}
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
+
+- For objects, pass `itemToStringLabel` (shown text) and, if needed, `isItemEqualToValue`.
+- For server-side search, control the input with `onInputValueChange` and pass the results as `items`.
+- `showClear` and `showTrigger` on `ComboboxInput` toggle the clear and open buttons.
+
+## Accessibility
+
+- Follows the WAI-ARIA combobox pattern: the input owns a listbox, and the highlighted option is
+  announced as you move.
+
+## API Reference
+
+<ApiTable components={['ComboboxInput', 'ComboboxContent', 'ComboboxList', 'ComboboxItem', 'ComboboxEmpty', 'ComboboxGroup', 'ComboboxGroupLabel', 'ComboboxSeparator']} baseUi="combobox" />
+
+---
+
+## Date Picker (https://innostes.com/ui/docs/components/forms/date-picker)
+
+DatePicker and DateRangePicker with presets, min/max, clearing, and plain-form submission.
+
+<ComponentPreview name="forms/date-picker/basic" />
+
+## Import
+
+```tsx
+import { DatePicker, DateRangePicker, defaultDateRangePresets, type DateRange } from '@innostes/ui';
+```
+
+## DatePicker
+
+```tsx
+<Label htmlFor="due">Due date</Label>
+<DatePicker id="due" name="dueDate" value={due} onValueChange={setDue} min={new Date()} />
+```
+
+- Shows the date with `Intl` (`dateStyle: 'medium'` by default); change it with `format`
+  (`Intl.DateTimeFormat` options or a function).
+- `name` submits the date as `YYYY-MM-DD`, so it works with plain forms and server actions.
+- `captionLayout="dropdown"` adds month and year selects, for dates of birth.
+- `clearable` (default `true`) shows a clear button.
+
+## DateRangePicker
+
+```tsx
+<DateRangePicker aria-label="Report period" value={range} onValueChange={setRange} startName="from" endName="to" />
+```
+
+- `onValueChange` fires once both ends are picked, or when a preset is chosen.
+- `presets` defaults to Today, Yesterday, Last 7 / 30 days, This / Last month and This year.
+  Pass your own (with translated labels), or `[]` to hide them:
+
+```tsx
+const presets = [
+  { label: 'Q1', range: () => ({ from: new Date(2026, 0, 1), to: new Date(2026, 2, 31) }) },
+  ...defaultDateRangePresets,
+];
+```
+
+## Accessibility
+
+- The trigger is a button. Label it with `<Label htmlFor>` + `id`, or `aria-label`.
+- The calendar gets focus when it opens; Escape closes it and returns focus to the trigger.
+
+## API Reference
+
+<ApiTable components={['DatePicker', 'DateRangePicker']} baseUi="popover" />
+
+---
+
+## Field & Form (https://innostes.com/ui/docs/components/forms/field)
+
+Accessible wiring between label, control, help text and errors, with native and custom validation.
+
+<ComponentPreview name="forms/field/basic" />
+
+## Import
+
+```tsx
+import {
+  Field,
+  FieldLabel,
+  FieldDescription,
+  FieldError,
+  FieldItem,
+  Fieldset,
+  FieldsetLegend,
+  Form,
+  Label,
+} from '@innostes/ui';
+```
+
+## Anatomy
+
+```tsx
+<Form>
+  <Fieldset>
+    <FieldsetLegend />
+    <Field>
+      <FieldLabel />
+      {/* Input, Textarea, Select, Checkbox, … */}
+      <FieldDescription />
+      <FieldError />
+    </Field>
+  </Fieldset>
+</Form>
+```
+
+Every innostes form control works inside `Field`: the label, description and error are linked to
+it automatically (`for`/`id`, `aria-describedby`, `aria-invalid`).
+
+## Validation and server errors
+
+Validation uses native constraints (`required`, `type`, `minLength`, `pattern`, …) and the
+`validate` prop. Server errors go to `Form`'s `errors` prop, keyed by field `name`, and show in the
+matching `FieldError`.
+
+<ComponentPreview name="forms/field/form" />
+
+- Use `match` on `FieldError` to show your own message per constraint
+  (`valueMissing`, `typeMismatch`, `tooShort`, …). Without children it shows the browser message.
+- `validationMode` on `Field` (`onSubmit` by default, or `onBlur` / `onChange`) controls when it runs.
+- `onFormSubmit` receives the values as an object, keyed by `name`.
+
+## With React Hook Form or TanStack Form
+
+The controls are regular inputs, so form libraries work as usual. Pass their error state to the field:
+
+```tsx
+<Field name="email" invalid={!!errors.email}>
+  <FieldLabel>Email</FieldLabel>
+  <Input {...register('email')} />
+  <FieldError match={!!errors.email}>{errors.email?.message}</FieldError>
+</Field>
+```
+
+## Label
+
+`Label` is a standalone `<label>` for controls outside a `Field`. Inside a `Field`, use `FieldLabel`.
+
+## Accessibility
+
+- Errors set `aria-invalid` on the control and are announced through `aria-describedby`.
+- `required` on `FieldLabel` adds a visual `*` hidden from screen readers. Set `required` on the
+  control as well so it's announced and validated.
+- `Fieldset` renders a native `<fieldset>`; `disabled` disables every control inside.
+
+## API Reference
+
+<ApiTable components={['Field', 'FieldLabel', 'FieldDescription', 'FieldError', 'FieldItem', 'Fieldset', 'FieldsetLegend', 'Form', 'Label']} baseUi="field" />
+
+---
+
+## File Dropzone (https://innostes.com/ui/docs/components/forms/file-dropzone)
+
+Type, size and count checks, image thumbnails, and native form submission.
+
+<ComponentPreview name="forms/file-dropzone/basic" />
+
+## Import
+
+```tsx
+import { FileDropzone, formatBytes } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<FileDropzone
+  name="attachments"
+  accept="image/*,.pdf"
+  maxSize={5_000_000}
+  maxFiles={5}
+  hint="PDF or images, up to 5 MB"
+  value={files}
+  onValueChange={setFiles}
+/>
+```
+
+- `accept` uses the native syntax: extensions (`.csv`), MIME types (`application/pdf`) and wildcards (`image/*`).
+- Rejected files are listed under the zone with the reason, and passed to `onReject` as `{ file, reasons }`, where reasons are `type`, `size` or `count`.
+- `multiple={false}` keeps one file; a new one replaces it.
+- The files are mirrored into a real `<input type="file" name>`, so a plain `<form>` submits them. For uploads with progress, read `value` and upload it yourself.
+- `showFileList={false}` hides the built-in list so you can render your own (e.g. with upload progress). `formatBytes` formats sizes.
+
+## Accessibility
+
+- The "Browse files" button opens the native picker, so keyboard and screen-reader users never need drag and drop.
+- `hint` is linked to the button with `aria-describedby`.
+- Rejections are announced with `role="alert"`.
+
+## API Reference
+
+<ApiTable components={['FileDropzone']} />
+
+---
+
+## Forms (https://innostes.com/ui/docs/components/forms/index)
+
+Input fields, pickers, validation containers, and specialised editors for complex data entry.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Forms
+
+Enterprise applications rely heavily on accurate, structured data entry. innostes UI form components wrap Base UI primitives with consistent OKLCH styling, validation feedback, accessible labelling via `Field`, and localized formatting for dates, currencies, and numbers.
+
+## Components
+
+<CategoryGrid category="components/forms" />
+
+## Form design principles
+
+- **Always label inputs**: Wrap form controls with `<Field>` or provide explicit `aria-label`s for screen reader announcements.
+- **Validation feedback**: Display errors inline beneath the offending input using `<FieldError>`, and mark inputs with `invalid` to set appropriate ARIA attributes.
+- **Progressive enhancement**: Specialised controls like `DatePicker` and `LocaleSelect` fallback cleanly to standard inputs when necessary.
+
+---
+
+## Input Group (https://innostes.com/ui/docs/components/forms/input-group)
+
+InputGroup, SearchInput (clear, Escape, shortcut hint) and PasswordInput (show/hide).
+
+<ComponentPreview name="forms/input-group/basic" />
+
+## Import
+
+```tsx
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+  SearchInput,
+  PasswordInput,
+} from '@innostes/ui';
+```
+
+## InputGroup
+
+```tsx
+<InputGroup>
+  <InputGroupAddon>https://</InputGroupAddon>
+  <InputGroupInput placeholder="acme" aria-label="Workspace" />
+  <InputGroupAddon>.innostes.app</InputGroupAddon>
+</InputGroup>
+```
+
+`InputGroupAddon` has two looks: `variant="text"` (default) for units and domains, and
+`variant="icon"` for icons and small buttons.
+
+## SearchInput
+
+```tsx
+<SearchInput aria-label="Search orders" placeholder="Search orders…" onValueChange={setQuery} shortcut="⌘K" />
+```
+
+Escape and the × button clear it. `onValueChange` fires on every keystroke; debounce in your data
+layer if each change triggers a request.
+
+## PasswordInput
+
+```tsx
+<PasswordInput name="password" autoComplete="current-password" required />
+```
+
+The toggle button has `aria-pressed` and a label that changes ("Show password" / "Hide password").
+Translate it with `toggleLabels`.
+
+## API Reference
+
+<ApiTable components={['InputGroup', 'InputGroupAddon', 'SearchInput', 'PasswordInput']} baseUi="input" />
+
+---
+
+## Input (https://innostes.com/ui/docs/components/forms/input)
+
+Three sizes, invalid and disabled states, file inputs, and automatic Field wiring.
+
+<ComponentPreview name="forms/input/basic" />
+
+## Import
+
+```tsx
+import { Input } from '@innostes/ui';
+```
+
+## Usage
+
+Use it inside a [Field](/ui/docs/components/forms/field) so it gets a label and validation:
+
+```tsx
+<Field>
+  <FieldLabel>Email</FieldLabel>
+  <Input type="email" name="email" required />
+  <FieldError />
+</Field>
+```
+
+`size` changes the height (`sm` 32px, `md` 40px, `lg` 48px). The native `size` attribute is
+available as `htmlSize`.
+
+## Styling other controls like an input
+
+`inputVariants()` returns the input classes, for building custom controls that match:
+
+```tsx
+import { inputVariants } from '@innostes/ui';
+
+<div className={inputVariants({ size: 'sm' })}>…</div>
+```
+
+## Accessibility
+
+- Always give the input a label: `FieldLabel`, a `<label>`, or `aria-label`.
+- Invalid styles come from `aria-invalid` (set automatically inside `Field`).
+
+## API Reference
+
+<ApiTable components={['Input']} baseUi="input" />
+
+---
+
+## Locale Selects (https://innostes.com/ui/docs/components/forms/locale-select)
+
+Names come from the browser's Intl API in the user's language. No data files to bundle or update.
+
+<ComponentPreview name="forms/locale-select/basic" />
+
+## Import
+
+```tsx
+import {
+  CountrySelect,
+  TimezoneSelect,
+  LanguageSelect,
+  CurrencySelect,
+  DateFormatSelect,
+} from '@innostes/ui';
+```
+
+## Values
+
+| Component | Value | Example |
+| --- | --- | --- |
+| `CountrySelect` | ISO 3166-1 alpha-2 | `"IN"` |
+| `TimezoneSelect` | IANA time zone | `"Asia/Kolkata"` |
+| `LanguageSelect` | BCP 47 tag | `"en-IN"` |
+| `CurrencySelect` | ISO 4217 | `"INR"` |
+| `DateFormatSelect` | Pattern | `"DD/MM/YYYY"` |
+
+These are the standard codes your backend and `Intl` already use.
+
+## Options
+
+- `locale` sets the language of the names: `<CountrySelect locale="de" />` shows "Deutschland".
+- `priority` lists some values first, e.g. the countries you operate in: `priority={['IN', 'US']}`.
+- `include` limits the list, e.g. to the currencies you support.
+- `TimezoneSelect` is sorted by UTC offset and labelled `(GMT+05:30) Asia/Kolkata`; search matches the
+  city and the offset. Renamed zones (Calcutta → Kolkata, Kiev → Kyiv) show their current name.
+- `LanguageSelect` shows each language's own name too ("German · Deutsch"); pass `languages` for your list.
+- `CountrySelect` uses emoji flags. Windows shows these as two letters; pass `renderFlag` to use an
+  image or icon library instead.
+
+## API Reference
+
+<ApiTable components={['CountrySelect', 'TimezoneSelect', 'LanguageSelect', 'CurrencySelect', 'DateFormatSelect']} baseUi="combobox" />
+
+---
+
+## Number Field (https://innostes.com/ui/docs/components/forms/number-field)
+
+Min/max clamping, keyboard and wheel stepping, currency and percent formats.
+
+<ComponentPreview name="forms/number-field/basic" />
+
+## Import
+
+```tsx
+import { NumberField } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<NumberField defaultValue={1} min={0} max={99} aria-label="Quantity" />
+
+<NumberField
+  value={price}
+  onValueChange={setPrice}
+  step={0.01}
+  format={{ style: 'currency', currency: 'EUR' }}
+  aria-label="Price"
+/>
+```
+
+`format` takes [`Intl.NumberFormat` options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options)
+and formats for the user's locale. The value stays a plain `number` (or `null` when empty).
+
+## Accessibility
+
+- Arrow Up/Down step by `step`; Page Up/Down by `largeStep`; Home/End jump to `min`/`max`.
+
+## API Reference
+
+<ApiTable components={['NumberField']} baseUi="number-field" />
+
+---
+
+## Radio Group (https://innostes.com/ui/docs/components/forms/radio-group)
+
+Arrow-key navigation, form submission and Field support.
+
+<ComponentPreview name="forms/radio-group/basic" />
+
+## Import
+
+```tsx
+import { Radio, RadioGroup } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<RadioGroup name="plan" defaultValue="business" aria-label="Plan">
+  <label className="flex items-center gap-2"><Radio value="starter" /> Starter</label>
+  <label className="flex items-center gap-2"><Radio value="business" /> Business</label>
+</RadioGroup>
+```
+
+Use radios for 2–6 visible options. For longer lists, use [Select](/ui/docs/components/forms/select).
+Style a selected option's wrapper with `has-data-checked:` (as in the demo).
+
+## Accessibility
+
+- Arrow keys move and select; Tab enters and leaves the group.
+- Label the group (`aria-label`, or `aria-labelledby` pointing at a heading).
+
+## API Reference
+
+<ApiTable components={['RadioGroup', 'Radio']} baseUi="radio" />
+
+---
+
+## Rich Text Editor (https://innostes.com/ui/docs/components/forms/rich-text-editor)
+
+Bold, headings, lists, quotes, links and undo, with Markdown shortcuts. Built on Tiptap, in a separate entry point.
+
+<ComponentPreview name="forms/rich-text-editor/basic" />
+
+The editor lives in a **separate entry point** (`@innostes/ui/editor`), so apps without rich text never load it.
+
+## Installation
+
+It is built on [Tiptap](https://tiptap.dev) 3 (MIT), which works with React 17, 18 and 19. Install its peer dependencies:
+
+```sh
+pnpm add @tiptap/react @tiptap/pm @tiptap/core @tiptap/starter-kit @tiptap/extensions
+```
+
+## Import
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+```
+
+## Usage
+
+```tsx
+<Field>
+  <FieldLabel id="notes-label">Delivery notes</FieldLabel>
+  <RichTextEditor
+    aria-labelledby="notes-label"
+    placeholder="Gate code, contact person, unloading hours…"
+    value={notes}
+    onValueChange={setNotes}
+  />
+</Field>
+```
+
+- The value is **HTML**. An empty editor gives `''`, so required checks are simple.
+- `name` submits the HTML in a hidden input, for plain `<form>` posts.
+- `toolbar` picks and orders the buttons (`'|'` adds a divider), or `false` hides it. Markdown shortcuts still work: `**bold**`, `_italic_`, `## heading`, `- list`, `1. list`, `> quote`.
+- `readOnly` shows saved content without the toolbar or border, e.g. on a detail page.
+- `extensions` adds Tiptap extensions (character count, mentions, tables). `onReady` gives you the Tiptap `editor` for advanced control.
+- `labels` translates the toolbar and link form.
+
+## Security
+
+Content is parsed against the editor's schema, so pasted or loaded HTML loses everything it doesn't support: scripts, event handlers, styles, images and unknown tags. Links only accept safe protocols (`javascript:` is refused).
+
+The HTML still comes from users. Sanitize it on the server before storing it, and again (or render it through this editor in `readOnly` mode) wherever you display it.
+
+## Keyboard
+
+| Shortcut | Action |
+| --- | --- |
+| Ctrl/⌘ + B, I, U | Bold, italic, underline |
+| Ctrl/⌘ + Shift + S | Strikethrough |
+| Ctrl/⌘ + Shift + 7 / 8 | Numbered / bulleted list |
+| Ctrl/⌘ + Shift + B | Quote |
+| Ctrl/⌘ + E | Inline code |
+| Ctrl/⌘ + Z / Shift + Z | Undo / redo |
+
+The toolbar is one tab stop; arrow keys move between its buttons. Each formatting button reports whether it's on with `aria-pressed`.
+
+## API Reference
+
+<ApiTable components={['RichTextEditor']} />
+
+---
+
+## Searchable Select (https://innostes.com/ui/docs/components/forms/searchable-select)
+
+For long lists of simple options. Matches labels and keywords, accent-insensitive.
+
+<ComponentPreview name="forms/searchable-select/basic" />
+
+## Import
+
+```tsx
+import { SearchableSelect, type SearchableSelectOption } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+const options: SearchableSelectOption[] = warehouses.map((w) => ({
+  value: w.id,
+  label: w.name,
+  keywords: [w.city, w.code],   // also matched by the search
+  trailing: w.city,             // shown at the end of the option
+}));
+
+<SearchableSelect aria-label="Warehouse" options={options} value={id} onValueChange={setId} name="warehouseId" />
+```
+
+- `value` is the option's `value` string (or `null`), so it fits straight into forms and APIs.
+- Search ignores case and accents ("sao" finds "São Paulo") and matches `keywords` too.
+- `leading` shows an element before the label (an avatar, a flag), also inside the input once selected.
+
+Use [Select](/ui/docs/components/forms/select) for short lists (under ~10 options), and
+[Combobox](/ui/docs/components/forms/combobox) when you need custom item rendering, groups or
+server-side search.
+
+## API Reference
+
+<ApiTable components={['SearchableSelect']} baseUi="combobox" />
+
+---
+
+## Select (https://innostes.com/ui/docs/components/forms/select)
+
+Groups, separators, multiple selection, type-ahead and form submission.
+
+<ComponentPreview name="forms/select/basic" />
+
+## Import
+
+```tsx
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectGroupLabel,
+  SelectSeparator,
+} from '@innostes/ui';
+```
+
+## Usage
+
+Pass `items` so `SelectValue` can show the selected label (not just the value):
+
+```tsx
+const statuses = [
+  { value: 'active', label: 'Active' },
+  { value: 'archived', label: 'Archived' },
+];
+
+<Select items={statuses} defaultValue="active" name="status">
+  <SelectTrigger aria-label="Status">
+    <SelectValue />
+  </SelectTrigger>
+  <SelectContent>
+    {statuses.map((s) => (
+      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+    ))}
+  </SelectContent>
+</Select>
+```
+
+- Add `placeholder` to `SelectValue` for an empty state.
+- Add `multiple` to `Select` to pick several values (`value` becomes an array).
+- The list opens below the trigger. Set `alignItemWithTrigger` on `SelectContent` for the
+  macOS-style list that overlaps the trigger.
+
+For long or searchable lists, use [Combobox](/ui/docs/components/forms/combobox).
+
+## Accessibility
+
+- Arrow keys, Home/End and type-ahead move through options; Enter selects; Escape closes.
+- Label it with `FieldLabel` inside a `Field`, or `aria-label` on the trigger.
+
+## API Reference
+
+<ApiTable components={['SelectTrigger', 'SelectValue', 'SelectContent', 'SelectItem', 'SelectGroup', 'SelectGroupLabel', 'SelectSeparator']} baseUi="select" />
+
+---
+
+## Slider (https://innostes.com/ui/docs/components/forms/slider)
+
+Single values and ranges, keyboard support, form submission.
+
+<ComponentPreview name="forms/slider/basic" />
+
+## Import
+
+```tsx
+import { Slider } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Slider defaultValue={40} aria-label="Volume" />
+
+// A range: pass an array
+<Slider
+  value={range}
+  onValueChange={setRange}
+  min={0}
+  max={1000}
+  step={10}
+  thumbLabels={['Minimum price', 'Maximum price']}
+/>
+```
+
+Show the selected value next to the slider when exact numbers matter, or use a
+[Number Field](/ui/docs/components/forms/number-field) instead.
+
+## Accessibility
+
+- Each thumb is a `role="slider"` with `aria-valuenow`. Arrow keys step; Page Up/Down step by `largeStep`.
+- Ranges need `thumbLabels` so each thumb has its own name.
+
+## API Reference
+
+<ApiTable components={['Slider']} baseUi="slider" />
+
+---
+
+## Switch (https://innostes.com/ui/docs/components/forms/switch)
+
+Two sizes, form submission and Field support.
+
+<ComponentPreview name="forms/switch/basic" />
+
+## Import
+
+```tsx
+import { Switch } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<label className="flex items-center gap-3">
+  <Switch name="notifications" defaultChecked /> Email notifications
+</label>
+```
+
+Use a switch when the change takes effect right away. When the user must press Save, a
+[Checkbox](/ui/docs/components/forms/checkbox) is clearer.
+
+## Accessibility
+
+- Announced as `role="switch"` with `aria-checked`. Space toggles it.
+
+## API Reference
+
+<ApiTable components={['Switch']} baseUi="switch" />
+
+---
+
+## Tag Input (https://innostes.com/ui/docs/components/forms/tag-input)
+
+Labels, skills, recipients and SKUs as chips, with suggestions, paste splitting, limits and validation.
+
+<ComponentPreview name="forms/tag-input/basic" />
+
+## Import
+
+```tsx
+import { TagInput } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<TagInput
+  aria-label="Labels"
+  suggestions={labels}
+  value={value}
+  onValueChange={setValue}
+  max={10}
+/>
+```
+
+- **Adding**: Enter or a delimiter (`,` by default; change with `delimiters`). Pasting `a, b, c` adds three tags.
+- **Suggestions**: pass `suggestions` to show a filtered list. Typing a known tag in any case uses the suggestion's casing.
+- **Closed lists**: `allowCustom={false}` only accepts suggestions.
+- **Rules**: `validate` rejects tags (e.g. invalid emails); `max` caps the count and disables the input when reached. Duplicates are ignored, case-insensitively.
+- **Forms**: `name` submits each tag, like a multi-select.
+
+## Accessibility
+
+- Built on Base UI's multi-select Combobox: the input is a `combobox`, and suggestions are a `listbox`.
+- From the start of the input, Left Arrow moves to the tags; Backspace or Delete removes the focused tag.
+- Each remove button is labelled (`removeLabel`, default `Remove <tag>`).
+
+## API Reference
+
+<ApiTable components={['TagInput']} />
+
+---
+
+## Textarea (https://innostes.com/ui/docs/components/forms/textarea)
+
+Optional auto-resize, and automatic Field wiring.
+
+<ComponentPreview name="forms/textarea/basic" />
+
+## Import
+
+```tsx
+import { Textarea } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Textarea name="notes" rows={4} />
+<Textarea autoResize rows={2} />  {/* grows with the content */}
+```
+
+`autoResize` uses CSS `field-sizing: content`. Browsers without support fall back to a normal,
+vertically resizable textarea.
+
+## API Reference
+
+<ApiTable components={['Textarea']} />
+
+---
+
+## App Rail (https://innostes.com/ui/docs/components/layout/app-rail)
+
+Used alongside a sidebar to navigate between top-level areas or modules in complex applications, featuring active states, tooltips, and badges.
+
+<ComponentPreview name="layout/app-rail/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  AppRail,
+  AppRailItem,
+  AppRailHeader,
+  AppRailFooter,
+  AppRailSeparator,
+} from '@innostes/ui';
+```
+
+## Usage
+
+The `AppRail` is designed to be placed before a `Sidebar` inside a `SidebarProvider`. It provides the first level of navigation (e.g. switching between entire apps like ERP, HRMS, CRM), while the `Sidebar` provides the second level (the pages within that app).
+
+```tsx
+<SidebarProvider>
+  <AppRail>
+    <AppRailHeader>
+      <Logo />
+    </AppRailHeader>
+
+    <AppRailItem
+      icon={<HomeIcon />}
+      label="Home"
+      isActive
+      render={<Link href="/" />}
+    />
+    <AppRailItem
+      icon={<UsersIcon />}
+      label="HRMS"
+      render={<Link href="/hrms" />}
+    />
+
+    <AppRailSeparator />
+
+    <AppRailFooter>
+      <AppRailItem icon={<SettingsIcon />} label="Settings" />
+    </AppRailFooter>
+  </AppRail>
+
+  <Sidebar>
+    {/* Sidebar content for the active module */}
+  </Sidebar>
+  <SidebarInset>
+    {/* Main content */}
+  </SidebarInset>
+</SidebarProvider>
+```
+
+### Responsive behavior
+
+The `AppRail` is hidden by default on small screens (below `md`). On mobile, the `Sidebar` takes over as a slide-in panel. For a consistent experience on mobile, you should typically include the same top-level links inside the mobile version of your navigation (e.g. within a top bar or at the bottom/top of the mobile sidebar).
+
+### Label display
+
+By default, the `label` passed to `AppRailItem` acts as its accessible name and is displayed in a tooltip when the user hovers over the item. If you prefer to show the text beneath the icon constantly, set `showLabel={true}`.
+
+## API Reference
+
+<ApiTable components={['AppRail', 'AppRailItem', 'AppRailHeader', 'AppRailFooter', 'AppRailSeparator']} />
+
+---
+
+## Form Layout (https://innostes.com/ui/docs/components/layout/form-layout)
+
+FormGrid, FormSection and FormActions. Responsive to the space they're in, not the screen.
+
+<ComponentPreview name="layout/form-layout/basic" align="start" />
+
+## Import
+
+```tsx
+import { FormGrid, FormSection, FormActions } from '@innostes/ui';
+```
+
+## FormGrid
+
+Places fields in 1–4 columns. Make a field span the row with `className="col-span-full"`.
+
+```tsx
+<FormGrid columns={2}>
+  <Field>…</Field>
+  <Field>…</Field>
+  <Field className="col-span-full">…</Field>
+</FormGrid>
+```
+
+It uses **container queries**: the columns follow the width of the form's container, so the
+same form works in a page, a sheet or a dialog.
+
+## FormSection
+
+A titled group of fields. `layout="aside"` puts the title on the left (settings pages);
+`layout="stacked"` (default) puts it above (wizards, dialogs).
+
+## FormActions
+
+The button row at the end of a form. `align="between"` puts the first button at the start
+(Cancel / Back) and the rest at the end. `sticky` keeps it visible on long forms.
+
+## API Reference
+
+<ApiTable components={['FormGrid', 'FormSection', 'FormActions']} />
+
+---
+
+## Layout (https://innostes.com/ui/docs/components/layout/index)
+
+Scaffolding primitives for responsive ERP application shells, navigation bars, and data panes.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Layout
+
+Layout components define the structural scaffold for Northwind Traders Pvt Ltd's applications. They orchestrate viewports, responsive sidebars, persistent headers, and split-pane inspection canvases to support complex enterprise workflows.
+
+## Components
+
+<CategoryGrid category="components/layout" />
+
+## Usage guidelines
+
+- **Application Shell**: Combine `AppRail`, `Sidebar`, `TopBar`, and `PageHeader` to create structured, responsive application frames.
+- **Scroll containment**: Use `ScrollArea` for customized, accessible scrollable regions rather than unstyled browser overflow bars.
+- **Form layouts**: Structure form controls using `FormLayout` to enforce standard vertical rhythm and responsive column wrapping.
+
+---
+
+## Page Header (https://innostes.com/ui/docs/components/layout/page-header)
+
+Breadcrumb, title, description and page actions, responsive by default.
+
+<ComponentPreview name="layout/page-header/basic" />
+
+## Import
+
+```tsx
+import { PageHeader } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<PageHeader
+  breadcrumb={<Breadcrumb>…</Breadcrumb>}
+  title="Orders"
+  description="Track and fulfil customer orders."
+  actions={
+    <>
+      <Button variant="outline">Export</Button>
+      <Button>New order</Button>
+    </>
+  }
+/>
+```
+
+Put the primary action last. On small screens the actions wrap under the title.
+
+## Accessibility
+
+- `title` renders the page's `<h1>`. Use one `PageHeader` per page.
+
+## API Reference
+
+<ApiTable components={['PageHeader']} />
+
+---
+
+## Scroll Area (https://innostes.com/ui/docs/components/layout/scroll-area)
+
+Native scrolling and keyboard support, styled scrollbars on every platform.
+
+<ComponentPreview name="layout/scroll-area/basic" />
+
+## Import
+
+```tsx
+import { ScrollArea } from '@innostes/ui';
+```
+
+## Usage
+
+Give it a height or max-height. `scrollbars` is `vertical` (default), `horizontal` or `both`.
+Padding for the content goes on `viewportClassName`.
+
+## API Reference
+
+<ApiTable components={['ScrollArea']} baseUi="scroll-area" />
+
+---
+
+## Separator (https://innostes.com/ui/docs/components/layout/separator)
+
+Horizontal or vertical, announced as a separator.
+
+<ComponentPreview name="layout/separator/basic" />
+
+## Import
+
+```tsx
+import { Separator } from '@innostes/ui';
+```
+
+## API Reference
+
+<ApiTable components={['Separator']} baseUi="separator" />
+
+---
+
+## Sidebar (https://innostes.com/ui/docs/components/layout/sidebar)
+
+Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and a keyboard shortcut.
+
+<ComponentPreview name="layout/sidebar/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarSeparator,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupAction,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
+  SidebarTrigger,
+  SidebarRail,
+  SidebarInset,
+  useSidebar,
+} from '@innostes/ui';
+```
+
+## Layout
+
+```tsx title="app/(admin)/layout.tsx"
+<SidebarProvider>
+  <Sidebar>
+    <SidebarHeader>{/* logo, workspace switcher */}</SidebarHeader>
+    <SidebarContent>
+      <SidebarGroup>
+        <SidebarGroupLabel>Sales</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              icon={<ShoppingCartIcon />}
+              isActive={pathname.startsWith('/orders')}
+              render={<Link href="/orders" />}
+            >
+              Orders
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+    </SidebarContent>
+    <SidebarFooter>{/* user menu */}</SidebarFooter>
+  </Sidebar>
+  <SidebarInset>
+    <header><SidebarTrigger /></header>
+    <main>{children}</main>
+  </SidebarInset>
+</SidebarProvider>
+```
+
+## Behaviour
+
+- **Desktop**: expanded (256px) or collapsed to icons (56px). Collapsed items show their label in a tooltip.
+- **Mobile** (below 768px, set with `mobileQuery`): the sidebar becomes a slide-in panel that closes when an item is chosen.
+- **Shortcut**: Ctrl/⌘ + B toggles it (`keyboardShortcut`, or `null` to turn off).
+- **Persist** the choice by controlling `open` / `onOpenChange` and saving it, e.g. in a cookie, so the server renders the right state.
+
+`useSidebar()` gives any component inside the provider `open`, `toggle`, `isMobile` and setters.
+
+## Custom Width
+
+You can customize the width of the sidebar when expanded, collapsed to icons, and on mobile. These props map directly to `--sidebar-width`, `--sidebar-width-icon`, and `--sidebar-width-mobile` CSS variables.
+
+<ComponentPreview name="layout/sidebar/width" align="start" className="p-4 sm:p-4" />
+
+## Variants
+
+The sidebar comes in three visual variants: `sidebar` (classic full-height side navigation), `floating` (a floating panel distinct from the edge), and `inset` (a sidebar that wraps the content area with a rounded border).
+
+<ComponentPreview name="layout/sidebar/variants" align="start" className="p-4 sm:p-4" />
+
+## Submenus
+
+For deeper navigation structures, use `SidebarMenuSub`, `SidebarMenuSubItem`, and `SidebarMenuSubButton` inside a `SidebarMenuItem`.
+
+<ComponentPreview name="layout/sidebar/nav-submenu" align="start" className="p-4 sm:p-4" />
+
+## Theming the sidebar
+
+The sidebar is built with its own set of CSS variables (tokens) independent from the rest of the application. This allows you to give the app shell a distinct look (like a dark sidebar in a light app) without affecting standard components.
+
+To theme the sidebar, override the `--color-sidebar*` tokens in your CSS.
+
+```css
+@theme {
+  --color-sidebar: var(--color-slate-900);
+  --color-sidebar-foreground: var(--color-slate-50);
+  --color-sidebar-primary: var(--color-blue-500);
+  --color-sidebar-primary-foreground: var(--color-white);
+  --color-sidebar-accent: var(--color-slate-800);
+  --color-sidebar-accent-foreground: var(--color-slate-50);
+  --color-sidebar-border: var(--color-slate-800);
+  --color-sidebar-ring: var(--color-blue-500);
+}
+```
+
+## Accessibility
+
+- The sidebar is a `<nav>` landmark (label it with `label`). The active item has `aria-current="page"`.
+- `SidebarTrigger` reports `aria-expanded`.
+
+## API Reference
+
+<ApiTable components={['SidebarProvider', 'Sidebar', 'SidebarHeader', 'SidebarContent', 'SidebarFooter', 'SidebarSeparator', 'SidebarGroup', 'SidebarGroupLabel', 'SidebarGroupAction', 'SidebarMenu', 'SidebarMenuItem', 'SidebarMenuButton', 'SidebarMenuAction', 'SidebarMenuBadge', 'SidebarMenuSub', 'SidebarMenuSubItem', 'SidebarMenuSubButton', 'SidebarTrigger', 'SidebarRail', 'SidebarInset']} />
+
+---
+
+## Split Pane (https://innostes.com/ui/docs/components/layout/split-pane)
+
+A list beside its detail, with a draggable, keyboard-resizable divider.
+
+<ComponentPreview name="layout/split-pane/basic" />
+
+## Import
+
+```tsx
+import { SplitPane } from '@innostes/ui';
+```
+
+## Usage
+
+Pass exactly two children and give the pane a height.
+
+```tsx
+<SplitPane defaultSize={35} minSize={20} maxSize={60} className="h-[calc(100dvh-8rem)]">
+  <OrderList />
+  <OrderDetail />
+</SplitPane>
+```
+
+- `size` and the limits are percentages of the first pane. Control it with `size` / `onSizeChange`, e.g. to save the user's layout.
+- `orientation="vertical"` stacks the panes.
+- Double-clicking the divider restores `defaultSize`.
+- On small screens, consider rendering the detail in a `Sheet` instead.
+
+## Accessibility
+
+The divider is a focusable `separator` with its value and range, and `aria-controls` pointing at the first pane.
+
+| Key | Action |
+| --- | --- |
+| Left / Right (Up / Down when stacked) | Resize by `step` (Shift: 4×) |
+| Home / End | Smallest / largest size |
+
+## API Reference
+
+<ApiTable components={['SplitPane']} />
+
+---
+
+## Top Bar (https://innostes.com/ui/docs/components/layout/top-bar)
+
+A responsive top navigation bar with slots for branding, search, and actions.
+
+<ComponentPreview name="layout/top-bar/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  TopBar,
+  TopBarStart,
+  TopBarCenter,
+  TopBarEnd,
+} from '@innostes/ui';
+```
+
+## Usage
+
+The `TopBar` is designed to be the primary header of your application, usually containing the app switcher/logo, global search, notifications, and user profile.
+
+Layout is controlled through three semantic slots:
+- `TopBarStart`: Aligned to the start, containing branding or a `SidebarTrigger`.
+- `TopBarCenter`: Takes up the remaining space and shrinks first. Ideal for global search.
+- `TopBarEnd`: Aligned to the end, containing actions, notifications, and the `UserMenu`.
+
+```tsx
+<TopBar sticky blur>
+  <TopBarStart>
+    <SidebarTrigger />
+    <AppSwitcher sections={...} />
+  </TopBarStart>
+
+  <TopBarCenter>
+    <SearchInput placeholder="Search..." />
+  </TopBarCenter>
+
+  <TopBarEnd>
+    <NotificationBell items={...} />
+    <UserMenu name="John Doe" />
+  </TopBarEnd>
+</TopBar>
+```
+
+### Height Customization
+
+The default height is `4rem` (64px). You can customize it by overriding the `--top-bar-height` CSS variable.
+
+```css
+.my-custom-top-bar {
+  --top-bar-height: 3.5rem;
+}
+```
+
+## API Reference
+
+<ApiTable components={['TopBar', 'TopBarStart', 'TopBarCenter', 'TopBarEnd']} />
+
+---
+
+## Accordion (https://innostes.com/ui/docs/components/navigation/accordion)
+
+One or many open sections, animated height, keyboard support.
+
+<ComponentPreview name="navigation/accordion/basic" />
+
+## Import
+
+```tsx
+import { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Accordion defaultValue={['billing']}>
+  <AccordionItem value="billing">
+    <AccordionTrigger>Billing</AccordionTrigger>
+    <AccordionPanel>…</AccordionPanel>
+  </AccordionItem>
+</Accordion>
+```
+
+Add `multiple` to allow several open sections. `value` is always an array.
+
+## Accessibility
+
+- Triggers are buttons inside headings, with `aria-expanded` and `aria-controls`.
+- Arrow keys move between triggers.
+
+## API Reference
+
+<ApiTable components={['Accordion', 'AccordionItem', 'AccordionTrigger', 'AccordionPanel']} baseUi="accordion" />
+
+---
+
+## Breadcrumb (https://innostes.com/ui/docs/components/navigation/breadcrumb)
+
+Links to each ancestor, a marked current page, and an ellipsis for long paths.
+
+<ComponentPreview name="navigation/breadcrumb/basic" />
+
+## Import
+
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+} from '@innostes/ui';
+```
+
+## With your router
+
+`BreadcrumbLink` renders an `<a>`. Pass `render` to use your router's link:
+
+```tsx
+import Link from 'next/link';
+
+<BreadcrumbLink render={<Link href="/orders" />}>Orders</BreadcrumbLink>
+```
+
+## Accessibility
+
+- A `<nav aria-label="Breadcrumb">` containing an ordered list.
+- The current page has `aria-current="page"`; separators are hidden from screen readers.
+
+## API Reference
+
+<ApiTable components={['BreadcrumbLink']} />
+
+The other parts take the props of their HTML element.
+
+---
+
+## Collapsible (https://innostes.com/ui/docs/components/navigation/collapsible)
+
+An unstyled disclosure with a height animation, for "advanced options" and similar.
+
+<ComponentPreview name="navigation/collapsible/basic" />
+
+## Import
+
+```tsx
+import { Collapsible, CollapsibleTrigger, CollapsiblePanel } from '@innostes/ui';
+```
+
+## Usage
+
+The trigger gets `data-panel-open` while open; use it to rotate an icon
+(`group-data-panel-open:rotate-180`), as in the demo.
+
+## API Reference
+
+<ApiTable components={['Collapsible', 'CollapsibleTrigger', 'CollapsiblePanel']} baseUi="collapsible" />
+
+---
+
+## Navigation (https://innostes.com/ui/docs/components/navigation/index)
+
+Structures and controls that guide operators through multi-step journeys and hierarchical data.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Navigation
+
+Navigation components establish information architecture and wayfinding across Northwind Traders Pvt Ltd's ERP modules. They provide predictable, keyboard-accessible paths through complex inventory hierarchies, multi-stage procurement flows, and paginated records.
+
+## Components
+
+<CategoryGrid category="components/navigation" />
+
+## Usage guidelines
+
+- **Wayfinding hierarchy**: Combine `Breadcrumb` for relational hierarchy, `Tabs` for alternate views of an entity, and `Stepper` for sequential multi-step wizards.
+- **Keyboard navigation**: Tab strips support Left/Right arrow keys for roving focus. Accordions support Up/Down arrow navigation.
+- **RTL awareness**: All navigation elements honour document directionality (`dir="rtl"`) with logical margin and icon rotation.
+
+---
+
+## Pagination (https://innostes.com/ui/docs/components/navigation/pagination)
+
+Controlled, translatable, with a stable width as you page.
+
+<ComponentPreview name="navigation/pagination/basic" />
+
+## Import
+
+```tsx
+import { Pagination, getPaginationRange } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+const [page, setPage] = useState(1);
+
+<Pagination page={page} pageCount={Math.ceil(total / pageSize)} onPageChange={setPage} />
+```
+
+- The number of buttons stays the same as you move, so the controls don't jump under the pointer.
+- `labels` translates "Previous", "Next" and the page names.
+
+## Custom pagination UI
+
+`getPaginationRange` returns the items to show (numbers and ellipses), so you can build any layout
+on the same logic. It has no React code, so it also works on the server.
+
+```ts
+getPaginationRange({ page: 6, pageCount: 20 });
+// → [1, 'ellipsis-start', 5, 6, 7, 'ellipsis-end', 20]
+```
+
+## Accessibility
+
+- `<nav aria-label="Pagination">`; the current page has `aria-current="page"`; every button is labelled.
+
+## API Reference
+
+<ApiTable components={['Pagination']} />
+
+---
+
+## Stepper (https://innostes.com/ui/docs/components/navigation/stepper)
+
+Horizontal or vertical, with descriptions, error states and clickable completed steps.
+
+<ComponentPreview name="navigation/stepper/basic" />
+
+## Import
+
+```tsx
+import { Stepper, type StepperStep } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+const [step, setStep] = useState(0);
+
+<Stepper steps={steps} currentStep={step} onStepClick={setStep} />
+```
+
+- Steps before `currentStep` are complete. Set `status: 'error'` on a step to flag a problem.
+- With `onStepClick`, completed steps become buttons, so users can go back but not skip ahead.
+- `labelPlacement="end"` puts titles next to the markers for a more compact horizontal stepper.
+
+## Vertical
+
+For order tracking, import jobs and long flows:
+
+<ComponentPreview name="navigation/stepper/vertical" />
+
+## Accessibility
+
+- A `<nav aria-label="Progress">` with an ordered list; the current step has `aria-current="step"`.
+- Completed and failed steps are announced ("completed", "has errors"), not shown by colour only.
+
+See the [Setup Wizard example](/ui/docs/examples/setup-wizard) for a full flow.
+
+## API Reference
+
+<ApiTable components={['Stepper']} />
+
+---
+
+## Tabs (https://innostes.com/ui/docs/components/navigation/tabs)
+
+Underline and pill styles with an animated indicator, horizontal or vertical.
+
+<ComponentPreview name="navigation/tabs/basic" />
+
+## Import
+
+```tsx
+import { Tabs, TabsList, TabsTab, TabsPanel } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Tabs defaultValue="overview">
+  <TabsList>
+    <TabsTab value="overview">Overview</TabsTab>
+    <TabsTab value="activity">Activity</TabsTab>
+  </TabsList>
+  <TabsPanel value="overview">…</TabsPanel>
+  <TabsPanel value="activity">…</TabsPanel>
+</Tabs>
+```
+
+- `variant="underline"` (default) for page sections; `variant="pills"` for compact switches,
+  like a date range above a chart.
+- To sync the tab with the URL, control it with `value` / `onValueChange`.
+- `orientation="vertical"` stacks the tabs for settings pages.
+
+## Accessibility
+
+- Arrow keys move between tabs; the active panel is linked with `aria-controls`/`aria-labelledby`.
+
+## API Reference
+
+<ApiTable components={['Tabs', 'TabsList', 'TabsTab', 'TabsPanel']} baseUi="tabs" />
+
+---
+
+## Alert Dialog (https://innostes.com/ui/docs/components/overlays/alert-dialog)
+
+A dialog that can't be dismissed by clicking outside; the user must choose.
+
+<ComponentPreview name="overlays/alert-dialog/basic" />
+
+## Import
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogClose,
+} from '@innostes/ui';
+```
+
+## Writing good confirmations
+
+- Title asks the question: "Delete Acme Corp?", not "Are you sure?".
+- Description states the consequence: what's lost, and whether it can be undone.
+- The confirm button repeats the action ("Delete customer"), not "OK".
+
+## Accessibility
+
+- `role="alertdialog"`, labelled by the title and described by the description.
+- Focus starts inside the dialog; Escape cancels.
+
+## API Reference
+
+<ApiTable components={['AlertDialogContent', 'AlertDialogTitle', 'AlertDialogDescription']} baseUi="alert-dialog" />
+
+---
+
+## Command Palette (https://innostes.com/ui/docs/components/overlays/command-palette)
+
+A global command palette triggered by a keyboard shortcut (e.g. ⌘K) to quickly navigate and execute actions across the application.
+
+<ComponentPreview name="overlays/command-palette/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import { CommandPalette, CommandItem, CommandGroup } from '@innostes/ui';
+```
+
+## Usage
+
+The `CommandPalette` component is a global, floating search overlay designed to help users quickly find pages or perform actions. It includes built-in keyboard shortcut handling and accessible listbox navigation.
+
+Pass an array of grouped items using the `groups` prop. Each item must specify an `id`, `label`, and an `onSelect` callback.
+
+```tsx
+function App() {
+  const groups = [
+    {
+      heading: 'Pages',
+      items: [
+        {
+          id: 'orders',
+          label: 'Orders',
+          icon: <CartIcon />,
+          onSelect: () => router.push('/orders')
+        },
+        // ...
+      ]
+    },
+    {
+      heading: 'Actions',
+      items: [
+        {
+          id: 'new-invoice',
+          label: 'Create invoice',
+          shortcut: 'C I',
+          onSelect: createInvoice
+        },
+        // ...
+      ]
+    },
+  ];
+
+  return <CommandPalette groups={groups} />;
+}
+```
+
+### Keyboard Shortcuts
+
+By default, the command palette listens for `Ctrl + K` or `⌘ + K` to open. You can change this behavior by setting the `hotkey` prop to a different character, or pass `null` to disable the built-in shortcut and manage opening state yourself.
+
+### Custom Filtering
+
+The component automatically filters items based on a case- and accent-insensitive search against the item's `label`, `description`, and `keywords`.
+
+If you need a more advanced filtering algorithm, you can provide a custom `filter` function:
+
+```tsx
+<CommandPalette
+  groups={groups}
+  filter={(item, query) => customMatch(item.label, query)}
+/>
+```
+
+### Advanced Styling
+
+You can deeply customize the internal parts of the palette using the `classNames` prop, targeting slots like `popup`, `input`, `list`, `groupHeading`, `item`, `empty`, and `footer`.
+
+## API Reference
+
+<ApiTable components={['CommandPalette']} />
+
+---
+
+## Context Menu (https://innostes.com/ui/docs/components/overlays/context-menu)
+
+Same items as Dropdown Menu, positioned at the pointer.
+
+<ComponentPreview name="overlays/context-menu/basic" />
+
+## Import
+
+```tsx
+import {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  // …and ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuSub, etc.
+} from '@innostes/ui';
+```
+
+## Usage
+
+Items are the same components as [Dropdown Menu](/ui/docs/components/overlays/dropdown-menu),
+exported with `ContextMenu*` names.
+
+<Callout type="warn">
+  Right-click is hard to discover and unavailable to some users. Make every action in a context menu
+  reachable another way too, e.g. a row actions button.
+</Callout>
+
+## API Reference
+
+<ApiTable components={['ContextMenuContent']} baseUi="context-menu" />
+
+---
+
+## Dialog (https://innostes.com/ui/docs/components/overlays/dialog)
+
+Focus trap, Escape and outside-click to close, nested dialogs, and five sizes.
+
+<ComponentPreview name="overlays/dialog/basic" />
+
+## Import
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@innostes/ui';
+```
+
+## Anatomy
+
+```tsx
+<Dialog>
+  <DialogTrigger />
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle />
+      <DialogDescription />
+    </DialogHeader>
+    {/* content */}
+    <DialogFooter>
+      <DialogClose />
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+## Usage
+
+- Use `render` to make the trigger and close buttons our `Button`:
+  `<DialogTrigger render={<Button />}>Edit</DialogTrigger>`.
+- Control it with `open` / `onOpenChange` to close after an async save (see the demo).
+- `size` on `DialogContent`: `sm`, `md` (default), `lg`, `xl`, `full`.
+- Set `showCloseButton={false}` to hide the × button.
+
+Use a dialog for short, focused tasks. For larger forms next to the content, a
+[Sheet](/ui/docs/components/overlays/sheet) keeps more context visible. To confirm destructive
+actions, use [Alert Dialog](/ui/docs/components/overlays/alert-dialog).
+
+## Accessibility
+
+- Focus moves into the dialog on open and back to the trigger on close; Tab stays inside.
+- Labelled by `DialogTitle` and described by `DialogDescription`. Always include a title.
+
+## API Reference
+
+<ApiTable components={['DialogContent', 'DialogTitle', 'DialogDescription', 'DialogHeader', 'DialogFooter']} baseUi="dialog" />
+
+---
+
+## Dropdown Menu (https://innostes.com/ui/docs/components/overlays/dropdown-menu)
+
+Groups, shortcuts, checkbox and radio items, submenus and destructive actions.
+
+<ComponentPreview name="overlays/dropdown-menu/basic" />
+
+## Import
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLinkItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuGroup,
+  DropdownMenuGroupLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+} from '@innostes/ui';
+```
+
+## Row actions
+
+The most common admin pattern: a "⋯" button per table row.
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger render={<Button variant="ghost" size="sm" iconOnly aria-label={`Actions for ${order.id}`} />}>
+    <MoreHorizontalIcon />
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="end">
+    <DropdownMenuItem onClick={() => open(order)}>View</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem variant="destructive" onClick={() => refund(order)}>Refund</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+## Submenus
+
+Put a `DropdownMenuSubTrigger` and a `DropdownMenuContent` inside `DropdownMenuSub`.
+
+## Accessibility
+
+- Arrow keys move between items, type-ahead jumps to an item, Enter/Space activates, Escape closes.
+- `DropdownMenuShortcut` is a visual hint only; register the keyboard shortcut yourself.
+
+## API Reference
+
+<ApiTable components={['DropdownMenuContent', 'DropdownMenuItem', 'DropdownMenuShortcut']} baseUi="menu" />
+
+---
+
+## Overlays (https://innostes.com/ui/docs/components/overlays/index)
+
+Layered interface elements that appear above base page content for focused interactions.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Overlays
+
+Overlays present supplementary workflows, context-sensitive details, and decision prompts above the primary page canvas. They enable Northwind Traders operators to complete focused sub-tasks without navigating away from their active workspace.
+
+## Components
+
+<CategoryGrid category="components/overlays" />
+
+## Usage guidelines
+
+- **Modality**: Use `Dialog` or `AlertDialog` when operator confirmation or focused data entry is mandatory before proceeding. Use `Sheet` for wide inspection panels and edit drawers.
+- **Focus management**: Overlays automatically trap focus when opened, restore focus to the triggering element upon dismissal, and close on Escape key navigation.
+- **Progressive disclosure**: Reserve `Tooltip` for non-essential keyboard hints and iconography descriptions. Use `Popover` for rich interactive menus and filters.
+
+---
+
+## Popover (https://innostes.com/ui/docs/components/overlays/popover)
+
+Small forms, share panels and pickers that float next to their trigger.
+
+<ComponentPreview name="overlays/popover/basic" />
+
+## Import
+
+```tsx
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverTitle,
+  PopoverDescription,
+  PopoverClose,
+} from '@innostes/ui';
+```
+
+## Usage
+
+`side`, `align` and `sideOffset` on `PopoverContent` position it; it flips automatically when
+there's no room. For plain hints, use [Tooltip](/ui/docs/components/overlays/tooltip).
+
+## Accessibility
+
+- The trigger has `aria-expanded`. Focus moves into the popover and returns on close.
+- Escape and outside click close it.
+
+## API Reference
+
+<ApiTable components={['PopoverContent', 'PopoverTitle', 'PopoverDescription']} baseUi="popover" />
+
+---
+
+## Sheet (https://innostes.com/ui/docs/components/overlays/sheet)
+
+For filters, record details and edit forms next to a list. Slides from any side, RTL-aware.
+
+<ComponentPreview name="overlays/sheet/basic" />
+
+## Import
+
+```tsx
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetBody,
+  SheetFooter,
+  SheetClose,
+} from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Sheet>
+  <SheetTrigger render={<Button variant="outline" />}>Filters</SheetTrigger>
+  <SheetContent side="right">
+    <SheetHeader>
+      <SheetTitle>Filters</SheetTitle>
+    </SheetHeader>
+    <SheetBody>…</SheetBody>   {/* scrolls when content is long */}
+    <SheetFooter>…</SheetFooter>
+  </SheetContent>
+</Sheet>
+```
+
+`side` is `right` (default), `left`, `top` or `bottom`. Left and right flip in right-to-left layouts.
+
+## Accessibility
+
+Same as [Dialog](/ui/docs/components/overlays/dialog): focus is trapped, Escape closes, and the
+title labels the panel.
+
+## API Reference
+
+<ApiTable components={['SheetContent', 'SheetTitle', 'SheetDescription']} baseUi="dialog" />
+
+---
+
+## Tooltip (https://innostes.com/ui/docs/components/overlays/tooltip)
+
+Names icon buttons and shows shortcuts. Shared delay across a toolbar.
+
+<ComponentPreview name="overlays/tooltip/basic" />
+
+## Import
+
+```tsx
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Tooltip>
+  <TooltipTrigger render={<Button iconOnly variant="ghost" aria-label="Archive" />}>
+    <ArchiveIcon />
+  </TooltipTrigger>
+  <TooltipContent>Archive</TooltipContent>
+</Tooltip>
+```
+
+Wrap your app in `TooltipProvider` once. After the first tooltip opens, moving to the next trigger
+shows it instantly, which makes toolbars feel fast.
+
+## Accessibility
+
+- Opens on hover and keyboard focus; Escape closes it.
+- Tooltips are not reachable on touch devices and are skipped by some screen readers. The trigger
+  still needs its own `aria-label`, and tooltips must never hold essential information.
+
+## API Reference
+
+<ApiTable components={['TooltipContent', 'TooltipProvider']} baseUi="tooltip" />
+
+---
+
+## Dashboard (https://innostes.com/ui/docs/examples/dashboard)
+
+An HRMS dashboard bringing together the Sidebar, AppRail, TopBar, MetricCards, charts, and dashboard widgets.
+
+<ComponentPreview
+  name="examples/dashboard"
+  align="start"
+  className="p-0 sm:p-0"
+/>
+
+## What's in it
+
+This reference example combines our layout and widget components into a responsive HRMS application layout, matching our reference dashboard composition.
+
+| Part                     | Components                                                                                                                                                                                                                  |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Global Navigation**    | [`AppRail`](/ui/docs/components/layout/app-rail) on the far left with `AppRailItem`                                                                                                                                         |
+| **Workspace Navigation** | [`SidebarProvider`](/ui/docs/components/layout/sidebar), `Sidebar` (icon collapsible), `SidebarMenu`                                                                                                                        |
+| **Top Header**           | [`TopBar`](/ui/docs/components/layout/top-bar) with [`AppSwitcher`](/ui/docs/widgets/app-switcher), [`NotificationBell`](/ui/docs/widgets/notification-bell), and [`UserMenu`](/ui/docs/widgets/user-menu)               |
+| **Content Area**         | `SidebarInset` containing the main content                                                                                                                                                                                  |
+| **Welcome**              | `WelcomeBanner`                                                                                                                                                                                                             |
+| **KPIs**                 | [`MetricCard`](/ui/docs/widgets/metric-card) and `MetricGrid`                                                                                                                                                                |
+| **Data Viz**             | [`BarChart`](/ui/docs/charts/cartesian) in a [`WidgetCard`](/ui/docs/widgets/widget-card)                                                                                                                                    |
+| **Dashboard Widgets**    | `QuickActions`, `EntityList`, `ActivityFeed`                                                                                                                                                                                |
+
+### Responsive behaviour
+
+Open the **Code** tab to copy the full page. The layout responds to its container and viewport widths:
+
+- At narrower widths, the `AppRail` collapses or hides.
+- The `Sidebar` collapses to an icon rail or goes off-canvas automatically.
+- Dashboard widgets like the `BarChart` and `MetricCard`s stack vertically using grid layout and container queries (`@container`).
+
+---
+
+## Setup Wizard (https://innostes.com/ui/docs/examples/setup-wizard)
+
+Brand panel, stepper, responsive form grid, locale selects, validation and a wizard footer.
+
+<ComponentPreview name="examples/setup-wizard" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+| Part | Components |
+| --- | --- |
+| Brand panel | `Badge`, `IconTile` |
+| Progress | `Stepper` (completed steps are clickable) |
+| Form | `Form`, `FormGrid`, `Field`, `Input`, `Label` |
+| Locale settings | `CountrySelect`, `TimezoneSelect`, `LanguageSelect`, `DateFormatSelect` |
+| Help | `Alert` (info) |
+| Footer | `FormActions align="between"`, `Button` |
+
+Try submitting with an empty name, or a slug with spaces: validation runs on submit and the errors
+are announced. The layout uses container queries, so it adapts to wherever it's placed.
+
+---
+
+## Colour (https://innostes.com/ui/docs/foundations/colour)
+
+OKLCH semantic palette, contrast tokens, and functional roles.
+
+# Colour
+
+The innostes UI design system employs a semantic colour architecture formulated in the OKLCH colour space. OKLCH guarantees perceptual uniformity across shades, ensuring predictable contrast ratios and consistent luminance across light and dark display modes.
+
+## Semantic architecture
+
+Rather than binding visual elements directly to raw hex values, the library exposes functional tokens mapped to operational roles:
+
+- `primary`: Core interactive triggers, selected states, and brand emphasis.
+- `secondary`: Supporting interface elements, subtle hover backgrounds, and secondary actions.
+- `muted`: Low-emphasis surfaces, disabled borders, and secondary typography.
+- `accent`: Interactive callouts, active navigation items, and highlighted records.
+- `destructive`: Error banners, irreversible deletions, and critical alert indicators.
+- `success`, `warning`, `info`: Contextual status indicators for transactional data tables and badges.
+
+Detailed token swatches, dark mode mappings, and contrast ratio validation tables are maintained in `packages/ui/tailwind/theme.css`.
+
+---
+
+## Dark mode (https://innostes.com/ui/docs/foundations/dark-mode)
+
+Dark theme implementation, token inversion, and hydration strategies.
+
+# Dark mode
+
+innostes UI provides native dark mode support across every component, chart, and widget. Theme switching relies on CSS class toggling (`.dark`) or data attributes (`data-theme="dark"`), updating OKLCH token variables without triggering component re-renders.
+
+## Implementation overview
+
+Dark mode tokens are defined in `packages/ui/tailwind/dark.css`. When the `.dark` class is applied to the root `<html>` or container element, CSS custom properties are remapped to appropriate dark-variant values.
+
+In Next.js applications, theme synchronization is managed using `next-themes`, ensuring zero flash of unstyled content (FOUC) during client-side hydration.
+
+---
+
+## Icons (https://innostes.com/ui/docs/foundations/icons)
+
+Iconography principles, Lucide icon integration, and accessibility conventions.
+
+# Icons
+
+Icons in innostes UI provide immediate visual cues alongside textual labels. The design system standardises on the Lucide icon library, ensuring consistent stroke weights, optical alignment, and predictable bounding boxes across all components.
+
+## Guidelines
+
+- **Textual accompaniment**: Icons that trigger interactive operations must include visible text or an explicit `aria-label` for assistive technologies.
+- **Decorative iconography**: Icons that accompany descriptive text should receive `aria-hidden="true"` to prevent duplicate screen reader announcements.
+- **Sizing standards**: Standard icon sizes align with typographic scale: `size-3.5` (14px) for compact tags, `size-4` (16px) for standard buttons and inputs, and `size-5` (20px) for navigation items.
+
+---
+
+## Motion (https://innostes.com/ui/docs/foundations/motion)
+
+Transition durations, easing curves, and reduced-motion accessibility.
+
+# Motion
+
+Motion in innostes UI is functional, understated, and swift. Animation serves exclusively to orient operators during spatial state transitions—such as expanding accordion panels, opening dialog overlays, and displaying toast notifications.
+
+## Animation principles
+
+- **Duration**: Micro-interactions complete within 150ms to 200ms. Structural layout changes and large overlay entrances finish within 250ms to prevent perceptible lag.
+- **Easing**: Natural decelerate curves (`cubic-bezier(0, 0, 0.2, 1)`) govern entrance animations, whilst accelerate curves govern dismissals.
+- **Reduced motion**: Every animated component respects the user's `prefers-reduced-motion: reduce` system preference by replacing motion with immediate opacity fades or zero-duration transitions.
+
+---
+
+## Spacing and layout (https://innostes.com/ui/docs/foundations/spacing)
+
+4px spatial rhythm, density modes, and responsive layout primitives.
+
+# Spacing and layout
+
+Consistent spatial rhythm prevents visual clutter and establishes structural relationships between interface elements. innostes UI adopts a 4px base increment across padding, margin, gap, and dimension tokens.
+
+## Spatial grid
+
+Spatial values follow a linear 4px progression aligned with standard Tailwind CSS spacing utilities:
+
+- `1` (4px): Micro-spacing between icon glyphs and adjacent inline text.
+- `2` (8px): Compact padding inside buttons, badges, and grouped controls.
+- `3` (12px): Default internal padding for form inputs and table cells.
+- `4` (16px): Card padding, dialog gutters, and standard component gaps.
+- `6` (24px) to `8` (32px): Layout section margins and page header separation.
+
+Components accommodate both standard and compact density modes, allowing operators to adjust data density according to screen resolution and task requirements.
+
+---
+
+## Status legend (https://innostes.com/ui/docs/foundations/status-legend)
+
+Stability tiers and readiness criteria for components in @innostes/ui.
+
+# Status legend
+
+Every component, widget, and chart in `@innostes/ui` carries an explicit status badge reflecting its API stability and production readiness. These statuses establish clear expectations for application developers across Northwind Traders Pvt Ltd.
+
+## Status tiers
+
+### Stable
+
+The component has completed thorough browser QA, unit testing, and accessibility verification. Its public API conforms strictly to Semantic Versioning (SemVer).
+
+- **Breaking changes**: Breaking changes occur only in major version increments (e.g. `1.0.0` to `2.0.0`), accompanied by migration guides and codemods where feasible.
+- **Production readiness**: Recommended for all mission-critical production interfaces and customer-facing workflows.
+- **Support**: Receives active maintenance, security patches, and forward-compatibility testing across supported React runtimes.
+
+### Beta
+
+The component is functionally complete and usable in production environments, but its API surface may undergo refinements based on enterprise team feedback.
+
+- **Breaking changes**: Breaking modifications may occur in minor version increments (e.g. `0.2.0` to `0.3.0`), with documented migration paths in release notes.
+- **Production readiness**: Suitable for early adoption, internal pilot tools, and feature development with active developer oversight.
+- **Feedback**: Developers are encouraged to report ergonomics issues and edge cases before the component graduates to Stable.
+
+### Experimental
+
+The component represents an early architectural exploration or prototype. It demonstrates emerging interaction patterns or evaluates new underlying technologies.
+
+- **Breaking changes**: Breaking changes or removal may occur in any release without prior deprecation notices.
+- **Production readiness**: Intended strictly for experimentation and design prototyping. Avoid using in core enterprise transactions.
+
+## Graduation criteria
+
+A component graduates from Beta to Stable only when meeting all of the following requirements:
+
+1. **Complete documentation**: Full adherence to the component documentation template, including anatomical breakdown, interactive examples, do/don't guidelines, and keyboard interaction tables.
+2. **Automated test coverage**: Unit and integration test suites covering at least 90% statement coverage across all visual variants, states, and accessibility hooks.
+3. **Multi-runtime verification**: Verified operational stability across React 19, React 18, and React 17 environments.
+4. **Design token conformance**: Full support for both light and dark themes using OKLCH colour tokens and CSS variables.
+
+---
+
+## Typography (https://innostes.com/ui/docs/foundations/typography)
+
+Type scale, font stacks, and typographic hierarchy for enterprise data density.
+
+# Typography
+
+Typographic scale in innostes UI balances high information density with sustained reading comfort. Designed for enterprise data grids, accounting ledgers, and operational dashboards at Northwind Traders Pvt Ltd, the typographic hierarchy prioritises tabular alignment and clear legibility.
+
+## Type scale
+
+The type scale maps to CSS custom properties defined in the root stylesheet:
+
+- `text-xs` (12px): Metadata timestamps, badge labels, and compact table captions.
+- `text-sm` (14px): Standard enterprise body text, input fields, and data grid cells.
+- `text-base` (16px): Document body copy, modal subtitles, and standard card headers.
+- `text-lg` to `text-2xl` (18px–24px): Section titles, metric card values, and page headings.
+
+The primary system font stack leverages modern geometric system typefaces with automatic fallback to Inter and Segoe UI, paired with monospace font stacks optimized for tabular numeric data.
+
+---
+
+## Next.js (https://innostes.com/ui/docs/frameworks/nextjs)
+
+Integration guide for Next.js App Router, React Server Components, and styling.
+
+# Next.js
+
+`@innostes/ui` integrates cleanly with Next.js 15 and 16 App Router. Because the library uses modern Base UI primitives with client-side interactive state, components declare `'use client'` where necessary, enabling composition inside React Server Components.
+
+## Setup
+
+Install `@innostes/ui` alongside required styling dependencies:
+
+```bash
+npm install @innostes/ui lucide-react clsx tailwind-merge
+```
+
+Import the stylesheet in your root layout:
+
+```tsx
+// app/layout.tsx
+import '@innostes/ui/styles.css';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+Components that wrap client events (such as `Button`, `Dialog`, or `Select`) can be imported directly into server components or nested within interactive client wrappers.
+
+---
+
+## Vite (https://innostes.com/ui/docs/frameworks/vite)
+
+Integration guide for Vite React projects with Tailwind CSS.
+
+# Vite
+
+Vite provides a lightning-fast build environment for Single Page Applications (SPAs). `@innostes/ui` ships with pre-bundled ES modules and CSS entry points designed for instant hot-module reloading in Vite.
+
+## Setup
+
+Create or configure your Vite project with React and TypeScript:
+
+```bash
+npm install @innostes/ui lucide-react clsx tailwind-merge
+```
+
+Include the global stylesheet in your main entry point:
+
+```tsx
+// src/main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import '@innostes/ui/styles.css';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+```
+
+When building with Tailwind CSS v4, reference `@innostes/ui/tailwind` in your primary CSS entry to inherit all OKLCH design tokens.
+
+---
+
+## Introduction (https://innostes.com/ui/docs)
+
+Accessible React components for admin interfaces, built on Base UI and Tailwind CSS.
+
+innostes UI is the component library behind every innostes product. It gives you everything an admin
+panel needs (forms, tables, dialogs, navigation and an app shell), with one consistent API and
+your own theme.
+
+<ComponentPreview name="examples/dashboard" align="start" className="p-0 sm:p-0" />
+
+## Why innostes UI
+
+<Cards>
+  <Card icon={<Accessibility />} title="Accessible by default" href="/ui/docs/resources/conventions#accessibility">
+    Built on Base UI: keyboard support, focus management and ARIA follow WAI-ARIA, and every
+    component is tested for it.
+  </Card>
+  <Card icon={<Palette />} title="Your theme, everywhere" href="/ui/docs/theming">
+    Semantic design tokens with Tailwind defaults. Change a token once and every component follows,
+    including dark mode.
+  </Card>
+  <Card icon={<Wind />} title="With or without Tailwind" href="/ui/docs/installation">
+    Tailwind apps share their theme with the components. Other apps import one stylesheet.
+  </Card>
+  <Card icon={<Terminal />} title="Made for developers" href="/ui/docs/resources/conventions">
+    Typed props with TSDoc, controlled or uncontrolled state, `render` composition, and `className`
+    that always wins.
+  </Card>
+</Cards>
+
+## Components
+
+| Category | Components |
+| --- | --- |
+| **Actions** | [Button](/ui/docs/components/actions/button), [Button Group](/ui/docs/components/actions/button-group), [Toggle](/ui/docs/components/actions/toggle), [Toggle Group](/ui/docs/components/actions/toggle-group) |
+| **Forms** | [Field & Form](/ui/docs/components/forms/field), [Input](/ui/docs/components/forms/input), [Textarea](/ui/docs/components/forms/textarea), [Checkbox](/ui/docs/components/forms/checkbox), [Radio Group](/ui/docs/components/forms/radio-group), [Switch](/ui/docs/components/forms/switch), [Select](/ui/docs/components/forms/select), [Combobox](/ui/docs/components/forms/combobox), [Number Field](/ui/docs/components/forms/number-field), [Slider](/ui/docs/components/forms/slider) |
+| **Data display** | [Data Table](/ui/docs/components/data-display/data-table), [Table](/ui/docs/components/data-display/table), [Card](/ui/docs/components/data-display/card), [Stat](/ui/docs/components/data-display/stat), [Badge](/ui/docs/components/data-display/badge), [Avatar](/ui/docs/components/data-display/avatar), [Empty State](/ui/docs/components/data-display/empty-state), [Kbd](/ui/docs/components/data-display/kbd) |
+| **Feedback** | [Alert](/ui/docs/components/feedback/alert), [Toast](/ui/docs/components/feedback/toast), [Progress](/ui/docs/components/feedback/progress), [Meter](/ui/docs/components/feedback/meter), [Skeleton](/ui/docs/components/feedback/skeleton), [Spinner](/ui/docs/components/feedback/spinner) |
+| **Overlays** | [Dialog](/ui/docs/components/overlays/dialog), [Alert Dialog](/ui/docs/components/overlays/alert-dialog), [Sheet](/ui/docs/components/overlays/sheet), [Popover](/ui/docs/components/overlays/popover), [Tooltip](/ui/docs/components/overlays/tooltip), [Dropdown Menu](/ui/docs/components/overlays/dropdown-menu), [Context Menu](/ui/docs/components/overlays/context-menu) |
+| **Navigation** | [Tabs](/ui/docs/components/navigation/tabs), [Breadcrumb](/ui/docs/components/navigation/breadcrumb), [Pagination](/ui/docs/components/navigation/pagination), [Accordion](/ui/docs/components/navigation/accordion), [Collapsible](/ui/docs/components/navigation/collapsible) |
+| **Layout** | [Sidebar](/ui/docs/components/layout/sidebar), [Page Header](/ui/docs/components/layout/page-header), [Separator](/ui/docs/components/layout/separator), [Scroll Area](/ui/docs/components/layout/scroll-area) |
+
+## Next steps
+
+<Cards>
+  <Card title="Installation" href="/ui/docs/installation" />
+  <Card title="API Conventions" href="/ui/docs/resources/conventions" />
+</Cards>
+
+---
+
+## Installation (https://innostes.com/ui/docs/installation)
+
+Add innostes UI to a React app in a few minutes.
+
+## Requirements
+
+- React 17, 18 or 19 (and the matching React DOM). The test suite runs on all three.
+- Tailwind CSS v4 (optional, recommended)
+
+`@base-ui/react`, `class-variance-authority`, `clsx` and `tailwind-merge` are installed with the package.
+
+<Steps>
+<Step>
+
+### Install the package
+
+```bash tab="pnpm"
+pnpm add @innostes/ui
+```
+
+```bash tab="npm"
+npm install @innostes/ui
+```
+
+```bash tab="yarn"
+yarn add @innostes/ui
+```
+
+</Step>
+<Step>
+
+### Add the styles
+
+<Tabs items={['With Tailwind CSS', 'Without Tailwind CSS']}>
+<Tab value="With Tailwind CSS">
+
+Import the package after Tailwind in your main CSS file. Components then use **your** theme, and
+Tailwind only generates the classes the components actually use.
+
+```css title="app/globals.css"
+@import 'tailwindcss';
+@import '@innostes/ui/tailwind.css';
+@import '@innostes/ui/dark.css'; /* optional dark theme */
+```
+
+</Tab>
+<Tab value="Without Tailwind CSS">
+
+Import the precompiled stylesheet once, in your app entry.
+
+```ts title="main.tsx"
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css'; // optional dark theme
+```
+
+It uses the default theme and contains no CSS reset, so it won't restyle the rest of your app.
+
+</Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+### Add the providers
+
+Mount `Toaster` once to show [toasts](/ui/docs/components/feedback/toast), and wrap the app in
+`TooltipProvider` so tooltips share their delay.
+
+```tsx title="app/layout.tsx"
+import { Toaster, TooltipProvider } from '@innostes/ui';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <TooltipProvider>{children}</TooltipProvider>
+        <Toaster />
+      </body>
+    </html>
+  );
+}
+```
+
+Popups render in a portal at the end of `<body>`. If your root element creates its own stacking
+context, add `isolation: isolate` to it so popups always appear on top.
+
+</Step>
+<Step>
+
+### Use a component
+
+```tsx
+import { Button, toast } from '@innostes/ui';
+
+export function SaveButton() {
+  return <Button onClick={() => toast.success('Saved')}>Save</Button>;
+}
+```
+
+</Step>
+</Steps>
+
+## Next.js
+
+Interactive components ship with `"use client"`, so you can import them straight into Server
+Components. Helpers like `cn()` and `buttonVariants()` work on the server too.
+
+## TypeScript
+
+Types ship with the package. Every prop has TSDoc, so your editor shows descriptions and defaults
+on hover.
+
+---
+
+## Application shell (https://innostes.com/ui/docs/patterns/app-shell)
+
+Composable layout scaffolding for multi-tenant enterprise dashboards.
+
+# Application shell
+
+The application shell provides the structural frame within which ERP modules operate. Comprising `AppRail`, `Sidebar`, `TopBar`, and `PageHeader`, it maintains continuous context, breadcrumb paths, and user account actions.
+
+## Structure
+
+1. **Primary rail**: High-level module switching (Procurement, Inventory, Finance, Human Resources).
+2. **Context sidebar**: Deep navigational trees, collapsible folders, and saved view bookmarks.
+3. **Top bar**: Global command palette trigger, notification bell, and user profile switcher.
+4. **Canvas**: Main content region with dynamic page headers and breadcrumbs.
+
+---
+
+## Complex forms (https://innostes.com/ui/docs/patterns/complex-forms)
+
+Architecture for multi-section data entry, validation, and unsaved changes.
+
+# Complex forms
+
+Enterprise procurement, invoicing, and inventory intake require structured data collection spanning dozens of interrelated fields. The complex forms pattern orchestrates `FormLayout`, `Field`, input groups, and validation feedback into a coherent operator experience.
+
+## Design principles
+
+- **Sectional grouping**: Divide extensive forms into logical cards or accordion steps to reduce visual fatigue.
+- **Immediate validation**: Validate fields on blur and on submit, displaying inline errors via `FieldError` linked with `aria-describedby`.
+- **Dirty state protection**: Track form dirty state and warn operators before navigating away from incomplete transactions.
+
+---
+
+## Data management (https://innostes.com/ui/docs/patterns/data-management)
+
+Patterns for enterprise data tables, batch actions, and filtering.
+
+# Data management
+
+High-volume operations at Northwind Traders Pvt Ltd involve browsing, filtering, and updating thousands of shipment records and customer accounts. The data management pattern defines how `DataTable`, `Pagination`, search bars, and batch action toolbars collaborate.
+
+## Key considerations
+
+- **Server-driven state**: Sorting, pagination, and multi-field filtering query the backend directly, preserving URL search parameters for link sharing.
+- **Batch execution**: Selection toolbars appear upon selecting records, allowing bulk state transitions (e.g. "Approve selected", "Export to CSV").
+- **Responsive fallback**: On narrow mobile viewports, tables adapt into card lists or horizontally scrollable containers with pinned identity columns.
+
+---
+
+## Patterns (https://innostes.com/ui/docs/patterns/index)
+
+Reusable composition recipes for enterprise application architectures.
+
+# Patterns
+
+Patterns document established combinations of primitives and widgets that resolve recurrent enterprise challenges at Northwind Traders Pvt Ltd. Rather than prescribing rigid page templates, patterns offer composable blueprints for forms, data tables, and application shells.
+
+## Core patterns
+
+- **Complex forms**: Multi-section data entry, conditional validation with Zod, unsaved changes detection, and accessible error summaries.
+- **Data management**: High-density server tables, compound filtering drawers, batch selection workflows, and export pipelines.
+- **Application shell**: Responsive dual-tier navigation, persistent command bars, collapsible sidebars, and contextual breadcrumbs.
+
+---
+
+## Changelog (https://innostes.com/ui/docs/resources/changelog)
+
+Release history, bug fixes, enhancements, and breaking change records for @innostes/ui.
+
+# Changelog
+
+All notable changes to the `@innostes/ui` package are documented chronologically in accordance with Keep a Changelog principles. Every release adheres strictly to Semantic Versioning.
+
+## Version 0.1.0
+
+### Added
+
+- Hardened 19 action and form primitives with Base UI integration and accessible labelling tokens.
+- Accessible ARIA live regions and progress meter percentage normalization across feedback components.
+- Overlay primitives including `Dialog`, `Sheet`, `Popover`, `Tooltip`, and `AlertDialog` with logical RTL positioning.
+- Enterprise widgets: `PermissionMatrix`, `KanbanBoard`, `MetricCard`, `WidgetCard`, and `Sparkline`.
+- Cartesian and donut chart visualisations built on Recharts with semantic token support.
+- Documentation site enhancements: dynamic props playground, interactive category overviews, and LLM text exports.
+
+---
+
+## Contributing (https://innostes.com/ui/docs/resources/contributing)
+
+Development guidelines, code standards, and PR submission workflows.
+
+# Contributing
+
+Contributions to `@innostes/ui` are welcome from engineering teams across Northwind Traders Pvt Ltd. This guide outlines local environment setup, testing requirements, and quality checks required before submitting pull requests.
+
+## Workflow
+
+1. **Monorepo setup**: Clone the repository and install dependencies with `pnpm install`.
+2. **Component development**: Implement new primitives in `packages/ui/src/` adhering strictly to Base UI conventions and British English TSDoc.
+3. **Automated verification**: Run uncached quality gates before raising a pull request:
+   ```bash
+   pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache
+   pnpm nx run landing:docs-check
+   ```
+4. **Documentation**: Every new component requires complete documentation adhering to the component template.
+
+---
+
+## API Conventions (https://innostes.com/ui/docs/resources/conventions)
+
+The rules every innostes UI component follows, so you can guess the API.
+
+Learn these once and every component works the way you expect.
+
+## Composition
+
+Components with several parts are **flat named exports**, not namespaces:
+
+```tsx
+import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@innostes/ui';
+```
+
+Everything is exported from the package root. Imports are tree-shaken: you only ship what you use.
+
+
+## Customization
+
+innostes UI provides several mechanisms for customization, from global theming to pinpoint overrides.
+
+### 1. Design tokens
+
+Design tokens are CSS custom properties defined in `packages/ui/tailwind/theme.css`. Changing a token re-themes every component that uses it automatically across both light and dark modes.
+
+```css
+/* Change the primary colour and fluid type scale globally */
+@theme {
+  --color-primary: var(--color-indigo-600);
+  --text-display: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+}
+```
+
+### 2. CSS variables for sizing
+
+Certain dimensions are exposed as CSS variables rather than semantic tokens. This allows you to set them via component props or override them in CSS.
+
+```tsx
+// Set via prop (writes the CSS variable inline)
+<SidebarProvider width="20rem">
+  <Sidebar />
+</SidebarProvider>
+```
+
+```css
+/* Or override globally in your CSS */
+:root {
+  --sidebar-width: 20rem;
+  --sidebar-width-icon: 4rem;
+  --sidebar-width-mobile: min(20rem, 85vw);
+  --app-rail-width: 5rem;
+  --top-bar-height: 4.5rem;
+}
+```
+
+### 3. `className`
+
+Like any React component, the plain `className` prop acts as a Tailwind escape hatch on the component's root element. It is merged using `tailwind-merge`, so your classes win over internal defaults.
+
+```tsx
+<Button className="rounded-full shadow-lg">Save</Button>
+```
+
+### 4. `classNames` (multi-part overrides)
+
+For complex components with multiple parts, the `classNames` prop (using `SlotClassNames<Slot>`) allows you to override styles for specific internal slots.
+
+Every styled element carries a `data-slot` attribute. Values passed to `classNames` are merged last, resolving conflicts via Tailwind.
+
+```tsx
+<MetricCard
+  label="Revenue"
+  value="$12,000"
+  classNames={{
+    root: 'border-blue-200',
+    value: 'text-blue-700 font-serif'
+  }}
+/>
+```
+
+The following components support the `classNames` prop:
+`ActionList`, `ActivityFeed`, `AppSwitcher`, `CommandPalette`, `DataTable`, `DonutChart`, `EmptyState`, `EntityList`, `MetricCard`, `Notifications`, `PageHeader`, `QuickActions`, `Stepper`, `UserMenu`, `WelcomeBanner`, `WidgetCard`.
+
+### 5. `render` prop (polymorphism)
+
+Via Base UI's `useRender`/`mergeProps`, you can swap the underlying element or component entirely while keeping the component's behavior and ARIA attributes intact.
+
+```tsx
+// Renders the button as a Next.js Link
+<Button render={<Link href="/settings" />} nativeButton={false}>
+  Settings
+</Button>
+```
+
+## Responsiveness
+
+### 1. Fluid typography
+
+Instead of fixed sizes or viewport breakpoints, innostes UI uses `clamp()`-based fluid typography for smooth scaling.
+
+```css
+/* Fluid type automatically scales based on viewport width */
+--text-heading: clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);
+```
+
+### 2. Container queries
+
+For component-level responsiveness, innostes UI relies on CSS container queries (`@container`, `@max-*`) rather than viewport breakpoints. This is crucial because components often live inside sidebars or panels and need to respond to their *available space*, not the overall screen size.
+
+```tsx
+// DataTable switches to stack mode based on its container's width, not the screen width
+<DataTable responsive="stack" data={data} columns={columns} />
+```
+
+Components utilizing container queries include `DataTable`, `Stepper`, and `WelcomeBanner`.
+
+## Controlled and uncontrolled
+
+Every stateful component works both ways, using React's naming:
+
+| Uncontrolled | Controlled | Callback |
+| --- | --- | --- |
+| `defaultValue` | `value` | `onValueChange` |
+| `defaultOpen` | `open` | `onOpenChange` |
+| `defaultChecked` | `checked` | `onCheckedChange` |
+| `defaultPressed` | `pressed` | `onPressedChange` |
+
+Callbacks receive the new value first, then an `eventDetails` object (with `reason` and `event`).
+
+## Styling
+
+- **`className`** is merged with `tailwind-merge`, so your classes win over ours.
+  On interactive parts it can also be a function of the component state:
+  `className={({ disabled }) => (disabled ? 'opacity-30' : undefined)}`.
+- **`data-slot`** names every part (`data-slot="dialog-content"`), so you can target parts from CSS
+  or a parent: `[&_[data-slot=card-title]]:text-lg`.
+- **State attributes** come from Base UI: `data-open`, `data-checked`, `data-disabled`,
+  `data-highlighted`, `data-invalid`, … Style states with Tailwind's `data-*:` variants.
+- **Variant helpers** (`buttonVariants`, `badgeVariants`, `inputVariants`, `toggleVariants`) give you
+  the classes without the component, e.g. for router links. They're server-safe.
+
+## Rendering another element
+
+Parts built on Base UI take a `render` prop to change the element or compose with your own:
+
+```tsx
+<Button render={<Link href="/orders" />} nativeButton={false}>Orders</Button>
+<DialogTrigger render={<Button variant="outline" />}>Edit</DialogTrigger>
+```
+
+Our props and handlers are merged into the element you pass.
+
+## Refs
+
+Every component forwards `ref` to its root element with `forwardRef`, so refs work the same on
+React 17, 18 and 19.
+
+## Server Components
+
+Interactive components ship with `"use client"`, so you can import them into Server Components.
+Pure helpers (`cn`, `buttonVariants`, `getPaginationRange`, …) don't, and work on the server.
+
+## Sizes
+
+Controls share one size scale so they line up in a row:
+
+| Size | Height | Use |
+| --- | --- | --- |
+| `sm` | 32px | Dense tables, toolbars |
+| `md` | 40px | Default |
+| `lg` | 48px | Marketing pages, touch-first screens |
+
+## Accessibility
+
+- Keyboard support and ARIA come from Base UI, which follows the WAI-ARIA Authoring Practices.
+- Icon-only controls require an `aria-label`. The docs for each component list what you must provide.
+- Every component is tested for its roles and keyboard behaviour.
+
+## Versioning
+
+innostes UI follows [semantic versioning](https://semver.org). Breaking changes only happen in major
+versions and are listed in the changelog with a migration note.
+
+---
+
+## FAQ (https://innostes.com/ui/docs/resources/faq)
+
+Frequently asked questions regarding @innostes/ui installation, theming, and usage.
+
+# Frequently asked questions
+
+Common questions and answers regarding `@innostes/ui` integration and enterprise usage.
+
+## General
+
+### How does innostes UI differ from standard Tailwind component libraries?
+
+`@innostes/ui` is built directly on Base UI unstyled primitives, ensuring full WAI-ARIA compliance, roving focus management, and keyboard accessibility by default. Tailwind CSS v4 provides token-based styling rather than arbitrary utility classes.
+
+### Can I use innostes UI with React 17 or React 18?
+
+Yes. The package is thoroughly tested and verified across React 17, React 18, and React 19 runtimes using dedicated test matrices in our CI pipeline.
+
+### Does the library support dark mode?
+
+Yes. All components consume OKLCH semantic variables that dynamically adjust when toggling between `.light` and `.dark` class names or `data-theme` attributes on the root container.
+
+---
+
+## Resources (https://innostes.com/ui/docs/resources/index)
+
+Architecture conventions, changelogs, migration guides, and support policies.
+
+# Resources
+
+Reference documentation, architectural conventions, contribution standards, and release governance for `@innostes/ui`. These resources guide engineers and contributors in maintaining code quality, version compatibility, and secure development practices.
+
+## Available resources
+
+- **Conventions**: Core design principles, component composition rules, event signatures, and styling models.
+- **Changelog**: Detailed release notes tracking new components, enhancements, bug fixes, and deprecations.
+- **Versioning and support**: Semantic versioning guarantees, browser compatibility matrix, and LTS support windows.
+- **Migration guides**: Step-by-step upgrade instructions for major library releases and breaking changes.
+- **Contributing**: Development workflow, local testing procedures, and submission standards.
+- **Security**: Vulnerability reporting protocols, dependency audit policies, and security advisories.
+- **FAQ**: Frequently asked questions regarding framework integration, bundle size, and styling overrides.
+
+---
+
+## Migration guides (https://innostes.com/ui/docs/resources/migration)
+
+Upgrade instructions and breaking change migrations between major versions.
+
+# Migration guides
+
+Detailed upgrade procedures and codemod instructions for transitioning across major `@innostes/ui` releases.
+
+## Upgrading to 0.1.0
+
+The initial enterprise overhaul release normalizes component properties and aligns layout behaviors with Base UI conventions:
+
+- **Breadcrumb**: Resolved false-positive active state warnings; root items now default to `href` links whilst terminal items omit anchors.
+- **Progress and Meter**: Value bounds are now strictly clamped between 0 and 100, accepting explicit `aria-valuetext` formatters.
+- **Dialog and Sheet**: Replaced directional string literals with logical `side="start" | "end"` positioning properties.
+- **RichTextEditor**: Added explicit `invalid` boolean prop for uniform validation integration inside `<Field>`.
+
+---
+
+## Security (https://innostes.com/ui/docs/resources/security)
+
+Security practices, vulnerability reporting, and dependency auditing.
+
+# Security
+
+Security is foundational to the development lifecycle of `@innostes/ui`. Because the library runs in mission-critical ERP environments handling sensitive business and financial data, all components undergo continuous security review.
+
+## Reporting vulnerabilities
+
+If you discover a potential security vulnerability within `@innostes/ui` or associated tooling, please report it privately:
+
+- Send vulnerability disclosures directly to `security@innostes.com`.
+- Avoid filing public issues on GitHub for undisclosed security vulnerabilities.
+- Provide reproduction steps, package version, and expected impact.
+
+## Dependency auditing
+
+Automated dependency audits execute on every CI run via `pnpm audit`. High or critical severity findings block release pipelines until patches or vendor updates are merged.
+
+---
+
+## Versioning and support (https://innostes.com/ui/docs/resources/versioning)
+
+Semantic versioning policy, release lifecycle, and browser compatibility targets.
+
+# Versioning and support
+
+The `@innostes/ui` package follows Semantic Versioning (SemVer 2.0.0). Version numbers adhere to the `MAJOR.MINOR.PATCH` structure, providing predictable upgrade paths for Northwind Traders Pvt Ltd's engineering teams.
+
+## Release cadence
+
+- **Patch releases** (`0.1.x`): Backwards-compatible bug fixes, security remediations, and performance improvements.
+- **Minor releases** (`0.x.0`): Backwards-compatible feature additions, new components, and deprecation notices.
+- **Major releases** (`x.0.0`): Breaking changes, major architectural migrations, or minimum React runtime requirement upgrades.
+
+## Supported environments
+
+The library supports modern evergreen desktop and mobile browsers:
+
+- Chromium (Chrome, Edge, Opera) latest 2 major versions.
+- Mozilla Firefox latest 2 major versions.
+- Apple Safari latest 2 major versions.
+- Node.js LTS versions (v20, v22) for SSR and build tooling.
+
+---
+
+## Theming (https://innostes.com/ui/docs/theming)
+
+Change colours once in your Tailwind theme and every component follows.
+
+Components are styled with **semantic tokens** such as `bg-primary`, `text-muted-foreground` or
+`border-border`. Each token is a CSS variable with a default from Tailwind's palette.
+
+<ThemingDemo />
+
+## Override tokens
+
+With Tailwind, set any token in your `@theme` block. Anything you leave out keeps its default.
+
+```css title="app/globals.css"
+@import 'tailwindcss';
+@import '@innostes/ui/tailwind.css';
+
+@theme {
+  --color-primary: var(--color-emerald-600);
+  --color-primary-hover: var(--color-emerald-700);
+  --radius-md: 0.75rem;
+}
+```
+
+Because defaults point at Tailwind's palette (`--color-primary` is `--color-blue-600`), changing
+your palette also changes the components.
+
+Without Tailwind, set the same CSS variables on `:root`:
+
+```css
+:root {
+  --color-primary: #16a34a;
+  --color-primary-hover: #15803d;
+}
+```
+
+## Dark mode
+
+Import the dark theme. It switches on under a `.dark` class or `data-theme="dark"` on any ancestor,
+usually `<html>`, which is what `next-themes` and most theme switchers set.
+
+```css
+@import '@innostes/ui/dark.css';
+```
+
+To customise it, override tokens inside your own `.dark` block after the import.
+
+## Scoped themes
+
+Tokens are plain CSS variables, so you can re-theme a part of the page, e.g. a white-label area:
+
+```tsx
+<section style={{ '--color-primary': 'var(--color-violet-600)' } as React.CSSProperties}>
+  <Button>Uses violet</Button>
+</section>
+```
+
+## Tokens
+
+| Token | Default | Used for |
+| --- | --- | --- |
+| `background` / `foreground` | white / zinc-950 | Page surface and text |
+| `card` / `card-foreground` | white / zinc-950 | Cards, tables, sidebar |
+| `popover` / `popover-foreground` | white / zinc-950 | Menus, dialogs, popovers, toasts |
+| `primary` (`-hover`, `-foreground`) | blue-600 (blue-700, white) | Main actions, selection, focus |
+| `secondary` (`-hover`, `-foreground`) | zinc-100 (zinc-200, zinc-900) | Secondary actions |
+| `muted` / `muted-foreground` | zinc-100 / zinc-500 | Subtle backgrounds, help text |
+| `accent` / `accent-foreground` | zinc-100 / zinc-900 | Hovered and highlighted items |
+| `destructive` (`-hover`, `-foreground`) | red-600 (red-700, white) | Dangerous actions, errors |
+| `success` / `success-foreground` | emerald-600 / white | Positive status |
+| `warning` / `warning-foreground` | amber-500 / amber-950 | Caution status |
+| `info` / `info-foreground` | sky-600 / white | Neutral status |
+| `border` | zinc-200 | Dividers and outlines |
+| `input` | zinc-300 | Form control borders |
+| `ring` | blue-500 | Focus outlines |
+| `overlay` | black / 40% | Backdrop behind dialogs |
+
+Each token is a colour variable: `--color-<token>`, used as `bg-<token>`, `text-<token>`,
+`border-<token>` and so on. Sizes, radius and fonts use Tailwind's standard tokens
+(`--spacing`, `--radius-md`, `--text-sm`, …).
+
+---
+
+## App Switcher (https://innostes.com/ui/docs/widgets/app-switcher)
+
+A rich popover menu designed for the ECOSYSTEM module launcher, featuring grouped apps, descriptions, icons, and built-in search functionality.
+
+<ComponentPreview name="widgets/app-switcher/basic" align="center" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import { AppSwitcher } from '@innostes/ui';
+```
+
+## Usage
+
+The `AppSwitcher` is primarily used in the top bar as a way to navigate between large, distinct parts of an ecosystem (e.g., switching from the HRMS module to the ERP module).
+
+It accepts an array of `sections`, where each section contains a list of `apps`.
+
+```tsx
+function TopNavigation() {
+  const sections = [
+    {
+      label: 'Modules',
+      apps: [
+        {
+          id: 'erp',
+          name: 'ERP',
+          description: 'Business operations',
+          icon: <BuildingIcon />,
+          tone: 'chart-1',
+          href: '/erp'
+        },
+        {
+          id: 'hrms',
+          name: 'HRMS',
+          description: 'People & HR',
+          icon: <UsersIcon />,
+          tone: 'chart-3',
+          href: '/hrms'
+        },
+      ]
+    },
+  ];
+
+  return <AppSwitcher value="hrms" sections={sections} />;
+}
+```
+
+### Routing
+
+You can handle navigation in three ways:
+
+1. Provide an `href` to each app. The item will render as an `<a>` tag.
+2. Provide a `render` element (e.g., `render={<Link href="/hrms" />}`). The component will merge its props into your custom link component.
+3. Use the controlled `value` and `onValueChange` props to navigate programmatically when an app is selected.
+
+### Search
+
+The component automatically includes a search input if there are more than 6 applications provided across all sections. You can manually force it to show or hide by setting the `searchable` boolean prop.
+
+## API Reference
+
+<ApiTable components={['AppSwitcher']} />
+
+---
+
+## Change Log (https://innostes.com/ui/docs/widgets/change-log)
+
+An audit trail with field-level before and after values, notes and day groups.
+
+<ComponentPreview name="widgets/change-log/basic" />
+
+## Import
+
+```tsx
+import { ChangeLog } from '@innostes/ui';
+```
+
+## Usage
+
+Map your audit records to entries, newest first:
+
+```tsx
+<ChangeLog
+  groupByDay
+  entries={audit.map((a) => ({
+    id: a.id,
+    actor: a.user.name,
+    action: a.summary, // "updated the invoice"
+    time: new Date(a.at),
+    changes: a.diff.map((d) => ({ field: d.label, from: d.old, to: d.new })),
+    note: a.comment,
+  }))}
+/>
+```
+
+- `from` and `to` take any content, e.g. status badges. Empty values show `emptyValue` (default "—").
+- Built on `ActivityFeed`'s timeline, so it takes the same `groupByDay`, `locale` and `now` props. Use `ActivityFeed` for event streams without field changes.
+
+## Accessibility
+
+Changes are a description list; old values use `<del>` and new values `<ins>`, with hidden "from" / "to" labels (`diffLabels` to translate).
+
+## API Reference
+
+<ApiTable components={['ChangeLog']} />
+
+---
+
+## Widgets (https://innostes.com/ui/docs/widgets/index)
+
+High-level business components combining multiple primitives for enterprise ERP patterns.
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Widgets
+
+Widgets are domain-ready, composite enterprise components designed specifically for Northwind Traders Pvt Ltd's ERP operations. From role-based access matrixes to drag-and-drop Kanban logistics boards, widgets assemble primitives into production-ready business blocks.
+
+## Components
+
+<CategoryGrid category="widgets" />
+
+## Usage guidelines
+
+- **Business logic separation**: Widgets encapsulate UI interactions and visual states while accepting pure data props and callback handlers for business operations.
+- **Data density**: Widgets support compact display modes to present high-density business intelligence without visual clutter.
+- **Touch and keyboard**: All widgets include accessible touch targets and keyboard alternatives for mouse-intensive operations.
+
+---
+
+## Kanban Board (https://innostes.com/ui/docs/widgets/kanban-board)
+
+Pipelines, deals, tickets and approval stages, with drag and drop, keyboard moves and WIP limits.
+
+<ComponentPreview name="widgets/kanban-board/basic" />
+
+## Import
+
+```tsx
+import { KanbanBoard, moveKanbanItem, type KanbanColumn } from '@innostes/ui';
+```
+
+## Usage
+
+Cards need a string `id`. The board renders the card frame; `renderCard` renders what's inside.
+
+```tsx
+<KanbanBoard
+  aria-label="Deals"
+  value={columns}
+  onValueChange={(next, move) => {
+    setColumns(next);
+    api.updateDealStage(move.itemId, move.toColumnId, move.toIndex);
+  }}
+  canMove={(move) => !(move.fromColumnId === 'lead' && move.toColumnId === 'won')}
+  getItemLabel={(deal) => deal.name}
+  renderCard={(deal) => <DealCard deal={deal} />}
+  onCardOpen={(deal) => router.push(`/deals/${deal.id}`)}
+/>
+```
+
+- `onValueChange` gets the new columns and the move (`itemId`, `fromColumnId`, `fromIndex`, `toColumnId`, `toIndex`).
+- `canMove` blocks moves, e.g. skipping a required stage.
+- `limit` on a column shows `count/limit` and turns red above it.
+- `columnActions` adds buttons to column headers.
+- `moveKanbanItem(columns, itemId, toColumnId, toIndex)` applies a move to plain data, e.g. for optimistic updates or real-time sync.
+
+Mouse dragging uses native HTML drag and drop, which doesn't work on touch screens. On phones, let people open the card (`onCardOpen`) and change its stage there.
+
+## Accessibility
+
+Drag and drop isn't required. Each card is focusable, and every step is announced:
+
+| Key | Action |
+| --- | --- |
+| Arrows | Move focus between cards and columns |
+| Space | Pick up the card, then drop it |
+| Arrows (holding) | Move the card up, down or to another column |
+| Escape | Cancel the move |
+| Enter | `onCardOpen` |
+
+Pass `labels` to translate the instructions and announcements.
+
+## API Reference
+
+<ApiTable components={['KanbanBoard']} />
+
+---
+
+## Metric Card (https://innostes.com/ui/docs/widgets/metric-card)
+
+One component, seven designs: default, compact, sparkline, progress, comparison, split and accent.
+
+<ComponentPreview name="widgets/metric-card/variants" align="start" />
+
+## Import
+
+```tsx
+import { MetricCard, MetricGrid, MetricDelta } from '@innostes/ui';
+```
+
+## Choosing a variant
+
+| Variant | Use it for |
+| --- | --- |
+| `default` | The standard KPI row: icon, value, trend and comparison. |
+| `compact` | Many metrics in little space, e.g. a sidebar or a dense ops dashboard. |
+| `accent` | The one or two metrics that matter most on the page. |
+| `sparkline` | When the direction over time matters more than one number. |
+| `progress` | Progress towards a target: sales quota, budget, OKR. |
+| `comparison` | This period next to the previous one, side by side. |
+| `split` | One total broken down into a few parts, e.g. attendance by status. |
+
+Use one variant per row so the row lines up.
+
+## Deltas and trends
+
+```tsx
+<MetricCard label="Revenue" value="€48,250" delta={0.125} comparison="vs last month" />   // ↑ +12.5% (green)
+<MetricCard label="Refund rate" value="1.2%" delta={0.2} upIsGood={false} />              // ↑ +20% (red)
+<MetricCard label="Team" value="42" delta="+3 people" />                                  // string, shown as is
+```
+
+- A **number** `delta` is a fraction: `0.125` shows as `+12.5%`, formatted for the user's locale.
+  Change it with `deltaFormat` (any `Intl.NumberFormat` options).
+- A **string** `delta` is shown as is. A leading `+` or `-` sets the arrow.
+- `upIsGood={false}` flips the colours for metrics where an increase is bad.
+- The arrow is announced to screen readers ("Up", "Down"), so colour isn't the only signal.
+
+## Formatting values
+
+`value` is a `ReactNode`: format it yourself so it matches the rest of your app.
+
+```tsx
+const money = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+<MetricCard label="Revenue" value={money.format(revenue)} />
+```
+
+## Links, menus and loading
+
+<ComponentPreview name="widgets/metric-card/states" align="start" />
+
+- `render={<Link href="/orders" />}` makes the whole card a link (with hover and focus styles).
+- `action` adds a control in the corner, e.g. a `DropdownMenu`. (Not with `render`, because a link
+  can't contain a button.)
+- `loading` shows a skeleton in place of the value and sets `aria-busy`.
+
+## Layout
+
+`MetricGrid` fits as many equal columns as there's room for. Set `minCardWidth` (default `14rem`)
+to control when it wraps.
+
+## `MetricDelta` on its own
+
+The coloured trend is exported for tables and lists:
+
+```tsx
+<MetricDelta delta={-0.04} upIsGood={false} />
+```
+
+`getTrend`, `getSentiment` and `formatDelta` are exported too. They have no React code, so they
+work anywhere.
+
+## Customization
+
+Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customization) for the full customization model.
+
+## API Reference
+
+<ApiTable components={['MetricCard', 'MetricGrid']} />
+
+---
+
+## Notification Bell (https://innostes.com/ui/docs/widgets/notification-bell)
+
+A rich popover component to display recent notifications, relative timestamps, and unread statuses, usually placed in the TopBar.
+
+<ComponentPreview name="widgets/notification-bell/basic" align="center" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import { NotificationBell, NotificationList, NotificationItem } from '@innostes/ui';
+```
+
+## Usage
+
+The `NotificationBell` is primarily used in the top bar. It wraps a trigger and a popover containing a `NotificationList`.
+
+It automatically calculates the unread count based on the `items` provided (items where `read` is falsy or `undefined`), or you can explicitly provide an `unreadCount`.
+
+```tsx
+function TopNavigation() {
+  const notifications: NotificationItem[] = [
+    {
+      id: '1',
+      title: 'New message from Sarah',
+      description: 'Can we review the latest designs?',
+      time: new Date(),
+      icon: <MessageSquareIcon />,
+      tone: 'primary',
+      read: false,
+    },
+    // ...
+  ];
+
+  return (
+    <NotificationBell
+      items={notifications}
+      onMarkAllRead={() => markAllRead()}
+      viewAll={{ href: '/notifications' }}
+    />
+  );
+}
+```
+
+### Notification List
+
+If you need to render the list of notifications outside of the bell popover (for example, on a dedicated full-page notifications view or inside a widget card), you can use the `NotificationList` component directly.
+
+```tsx
+<NotificationList
+  items={notifications}
+  onItemClick={(item) => markRead(item.id)}
+/>
+```
+
+## API Reference
+
+<ApiTable components={['NotificationBell', 'NotificationList']} />
+
+---
+
+## Permission Matrix (https://innostes.com/ui/docs/widgets/permission-matrix)
+
+Resources by actions, grouped by module, with row and column "all" toggles.
+
+<ComponentPreview name="widgets/permission-matrix/basic" />
+
+## Import
+
+```tsx
+import { PermissionMatrix, permissionKey } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<PermissionMatrix
+  aria-label={`Permissions for ${role.name}`}
+  actions={[
+    { id: 'view', label: 'View' },
+    { id: 'edit', label: 'Edit' },
+    { id: 'approve', label: 'Approve' },
+  ]}
+  resources={[
+    { id: 'invoices', label: 'Invoices', group: 'Finance' },
+    { id: 'payroll', label: 'Payroll', group: 'HR', actions: ['view', 'approve'] },
+  ]}
+  value={role.permissions}
+  onValueChange={(permissions) => save({ ...role, permissions })}
+/>
+```
+
+- The value is a flat list of `"resource:action"` keys. `permissionKey(resource, action)` builds one.
+- `actions` on a resource limits which actions apply; other cells show a dash.
+- `group` lists rows under section headings, in the order they first appear.
+- `readOnly` shows the permissions without bulk toggles or changes, e.g. for system roles.
+
+## Accessibility
+
+A real `<table>` with row and column headers. Every checkbox is named after its action and resource ("Edit Invoices"); bulk toggles show a mixed state when only some permissions are granted.
+
+## API Reference
+
+<ApiTable components={['PermissionMatrix']} />
+
+---
+
+## Sparkline (https://innostes.com/ui/docs/widgets/sparkline)
+
+Pure SVG, no chart library, server-safe.
+
+<ComponentPreview name="widgets/sparkline/basic" />
+
+## Import
+
+```tsx
+import { Sparkline } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Sparkline data={[12, 18, 15, 22, 28]} tone="success" label="Orders, last 5 days, rising" />
+```
+
+- It fills the width of its container; set the height with `height` (default 40px).
+- `area={false}` draws only the line, which suits table cells.
+- Without `label` it's decorative and hidden from screen readers. Add a `label` when the trend
+  carries information that isn't written next to it.
+
+For full charts with axes and tooltips, use the chart components (coming next).
+
+## Customization
+
+Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customization) for the full customization model.
+
+## API Reference
+
+<ApiTable components={['Sparkline']} />
+
+---
+
+## User Menu (https://innostes.com/ui/docs/widgets/user-menu)
+
+A user profile button that opens a dropdown menu. Typically used in the top bar or sidebar footer to access profile settings and sign out.
+
+<ComponentPreview name="widgets/user-menu/basic" align="center" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import { UserMenu } from '@innostes/ui';
+```
+
+## Usage
+
+The `UserMenu` provides a consistent trigger showing the user's avatar and details. It wraps a dropdown menu, so you can pass standard `DropdownMenuItem` components as children.
+
+```tsx
+function AppHeader() {
+  return (
+    <UserMenu
+      name="Arun Kumar"
+      subtitle="Acme Corp"
+      email="arun@acme.com"
+      avatarSrc={user.photoUrl}
+    >
+      <DropdownMenuItem>Profile</DropdownMenuItem>
+      <DropdownMenuItem>Settings</DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem variant="destructive" onClick={signOut}>
+        Sign out
+      </DropdownMenuItem>
+    </UserMenu>
+  );
+}
+```
+
+### Avatar fallback
+
+If `avatarSrc` is not provided, the component automatically generates initials based on the `name` prop (e.g., "Arun Kumar" -> "AK"). You can override this behavior by explicitly passing an `initials` string.
+
+## API Reference
+
+<ApiTable components={['UserMenu']} />
+
+---
+
+## Widget Card (https://innostes.com/ui/docs/widgets/widget-card)
+
+Header with title, count, actions and "View all", plus built-in loading, empty and error states.
+
+<ComponentPreview name="widgets/widget-card/basic" />
+
+## Import
+
+```tsx
+import { WidgetCard } from '@innostes/ui';
+```
+
+## Usage
+
+Wrap any dashboard content (a list, a table, a chart) to give it a consistent header and the
+three states every data widget needs:
+
+```tsx
+const { data, isLoading, error, refetch } = usePendingActions();
+
+<WidgetCard
+  title="Pending actions"
+  count={data?.length}
+  viewAll={{ href: '/approvals' }}
+  actions={<PeriodSelect />}
+  loading={isLoading}
+  error={error ? 'Could not load pending actions.' : undefined}
+  onRetry={refetch}
+  empty={data?.length === 0}
+  emptyState="You're all caught up."
+>
+  <PendingActionList items={data} />
+</WidgetCard>
+```
+
+- `viewAll` takes `href`, `onClick` or `render={<Link href="…" />}` for your router.
+- `padding="none"` lets tables and charts reach the card edges.
+- `count` shows a badge next to the title (`99+` above 99); `countTone` changes its colour.
+
+## Accessibility
+
+- Renders a `<section>` labelled by its title, so screen-reader users can jump between widgets.
+- `headingLevel` (default `h2`) keeps the page outline correct.
+- Loading sets `aria-busy`; errors use `role="alert"`.
+
+## Customization
+
+Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customization) for the full customization model.
+
+## API Reference
+
+<ApiTable components={['WidgetCard']} />
+
+---

@@ -25,7 +25,9 @@ export function runConsistencyCheck() {
 
   // Check version string
   const versionMatch = /export const uiVersion\s*=\s*['"]([^'"]+)['"]/.exec(sharedContent);
-  if (!versionMatch) {
+  if (sharedContent.includes('uiPkg.version')) {
+    // Dynamically imported from packages/ui/package.json
+  } else if (!versionMatch) {
     errors.push({
       file: 'apps/landing/lib/shared.ts',
       line: 1,

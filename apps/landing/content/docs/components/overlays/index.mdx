@@ -1,0 +1,22 @@
+---
+title: Overlays
+description: Modal dialogs, sheets, popovers, tooltips, and command menus.
+status: Stable
+summary: Layered interface elements that appear above base page content for focused interactions.
+---
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Overlays
+
+Overlays present supplementary workflows, context-sensitive details, and decision prompts above the primary page canvas. They enable Northwind Traders operators to complete focused sub-tasks without navigating away from their active workspace.
+
+## Components
+
+<CategoryGrid category="components/overlays" />
+
+## Usage guidelines
+
+- **Modality**: Use `Dialog` or `AlertDialog` when operator confirmation or focused data entry is mandatory before proceeding. Use `Sheet` for wide inspection panels and edit drawers.
+- **Focus management**: Overlays automatically trap focus when opened, restore focus to the triggering element upon dismissal, and close on Escape key navigation.
+- **Progressive disclosure**: Reserve `Tooltip` for non-essential keyboard hints and iconography descriptions. Use `Popover` for rich interactive menus and filters.

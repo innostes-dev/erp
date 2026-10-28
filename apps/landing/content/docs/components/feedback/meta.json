@@ -1,4 +1,13 @@
 {
   "title": "Feedback",
-  "pages": ["alert", "toast", "progress", "meter", "gauge", "skeleton", "spinner"]
+  "pages": [
+    "index",
+    "alert",
+    "toast",
+    "progress",
+    "meter",
+    "gauge",
+    "skeleton",
+    "spinner"
+  ]
 }

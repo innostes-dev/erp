@@ -1,0 +1,37 @@
+---
+title: Next.js
+description: Integration guide for Next.js App Router, React Server Components, and styling.
+---
+
+# Next.js
+
+`@innostes/ui` integrates cleanly with Next.js 15 and 16 App Router. Because the library uses modern Base UI primitives with client-side interactive state, components declare `'use client'` where necessary, enabling composition inside React Server Components.
+
+## Setup
+
+Install `@innostes/ui` alongside required styling dependencies:
+
+```bash
+npm install @innostes/ui lucide-react clsx tailwind-merge
+```
+
+Import the stylesheet in your root layout:
+
+```tsx
+// app/layout.tsx
+import '@innostes/ui/styles.css';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+Components that wrap client events (such as `Button`, `Dialog`, or `Select`) can be imported directly into server components or nested within interactive client wrappers.

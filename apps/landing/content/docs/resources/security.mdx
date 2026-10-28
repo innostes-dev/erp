@@ -1,0 +1,20 @@
+---
+title: Security
+description: Security practices, vulnerability reporting, and dependency auditing.
+---
+
+# Security
+
+Security is foundational to the development lifecycle of `@innostes/ui`. Because the library runs in mission-critical ERP environments handling sensitive business and financial data, all components undergo continuous security review.
+
+## Reporting vulnerabilities
+
+If you discover a potential security vulnerability within `@innostes/ui` or associated tooling, please report it privately:
+
+- Send vulnerability disclosures directly to `security@innostes.com`.
+- Avoid filing public issues on GitHub for undisclosed security vulnerabilities.
+- Provide reproduction steps, package version, and expected impact.
+
+## Dependency auditing
+
+Automated dependency audits execute on every CI run via `pnpm audit`. High or critical severity findings block release pipelines until patches or vendor updates are merged.

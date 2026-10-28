@@ -1,0 +1,126 @@
+# innostes UI
+
+> A production-grade design system and React component library engineered for enterprise ERP, HRMS, and CRM platforms. Accessible, WCAG 2.2 AA compliant, and localized.
+
+## Core Documentation
+- [Accessibility](https://innostes.com/ui/docs/accessibility): Accessibility conformance standards, keyboard models, and assistive technology support.
+- [Colour](https://innostes.com/ui/docs/foundations/colour): OKLCH semantic palette, contrast tokens, and functional roles.
+- [Dark mode](https://innostes.com/ui/docs/foundations/dark-mode): Dark theme implementation, token inversion, and hydration strategies.
+- [Icons](https://innostes.com/ui/docs/foundations/icons): Iconography principles, Lucide icon integration, and accessibility conventions.
+- [Motion](https://innostes.com/ui/docs/foundations/motion): Transition durations, easing curves, and reduced-motion accessibility.
+- [Spacing and layout](https://innostes.com/ui/docs/foundations/spacing): 4px spatial rhythm, density modes, and responsive layout primitives.
+- [Status legend](https://innostes.com/ui/docs/foundations/status-legend): Stability tiers and readiness criteria for components in @innostes/ui.
+- [Typography](https://innostes.com/ui/docs/foundations/typography): Type scale, font stacks, and typographic hierarchy for enterprise data density.
+- [Next.js](https://innostes.com/ui/docs/frameworks/nextjs): Integration guide for Next.js App Router, React Server Components, and styling.
+- [Vite](https://innostes.com/ui/docs/frameworks/vite): Integration guide for Vite React projects with Tailwind CSS.
+- [Introduction](https://innostes.com/ui/docs): Accessible React components for admin interfaces, built on Base UI and Tailwind CSS.
+- [Installation](https://innostes.com/ui/docs/installation): Add innostes UI to a React app in a few minutes.
+- [Application shell](https://innostes.com/ui/docs/patterns/app-shell): Composable layout scaffolding for multi-tenant enterprise dashboards.
+- [Complex forms](https://innostes.com/ui/docs/patterns/complex-forms): Architecture for multi-section data entry, validation, and unsaved changes.
+- [Data management](https://innostes.com/ui/docs/patterns/data-management): Patterns for enterprise data tables, batch actions, and filtering.
+- [Patterns](https://innostes.com/ui/docs/patterns/index): Reusable composition recipes for enterprise application architectures.
+- [Theming](https://innostes.com/ui/docs/theming): Change colours once in your Tailwind theme and every component follows.
+
+## Components
+- [Button Group](https://innostes.com/ui/docs/components/actions/button-group) [Stable]: Merges borders and corners of adjacent buttons, horizontally or vertically.
+- [Button](https://innostes.com/ui/docs/components/actions/button) [Stable]: A flexible button component with multiple variants, sizes, and states.
+- [Actions](https://innostes.com/ui/docs/components/actions/index) [Stable]: Core interactive controls for submitting forms, triggering commands, and toggling states.
+- [Toggle Group](https://innostes.com/ui/docs/components/actions/toggle-group) [Stable]: Single or multiple selection with roving focus and arrow-key navigation.
+- [Toggle](https://innostes.com/ui/docs/components/actions/toggle) [Stable]: Two-state button for formatting, favourites and view options.
+- [Avatar](https://innostes.com/ui/docs/components/data-display/avatar) [Stable]: Image with initials fallback, four sizes, round or square, and stacked groups.
+- [Badge](https://innostes.com/ui/docs/components/data-display/badge) [Stable]: Semantic colours for statuses, with an optional dot.
+- [Card](https://innostes.com/ui/docs/components/data-display/card) [Stable]: Header with title, description and actions, plus content and footer areas.
+- [Data Table](https://innostes.com/ui/docs/components/data-display/data-table) [Beta]: Sorting, row selection, pagination, loading and empty states. Client-side or server-side.
+- [Empty State](https://innostes.com/ui/docs/components/data-display/empty-state) [Stable]: Icon, title, explanation and next actions for empty lists and searches.
+- [Icon Tile](https://innostes.com/ui/docs/components/data-display/icon-tile) [Stable]: 14 colours, soft or solid, four sizes. Used by metric cards, lists and feature grids.
+- [Data display](https://innostes.com/ui/docs/components/data-display/index) [Stable]: Components for structured record presentation, hierarchies, and metric highlights.
+- [Kbd](https://innostes.com/ui/docs/components/data-display/kbd) [Stable]: For shortcuts in tooltips, menus and help text.
+- [Stat](https://innostes.com/ui/docs/components/data-display/stat) [Stable]: Label, value and trend, with colours that know whether "up" is good.
+- [Table](https://innostes.com/ui/docs/components/data-display/table) [Stable]: Native table markup with consistent spacing, hover and selected rows, and horizontal scrolling.
+- [Tree View](https://innostes.com/ui/docs/components/data-display/tree-view) [Beta]: Departments, chart of accounts, categories and folders, with full WAI-ARIA tree keyboard support.
+- [Alert](https://innostes.com/ui/docs/components/feedback/alert) [Stable]: Info, success, warning and error messages with matching icons and live-region roles.
+- [Gauge](https://innostes.com/ui/docs/components/feedback/gauge) [Beta]: KPI dials for budget use, capacity, SLA and quota, with value-based colours.
+- [Feedback](https://innostes.com/ui/docs/components/feedback/index) [Stable]: Components for communicating system status, background task progress, and operation outcomes.
+- [Meter](https://innostes.com/ui/docs/components/feedback/meter) [Stable]: Storage, seats or quota usage, with tone colours for limits.
+- [Progress](https://innostes.com/ui/docs/components/feedback/progress) [Stable]: Determinate and indeterminate bars with an optional label and value.
+- [Skeleton](https://innostes.com/ui/docs/components/feedback/skeleton) [Stable]: Pulsing shapes sized with utility classes. Respects reduced motion.
+- [Spinner](https://innostes.com/ui/docs/components/feedback/spinner) [Stable]: Inherits the text colour; sized with utility classes.
+- [Toast](https://innostes.com/ui/docs/components/feedback/toast) [Stable]: Success, error, warning, loading and promise toasts with actions, swipe to dismiss and a queue limit.
+- [Calendar](https://innostes.com/ui/docs/components/forms/calendar) [Stable]: Single and range modes, min/max and disabled days, one or two months, locale-aware, fully keyboard accessible.
+- [Checkbox](https://innostes.com/ui/docs/components/forms/checkbox) [Stable]: Single checkboxes and groups with a "select all" parent.
+- [Combobox](https://innostes.com/ui/docs/components/forms/combobox) [Beta]: Type to filter, arrow keys to move, Enter to pick. For long lists like countries or customers.
+- [Date Picker](https://innostes.com/ui/docs/components/forms/date-picker) [Stable]: DatePicker and DateRangePicker with presets, min/max, clearing, and plain-form submission.
+- [Field & Form](https://innostes.com/ui/docs/components/forms/field) [Stable]: Accessible wiring between label, control, help text and errors, with native and custom validation.
+- [File Dropzone](https://innostes.com/ui/docs/components/forms/file-dropzone) [Beta]: Type, size and count checks, image thumbnails, and native form submission.
+- [Forms](https://innostes.com/ui/docs/components/forms/index) [Stable]: Input fields, pickers, validation containers, and specialised editors for complex data entry.
+- [Input Group](https://innostes.com/ui/docs/components/forms/input-group) [Stable]: InputGroup, SearchInput (clear, Escape, shortcut hint) and PasswordInput (show/hide).
+- [Input](https://innostes.com/ui/docs/components/forms/input) [Stable]: Three sizes, invalid and disabled states, file inputs, and automatic Field wiring.
+- [Locale Selects](https://innostes.com/ui/docs/components/forms/locale-select) [Stable]: Names come from the browser's Intl API in the user's language. No data files to bundle or update.
+- [Number Field](https://innostes.com/ui/docs/components/forms/number-field) [Stable]: Min/max clamping, keyboard and wheel stepping, currency and percent formats.
+- [Radio Group](https://innostes.com/ui/docs/components/forms/radio-group) [Stable]: Arrow-key navigation, form submission and Field support.
+- [Rich Text Editor](https://innostes.com/ui/docs/components/forms/rich-text-editor) [Beta]: Bold, headings, lists, quotes, links and undo, with Markdown shortcuts. Built on Tiptap, in a separate entry point.
+- [Searchable Select](https://innostes.com/ui/docs/components/forms/searchable-select) [Stable]: For long lists of simple options. Matches labels and keywords, accent-insensitive.
+- [Select](https://innostes.com/ui/docs/components/forms/select) [Stable]: Groups, separators, multiple selection, type-ahead and form submission.
+- [Slider](https://innostes.com/ui/docs/components/forms/slider) [Stable]: Single values and ranges, keyboard support, form submission.
+- [Switch](https://innostes.com/ui/docs/components/forms/switch) [Stable]: Two sizes, form submission and Field support.
+- [Tag Input](https://innostes.com/ui/docs/components/forms/tag-input) [Beta]: Labels, skills, recipients and SKUs as chips, with suggestions, paste splitting, limits and validation.
+- [Textarea](https://innostes.com/ui/docs/components/forms/textarea) [Stable]: Optional auto-resize, and automatic Field wiring.
+- [App Rail](https://innostes.com/ui/docs/components/layout/app-rail) [Stable]: Used alongside a sidebar to navigate between top-level areas or modules in complex applications, featuring active states, tooltips, and badges.
+- [Form Layout](https://innostes.com/ui/docs/components/layout/form-layout) [Stable]: FormGrid, FormSection and FormActions. Responsive to the space they're in, not the screen.
+- [Layout](https://innostes.com/ui/docs/components/layout/index) [Stable]: Scaffolding primitives for responsive ERP application shells, navigation bars, and data panes.
+- [Page Header](https://innostes.com/ui/docs/components/layout/page-header) [Stable]: Breadcrumb, title, description and page actions, responsive by default.
+- [Scroll Area](https://innostes.com/ui/docs/components/layout/scroll-area) [Stable]: Native scrolling and keyboard support, styled scrollbars on every platform.
+- [Separator](https://innostes.com/ui/docs/components/layout/separator) [Stable]: Horizontal or vertical, announced as a separator.
+- [Sidebar](https://innostes.com/ui/docs/components/layout/sidebar) [Stable]: Collapses to icons on desktop, slides in on mobile, with groups, badges, tooltips, nested submenus, and a keyboard shortcut.
+- [Split Pane](https://innostes.com/ui/docs/components/layout/split-pane) [Beta]: A list beside its detail, with a draggable, keyboard-resizable divider.
+- [Top Bar](https://innostes.com/ui/docs/components/layout/top-bar) [Stable]: A responsive top navigation bar with slots for branding, search, and actions.
+- [Accordion](https://innostes.com/ui/docs/components/navigation/accordion) [Stable]: One or many open sections, animated height, keyboard support.
+- [Breadcrumb](https://innostes.com/ui/docs/components/navigation/breadcrumb) [Stable]: Links to each ancestor, a marked current page, and an ellipsis for long paths.
+- [Collapsible](https://innostes.com/ui/docs/components/navigation/collapsible) [Stable]: An unstyled disclosure with a height animation, for "advanced options" and similar.
+- [Navigation](https://innostes.com/ui/docs/components/navigation/index) [Stable]: Structures and controls that guide operators through multi-step journeys and hierarchical data.
+- [Pagination](https://innostes.com/ui/docs/components/navigation/pagination) [Stable]: Controlled, translatable, with a stable width as you page.
+- [Stepper](https://innostes.com/ui/docs/components/navigation/stepper) [Stable]: Horizontal or vertical, with descriptions, error states and clickable completed steps.
+- [Tabs](https://innostes.com/ui/docs/components/navigation/tabs) [Stable]: Underline and pill styles with an animated indicator, horizontal or vertical.
+- [Alert Dialog](https://innostes.com/ui/docs/components/overlays/alert-dialog) [Stable]: A dialog that can't be dismissed by clicking outside; the user must choose.
+- [Command Palette](https://innostes.com/ui/docs/components/overlays/command-palette) [Stable]: A global command palette triggered by a keyboard shortcut (e.g. ⌘K) to quickly navigate and execute actions across the application.
+- [Context Menu](https://innostes.com/ui/docs/components/overlays/context-menu) [Stable]: Same items as Dropdown Menu, positioned at the pointer.
+- [Dialog](https://innostes.com/ui/docs/components/overlays/dialog) [Stable]: Focus trap, Escape and outside-click to close, nested dialogs, and five sizes.
+- [Dropdown Menu](https://innostes.com/ui/docs/components/overlays/dropdown-menu) [Stable]: Groups, shortcuts, checkbox and radio items, submenus and destructive actions.
+- [Overlays](https://innostes.com/ui/docs/components/overlays/index) [Stable]: Layered interface elements that appear above base page content for focused interactions.
+- [Popover](https://innostes.com/ui/docs/components/overlays/popover) [Stable]: Small forms, share panels and pickers that float next to their trigger.
+- [Sheet](https://innostes.com/ui/docs/components/overlays/sheet) [Stable]: For filters, record details and edit forms next to a list. Slides from any side, RTL-aware.
+- [Tooltip](https://innostes.com/ui/docs/components/overlays/tooltip) [Stable]: Names icon buttons and shows shortcuts. Shared delay across a toolbar.
+
+## Widgets
+- [App Switcher](https://innostes.com/ui/docs/widgets/app-switcher) [Stable]: A rich popover menu designed for the ECOSYSTEM module launcher, featuring grouped apps, descriptions, icons, and built-in search functionality.
+- [Change Log](https://innostes.com/ui/docs/widgets/change-log) [Beta]: An audit trail with field-level before and after values, notes and day groups.
+- [Widgets](https://innostes.com/ui/docs/widgets/index) [Stable]: High-level business components combining multiple primitives for enterprise ERP patterns.
+- [Kanban Board](https://innostes.com/ui/docs/widgets/kanban-board) [Beta]: Pipelines, deals, tickets and approval stages, with drag and drop, keyboard moves and WIP limits.
+- [Metric Card](https://innostes.com/ui/docs/widgets/metric-card) [Stable]: One component, seven designs: default, compact, sparkline, progress, comparison, split and accent.
+- [Notification Bell](https://innostes.com/ui/docs/widgets/notification-bell) [Stable]: A rich popover component to display recent notifications, relative timestamps, and unread statuses, usually placed in the TopBar.
+- [Permission Matrix](https://innostes.com/ui/docs/widgets/permission-matrix) [Beta]: Resources by actions, grouped by module, with row and column "all" toggles.
+- [Sparkline](https://innostes.com/ui/docs/widgets/sparkline) [Stable]: Pure SVG, no chart library, server-safe.
+- [User Menu](https://innostes.com/ui/docs/widgets/user-menu) [Stable]: A user profile button that opens a dropdown menu. Typically used in the top bar or sidebar footer to access profile settings and sign out.
+- [Widget Card](https://innostes.com/ui/docs/widgets/widget-card) [Stable]: Header with title, count, actions and "View all", plus built-in loading, empty and error states.
+
+## Charts
+- [Cartesian Charts](https://innostes.com/ui/docs/charts/cartesian): Bar, Line, and Area charts for visualizing categorical data series.
+- [Donut Chart](https://innostes.com/ui/docs/charts/donut): A Donut chart for visualizing proportions with a prominent center metric.
+- [Charts](https://innostes.com/ui/docs/charts/index) [Stable]: Accessible, theme-aware charting primitives for financial summaries and inventory analytics.
+
+## Patterns and Examples
+- [Dashboard](https://innostes.com/ui/docs/examples/dashboard): An HRMS dashboard bringing together the Sidebar, AppRail, TopBar, MetricCards, charts, and dashboard widgets.
+- [Setup Wizard](https://innostes.com/ui/docs/examples/setup-wizard): Brand panel, stepper, responsive form grid, locale selects, validation and a wizard footer.
+
+## Resources and Governance
+- [Changelog](https://innostes.com/ui/docs/resources/changelog): Release history, bug fixes, enhancements, and breaking change records for @innostes/ui.
+- [Contributing](https://innostes.com/ui/docs/resources/contributing): Development guidelines, code standards, and PR submission workflows.
+- [API Conventions](https://innostes.com/ui/docs/resources/conventions): The rules every innostes UI component follows, so you can guess the API.
+- [FAQ](https://innostes.com/ui/docs/resources/faq): Frequently asked questions regarding @innostes/ui installation, theming, and usage.
+- [Resources](https://innostes.com/ui/docs/resources/index): Architecture conventions, changelogs, migration guides, and support policies.
+- [Migration guides](https://innostes.com/ui/docs/resources/migration): Upgrade instructions and breaking change migrations between major versions.
+- [Security](https://innostes.com/ui/docs/resources/security): Security practices, vulnerability reporting, and dependency auditing.
+- [Versioning and support](https://innostes.com/ui/docs/resources/versioning): Semantic versioning policy, release lifecycle, and browser compatibility targets.
+
+## Full Documentation
+- [Full LLM Reference](https://innostes.com/llms-full.txt): Complete consolidated documentation and API reference in one document.

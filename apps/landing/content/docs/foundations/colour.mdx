@@ -1,0 +1,21 @@
+---
+title: Colour
+description: OKLCH semantic palette, contrast tokens, and functional roles.
+---
+
+# Colour
+
+The innostes UI design system employs a semantic colour architecture formulated in the OKLCH colour space. OKLCH guarantees perceptual uniformity across shades, ensuring predictable contrast ratios and consistent luminance across light and dark display modes.
+
+## Semantic architecture
+
+Rather than binding visual elements directly to raw hex values, the library exposes functional tokens mapped to operational roles:
+
+- `primary`: Core interactive triggers, selected states, and brand emphasis.
+- `secondary`: Supporting interface elements, subtle hover backgrounds, and secondary actions.
+- `muted`: Low-emphasis surfaces, disabled borders, and secondary typography.
+- `accent`: Interactive callouts, active navigation items, and highlighted records.
+- `destructive`: Error banners, irreversible deletions, and critical alert indicators.
+- `success`, `warning`, `info`: Contextual status indicators for transactional data tables and badges.
+
+Detailed token swatches, dark mode mappings, and contrast ratio validation tables are maintained in `packages/ui/tailwind/theme.css`.

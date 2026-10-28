@@ -3,6 +3,7 @@
 import {
   forwardRef,
   type ComponentProps,
+  type HTMLAttributes,
   type ReactElement,
   type ReactNode,
 } from 'react';
@@ -469,6 +470,8 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
             className,
           ),
           'aria-busy': loading || undefined,
+          'data-slot': 'metric-card',
+          'data-variant': variant,
           children: (
             <>
               {action && !interactive && (
@@ -485,12 +488,8 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
               )}
             </>
           ),
-        } as ComponentProps<'div'>,
-        {
-          'data-slot': 'metric-card',
-          'data-variant': variant,
-          ...props,
-        } as ComponentProps<'div'>,
+        } as HTMLAttributes<HTMLDivElement>,
+        props as HTMLAttributes<HTMLDivElement>,
       ),
     });
 

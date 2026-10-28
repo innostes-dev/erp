@@ -1,0 +1,22 @@
+---
+title: Navigation
+description: Tabs, breadcrumbs, steppers, pagination, and disclosure patterns.
+status: Stable
+summary: Structures and controls that guide operators through multi-step journeys and hierarchical data.
+---
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Navigation
+
+Navigation components establish information architecture and wayfinding across Northwind Traders Pvt Ltd's ERP modules. They provide predictable, keyboard-accessible paths through complex inventory hierarchies, multi-stage procurement flows, and paginated records.
+
+## Components
+
+<CategoryGrid category="components/navigation" />
+
+## Usage guidelines
+
+- **Wayfinding hierarchy**: Combine `Breadcrumb` for relational hierarchy, `Tabs` for alternate views of an entity, and `Stepper` for sequential multi-step wizards.
+- **Keyboard navigation**: Tab strips support Left/Right arrow keys for roving focus. Accordions support Up/Down arrow navigation.
+- **RTL awareness**: All navigation elements honour document directionality (`dir="rtl"`) with logical margin and icon rotation.

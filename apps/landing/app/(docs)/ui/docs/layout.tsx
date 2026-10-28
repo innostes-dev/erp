@@ -10,14 +10,15 @@ export default function Layout({ children }: LayoutProps<'/ui/docs'>) {
       badge={`v${uiVersion}`}
       homeUrl="/ui"
       links={[
-        { text: 'Docs', url: '/ui/docs', active: 'none' },
+        { text: 'Overview', url: '/ui/docs', active: 'none' },
         {
           text: 'Components',
-          url: '/ui/docs/components/actions/button',
+          url: '/ui/docs/components/actions',
           active: 'none',
         },
-        { text: 'Examples', url: '/ui/docs/examples/dashboard' },
-        { text: 'Theming', url: '/ui/docs/theming' },
+        { text: 'Patterns', url: '/ui/docs/patterns' },
+        { text: 'Foundations', url: '/ui/docs/foundations/status-legend' },
+        { text: 'Resources', url: '/ui/docs/resources' },
         { text: 'Developers', url: '/docs' },
       ]}
       cta={{ text: 'Get Started', url: '/ui/docs/installation' }}

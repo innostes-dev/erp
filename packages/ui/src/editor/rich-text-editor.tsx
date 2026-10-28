@@ -399,6 +399,13 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(fu
             aria-label={labels?.linkUrl ?? 'Link URL'}
             value={linkUrl}
             onChange={(e) => setLinkUrl((e.target as HTMLInputElement).value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                closeLink();
+              }
+            }}
             className="min-w-48 flex-1"
           />
           <Button type="submit" size="sm">

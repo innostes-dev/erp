@@ -1,0 +1,19 @@
+---
+title: Contributing
+description: Development guidelines, code standards, and PR submission workflows.
+---
+
+# Contributing
+
+Contributions to `@innostes/ui` are welcome from engineering teams across Northwind Traders Pvt Ltd. This guide outlines local environment setup, testing requirements, and quality checks required before submitting pull requests.
+
+## Workflow
+
+1. **Monorepo setup**: Clone the repository and install dependencies with `pnpm install`.
+2. **Component development**: Implement new primitives in `packages/ui/src/` adhering strictly to Base UI conventions and British English TSDoc.
+3. **Automated verification**: Run uncached quality gates before raising a pull request:
+   ```bash
+   pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache
+   pnpm nx run landing:docs-check
+   ```
+4. **Documentation**: Every new component requires complete documentation adhering to the component template.

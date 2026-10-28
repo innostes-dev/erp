@@ -1,0 +1,17 @@
+---
+title: Migration guides
+description: Upgrade instructions and breaking change migrations between major versions.
+---
+
+# Migration guides
+
+Detailed upgrade procedures and codemod instructions for transitioning across major `@innostes/ui` releases.
+
+## Upgrading to 0.1.0
+
+The initial enterprise overhaul release normalizes component properties and aligns layout behaviors with Base UI conventions:
+
+- **Breadcrumb**: Resolved false-positive active state warnings; root items now default to `href` links whilst terminal items omit anchors.
+- **Progress and Meter**: Value bounds are now strictly clamped between 0 and 100, accepting explicit `aria-valuetext` formatters.
+- **Dialog and Sheet**: Replaced directional string literals with logical `side="start" | "end"` positioning properties.
+- **RichTextEditor**: Added explicit `invalid` boolean prop for uniform validation integration inside `<Field>`.

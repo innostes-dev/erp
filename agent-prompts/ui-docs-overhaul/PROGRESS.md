@@ -231,3 +231,47 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: remaining items in `AUDIT.md` for prompts 07–19.
+
+
+## 07 – Docs platform: information architecture, building blocks and site features – 2026-10-29
+
+**Summary**: Established complete enterprise information architecture with section overviews and dynamic category grids generated from page frontmatter. Implemented reusable MDX building blocks (`KeyboardTable`, `DoDont`, `Anatomy`, `PropsPlayground`, `StatusBadge`, `Since`, `CategoryGrid`), migrated `ButtonPlayground` to `PropsPlayground`, and added full enterprise documentation platform features (dynamic OpenGraph cards via `/api/og`, `sitemap.xml`, `robots.txt`, branded `not-found.tsx`, `public/llms.txt` + `llms-full.txt`, search prop indexing, and responsive/print styles). Rewrote authoring guide (`writing-docs.mdx`) and established empty-free stubs across `frameworks/`, `foundations/`, `patterns/`, and `resources/`.
+
+**Changed**:
+- `apps/landing/components/docs/`: created `keyboard-table.tsx`, `do-dont.tsx`, `anatomy.tsx`, `props-playground.tsx`, `status-badge.tsx`, `since.tsx`, `category-grid.tsx`; migrated `button-playground.tsx` onto `PropsPlayground`.
+- `apps/landing/components/docs/preview-tabs.tsx`: added 360px viewport toggle and dark/light preview toggle.
+- `apps/landing/components/docs/docs-page.tsx`: added `editOnGithub` link, `lastUpdate`, and OpenGraph dynamic metadata.
+- `apps/landing/app/api/og/route.tsx`: dynamic OpenGraph social image generator with edge runtime.
+- `apps/landing/app/sitemap.ts` & `apps/landing/app/robots.ts`: dynamic sitemap and crawl configuration.
+- `apps/landing/app/not-found.tsx`: branded 404 error page with quick search and top destination links.
+- `apps/landing/app/api/search/route.ts`: search route indexing component prop names from `api.json`.
+- `apps/landing/app/global.css`: added print stylesheet hiding navigation chrome.
+- `apps/landing/lib/shared.ts`: dynamically loaded package version from `packages/ui/package.json`.
+- `apps/landing/scripts/generate-llms.mjs`: build script generating `public/llms.txt` and `public/llms-full.txt`.
+- `apps/landing/content/docs/`: created category overviews (`components/actions/index.mdx`, `forms/index.mdx`, `data-display/index.mdx`, `feedback/index.mdx`, `overlays/index.mdx`, `navigation/index.mdx`, `layout/index.mdx`, `widgets/index.mdx`, `charts/index.mdx`).
+- Added non-empty stubs:
+  - `content/docs/frameworks/` (`nextjs.mdx`, `vite.mdx` - filled in prompt 08).
+  - `content/docs/foundations/` (`status-legend.mdx`, `colour.mdx`, `typography.mdx`, `spacing.mdx`, `icons.mdx`, `motion.mdx`, `dark-mode.mdx` - filled in prompt 08).
+  - `content/docs/accessibility.mdx` (expanded in prompt 08).
+  - `content/docs/patterns/` (`index.mdx`, `complex-forms.mdx`, `data-management.mdx`, `app-shell.mdx` - filled in prompt 13).
+  - `content/docs/resources/` (`index.mdx`, `conventions.mdx`, `changelog.mdx`, `versioning.mdx`, `migration.mdx`, `contributing.mdx`, `security.mdx`, `faq.mdx` - filled in prompt 15).
+- `apps/landing/content/dev-docs/guides/writing-docs.mdx`: complete rewrite documenting component template, MDX blocks, example data universe, demo conventions, and quality gates.
+
+**API changes**: none.
+
+**Decisions**:
+- Category overview grids are rendered dynamically via `source.getPages()`, ensuring component listings never drift from filesystem state.
+- `PropsPlayground` accepts standard control definitions (`select`, `boolean`, `text`, `number`) and synthesizes interactive previews with live code generation.
+- Search indexes prop names directly from `packages/ui/dist/api.json` into Fumadocs structured data.
+- Relative redirect configured from legacy `/ui/docs/conventions` to `/ui/docs/resources/conventions`.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (all 6 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (136 static pages, `_not-found`, `sitemap.xml`, `robots.txt`, `api/og`, `api/search`).
+- `pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache`: PASS (31 test files, 244 tests).
+- `pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache`: PASS (all 27 test files, 218 tests across both runtimes).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: remaining items in `AUDIT.md` for prompts 08–19.
+

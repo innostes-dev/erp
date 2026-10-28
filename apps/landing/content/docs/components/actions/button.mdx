@@ -45,6 +45,17 @@ export function Example() {
 
 </UsageGrid>
 
+## Anatomy
+
+<Anatomy
+  slots={[
+    { name: 'root', description: 'The outer button element (native button or custom render element)', dataSlot: 'button' },
+    { name: 'spinner', description: 'Animated loading indicator rendered during active state', dataSlot: 'button-spinner' },
+    { name: 'start-icon', description: 'Leading icon slot aligned with typography', dataSlot: 'button-icon-start' },
+    { name: 'end-icon', description: 'Trailing icon slot aligned with typography', dataSlot: 'button-icon-end' },
+  ]}
+/>
+
 ## Variants
 
 Use `variant` to change the visual style of the button.
@@ -184,6 +195,29 @@ Buttons default to `type="button"`, so they never submit a form by accident. Set
 - Visible focus ring from the `--color-ring` token.
 - `loading` sets `aria-busy` and keeps focus, so the user isn't moved away.
 - Icon-only buttons need an `aria-label`. Icons inside buttons are hidden from screen readers.
+
+### Keyboard interaction
+
+<KeyboardTable
+  rows={[
+    [['Enter'], 'Activates the button and triggers its click handler.'],
+    [['Space'], 'Activates the button and triggers its click handler.'],
+  ]}
+/>
+
+## Guidelines
+
+<DoDont>
+  <Do caption="Use primary buttons for the main action on a screen, with at most one primary action per view.">
+    <Button variant="primary">Create order</Button>
+  </Do>
+  <Dont caption="Do not use multiple primary buttons in the same container.">
+    <div className="flex gap-2">
+      <Button variant="primary">Submit</Button>
+      <Button variant="primary">Save draft</Button>
+    </div>
+  </Dont>
+</DoDont>
 
 ## Theming
 

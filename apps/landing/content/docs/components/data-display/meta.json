@@ -1,6 +1,7 @@
 {
   "title": "Data Display",
   "pages": [
+    "index",
     "data-table",
     "table",
     "tree-view",

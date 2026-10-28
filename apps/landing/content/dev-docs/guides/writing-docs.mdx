@@ -1,98 +1,148 @@
 ---
-title: Writing Docs
-description: Add and edit pages in the developer docs and the innostes UI docs.
+title: Writing docs
+description: Authoring standards, MDX components, and quality gates for innostes documentation.
 icon: PenLine
 ---
 
-Both doc sets live in `apps/landing` and are written in MDX (Markdown with React components).
+All documentation across the repository lives in `apps/landing` and is written in MDX (Markdown with React components).
 
-| Docs | Folder | URL |
+| Documentation | Directory | Base URL |
 | --- | --- | --- |
 | Developer docs | `content/dev-docs/` | `/docs` |
-| innostes UI docs | `content/docs/` | `/ui/docs` |
+| innostes UI design system | `content/docs/` | `/ui/docs` |
 
-Run `pnpm nx dev landing` and edit. Pages reload on save.
+Run `pnpm nx dev landing` to start the local documentation server with instant hot-reloading.
 
-## Add a page
+## Component page template
 
-Create an `.mdx` file. The path becomes the URL: `content/dev-docs/guides/testing.mdx` →
-`/docs/guides/testing`.
+Every component page in `content/docs/` must follow this precise order:
 
-```mdx title="content/dev-docs/guides/testing.mdx"
----
-title: Testing
-description: How we test innostes.
-icon: FlaskConical
----
+1. **Frontmatter**: `title`, `description` (one sentence ending with a full stop), `icon`, `status`, and `summary`.
+2. **Lead preview**: `<ComponentPreview>` displaying the primary enterprise scenario.
+3. **Import**: exact entry point package import snippet.
+4. **When to use**: guidance on when to choose this component and when to choose alternatives.
+5. **Anatomy**: `<Anatomy>` breakdown of exported slots and parts.
+6. **Examples**: scenarios showing variants, sizes, loading, disabled, and form integration.
+7. **Accessibility**: roles, keyboard navigation table (`<KeyboardTable>`), and assistive technology guidelines.
+8. **Guidelines**: `<DoDont>` pairs providing clear design and usage recommendations.
+9. **API reference**: `<ApiTable>` for all exported parts.
+10. **Related**: links to related components or patterns.
 
-## Unit tests
+## MDX building blocks
 
-Write content here.
+The following reusable MDX components are registered globally in `components/mdx.tsx`:
+
+### Keyboard table
+
+Renders accessible keyboard interaction tables with styled `<Kbd>` key caps:
+
+```mdx
+<KeyboardTable
+  rows={[
+    [['Enter'], 'Activates the focused item.'],
+    [['ArrowDown'], 'Moves focus to the next item in the list.'],
+  ]}
+/>
 ```
 
-## Frontmatter
+### Do and don't guidelines
 
-| Field | Required | Purpose |
-| --- | --- | --- |
-| `title` | yes | Page title and sidebar label |
-| `description` | no | Shown under the title and in search |
-| `icon` | no | A [Lucide](https://lucide.dev/icons) icon name for the sidebar, e.g. `Rocket` |
-| `status` | no | Badge: `Stable`, `Beta` or `Experimental` |
-| `summary` | no | Short text on the right of the header |
-| `install` | no | A command shown with a copy button |
+Visual side-by-side design recommendations with accessible status icons:
 
-## Order and sections
-
-Each folder has a `meta.json` that sets the sidebar order. `---Name---` adds a section heading, and
-`...folder` lists a folder's pages without nesting them.
-
-```json title="content/dev-docs/meta.json"
-{
-  "pages": ["---Get Started---", "index", "getting-started", "---Guides---", "...guides"]
-}
+```mdx
+<DoDont>
+  <Do caption="Use primary buttons for the single primary operation on a view.">
+    <Button variant="primary">Submit</Button>
+  </Do>
+  <Dont caption="Do not use multiple primary buttons in the same container.">
+    <div className="flex gap-2">
+      <Button variant="primary">Save</Button>
+      <Button variant="primary">Submit</Button>
+    </div>
+  </Dont>
+</DoDont>
 ```
 
-A new page doesn't show in the sidebar until you add it to `meta.json`.
+### Anatomy
 
-## Components you can use
+Documents exported component slots and `data-slot` selectors:
 
-| Component | Use for |
-| --- | --- |
-| `<Callout type="info \| warn \| error">` | Notes and warnings |
-| `<Cards>` / `<Card href>` | Link grids |
-| `<Steps>` / `<Step>` | Step-by-step instructions |
-| `<Tabs items>` / `<Tab value>` | Alternatives, e.g. with and without Tailwind |
-| `<Files>` / `<Folder>` / `<File>` | Folder trees |
-| `<TypeTable type>` | Props tables |
-| `<Preview>` / `<PreviewRow>` | Live component previews (UI docs) |
-| `<Button>` | The real `@innostes/ui` button |
-
-Components are registered in `components/mdx.tsx`. Add new ones there.
-
-## Code blocks
-
-````mdx
-```tsx title="example.tsx"
-export function Example() {}
+```mdx
+<Anatomy
+  slots={[
+    { name: 'root', description: 'The outer wrapper element', dataSlot: 'field' },
+    { name: 'label', description: 'Input label element', dataSlot: 'field-label' },
+  ]}
+/>
 ```
-````
 
-Add `tab="pnpm"` to several blocks in a row to show them as tabs.
+### Props playground
 
-## Quality gates
+Provides an interactive live playground with runtime prop controls and generated code snippets:
 
-Documentation is verified by automated checks in CI before any changes merge:
+```mdx
+<PropsPlayground
+  component="Button"
+  controls={[
+    { name: 'variant', type: 'select', options: ['primary', 'secondary', 'outline'], default: 'primary' },
+    { name: 'size', type: 'select', options: ['sm', 'md', 'lg'], default: 'md' },
+    { name: 'disabled', type: 'boolean', default: false },
+  ]}
+/>
+```
 
-```sh
+### Status badge and since version
+
+- `<StatusBadge status="Stable | Beta | Experimental" />`: Displays component stability tier linked to the status legend.
+- `<Since version="0.2.0" />`: Marks properties or components introduced in a specific release.
+
+### Category grid
+
+Dynamically renders the grid of components within a category folder based on page frontmatter:
+
+```mdx
+<CategoryGrid category="components/forms" />
+```
+
+## Example data universe
+
+All documentation demos, mock datasets, and code examples must use the unified **Northwind Traders Pvt Ltd** enterprise universe:
+
+- **Organisation**: Northwind Traders Pvt Ltd (distributor in Bengaluru). Related companies: Acme Traders, Globex Retail, Initech Pvt Ltd, Umbrella Logistics, Stark Components, Wayne Foods.
+- **People**: realistic Indian names (Kavya Reddy, Arjun Mehta, Priya Shah, Rahul Verma, Meera Iyer, Sara Khan, Ravi Kumar). Never use placeholder names such as John Doe, Foo, or Bar.
+- **Currency**: Indian Rupees (`INR`), formatted with `Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })`.
+- **Identifiers**: `INV-2026-0142`, `PO-1182`, `EMP-0231`, `SO-1042`.
+- **Domain**: ERP, logistics, procurement, invoicing, and inventory management.
+
+## Demo conventions
+
+- Keep demo files isolated in `components/demos/`.
+- Every demo must compile cleanly, use only public package imports, work responsively down to 360px viewport width, and support light and dark display modes.
+- The code snippet displayed must match the running demo code.
+
+## Voice and writing standards
+
+Documentation should read like an enterprise reference manual—authoritative, concise, and verifiable:
+
+- **British English**: Use British spelling in prose and TSDoc (`colour`, `behaviour`, `customise`, `centre`, `licence`).
+- **Sentence case**: Apply sentence case to all headings, button labels, and table headers ("Date picker", not "Date Picker").
+- **Banned phrases**: Never use marketing buzzwords or AI conversational cliches:
+  - *Forbidden*: `seamless(ly)`, `robust`, `powerful`, `effortless(ly)`, `leverage`, `supercharge`, `cutting-edge`, `out of the box`, `under the hood`, `simply`, `just`.
+  - *Forbidden*: Emoji, exclamation marks, or rhetorical questions.
+
+## Automated quality gates
+
+Before submitting any documentation changes, run the automated quality gate test suite:
+
+```bash
 pnpm nx run landing:docs-check
 ```
 
-The gate checks:
+The gate scripts (`apps/landing/scripts/checks/`) enforce:
 
-- **Links**: every internal link and `#anchor` resolves to a real page and heading.
-- **Demos**: every demo exists, is rendered in docs, and imports only sanctioned packages.
-- **Sidebar**: all pages are registered in `meta.json`.
-- **MDX safety**: unescaped curly braces in prose are flagged.
-- **Prose standards**: no marketing buzzwords, emoji, exclamation marks, or placeholder names.
-- **Coverage & API tables**: all public exports are documented or explicit allowlisted in `docs-coverage-allowlist.json`.
-
+1. **Links**: every internal link and anchor resolves to a valid destination.
+2. **Demos**: every demo file exists and uses sanctioned imports.
+3. **Sidebar**: all pages exist and are registered in `meta.json`.
+4. **MDX safety**: checks for unescaped prose braces that could trigger MDX parser errors.
+5. **Consistency**: synchronises package versions between `packages/ui` and documentation headers.
+6. **Prose rules**: verifies British English, blocks banned buzzwords, and forbids placeholder data.

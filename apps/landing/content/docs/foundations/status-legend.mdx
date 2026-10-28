@@ -1,0 +1,42 @@
+---
+title: Status legend
+description: Stability tiers and readiness criteria for components in @innostes/ui.
+---
+
+# Status legend
+
+Every component, widget, and chart in `@innostes/ui` carries an explicit status badge reflecting its API stability and production readiness. These statuses establish clear expectations for application developers across Northwind Traders Pvt Ltd.
+
+## Status tiers
+
+### Stable
+
+The component has completed thorough browser QA, unit testing, and accessibility verification. Its public API conforms strictly to Semantic Versioning (SemVer).
+
+- **Breaking changes**: Breaking changes occur only in major version increments (e.g. `1.0.0` to `2.0.0`), accompanied by migration guides and codemods where feasible.
+- **Production readiness**: Recommended for all mission-critical production interfaces and customer-facing workflows.
+- **Support**: Receives active maintenance, security patches, and forward-compatibility testing across supported React runtimes.
+
+### Beta
+
+The component is functionally complete and usable in production environments, but its API surface may undergo refinements based on enterprise team feedback.
+
+- **Breaking changes**: Breaking modifications may occur in minor version increments (e.g. `0.2.0` to `0.3.0`), with documented migration paths in release notes.
+- **Production readiness**: Suitable for early adoption, internal pilot tools, and feature development with active developer oversight.
+- **Feedback**: Developers are encouraged to report ergonomics issues and edge cases before the component graduates to Stable.
+
+### Experimental
+
+The component represents an early architectural exploration or prototype. It demonstrates emerging interaction patterns or evaluates new underlying technologies.
+
+- **Breaking changes**: Breaking changes or removal may occur in any release without prior deprecation notices.
+- **Production readiness**: Intended strictly for experimentation and design prototyping. Avoid using in core enterprise transactions.
+
+## Graduation criteria
+
+A component graduates from Beta to Stable only when meeting all of the following requirements:
+
+1. **Complete documentation**: Full adherence to the component documentation template, including anatomical breakdown, interactive examples, do/don't guidelines, and keyboard interaction tables.
+2. **Automated test coverage**: Unit and integration test suites covering at least 90% statement coverage across all visual variants, states, and accessibility hooks.
+3. **Multi-runtime verification**: Verified operational stability across React 19, React 18, and React 17 environments.
+4. **Design token conformance**: Full support for both light and dark themes using OKLCH colour tokens and CSS variables.

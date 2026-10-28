@@ -1,0 +1,22 @@
+---
+title: Charts
+description: Data visualisation components including Cartesian charts, sparklines, and donuts.
+status: Stable
+summary: Accessible, theme-aware charting primitives for financial summaries and inventory analytics.
+---
+
+import { CategoryGrid } from '@/components/docs/category-grid';
+
+# Charts
+
+Chart components deliver accessible, responsive data visualisations across Northwind Traders Pvt Ltd's executive dashboards and operational reports. Built on Recharts with semantic design tokens, they adapt automatically to light and dark themes.
+
+## Components
+
+<CategoryGrid category="charts" />
+
+## Usage guidelines
+
+- **Semantic colour assignment**: Use token-based palette colours rather than hardcoded hex codes to guarantee contrast in both light and dark themes.
+- **Data alternatives**: Always provide accessible data tables or summary text alongside charts to ensure full accessibility for screen reader operators.
+- **Formatters**: Use localized number and currency formatters (`Intl.NumberFormat`) for tooltip and axis ticks.

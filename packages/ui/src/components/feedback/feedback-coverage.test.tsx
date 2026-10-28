@@ -2,14 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
   Gauge,
   Meter,
   Progress,
-  Skeleton,
-  Spinner,
   Toaster,
   toast,
 } from '@innostes/ui';

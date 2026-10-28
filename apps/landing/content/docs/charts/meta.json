@@ -1,4 +1,8 @@
 {
   "title": "Charts",
-  "pages": ["cartesian", "donut"]
+  "pages": [
+    "index",
+    "cartesian",
+    "donut"
+  ]
 }

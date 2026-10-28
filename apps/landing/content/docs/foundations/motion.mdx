@@ -1,0 +1,14 @@
+---
+title: Motion
+description: Transition durations, easing curves, and reduced-motion accessibility.
+---
+
+# Motion
+
+Motion in innostes UI is functional, understated, and swift. Animation serves exclusively to orient operators during spatial state transitions—such as expanding accordion panels, opening dialog overlays, and displaying toast notifications.
+
+## Animation principles
+
+- **Duration**: Micro-interactions complete within 150ms to 200ms. Structural layout changes and large overlay entrances finish within 250ms to prevent perceptible lag.
+- **Easing**: Natural decelerate curves (`cubic-bezier(0, 0, 0.2, 1)`) govern entrance animations, whilst accelerate curves govern dismissals.
+- **Reduced motion**: Every animated component respects the user's `prefers-reduced-motion: reduce` system preference by replacing motion with immediate opacity fades or zero-duration transitions.
