@@ -1,0 +1,34 @@
+---
+title: Hiring Pipeline
+description: Multi-stage talent recruitment pipeline with KanbanBoard, drag-and-drop, and candidate details Sheet drawer.
+icon: Kanban
+summary: Recruitment board with multi-stage Kanban columns, drag-and-drop moves, salary indicators, and slide-out candidate Sheet.
+full: true
+---
+
+<ComponentPreview name="examples/hiring-pipeline" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates talent recruitment and candidate workflow tracking for supply chain personnel at Northwind Traders Pvt Ltd:
+
+| Section | Components |
+| :--- | :--- |
+| **Pipeline Scaffolding** | [`KanbanBoard`](/ui/docs/widgets/kanban-board) with 5 recruitment stages (Applied, Screening, Technical, Offer, Hired) |
+| **Candidate Cards** | Custom card layout with candidate name, role, expected CTC in INR Lakhs, rating stars, and avatar |
+| **Candidate Identity** | [`Avatar`](/ui/docs/components/data-display/avatar), [`AvatarFallback`](/ui/docs/components/data-display/avatar) |
+| **Stage Badges & Dots** | Color-coded status dots (`tone`) identifying stage urgency and progression |
+| **Candidate Inspector** | [`Sheet`](/ui/docs/components/overlays/sheet) slide-out drawer displaying candidate experience, notice periods, and interviewer notes |
+| **Action Triggers** | [`Button`](/ui/docs/components/actions/button) to advance candidates to the subsequent pipeline stage |
+| **Move Notifications** | [`toast`](/ui/docs/components/feedback/toast) announcing stage transitions upon card drop |
+
+## Responsive behaviour
+
+- **Desktop (>= 1280px)**: All 5 Kanban columns display side-by-side with full card previews. Drag-and-drop interactions work via mouse or keyboard shortcuts.
+- **Tablet & Mobile (< 1280px)**: The board enables smooth horizontal swipe scrolling. Tapping any candidate card slides out the candidate details in the full-height mobile [`Sheet`](/ui/docs/components/overlays/sheet).
+
+## Accessibility notes
+
+- **Keyboard drag-and-drop**: In addition to mouse dragging, [`KanbanBoard`](/ui/docs/widgets/kanban-board) supports complete keyboard reordering: press <kbd>Space</kbd> to pick up a card, use <kbd>Arrow</kbd> keys to move across columns, and press <kbd>Space</kbd> to drop.
+- **Live region announcements**: All pickup, move, drop, and cancel events trigger accessible announcements through polite live regions.
+- **Sheet drawer focus**: When a candidate card is activated, focus transitions into the candidate details sheet and returns to the triggering card when dismissed.

@@ -122,8 +122,15 @@
 - [Charts](https://innostes.com/ui/docs/charts/index) [Stable]: Accessible, theme-aware charting primitives for financial summaries and inventory analytics.
 
 ## Patterns and Examples
-- [Dashboard](https://innostes.com/ui/docs/examples/dashboard): An HRMS dashboard bringing together the Sidebar, AppRail, TopBar, MetricCards, charts, and dashboard widgets.
-- [Setup Wizard](https://innostes.com/ui/docs/examples/setup-wizard): Brand panel, stepper, responsive form grid, locale selects, validation and a wizard footer.
+- [Dashboard](https://innostes.com/ui/docs/examples/dashboard): An enterprise dashboard bringing together AppRail, Sidebar, TopBar, MetricCards, CartesianCharts, and widgets.
+- [Employee Directory](https://innostes.com/ui/docs/examples/employee-directory): Enterprise personnel directory with SplitPane desktop layout, mobile Sheet inspector, departmental TreeView, and contact cards.
+- [Hiring Pipeline](https://innostes.com/ui/docs/examples/hiring-pipeline): Recruitment board with multi-stage Kanban columns, drag-and-drop moves, salary indicators, and slide-out candidate Sheet.
+- [Examples Gallery](https://innostes.com/ui/docs/examples/index): Production-grade reference application screens built exclusively with @innostes/ui components and design tokens.
+- [Invoice Detail](https://innostes.com/ui/docs/examples/invoice-detail): Detailed transaction invoice inspector with PageHeader breadcrumbs, fiscal summaries, line items, ChangeLog audit, and AlertDialog.
+- [Invoice List](https://innostes.com/ui/docs/examples/invoice-list): High-density invoice registry with multi-column sorting, selection, status badges, batch actions, and CSV export.
+- [Roles and Permissions](https://innostes.com/ui/docs/examples/roles-and-permissions): Access control management screen with custom and system role listings, member headcounts, and PermissionMatrix grid.
+- [Settings](https://innostes.com/ui/docs/examples/settings): Multi-section enterprise configuration screen with FormSection, FormGrid, Switches, Selects, and sticky unsaved-changes save bar.
+- [Setup Wizard](https://innostes.com/ui/docs/examples/setup-wizard): Enterprise onboarding wizard with brand panel, Stepper, responsive form grid, locale selects, and error summary.
 
 ## Resources and Governance
 - [Changelog](https://innostes.com/ui/docs/resources/changelog): Release history, bug fixes, enhancements, and breaking change records for @innostes/ui.

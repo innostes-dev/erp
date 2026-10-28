@@ -1,0 +1,35 @@
+---
+title: Invoice Detail
+description: Full tax invoice review screen with PageHeader, summary cards, itemised table, ChangeLog audit trail, and settlement dialogue.
+icon: FileText
+summary: Detailed transaction invoice inspector with PageHeader breadcrumbs, fiscal summaries, line items, ChangeLog audit, and AlertDialog.
+full: true
+---
+
+<ComponentPreview name="examples/invoice-detail" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen provides a transactional review workspace for single tax invoices, bringing together fiscal summaries, statutory line items, audit logs, and irreversible payment settlement workflows:
+
+| Section | Components |
+| :--- | :--- |
+| **Page Header** | [`PageHeader`](/ui/docs/components/layout/page-header) with breadcrumbs navigation and download/action triggers |
+| **Status Tag** | [`Badge`](/ui/docs/components/data-display/badge) reflecting real-time settlement status |
+| **Fiscal Summaries** | [`Card`](/ui/docs/components/data-display/card) grid detailing total invoice value, customer GSTIN, issue date, and place of supply |
+| **Line Items** | Semantic [`Table`](/ui/docs/components/data-display/table) with item description, HSN codes, quantity, unit rates, and GST subtotals |
+| **Audit Lifecycle** | [`ChangeLog`](/ui/docs/widgets/change-log) documenting author, role, timestamp, and GSTN portal filing history |
+| **Settlement Confirmation** | [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) providing a two-phase confirmation modal before ledger posting |
+| **Toast Confirmation** | [`toast`](/ui/docs/components/feedback/toast) providing immediate asynchronous mutation feedback |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Top metrics render in a 4-column balanced card grid. Line items display all 6 columns (Description, HSN, Qty, Rate, Tax, Total) without truncation.
+- **Tablet (640px – 1023px)**: Fiscal metrics re-flow into a 2x2 grid. Table allows horizontal scrolling with sticky headers.
+- **Mobile (< 640px)**: Action buttons stack below the title. Metrics cards render full-width vertically.
+
+## Accessibility notes
+
+- **Confirmation semantics**: The settlement dialogue uses `role="alertdialog"` to announce high-consequence fiscal commitments to assistive technologies with immediate priority.
+- **Focus entrapment**: While the confirmation dialogue is open, keyboard focus remains trapped within the modal boundary until confirmed or cancelled via <kbd>Escape</kbd>.
+- **Table summary semantics**: Line item calculations are grouped into `<tbody>` rows with clear `colSpan` totals, allowing screen reader operators to follow accounting hierarchies.

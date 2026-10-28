@@ -1,0 +1,34 @@
+---
+title: Invoice List
+description: Enterprise tax invoice registry with search, status filtering, selection, bulk actions, and pagination.
+icon: Receipt
+summary: High-density invoice registry with multi-column sorting, selection, status badges, batch actions, and CSV export.
+full: true
+---
+
+<ComponentPreview name="examples/invoice-list" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates high-density operational data management for GST tax invoices in the Northwind Traders Pvt Ltd procurement ecosystem:
+
+| Section | Components |
+| :--- | :--- |
+| **Header & Actions** | [`Button`](/ui/docs/components/actions/button) with export shortcuts and primary creation action |
+| **Filtering Toolbar** | [`Input`](/ui/docs/components/forms/input) with search icon prefix, [`Select`](/ui/docs/components/forms/select) for status segmentation |
+| **Batch Action Bar** | Contextual banner rendered conditionally when rows are selected, with bulk reminder and export triggers |
+| **Data Grid** | [`DataTable`](/ui/docs/components/data-display/data-table) with row selection checkboxes, customer details, and INR formatting |
+| **Status Indicators** | [`Badge`](/ui/docs/components/data-display/badge) with semantic color variants (`default`, `secondary`, `destructive`, `outline`) |
+| **Row Actions** | [`DropdownMenu`](/ui/docs/components/overlays/dropdown-menu) with item actions (View details, Download PDF, Send reminder) |
+| **Notifications** | [`toast`](/ui/docs/components/feedback/toast) confirming batch operations and export generation |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Full multi-column tabular view displaying invoice number, customer legal name, GSTIN, due dates, currency totals, status tags, and action triggers.
+- **Mobile (< 768px)**: The toolbar controls stack vertically into full-width elements. The table switches cleanly or scrolls horizontally without breaking outer container boundaries.
+
+## Accessibility notes
+
+- **Selection semantics**: The master checkbox in the header reflects `aria-checked="mixed"` when a partial subset of rows is selected. Individual row checkboxes carry descriptive `aria-label` tags including invoice numbers.
+- **Search debounce**: Search input updates announce results politely via live regions without interrupting screen reader speech mid-keystroke.
+- **Row action menus**: Each row menu button exposes an explicit accessible label (e.g. `aria-label="Actions for INV-2026-0801"`).

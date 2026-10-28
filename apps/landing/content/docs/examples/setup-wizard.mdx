@@ -1,8 +1,8 @@
 ---
 title: Setup Wizard
-description: A multi-step onboarding flow built only with innostes UI.
-icon: Wand
-summary: Brand panel, stepper, responsive form grid, locale selects, validation and a wizard footer.
+description: Multi-step tenant onboarding flow with Stepper, form grids, locale selectors, and validation.
+icon: Sparkles
+summary: Enterprise onboarding wizard with brand panel, Stepper, responsive form grid, locale selects, and error summary.
 full: true
 ---
 
@@ -10,14 +10,24 @@ full: true
 
 ## What's in it
 
-| Part | Components |
-| --- | --- |
-| Brand panel | `Badge`, `IconTile` |
-| Progress | `Stepper` (completed steps are clickable) |
-| Form | `Form`, `FormGrid`, `Field`, `Input`, `Label` |
-| Locale settings | `CountrySelect`, `TimezoneSelect`, `LanguageSelect`, `DateFormatSelect` |
-| Help | `Alert` (info) |
-| Footer | `FormActions align="between"`, `Button` |
+This reference onboarding wizard guides new enterprise tenants through company configuration, database connection, administrator provisioning, and regional locale preferences:
 
-Try submitting with an empty name, or a slug with spaces: validation runs on submit and the errors
-are announced. The layout uses container queries, so it adapts to wherever it's placed.
+| Section | Components |
+| :--- | :--- |
+| **Brand Panel** | [`Badge`](/ui/docs/components/data-display/badge), [`IconTile`](/ui/docs/components/data-display/icon-tile) |
+| **Progress Stepper** | [`Stepper`](/ui/docs/components/navigation/stepper) with interactive completed steps and step descriptions |
+| **Form Entry** | [`Field`](/ui/docs/components/forms/field), [`FieldLabel`](/ui/docs/components/forms/field), [`Input`](/ui/docs/components/forms/input), [`FormGrid`](/ui/docs/components/layout/form-layout) |
+| **Regional Settings** | [`CountrySelect`](/ui/docs/components/forms/locale-select), [`LanguageSelect`](/ui/docs/components/forms/locale-select), [`TimezoneSelect`](/ui/docs/components/forms/locale-select), [`DateFormatSelect`](/ui/docs/components/forms/locale-select) |
+| **Inline Guidance** | [`Alert`](/ui/docs/components/feedback/alert) with info tone |
+| **Wizard Navigation** | [`FormActions`](/ui/docs/components/layout/form-layout), [`Button`](/ui/docs/components/actions/button) |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Renders a horizontal split view with the brand feature overview on the left panel (40% width) and the active setup form on the right panel (60% width).
+- **Tablet & Mobile (< 1024px)**: Collapses into a single vertical container. The brand panel transforms into a compact header banner, and the horizontal `Stepper` compresses using compact step indicators. Form inputs span full container width.
+
+## Accessibility notes
+
+- **Step announcement**: The [`Stepper`](/ui/docs/components/navigation/stepper) communicates progress to screen readers with `aria-current="step"` on the active step and polite announcements upon advancing.
+- **Form error associations**: All form controls are wrapped in [`Field`](/ui/docs/components/forms/field), ensuring invalid inputs automatically link to [`FieldError`](/ui/docs/components/forms/field) messages via `aria-describedby` and reflect `aria-invalid="true"`.
+- **Focus management**: Advancing to the next step programmatically shifts keyboard focus to the first interactive field in the newly rendered step.

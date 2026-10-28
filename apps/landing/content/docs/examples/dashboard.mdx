@@ -1,8 +1,8 @@
 ---
 title: Dashboard
-description: A complete admin page built only with innostes UI.
+description: Complete executive operations dashboard built with @innostes/ui layout primitives and widgets.
 icon: LayoutDashboard
-summary: An HRMS dashboard bringing together the Sidebar, AppRail, TopBar, MetricCards, charts, and dashboard widgets.
+summary: An enterprise dashboard bringing together AppRail, Sidebar, TopBar, MetricCards, CartesianCharts, and widgets.
 full: true
 ---
 
@@ -10,23 +10,26 @@ full: true
 
 ## What's in it
 
-This reference example combines our layout and widget components into a responsive HRMS application layout, matching our reference dashboard composition.
+This reference screen combines `@innostes/ui` layout primitives, widgets, and charting engines into a high-density operations dashboard for Northwind Traders Pvt Ltd:
 
-| Part                     | Components                                                                                                                                                                                                                  |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Global Navigation**    | [`AppRail`](/ui/docs/components/layout/app-rail) on the far left with `AppRailItem`                                                                                                                                         |
-| **Workspace Navigation** | [`SidebarProvider`](/ui/docs/components/layout/sidebar), `Sidebar` (icon collapsible), `SidebarMenu`                                                                                                                        |
-| **Top Header**           | [`TopBar`](/ui/docs/components/layout/top-bar) with [`AppSwitcher`](/ui/docs/widgets/app-switcher), [`NotificationBell`](/ui/docs/widgets/notifications), and [`UserMenu`](/ui/docs/widgets/user-menu)               |
-| **Content Area**         | `SidebarInset` containing the main content                                                                                                                                                                                  |
-| **Welcome**              | `WelcomeBanner`                                                                                                                                                                                                             |
-| **KPIs**                 | [`MetricCard`](/ui/docs/widgets/metric-card) and `MetricGrid`                                                                                                                                                                |
-| **Data Viz**             | [`BarChart`](/ui/docs/charts/cartesian) in a [`WidgetCard`](/ui/docs/widgets/widget-card)                                                                                                                                    |
-| **Dashboard Widgets**    | `QuickActions`, `EntityList`, `ActivityFeed`                                                                                                                                                                                |
+| Section | Components |
+| :--- | :--- |
+| **Global Navigation** | [`AppRail`](/ui/docs/components/layout/app-rail) with persistent primary module icons |
+| **Workspace Navigation** | [`Sidebar`](/ui/docs/components/layout/sidebar), `SidebarProvider`, `SidebarMenu`, `SidebarMenuItem` |
+| **Top Header** | [`TopBar`](/ui/docs/components/layout/top-bar) with [`AppSwitcher`](/ui/docs/widgets/app-switcher), [`Notifications`](/ui/docs/widgets/notifications), and [`UserMenu`](/ui/docs/widgets/user-menu) |
+| **Welcome Header** | [`WelcomeBanner`](/ui/docs/widgets/welcome-banner) with action shortcuts |
+| **KPI Metrics** | [`MetricCard`](/ui/docs/widgets/metric-card) formatted for Indian numbering (`₹` Lakhs/Crores) |
+| **Data Visualization** | [`CartesianCharts`](/ui/docs/charts/cartesian) wrapped in [`WidgetCard`](/ui/docs/widgets/widget-card) |
+| **Operational Widgets** | [`QuickActions`](/ui/docs/widgets/quick-actions), [`EntityList`](/ui/docs/widgets/entity-list), [`ActivityFeed`](/ui/docs/widgets/activity-feed) |
 
-### Responsive behaviour
+## Responsive behaviour
 
-Open the **Code** tab to copy the full page. The layout responds to its container and viewport widths:
+- **Desktop (>= 1280px)**: The dual-tier navigation displays the full `AppRail` alongside an expanded 256px `Sidebar`. Widgets arrange across a 12-column analytical grid.
+- **Tablet (768px – 1279px)**: The `Sidebar` automatically collapses to an icon rail (`state="collapsed"`). Widget cards adapt to two equal columns.
+- **Mobile (< 768px)**: The `AppRail` and `Sidebar` transition to an accessible off-canvas drawer triggered by the `SidebarTrigger` in the header. Metric cards and widgets stack into a single vertical scroll stream.
 
-- At narrower widths, the `AppRail` collapses or hides.
-- The `Sidebar` collapses to an icon rail or goes off-canvas automatically.
-- Dashboard widgets like the `BarChart` and `MetricCard`s stack vertically using grid layout and container queries (`@container`).
+## Accessibility notes
+
+- **Landmark semantics**: The layout exposes landmark regions (`<nav aria-label="Global application rail">`, `<nav aria-label="Workspace sidebar">`, `<header>`, `<main id="main-content">`) allowing screen reader operators to jump between regions using landmark navigation keys.
+- **Skip navigation**: Includes a [`SkipLink`](/ui/docs/components/navigation/breadcrumb) targeting `#main-content` at the top of the tab order.
+- **Keyboard focus**: When the mobile drawer opens, keyboard focus moves to the close button and remains trapped within the navigation drawer until dismissed.

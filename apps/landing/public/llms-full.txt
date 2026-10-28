@@ -10957,54 +10957,436 @@ Tooltips can position along `top`, `bottom`, `left`, or `right` margins, and wil
 
 ## Dashboard (https://innostes.com/ui/docs/examples/dashboard)
 
-An HRMS dashboard bringing together the Sidebar, AppRail, TopBar, MetricCards, charts, and dashboard widgets.
+An enterprise dashboard bringing together AppRail, Sidebar, TopBar, MetricCards, CartesianCharts, and widgets.
 
 <ComponentPreview name="examples/dashboard" align="start" className="p-0 sm:p-0" />
 
 ## What's in it
 
-This reference example combines our layout and widget components into a responsive HRMS application layout, matching our reference dashboard composition.
+This reference screen combines `@innostes/ui` layout primitives, widgets, and charting engines into a high-density operations dashboard for Northwind Traders Pvt Ltd:
 
-| Part                     | Components                                                                                                                                                                                                                  |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Global Navigation**    | [`AppRail`](/ui/docs/components/layout/app-rail) on the far left with `AppRailItem`                                                                                                                                         |
-| **Workspace Navigation** | [`SidebarProvider`](/ui/docs/components/layout/sidebar), `Sidebar` (icon collapsible), `SidebarMenu`                                                                                                                        |
-| **Top Header**           | [`TopBar`](/ui/docs/components/layout/top-bar) with [`AppSwitcher`](/ui/docs/widgets/app-switcher), [`NotificationBell`](/ui/docs/widgets/notifications), and [`UserMenu`](/ui/docs/widgets/user-menu)               |
-| **Content Area**         | `SidebarInset` containing the main content                                                                                                                                                                                  |
-| **Welcome**              | `WelcomeBanner`                                                                                                                                                                                                             |
-| **KPIs**                 | [`MetricCard`](/ui/docs/widgets/metric-card) and `MetricGrid`                                                                                                                                                                |
-| **Data Viz**             | [`BarChart`](/ui/docs/charts/cartesian) in a [`WidgetCard`](/ui/docs/widgets/widget-card)                                                                                                                                    |
-| **Dashboard Widgets**    | `QuickActions`, `EntityList`, `ActivityFeed`                                                                                                                                                                                |
+| Section | Components |
+| :--- | :--- |
+| **Global Navigation** | [`AppRail`](/ui/docs/components/layout/app-rail) with persistent primary module icons |
+| **Workspace Navigation** | [`Sidebar`](/ui/docs/components/layout/sidebar), `SidebarProvider`, `SidebarMenu`, `SidebarMenuItem` |
+| **Top Header** | [`TopBar`](/ui/docs/components/layout/top-bar) with [`AppSwitcher`](/ui/docs/widgets/app-switcher), [`Notifications`](/ui/docs/widgets/notifications), and [`UserMenu`](/ui/docs/widgets/user-menu) |
+| **Welcome Header** | [`WelcomeBanner`](/ui/docs/widgets/welcome-banner) with action shortcuts |
+| **KPI Metrics** | [`MetricCard`](/ui/docs/widgets/metric-card) formatted for Indian numbering (`₹` Lakhs/Crores) |
+| **Data Visualization** | [`CartesianCharts`](/ui/docs/charts/cartesian) wrapped in [`WidgetCard`](/ui/docs/widgets/widget-card) |
+| **Operational Widgets** | [`QuickActions`](/ui/docs/widgets/quick-actions), [`EntityList`](/ui/docs/widgets/entity-list), [`ActivityFeed`](/ui/docs/widgets/activity-feed) |
 
-### Responsive behaviour
+## Responsive behaviour
 
-Open the **Code** tab to copy the full page. The layout responds to its container and viewport widths:
+- **Desktop (>= 1280px)**: The dual-tier navigation displays the full `AppRail` alongside an expanded 256px `Sidebar`. Widgets arrange across a 12-column analytical grid.
+- **Tablet (768px – 1279px)**: The `Sidebar` automatically collapses to an icon rail (`state="collapsed"`). Widget cards adapt to two equal columns.
+- **Mobile (< 768px)**: The `AppRail` and `Sidebar` transition to an accessible off-canvas drawer triggered by the `SidebarTrigger` in the header. Metric cards and widgets stack into a single vertical scroll stream.
 
-- At narrower widths, the `AppRail` collapses or hides.
-- The `Sidebar` collapses to an icon rail or goes off-canvas automatically.
-- Dashboard widgets like the `BarChart` and `MetricCard`s stack vertically using grid layout and container queries (`@container`).
+## Accessibility notes
+
+- **Landmark semantics**: The layout exposes landmark regions (`<nav aria-label="Global application rail">`, `<nav aria-label="Workspace sidebar">`, `<header>`, `<main id="main-content">`) allowing screen reader operators to jump between regions using landmark navigation keys.
+- **Skip navigation**: Includes a [`SkipLink`](/ui/docs/components/navigation/breadcrumb) targeting `#main-content` at the top of the tab order.
+- **Keyboard focus**: When the mobile drawer opens, keyboard focus moves to the close button and remains trapped within the navigation drawer until dismissed.
+
+---
+
+## Employee Directory (https://innostes.com/ui/docs/examples/employee-directory)
+
+Enterprise personnel directory with SplitPane desktop layout, mobile Sheet inspector, departmental TreeView, and contact cards.
+
+<ComponentPreview name="examples/employee-directory" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates master-detail navigation for enterprise employee records across Northwind Traders Pvt Ltd regional hubs:
+
+| Section | Components |
+| :--- | :--- |
+| **Desktop Master-Detail** | [`SplitPane`](/ui/docs/components/layout/split-pane) with fluid percentage splits and resizer separator |
+| **Mobile Drawer Inspector** | [`Sheet`](/ui/docs/components/overlays/sheet) sliding out from the right on viewports under 1024px |
+| **Department Hierarchy** | [`TreeView`](/ui/docs/components/data-display/tree-view) with collapsible department nodes and headcount badges |
+| **Employee Selection List** | Semantic `role="listbox"` with keyboard selection and active state styling |
+| **Identity & Avatars** | [`Avatar`](/ui/docs/components/data-display/avatar), [`AvatarFallback`](/ui/docs/components/data-display/avatar) rendering calculated initials |
+| **Profile Breakdown** | [`Card`](/ui/docs/components/data-display/card) grouping organizational tenure and direct contact channels |
+| **Filter & Search** | [`Input`](/ui/docs/components/forms/input) with search icon prefix |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Renders a horizontal [`SplitPane`](/ui/docs/components/layout/split-pane). The left pane contains the search filter, department TreeView, and scrollable personnel list. The right pane displays the active profile details.
+- **Tablet & Mobile (< 1024px)**: Transitions cleanly to a full-width list. Tapping any associate row slides out a right-hand [`Sheet`](/ui/docs/components/overlays/sheet) drawer containing their full profile and direct action buttons.
+
+## Accessibility notes
+
+- **Listbox semantics**: The associate list exposes `role="listbox"` with each record rendering as `role="option"` and carrying `aria-selected` reflecting active selection.
+- **Roving keyboard focus**: Operators can navigate the employee list using <kbd>Arrow Up</kbd> and <kbd>Arrow Down</kbd> keys and activate records via <kbd>Enter</kbd> or <kbd>Space</kbd>.
+- **Resizer separator**: The [`SplitPane`](/ui/docs/components/layout/split-pane) divider exposes `role="separator"` with keyboard accessibility via arrow keys.
+
+---
+
+## Hiring Pipeline (https://innostes.com/ui/docs/examples/hiring-pipeline)
+
+Recruitment board with multi-stage Kanban columns, drag-and-drop moves, salary indicators, and slide-out candidate Sheet.
+
+<ComponentPreview name="examples/hiring-pipeline" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates talent recruitment and candidate workflow tracking for supply chain personnel at Northwind Traders Pvt Ltd:
+
+| Section | Components |
+| :--- | :--- |
+| **Pipeline Scaffolding** | [`KanbanBoard`](/ui/docs/widgets/kanban-board) with 5 recruitment stages (Applied, Screening, Technical, Offer, Hired) |
+| **Candidate Cards** | Custom card layout with candidate name, role, expected CTC in INR Lakhs, rating stars, and avatar |
+| **Candidate Identity** | [`Avatar`](/ui/docs/components/data-display/avatar), [`AvatarFallback`](/ui/docs/components/data-display/avatar) |
+| **Stage Badges & Dots** | Color-coded status dots (`tone`) identifying stage urgency and progression |
+| **Candidate Inspector** | [`Sheet`](/ui/docs/components/overlays/sheet) slide-out drawer displaying candidate experience, notice periods, and interviewer notes |
+| **Action Triggers** | [`Button`](/ui/docs/components/actions/button) to advance candidates to the subsequent pipeline stage |
+| **Move Notifications** | [`toast`](/ui/docs/components/feedback/toast) announcing stage transitions upon card drop |
+
+## Responsive behaviour
+
+- **Desktop (>= 1280px)**: All 5 Kanban columns display side-by-side with full card previews. Drag-and-drop interactions work via mouse or keyboard shortcuts.
+- **Tablet & Mobile (< 1280px)**: The board enables smooth horizontal swipe scrolling. Tapping any candidate card slides out the candidate details in the full-height mobile [`Sheet`](/ui/docs/components/overlays/sheet).
+
+## Accessibility notes
+
+- **Keyboard drag-and-drop**: In addition to mouse dragging, [`KanbanBoard`](/ui/docs/widgets/kanban-board) supports complete keyboard reordering: press <kbd>Space</kbd> to pick up a card, use <kbd>Arrow</kbd> keys to move across columns, and press <kbd>Space</kbd> to drop.
+- **Live region announcements**: All pickup, move, drop, and cancel events trigger accessible announcements through polite live regions.
+- **Sheet drawer focus**: When a candidate card is activated, focus transitions into the candidate details sheet and returns to the triggering card when dismissed.
+
+---
+
+## Examples Gallery (https://innostes.com/ui/docs/examples/index)
+
+Production-grade reference application screens built exclusively with @innostes/ui components and design tokens.
+
+Explore full-screen enterprise reference screens built with `@innostes/ui`. Each example is an accessible, responsive, production-calibrated workflow modeled on Northwind Traders Pvt Ltd's ERP and operations platform.
+
+## Reference screens gallery
+
+<div className="grid gap-6 sm:grid-cols-2 mt-6">
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/dashboard" className="hover:underline text-primary">
+            Executive Dashboard →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">Layout & Viz</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Dual-tier AppRail and Sidebar navigation, TopBar, MetricCards with Indian numbering, and Cartesian charts.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>AppRail, Sidebar, MetricCard, Chart</span>
+      <a href="/ui/docs/examples/dashboard" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/setup-wizard" className="hover:underline text-primary">
+            Setup Wizard →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-chart-1/10 text-chart-1 font-medium">Onboarding</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Multi-step tenant configuration flow with brand features panel, Stepper, locale selects, and error validation.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>Stepper, FormGrid, LocaleSelect, Alert</span>
+      <a href="/ui/docs/examples/setup-wizard" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/invoice-list" className="hover:underline text-primary">
+            Invoice Registry →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">DataTable</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        High-density tax invoice table with debounced search, status segmentation, row selection, and batch actions.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>DataTable, Badge, DropdownMenu, Toast</span>
+      <a href="/ui/docs/examples/invoice-list" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/invoice-detail" className="hover:underline text-primary">
+            Invoice Detail & Settlement →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning font-medium">Audit & Review</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Transactional invoice review with PageHeader breadcrumbs, fiscal metrics, itemised table, ChangeLog, and AlertDialog.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>PageHeader, Table, ChangeLog, AlertDialog</span>
+      <a href="/ui/docs/examples/invoice-detail" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/employee-directory" className="hover:underline text-primary">
+            Employee Directory →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-chart-2/10 text-chart-2 font-medium">Master-Detail</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Master-detail screen with desktop SplitPane resizer, mobile Sheet drawer, departmental TreeView, and profile cards.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>SplitPane, Sheet, TreeView, Avatar</span>
+      <a href="/ui/docs/examples/employee-directory" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/settings" className="hover:underline text-primary">
+            Tenant Preferences →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">Form Layout</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Multi-section administration console with FormSection, FormGrid, Switches, Selects, and sticky unsaved-changes bar.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>FormSection, Switch, Select, Toast</span>
+      <a href="/ui/docs/examples/settings" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/roles-and-permissions" className="hover:underline text-primary">
+            Roles & Permissions →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">Access Control</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        RBAC security policy management with role listings, member headcounts, and PermissionMatrix with bulk toggles.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>PermissionMatrix, Card, Badge, Toast</span>
+      <a href="/ui/docs/examples/roles-and-permissions" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+
+  <div className="border rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm flex flex-col justify-between">
+    <div className="p-5 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg">
+          <a href="/ui/docs/examples/hiring-pipeline" className="hover:underline text-primary">
+            Hiring Pipeline →
+          </a>
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-chart-4/10 text-chart-4 font-medium">Kanban</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Multi-stage talent recruitment pipeline with KanbanBoard, drag-and-drop moves, CTC tags, and candidate Sheet drawer.
+      </p>
+    </div>
+    <div className="px-5 py-3 bg-muted/30 border-t flex items-center justify-between text-xs text-muted-foreground">
+      <span>KanbanBoard, Sheet, Avatar, Star</span>
+      <a href="/ui/docs/examples/hiring-pipeline" className="font-medium hover:underline text-primary">View example</a>
+    </div>
+  </div>
+</div>
+
+---
+
+## Invoice Detail (https://innostes.com/ui/docs/examples/invoice-detail)
+
+Detailed transaction invoice inspector with PageHeader breadcrumbs, fiscal summaries, line items, ChangeLog audit, and AlertDialog.
+
+<ComponentPreview name="examples/invoice-detail" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen provides a transactional review workspace for single tax invoices, bringing together fiscal summaries, statutory line items, audit logs, and irreversible payment settlement workflows:
+
+| Section | Components |
+| :--- | :--- |
+| **Page Header** | [`PageHeader`](/ui/docs/components/layout/page-header) with breadcrumbs navigation and download/action triggers |
+| **Status Tag** | [`Badge`](/ui/docs/components/data-display/badge) reflecting real-time settlement status |
+| **Fiscal Summaries** | [`Card`](/ui/docs/components/data-display/card) grid detailing total invoice value, customer GSTIN, issue date, and place of supply |
+| **Line Items** | Semantic [`Table`](/ui/docs/components/data-display/table) with item description, HSN codes, quantity, unit rates, and GST subtotals |
+| **Audit Lifecycle** | [`ChangeLog`](/ui/docs/widgets/change-log) documenting author, role, timestamp, and GSTN portal filing history |
+| **Settlement Confirmation** | [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) providing a two-phase confirmation modal before ledger posting |
+| **Toast Confirmation** | [`toast`](/ui/docs/components/feedback/toast) providing immediate asynchronous mutation feedback |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Top metrics render in a 4-column balanced card grid. Line items display all 6 columns (Description, HSN, Qty, Rate, Tax, Total) without truncation.
+- **Tablet (640px – 1023px)**: Fiscal metrics re-flow into a 2x2 grid. Table allows horizontal scrolling with sticky headers.
+- **Mobile (< 640px)**: Action buttons stack below the title. Metrics cards render full-width vertically.
+
+## Accessibility notes
+
+- **Confirmation semantics**: The settlement dialogue uses `role="alertdialog"` to announce high-consequence fiscal commitments to assistive technologies with immediate priority.
+- **Focus entrapment**: While the confirmation dialogue is open, keyboard focus remains trapped within the modal boundary until confirmed or cancelled via <kbd>Escape</kbd>.
+- **Table summary semantics**: Line item calculations are grouped into `<tbody>` rows with clear `colSpan` totals, allowing screen reader operators to follow accounting hierarchies.
+
+---
+
+## Invoice List (https://innostes.com/ui/docs/examples/invoice-list)
+
+High-density invoice registry with multi-column sorting, selection, status badges, batch actions, and CSV export.
+
+<ComponentPreview name="examples/invoice-list" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates high-density operational data management for GST tax invoices in the Northwind Traders Pvt Ltd procurement ecosystem:
+
+| Section | Components |
+| :--- | :--- |
+| **Header & Actions** | [`Button`](/ui/docs/components/actions/button) with export shortcuts and primary creation action |
+| **Filtering Toolbar** | [`Input`](/ui/docs/components/forms/input) with search icon prefix, [`Select`](/ui/docs/components/forms/select) for status segmentation |
+| **Batch Action Bar** | Contextual banner rendered conditionally when rows are selected, with bulk reminder and export triggers |
+| **Data Grid** | [`DataTable`](/ui/docs/components/data-display/data-table) with row selection checkboxes, customer details, and INR formatting |
+| **Status Indicators** | [`Badge`](/ui/docs/components/data-display/badge) with semantic color variants (`default`, `secondary`, `destructive`, `outline`) |
+| **Row Actions** | [`DropdownMenu`](/ui/docs/components/overlays/dropdown-menu) with item actions (View details, Download PDF, Send reminder) |
+| **Notifications** | [`toast`](/ui/docs/components/feedback/toast) confirming batch operations and export generation |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Full multi-column tabular view displaying invoice number, customer legal name, GSTIN, due dates, currency totals, status tags, and action triggers.
+- **Mobile (< 768px)**: The toolbar controls stack vertically into full-width elements. The table switches cleanly or scrolls horizontally without breaking outer container boundaries.
+
+## Accessibility notes
+
+- **Selection semantics**: The master checkbox in the header reflects `aria-checked="mixed"` when a partial subset of rows is selected. Individual row checkboxes carry descriptive `aria-label` tags including invoice numbers.
+- **Search debounce**: Search input updates announce results politely via live regions without interrupting screen reader speech mid-keystroke.
+- **Row action menus**: Each row menu button exposes an explicit accessible label (e.g. `aria-label="Actions for INV-2026-0801"`).
+
+---
+
+## Roles and Permissions (https://innostes.com/ui/docs/examples/roles-and-permissions)
+
+Access control management screen with custom and system role listings, member headcounts, and PermissionMatrix grid.
+
+<ComponentPreview name="examples/roles-and-permissions" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates enterprise Role-Based Access Control (RBAC) policy administration for Northwind Traders Pvt Ltd:
+
+| Section | Components |
+| :--- | :--- |
+| **Header Bar** | Page title, description, and primary Save permissions [`Button`](/ui/docs/components/actions/button) |
+| **Role Navigation** | Interactive [`Card`](/ui/docs/components/data-display/card) list displaying role titles, descriptions, member counts, and badges |
+| **System & Custom Tags** | [`Badge`](/ui/docs/components/data-display/badge) distinguishing immutable system roles from tenant custom roles |
+| **Access Matrix Grid** | [`PermissionMatrix`](/ui/docs/widgets/permission-matrix) with sticky resource column and bulk toggles |
+| **Policy Notifications** | [`toast`](/ui/docs/components/feedback/toast) confirming committed security policies |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Dual-column layout with the role selection cards on the left (4 columns) and the interactive `PermissionMatrix` on the right (8 columns).
+- **Tablet & Mobile (< 1024px)**: Stacks into a single column. The matrix container enables smooth horizontal scrolling with the resource label column frozen (`stickyColumn={true}`).
+
+## Accessibility notes
+
+- **Matrix semantics**: The [`PermissionMatrix`](/ui/docs/widgets/permission-matrix) renders a semantic `<table>` with associated `scope="row"` and `scope="col"` headers. Checkboxes carry programmatic labels combining action and resource.
+- **System role immutability**: For system roles, checkboxes render with `disabled` or `readOnly` attributes, preventing unauthorized mutations while maintaining keyboard focusability.
+- **Bulk toggle announcements**: Clicking column or row headers announces the updated bulk permission state politely to screen readers.
+
+---
+
+## Settings (https://innostes.com/ui/docs/examples/settings)
+
+Multi-section enterprise configuration screen with FormSection, FormGrid, Switches, Selects, and sticky unsaved-changes save bar.
+
+<ComponentPreview name="examples/settings" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates an administrative preferences console for managing corporate identity, statutory tax registrations, notification channels, and security policies:
+
+| Section | Components |
+| :--- | :--- |
+| **Section Scaffolding** | [`FormSection`](/ui/docs/components/layout/form-layout) grouping related preferences with titles and descriptions |
+| **Responsive Grid** | [`FormGrid`](/ui/docs/components/layout/form-layout) providing fluid 2-column input layouts on desktop and single-column on mobile |
+| **Accessible Fields** | [`Field`](/ui/docs/components/forms/field), [`FieldLabel`](/ui/docs/components/forms/field), [`FieldDescription`](/ui/docs/components/forms/field) |
+| **Input Controls** | [`Input`](/ui/docs/components/forms/input) for entity names and GSTIN, [`Select`](/ui/docs/components/forms/select) for currency and timezone |
+| **Feature Toggles** | [`Switch`](/ui/docs/components/forms/switch) for WhatsApp alerts, SMS triggers, and mandatory 2FA |
+| **Floating Save Bar** | Sticky bottom floating container with animation, rendered conditionally when `isDirty` is true |
+| **Actions & Recovery** | [`Button`](/ui/docs/components/actions/button) for Discard and Save Changes, with [`toast`](/ui/docs/components/feedback/toast) confirmations |
+
+## Responsive behaviour
+
+- **Desktop (>= 768px)**: Inputs inside `FormGrid` sit in balanced pairs or span full width based on `sm:col-span-2` utility classes. The floating save bar floats centered with a max-width of 576px.
+- **Mobile (< 768px)**: All form fields collapse to single-column full-width controls. The floating save bar anchors across the full viewport width with edge-to-edge padding.
+
+## Accessibility notes
+
+- **Switch labels**: Every [`Switch`](/ui/docs/components/forms/switch) includes an explicit programmatic `aria-label` attribute matching its visible section title.
+- **Unsaved change warnings**: When the floating save bar mounts upon field modification, the status text is announced via live region to prevent inadvertent data loss.
+- **Keyboard navigation**: Operators can navigate the entire settings form and commit updates without leaving the keyboard via standard <kbd>Tab</kbd> and <kbd>Enter</kbd> controls.
 
 ---
 
 ## Setup Wizard (https://innostes.com/ui/docs/examples/setup-wizard)
 
-Brand panel, stepper, responsive form grid, locale selects, validation and a wizard footer.
+Enterprise onboarding wizard with brand panel, Stepper, responsive form grid, locale selects, and error summary.
 
 <ComponentPreview name="examples/setup-wizard" align="start" className="p-0 sm:p-0" />
 
 ## What's in it
 
-| Part | Components |
-| --- | --- |
-| Brand panel | `Badge`, `IconTile` |
-| Progress | `Stepper` (completed steps are clickable) |
-| Form | `Form`, `FormGrid`, `Field`, `Input`, `Label` |
-| Locale settings | `CountrySelect`, `TimezoneSelect`, `LanguageSelect`, `DateFormatSelect` |
-| Help | `Alert` (info) |
-| Footer | `FormActions align="between"`, `Button` |
+This reference onboarding wizard guides new enterprise tenants through company configuration, database connection, administrator provisioning, and regional locale preferences:
 
-Try submitting with an empty name, or a slug with spaces: validation runs on submit and the errors
-are announced. The layout uses container queries, so it adapts to wherever it's placed.
+| Section | Components |
+| :--- | :--- |
+| **Brand Panel** | [`Badge`](/ui/docs/components/data-display/badge), [`IconTile`](/ui/docs/components/data-display/icon-tile) |
+| **Progress Stepper** | [`Stepper`](/ui/docs/components/navigation/stepper) with interactive completed steps and step descriptions |
+| **Form Entry** | [`Field`](/ui/docs/components/forms/field), [`FieldLabel`](/ui/docs/components/forms/field), [`Input`](/ui/docs/components/forms/input), [`FormGrid`](/ui/docs/components/layout/form-layout) |
+| **Regional Settings** | [`CountrySelect`](/ui/docs/components/forms/locale-select), [`LanguageSelect`](/ui/docs/components/forms/locale-select), [`TimezoneSelect`](/ui/docs/components/forms/locale-select), [`DateFormatSelect`](/ui/docs/components/forms/locale-select) |
+| **Inline Guidance** | [`Alert`](/ui/docs/components/feedback/alert) with info tone |
+| **Wizard Navigation** | [`FormActions`](/ui/docs/components/layout/form-layout), [`Button`](/ui/docs/components/actions/button) |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Renders a horizontal split view with the brand feature overview on the left panel (40% width) and the active setup form on the right panel (60% width).
+- **Tablet & Mobile (< 1024px)**: Collapses into a single vertical container. The brand panel transforms into a compact header banner, and the horizontal `Stepper` compresses using compact step indicators. Form inputs span full container width.
+
+## Accessibility notes
+
+- **Step announcement**: The [`Stepper`](/ui/docs/components/navigation/stepper) communicates progress to screen readers with `aria-current="step"` on the active step and polite announcements upon advancing.
+- **Form error associations**: All form controls are wrapped in [`Field`](/ui/docs/components/forms/field), ensuring invalid inputs automatically link to [`FieldError`](/ui/docs/components/forms/field) messages via `aria-describedby` and reflect `aria-invalid="true"`.
+- **Focus management**: Advancing to the next step programmatically shifts keyboard focus to the first interactive field in the newly rendered step.
 
 ---
 
@@ -13733,8 +14115,6 @@ import { useState, useEffect, useTransition } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   SplitPane,
-  SplitPanePanel,
-  SplitPaneResizer,
   Sheet,
   SheetContent,
   SheetHeader,
@@ -13925,9 +14305,9 @@ export function MasterDetailScreen() {
           </Sheet>
         </div>
       ) : (
-        // Desktop layout: SplitPane side-by-side with resizer
-        <SplitPane direction="horizontal" defaultSizes={[38, 62]}>
-          <SplitPanePanel minSize={280} defaultSize={380} className="border-r flex flex-col">
+        // Desktop layout: SplitPane side-by-side
+        <SplitPane defaultSize={38} minSize={20} maxSize={60} orientation="horizontal" className="h-full">
+          <div className="border-r flex flex-col h-full">
             <div className="p-4 border-b">
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -13967,13 +14347,11 @@ export function MasterDetailScreen() {
                 </div>
               ))}
             </div>
-          </SplitPanePanel>
+          </div>
 
-          <SplitPaneResizer aria-label="Resize requisition panel" />
-
-          <SplitPanePanel minSize={400} className="overflow-y-auto bg-muted/5">
+          <div className="overflow-y-auto bg-muted/5 h-full">
             <DetailContent item={selectedItem} />
-          </SplitPanePanel>
+          </div>
         </SplitPane>
       )}
     </div>
@@ -13985,7 +14363,7 @@ export function MasterDetailScreen() {
 
 - **Keyboard navigation semantics**: Master items rendered inside the navigation column should expose `role="option"` inside a container with `role="listbox"`. Set `aria-selected="true"` on the currently active item.
 - **Focus handoff**: When pressing <kbd>Enter</kbd> to inspect a record on desktop, allow keyboard users to advance focus directly to the detail action buttons using <kbd>Tab</kbd>.
-- **Accessible resizers**: The [`SplitPaneResizer`](/ui/docs/components/layout/split-pane) component renders `role="separator"` with appropriate `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` attributes, supporting incrementation via <kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd>.
+- **Accessible resizers**: The [`SplitPane`](/ui/docs/components/layout/split-pane) divider renders `role="separator"` with keyboard accessibility supporting step resizing via <kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd>.
 - **Mobile sheet close focus**: When the mobile [`Sheet`](/ui/docs/components/overlays/sheet) dismisses, return keyboard focus cleanly to the trigger list card.
 
 ## Common mistakes

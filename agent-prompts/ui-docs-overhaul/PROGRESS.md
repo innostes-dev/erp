@@ -467,4 +467,41 @@ drop, which doesn't work on touch screens.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 14 (Full-screen realistic examples).
+- Non-blocking: none. Resolved in 14.
+
+
+## 14 – Examples: full-page reference screens – 2026-10-29
+
+**Summary**: Completed production-grade reference application screens for `@innostes/ui` modeled on Northwind Traders Pvt Ltd's enterprise operations. Fixed all broken internal links across the reference dashboard (DOC-001) and elevated Setup Wizard to full template compliance. Created six new full-page reference screens with live interactive previews, component composition tables, responsive breakpoint notes, keyboard/ARIA accessibility documentation, and copyable source code: Invoice List (DataTable with filters, selection, batch actions, and CSV export), Invoice Detail (PageHeader, fiscal cards, itemized line items, ChangeLog audit trail, and AlertDialog settlement), Employee Directory (SplitPane desktop layout, mobile Sheet drawer, departmental TreeView, and contact cards), Settings (multi-section FormLayout, Switches, Selects, and sticky unsaved-changes save bar), Roles and Permissions (RBAC configuration with system vs custom badges and PermissionMatrix), and Hiring Pipeline (5-stage KanbanBoard with drag-and-drop and candidate detail Sheet). Added the Examples Gallery overview page linking all eight reference screens. Resolved DOC-001 and DOC-014.
+
+**Changed**:
+- Created mock data module:
+  - `apps/landing/components/demos/_data/northwind.ts`: realistic Northwind invoices, line items, personnel, candidates, and organizational structures.
+- Created reference demo components:
+  - `apps/landing/components/demos/examples/invoice-list.tsx`: tax invoice registry with selection and bulk actions.
+  - `apps/landing/components/demos/examples/invoice-detail.tsx`: transaction invoice review with ChangeLog and settlement dialogue.
+  - `apps/landing/components/demos/examples/employee-directory.tsx`: personnel directory with SplitPane and mobile Sheet inspector.
+  - `apps/landing/components/demos/examples/settings.tsx`: tenant configuration console with sticky unsaved-changes save bar.
+  - `apps/landing/components/demos/examples/roles-and-permissions.tsx`: security policy matrix with role selector cards.
+  - `apps/landing/components/demos/examples/hiring-pipeline.tsx`: talent recruitment Kanban board with candidate Sheet.
+- Created and updated documentation pages:
+  - `apps/landing/content/docs/examples/index.mdx`: full-screen gallery grid linking all 8 reference screens.
+  - `apps/landing/content/docs/examples/dashboard.mdx`: fixed links, added accessibility notes and responsive details (DOC-001).
+  - `apps/landing/content/docs/examples/setup-wizard.mdx`: elevated to 7-section standard with accessibility notes.
+  - `apps/landing/content/docs/examples/invoice-list.mdx`: full documentation for invoice registry.
+  - `apps/landing/content/docs/examples/invoice-detail.mdx`: full documentation for invoice inspection and settlement.
+  - `apps/landing/content/docs/examples/employee-directory.mdx`: full documentation for master-detail directory.
+  - `apps/landing/content/docs/examples/settings.mdx`: full documentation for enterprise configuration console.
+  - `apps/landing/content/docs/examples/roles-and-permissions.mdx`: full documentation for access control matrix.
+  - `apps/landing/content/docs/examples/hiring-pipeline.mdx`: full documentation for recruitment pipeline.
+  - `apps/landing/content/docs/examples/meta.json`: updated with index and all 8 reference pages.
+- Generated demo registry (98 total demos) and updated LLMs index.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.22s, all 9 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (static generation completed).
+- Checked viewports (1440px, 1024px, 768px, 360px), light/dark themes, and keyboard navigation.
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 15 (Governance and release readiness).

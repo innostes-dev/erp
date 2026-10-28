@@ -1,0 +1,32 @@
+---
+title: Roles and Permissions
+description: Enterprise RBAC configuration screen with role selection sidebar, policy descriptions, and PermissionMatrix.
+icon: ShieldCheck
+summary: Access control management screen with custom and system role listings, member headcounts, and PermissionMatrix grid.
+full: true
+---
+
+<ComponentPreview name="examples/roles-and-permissions" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates enterprise Role-Based Access Control (RBAC) policy administration for Northwind Traders Pvt Ltd:
+
+| Section | Components |
+| :--- | :--- |
+| **Header Bar** | Page title, description, and primary Save permissions [`Button`](/ui/docs/components/actions/button) |
+| **Role Navigation** | Interactive [`Card`](/ui/docs/components/data-display/card) list displaying role titles, descriptions, member counts, and badges |
+| **System & Custom Tags** | [`Badge`](/ui/docs/components/data-display/badge) distinguishing immutable system roles from tenant custom roles |
+| **Access Matrix Grid** | [`PermissionMatrix`](/ui/docs/widgets/permission-matrix) with sticky resource column and bulk toggles |
+| **Policy Notifications** | [`toast`](/ui/docs/components/feedback/toast) confirming committed security policies |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Dual-column layout with the role selection cards on the left (4 columns) and the interactive `PermissionMatrix` on the right (8 columns).
+- **Tablet & Mobile (< 1024px)**: Stacks into a single column. The matrix container enables smooth horizontal scrolling with the resource label column frozen (`stickyColumn={true}`).
+
+## Accessibility notes
+
+- **Matrix semantics**: The [`PermissionMatrix`](/ui/docs/widgets/permission-matrix) renders a semantic `<table>` with associated `scope="row"` and `scope="col"` headers. Checkboxes carry programmatic labels combining action and resource.
+- **System role immutability**: For system roles, checkboxes render with `disabled` or `readOnly` attributes, preventing unauthorized mutations while maintaining keyboard focusability.
+- **Bulk toggle announcements**: Clicking column or row headers announces the updated bulk permission state politely to screen readers.

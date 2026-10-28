@@ -1,0 +1,34 @@
+---
+title: Settings
+description: Enterprise administrative configuration screen with FormLayout sections, Switches, Selects, and unsaved changes save bar.
+icon: Settings
+summary: Multi-section enterprise configuration screen with FormSection, FormGrid, Switches, Selects, and sticky unsaved-changes save bar.
+full: true
+---
+
+<ComponentPreview name="examples/settings" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates an administrative preferences console for managing corporate identity, statutory tax registrations, notification channels, and security policies:
+
+| Section | Components |
+| :--- | :--- |
+| **Section Scaffolding** | [`FormSection`](/ui/docs/components/layout/form-layout) grouping related preferences with titles and descriptions |
+| **Responsive Grid** | [`FormGrid`](/ui/docs/components/layout/form-layout) providing fluid 2-column input layouts on desktop and single-column on mobile |
+| **Accessible Fields** | [`Field`](/ui/docs/components/forms/field), [`FieldLabel`](/ui/docs/components/forms/field), [`FieldDescription`](/ui/docs/components/forms/field) |
+| **Input Controls** | [`Input`](/ui/docs/components/forms/input) for entity names and GSTIN, [`Select`](/ui/docs/components/forms/select) for currency and timezone |
+| **Feature Toggles** | [`Switch`](/ui/docs/components/forms/switch) for WhatsApp alerts, SMS triggers, and mandatory 2FA |
+| **Floating Save Bar** | Sticky bottom floating container with animation, rendered conditionally when `isDirty` is true |
+| **Actions & Recovery** | [`Button`](/ui/docs/components/actions/button) for Discard and Save Changes, with [`toast`](/ui/docs/components/feedback/toast) confirmations |
+
+## Responsive behaviour
+
+- **Desktop (>= 768px)**: Inputs inside `FormGrid` sit in balanced pairs or span full width based on `sm:col-span-2` utility classes. The floating save bar floats centered with a max-width of 576px.
+- **Mobile (< 768px)**: All form fields collapse to single-column full-width controls. The floating save bar anchors across the full viewport width with edge-to-edge padding.
+
+## Accessibility notes
+
+- **Switch labels**: Every [`Switch`](/ui/docs/components/forms/switch) includes an explicit programmatic `aria-label` attribute matching its visible section title.
+- **Unsaved change warnings**: When the floating save bar mounts upon field modification, the status text is announced via live region to prevent inadvertent data loss.
+- **Keyboard navigation**: Operators can navigate the entire settings form and commit updates without leaving the keyboard via standard <kbd>Tab</kbd> and <kbd>Enter</kbd> controls.

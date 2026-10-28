@@ -1,0 +1,34 @@
+---
+title: Employee Directory
+description: Master-detail personnel directory with SplitPane on desktop, Sheet on mobile, and departmental TreeView.
+icon: Users
+summary: Enterprise personnel directory with SplitPane desktop layout, mobile Sheet inspector, departmental TreeView, and contact cards.
+full: true
+---
+
+<ComponentPreview name="examples/employee-directory" align="start" className="p-0 sm:p-0" />
+
+## What's in it
+
+This reference screen demonstrates master-detail navigation for enterprise employee records across Northwind Traders Pvt Ltd regional hubs:
+
+| Section | Components |
+| :--- | :--- |
+| **Desktop Master-Detail** | [`SplitPane`](/ui/docs/components/layout/split-pane) with fluid percentage splits and resizer separator |
+| **Mobile Drawer Inspector** | [`Sheet`](/ui/docs/components/overlays/sheet) sliding out from the right on viewports under 1024px |
+| **Department Hierarchy** | [`TreeView`](/ui/docs/components/data-display/tree-view) with collapsible department nodes and headcount badges |
+| **Employee Selection List** | Semantic `role="listbox"` with keyboard selection and active state styling |
+| **Identity & Avatars** | [`Avatar`](/ui/docs/components/data-display/avatar), [`AvatarFallback`](/ui/docs/components/data-display/avatar) rendering calculated initials |
+| **Profile Breakdown** | [`Card`](/ui/docs/components/data-display/card) grouping organizational tenure and direct contact channels |
+| **Filter & Search** | [`Input`](/ui/docs/components/forms/input) with search icon prefix |
+
+## Responsive behaviour
+
+- **Desktop (>= 1024px)**: Renders a horizontal [`SplitPane`](/ui/docs/components/layout/split-pane). The left pane contains the search filter, department TreeView, and scrollable personnel list. The right pane displays the active profile details.
+- **Tablet & Mobile (< 1024px)**: Transitions cleanly to a full-width list. Tapping any associate row slides out a right-hand [`Sheet`](/ui/docs/components/overlays/sheet) drawer containing their full profile and direct action buttons.
+
+## Accessibility notes
+
+- **Listbox semantics**: The associate list exposes `role="listbox"` with each record rendering as `role="option"` and carrying `aria-selected` reflecting active selection.
+- **Roving keyboard focus**: Operators can navigate the employee list using <kbd>Arrow Up</kbd> and <kbd>Arrow Down</kbd> keys and activate records via <kbd>Enter</kbd> or <kbd>Space</kbd>.
+- **Resizer separator**: The [`SplitPane`](/ui/docs/components/layout/split-pane) divider exposes `role="separator"` with keyboard accessibility via arrow keys.

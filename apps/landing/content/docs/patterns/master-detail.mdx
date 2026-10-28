@@ -32,8 +32,6 @@ import { useState, useEffect, useTransition } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   SplitPane,
-  SplitPanePanel,
-  SplitPaneResizer,
   Sheet,
   SheetContent,
   SheetHeader,
@@ -224,9 +222,9 @@ export function MasterDetailScreen() {
           </Sheet>
         </div>
       ) : (
-        // Desktop layout: SplitPane side-by-side with resizer
-        <SplitPane direction="horizontal" defaultSizes={[38, 62]}>
-          <SplitPanePanel minSize={280} defaultSize={380} className="border-r flex flex-col">
+        // Desktop layout: SplitPane side-by-side
+        <SplitPane defaultSize={38} minSize={20} maxSize={60} orientation="horizontal" className="h-full">
+          <div className="border-r flex flex-col h-full">
             <div className="p-4 border-b">
               <div className="relative">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -266,13 +264,11 @@ export function MasterDetailScreen() {
                 </div>
               ))}
             </div>
-          </SplitPanePanel>
+          </div>
 
-          <SplitPaneResizer aria-label="Resize requisition panel" />
-
-          <SplitPanePanel minSize={400} className="overflow-y-auto bg-muted/5">
+          <div className="overflow-y-auto bg-muted/5 h-full">
             <DetailContent item={selectedItem} />
-          </SplitPanePanel>
+          </div>
         </SplitPane>
       )}
     </div>
@@ -284,7 +280,7 @@ export function MasterDetailScreen() {
 
 - **Keyboard navigation semantics**: Master items rendered inside the navigation column should expose `role="option"` inside a container with `role="listbox"`. Set `aria-selected="true"` on the currently active item.
 - **Focus handoff**: When pressing <kbd>Enter</kbd> to inspect a record on desktop, allow keyboard users to advance focus directly to the detail action buttons using <kbd>Tab</kbd>.
-- **Accessible resizers**: The [`SplitPaneResizer`](/ui/docs/components/layout/split-pane) component renders `role="separator"` with appropriate `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` attributes, supporting incrementation via <kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd>.
+- **Accessible resizers**: The [`SplitPane`](/ui/docs/components/layout/split-pane) divider renders `role="separator"` with keyboard accessibility supporting step resizing via <kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd>.
 - **Mobile sheet close focus**: When the mobile [`Sheet`](/ui/docs/components/overlays/sheet) dismisses, return keyboard focus cleanly to the trigger list card.
 
 ## Common mistakes

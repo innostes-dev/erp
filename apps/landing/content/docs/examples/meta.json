@@ -1,7 +1,14 @@
 {
   "title": "Examples",
   "pages": [
+    "index",
     "dashboard",
-    "setup-wizard"
+    "setup-wizard",
+    "invoice-list",
+    "invoice-detail",
+    "employee-directory",
+    "settings",
+    "roles-and-permissions",
+    "hiring-pipeline"
   ]
 }

@@ -21,6 +21,12 @@ import Demo_data_display_stat_basic_tsx from './data-display/stat/basic';
 import Demo_data_display_table_basic_tsx from './data-display/table/basic';
 import Demo_data_display_tree_view_basic_tsx from './data-display/tree-view/basic';
 import Demo_examples_dashboard_tsx from './examples/dashboard';
+import Demo_examples_employee_directory_tsx from './examples/employee-directory';
+import Demo_examples_hiring_pipeline_tsx from './examples/hiring-pipeline';
+import Demo_examples_invoice_detail_tsx from './examples/invoice-detail';
+import Demo_examples_invoice_list_tsx from './examples/invoice-list';
+import Demo_examples_roles_and_permissions_tsx from './examples/roles-and-permissions';
+import Demo_examples_settings_tsx from './examples/settings';
 import Demo_examples_setup_wizard_tsx from './examples/setup-wizard';
 import Demo_feedback_alert_basic_tsx from './feedback/alert/basic';
 import Demo_feedback_gauge_basic_tsx from './feedback/gauge/basic';
@@ -115,6 +121,12 @@ export const demos: Record<string, ComponentType> = {
   'data-display/table/basic': Demo_data_display_table_basic_tsx,
   'data-display/tree-view/basic': Demo_data_display_tree_view_basic_tsx,
   'examples/dashboard': Demo_examples_dashboard_tsx,
+  'examples/employee-directory': Demo_examples_employee_directory_tsx,
+  'examples/hiring-pipeline': Demo_examples_hiring_pipeline_tsx,
+  'examples/invoice-detail': Demo_examples_invoice_detail_tsx,
+  'examples/invoice-list': Demo_examples_invoice_list_tsx,
+  'examples/roles-and-permissions': Demo_examples_roles_and_permissions_tsx,
+  'examples/settings': Demo_examples_settings_tsx,
   'examples/setup-wizard': Demo_examples_setup_wizard_tsx,
   'feedback/alert/basic': Demo_feedback_alert_basic_tsx,
   'feedback/gauge/basic': Demo_feedback_gauge_basic_tsx,
