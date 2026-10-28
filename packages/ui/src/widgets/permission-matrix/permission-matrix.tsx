@@ -53,6 +53,10 @@ export interface PermissionMatrixProps
   readOnly?: boolean;
   /** Add "all" checkboxes for each row and column. @default true */
   bulkToggles?: boolean;
+  /** Keep the resource column visible while the matrix scrolls horizontally. @default true */
+  stickyColumn?: boolean;
+  /** Keep the header visible while scrolling down. @default false */
+  stickyHeader?: boolean;
   /** Heading of the first column. @default 'Resource' */
   resourceLabel?: string;
   /** Accessible names for bulk toggles, for translation. */
@@ -61,6 +65,10 @@ export interface PermissionMatrixProps
     row?: (resource: string) => string;
     /** @default (action) => `${action} for all` */
     column?: (action: string) => string;
+    /** @default 'Not applicable' */
+    notApplicable?: string;
+    /** Accessible name when partially granted (mixed). @default (name) => `${name} (partially granted)` */
+    mixed?: (name: string) => string;
   };
   /** Classes for inner parts. */
   classNames?: SlotClassNames<PermissionMatrixSlot>;
@@ -99,6 +107,8 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
     onValueChange,
     readOnly = false,
     bulkToggles = true,
+    stickyColumn = true,
+    stickyHeader = false,
     resourceLabel = 'Resource',
     labels,
     className,
@@ -116,6 +126,7 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
   const columnKeys = (a: PermissionAction) => resources.filter((r) => applies(r, a)).map((r) => permissionKey(r.id, a.id));
 
   const setMany = (keys: string[], on: boolean) => {
+    if (readOnly) return;
     const next = new Set(granted);
     for (const k of keys) {
       if (on) next.add(k);
@@ -139,6 +150,7 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
   const colCount = actions.length + 1;
   const rowLabel = labels?.row ?? ((r: string) => `All permissions for ${r}`);
   const colLabel = labels?.column ?? ((a: string) => `${a} for all`);
+  const notApplicableText = labels?.notApplicable ?? 'Not applicable';
 
   return (
     <div
@@ -152,9 +164,15 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
         data-slot="permission-matrix-table"
         className={cn('w-full border-collapse text-sm', classNames?.table)}
       >
-        <thead className="bg-muted/50">
+        <thead className={cn('bg-muted/50', stickyHeader && 'sticky top-0 z-20 bg-muted')}>
           <tr>
-            <th scope="col" className="px-4 py-2.5 text-start font-medium text-muted-foreground">
+            <th
+              scope="col"
+              className={cn(
+                'px-4 py-2.5 text-start font-medium text-muted-foreground',
+                stickyColumn && 'sticky start-0 z-10 bg-muted/95',
+              )}
+            >
               {resourceLabel}
             </th>
             {actions.map((a) => {
@@ -166,7 +184,7 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
                     {a.label}
                     {bulkToggles && !readOnly && keys.length > 0 && (
                       <Checkbox
-                        aria-label={colLabel(a.label)}
+                        aria-label={labels?.mixed && s.indeterminate ? labels.mixed(a.label) : colLabel(a.label)}
                         checked={s.checked}
                         indeterminate={s.indeterminate}
                         onCheckedChange={() => setMany(keys, !s.checked)}
@@ -193,19 +211,27 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
                 const s = stateOf(keys, granted);
                 return (
                   <tr key={r.id} data-slot="permission-matrix-row" className={cn('border-t border-border hover:bg-muted/30', classNames?.row)}>
-                    <th scope="row" data-slot="permission-matrix-resource" className={cn('px-4 py-2.5 text-start font-normal', classNames?.resource)}>
+                    <th
+                      scope="row"
+                      data-slot="permission-matrix-resource"
+                      className={cn(
+                        'px-4 py-2.5 text-start font-normal',
+                        stickyColumn && 'sticky start-0 z-10 bg-card/95',
+                        classNames?.resource,
+                      )}
+                    >
                       <span className="flex items-center gap-3">
                         {bulkToggles && !readOnly && keys.length > 0 && (
                           <Checkbox
-                            aria-label={rowLabel(r.label)}
+                            aria-label={labels?.mixed && s.indeterminate ? labels.mixed(r.label) : rowLabel(r.label)}
                             checked={s.checked}
                             indeterminate={s.indeterminate}
                             onCheckedChange={() => setMany(keys, !s.checked)}
                           />
                         )}
-                        <span className="flex flex-col">
-                          <span className="font-medium text-foreground">{r.label}</span>
-                          {r.description && <span className="text-xs text-muted-foreground">{r.description}</span>}
+                        <span className="flex min-w-0 flex-col">
+                          <span className="font-medium text-foreground break-words">{r.label}</span>
+                          {r.description && <span className="text-xs text-muted-foreground break-words">{r.description}</span>}
                         </span>
                       </span>
                     </th>
@@ -218,13 +244,14 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
                               aria-label={`${a.label} ${r.label}`}
                               checked={granted.has(key)}
                               readOnly={readOnly}
+                              disabled={readOnly}
                               onCheckedChange={(on) => setMany([key], on)}
                               className="align-middle"
                             />
                           ) : (
                             <span className="text-muted-foreground">
                               <span aria-hidden="true">—</span>
-                              <span className="sr-only">Not applicable</span>
+                              <span className="sr-only">{notApplicableText}</span>
                             </span>
                           )}
                         </td>

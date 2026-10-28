@@ -116,7 +116,7 @@ export const ChangeLog = forwardRef<HTMLDivElement, ChangeLogProps>(function Cha
                       <dd className="m-0 flex min-w-0 flex-wrap items-center gap-1.5">
                         <del
                           data-slot="change-log-from"
-                          className={cn('text-muted-foreground line-through decoration-destructive/60', classNames?.from)}
+                          className={cn('text-muted-foreground line-through decoration-destructive/60 break-words', classNames?.from)}
                         >
                           <span className="sr-only">{diffLabels?.from ?? 'from'} </span>
                           {show(change.from)}
@@ -124,7 +124,7 @@ export const ChangeLog = forwardRef<HTMLDivElement, ChangeLogProps>(function Cha
                         <ArrowRightIcon className="size-3 shrink-0 text-muted-foreground rtl:rotate-180" />
                         <ins
                           data-slot="change-log-to"
-                          className={cn('font-medium text-foreground no-underline', classNames?.to)}
+                          className={cn('font-medium text-foreground no-underline break-words', classNames?.to)}
                         >
                           <span className="sr-only">{diffLabels?.to ?? 'to'} </span>
                           {show(change.to)}

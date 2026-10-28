@@ -82,6 +82,8 @@ export interface RichTextEditorProps
   disabled?: boolean;
   /** Prevents editing and hides the toolbar, e.g. to display saved notes. @default false */
   readOnly?: boolean;
+  /** Mark the field as invalid (e.g. from form validation). @default false */
+  invalid?: boolean;
   /**
    * Toolbar buttons in order; `'|'` adds a divider. `false` hides the toolbar (Markdown-style
    * shortcuts like `**bold**` and `- list` still work).
@@ -170,6 +172,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(fu
     name,
     disabled = false,
     readOnly = false,
+    invalid = false,
     toolbar = defaultToolbar,
     extensions = [],
     onReady,
@@ -212,6 +215,7 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(fu
         id: baseId,
         role: 'textbox',
         'aria-multiline': 'true',
+        ...(invalid ? { 'aria-invalid': 'true' } : {}),
         ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
         ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
         ...(ariaDescribedBy ? { 'aria-describedby': ariaDescribedBy } : {}),
@@ -322,11 +326,13 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(fu
       data-slot="rich-text-editor"
       data-disabled={disabled ? '' : undefined}
       data-readonly={readOnly ? '' : undefined}
+      data-invalid={invalid ? '' : undefined}
       className={cn(
         'flex w-full flex-col overflow-hidden rounded-md border border-input bg-background shadow-xs transition-[color,box-shadow,border-color]',
         'focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25',
         'data-disabled:cursor-not-allowed data-disabled:opacity-50',
         'data-readonly:border-transparent data-readonly:bg-transparent data-readonly:shadow-none data-readonly:focus-within:ring-0',
+        'data-invalid:border-destructive data-invalid:focus-within:ring-destructive/25',
         classNames?.root,
         className,
       )}

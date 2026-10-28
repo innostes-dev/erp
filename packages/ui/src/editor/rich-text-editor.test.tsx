@@ -108,4 +108,84 @@ describe('RichTextEditor', () => {
     const buttons = screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'));
     expect(buttons).toEqual(['Gras', 'Link']);
   });
+
+  it('reflects invalid and disabled states for form integration', async () => {
+    const { container } = render(
+      <RichTextEditor aria-label="Notes" invalid disabled defaultValue="<p>Test</p>" />,
+    );
+    const root = container.querySelector('[data-slot="rich-text-editor"]');
+    expect(root).toHaveAttribute('data-invalid');
+    expect(root).toHaveAttribute('data-disabled');
+
+    const box = await screen.findByRole('textbox', { name: 'Notes' });
+    expect(box).toHaveAttribute('aria-invalid', 'true');
+    expect(box).toHaveAttribute('contenteditable', 'false');
+  });
+
+  it('supports closing and removing links via the link form', async () => {
+    const user = userEvent.setup();
+    const { getEditor, ready } = renderEditor({
+      defaultValue: '<p><a href="https://innostes.com">Link Text</a></p>',
+    });
+    await ready();
+    getEditor().commands.selectAll();
+
+    // Open link form
+    await user.click(screen.getByRole('button', { name: 'Link' }));
+    const input = screen.getByRole('textbox', { name: 'Link URL' });
+    expect(input).toHaveValue('https://innostes.com');
+
+    // Cancel with Escape while input is focused
+    await user.type(input, '{Escape}');
+    expect(screen.queryByRole('textbox', { name: 'Link URL' })).not.toBeInTheDocument();
+
+    // Reopen and remove link
+    await user.click(screen.getByRole('button', { name: 'Link' }));
+    const removeBtn = screen.getByRole('button', { name: 'Remove link' });
+    await user.click(removeBtn);
+    expect(screen.queryByRole('textbox', { name: 'Link URL' })).not.toBeInTheDocument();
+    expect(getEditor().getHTML()).toBe('<p>Link Text</p>');
+  });
+
+  it('runs all standard toolbar formatting actions', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+    const { getEditor, ready } = renderEditor({
+      defaultValue: '<p>Text</p>',
+      onValueChange,
+      toolbar: [
+        'italic',
+        'underline',
+        'strike',
+        'heading',
+        'orderedList',
+        'blockquote',
+        'code',
+        'redo',
+      ],
+    });
+    await ready();
+    getEditor().commands.selectAll();
+
+    await user.click(screen.getByRole('button', { name: 'Italic' }));
+    expect(onValueChange).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Underline' }));
+    expect(onValueChange).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Strikethrough' }));
+    expect(onValueChange).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Heading' }));
+    expect(onValueChange).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Numbered list' }));
+    expect(onValueChange).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Quote' }));
+    expect(onValueChange).toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Inline code' }));
+    expect(onValueChange).toHaveBeenCalled();
+  });
 });

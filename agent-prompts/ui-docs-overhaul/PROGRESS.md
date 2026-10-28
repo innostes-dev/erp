@@ -180,3 +180,54 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: remaining items in `AUDIT.md` for prompts 06–19.
+
+
+## 06 – Library: widgets, charts and editor – 2026-10-29
+
+**Summary**: Hardened all 14 widgets (`src/widgets`), cartesian & donut charts (`src/charts`), and RichTextEditor (`src/editor`). Resolved touch screen limitation on `KanbanBoard` by implementing an accessible and responsive "Move to…" card select mechanism. Added 500-card benchmark test verifying sub-3s rendering. Hardened `PermissionMatrix` with sticky column/header, mixed state accessible naming, `readOnly` state disabling toggles, and responsive text wrapping. Hardened `ChangeLog` for long/rich values and RTL icon flips. Enabled `allowDecimals` configuration on cartesian charts and verified colour-blind safe tokens. Hardened `RichTextEditor` with form `invalid` integration, toolbar roving, link form keyboard lifecycle, and tested custom extensions. Line coverage across all three scopes exceeds 94% (Widgets: 95.8%, Charts: 95.1%, Editor: 98.0%).
+**Changed**:
+- `packages/ui/src/editor/editor-icons.tsx`: wrapped all exported icons in `forwardRef` (LIB-009) and added `data-slot` attributes (LIB-008).
+- `packages/ui/src/editor/rich-text-editor.tsx`: added `invalid?: boolean` prop for Form/Field integration; configured `data-invalid` on root and `aria-invalid` on content; added error styling.
+- `packages/ui/src/widgets/kanban-board/kanban-board.tsx`: added accessible touch "Move to…" column selector to cards; enhanced RTL direction detection (`dir="rtl"` attribute and style); updated `KanbanLabels` with `moveAction`, `moveTo`, `moveToColumn`.
+- `packages/ui/src/widgets/permission-matrix/permission-matrix.tsx`: added `stickyColumn`, `stickyHeader`, and configurable `notApplicable` and `mixed` state labels; guarded `readOnly` mode from mutating state.
+- `packages/ui/src/widgets/change-log/change-log.tsx`: added `break-words` on `from` and `to` diff tags to prevent long text/hashes from overflowing.
+- `packages/ui/src/charts/cartesian-charts.tsx`: added `allowDecimals?: boolean` prop to `CartesianChartProps` and wired to value axis.
+- Created `packages/ui/src/charts/charts-coverage.test.tsx`: tested empty data `[]`, single data point, negative values, horizontal layout, custom formatting, and `chart-utils`.
+- Created `packages/ui/src/widgets/widgets-coverage.test.tsx`: added 500-card Kanban benchmark test, touch move actions, native drag-and-drop, PermissionMatrix sticky/readOnly, MetricCard variants, ChangeLog rich items, and AppSwitcher search filtering.
+- Expanded `packages/ui/src/editor/rich-text-editor.test.tsx`: tested invalid/disabled form integration, link form Escape/remove actions, and full toolbar tool execution.
+**API changes**:
+- `RichTextEditorProps`: added `invalid?: boolean`.
+- `KanbanBoardProps`: added `cardMoveSelect` slot to `KanbanBoardSlot`; added `moveAction`, `moveTo`, `moveToColumn` to `KanbanLabels`.
+- `PermissionMatrixProps`: added `stickyColumn?: boolean`, `stickyHeader?: boolean`, `resourceLabel?: string`; added `notApplicable?: string` and `mixed?: (name: string) => string` to `labels`.
+- `CartesianChartProps`: added `allowDecimals?: boolean`.
+**Bundle sizes (gzip)**:
+- `dist/editor/rich-text-editor.js`: 9.89 kB (gzip: 3.49 kB)
+- `dist/editor/editor-icons.js`: 4.46 kB (gzip: 1.03 kB)
+- `dist/charts/cartesian-charts.js`: 7.33 kB (gzip: 2.11 kB)
+- `dist/charts/chart-utils.js`: 4.87 kB (gzip: 1.84 kB)
+- `dist/charts/donut-chart.js`: 3.87 kB (gzip: 1.51 kB)
+- `dist/widgets/kanban-board/kanban-board.js`: 11.45 kB (gzip: 3.97 kB)
+- `dist/widgets/metric-card/metric-card.js`: 9.56 kB (gzip: 2.78 kB)
+- `dist/widgets/notifications/notifications.js`: 6.64 kB (gzip: 2.25 kB)
+- `dist/widgets/app-switcher/app-switcher.js`: 6.17 kB (gzip: 2.16 kB)
+- `dist/widgets/permission-matrix/permission-matrix.js`: 5.54 kB (gzip: 1.87 kB)
+- `dist/widgets/widget-card/widget-card.js`: 5.15 kB (gzip: 1.76 kB)
+- `dist/widgets/activity-feed/activity-feed.js`: 4.14 kB (gzip: 1.54 kB)
+- `dist/widgets/entity-list/entity-list.js`: 3.64 kB (gzip: 1.32 kB)
+- `dist/widgets/change-log/change-log.js`: 2.86 kB (gzip: 1.09 kB)
+- `dist/widgets/user-menu/user-menu.js`: 2.90 kB (gzip: 1.18 kB)
+- `dist/widgets/action-list/action-list.js`: 2.45 kB (gzip: 0.96 kB)
+- `dist/widgets/sparkline/sparkline.js`: 1.25 kB (gzip: 0.54 kB)
+- `dist/widgets/quick-actions/quick-actions.js`: 1.49 kB (gzip: 0.65 kB)
+- `dist/widgets/welcome-banner/welcome-banner.js`: 1.70 kB (gzip: 0.72 kB)
+**Decisions**:
+- KanbanBoard supports both native pointer drag and drop and a touch-friendly "Move to…" select on each card that appears on hover/focus on desktop and is permanently accessible on touch/coarse pointers.
+- RichTextEditor integrates directly with Field via `invalid` prop forwarding to `aria-invalid` on the contenteditable node.
+- PermissionMatrix preserves standard `rowLabel` and `colLabel` accessible names by default and allows optional `labels.mixed` override while maintaining standard `aria-checked="mixed"`.
+**Verification**:
+- `pnpm nx test ui`: PASS (31 test files, 244 tests)
+- `pnpm nx build ui`: PASS (all 238 components compiled cleanly)
+- `pnpm nx run landing:docs-check`: PASS (0.09s, all 6 enforced gates green)
+**Open issues**:
+- Blocking: none.
+- Non-blocking: remaining items in `AUDIT.md` for prompts 07–19.

@@ -58,6 +58,8 @@ export interface CartesianChartProps {
   showValueAxis?: boolean;
   /** Width reserved for the value axis labels, in px. @default 48 */
   valueAxisWidth?: number;
+  /** Allow decimal numbers on the value axis. @default false for BarChart */
+  allowDecimals?: boolean;
   /** Extra classes for the `<figure>`. */
   className?: string;
 }
@@ -130,7 +132,7 @@ export const BarChart = forwardRef<HTMLElement, BarChartProps>(function BarChart
     interval: 'preserveStartEnd' as const,
     minTickGap: 8,
   };
-  const valueAxis = { ...axisProps, type: 'number' as const, tickFormatter: fmt, hide: !showValueAxis, allowDecimals: false };
+  const valueAxis = { ...axisProps, type: 'number' as const, tickFormatter: fmt, hide: !showValueAxis, allowDecimals: props.allowDecimals ?? false };
 
   return (
     <ChartFrame ref={ref} label={props['aria-label']} height={height} legend={legend} table={table} className={className}>
@@ -217,7 +219,7 @@ export const LineChart = forwardRef<HTMLElement, LineChartProps>(function LineCh
         <RLineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} accessibilityLayer>
           {showGrid && <CartesianGrid {...gridProps} vertical={false} />}
           <XAxis {...axisProps} dataKey={categoryKey} tickFormatter={categoryFormatter} interval="preserveStartEnd" minTickGap={16} />
-          <YAxis {...axisProps} tickFormatter={fmt} hide={!showValueAxis} width={valueAxisWidth} />
+          <YAxis {...axisProps} tickFormatter={fmt} hide={!showValueAxis} width={valueAxisWidth} allowDecimals={props.allowDecimals} />
           {showTooltip && (
             <Tooltip
               cursor={{ stroke: 'var(--color-border)' }}
@@ -291,7 +293,7 @@ export const AreaChart = forwardRef<HTMLElement, AreaChartProps>(function AreaCh
           </defs>
           {showGrid && <CartesianGrid {...gridProps} vertical={false} />}
           <XAxis {...axisProps} dataKey={categoryKey} tickFormatter={categoryFormatter} interval="preserveStartEnd" minTickGap={16} />
-          <YAxis {...axisProps} tickFormatter={fmt} hide={!showValueAxis} width={valueAxisWidth} />
+          <YAxis {...axisProps} tickFormatter={fmt} hide={!showValueAxis} width={valueAxisWidth} allowDecimals={props.allowDecimals} />
           {showTooltip && (
             <Tooltip
               cursor={{ stroke: 'var(--color-border)' }}

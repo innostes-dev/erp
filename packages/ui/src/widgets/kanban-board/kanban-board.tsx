@@ -108,9 +108,24 @@ export interface KanbanLabels {
   cancelled?: (item: string) => string;
   /** @default 'No cards' */
   empty?: ReactNode;
+  /** Label for move select placeholder. @default 'Move to…' */
+  moveAction?: string;
+  /** Accessible label for the move select. @default (item) => `Move ${item}` */
+  moveTo?: (item: string) => string;
+  /** Label for target column option. @default (column) => `Move to ${column}` */
+  moveToColumn?: (column: string) => string;
 }
 
-export type KanbanBoardSlot = 'root' | 'column' | 'columnHeader' | 'columnTitle' | 'count' | 'list' | 'card' | 'empty';
+export type KanbanBoardSlot =
+  | 'root'
+  | 'column'
+  | 'columnHeader'
+  | 'columnTitle'
+  | 'count'
+  | 'list'
+  | 'card'
+  | 'cardMoveSelect'
+  | 'empty';
 
 export interface KanbanBoardProps<T extends { id: string }>
   extends Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'children'> {
@@ -147,6 +162,9 @@ const defaults = {
     `${item} moved to ${column}, position ${pos} of ${total}.`,
   dropped: (item: string, column: string, pos: number) => `${item} dropped in ${column}, position ${pos}.`,
   cancelled: (item: string) => `Move cancelled. ${item} returned to its place.`,
+  moveAction: 'Move to…',
+  moveTo: (item: string) => `Move ${item}`,
+  moveToColumn: (column: string) => `Move to ${column}`,
 };
 
 function KanbanBoardImpl<T extends { id: string }>(
@@ -243,7 +261,10 @@ function KanbanBoardImpl<T extends { id: string }>(
       }
       let col = pos.col;
       let index = pos.index;
-      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+      const rtl =
+        event.currentTarget.closest('[dir="rtl"]') !== null ||
+        (typeof document !== 'undefined' && document.dir === 'rtl') ||
+        getComputedStyle(event.currentTarget).direction === 'rtl';
       const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
       const back = rtl ? 'ArrowRight' : 'ArrowLeft';
       if (key === 'ArrowUp') index--;
@@ -277,7 +298,10 @@ function KanbanBoardImpl<T extends { id: string }>(
       focusCard(shown[pos.col]!.items[pos.index + (key === 'ArrowDown' ? 1 : -1)]?.id);
     } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
       event.preventDefault();
-      const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
+      const rtl =
+        event.currentTarget.closest('[dir="rtl"]') !== null ||
+        (typeof document !== 'undefined' && document.dir === 'rtl') ||
+        getComputedStyle(event.currentTarget).direction === 'rtl';
       const step = (key === 'ArrowRight') !== rtl ? 1 : -1;
       for (let c = pos.col + step; c >= 0 && c < shown.length; c += step) {
         const items = shown[c]!.items;
@@ -422,6 +446,41 @@ function KanbanBoardImpl<T extends { id: string }>(
                   >
                     <GripVerticalIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground" />
                     <div className="min-w-0 flex-1">{renderCard(item)}</div>
+                    {shown.length > 1 && (
+                      <select
+                        aria-label={t.moveTo(getItemLabel(item))}
+                        data-slot="kanban-card-move-select"
+                        value=""
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          const targetColId = e.target.value;
+                          if (!targetColId) return;
+                          const targetCol = shown.find((c) => c.id === targetColId);
+                          if (!targetCol) return;
+                          const ok = commit(item.id, targetCol.id, targetCol.items.length);
+                          if (ok) {
+                            setAnnouncement(t.dropped(getItemLabel(item), targetCol.title, targetCol.items.length + 1));
+                          }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                          'absolute top-2 end-2 text-xs opacity-0 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100',
+                          'rounded border border-border bg-background px-1.5 py-0.5 shadow-xs cursor-pointer',
+                          classNames?.cardMoveSelect,
+                        )}
+                      >
+                        <option value="" disabled>
+                          {t.moveAction}
+                        </option>
+                        {shown
+                          .filter((c) => c.id !== column.id)
+                          .map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {t.moveToColumn(c.title)}
+                            </option>
+                          ))}
+                      </select>
+                    )}
                   </li>
                 );
               })}
