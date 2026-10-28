@@ -23,6 +23,7 @@ export function createCompatConfig(projectDir: string, name: string) {
       alias: [
         { find: /^@innostes\/ui$/, replacement: path.join(ui, 'dist/index.js') },
         { find: /^@innostes\/ui\/charts$/, replacement: path.join(ui, 'dist/charts/index.js') },
+        { find: /^@innostes\/ui\/editor$/, replacement: path.join(ui, 'dist/editor/index.js') },
         fromCompat('react-dom'),
         fromCompat('react-is'),
         fromCompat('react'),
@@ -30,12 +31,20 @@ export function createCompatConfig(projectDir: string, name: string) {
         fromCompat('@testing-library/react'),
         // React 17 apps use Recharts 2.15; React 18+ use Recharts 3.
         fromCompat('recharts'),
+        // Tiptap's CommonJS shim requires `react` itself, which aliases can't reach; this
+        // project's copy resolves to this project's React.
+        fromCompat('use-sync-external-store'),
       ],
     },
     test: {
       name,
       root: ui,
-      include: ['src/components/**/*.test.tsx', 'src/widgets/**/*.test.tsx', 'src/charts/**/*.test.tsx'],
+      include: [
+        'src/components/**/*.test.tsx',
+        'src/widgets/**/*.test.tsx',
+        'src/charts/**/*.test.tsx',
+        'src/editor/**/*.test.tsx',
+      ],
       setupFiles: [path.join(ui, 'src/test/setup.ts'), path.join(projectDir, 'react-version.setup.ts')],
       environment: 'jsdom',
       css: false,
@@ -43,7 +52,12 @@ export function createCompatConfig(projectDir: string, name: string) {
       // Generous, because CI runs the React 17/18/19 suites in parallel.
       testTimeout: 15_000,
       // Process these through Vite so the aliases above reach their imports too.
-      server: { deps: { inline: [/@base-ui/, /@floating-ui/, /@testing-library\/react/, /recharts/] } },
+      // Tiptap is shared with packages/ui; inlining it makes its React imports use this project's React.
+      server: {
+        deps: {
+          inline: [/@base-ui/, /@floating-ui/, /@testing-library\/react/, /recharts/, /@tiptap/, /use-sync-external-store/],
+        },
+      },
     },
   });
 }

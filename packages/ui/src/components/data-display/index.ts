@@ -9,3 +9,4 @@ export * from './icon-tile/icon-tile';
 export * from './kbd/kbd';
 export * from './stat/stat';
 export * from './table/table';
+export * from './tree-view/tree-view';

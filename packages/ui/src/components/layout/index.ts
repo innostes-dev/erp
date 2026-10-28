@@ -5,4 +5,5 @@ export * from './page-header/page-header';
 export * from './scroll-area/scroll-area';
 export * from './separator/separator';
 export * from './sidebar/sidebar';
+export * from './split-pane/split-pane';
 export * from './top-bar/top-bar';

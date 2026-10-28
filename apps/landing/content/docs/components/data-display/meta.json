@@ -3,6 +3,7 @@
   "pages": [
     "data-table",
     "table",
+    "tree-view",
     "card",
     "stat",
     "badge",

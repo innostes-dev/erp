@@ -173,3 +173,32 @@ export const ClockIcon = (p: IconProps) => (
     <path d="M12 6v6l4 2" />
   </Icon>
 );
+export const UploadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3v12" />
+    <path d="m17 8-5-5-5 5" />
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+  </Icon>
+);
+export const FileIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+  </Icon>
+);
+export const GripVerticalIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="9" cy="12" r="1" />
+    <circle cx="9" cy="5" r="1" />
+    <circle cx="9" cy="19" r="1" />
+    <circle cx="15" cy="12" r="1" />
+    <circle cx="15" cy="5" r="1" />
+    <circle cx="15" cy="19" r="1" />
+  </Icon>
+);
+export const ArrowRightIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </Icon>
+);

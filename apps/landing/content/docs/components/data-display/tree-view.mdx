@@ -1,0 +1,60 @@
+---
+title: Tree View
+description: A hierarchy that expands and collapses.
+icon: ListTree
+status: Beta
+summary: Departments, chart of accounts, categories and folders, with full WAI-ARIA tree keyboard support.
+---
+
+<ComponentPreview name="data-display/tree-view/basic" />
+
+## Import
+
+```tsx
+import { TreeView, type TreeNode } from '@innostes/ui';
+```
+
+## Usage
+
+Pass nested `TreeNode`s. A node with `children` (even an empty array) can be expanded.
+
+```tsx
+const accounts: TreeNode[] = [
+  {
+    id: 'assets',
+    label: 'Assets',
+    children: [
+      { id: 'cash', label: 'Cash', meta: '₹4.2L' },
+      { id: 'ar', label: 'Accounts receivable', meta: '₹12.8L' },
+    ],
+  },
+];
+
+<TreeView
+  aria-label="Chart of accounts"
+  items={accounts}
+  expanded={expanded}
+  onExpandedChange={setExpanded}
+  selected={account}
+  onSelectedChange={setAccount}
+/>
+```
+
+- `icon` goes before the label, `meta` (a count, an amount) at the end.
+- `disabled` nodes can be focused but not selected.
+- For lazy loading, give a node `children: []`, load its children in `onExpandedChange`, then update `items`.
+
+## Keyboard
+
+| Key | Action |
+| --- | --- |
+| Up / Down | Previous / next visible node |
+| Right | Expand; if expanded, go to the first child |
+| Left | Collapse; if collapsed, go to the parent |
+| Home / End | First / last visible node |
+| Enter / Space | Select |
+| Letters | Jump to the next node starting with them |
+
+## API Reference
+
+<ApiTable components={['TreeView']} />

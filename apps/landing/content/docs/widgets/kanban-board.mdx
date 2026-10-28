@@ -1,0 +1,60 @@
+---
+title: Kanban Board
+description: Cards that move between columns.
+icon: SquareKanban
+status: Beta
+summary: Pipelines, deals, tickets and approval stages, with drag and drop, keyboard moves and WIP limits.
+---
+
+<ComponentPreview name="widgets/kanban-board/basic" />
+
+## Import
+
+```tsx
+import { KanbanBoard, moveKanbanItem, type KanbanColumn } from '@innostes/ui';
+```
+
+## Usage
+
+Cards need a string `id`. The board renders the card frame; `renderCard` renders what's inside.
+
+```tsx
+<KanbanBoard
+  aria-label="Deals"
+  value={columns}
+  onValueChange={(next, move) => {
+    setColumns(next);
+    api.updateDealStage(move.itemId, move.toColumnId, move.toIndex);
+  }}
+  canMove={(move) => !(move.fromColumnId === 'lead' && move.toColumnId === 'won')}
+  getItemLabel={(deal) => deal.name}
+  renderCard={(deal) => <DealCard deal={deal} />}
+  onCardOpen={(deal) => router.push(`/deals/${deal.id}`)}
+/>
+```
+
+- `onValueChange` gets the new columns and the move (`itemId`, `fromColumnId`, `fromIndex`, `toColumnId`, `toIndex`).
+- `canMove` blocks moves, e.g. skipping a required stage.
+- `limit` on a column shows `count/limit` and turns red above it.
+- `columnActions` adds buttons to column headers.
+- `moveKanbanItem(columns, itemId, toColumnId, toIndex)` applies a move to plain data, e.g. for optimistic updates or real-time sync.
+
+Mouse dragging uses native HTML drag and drop, which doesn't work on touch screens. On phones, let people open the card (`onCardOpen`) and change its stage there.
+
+## Accessibility
+
+Drag and drop isn't required. Each card is focusable, and every step is announced:
+
+| Key | Action |
+| --- | --- |
+| Arrows | Move focus between cards and columns |
+| Space | Pick up the card, then drop it |
+| Arrows (holding) | Move the card up, down or to another column |
+| Escape | Cancel the move |
+| Enter | `onCardOpen` |
+
+Pass `labels` to translate the instructions and announcements.
+
+## API Reference
+
+<ApiTable components={['KanbanBoard']} />

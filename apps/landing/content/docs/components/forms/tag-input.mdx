@@ -1,0 +1,43 @@
+---
+title: Tag Input
+description: Free-form or suggested values as removable tags.
+icon: Tags
+status: Beta
+summary: Labels, skills, recipients and SKUs as chips, with suggestions, paste splitting, limits and validation.
+---
+
+<ComponentPreview name="forms/tag-input/basic" />
+
+## Import
+
+```tsx
+import { TagInput } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<TagInput
+  aria-label="Labels"
+  suggestions={labels}
+  value={value}
+  onValueChange={setValue}
+  max={10}
+/>
+```
+
+- **Adding**: Enter or a delimiter (`,` by default; change with `delimiters`). Pasting `a, b, c` adds three tags.
+- **Suggestions**: pass `suggestions` to show a filtered list. Typing a known tag in any case uses the suggestion's casing.
+- **Closed lists**: `allowCustom={false}` only accepts suggestions.
+- **Rules**: `validate` rejects tags (e.g. invalid emails); `max` caps the count and disables the input when reached. Duplicates are ignored, case-insensitively.
+- **Forms**: `name` submits each tag, like a multi-select.
+
+## Accessibility
+
+- Built on Base UI's multi-select Combobox: the input is a `combobox`, and suggestions are a `listbox`.
+- From the start of the input, Left Arrow moves to the tags; Backspace or Delete removes the focused tag.
+- Each remove button is labelled (`removeLabel`, default `` `Remove ${tag}` ``).
+
+## API Reference
+
+<ApiTable components={['TagInput']} />

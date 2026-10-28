@@ -1,0 +1,45 @@
+---
+title: File Dropzone
+description: Attach files by drag and drop or browsing.
+icon: Upload
+status: Beta
+summary: Type, size and count checks, image thumbnails, and native form submission.
+---
+
+<ComponentPreview name="forms/file-dropzone/basic" />
+
+## Import
+
+```tsx
+import { FileDropzone, formatBytes } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<FileDropzone
+  name="attachments"
+  accept="image/*,.pdf"
+  maxSize={5_000_000}
+  maxFiles={5}
+  hint="PDF or images, up to 5 MB"
+  value={files}
+  onValueChange={setFiles}
+/>
+```
+
+- `accept` uses the native syntax: extensions (`.csv`), MIME types (`application/pdf`) and wildcards (`image/*`).
+- Rejected files are listed under the zone with the reason, and passed to `onReject` as `{ file, reasons }`, where reasons are `type`, `size` or `count`.
+- `multiple={false}` keeps one file; a new one replaces it.
+- The files are mirrored into a real `<input type="file" name>`, so a plain `<form>` submits them. For uploads with progress, read `value` and upload it yourself.
+- `showFileList={false}` hides the built-in list so you can render your own (e.g. with upload progress). `formatBytes` formats sizes.
+
+## Accessibility
+
+- The "Browse files" button opens the native picker, so keyboard and screen-reader users never need drag and drop.
+- `hint` is linked to the button with `aria-describedby`.
+- Rejections are announced with `role="alert"`.
+
+## API Reference
+
+<ApiTable components={['FileDropzone']} />
