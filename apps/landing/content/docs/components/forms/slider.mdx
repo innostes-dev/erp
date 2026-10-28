@@ -1,10 +1,13 @@
 ---
 title: Slider
-description: Pick a number or a range by dragging.
+description: Interactive sliding track control for choosing single numeric values or continuous dual-thumb ranges.
 icon: SlidersHorizontal
 status: Stable
-summary: Single values and ranges, keyboard support, form submission.
+summary: Accessible slider component supporting single values, dual-thumb price ranges, keyboard stepping, and form submission.
+install: pnpm add @innostes/ui
 ---
+
+`Slider` allows users to select a single numerical value or a bounded numerical range by dragging thumbs along a horizontal track or adjusting values via keyboard arrows. Built on Base UI's slider primitive, it supports dual-thumb range filtering, custom stepping, and automatic accessibility announcements.
 
 <ComponentPreview name="forms/slider/basic" />
 
@@ -14,30 +17,95 @@ summary: Single values and ranges, keyboard support, form submission.
 import { Slider } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Slider** for selecting approximate numeric values along a continuous range (e.g. percentage volumes, price range filters, inspection sample thresholds).
+- **Use NumberField** when exact numerical precision is required (e.g. entering invoice currency totals or unit quantities).
+- **Use Progress or Meter** when displaying a read-only visual measurement without user dragging interaction.
+
+## Examples
+
+### Single value slider
+
+Select a discrete numeric value along a defined boundary:
 
 ```tsx
-<Slider defaultValue={40} aria-label="Volume" />
-
-// A range: pass an array
-<Slider
-  value={range}
-  onValueChange={setRange}
-  min={0}
-  max={1000}
-  step={10}
-  thumbLabels={['Minimum price', 'Maximum price']}
-/>
+<Field>
+  <FieldLabel>Warehouse humidity threshold (%)</FieldLabel>
+  <Slider defaultValue={45} min={20} max={80} step={5} aria-label="Humidity threshold" />
+</Field>
 ```
 
-Show the selected value next to the slider when exact numbers matter, or use a
-[Number Field](/ui/docs/components/forms/number-field) instead.
+### Dual-thumb range selection
+
+Pass an array of two numbers (`[min, max]`) to enable dual-thumb range mode:
+
+```tsx
+const [priceRange, setPriceRange] = useState<number[]>([2500, 8000]);
+
+<div className="space-y-2">
+  <div className="flex justify-between text-sm font-medium">
+    <span>Procurement budget</span>
+    <span className="font-mono text-muted-foreground">₹{priceRange[0]} – ₹{priceRange[1]}</span>
+  </div>
+  <Slider
+    value={priceRange}
+    onValueChange={(val) => setPriceRange(val as number[])}
+    min={1000}
+    max={15000}
+    step={250}
+    thumbLabels={['Minimum budget rate', 'Maximum budget rate']}
+  />
+</div>
+```
 
 ## Accessibility
 
-- Each thumb is a `role="slider"` with `aria-valuenow`. Arrow keys step; Page Up/Down step by `largeStep`.
-- Ranges need `thumbLabels` so each thumb has its own name.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowRight / ArrowUp', action: 'Increments the slider value by one step.' },
+    { key: 'ArrowLeft / ArrowDown', action: 'Decrements the slider value by one step.' },
+    { key: 'PageUp', action: 'Increments the slider value by largeStep.' },
+    { key: 'PageDown', action: 'Decrements the slider value by largeStep.' },
+    { key: 'Home', action: 'Jumps directly to the minimum bound value.' },
+    { key: 'End', action: 'Jumps directly to the maximum bound value.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="slider"`**: Emitted on each thumb element.
+- **ARIA synchronization**: Exposes `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- **`thumbLabels` requirement**: In dual-thumb range mode, `thumbLabels` **must** be provided so screen readers announce which thumb is being adjusted (e.g. `thumbLabels={['Minimum rate', 'Maximum rate']}`).
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always display the currently selected value numerically beside the slider when exact figures matter to the operator.
+  </Do>
+  <Dont>
+    Never use `Slider` without a visible numerical readout when users need to select precise monetary amounts.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide descriptive `thumbLabels` for dual-thumb range sliders.
+  </Do>
+  <Dont>
+    Never allow the minimum thumb to cross past the maximum thumb; `@innostes/ui` automatically clamps thumbs to prevent inversion.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Slider']} baseUi="slider" />
+
+## Related
+
+- [NumberField](/ui/docs/components/forms/number-field) — Typed numerical input with precision steppers.
+- [Progress](/ui/docs/components/feedback/progress) — Read-only task progress bar.
+- [Meter](/ui/docs/components/feedback/meter) — Read-only capacity and quota gauge.

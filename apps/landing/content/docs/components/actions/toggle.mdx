@@ -1,40 +1,116 @@
 ---
 title: Toggle
-description: A button that is either on or off.
+description: A two-state button that can be switched on or off with immediate visual feedback.
 icon: ToggleLeft
 status: Stable
-summary: Two-state button for formatting, favourites and view options.
+summary: Accessible two-state pressed button primitive for formatting toolbars, favorites, and view modes.
+install: pnpm add @innostes/ui
 ---
+
+Toggle is a two-state interactive control built on Base UI's toggle primitive. Unlike a standard button that triggers an action and immediately resets, Toggle maintains a pressed or unpressed state reflected via `aria-pressed`. It is ideal for rich text editor toolbars, bookmarking records, and filtering table views.
 
 <ComponentPreview name="actions/toggle/basic" />
 
 ## Import
 
 ```tsx
-import { Toggle } from '@innostes/ui';
+import { Toggle, toggleVariants } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Toggle** for binary options where the button itself displays its active state (e.g. bold formatting, bookmarking an invoice).
+- **Use Switch** for binary preferences inside configuration forms where a toggle switch with a distinct track and thumb is expected.
+- **Use Checkbox** for multi-item selection in data tables or form agreements.
+- **Use ToggleGroup** when grouping multiple toggle buttons into a toolbar or single-choice segmented control.
+
+## Examples
+
+### Basic usage
+
+Toggle supports both uncontrolled (`defaultPressed`) and controlled (`pressed`, `onPressedChange`) modes:
 
 ```tsx
 // Uncontrolled
-<Toggle aria-label="Bold" defaultPressed><BoldIcon /></Toggle>
+<Toggle defaultPressed aria-label="Toggle bold text">
+  <Bold className="size-4" />
+</Toggle>
 
 // Controlled
-const [starred, setStarred] = useState(false);
-<Toggle pressed={starred} onPressedChange={setStarred} aria-label="Star">
-  <StarIcon />
+<Toggle
+  pressed={isBookmarked}
+  onPressedChange={setIsBookmarked}
+  aria-label="Bookmark purchase order"
+>
+  <Bookmark className="size-4" />
 </Toggle>
 ```
 
-Use `Toggle` for state that applies immediately and is shown by the button itself.
-For settings in a form, use [Switch](/ui/docs/components/forms/switch).
+### With text label
+
+Toggles can pair icons with visible textual descriptions:
+
+```tsx
+<Toggle variant="outline" aria-label="Mark invoice as urgent">
+  <AlertCircle className="size-4 me-1.5 text-amber-500" />
+  <span>Mark urgent</span>
+</Toggle>
+```
+
+### Sizes
+
+Toggles support the standard `sm` (32px), `md` (40px, default), and `lg` (48px) size scale:
+
+```tsx
+<Toggle size="sm" aria-label="Compact toggle"><Pin className="size-3.5" /></Toggle>
+<Toggle size="md" aria-label="Default toggle"><Pin className="size-4" /></Toggle>
+<Toggle size="lg" aria-label="Large toggle"><Pin className="size-5" /></Toggle>
+```
 
 ## Accessibility
 
-- Exposes `aria-pressed`, so screen readers announce "pressed" / "not pressed".
-- Icon-only toggles need an `aria-label`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Space', action: 'Toggles the pressed state between on and off.' },
+    { key: 'Enter', action: 'Toggles the pressed state between on and off.' },
+    { key: 'Tab', action: 'Moves focus to the toggle or away to the next interactive control.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`aria-pressed`**: Emits `aria-pressed="true"` when active and `aria-pressed="false"` when inactive. Screen readers announce "pressed" or "not pressed" immediately.
+- **Icon-only requirement**: When a toggle contains only an icon glyph, an accessible name **must** be provided via `aria-label`.
+- **Disabled state**: Applies `disabled` and `aria-disabled="true"` to prevent state changes.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an `aria-label` describing the state being toggled when no visible text is present (e.g. `aria-label="Toggle italic text"`).
+  </Do>
+  <Dont>
+    Never use `Toggle` for irreversible operational actions such as deleting records or submitting forms; use `Button` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use `Toggle` when changes take effect immediately without requiring a separate "Save" form submission.
+  </Do>
+  <Dont>
+    Never nest a `Toggle` inside a standard form where users expect explicit submit button confirmation.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Toggle']} baseUi="toggle" />
+
+## Related
+
+- [ToggleGroup](/ui/docs/components/actions/toggle-group) — Grouped collection of toggle buttons for toolbar selection.
+- [Switch](/ui/docs/components/forms/switch) — Binary on/off control with physical switch semantics.
+- [Button](/ui/docs/components/actions/button) — Foundation action trigger.

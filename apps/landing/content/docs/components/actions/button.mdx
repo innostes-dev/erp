@@ -1,49 +1,31 @@
 ---
 title: Button
-description: Buttons let users take actions and make choices with a single tap.
+description: Trigger interactive operations, form submissions, and modal dialogues with accessible keyboard handling.
 icon: SquareMousePointer
 status: Stable
-summary: A flexible button component with multiple variants, sizes, and states.
+summary: Foundation action trigger supporting multiple semantic variants, sizes, loading spinners, and render polymorphism.
 install: pnpm add @innostes/ui
 ---
 
-<PageTabs
-  items={[
-    { label: 'Overview', href: 'preview' },
-    { label: 'Examples', href: 'examples' },
-    { label: 'API', href: 'api-reference' },
-    { label: 'Customization', href: 'theming' },
-    { label: 'Accessibility', href: 'accessibility' },
-  ]}
-/>
+import { ButtonPlayground } from '@/components/docs/button-playground';
+import { VariantCards, SizesDemo, IconsDemo, LoadingDemo, DisabledDemo, AsLinkDemo } from '@/components/docs/button-demos';
 
-## Preview
+Buttons allow users to execute single-tap operations, submit forms, confirm transactions, and trigger dialogues. Built on Base UI's button primitive, `@innostes/ui` buttons guarantee visible keyboard focus rings, proper disabled state semantics, and render polymorphism without invalid DOM nesting.
 
-Different variants, sizes and states of the button component.
+<ComponentPreview name="actions/button/basic" />
 
-<ButtonShowcase />
+## Import
 
-## Usage
-
-Import the Button component and use it in your application.
-
-<UsageGrid>
-
-```tsx title="example.tsx"
-import { Button } from '@innostes/ui';
-
-export function Example() {
-  return (
-    <Button variant="primary" size="md">
-      Click me
-    </Button>
-  );
-}
+```tsx
+import { Button, buttonVariants } from '@innostes/ui';
 ```
 
-<ButtonPlayground />
+## When to use
 
-</UsageGrid>
+- **Use Button** for operational actions such as saving records, approving purchase orders, opening modals, or deleting items.
+- **Use Link or Button with `render`** when navigating to a new URL or page route.
+- **Use ButtonGroup** when grouping closely related actions into a single segmented bar (e.g. Save, Save and submit).
+- **Use Toggle or ToggleGroup** when switching a two-state option on or off, or selecting from a mutual exclusion set.
 
 ## Anatomy
 
@@ -56,183 +38,109 @@ export function Example() {
   ]}
 />
 
-## Variants
+## Examples
 
-Use `variant` to change the visual style of the button.
+### Interactive playground
+
+Experiment with button props, variants, and interactive states:
+
+<ButtonPlayground />
+
+### Variants
+
+Use `variant` to express visual hierarchy:
 
 <VariantCards />
 
 ```tsx
-<Button variant="primary">Primary</Button>
-<Button variant="secondary">Secondary</Button>
-<Button variant="outline">Outline</Button>
-<Button variant="ghost">Ghost</Button>
-<Button variant="destructive">Destructive</Button>
-<Button variant="link">Link</Button>
+<Button variant="primary">Approve PO</Button>
+<Button variant="secondary">Filter view</Button>
+<Button variant="outline">Export CSV</Button>
+<Button variant="ghost">Cancel</Button>
+<Button variant="destructive">Void invoice</Button>
+<Button variant="link">Terms of supply</Button>
 ```
 
-## Sizes
+### Sizes
 
-Use `size` to change the height and padding: `sm` (32px), `md` (40px, default) or `lg` (48px).
+Choose from three standardized heights: `sm` (32px), `md` (40px, default), and `lg` (48px):
 
 <SizesDemo />
 
 ```tsx
-<Button size="sm">Small</Button>
-<Button size="md">Medium</Button>
-<Button size="lg">Large</Button>
+<Button size="sm">Compact (32px)</Button>
+<Button size="md">Default (40px)</Button>
+<Button size="lg">Large (48px)</Button>
 ```
 
-## With Icons
+### With icons
 
-Use `startIcon` and `endIcon` for icons next to the label. For a square button with only an icon,
-use `iconOnly` and always add an `aria-label`.
+Add leading or trailing icons using `startIcon` and `endIcon`. For icon-only triggers, use `iconOnly` alongside an explicit `aria-label`:
 
 <IconsDemo />
 
-```tsx
-<Button startIcon={<Plus />}>Add item</Button>
-<Button variant="outline" endIcon={<ArrowRight />}>Continue</Button>
-<Button variant="ghost" iconOnly aria-label="Close">
-  <X />
-</Button>
-```
+### Loading state
 
-SVG icons are 16px by default. Give an icon a `size-*` class to change it.
-
-## Loading State
-
-`loading` shows a spinner and blocks clicks. The button stays focusable and announces
-`aria-busy`, so keyboard and screen reader users don't lose their place.
-Use `loadingText` to change the label while loading.
+Display a spinning indicator and prevent accidental duplicate submissions:
 
 <LoadingDemo />
 
-```tsx
-<Button loading>Save</Button>
-<Button loading loadingText="Saving…">Save</Button>
-```
+### Disabled state
 
-## Disabled State
-
-`disabled` blocks interaction. Add `focusableWhenDisabled` to keep the button in the tab order,
-for example when a tooltip explains why it's disabled.
+Deactivate interactions during invalid preconditions:
 
 <DisabledDemo />
 
-```tsx
-<Button disabled>Disabled</Button>
-<Button disabled focusableWhenDisabled>Focusable when disabled</Button>
-```
+### As link
 
-## Full Width
-
-`fullWidth` stretches the button to fill its container.
-
-<FullWidthDemo />
-
-```tsx
-<Button fullWidth>Sign in</Button>
-```
-
-## Examples
-
-### As a link
-
-Use `render` to output a different element while keeping the button styles and behaviour.
-Set `nativeButton={false}` when the element is not a `<button>`.
+Render the button visually while rendering an underlying framework router link:
 
 <AsLinkDemo />
 
-```tsx
-<Button render={<a href="/pricing" />} nativeButton={false}>
-  See pricing
-</Button>
-```
-
-### With a router link
-
-`buttonVariants()` returns the button classes, so any element can look like a button.
-
-```tsx
-import Link from 'next/link';
-import { buttonVariants } from '@innostes/ui';
-
-<Link href="/dashboard" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-  Dashboard
-</Link>
-```
-
-### In a form
-
-Buttons default to `type="button"`, so they never submit a form by accident. Set `type="submit"` for the submit button.
-
-```tsx
-<form onSubmit={save}>
-  <Button type="submit" loading={isSaving}>Save</Button>
-  <Button variant="ghost" onClick={cancel}>Cancel</Button>
-</form>
-```
-
-## API Reference
-
-<ApiTable components={['Button']} baseUi="button" />
-
-
-### Data attributes
-
-| Attribute | When |
-| --- | --- |
-| `data-variant` | Always, with the variant name |
-| `data-disabled` | The button is disabled or loading |
-| `data-loading` | The button is loading |
-
 ## Accessibility
 
-- Renders a native `<button>` with `type="button"` by default.
-- Built on [Base UI Button](https://base-ui.com/react/components/button): keyboard activation with
-  <kbd>Enter</kbd> and <kbd>Space</kbd>, and correct roles when rendered as another element.
-- Visible focus ring from the `--color-ring` token.
-- `loading` sets `aria-busy` and keeps focus, so the user isn't moved away.
-- Icon-only buttons need an `aria-label`. Icons inside buttons are hidden from screen readers.
-
-### Keyboard interaction
+### Keyboard navigation
 
 <KeyboardTable
   rows={[
-    [['Enter'], 'Activates the button and triggers its click handler.'],
-    [['Space'], 'Activates the button and triggers its click handler.'],
+    { key: 'Enter', action: 'Triggers the button click action or submits the enclosing form.' },
+    { key: 'Space', action: 'Triggers the button click action and emits active button states.' },
+    { key: 'Tab', action: 'Moves keyboard focus onto or away from the button in sequential reading order.' },
   ]}
 />
+
+### Screen readers and ARIA
+
+- **Native `<button>` element**: Guarantees standard button accessibility semantics in the accessibility tree.
+- **Icon-only requirement**: When `iconOnly` is enabled, an accessible name **must** be provided via `aria-label`.
+- **Loading state**: When `loading={true}` is set, the button receives `aria-busy="true"` and `disabled={true}`, preventing duplicate network invocations.
 
 ## Guidelines
 
 <DoDont>
-  <Do caption="Use primary buttons for the main action on a screen, with at most one primary action per view.">
-    <Button variant="primary">Create order</Button>
+  <Do>
+    Use descriptive, action-oriented verbs such as "Approve purchase order", "Save changes", or "Void invoice".
   </Do>
-  <Dont caption="Do not use multiple primary buttons in the same container.">
-    <div className="flex gap-2">
-      <Button variant="primary">Submit</Button>
-      <Button variant="primary">Save draft</Button>
-    </div>
+  <Dont>
+    Never use vague labels such as "Click here", "Submit", or "OK" on enterprise action buttons.
   </Dont>
 </DoDont>
 
-## Theming
+<DoDont>
+  <Do>
+    Always supply an `aria-label` when using the `iconOnly` prop so screen readers describe the operation.
+  </Do>
+  <Dont>
+    Never leave icon-only buttons unlabelled, or use decorative icons that duplicate neighbouring text labels.
+  </Dont>
+</DoDont>
 
-The button uses the `primary`, `secondary`, `muted`, `destructive`, `border` and `ring` tokens.
-Change them in your theme to restyle every button. See [Theming](/ui/docs/theming).
+## API reference
 
-```css
-@theme {
-  --color-primary: var(--color-violet-600);
-  --color-primary-hover: var(--color-violet-700);
-}
-```
+<ApiTable components={['Button']} baseUi="button" />
 
-Or change one button with `className`:
+## Related
 
-```tsx
-<Button className="rounded-full px-6">Rounded</Button>
-```
+- [ButtonGroup](/ui/docs/components/actions/button-group) — Segmented button container for grouped operational triggers.
+- [Toggle](/ui/docs/components/actions/toggle) — Two-state pressed toggle button.
+- [FormActions](/ui/docs/components/forms/field) — Responsive footer container for form submission buttons.

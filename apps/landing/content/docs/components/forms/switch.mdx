@@ -1,10 +1,15 @@
 ---
 title: Switch
-description: An on/off control for settings that apply immediately.
+description: A physical toggle switch control for binary settings that take immediate operational effect.
 icon: ToggleRight
 status: Stable
-summary: Two sizes, form submission and Field support.
+summary: Accessible binary switch primitive with animated thumb sliding, sizes, and instant state synchronization.
+install: pnpm add @innostes/ui
 ---
+
+import { SwitchPlayground } from '@/components/docs/switch-playground';
+
+`Switch` provides a physical toggle slider for binary configuration options. Built on Base UI's switch primitive, it emits `role="switch"` semantics and smooth CSS sliding transitions. It is designed for preferences and live operational flags (e.g. enabling automatic replenishment) where changes activate immediately without a manual save step.
 
 <ComponentPreview name="forms/switch/basic" />
 
@@ -14,21 +19,93 @@ summary: Two sizes, form submission and Field support.
 import { Switch } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Switch** for standalone configuration toggles that apply immediately (e.g. "Dark mode", "SMS dispatch alerts").
+- **Use Checkbox** for form fields where selections require an explicit "Submit" button, or when multi-item table selection is required.
+- **Use Toggle** for styling buttons inside rich text toolbars or view filters.
+
+## Examples
+
+### Interactive playground
+
+Experiment with switch sizes, states, and disabled attributes:
+
+<SwitchPlayground />
+
+### Inside a field with description
+
+Pair the switch with a clear label and operational explanation:
 
 ```tsx
-<label className="flex items-center gap-3">
-  <Switch name="notifications" defaultChecked /> Email notifications
-</label>
+<Field>
+  <label className="flex items-start gap-3 cursor-pointer">
+    <Switch name="autoReorder" defaultChecked className="mt-0.5" />
+    <div>
+      <span className="text-sm font-medium text-foreground">
+        Automated replenishment
+      </span>
+      <p className="text-xs text-muted-foreground">
+        Automatically draft purchase orders when inventory falls below minimum buffer.
+      </p>
+    </div>
+  </label>
+</Field>
 ```
 
-Use a switch when the change takes effect right away. When the user must press Save, a
-[Checkbox](/ui/docs/components/forms/checkbox) is clearer.
+### Sizes
+
+Switches are available in `sm` and `md` (default) sizes:
+
+```tsx
+<Switch size="sm" aria-label="Compact switch" />
+<Switch size="md" aria-label="Default switch" />
+```
 
 ## Accessibility
 
-- Announced as `role="switch"` with `aria-checked`. Space toggles it.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Space', action: 'Toggles the switch between on (checked) and off (unchecked).' },
+    { key: 'Enter', action: 'Toggles the switch state in standard browser form contexts.' },
+    { key: 'Tab', action: 'Moves focus to or away from the switch element.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="switch"`**: Emitted automatically to ensure assistive technologies announce "switch, on" or "switch, off" rather than generic checkboxes.
+- **`aria-checked`**: Synchronized dynamically with the active state.
+- **Required labelling**: Ensure the switch is enclosed within a `<label>` or provided an explicit `aria-label`.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use `Switch` when toggling the setting takes immediate effect in the system.
+  </Do>
+  <Dont>
+    Never use `Switch` in standard forms where the user must still click an external "Save" or "Submit" button; use `Checkbox` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Pair the switch with clear textual labels that explain what feature is enabled when turned on.
+  </Do>
+  <Dont>
+    Never change the label text based on state (e.g. changing "Off" to "On"); keep the label static.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Switch']} baseUi="switch" />
+
+## Related
+
+- [Checkbox](/ui/docs/components/forms/checkbox) — Standard checkbox for form agreements.
+- [Toggle](/ui/docs/components/actions/toggle) — Two-state pressed button.
+- [RadioGroup](/ui/docs/components/forms/radio-group) — Mutually exclusive multi-option selection.

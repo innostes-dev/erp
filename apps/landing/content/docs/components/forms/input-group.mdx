@@ -1,10 +1,13 @@
 ---
 title: Input Group
-description: Inputs with text, icons or buttons attached, plus search and password fields.
+description: Attach text prefixes, suffixes, currency symbols, and action buttons directly to input tracks.
 icon: TextCursor
 status: Stable
-summary: InputGroup, SearchInput (clear, Escape, shortcut hint) and PasswordInput (show/hide).
+summary: Unified input container merging leading and trailing addons, copy triggers, and currency labels.
+install: pnpm add @innostes/ui
 ---
+
+`InputGroup` merges single-line inputs with leading and trailing addons into a single contiguous bordered track. It is designed for URL prefixes, monetary currency denominations (e.g. `₹` and `INR`), unit indicators (e.g. `kg`, `litres`), and inline copy buttons.
 
 <ComponentPreview name="forms/input-group/basic" />
 
@@ -20,37 +23,113 @@ import {
 } from '@innostes/ui';
 ```
 
-## InputGroup
+## When to use
+
+- **Use InputGroup** when an input requires an explicit unit of measurement, protocol prefix (`https://`), currency symbol, or action button directly attached to the input boundary.
+- **Use Input** for plain text fields that do not require affixed addons.
+- **Use NumberField** when capturing numbers that require stepper up/down buttons and automatic locale formatting.
+
+## Examples
+
+### Currency and unit addons
+
+Add static currency glyphs and unit labels:
 
 ```tsx
-<InputGroup>
-  <InputGroupAddon>https://</InputGroupAddon>
-  <InputGroupInput placeholder="acme" aria-label="Workspace" />
-  <InputGroupAddon>.innostes.app</InputGroupAddon>
-</InputGroup>
+<Field>
+  <FieldLabel>Procurement unit price</FieldLabel>
+  <InputGroup>
+    <InputGroupAddon>₹</InputGroupAddon>
+    <InputGroupInput inputMode="decimal" placeholder="0.00" />
+    <InputGroupAddon>INR</InputGroupAddon>
+  </InputGroup>
+</Field>
 ```
 
-`InputGroupAddon` has two looks: `variant="text"` (default) for units and domains, and
-`variant="icon"` for icons and small buttons.
+### URL protocol prefix
 
-## SearchInput
+Affix domain and protocol prefixes:
 
 ```tsx
-<SearchInput aria-label="Search orders" placeholder="Search orders…" onValueChange={setQuery} shortcut="⌘K" />
+<Field>
+  <FieldLabel>Tenant portal address</FieldLabel>
+  <InputGroup>
+    <InputGroupAddon>https://</InputGroupAddon>
+    <InputGroupInput placeholder="northwind" />
+    <InputGroupAddon>.innostes.com</InputGroupAddon>
+  </InputGroup>
+</Field>
 ```
 
-Escape and the × button clear it. `onValueChange` fires on every keystroke; debounce in your data
-layer if each change triggers a request.
+### Icon addon with inline action button
 
-## PasswordInput
+Combine an icon prefix with a trailing copy trigger button:
 
 ```tsx
-<PasswordInput name="password" autoComplete="current-password" required />
+<Field>
+  <FieldLabel>ERP webhook key</FieldLabel>
+  <InputGroup>
+    <InputGroupAddon variant="icon">
+      <Key className="size-4 text-muted-foreground" />
+    </InputGroupAddon>
+    <InputGroupInput defaultValue="whsec_908234892019" readOnly font-mono />
+    <InputGroupAddon variant="icon" className="pe-1">
+      <Button
+        size="sm"
+        variant="ghost"
+        iconOnly
+        aria-label="Copy webhook secret"
+        onClick={() => navigator.clipboard.writeText('whsec_908234892019')}
+      >
+        <Copy className="size-3.5" />
+      </Button>
+    </InputGroupAddon>
+  </InputGroup>
+</Field>
 ```
 
-The toggle button has `aria-pressed` and a label that changes ("Show password" / "Hide password").
-Translate it with `toggleLabels`.
+## Accessibility
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['InputGroup', 'InputGroupAddon', 'SearchInput', 'PasswordInput']} baseUi="input" />
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Focuses the inner input field, or moves to the interactive addon button if present.' },
+    { key: 'Space / Enter', action: 'Triggers action buttons housed within the addon slots.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Focus containment**: Clicking on a static text or icon addon transfers focus automatically to the nested input element.
+- **Semantic grouping**: The container groups visual addons without fragmenting the accessibility tree, preserving standard `aria-describedby` associations from `<Field>`.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use `InputGroupAddon` for short units (e.g. `₹`, `kg`, `cm`, `https://`) that provide immediate formatting context.
+  </Do>
+  <Dont>
+    Never place lengthy prose or instructional sentences inside an addon slot; use `<FieldDescription>` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Always supply an explicit `aria-label` when placing an icon-only button inside an addon slot.
+  </Do>
+  <Dont>
+    Never attach multiple overlapping action buttons to a single input track; limit addons to one clear secondary trigger.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable components={['InputGroup', 'InputGroupAddon', 'InputGroupInput', 'SearchInput', 'PasswordInput']} baseUi="input" />
+
+## Related
+
+- [Input](/ui/docs/components/forms/input) — Base single-line text input field.
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form layout and validation wrapper.
+- [NumberField](/ui/docs/components/forms/number-field) — Specialized numerical input with step buttons.

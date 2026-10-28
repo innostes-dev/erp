@@ -1,10 +1,13 @@
 ---
 title: Button Group
-description: Joins related buttons into one control.
+description: Group related buttons into a connected segment with unified borders and corner rounding.
 icon: Group
 status: Stable
-summary: Merges borders and corners of adjacent buttons, horizontally or vertically.
+summary: Segmented container joining adjacent buttons horizontally or vertically for pagers and split actions.
+install: pnpm add @innostes/ui
 ---
+
+ButtonGroup organizes a collection of related button triggers into a cohesive segmented bar, collapsing adjacent borders and rounding only the outer corners. It is commonly used for date pagination controls, multi-part save buttons, and table view switchers.
 
 <ComponentPreview name="actions/button-group/basic" />
 
@@ -14,23 +17,98 @@ summary: Merges borders and corners of adjacent buttons, horizontally or vertica
 import { Button, ButtonGroup } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Use a group for actions that belong together: a pager, a split button, or a set of views.
-For buttons that toggle state, use [Toggle Group](/ui/docs/components/actions/toggle-group) instead.
+- **Use ButtonGroup** when grouping related triggers such as pagination controls (Previous / Today / Next) or split action menus (Save / More options).
+- **Use ToggleGroup** when buttons toggle pressed states or select mutually exclusive options.
+- **Use FormActions** when laying out separate form submission buttons (e.g. Save and Cancel) across a footer.
+
+## Examples
+
+### Basic usage
+
+Wrap adjacent buttons with `ButtonGroup` and assign an accessible label:
 
 ```tsx
-<ButtonGroup aria-label="Pager">
-  <Button variant="outline">Previous</Button>
-  <Button variant="outline">Next</Button>
+<ButtonGroup aria-label="Order pagination">
+  <Button variant="outline" size="sm">Previous</Button>
+  <Button variant="outline" size="sm">Next</Button>
+</ButtonGroup>
+```
+
+### Split button
+
+Combine a primary action trigger with a contextual dropdown menu button:
+
+```tsx
+<ButtonGroup aria-label="Invoice settlement actions">
+  <Button variant="primary">Approve and remit</Button>
+  <Button
+    variant="primary"
+    iconOnly
+    aria-label="Additional remittance options"
+    className="border-s border-s-primary-foreground/20"
+  >
+    <ChevronDown className="size-4" />
+  </Button>
+</ButtonGroup>
+```
+
+### Orientation
+
+Arrange buttons vertically when building sidebar toolbars:
+
+```tsx
+<ButtonGroup orientation="vertical" aria-label="Document view tools">
+  <Button variant="outline" size="sm">Zoom in</Button>
+  <Button variant="outline" size="sm">Zoom out</Button>
+  <Button variant="outline" size="sm">Reset</Button>
 </ButtonGroup>
 ```
 
 ## Accessibility
 
-- Renders `role="group"`. Give it an `aria-label` that describes the set.
-- Focus outlines stay on top of neighbouring buttons.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus sequentially between the individual buttons inside the group.' },
+    { key: 'Enter / Space', action: 'Activates the currently focused button.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="group"`**: Automatically applied to the wrapper container.
+- **`aria-label` requirement**: You **must** provide `aria-label` or `aria-labelledby` describing the collection of buttons (e.g. `aria-label="Pagination controls"`).
+- **Z-index focus stacking**: Focus rings are rendered with elevated z-index so the active button outline is never clipped by neighbouring buttons.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always provide an `aria-label` on `ButtonGroup` explaining the shared purpose of the grouped actions.
+  </Do>
+  <Dont>
+    Never use `ButtonGroup` for mutually exclusive selection; use `ToggleGroup` or `RadioGroup` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Maintain consistent button variants and sizes inside a single group container.
+  </Do>
+  <Dont>
+    Never mix conflicting heights (`size="sm"` with `size="lg"`) within the same button group.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['ButtonGroup']} />
+
+## Related
+
+- [Button](/ui/docs/components/actions/button) — Individual interactive action trigger.
+- [ToggleGroup](/ui/docs/components/actions/toggle-group) — Connected group of toggle buttons for selection states.
+- [Pagination](/ui/docs/components/navigation/pagination) — High-level navigation control for multi-page data sets.

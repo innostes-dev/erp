@@ -22,11 +22,11 @@
 - [Theming & Design Tokens](https://innostes.com/ui/docs/theming): Semantic design token architecture, OKLCH colour system, theme overrides, multi-tenant scoping, and generated token reference.
 
 ## Components
-- [Button Group](https://innostes.com/ui/docs/components/actions/button-group) [Stable]: Merges borders and corners of adjacent buttons, horizontally or vertically.
-- [Button](https://innostes.com/ui/docs/components/actions/button) [Stable]: A flexible button component with multiple variants, sizes, and states.
+- [Button Group](https://innostes.com/ui/docs/components/actions/button-group) [Stable]: Segmented container joining adjacent buttons horizontally or vertically for pagers and split actions.
+- [Button](https://innostes.com/ui/docs/components/actions/button) [Stable]: Foundation action trigger supporting multiple semantic variants, sizes, loading spinners, and render polymorphism.
 - [Actions](https://innostes.com/ui/docs/components/actions/index) [Stable]: Core interactive controls for submitting forms, triggering commands, and toggling states.
-- [Toggle Group](https://innostes.com/ui/docs/components/actions/toggle-group) [Stable]: Single or multiple selection with roving focus and arrow-key navigation.
-- [Toggle](https://innostes.com/ui/docs/components/actions/toggle) [Stable]: Two-state button for formatting, favourites and view options.
+- [Toggle Group](https://innostes.com/ui/docs/components/actions/toggle-group) [Stable]: Segmented control managing single or multiple active states with roving tabindex and arrow-key navigation.
+- [Toggle](https://innostes.com/ui/docs/components/actions/toggle) [Stable]: Accessible two-state pressed button primitive for formatting toolbars, favorites, and view modes.
 - [Avatar](https://innostes.com/ui/docs/components/data-display/avatar) [Stable]: Image with initials fallback, four sizes, round or square, and stacked groups.
 - [Badge](https://innostes.com/ui/docs/components/data-display/badge) [Stable]: Semantic colours for statuses, with an optional dot.
 - [Card](https://innostes.com/ui/docs/components/data-display/card) [Stable]: Header with title, description and actions, plus content and footer areas.
@@ -46,25 +46,25 @@
 - [Skeleton](https://innostes.com/ui/docs/components/feedback/skeleton) [Stable]: Pulsing shapes sized with utility classes. Respects reduced motion.
 - [Spinner](https://innostes.com/ui/docs/components/feedback/spinner) [Stable]: Inherits the text colour; sized with utility classes.
 - [Toast](https://innostes.com/ui/docs/components/feedback/toast) [Stable]: Success, error, warning, loading and promise toasts with actions, swipe to dismiss and a queue limit.
-- [Calendar](https://innostes.com/ui/docs/components/forms/calendar) [Stable]: Single and range modes, min/max and disabled days, one or two months, locale-aware, fully keyboard accessible.
-- [Checkbox](https://innostes.com/ui/docs/components/forms/checkbox) [Stable]: Single checkboxes and groups with a "select all" parent.
-- [Combobox](https://innostes.com/ui/docs/components/forms/combobox) [Beta]: Type to filter, arrow keys to move, Enter to pick. For long lists like countries or customers.
-- [Date Picker](https://innostes.com/ui/docs/components/forms/date-picker) [Stable]: DatePicker and DateRangePicker with presets, min/max, clearing, and plain-form submission.
-- [Field & Form](https://innostes.com/ui/docs/components/forms/field) [Stable]: Accessible wiring between label, control, help text and errors, with native and custom validation.
-- [File Dropzone](https://innostes.com/ui/docs/components/forms/file-dropzone) [Beta]: Type, size and count checks, image thumbnails, and native form submission.
+- [Calendar](https://innostes.com/ui/docs/components/forms/calendar) [Stable]: Single and range modes, min/max bounds, disabled dates, one or two month views, and Intl-based locale formatting.
+- [Checkbox](https://innostes.com/ui/docs/components/forms/checkbox) [Stable]: Accessible checkbox primitive supporting single agreement boxes, multi-select tables, and indeterminate "select all" parent groups.
+- [Combobox](https://innostes.com/ui/docs/components/forms/combobox) [Beta]: Accessible combobox input for filtering and selecting values from extensive or remote dataset collections.
+- [Date Picker](https://innostes.com/ui/docs/components/forms/date-picker) [Stable]: DatePicker and DateRangePicker with built-in presets, min/max bounds, clearing triggers, and standard YYYY-MM-DD form submissions.
+- [Field and Form](https://innostes.com/ui/docs/components/forms/field) [Stable]: Accessible form container linking labels, descriptions, and errors with native constraint validation and server error mapping.
+- [File Dropzone](https://innostes.com/ui/docs/components/forms/file-dropzone) [Beta]: MIME type and extension checking, file size and count constraints, image thumbnails, and native form integration.
 - [Forms](https://innostes.com/ui/docs/components/forms/index) [Stable]: Input fields, pickers, validation containers, and specialised editors for complex data entry.
-- [Input Group](https://innostes.com/ui/docs/components/forms/input-group) [Stable]: InputGroup, SearchInput (clear, Escape, shortcut hint) and PasswordInput (show/hide).
-- [Input](https://innostes.com/ui/docs/components/forms/input) [Stable]: Three sizes, invalid and disabled states, file inputs, and automatic Field wiring.
-- [Locale Selects](https://innostes.com/ui/docs/components/forms/locale-select) [Stable]: Names come from the browser's Intl API in the user's language. No data files to bundle or update.
-- [Number Field](https://innostes.com/ui/docs/components/forms/number-field) [Stable]: Min/max clamping, keyboard and wheel stepping, currency and percent formats.
-- [Radio Group](https://innostes.com/ui/docs/components/forms/radio-group) [Stable]: Arrow-key navigation, form submission and Field support.
-- [Rich Text Editor](https://innostes.com/ui/docs/components/forms/rich-text-editor) [Beta]: Bold, headings, lists, quotes, links and undo, with Markdown shortcuts. Built on Tiptap, in a separate entry point.
-- [Searchable Select](https://innostes.com/ui/docs/components/forms/searchable-select) [Stable]: For long lists of simple options. Matches labels and keywords, accent-insensitive.
-- [Select](https://innostes.com/ui/docs/components/forms/select) [Stable]: Groups, separators, multiple selection, type-ahead and form submission.
-- [Slider](https://innostes.com/ui/docs/components/forms/slider) [Stable]: Single values and ranges, keyboard support, form submission.
-- [Switch](https://innostes.com/ui/docs/components/forms/switch) [Stable]: Two sizes, form submission and Field support.
-- [Tag Input](https://innostes.com/ui/docs/components/forms/tag-input) [Beta]: Labels, skills, recipients and SKUs as chips, with suggestions, paste splitting, limits and validation.
-- [Textarea](https://innostes.com/ui/docs/components/forms/textarea) [Stable]: Optional auto-resize, and automatic Field wiring.
+- [Input Group](https://innostes.com/ui/docs/components/forms/input-group) [Stable]: Unified input container merging leading and trailing addons, copy triggers, and currency labels.
+- [Input](https://innostes.com/ui/docs/components/forms/input) [Stable]: Accessible single-line input field supporting multiple types, clear buttons, password visibility toggles, and automatic Field wiring.
+- [Locale Selects](https://innostes.com/ui/docs/components/forms/locale-select) [Stable]: Pre-configured searchable select components returning standard ISO and IANA codes with zero third-party dataset bundle overhead.
+- [Number Field](https://innostes.com/ui/docs/components/forms/number-field) [Stable]: Accessible numeric input field supporting min/max bounds, wheel stepping, and en-IN currency and percent formats.
+- [Radio Group](https://innostes.com/ui/docs/components/forms/radio-group) [Stable]: Accessible radio group primitive for selecting exactly one option from a visible set of choices.
+- [Rich Text Editor](https://innostes.com/ui/docs/components/forms/rich-text-editor) [Beta]: Bold, headings, lists, quotes, links, and history shortcuts packaged in a modular entry point with form validation support.
+- [Searchable Select](https://innostes.com/ui/docs/components/forms/searchable-select) [Stable]: Filterable single-select dropdown matching labels and keywords with accent-insensitive search.
+- [Select](https://innostes.com/ui/docs/components/forms/select) [Stable]: Accessible dropdown selection menu with groups, separators, multiple selection, type-ahead, and automatic Field wiring.
+- [Slider](https://innostes.com/ui/docs/components/forms/slider) [Stable]: Accessible slider component supporting single values, dual-thumb price ranges, keyboard stepping, and form submission.
+- [Switch](https://innostes.com/ui/docs/components/forms/switch) [Stable]: Accessible binary switch primitive with animated thumb sliding, sizes, and instant state synchronization.
+- [Tag Input](https://innostes.com/ui/docs/components/forms/tag-input) [Beta]: Removable chip tag entry control supporting autocomplete suggestions, delimiter pasting, maximum bounds, and validation.
+- [Textarea](https://innostes.com/ui/docs/components/forms/textarea) [Stable]: Accessible multiline text input supporting field-sizing auto-resize, rows configuration, and automatic Field wiring.
 - [App Rail](https://innostes.com/ui/docs/components/layout/app-rail) [Stable]: Used alongside a sidebar to navigate between top-level areas or modules in complex applications, featuring active states, tooltips, and badges.
 - [Form Layout](https://innostes.com/ui/docs/components/layout/form-layout) [Stable]: FormGrid, FormSection and FormActions. Responsive to the space they're in, not the screen.
 - [Layout](https://innostes.com/ui/docs/components/layout/index) [Stable]: Scaffolding primitives for responsive ERP application shells, navigation bars, and data panes.

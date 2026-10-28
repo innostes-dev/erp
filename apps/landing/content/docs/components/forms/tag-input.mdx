@@ -1,10 +1,13 @@
 ---
 title: Tag Input
-description: Free-form or suggested values as removable tags.
+description: Freeform or suggested categorical values entered and rendered as removable chip tags.
 icon: Tags
 status: Beta
-summary: Labels, skills, recipients and SKUs as chips, with suggestions, paste splitting, limits and validation.
+summary: Removable chip tag entry control supporting autocomplete suggestions, delimiter pasting, maximum bounds, and validation.
+install: pnpm add @innostes/ui
 ---
+
+`TagInput` captures and organizes multiple keywords, product SKUs, tax categories, or email recipients as removable chips. Built on Base UI's multi-select Combobox primitive, it supports comma-separated text pasting, custom tag validation, maximum limits, and keyboard arrow traversal across existing tags.
 
 <ComponentPreview name="forms/tag-input/basic" />
 
@@ -14,30 +17,117 @@ summary: Labels, skills, recipients and SKUs as chips, with suggestions, paste s
 import { TagInput } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use TagInput** when users need to assign multiple freeform or suggested tags (such as product categories, logistics tags, or notification recipients).
+- **Use Combobox** when selecting items from a large database where items represent fixed single entities.
+- **Use Select** with `multiple` when users pick from a small fixed list of options without typing custom tags.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **TagInput** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Moderate lists requiring fast dropdown filter search |
+| **[Select](/ui/docs/components/forms/select)** | Single or Multi | 5 to 15 | No (type-ahead) | Compact predefined lists (e.g. status, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+
+## Examples
+
+### Autocomplete suggestions with limits
+
+Limit the total number of allowed tags and suggest existing values:
+
+```tsx
+const departmentTags = ['Procurement', 'Inventory', 'GST Compliance', 'Logistics', 'Quality Audit'];
+
+<Field>
+  <FieldLabel>Operational tags</FieldLabel>
+  <TagInput
+    suggestions={departmentTags}
+    defaultValue={['Procurement', 'GST Compliance']}
+    placeholder="Add tag (e.g. Logistics)..."
+    max={5}
+    aria-label="Department tags"
+  />
+  <FieldDescription>Maximum 5 tags allowed per consignment.</FieldDescription>
+</Field>
+```
+
+### Custom tag validation and pasting
+
+Enforce regex pattern validation on tags and parse comma-delimited clipboard text:
+
+```tsx
+<Field>
+  <FieldLabel>Notification recipients</FieldLabel>
+  <TagInput
+    placeholder="officer@northwind.in..."
+    validate={(tag) => /^\S+@\S+\.\S+$/.test(tag)}
+    delimiters={[',', ';', ' ']}
+    aria-label="Notification email addresses"
+  />
+  <FieldDescription>Type or paste comma-separated corporate email addresses.</FieldDescription>
+</Field>
+```
+
+### Closed suggestion lists
+
+Set `allowCustom={false}` to restrict selections exclusively to predefined suggestions:
 
 ```tsx
 <TagInput
-  aria-label="Labels"
-  suggestions={labels}
-  value={value}
-  onValueChange={setValue}
-  max={10}
+  allowCustom={false}
+  suggestions={['Warehouse-A', 'Warehouse-B', 'Transit-Hub']}
+  placeholder="Select warehouse zones..."
 />
 ```
 
-- **Adding**: Enter or a delimiter (`,` by default; change with `delimiters`). Pasting `a, b, c` adds three tags.
-- **Suggestions**: pass `suggestions` to show a filtered list. Typing a known tag in any case uses the suggestion's casing.
-- **Closed lists**: `allowCustom={false}` only accepts suggestions.
-- **Rules**: `validate` rejects tags (e.g. invalid emails); `max` caps the count and disables the input when reached. Duplicates are ignored, case-insensitively.
-- **Forms**: `name` submits each tag, like a multi-select.
-
 ## Accessibility
 
-- Built on Base UI's multi-select Combobox: the input is a `combobox`, and suggestions are a `listbox`.
-- From the start of the input, Left Arrow moves to the tags; Backspace or Delete removes the focused tag.
-- Each remove button is labelled (`removeLabel`, default `Remove <tag>`).
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Enter / Comma', action: 'Converts current input text into a committed tag chip.' },
+    { key: 'ArrowLeft', action: 'From the start of the text input, moves focus backward into the preceding tag chips.' },
+    { key: 'ArrowRight', action: 'Moves focus forward across tags back to the text entry field.' },
+    { key: 'Backspace / Delete', action: 'Removes the currently focused tag chip, or removes the last tag when input is empty.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Combobox & Listbox roles**: The text input operates as `role="combobox"` controlling an ARIA listbox popup for suggestions.
+- **Accessible removal buttons**: Each chip contains an inline dismissal button labelled via `removeLabel` (defaults to `"Remove <tag>"`).
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an informative `placeholder` and helper description explaining how to commit tags (e.g. "Press Enter or comma to add").
+  </Do>
+  <Dont>
+    Never use `TagInput` when users can only pick one single value; use `Select` or `SearchableSelect` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use `validate` to reject malformed input strings (such as invalid email formats or disallowed characters).
+  </Do>
+  <Dont>
+    Never allow duplicate tags; `@innostes/ui` automatically deduplicates entries case-insensitively.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['TagInput']} />
+
+## Related
+
+- [Combobox](/ui/docs/components/forms/combobox) — Autocomplete input with floating listbox results.
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Filterable dropdown selector.
+- [Badge](/ui/docs/components/data-display/badge) — Static metadata and status indicators.

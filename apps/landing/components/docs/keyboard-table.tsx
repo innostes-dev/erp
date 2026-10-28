@@ -1,18 +1,30 @@
 import { Kbd } from '@innostes/ui';
 
+export interface KeyboardRowObject {
+  key?: string | string[];
+  keys?: string | string[];
+  action: string;
+}
+
+export type KeyboardTableRow = [string | string[], string] | KeyboardRowObject;
+
 export interface KeyboardTableProps {
   /**
-   * List of rows, where each row is a pair of:
-   * 1. A key shortcut (e.g. 'Enter' or ['Ctrl', 'K'] or ['ArrowUp', 'ArrowDown'])
-   * 2. The description of what the key does.
+   * List of rows, where each row is either:
+   * 1. A pair: `[keys, action]` (e.g. `['Enter', 'Submits form']` or `[['Ctrl', 'K'], 'Opens search']`)
+   * 2. An object: `{ key: '...', action: '...' }`
    */
-  rows: [string | string[], string][];
+  rows?: KeyboardTableRow[];
+  /** Alias for `rows` when passed as an object array. */
+  entries?: KeyboardTableRow[];
 }
 
 /**
  * A table documenting keyboard shortcuts and actions using the design system's `Kbd` component.
  */
-export function KeyboardTable({ rows }: KeyboardTableProps) {
+export function KeyboardTable({ rows, entries }: KeyboardTableProps) {
+  const items = rows ?? entries ?? [];
+
   return (
     <div className="not-prose my-6 w-full overflow-x-auto rounded-lg border border-fd-border">
       <table className="w-full border-collapse text-sm">
@@ -27,8 +39,24 @@ export function KeyboardTable({ rows }: KeyboardTableProps) {
           </tr>
         </thead>
         <tbody className="divide-y divide-fd-border">
-          {rows.map(([keys, action], index) => {
-            const keyList = Array.isArray(keys) ? keys : [keys];
+          {items.map((item, index) => {
+            let keySpec: string | string[] | undefined;
+            let action: string = '';
+
+            if (Array.isArray(item)) {
+              keySpec = item[0];
+              action = item[1];
+            } else if (item && typeof item === 'object') {
+              keySpec = item.key ?? item.keys;
+              action = item.action;
+            }
+
+            const keyList = Array.isArray(keySpec)
+              ? keySpec
+              : keySpec
+                ? [keySpec]
+                : [];
+
             return (
               <tr key={index} className="hover:bg-fd-muted/30">
                 <td className="px-4 py-2.5 font-normal">

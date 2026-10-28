@@ -1,10 +1,13 @@
 ---
 title: Textarea
-description: A multi-line text field.
+description: Multiline text entry fields supporting auto-resize, character constraints, and accessible field integration.
 icon: TextAlignStart
 status: Stable
-summary: Optional auto-resize, and automatic Field wiring.
+summary: Accessible multiline text input supporting field-sizing auto-resize, rows configuration, and automatic Field wiring.
+install: pnpm add @innostes/ui
 ---
+
+`Textarea` provides multiline text input for customer remarks, delivery instructions, procurement notes, and descriptions. Built on standard HTML5 textarea ergonomics, it supports automatic vertical resizing via CSS `field-sizing: content` while integrating directly with `<Field>` for validation and error reporting.
 
 <ComponentPreview name="forms/textarea/basic" />
 
@@ -14,16 +17,99 @@ summary: Optional auto-resize, and automatic Field wiring.
 import { Textarea } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Textarea** for multiline text entries such as shipping instructions, invoice notes, or bug reports.
+- **Use Input** for single-line values such as customer names, email addresses, or phone numbers.
+- **Use RichTextEditor** when formatted text (bold, lists, links, headers) or document authoring is required.
+
+## Examples
+
+### Basic usage
+
+Specify the initial visible height using the `rows` prop:
 
 ```tsx
-<Textarea name="notes" rows={4} />
-<Textarea autoResize rows={2} />  {/* grows with the content */}
+<Field>
+  <FieldLabel>Dispatch instructions</FieldLabel>
+  <Textarea rows={4} placeholder="Gate delivery instructions, bay access codes..." />
+  <FieldDescription>Max 500 characters.</FieldDescription>
+</Field>
 ```
 
-`autoResize` uses CSS `field-sizing: content`. Browsers without support fall back to a normal,
-vertically resizable textarea.
+### Auto-resize
 
-## API Reference
+Enable `autoResize` to allow the textarea to grow vertically as the operator types:
+
+```tsx
+<Field>
+  <FieldLabel>Internal procurement note</FieldLabel>
+  <Textarea
+    autoResize
+    rows={2}
+    placeholder="Describe vendor negotiation terms..."
+  />
+  <FieldDescription>Grows smoothly with content using CSS field-sizing.</FieldDescription>
+</Field>
+```
+
+Browsers without native `field-sizing: content` support gracefully fall back to standard vertical drag-resizing.
+
+### Validation state
+
+When used inside `<Field>`, validation errors trigger error rings and ARIA live announcements:
+
+```tsx
+<Field name="justification" required>
+  <FieldLabel required>Order cancellation reason</FieldLabel>
+  <Textarea required minLength={10} />
+  <FieldError match="valueMissing">Please state a reason for cancelling this order.</FieldError>
+  <FieldError match="tooShort">Please provide at least 10 characters of explanation.</FieldError>
+</Field>
+```
+
+## Accessibility
+
+### Keyboard navigation
+
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus to the textarea or away to the subsequent interactive control.' },
+    { key: 'Enter', action: 'Inserts a new line character within the text content.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Automatic labelling**: When wrapped inside `<Field>`, the `<FieldLabel>` is programmatically coupled via `htmlFor`/`id`.
+- **Validation binding**: Error and helper descriptions connect via `aria-describedby` and set `aria-invalid="true"` when invalid.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an initial `rows` value (typically 3 to 5) that accommodates expected content without overwhelming the screen.
+  </Do>
+  <Dont>
+    Never use a `Textarea` for single-line values like titles, email addresses, or tax numbers; use `Input` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use `autoResize` for compact comment forms to keep the initial footprint minimal.
+  </Do>
+  <Dont>
+    Never hide the scrollbar or restrict manual resizing when `autoResize` is disabled.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Textarea']} />
+
+## Related
+
+- [Input](/ui/docs/components/forms/input) — Single-line text input field.
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form layout and error handling container.
+- [RichTextEditor](/ui/docs/components/forms/rich-text-editor) — Formatted document and markup editor.

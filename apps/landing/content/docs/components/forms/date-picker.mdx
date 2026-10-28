@@ -1,9 +1,9 @@
 ---
 title: Date Picker
-description: Date and date range fields with a calendar popup.
+description: Date and date range input fields with an accessible calendar popover, preset options, and form integration.
 icon: CalendarRange
 status: Stable
-summary: DatePicker and DateRangePicker with presets, min/max, clearing, and plain-form submission.
+summary: DatePicker and DateRangePicker with built-in presets, min/max bounds, clearing triggers, and standard YYYY-MM-DD form submissions.
 ---
 
 <ComponentPreview name="forms/date-picker/basic" />
@@ -11,44 +11,235 @@ summary: DatePicker and DateRangePicker with presets, min/max, clearing, and pla
 ## Import
 
 ```tsx
-import { DatePicker, DateRangePicker, defaultDateRangePresets, type DateRange } from '@innostes/ui';
+import {
+  DatePicker,
+  DateRangePicker,
+  defaultDateRangePresets,
+  type DateRange,
+  type DateRangePreset,
+} from '@innostes/ui';
 ```
 
-## DatePicker
+## When to use
+
+Use `DatePicker` or `DateRangePicker` when users need to select dates within forms, query bars, or filter headers without taking up permanent layout space:
+
+- Setting invoice due dates, quotation validity periods, or purchase order delivery dates.
+- Selecting custom reporting intervals or quick presets (such as "Last 30 days" or "This month") in financial analytics.
+- Capturing personal dates like date of birth using year/month dropdown navigation.
+
+When choosing between date components:
+- Use [Calendar](/ui/docs/components/forms/calendar) directly when you want the month grid permanently visible inline on the page (such as a resource booking calendar or dispatch dashboard).
+- Use `DatePicker` for selecting an isolated point in time (e.g. `dueDate`).
+- Use `DateRangePicker` when querying date spans bounded by start and end dates.
+- Use [Input](/ui/docs/components/forms/input) with `type="date"` if minimal JavaScript bundle size on legacy mobile browsers takes precedence over styling consistency.
+
+## Examples
+
+### Basic date picker
+
+Render `DatePicker` with an accessible label or `aria-label`. Use `value` and `onValueChange` for controlled state.
 
 ```tsx
-<Label htmlFor="due">Due date</Label>
-<DatePicker id="due" name="dueDate" value={due} onValueChange={setDue} min={new Date()} />
+'use client';
+
+import { useState } from 'react';
+import { DatePicker, Label } from '@innostes/ui';
+
+export function InvoiceDueDate() {
+  const [dueDate, setDueDate] = useState<Date | null>(new Date());
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="invoice-due">Payment due date</Label>
+      <DatePicker
+        id="invoice-due"
+        name="dueDate"
+        value={dueDate}
+        onValueChange={setDueDate}
+      />
+    </div>
+  );
+}
 ```
 
-- Shows the date with `Intl` (`dateStyle: 'medium'` by default); change it with `format`
-  (`Intl.DateTimeFormat` options or a function).
-- `name` submits the date as `YYYY-MM-DD`, so it works with plain forms and server actions.
-- `captionLayout="dropdown"` adds month and year selects, for dates of birth.
-- `clearable` (default `true`) shows a clear button.
+### Date formatting and locale
 
-## DateRangePicker
+The trigger formats dates using `Intl.DateTimeFormat` with `dateStyle: 'medium'` by default. You can supply custom `Intl.DateTimeFormatOptions` or a custom formatting function via the `format` prop. Pass `locale` to ensure month and day names correspond to the user's regional dialect.
 
 ```tsx
-<DateRangePicker aria-label="Report period" value={range} onValueChange={setRange} startName="from" endName="to" />
+import { DatePicker } from '@innostes/ui';
+
+export function FormattedDatePicker() {
+  return (
+    <DatePicker
+      locale="en-IN"
+      format={{ day: '2-digit', month: 'short', year: 'numeric' }}
+      aria-label="Voucher date"
+    />
+  );
+}
 ```
 
-- `onValueChange` fires once both ends are picked, or when a preset is chosen.
-- `presets` defaults to Today, Yesterday, Last 7 / 30 days, This / Last month and This year.
-  Pass your own (with translated labels), or `[]` to hide them:
+### Date constraints and disabled days
+
+Bound selectable dates using `min` and `max`. Use `isDateDisabled` to disable specific dates such as regional holidays or non-working days.
 
 ```tsx
-const presets = [
-  { label: 'Q1', range: () => ({ from: new Date(2026, 0, 1), to: new Date(2026, 2, 31) }) },
+import { DatePicker } from '@innostes/ui';
+
+const isSunday = (date: Date) => date.getDay() === 0;
+
+export function DeliverySlotPicker() {
+  return (
+    <DatePicker
+      min={new Date()}
+      isDateDisabled={isSunday}
+      placeholder="Select working day"
+      aria-label="Delivery slot"
+    />
+  );
+}
+```
+
+### Month and year dropdown navigation
+
+Set `captionLayout="dropdown"` to display dropdown selectors for year and month inside the popover calendar. This is ideal for historical dates such as employee date of birth or company incorporation.
+
+```tsx
+import { DatePicker } from '@innostes/ui';
+
+export function DateOfBirthPicker() {
+  return (
+    <DatePicker
+      captionLayout="dropdown"
+      fromYear={1950}
+      toYear={2010}
+      placeholder="Select date of birth"
+      aria-label="Date of birth"
+    />
+  );
+}
+```
+
+### Date range picker with presets
+
+`DateRangePicker` renders a popover with dual-month navigation alongside quick preset selections (e.g., "Today", "Last 7 days", "Last 30 days", "This month"). The `onValueChange` callback triggers when both `from` and `to` dates are chosen, or immediately when a preset button is clicked.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DateRangePicker, type DateRange } from '@innostes/ui';
+
+export function TaxPeriodFilter() {
+  const [period, setPeriod] = useState<DateRange>({
+    from: new Date(2026, 3, 1),
+    to: new Date(2026, 3, 30),
+  });
+
+  return (
+    <DateRangePicker
+      value={period}
+      onValueChange={setPeriod}
+      startName="startDate"
+      endName="endDate"
+      aria-label="GST tax period"
+    />
+  );
+}
+```
+
+You can define custom presets or pass an empty array (`presets={[]}`) to remove the preset column:
+
+```tsx
+import { DateRangePicker, defaultDateRangePresets } from '@innostes/ui';
+
+const fiscalPresets = [
+  {
+    label: 'Q1 (Apr–Jun)',
+    range: () => ({ from: new Date(2026, 3, 1), to: new Date(2026, 5, 30) }),
+  },
   ...defaultDateRangePresets,
 ];
+
+export function CustomPresetsDemo() {
+  return <DateRangePicker presets={fiscalPresets} aria-label="Fiscal period" />;
+}
+```
+
+### Form integration and submission
+
+`DatePicker` renders a hidden `<input type="hidden">` with the chosen date formatted as `YYYY-MM-DD` under the given `name` prop. `DateRangePicker` accepts `startName` and `endName` to submit both dates in standard HTML forms and server actions.
+
+```tsx
+import { DatePicker, Field, FieldLabel, FieldError } from '@innostes/ui';
+
+export function FormDatePickerExample() {
+  return (
+    <form action="/api/v1/invoices" method="POST">
+      <Field>
+        <FieldLabel htmlFor="due-date">Invoice due date</FieldLabel>
+        <DatePicker id="due-date" name="dueDate" required />
+        <FieldError />
+      </Field>
+    </form>
+  );
+}
 ```
 
 ## Accessibility
 
-- The trigger is a button. Label it with `<Label htmlFor>` + `id`, or `aria-label`.
-- The calendar gets focus when it opens; Escape closes it and returns focus to the trigger.
+`DatePicker` and `DateRangePicker` follow WAI-ARIA combobox and popover dialog specifications.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens the calendar popover when focused on the trigger button.' },
+    { key: 'Down Arrow', action: 'Opens the calendar popover and shifts keyboard focus to the calendar grid.' },
+    { key: 'Escape', action: 'Closes the popover calendar and restores focus to the trigger button.' },
+    { key: 'Tab', action: 'Navigates focus within the popover between the calendar grid, presets, and month controls.' },
+  ]}
+/>
+
+### Screen readers
+
+- The trigger element is an accessible button rendered with `aria-haspopup="dialog"`.
+- When opened, focus moves into the calendar grid, which announces the currently focused day with day of week, day number, month, and year.
+- Selected dates are announced with `aria-selected="true"`.
+- The clear button includes a localized `aria-label` ("Clear date" by default).
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an explicit label using FieldLabel or an aria-label attribute so screen reader users understand what date is requested.',
+    code: `<Label htmlFor="dispatch">Dispatch date</Label>\n<DatePicker id="dispatch" name="dispatchDate" />`,
+  }}
+  dont={{
+    description: 'Do not rely solely on placeholder text as a field label; placeholders vanish once a date is picked.',
+    code: `<DatePicker placeholder="Dispatch date" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Specify startName and endName on DateRangePicker so HTML form submissions submit cleanly separated ISO dates without extra parsing.',
+    code: `<DateRangePicker startName="startDate" endName="endDate" />`,
+  }}
+  dont={{
+    description: 'Do not parse a composite string manually on the server when separate hidden inputs are already provided.',
+    code: `// Avoid manual string splitting of "01/04/2026 - 30/04/2026"`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['DatePicker', 'DateRangePicker']} baseUi="popover" />
+
+## Related
+
+- [Calendar](/ui/docs/components/forms/calendar) — Inline calendar month grid for dashboards and date visualization.
+- [Field](/ui/docs/components/forms/field) — Form field container with label, description, and error messaging.
+- [Input](/ui/docs/components/forms/input) — Standard text, numeric, and native date inputs.

@@ -1,10 +1,13 @@
 ---
 title: Toggle Group
-description: A set of toggles where one or several can be on.
+description: A set of connected two-state buttons supporting single or multiple active selections.
 icon: Columns3
 status: Stable
-summary: Single or multiple selection with roving focus and arrow-key navigation.
+summary: Segmented control managing single or multiple active states with roving tabindex and arrow-key navigation.
+install: pnpm add @innostes/ui
 ---
+
+ToggleGroup coordinates a set of two-state toggle buttons. Built on Base UI's toggle group primitive, it supports both single-selection (e.g. text alignment, view modes) and multi-selection (e.g. text formatting options) with built-in roving focus management and keyboard arrow navigation.
 
 <ComponentPreview name="actions/toggle-group/basic" />
 
@@ -14,26 +17,105 @@ summary: Single or multiple selection with roving focus and arrow-key navigation
 import { ToggleGroup, ToggleGroupItem } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-`value` is always an array of the pressed items' values. Add `multiple` to allow several.
+- **Use ToggleGroup** when users need to switch between related view layouts (e.g. List vs Grid) or apply multiple independent formatting options (e.g. Bold, Italic, Underline).
+- **Use RadioGroup** when selecting one option from a list within a standard form where standard radio button styling is required.
+- **Use Tabs** when selecting an option switches an entire underlying panel or page view.
+- **Use ButtonGroup** when grouping operational action buttons that trigger commands rather than maintaining state.
+
+## Examples
+
+### Single selection
+
+In default mode, ToggleGroup operates with single selection:
 
 ```tsx
-const [view, setView] = useState(['list']);
+const [view, setView] = useState(['table']);
 
-<ToggleGroup value={view} onValueChange={setView} aria-label="View">
-  <ToggleGroupItem value="list">List</ToggleGroupItem>
-  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+<ToggleGroup value={view} onValueChange={setView} aria-label="Inventory layout">
+  <ToggleGroupItem value="table">Table view</ToggleGroupItem>
+  <ToggleGroupItem value="kanban">Kanban board</ToggleGroupItem>
 </ToggleGroup>
 ```
 
-`variant` and `size` set on the group apply to every item.
+### Multiple selection
+
+Enable the `multiple` prop to permit selecting more than one option concurrently:
+
+```tsx
+const [formatting, setFormatting] = useState(['bold', 'italic']);
+
+<ToggleGroup
+  multiple
+  value={formatting}
+  onValueChange={setFormatting}
+  aria-label="Rich text formatting"
+>
+  <ToggleGroupItem value="bold" aria-label="Bold"><Bold className="size-4" /></ToggleGroupItem>
+  <ToggleGroupItem value="italic" aria-label="Italic"><Italic className="size-4" /></ToggleGroupItem>
+  <ToggleGroupItem value="underline" aria-label="Underline"><Underline className="size-4" /></ToggleGroupItem>
+</ToggleGroup>
+```
+
+### Attached outline styling
+
+Use `variant="outline"` to merge borders and join the items into a solid segmented control:
+
+```tsx
+<ToggleGroup variant="outline" defaultValue={['all']} aria-label="Status filter">
+  <ToggleGroupItem value="all">All orders</ToggleGroupItem>
+  <ToggleGroupItem value="pending">Pending</ToggleGroupItem>
+  <ToggleGroupItem value="dispatched">Dispatched</ToggleGroupItem>
+</ToggleGroup>
+```
 
 ## Accessibility
 
-- Arrow keys move focus between items; Tab leaves the group.
-- Each item exposes `aria-pressed`. Label the group with `aria-label`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowRight / ArrowDown', action: 'Moves focus to the next item in the group, wrapping to the start.' },
+    { key: 'ArrowLeft / ArrowUp', action: 'Moves focus to the previous item in the group, wrapping to the end.' },
+    { key: 'Space / Enter', action: 'Toggles the pressed state of the currently focused item.' },
+    { key: 'Home / End', action: 'Jumps focus directly to the first or last item in the group.' },
+    { key: 'Tab', action: 'Leaves the toggle group and moves focus to the next control outside the group.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Roving tabindex**: Only the active or focused item has `tabIndex={0}`; remaining items receive `tabIndex={-1}`, ensuring the entire group acts as a single tab stop in the DOM.
+- **`role="group"`**: Automatically applied to the container alongside the provided `aria-label`.
+- **`aria-pressed`**: Emitted on each item to announce active state changes to screen readers.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always provide an `aria-label` on `ToggleGroup` describing the group purpose (e.g. `aria-label="View mode"`).
+  </Do>
+  <Dont>
+    Never use `ToggleGroup` for navigating between separate URLs; use `Tabs` or standard navigation links instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide an `aria-label` on each `ToggleGroupItem` when items contain only icons without text labels.
+  </Do>
+  <Dont>
+    Never mix mutually exclusive options with multi-select toggles inside the same group container.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['ToggleGroup', 'ToggleGroupItem']} baseUi="toggle-group" />
+
+## Related
+
+- [Toggle](/ui/docs/components/actions/toggle) — Standalone two-state button.
+- [ButtonGroup](/ui/docs/components/actions/button-group) — Connected container for operational command buttons.
+- [Tabs](/ui/docs/components/navigation/tabs) — Tabbed interface for swapping content panels.

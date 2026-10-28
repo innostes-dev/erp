@@ -1,10 +1,13 @@
 ---
-title: Field & Form
-description: Labels, descriptions, validation and form submission.
+title: Field and Form
+description: Accessible form validation, field label wiring, server error integration, and grid layout primitives.
 icon: RectangleEllipsis
 status: Stable
-summary: Accessible wiring between label, control, help text and errors, with native and custom validation.
+summary: Accessible form container linking labels, descriptions, and errors with native constraint validation and server error mapping.
+install: pnpm add @innostes/ui
 ---
+
+`Field` and `Form` provide the foundational scaffolding for all enterprise forms in `@innostes/ui`. Built on Base UI's field primitive, `Field` automatically links labels to controls via `htmlFor`, connects descriptive notes and error messages via `aria-describedby`, and manages `aria-invalid` without manual ID wiring.
 
 <ComponentPreview name="forms/field/basic" />
 
@@ -20,65 +23,133 @@ import {
   Fieldset,
   FieldsetLegend,
   Form,
-  Label,
+  FormActions,
+  FormGrid,
+  FormSection,
 } from '@innostes/ui';
 ```
 
-## Anatomy
+## When to use
+
+- **Use Field** around any input, select, textarea, or checkbox to automatically manage accessible names, helper text, and validation feedback.
+- **Use Form** to coordinate form submission, capture values as keyed objects, map server validation errors, and focus the first invalid control automatically.
+- **Use FormGrid and FormSection** to arrange complex ERP forms into structured, responsive multi-column layouts.
+
+## Examples
+
+### Purchase order header
+
+A realistic ERP purchase order header combining `Form`, `FormGrid`, `Field`, `Select`, `Input`, and `FormActions`:
+
+<ComponentPreview name="forms/field/purchase-order-header" />
+
+### Native constraint validation
+
+`Field` integrates with standard browser HTML5 constraint validation attributes (`required`, `minLength`, `pattern`, `min`, `max`):
 
 ```tsx
-<Form>
-  <Fieldset>
-    <FieldsetLegend />
-    <Field>
-      <FieldLabel />
-      {/* Input, Textarea, Select, Checkbox, … */}
-      <FieldDescription />
-      <FieldError />
-    </Field>
-  </Fieldset>
-</Form>
-```
-
-Every innostes form control works inside `Field`: the label, description and error are linked to
-it automatically (`for`/`id`, `aria-describedby`, `aria-invalid`).
-
-## Validation and server errors
-
-Validation uses native constraints (`required`, `type`, `minLength`, `pattern`, …) and the
-`validate` prop. Server errors go to `Form`'s `errors` prop, keyed by field `name`, and show in the
-matching `FieldError`.
-
-<ComponentPreview name="forms/field/form" />
-
-- Use `match` on `FieldError` to show your own message per constraint
-  (`valueMissing`, `typeMismatch`, `tooShort`, …). Without children it shows the browser message.
-- `validationMode` on `Field` (`onSubmit` by default, or `onBlur` / `onChange`) controls when it runs.
-- `onFormSubmit` receives the values as an object, keyed by `name`.
-
-## With React Hook Form or TanStack Form
-
-The controls are regular inputs, so form libraries work as usual. Pass their error state to the field:
-
-```tsx
-<Field name="email" invalid={!!errors.email}>
-  <FieldLabel>Email</FieldLabel>
-  <Input {...register('email')} />
-  <FieldError match={!!errors.email}>{errors.email?.message}</FieldError>
+<Field name="email">
+  <FieldLabel required>Work email</FieldLabel>
+  <Input type="email" required />
+  <FieldError match="valueMissing">Email address is required.</FieldError>
+  <FieldError match="typeMismatch">Enter a valid email address.</FieldError>
 </Field>
 ```
 
-## Label
+### Custom and asynchronous validation
 
-`Label` is a standalone `<label>` for controls outside a `Field`. Inside a `Field`, use `FieldLabel`.
+Supply a custom validator function via the `validate` prop on `Field`. The function receives the control value and returns an error message string or `null`:
+
+```tsx
+<Field
+  name="poNumber"
+  validate={async (value) => {
+    if (!value) return 'PO number is required';
+    const exists = await checkPoExistsOnServer(String(value));
+    return exists ? 'This purchase order number already exists.' : null;
+  }}
+>
+  <FieldLabel required>PO number</FieldLabel>
+  <Input placeholder="PO-2026-0000" />
+  <FieldError match="customError" />
+</Field>
+```
+
+### Server errors mapped to fields
+
+When a backend API rejects a submission, pass the returned error record to `Form`'s `errors` prop. Each error maps automatically to the matching `<FieldError>` child:
+
+<ComponentPreview name="forms/field/form" />
+
+### Validation timing and focus management
+
+By default, validation runs when the form is submitted (`validationMode="onSubmit"`). You can configure `validationMode` on individual fields or across the entire `Form`:
+
+- `onSubmit`: Validates only upon form submission (avoids premature nagging).
+- `onBlur`: Validates when the user tabs out of the input.
+- `onChange`: Re-validates immediately on keystroke once the field is dirty.
+
+When a submission fails validation, `Form` automatically moves keyboard focus to the **first invalid field** in DOM order, allowing keyboard and screen-reader users to remediate mistakes immediately.
 
 ## Accessibility
 
-- Errors set `aria-invalid` on the control and are announced through `aria-describedby`.
-- `required` on `FieldLabel` adds a visual `*` hidden from screen readers. Set `required` on the
-  control as well so it's announced and validated.
-- `Fieldset` renders a native `<fieldset>`; `disabled` disables every control inside.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus sequentially across interactive controls inside the form.' },
+    { key: 'Enter', action: 'Submits the form when focused inside a single-line input field.' },
+    { key: 'Escape', action: 'Dismisses active select dropdowns or combobox popups without closing the form.' },
+  ]}
+/>
 
-<ApiTable components={['Field', 'FieldLabel', 'FieldDescription', 'FieldError', 'FieldItem', 'Fieldset', 'FieldsetLegend', 'Form', 'Label']} baseUi="field" />
+### Screen readers and ARIA
+
+- **Automatic `aria-describedby`**: `Field` computes unique internal IDs and sets `aria-describedby` pointing to both `<FieldDescription>` and `<FieldError>`.
+- **`aria-invalid`**: Automatically set to `true` on the enclosed input whenever validation fails.
+- **Live region error announcements**: `<FieldError>` emits errors in an ARIA live region so screen readers announce corrections without requiring navigation away from the current field.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always wrap interactive form inputs inside a `<Field>` with a visible `<FieldLabel>` for sustained accessibility.
+  </Do>
+  <Dont>
+    Never rely on input `placeholder` text as a substitute for a visible `<FieldLabel>`.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Write specific, constructive error messages explaining how to resolve the issue (e.g. "Enter an 8-character GSTIN number").
+  </Do>
+  <Dont>
+    Never emit vague errors such as "Invalid input" or "Field error".
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Field',
+    'FieldLabel',
+    'FieldDescription',
+    'FieldError',
+    'FieldItem',
+    'Fieldset',
+    'FieldsetLegend',
+    'Form',
+    'FormActions',
+    'FormGrid',
+    'FormSection',
+  ]}
+  baseUi="field"
+/>
+
+## Related
+
+- [Input](/ui/docs/components/forms/input) — Single-line text input primitives.
+- [Select](/ui/docs/components/forms/select) — Dropdown menu selection.
+- [FormLayout](/ui/docs/components/layout/form-layout) — High-level multi-step form layout container.

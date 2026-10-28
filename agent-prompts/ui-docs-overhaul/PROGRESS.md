@@ -314,3 +314,29 @@ drop, which doesn't work on touch screens.
 - Non-blocking: Prompt 09 (Actions and forms component doc pages overhaul).
 
 
+
+
+## 09 – Component pages: actions and forms – 2026-10-29
+
+**Summary**: Completely overhauled all 22 action and form component documentation pages to match the standard seven-section template (Import, When to use, Examples, Accessibility with KeyboardTable and ARIA notes, Guidelines with Do/Don't recommendations, API reference with ApiTable, and Related). Created interactive `<PropsPlayground>` components for Input, Checkbox, Select, and Switch. Documented the full Field & Form validation lifecycle with a realistic Northwind Traders Purchase Order Header demo (`purchase-order-header.tsx`). Added a cross-component Select Family comparison matrix across Select, Combobox, SearchableSelect, TagInput, and RadioGroup. Created an upload-with-progress demo for FileDropzone using `showFileList={false}` and `Progress`. Documented Indian fiscal currency (`en-IN` INR) and percent formatting on NumberField. Enforced sentence case on all headings (DOC-008, DOC-011, DOC-012 for actions and forms).
+
+**Changed**:
+- `apps/landing/components/docs/keyboard-table.tsx`: made `rows` and `entries` polymorphic to support both pair tuples and key/action object arrays.
+- `apps/landing/components/docs/input-playground.tsx`: interactive playground for Input variants, sizes, and states.
+- `apps/landing/components/docs/checkbox-playground.tsx`: interactive playground for Checkbox sizes, states, and indeterminate state.
+- `apps/landing/components/docs/select-playground.tsx`: interactive playground for Select sizes and option sets.
+- `apps/landing/components/docs/switch-playground.tsx`: interactive playground for Switch sizes and states.
+- `apps/landing/components/demos/forms/field/purchase-order-header.tsx`: complete realistic enterprise form demo with PO number, vendor, order date, currency, payment terms, and delivery notes.
+- `apps/landing/components/demos/forms/file-dropzone/upload-progress.tsx`: upload-with-progress demo using `showFileList={false}` and `Progress`.
+- `apps/landing/content/docs/components/actions/`: rewrote `button.mdx`, `button-group.mdx`, `toggle.mdx`, and `toggle-group.mdx`.
+- `apps/landing/content/docs/components/forms/`: rewrote `field.mdx`, `input.mdx`, `input-group.mdx`, `textarea.mdx`, `checkbox.mdx`, `radio-group.mdx`, `switch.mdx`, `select.mdx`, `combobox.mdx`, `searchable-select.mdx`, `tag-input.mdx`, `number-field.mdx`, `slider.mdx`, `calendar.mdx`, `date-picker.mdx`, `file-dropzone.mdx`, `locale-select.mdx`, and `rich-text-editor.mdx`.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.15s, all 6 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (136 static pages, `_not-found`, `sitemap.xml`, `robots.txt`, `api/og`, `api/search`).
+- `pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache`: PASS (31 test files, 244 tests, 238 components compiled).
+- `pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache`: PASS (React 17 & 18 test & typecheck suites green).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 10 (Data display and feedback component pages overhaul).

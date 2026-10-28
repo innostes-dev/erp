@@ -1,9 +1,9 @@
 ---
 title: File Dropzone
-description: Attach files by drag and drop or browsing.
+description: Accessible drag-and-drop file attachment zone with client validation, progress integration, and form submission.
 icon: Upload
 status: Beta
-summary: Type, size and count checks, image thumbnails, and native form submission.
+summary: MIME type and extension checking, file size and count constraints, image thumbnails, and native form integration.
 ---
 
 <ComponentPreview name="forms/file-dropzone/basic" />
@@ -11,35 +11,198 @@ summary: Type, size and count checks, image thumbnails, and native form submissi
 ## Import
 
 ```tsx
-import { FileDropzone, formatBytes } from '@innostes/ui';
+import {
+  FileDropzone,
+  formatBytes,
+  type FileDropzoneProps,
+  type FileRejection,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `FileDropzone` when users need to attach documents, images, spreadsheets, or archives to records:
+
+- Attaching purchase order receipts, vendor contracts, or shipping manifests.
+- Uploading batch CSV or XLSX files for bulk inventory or price list imports.
+- Adding company logos, user avatars, or product catalogue photography.
+
+When choosing between file input patterns:
+- Use `FileDropzone` when users benefit from a prominent drag target, thumbnail previews, and instant client-side file rejection messages.
+- Use a standard [Button](/ui/docs/components/actions/button) wrapping a visually hidden native `<input type="file">` if screen real estate is constrained to a single compact row.
+
+## Examples
+
+### Basic upload zone
+
+Provide `name`, `accept`, `maxSize`, and a helpful `hint` describing allowed extensions and file sizes.
 
 ```tsx
-<FileDropzone
-  name="attachments"
-  accept="image/*,.pdf"
-  maxSize={5_000_000}
-  maxFiles={5}
-  hint="PDF or images, up to 5 MB"
-  value={files}
-  onValueChange={setFiles}
-/>
+'use client';
+
+import { useState } from 'react';
+import { FileDropzone } from '@innostes/ui';
+
+export function ReceiptAttachment() {
+  const [files, setFiles] = useState<File[]>([]);
+
+  return (
+    <FileDropzone
+      name="receipts"
+      accept="image/*,.pdf"
+      maxSize={5_000_000}
+      maxFiles={3}
+      hint="PDF or images, up to 5 MB each"
+      value={files}
+      onValueChange={setFiles}
+    />
+  );
+}
 ```
 
-- `accept` uses the native syntax: extensions (`.csv`), MIME types (`application/pdf`) and wildcards (`image/*`).
-- Rejected files are listed under the zone with the reason, and passed to `onReject` as `{ file, reasons }`, where reasons are `type`, `size` or `count`.
-- `multiple={false}` keeps one file; a new one replaces it.
-- The files are mirrored into a real `<input type="file" name>`, so a plain `<form>` submits them. For uploads with progress, read `value` and upload it yourself.
-- `showFileList={false}` hides the built-in list so you can render your own (e.g. with upload progress). `formatBytes` formats sizes.
+### File constraints and validation
+
+`FileDropzone` validates dropped or selected files against `accept`, `maxSize`, and `maxFiles`. Invalid files trigger `onReject` with an array of `FileRejection` objects explaining why each file was disallowed (`type`, `size`, or `count`).
+
+```tsx
+'use client';
+
+import { FileDropzone, type FileRejection } from '@innostes/ui';
+
+export function StrictDropzone() {
+  const handleReject = (rejections: FileRejection[]) => {
+    rejections.forEach(({ file, reasons }) => {
+      console.warn(`Rejected ${file.name}: ${reasons.join(', ')}`);
+    });
+  };
+
+  return (
+    <FileDropzone
+      accept=".csv,.xlsx"
+      maxSize={2_000_000}
+      maxFiles={1}
+      multiple={false}
+      hint="Single CSV or XLSX file up to 2 MB"
+      onReject={handleReject}
+    />
+  );
+}
+```
+
+### Custom file list with upload progress
+
+Set `showFileList={false}` to hide the built-in static list and render a custom file queue with live progress bars (e.g. while uploading chunks to Amazon S3 or Google Cloud Storage).
+
+<ComponentPreview name="forms/file-dropzone/upload-progress" />
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { FileDropzone, Progress, formatBytes } from '@innostes/ui';
+
+export function UploadWithProgress() {
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(65);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <FileDropzone
+        name="contract"
+        accept=".pdf"
+        showFileList={false}
+        onValueChange={setFiles}
+        hint="PDF documents up to 10 MB"
+      />
+      {files.map((file) => (
+        <div key={file.name} className="flex flex-col gap-1.5 rounded-lg border p-3">
+          <div className="flex justify-between text-sm">
+            <span>{file.name}</span>
+            <span>{formatBytes(file.size)}</span>
+          </div>
+          <Progress value={uploadProgress} aria-label={`Uploading ${file.name}`} />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Form integration and submission
+
+`FileDropzone` syncs its internal file list to a real, hidden `<input type="file" name="...">` element. This allows standard `multipart/form-data` form submissions and Next.js server actions to read uploaded files directly without manual FormData wiring.
+
+```tsx
+import { FileDropzone, Field, FieldLabel } from '@innostes/ui';
+
+export function VendorVerificationForm() {
+  return (
+    <form action="/api/v1/vendors/verify" method="POST" encType="multipart/form-data">
+      <Field>
+        <FieldLabel htmlFor="gst-cert">GST registration certificate</FieldLabel>
+        <FileDropzone
+          id="gst-cert"
+          name="certificate"
+          accept=".pdf"
+          maxFiles={1}
+          required
+        />
+      </Field>
+    </form>
+  );
+}
+```
 
 ## Accessibility
 
-- The "Browse files" button opens the native picker, so keyboard and screen-reader users never need drag and drop.
-- `hint` is linked to the button with `aria-describedby`.
-- Rejections are announced with `role="alert"`.
+`FileDropzone` complies with WCAG 2.2 AA non-text contrast, keyboard access, and assistive technology requirements.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus to the "Browse files" button inside the zone or removal buttons in the list.' },
+    { key: 'Enter / Space', action: 'Activates the focused "Browse files" trigger, opening the native operating system file picker.' },
+  ]}
+/>
+
+### Screen readers
+
+- The file input and browse action are exposed via an accessible `<button>` connected to the hidden file input. Users never need drag-and-drop gestures to upload files.
+- The `hint` text is linked to the browse trigger via `aria-describedby`.
+- When files are rejected due to invalid extensions, exceeding byte counts, or count limits, error notifications are injected inside an ARIA live region (`role="alert"`).
+- Remove buttons in the file list provide explicit accessible labels including the file name (e.g., `Remove invoice-001.pdf`).
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always validate file MIME types, byte sizes, and magic numbers on the backend server before storage.',
+    code: `// Express / Fastify / FastAPI server check\nif (file.size > 5_000_000) raise_error();`,
+  }}
+  dont={{
+    description: 'Never trust client-side accept filters as a security boundary against malicious executables or payloads.',
+    code: `// INSECURE: Assuming accept=".pdf" prevents malicious file execution\nconst saveToDisk = (file) => fs.writeFileSync(file.name, file.buffer);`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always display explicit file size and format limits in the hint so users know constraints beforehand.',
+    code: `<FileDropzone hint="PDF or PNG up to 10 MB each, maximum 3 files" />`,
+  }}
+  dont={{
+    description: 'Do not hide size and type constraints until after the user attempts a failed upload.',
+    code: `<FileDropzone /> // Missing guidance`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['FileDropzone']} />
+
+## Related
+
+- [Button](/ui/docs/components/actions/button) — Compact trigger for custom file picker patterns.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress indicator for asynchronous file transfers.
+- [Field](/ui/docs/components/forms/field) — Accessible form field container with label, description, and error state.

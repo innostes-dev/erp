@@ -1,9 +1,9 @@
 ---
 title: Calendar
-description: A month grid for picking a day or a range.
+description: A month grid for picking a day or a range of days with full keyboard navigation and locale awareness.
 icon: CalendarDays
 status: Stable
-summary: Single and range modes, min/max and disabled days, one or two months, locale-aware, fully keyboard accessible.
+summary: Single and range modes, min/max bounds, disabled dates, one or two month views, and Intl-based locale formatting.
 ---
 
 <ComponentPreview name="forms/calendar/basic" />
@@ -11,48 +11,202 @@ summary: Single and range modes, min/max and disabled days, one or two months, l
 ## Import
 
 ```tsx
-import { Calendar, type DateRange } from '@innostes/ui';
+import { Calendar, type DateRange, type Weekday } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Calendar` when users need to see an inline month view to choose a single calendar day or an inclusive date range:
+
+- Displaying booking schedules, dispatch timetables, or delivery cutoffs directly on an ERP dashboard.
+- Selecting ranges across one or two months when visualising calendar context is essential.
+- Building custom date filter panels.
+
+When choosing between date selection patterns:
+- Use [Date Picker](/ui/docs/components/forms/date-picker) if the calendar should appear within a compact popover triggered from a form field or table toolbar.
+- Use [Date Range Picker](/ui/docs/components/forms/date-picker#date-range-picker-with-presets) if you need preset ranges (such as "Last 30 days" or "This quarter") attached to a popover trigger.
+- Use [Input](/ui/docs/components/forms/input) with `type="date"` only when native mobile OS date pickers are explicitly preferred over consistent cross-browser styling.
+
+## Examples
+
+### Single date
+
+By default, `Calendar` runs in single-date mode (`mode="single"`). Provide `value` and `onValueChange` for controlled operation.
 
 ```tsx
-<Calendar value={date} onValueChange={setDate} />
-<Calendar mode="range" numberOfMonths={2} value={range} onValueChange={setRange} />
-<Calendar isDateDisabled={(d) => d.getDay() === 0 || d.getDay() === 6} min={new Date()} />
-<Calendar captionLayout="dropdown" fromYear={1950} toYear={2010} />   {/* month & year selects */}
+'use client';
+
+import { useState } from 'react';
+import { Calendar } from '@innostes/ui';
+
+export function DispatchDateSelector() {
+  const [dispatchDate, setDispatchDate] = useState<Date | null>(new Date());
+
+  return (
+    <Calendar
+      value={dispatchDate}
+      onValueChange={setDispatchDate}
+      aria-label="Dispatch schedule"
+    />
+  );
+}
 ```
 
-For a field that opens a calendar, use [Date Picker](/ui/docs/components/forms/date-picker).
+### Date range
 
-## Locale
+Set `mode="range"` to allow selecting a start date and an end date. Setting `numberOfMonths={2}` renders two consecutive months side-by-side, which simplifies picking cross-month accounting or reporting cycles.
 
-Month and weekday names come from `Intl` in the user's language. The first day of the week follows
-the locale (Monday for most of the world, Sunday for `en-US`); override it with `weekStartsOn`.
-Labels of the navigation buttons can be translated with `labels`.
+```tsx
+'use client';
 
-## Dates and time zones
+import { useState } from 'react';
+import { Calendar, type DateRange } from '@innostes/ui';
 
-The calendar works with **local calendar days**: values are `Date` objects at local midnight.
-Convert to and from your API's format at the edges, e.g. with `toISOString().slice(0, 10)` or the
-`YYYY-MM-DD` value the date pickers submit.
+export function AuditRangeCalendar() {
+  const [range, setRange] = useState<DateRange>({
+    from: new Date(2026, 3, 1),
+    to: new Date(2026, 3, 15),
+  });
 
-## Keyboard
+  return (
+    <Calendar
+      mode="range"
+      numberOfMonths={2}
+      value={range}
+      onValueChange={setRange}
+      aria-label="Audit observation period"
+    />
+  );
+}
+```
 
-| Key | Action |
-| --- | --- |
-| Arrow keys | Previous / next day and week |
-| Home / End | Start / end of the week |
-| Page Up / Page Down | Previous / next month |
-| Shift + Page Up / Page Down | Previous / next year |
-| Enter / Space | Select the focused day |
+### Date constraints and disabled dates
+
+Pass `min` and `max` bounds to prevent selecting dates outside allowable fiscal limits. Use `isDateDisabled` to disable specific calendar dates, such as gazetted public holidays or weekend warehouse closures.
+
+```tsx
+import { Calendar } from '@innostes/ui';
+
+const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
+
+export function WarehouseCutoffCalendar() {
+  return (
+    <Calendar
+      min={new Date(2026, 0, 1)}
+      max={new Date(2026, 11, 31)}
+      isDateDisabled={isWeekend}
+      aria-label="Warehouse loading date"
+    />
+  );
+}
+```
+
+### Dropdown year and month navigation
+
+For dates far in the past or future (such as incorporation dates or employee date of birth), set `captionLayout="dropdown"`. This substitutes plain month header text with accessible select dropdowns for rapid jumping.
+
+```tsx
+import { Calendar } from '@innostes/ui';
+
+export function IncorporationCalendar() {
+  return (
+    <Calendar
+      captionLayout="dropdown"
+      fromYear={1990}
+      toYear={2030}
+      aria-label="Entity incorporation date"
+    />
+  );
+}
+```
+
+### Locale and week start
+
+Month and weekday labels automatically derive from the user's browser runtime through `Intl.DateTimeFormat`. You can pass an explicit BCP 47 locale tag (`locale="en-IN"`) or override the first day of the week with `weekStartsOn` (where `0` is Sunday and `1` is Monday).
+
+```tsx
+import { Calendar } from '@innostes/ui';
+
+export function IndianFiscalCalendar() {
+  return (
+    <Calendar
+      locale="en-IN"
+      weekStartsOn={1}
+      aria-label="GST filing schedule"
+    />
+  );
+}
+```
+
+### Time zones
+
+`Calendar` operates strictly on **local calendar days**:
+- Values are native JavaScript `Date` instances clamped to midnight in the local browser runtime.
+- The component does not apply UTC hour offsets or time zone translations.
+- When sending values to an ERP API, serialise the calendar day to an ISO date string format (`YYYY-MM-DD`) at the application boundary, rather than sending a raw UTC timestamp that could shift the calendar day across midnight in eastern or western longitudes.
 
 ## Accessibility
 
-- Follows the WAI-ARIA date picker grid pattern: one tab stop, roving focus, `aria-selected`,
-  `aria-current="date"` for today, and full dates as labels ("Thursday, October 15, 2026").
-- Disabled days stay focusable (so keyboard users can move past them) and are marked `aria-disabled`.
+`Calendar` implements the W3C WAI-ARIA Date Picker Grid design pattern.
 
-## API Reference
+### Keyboard navigation
+
+The calendar grid is a single tab stop with roving tabindex across days.
+
+<KeyboardTable
+  entries={[
+    { key: 'Left Arrow', action: 'Moves focus to the previous day.' },
+    { key: 'Right Arrow', action: 'Moves focus to the next day.' },
+    { key: 'Up Arrow', action: 'Moves focus to the same weekday in the previous week.' },
+    { key: 'Down Arrow', action: 'Moves focus to the same weekday in the next week.' },
+    { key: 'Home', action: 'Moves focus to the first day of the current week.' },
+    { key: 'End', action: 'Moves focus to the last day of the current week.' },
+    { key: 'Page Up', action: 'Navigates to the previous month.' },
+    { key: 'Page Down', action: 'Navigates to the next month.' },
+    { key: 'Shift + Page Up', action: 'Navigates to the previous calendar year.' },
+    { key: 'Shift + Page Down', action: 'Navigates to the next calendar year.' },
+    { key: 'Enter / Space', action: 'Selects the currently focused day.' },
+  ]}
+/>
+
+### Screen readers
+
+- The month table uses `role="grid"` with column headers denoting abbreviated and full weekday names (`abbr` attribute).
+- Each cell has a full textual accessible label (e.g., "Thursday, 15 October 2026").
+- The current calendar date is marked with `aria-current="date"`.
+- Selected dates communicate their status through `aria-selected="true"`.
+- Disabled days maintain keyboard focusability to allow navigating across weeks without breaking roving focus, marked with `aria-disabled="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Clamp dates to midnight (00:00:00) in local time when computing boundaries to avoid subtle 1-hour daylight saving or offset mismatches.',
+    code: `const start = new Date(2026, 3, 1, 0, 0, 0, 0);`,
+  }}
+  dont={{
+    description: 'Do not pass raw UTC timestamps from an API directly into min or max props without converting to local calendar days.',
+    code: `// Can cause boundary skew across timezones\n<Calendar min={new Date('2026-04-01T00:00:00.000Z')} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use `numberOfMonths={2}` when rendering range mode on desktop screens so users can inspect start and end dates spanning consecutive months.',
+    code: `<Calendar mode="range" numberOfMonths={2} value={range} onValueChange={setRange} />`,
+  }}
+  dont={{
+    description: 'Do not use multi-month layouts inside narrow mobile dialogs or sidebars where horizontal scrolling would be required.',
+    code: `<div className="w-64">\n  <Calendar numberOfMonths={2} />\n</div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Calendar']} />
+
+## Related
+
+- [Date Picker](/ui/docs/components/forms/date-picker) — Popover-wrapped calendar for form inputs.
+- [Field](/ui/docs/components/forms/field) — Accessible container with labels, descriptions, and error messages.
+- [Locale Selects](/ui/docs/components/forms/locale-select) — Regional preference dropdowns for timezones, countries, and date formats.

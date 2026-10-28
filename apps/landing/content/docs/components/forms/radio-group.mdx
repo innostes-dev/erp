@@ -1,10 +1,13 @@
 ---
 title: Radio Group
-description: Pick exactly one option from a set.
+description: Mutually exclusive option selection controls with built-in arrow-key navigation and roving focus.
 icon: CircleDot
 status: Stable
-summary: Arrow-key navigation, form submission and Field support.
+summary: Accessible radio group primitive for selecting exactly one option from a visible set of choices.
+install: pnpm add @innostes/ui
 ---
+
+`RadioGroup` allows operators to select exactly one option from a set of mutually exclusive choices. Built on Base UI's radio primitive, it manages roving tabindex across options, coordinates native arrow-key navigation, and automatically exposes checked state attributes (`has-data-checked`) for custom card-style radio controls.
 
 <ComponentPreview name="forms/radio-group/basic" />
 
@@ -14,23 +17,108 @@ summary: Arrow-key navigation, form submission and Field support.
 import { Radio, RadioGroup } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use RadioGroup** when users must select exactly one option from a visible list of 2 to 5 options.
+- **Use Select** when screen real estate is limited or the list contains 5 to 15 options.
+- **Use Checkbox** when users can select multiple options independently or toggle a single agreement.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **RadioGroup** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential (e.g. shipping tier) |
+| **[Select](/ui/docs/components/forms/select)** | Single | 5 to 15 | No | Compact dropdown selection with a predefined list (e.g. payment terms) |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Long lists requiring keyboard search filtering (e.g. warehouse depot) |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Card-style radio options
+
+Style entire card containers using CSS `has-data-checked:` variants:
 
 ```tsx
-<RadioGroup name="plan" defaultValue="business" aria-label="Plan">
-  <label className="flex items-center gap-2"><Radio value="starter" /> Starter</label>
-  <label className="flex items-center gap-2"><Radio value="business" /> Business</label>
+<RadioGroup defaultValue="express" aria-label="Carrier shipping tier">
+  <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer has-data-checked:border-primary has-data-checked:bg-primary/5">
+    <Radio value="standard" className="mt-0.5" />
+    <div>
+      <span className="text-sm font-medium">Standard Road Transport</span>
+      <p className="text-xs text-muted-foreground">3-5 business days via Blue Dart</p>
+    </div>
+  </label>
+  <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer has-data-checked:border-primary has-data-checked:bg-primary/5">
+    <Radio value="express" className="mt-0.5" />
+    <div>
+      <span className="text-sm font-medium">Express Air Cargo</span>
+      <p className="text-xs text-muted-foreground">Next-day arrival at Bengaluru Airport</p>
+    </div>
+  </label>
 </RadioGroup>
 ```
 
-Use radios for 2–6 visible options. For longer lists, use [Select](/ui/docs/components/forms/select).
-Style a selected option's wrapper with `has-data-checked:` (as in the demo).
+### Form integration with field
+
+Coordinate radio groups inside `<Field>`:
+
+```tsx
+<Field name="settlementType">
+  <FieldLabel required>Settlement method</FieldLabel>
+  <RadioGroup defaultValue="neft">
+    <label className="flex items-center gap-2 text-sm"><Radio value="neft" /> NEFT / RTGS</label>
+    <label className="flex items-center gap-2 text-sm"><Radio value="upi" /> Corporate UPI</label>
+    <label className="flex items-center gap-2 text-sm"><Radio value="letter-of-credit" /> Letter of credit</label>
+  </RadioGroup>
+  <FieldError />
+</Field>
+```
 
 ## Accessibility
 
-- Arrow keys move and select; Tab enters and leaves the group.
-- Label the group (`aria-label`, or `aria-labelledby` pointing at a heading).
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowDown / ArrowRight', action: 'Moves selection and focus to the next radio option, wrapping to the first.' },
+    { key: 'ArrowUp / ArrowLeft', action: 'Moves selection and focus to the previous radio option, wrapping to the last.' },
+    { key: 'Space', action: 'Selects the currently focused radio button if not already selected.' },
+    { key: 'Tab', action: 'Enters or exits the radio group as a single combined tab stop.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="radiogroup"`**: Automatically applied to the wrapper container.
+- **Roving focus**: Only the selected radio button has `tabIndex={0}`, allowing the user to tab directly past the entire group once an option is set.
+- **`aria-checked`**: Screen readers announce "checked" or "not checked" automatically as arrow keys cycle options.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide a default selected value whenever possible so the form state is always deterministic.
+  </Do>
+  <Dont>
+    Never use `RadioGroup` for multi-item selection; use `Checkbox` or `CheckboxGroup` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Limit radio groups to 5 or fewer options to preserve vertical screen space in complex ERP layouts.
+  </Do>
+  <Dont>
+    Never present 10+ options in a radio group; use `Select` or `SearchableSelect` instead.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['RadioGroup', 'Radio']} baseUi="radio" />
+
+## Related
+
+- [Select](/ui/docs/components/forms/select) — Dropdown menu selection for medium option lists.
+- [Checkbox](/ui/docs/components/forms/checkbox) — Independent multi-item selection.
+- [ToggleGroup](/ui/docs/components/actions/toggle-group) — Connected segmented buttons for view toggling.

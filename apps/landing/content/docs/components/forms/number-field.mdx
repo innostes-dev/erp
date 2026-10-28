@@ -1,10 +1,13 @@
 ---
 title: Number Field
-description: A numeric input with step buttons and locale-aware formatting.
+description: Numerical input field with increment steppers, bounds clamping, and locale-aware currency and percent formatting.
 icon: Hash
 status: Stable
-summary: Min/max clamping, keyboard and wheel stepping, currency and percent formats.
+summary: Accessible numeric input field supporting min/max bounds, wheel stepping, and en-IN currency and percent formats.
+install: pnpm add @innostes/ui
 ---
+
+`NumberField` provides a precision numerical input control. Built on Base UI's number field primitive, it manages numeric stepping, bounds clamping (`min`, `max`), keyboard increment shortcuts, and automatic `Intl.NumberFormat` localization for Indian Rupees (`INR`), percentages, and quantities.
 
 <ComponentPreview name="forms/number-field/basic" />
 
@@ -14,27 +17,114 @@ summary: Min/max clamping, keyboard and wheel stepping, currency and percent for
 import { NumberField } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use NumberField** when capturing quantitative figures that benefit from stepping, bounds clamping, or locale-aware currency formatting (e.g. order quantities, prices, discount rates).
+- **Use Input** with `type="number"` only for simple unbounded numbers without stepping or formatting needs.
+- **Use Slider** when visual spatial selection along a continuous track is preferred over typed numeric input.
+
+## Examples
+
+### Currency formatting in en-IN
+
+`NumberField` formats numbers according to Indian numbering grouping rules (thousands, lakhs, crores) when supplied with `locale="en-IN"`:
 
 ```tsx
-<NumberField defaultValue={1} min={0} max={99} aria-label="Quantity" />
+<Field>
+  <FieldLabel>Procurement invoice total</FieldLabel>
+  <NumberField
+    defaultValue={145280.50}
+    step={100}
+    locale="en-IN"
+    format={{ style: 'currency', currency: 'INR' }}
+  />
+  <FieldDescription>Displays as ₹1,45,280.50 with proper Indian digit grouping.</FieldDescription>
+</Field>
+```
 
+### Percentage calculation
+
+When formatting percentages, supply a decimal fraction (e.g. `0.18` for 18%):
+
+```tsx
+<Field>
+  <FieldLabel>GST tax slab</FieldLabel>
+  <NumberField
+    defaultValue={0.18}
+    min={0}
+    max={0.28}
+    step={0.01}
+    locale="en-IN"
+    format={{ style: 'percent' }}
+  />
+</Field>
+```
+
+### Bounds and step behavior
+
+Enforce minimum, maximum, and step increments:
+
+```tsx
 <NumberField
-  value={price}
-  onValueChange={setPrice}
-  step={0.01}
-  format={{ style: 'currency', currency: 'EUR' }}
-  aria-label="Price"
+  defaultValue={10}
+  min={1}
+  max={100}
+  step={5}
+  largeStep={25}
+  aria-label="Pallet batch quantity"
 />
 ```
 
-`format` takes [`Intl.NumberFormat` options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options)
-and formats for the user's locale. The value stays a plain `number` (or `null` when empty).
+- **`step`**: Determines the increment for Up/Down arrow keys and stepper buttons (defaults to `1`).
+- **`largeStep`**: Determines the increment for `PageUp` and `PageDown` keys (defaults to `10`).
+- **Clamping**: Typing a number outside `[min, max]` automatically clamps to the boundary when the field loses focus.
 
 ## Accessibility
 
-- Arrow Up/Down step by `step`; Page Up/Down by `largeStep`; Home/End jump to `min`/`max`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowUp', action: 'Increments the current value by one step.' },
+    { key: 'ArrowDown', action: 'Decrements the current value by one step.' },
+    { key: 'PageUp', action: 'Increments the current value by largeStep.' },
+    { key: 'PageDown', action: 'Decrements the current value by largeStep.' },
+    { key: 'Home', action: 'Jumps directly to the min bound value if defined.' },
+    { key: 'End', action: 'Jumps directly to the max bound value if defined.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="spinbutton"`**: Identifies the control as an accessible numeric spinner.
+- **ARIA attributes**: Automatically exposes `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and `aria-valuetext` (reflecting localized formatted currency or percentages).
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Specify `locale="en-IN"` and `currency="INR"` for Indian enterprise ERP applications to guarantee correct rupee symbols and lakh/crore commas.
+  </Do>
+  <Dont>
+    Never hardcode currency symbols into input value strings manually; let `NumberField`'s `format` prop handle internationalisation.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Set sensible `min` bounds (such as `min={0}` or `min={1}`) to prevent invalid negative quantities on purchase orders.
+  </Do>
+  <Dont>
+    Never leave numeric bounds open when negative values would break downstream accounting workflows.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['NumberField']} baseUi="number-field" />
+
+## Related
+
+- [Slider](/ui/docs/components/forms/slider) — Interactive sliding track selector for numeric ranges.
+- [InputGroup](/ui/docs/components/forms/input-group) — Affix currency symbols or units to standard text fields.
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form validation container.

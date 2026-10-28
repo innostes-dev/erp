@@ -1,10 +1,15 @@
 ---
 title: Select
-description: Pick a value from a list.
+description: Dropdown selection controls for choosing single or multiple items from a bounded list.
 icon: ChevronsUpDown
 status: Stable
-summary: Groups, separators, multiple selection, type-ahead and form submission.
+summary: Accessible dropdown selection menu with groups, separators, multiple selection, type-ahead, and automatic Field wiring.
+install: pnpm add @innostes/ui
 ---
+
+import { SelectPlayground } from '@/components/docs/select-playground';
+
+`Select` displays a collapsed trigger button that opens a floating menu of options. Built on Base UI's select primitive, it supports type-ahead search, roving keyboard focus, group dividers, and multi-selection, while integrating directly into `<Field>` for validation.
 
 <ComponentPreview name="forms/select/basic" />
 
@@ -23,40 +28,133 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass `items` so `SelectValue` can show the selected label (not just the value):
+- **Use Select** when users need to choose from a predefined list of 5 to 15 items in a compact form layout.
+- **Use RadioGroup** when choices are few (2 to 5) and comparing options side-by-side without opening a menu is beneficial.
+- **Use SearchableSelect or Combobox** when the list contains more than 15 items or requires fast keyboard typing search.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **Select** | Single or Multi | 5 to 15 | No (type-ahead only) | Compact predefined lists (e.g. status, tax rate, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Long lists requiring keyboard search filtering (e.g. warehouse depot) |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Interactive playground
+
+Experiment with select trigger sizes and disabled states:
+
+<SelectPlayground />
+
+### Grouped options with separators
+
+Organize related choices using `SelectGroup` and `SelectSeparator`:
 
 ```tsx
-const statuses = [
-  { value: 'active', label: 'Active' },
-  { value: 'archived', label: 'Archived' },
-];
-
-<Select items={statuses} defaultValue="active" name="status">
-  <SelectTrigger aria-label="Status">
-    <SelectValue />
+<Select defaultValue="blr-central">
+  <SelectTrigger aria-label="Depot">
+    <SelectValue placeholder="Select warehouse depot..." />
   </SelectTrigger>
   <SelectContent>
-    {statuses.map((s) => (
-      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-    ))}
+    <SelectGroup>
+      <SelectGroupLabel>Karnataka Facilities</SelectGroupLabel>
+      <SelectItem value="blr-central">Bengaluru Central Hub</SelectItem>
+      <SelectItem value="whitefield">Whitefield Logistics Center</SelectItem>
+    </SelectGroup>
+    <SelectSeparator />
+    <SelectGroup>
+      <SelectGroupLabel>Maharashtra Facilities</SelectGroupLabel>
+      <SelectItem value="mumbai-port">Mumbai JNPT Port Depot</SelectItem>
+      <SelectItem value="pune-chakan">Pune Chakan Industrial Hub</SelectItem>
+    </SelectGroup>
   </SelectContent>
 </Select>
 ```
 
-- Add `placeholder` to `SelectValue` for an empty state.
-- Add `multiple` to `Select` to pick several values (`value` becomes an array).
-- The list opens below the trigger. Set `alignItemWithTrigger` on `SelectContent` for the
-  macOS-style list that overlaps the trigger.
+### Multiple selection
 
-For long or searchable lists, use [Combobox](/ui/docs/components/forms/combobox).
+Set `multiple` on the root `Select` component to allow choosing multiple items:
+
+```tsx
+const [selectedCurrencies, setSelectedCurrencies] = useState(['INR', 'USD']);
+
+<Select multiple value={selectedCurrencies} onValueChange={setSelectedCurrencies}>
+  <SelectTrigger aria-label="Settlement currencies">
+    <SelectValue placeholder="Select currencies..." />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="INR">Indian Rupee (INR)</SelectItem>
+    <SelectItem value="USD">US Dollar (USD)</SelectItem>
+    <SelectItem value="EUR">Euro (EUR)</SelectItem>
+    <SelectItem value="GBP">British Pound (GBP)</SelectItem>
+  </SelectContent>
+</Select>
+```
 
 ## Accessibility
 
-- Arrow keys, Home/End and type-ahead move through options; Enter selects; Escape closes.
-- Label it with `FieldLabel` inside a `Field`, or `aria-label` on the trigger.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Enter / Space', action: 'Opens the select menu when focused on the trigger; selects the highlighted item when open.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Navigates focus between menu items sequentially.' },
+    { key: 'Home / End', action: 'Jumps directly to the first or last selectable option.' },
+    { key: 'Type-ahead', action: 'Typing characters jumps focus directly to the matching option label.' },
+    { key: 'Escape', action: 'Dismisses the open dropdown menu and returns focus to the trigger button.' },
+  ]}
+/>
 
-<ApiTable components={['SelectTrigger', 'SelectValue', 'SelectContent', 'SelectItem', 'SelectGroup', 'SelectGroupLabel', 'SelectSeparator']} baseUi="select" />
+### Screen readers and ARIA
+
+- **`role="combobox"`**: Emitted on `<SelectTrigger>` alongside `aria-expanded` and `aria-haspopup="listbox"`.
+- **`role="listbox"` & `role="option"`**: Assigned to the content popup and individual items.
+- **Active descendant**: Communicates the currently focused option to screen readers using standard ARIA patterns.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use `Select` for bounded, predictable lists where users already know what options to expect.
+  </Do>
+  <Dont>
+    Never use `Select` for massive datasets (e.g. 500+ postal codes); use `Combobox` or `SearchableSelect` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide an informative placeholder on `<SelectValue placeholder="Select supplier..." />`.
+  </Do>
+  <Dont>
+    Never leave the trigger blank when no default value is selected.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Select',
+    'SelectTrigger',
+    'SelectValue',
+    'SelectContent',
+    'SelectItem',
+    'SelectGroup',
+    'SelectGroupLabel',
+    'SelectSeparator',
+  ]}
+  baseUi="select"
+/>
+
+## Related
+
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Filterable dropdown selection for longer lists.
+- [Combobox](/ui/docs/components/forms/combobox) — High-performance autocomplete input with virtualized options.
+- [RadioGroup](/ui/docs/components/forms/radio-group) — Mutually exclusive visible option cards.

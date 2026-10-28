@@ -1,69 +1,233 @@
 ---
 title: Rich Text Editor
-description: Formatted text for notes, descriptions and comments.
+description: Formatted text editor for notes, policy documents, and descriptions with Markdown shortcuts and Tiptap extensibility.
 icon: TextCursorInput
 status: Beta
-summary: Bold, headings, lists, quotes, links and undo, with Markdown shortcuts. Built on Tiptap, in a separate entry point.
+summary: Bold, headings, lists, quotes, links, and history shortcuts packaged in a modular entry point with form validation support.
 ---
 
 <ComponentPreview name="forms/rich-text-editor/basic" />
 
-The editor lives in a **separate entry point** (`@innostes/ui/editor`), so apps without rich text never load it.
-
-## Installation
-
-It is built on [Tiptap](https://tiptap.dev) 3 (MIT), which works with React 17, 18 and 19. Install its peer dependencies:
-
-```sh
-pnpm add @tiptap/react @tiptap/pm @tiptap/core @tiptap/starter-kit @tiptap/extensions
-```
+The editor lives in a **separate entry point** (`@innostes/ui/editor`) so applications that do not require rich text editing do not bundle Tiptap dependencies.
 
 ## Import
 
 ```tsx
-import { RichTextEditor } from '@innostes/ui/editor';
+import {
+  RichTextEditor,
+  type RichTextEditorProps,
+  type RichTextEditorLabels,
+  type RichTextTool,
+} from '@innostes/ui/editor';
 ```
 
-## Usage
+## When to use
+
+Use `RichTextEditor` when users need to author formatted prose beyond the limits of a plain text area:
+
+- Adding warehouse delivery instructions, packing specifications, or special handling notes on purchase orders.
+- Editing product catalogue marketing descriptions with bolding, lists, and external reference links.
+- Authoring internal standard operating procedures (SOPs) or supplier terms and conditions.
+
+When choosing between text inputs:
+- Use [Textarea](/ui/docs/components/forms/textarea) for plain, unformatted multiline input (e.g. shipping street address, feedback comments, or remarks).
+- Use `RichTextEditor` when users require formatted structure such as bulleted lists, headings, and inline links.
+
+## Examples
+
+### Installation
+
+`RichTextEditor` is built on [Tiptap](https://tiptap.dev) 3. Install its peer dependencies in your application:
+
+```bash
+pnpm add @tiptap/react @tiptap/pm @tiptap/core @tiptap/starter-kit @tiptap/extensions
+```
+
+### Basic editor
+
+Provide `value` and `onValueChange` for controlled operation. An empty editor normalises to an empty string `""`, making standard form validation checks straightforward.
 
 ```tsx
-<Field>
-  <FieldLabel id="notes-label">Delivery notes</FieldLabel>
-  <RichTextEditor
-    aria-labelledby="notes-label"
-    placeholder="Gate code, contact person, unloading hours…"
-    value={notes}
-    onValueChange={setNotes}
-  />
-</Field>
+'use client';
+
+import { useState } from 'react';
+import { Field, FieldLabel } from '@innostes/ui';
+import { RichTextEditor } from '@innostes/ui/editor';
+
+export function PurchaseOrderNotes() {
+  const [content, setContent] = useState('');
+
+  return (
+    <Field>
+      <FieldLabel id="po-notes">Delivery and unloading notes</FieldLabel>
+      <RichTextEditor
+        aria-labelledby="po-notes"
+        placeholder="Specify delivery bay, contact numbers, and unloading hours…"
+        value={content}
+        onValueChange={setContent}
+      />
+    </Field>
+  );
+}
 ```
 
-- The value is **HTML**. An empty editor gives `''`, so required checks are simple.
-- `name` submits the HTML in a hidden input, for plain `<form>` posts.
-- `toolbar` picks and orders the buttons (`'|'` adds a divider), or `false` hides it. Markdown shortcuts still work: `**bold**`, `_italic_`, `## heading`, `- list`, `1. list`, `> quote`.
-- `readOnly` shows saved content without the toolbar or border, e.g. on a detail page.
-- `extensions` adds Tiptap extensions (character count, mentions, tables). `onReady` gives you the Tiptap `editor` for advanced control.
-- `labels` translates the toolbar and link form.
+### Form validation and error state
 
-## Security
+Pass `invalid={true}` (or integrate inside `Field` with validation errors) to apply the semantic destructive border and ring tokens, setting `data-invalid` and `aria-invalid`.
 
-Content is parsed against the editor's schema, so pasted or loaded HTML loses everything it doesn't support: scripts, event handlers, styles, images and unknown tags. Links only accept safe protocols (`javascript:` is refused).
+```tsx
+'use client';
 
-The HTML still comes from users. Sanitize it on the server before storing it, and again (or render it through this editor in `readOnly` mode) wherever you display it.
+import { useState } from 'react';
+import { Field, FieldLabel, FieldError } from '@innostes/ui';
+import { RichTextEditor } from '@innostes/ui/editor';
 
-## Keyboard
+export function ValidatedEditor() {
+  const [html, setHtml] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const isInvalid = hasSubmitted && html.trim().length === 0;
 
-| Shortcut | Action |
-| --- | --- |
-| Ctrl/⌘ + B, I, U | Bold, italic, underline |
-| Ctrl/⌘ + Shift + S | Strikethrough |
-| Ctrl/⌘ + Shift + 7 / 8 | Numbered / bulleted list |
-| Ctrl/⌘ + Shift + B | Quote |
-| Ctrl/⌘ + E | Inline code |
-| Ctrl/⌘ + Z / Shift + Z | Undo / redo |
+  return (
+    <Field invalid={isInvalid}>
+      <FieldLabel id="scope-label">Work scope description</FieldLabel>
+      <RichTextEditor
+        aria-labelledby="scope-label"
+        value={html}
+        onValueChange={setHtml}
+        invalid={isInvalid}
+      />
+      {isInvalid && <FieldError>Work scope description is required.</FieldError>}
+    </Field>
+  );
+}
+```
 
-The toolbar is one tab stop; arrow keys move between its buttons. Each formatting button reports whether it's on with `aria-pressed`.
+### Custom toolbar configuration
 
-## API Reference
+Customise the visible toolbar actions using the `toolbar` prop, or pass `false` to hide the visual toolbar while preserving keyboard and Markdown shortcuts. Use `'|'` to insert visual dividers between action groups.
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+
+export function MinimalEditor() {
+  return (
+    <RichTextEditor
+      toolbar={['bold', 'italic', '|', 'bulletList', 'orderedList', '|', 'link']}
+      placeholder="Type notes or use Markdown shortcuts like **bold** or - list"
+      aria-label="Terms summary"
+    />
+  );
+}
+```
+
+### Read-only content display
+
+Pass `readOnly={true}` to display saved HTML content safely without the editing chrome or toolbar.
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+
+const savedHtml = '<p>Goods must be delivered to <strong>Bay 4</strong>.</p>';
+
+export function ReadOnlyNotice() {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <RichTextEditor
+        value={savedHtml}
+        readOnly
+        aria-label="Saved instructions"
+      />
+    </div>
+  );
+}
+```
+
+### Tiptap extensions and editor instance
+
+Pass custom extensions through the `extensions` prop, and access the raw Tiptap instance via `onReady` for advanced programmatic manipulation.
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+import CharacterCount from '@tiptap/extension-character-count';
+import type { Editor } from '@tiptap/react';
+
+export function ExtendedEditor() {
+  const handleReady = (editor: Editor) => {
+    // Programmatic access to Tiptap editor API
+    console.info('Editor initialized', editor.getHTML());
+  };
+
+  return (
+    <RichTextEditor
+      extensions={[CharacterCount.configure({ limit: 1000 })]}
+      onReady={handleReady}
+      aria-label="Character counted specification"
+    />
+  );
+}
+```
+
+## Accessibility
+
+`RichTextEditor` uses Base UI Toolbar primitives to provide an accessible formatting experience.
+
+### Keyboard navigation
+
+The toolbar forms a single tab stop with horizontal arrow navigation.
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus from the toolbar into the document editing canvas.' },
+    { key: 'Left Arrow / Right Arrow', action: 'Navigates between formatting buttons within the toolbar.' },
+    { key: 'Mod + B', action: 'Toggles bold on selected text (Cmd+B on macOS, Ctrl+B on Windows/Linux).' },
+    { key: 'Mod + I', action: 'Toggles italic on selected text.' },
+    { key: 'Mod + U', action: 'Toggles underline on selected text.' },
+    { key: 'Mod + Shift + S', action: 'Toggles strikethrough formatting.' },
+    { key: 'Mod + Shift + 8', action: 'Converts current paragraph to an unordered bulleted list.' },
+    { key: 'Mod + Shift + 7', action: 'Converts current paragraph to an ordered numbered list.' },
+    { key: 'Mod + Shift + B', action: 'Converts current block into a blockquote.' },
+    { key: 'Mod + E', action: 'Toggles inline code formatting.' },
+    { key: 'Mod + Z', action: 'Undoes the previous editing action.' },
+    { key: 'Mod + Shift + Z', action: 'Redoes the previously undone editing action.' },
+  ]}
+/>
+
+### Screen readers
+
+- Formatting buttons include descriptive `aria-label` attributes and stateful `aria-pressed` values indicating whether the active selection carries that style.
+- The link configuration popover traps focus until applied or dismissed with Escape.
+- Form validation errors are associated with the editor via `aria-describedby` when wrapped in a `Field`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always sanitize user-submitted HTML on your server before persisting it or re-rendering it elsewhere.',
+    code: `// Sanitize with DOMPurify or sanitize-html on server\nconst cleanHtml = sanitizeHtml(dirtyHtml, allowedTagsConfig);`,
+  }}
+  dont={{
+    description: 'Never render saved HTML directly into other views using dangerouslySetInnerHTML without sanitisation.',
+    code: `// INSECURE: Risk of cross-site scripting (XSS)\n<div dangerouslySetInnerHTML={{ __html: unverifiedPayload }} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an accessible label using FieldLabel with id or aria-label so screen reader users understand the field purpose.',
+    code: `<FieldLabel id="spec-label">Item specification</FieldLabel>\n<RichTextEditor aria-labelledby="spec-label" />`,
+  }}
+  dont={{
+    description: 'Do not rely entirely on the placeholder text as the only descriptor of the required input.',
+    code: `<RichTextEditor placeholder="Item specification" />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['RichTextEditor']} />
+
+## Related
+
+- [Textarea](/ui/docs/components/forms/textarea) — Plain text multiline input for unformatted remarks.
+- [Field](/ui/docs/components/forms/field) — Accessible field container with labels, descriptions, and error states.
+- [Button](/ui/docs/components/actions/button) — Interactive button component.

@@ -1,9 +1,9 @@
 ---
 title: Locale Selects
-description: Country, time zone, language, currency and date format pickers.
+description: Specialised country, time zone, language, currency, and date format pickers powered by the browser's native Intl API.
 icon: Globe
 status: Stable
-summary: Names come from the browser's Intl API in the user's language. No data files to bundle or update.
+summary: Pre-configured searchable select components returning standard ISO and IANA codes with zero third-party dataset bundle overhead.
 ---
 
 <ComponentPreview name="forms/locale-select/basic" />
@@ -17,32 +17,224 @@ import {
   LanguageSelect,
   CurrencySelect,
   DateFormatSelect,
+  type CountrySelectProps,
+  type TimezoneSelectProps,
+  type LanguageSelectProps,
+  type CurrencySelectProps,
+  type DateFormatSelectProps,
 } from '@innostes/ui';
 ```
 
-## Values
+## When to use
 
-| Component | Value | Example |
-| --- | --- | --- |
-| `CountrySelect` | ISO 3166-1 alpha-2 | `"IN"` |
-| `TimezoneSelect` | IANA time zone | `"Asia/Kolkata"` |
-| `LanguageSelect` | BCP 47 tag | `"en-IN"` |
-| `CurrencySelect` | ISO 4217 | `"INR"` |
-| `DateFormatSelect` | Pattern | `"DD/MM/YYYY"` |
+Use the locale select family when capturing regional and internationalisation configuration on settings pages, customer onboarding screens, or vendor registries:
 
-These are the standard codes your backend and `Intl` already use.
+- **CountrySelect**: Assigning registered business addresses, shipping destinations, or tax jurisdictions using ISO 3166-1 alpha-2 codes (e.g. `"IN"`, `"DE"`, `"US"`).
+- **TimezoneSelect**: Configuring tenant business hours, shift rosters, or automated invoice generation schedules using IANA time zone identifiers (e.g. `"Asia/Kolkata"`).
+- **LanguageSelect**: Setting user interface preferences or customer notification templates using BCP 47 language tags (e.g. `"en-IN"`, `"hi"`).
+- **CurrencySelect**: Defining multi-currency pricing, base accounting ledgers, or payment gateway currencies using ISO 4217 codes (e.g. `"INR"`, `"USD"`).
+- **DateFormatSelect**: Letting users configure their preferred display format for calendar and invoice dates (e.g. `"DD/MM/YYYY"`).
 
-## Options
+When choosing between locale components and general selects:
+- Use `LocaleSelect` components when selecting from standard international registries—names automatically localise to the user's browser runtime through `Intl.DisplayNames` without downloading megabytes of static JSON files.
+- Use [SearchableSelect](/ui/docs/components/forms/searchable-select) or [Combobox](/ui/docs/components/forms/combobox) when presenting domain-specific datasets (such as warehouse bins, internal cost centres, or custom product groups).
 
-- `locale` sets the language of the names: `<CountrySelect locale="de" />` shows "Deutschland".
-- `priority` lists some values first, e.g. the countries you operate in: `priority={['IN', 'US']}`.
-- `include` limits the list, e.g. to the currencies you support.
-- `TimezoneSelect` is sorted by UTC offset and labelled `(GMT+05:30) Asia/Kolkata`; search matches the
-  city and the offset. Renamed zones (Calcutta → Kolkata, Kiev → Kyiv) show their current name.
-- `LanguageSelect` shows each language's own name too ("German · Deutsch"); pass `languages` for your list.
-- `CountrySelect` uses emoji flags. Windows shows these as two letters; pass `renderFlag` to use an
-  image or icon library instead.
+## Examples
 
-## API Reference
+### Country selection
 
-<ApiTable components={['CountrySelect', 'TimezoneSelect', 'LanguageSelect', 'CurrencySelect', 'DateFormatSelect']} baseUi="combobox" />
+`CountrySelect` provides searchable country names accompanied by flag indicators. You can specify `priority` to pin operational jurisdictions to the top of the list.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { CountrySelect, Label } from '@innostes/ui';
+
+export function CompanyRegistrationCountry() {
+  const [country, setCountry] = useState('IN');
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="registered-country">Country of incorporation</Label>
+      <CountrySelect
+        id="registered-country"
+        name="countryCode"
+        value={country}
+        onValueChange={setCountry}
+        priority={['IN', 'AE', 'SG', 'GB', 'US']}
+      />
+    </div>
+  );
+}
+```
+
+### Time zone selection
+
+`TimezoneSelect` lists IANA time zone names sorted by UTC offset, formatting each item with its current offset (e.g., `(GMT+05:30) Asia/Kolkata`). Search matches both city names and GMT offset numerals.
+
+```tsx
+import { TimezoneSelect, Label } from '@innostes/ui';
+
+export function WarehouseTimezone() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="warehouse-tz">Operating time zone</Label>
+      <TimezoneSelect
+        id="warehouse-tz"
+        name="timeZone"
+        defaultValue="Asia/Kolkata"
+      />
+    </div>
+  );
+}
+```
+
+### Language selection
+
+`LanguageSelect` displays language names in both the active user's language and the native autonym (e.g. "German · Deutsch").
+
+```tsx
+import { LanguageSelect, Label } from '@innostes/ui';
+
+export function DocumentLanguage() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="doc-lang">Invoice template language</Label>
+      <LanguageSelect
+        id="doc-lang"
+        name="language"
+        defaultValue="en-IN"
+        priority={['en-IN', 'hi', 'ta', 'te']}
+      />
+    </div>
+  );
+}
+```
+
+### Currency selection
+
+`CurrencySelect` resolves ISO 4217 currency names and symbols through `Intl.DisplayNames`.
+
+```tsx
+import { CurrencySelect, Label } from '@innostes/ui';
+
+export function LedgerCurrency() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="ledger-curr">Functional currency</Label>
+      <CurrencySelect
+        id="ledger-curr"
+        name="currency"
+        defaultValue="INR"
+        priority={['INR', 'USD', 'EUR', 'GBP', 'AED']}
+      />
+    </div>
+  );
+}
+```
+
+### Date format selection
+
+`DateFormatSelect` presents common regional date patterns (e.g. `DD/MM/YYYY`, `MM/DD/YYYY`, `YYYY-MM-DD`).
+
+```tsx
+import { DateFormatSelect, Label } from '@innostes/ui';
+
+export function DisplayDateFormat() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="date-fmt">Preferred date format</Label>
+      <DateFormatSelect
+        id="date-fmt"
+        name="dateFormat"
+        defaultValue="DD/MM/YYYY"
+      />
+    </div>
+  );
+}
+```
+
+### Prioritised options and inclusion filters
+
+Use `include` to restrict options to an approved whitelist (e.g. only countries where your logistics network operates), and `priority` to pin preferred items to the top of the dropdown menu:
+
+```tsx
+import { CountrySelect } from '@innostes/ui';
+
+export function ShippingJurisdictions() {
+  return (
+    <CountrySelect
+      include={['IN', 'AE', 'SG', 'MY']}
+      priority={['IN']}
+      placeholder="Select shipping destination"
+      aria-label="Shipping country"
+    />
+  );
+}
+```
+
+## Accessibility
+
+All locale pickers are built on top of [SearchableSelect](/ui/docs/components/forms/searchable-select) and Base UI Combobox/Select primitives.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Down Arrow / Up Arrow', action: 'Navigates through the list of countries, currencies, time zones, or languages.' },
+    { key: 'Enter', action: 'Selects the currently focused locale option and closes the popover.' },
+    { key: 'Escape', action: 'Closes the popup menu and returns focus to the search input.' },
+    { key: 'Character keys', action: 'Filters options dynamically in real time.' },
+  ]}
+/>
+
+### Screen readers
+
+- Triggers announce their expanded/collapsed state via `aria-expanded`.
+- Search inputs carry `role="combobox"` with `aria-autocomplete="list"`.
+- Options are marked with `role="option"` and `aria-selected` indicates current selection.
+- List filtering announces matched option counts to assistive technology.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use the priority prop to place the home country and major trading partners at the top of long lists.',
+    code: `<CountrySelect priority={['IN', 'AE', 'US']} />`,
+  }}
+  dont={{
+    description: 'Do not force users to scroll through 200+ alphabetically ordered countries to select their domestic region.',
+    code: `<CountrySelect /> // Without priority in a localized Indian ERP context`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Store standard ISO/IANA codes in your database (e.g., "Asia/Kolkata", "INR", "IN").',
+    code: `const payload = { currency: 'INR', country: 'IN' };`,
+  }}
+  dont={{
+    description: 'Do not store localized display names like "Indian Rupee" or "India" in transaction tables.',
+    code: `// Flaky and difficult to query across localized tenants\nconst payload = { currency: 'Indian Rupee' };`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'CountrySelect',
+    'TimezoneSelect',
+    'LanguageSelect',
+    'CurrencySelect',
+    'DateFormatSelect',
+  ]}
+  baseUi="combobox"
+/>
+
+## Related
+
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Generic searchable single-select component.
+- [Select](/ui/docs/components/forms/select) — Standard select dropdown for concise lists.
+- [Combobox](/ui/docs/components/forms/combobox) — Typeahead combobox with autocomplete.

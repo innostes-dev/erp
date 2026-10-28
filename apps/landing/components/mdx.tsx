@@ -26,6 +26,10 @@ import { ComponentPreview } from './docs/component-preview';
 import { ApiTable } from './docs/api-table';
 import { PageTabs } from './docs/page-tabs';
 import { ButtonPlayground } from './docs/button-playground';
+import { InputPlayground } from './docs/input-playground';
+import { CheckboxPlayground } from './docs/checkbox-playground';
+import { SwitchPlayground } from './docs/switch-playground';
+import { SelectPlayground } from './docs/select-playground';
 import { PropsPlayground } from './docs/props-playground';
 import { KeyboardTable } from './docs/keyboard-table';
 import { DoDont, Do, Dont } from './docs/do-dont';
@@ -68,6 +72,10 @@ export function getMDXComponents(components?: MDXComponents) {
     UsageGrid,
     PageTabs,
     ButtonPlayground,
+    InputPlayground,
+    CheckboxPlayground,
+    SwitchPlayground,
+    SelectPlayground,
     PropsPlayground,
     KeyboardTable,
     DoDont,

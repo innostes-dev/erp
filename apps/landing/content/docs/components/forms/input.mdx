@@ -1,49 +1,119 @@
 ---
 title: Input
-description: A single-line text field.
+description: Single-line text input fields supporting sizes, search and password variants, and validation states.
 icon: TextCursorInput
 status: Stable
-summary: Three sizes, invalid and disabled states, file inputs, and automatic Field wiring.
+summary: Accessible single-line input field supporting multiple types, clear buttons, password visibility toggles, and automatic Field wiring.
+install: pnpm add @innostes/ui
 ---
+
+import { InputPlayground } from '@/components/docs/input-playground';
+
+`Input` is the primary single-line text entry primitive in `@innostes/ui`. Built on Base UI's input primitive, it automatically coordinates validation states (`aria-invalid`), disabled styling, focus rings, and font metrics across three standardized enterprise size scales.
 
 <ComponentPreview name="forms/input/basic" />
 
 ## Import
 
 ```tsx
-import { Input } from '@innostes/ui';
+import { Input, SearchInput, PasswordInput, inputVariants } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Use it inside a [Field](/ui/docs/components/forms/field) so it gets a label and validation:
+- **Use Input** for brief, single-line textual data such as names, email addresses, phone numbers, codes, or URL slugs.
+- **Use Textarea** when users need to enter multiline sentences, remarks, or notes.
+- **Use NumberField** when capturing numeric data that requires stepping, bounds checking, or currency formatting.
+- **Use InputGroup** when prepending or appending icons, currency symbols, or action buttons directly to the field track.
+
+## Examples
+
+### Interactive playground
+
+Customize sizes, HTML types, and validation states in real time:
+
+<InputPlayground />
+
+### Sizes
+
+Inputs support three standardized heights aligning with buttons and selects:
 
 ```tsx
-<Field>
-  <FieldLabel>Email</FieldLabel>
-  <Input type="email" name="email" required />
-  <FieldError />
-</Field>
+<Input size="sm" placeholder="Compact input (32px)" />
+<Input size="md" placeholder="Default input (40px)" />
+<Input size="lg" placeholder="Comfortable input (48px)" />
 ```
 
-`size` changes the height (`sm` 32px, `md` 40px, `lg` 48px). The native `size` attribute is
-available as `htmlSize`.
+### Search input
 
-## Styling other controls like an input
-
-`inputVariants()` returns the input classes, for building custom controls that match:
+`SearchInput` provides an integrated search glyph, clear button, and accessible keyboard shortcut styling:
 
 ```tsx
-import { inputVariants } from '@innostes/ui';
+<SearchInput
+  placeholder="Search purchase orders or vendor codes..."
+  onClear={() => console.log('Search cleared')}
+/>
+```
 
-<div className={inputVariants({ size: 'sm' })}>…</div>
+### Password input
+
+`PasswordInput` includes an accessible password visibility toggle button with eye icons:
+
+```tsx
+<PasswordInput placeholder="Enter ERP account password" />
+```
+
+### File upload input
+
+Inputs with `type="file"` inherit proper custom file-picker button styling:
+
+```tsx
+<Input type="file" aria-label="Upload supplier invoice PDF" />
 ```
 
 ## Accessibility
 
-- Always give the input a label: `FieldLabel`, a `<label>`, or `aria-label`.
-- Invalid styles come from `aria-invalid` (set automatically inside `Field`).
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus into the text field or moves forward to the next form element.' },
+    { key: 'Shift + Tab', action: 'Moves focus back to the preceding form control.' },
+    { key: 'Escape', action: 'Clears search text when focused inside a SearchInput.' },
+  ]}
+/>
 
-<ApiTable components={['Input']} baseUi="input" />
+### Screen readers and ARIA
+
+- **Accessible naming**: An input must always be associated with a label using `<FieldLabel>`, a native `<label htmlFor="...">`, or an explicit `aria-label`.
+- **Validation state**: When wrapped inside `<Field>`, `aria-invalid="true"` is automatically populated upon validation failure, triggering red border rings and auditory error feedback.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use placeholder text only for formatting examples (e.g. `PO-2026-0001`), never as a replacement for a visible label.
+  </Do>
+  <Dont>
+    Never rely on placeholder text to convey instructions, because placeholders disappear once the user begins typing.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Set appropriate `type`, `inputMode`, and `autoComplete` attributes (such as `type="email"` or `inputMode="numeric"`).
+  </Do>
+  <Dont>
+    Never disable autocomplete on standard login or address fields unless required by strict security policies.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable components={['Input', 'SearchInput', 'PasswordInput']} baseUi="input" />
+
+## Related
+
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form container managing labels, descriptions, and errors.
+- [InputGroup](/ui/docs/components/forms/input-group) — Prepend and append icons or currency symbols to input fields.
+- [NumberField](/ui/docs/components/forms/number-field) — Specialized numerical input with step increment buttons.

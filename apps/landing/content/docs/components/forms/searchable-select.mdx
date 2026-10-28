@@ -1,10 +1,13 @@
 ---
 title: Searchable Select
-description: A select you can type into to filter.
+description: A compact dropdown selector with integrated client-side typing search and keyword filtering.
 icon: TextSearch
 status: Stable
-summary: For long lists of simple options. Matches labels and keywords, accent-insensitive.
+summary: Filterable single-select dropdown matching labels and keywords with accent-insensitive search.
+install: pnpm add @innostes/ui
 ---
+
+`SearchableSelect` wraps an accessible listbox with a searchable text filter. It is designed for medium-length client-side option sets (15 to 100+ items) such as warehouse branches, account owners, country destinations, or currency codes where users benefit from typing to instantly narrow the list.
 
 <ComponentPreview name="forms/searchable-select/basic" />
 
@@ -14,27 +17,107 @@ summary: For long lists of simple options. Matches labels and keywords, accent-i
 import { SearchableSelect, type SearchableSelectOption } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use SearchableSelect** when selecting one option from a medium-sized list (15 to 100+ items) that can be filtered locally in the browser.
+- **Use Combobox** when the dataset is very large (hundreds or thousands of records), requires asynchronous server pagination, or allows freeform user-created tags.
+- **Use Select** when the list of options is small (under 15 items) and instant type-ahead suffices.
+- **Use RadioGroup** when comparing 2 to 5 options side-by-side.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **SearchableSelect** | Single | 15 to 100+ | Yes | Moderate lists requiring fast dropdown filter search (e.g. warehouse depot) |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[Select](/ui/docs/components/forms/select)** | Single or Multi | 5 to 15 | No (type-ahead) | Compact predefined lists (e.g. status, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Basic usage
+
+Provide an array of `SearchableSelectOption` objects with `value`, `label`, and optional `keywords`:
 
 ```tsx
-const options: SearchableSelectOption[] = warehouses.map((w) => ({
-  value: w.id,
-  label: w.name,
-  keywords: [w.city, w.code],   // also matched by the search
-  trailing: w.city,             // shown at the end of the option
-}));
+const options: SearchableSelectOption[] = [
+  { value: 'blr-hub', label: 'Bengaluru Central Hub', keywords: ['Karnataka', 'BLR'], trailing: 'Karnataka' },
+  { value: 'bom-jnpt', label: 'Mumbai JNPT Logistics', keywords: ['Maharashtra', 'BOM'], trailing: 'Maharashtra' },
+  { value: 'del-depot', label: 'Delhi NCR Freight Terminal', keywords: ['Delhi', 'DEL'], trailing: 'Delhi' },
+];
 
-<SearchableSelect aria-label="Warehouse" options={options} value={id} onValueChange={setId} name="warehouseId" />
+<SearchableSelect
+  options={options}
+  value={selectedDepot}
+  onValueChange={setSelectedDepot}
+  placeholder="Search depot by name or state..."
+  aria-label="Destination warehouse depot"
+/>
 ```
 
-- `value` is the option's `value` string (or `null`), so it fits straight into forms and APIs.
-- Search ignores case and accents ("sao" finds "São Paulo") and matches `keywords` too.
-- `leading` shows an element before the label (an avatar, a flag), also inside the input once selected.
+### Leading icons and avatars
 
-Use [Select](/ui/docs/components/forms/select) for short lists (under ~10 options), and
-[Combobox](/ui/docs/components/forms/combobox) when you need custom item rendering, groups or
-server-side search.
+Options support custom `leading` React nodes (such as icons or avatars) that render inside both the dropdown menu and the collapsed trigger:
 
-## API Reference
+```tsx
+const operatorOptions = operators.map((op) => ({
+  value: op.id,
+  label: op.name,
+  trailing: op.role,
+  leading: (
+    <Avatar size="xs">
+      <AvatarFallback>{op.initials}</AvatarFallback>
+    </Avatar>
+  ),
+}));
+
+<SearchableSelect options={operatorOptions} aria-label="Assign procurement officer" />
+```
+
+## Accessibility
+
+### Keyboard navigation
+
+<KeyboardTable
+  rows={[
+    { key: 'Enter / Space', action: 'Opens the filter popup when focused on the trigger; selects the highlighted option when open.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Cycles through filtered options sequentially.' },
+    { key: 'Escape', action: 'Closes the search dropdown and restores focus to the trigger button.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **ARIA Combobox pattern**: Uses `role="combobox"` with `aria-expanded` and `aria-controls`.
+- **Search filtering announcements**: Screen readers announce the count of matching options as the search string changes.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Include common abbreviations and alternate names in the `keywords` array (e.g. `keywords: ['KA', 'Bangalore']`).
+  </Do>
+  <Dont>
+    Never use `SearchableSelect` for massive collections of 1,000+ items that should be paginated on the server; use `Combobox` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide an informative placeholder indicating what fields are searchable (e.g. "Search by depot code or city...").
+  </Do>
+  <Dont>
+    Never omit the accessible label when placing `SearchableSelect` inside custom toolbars without a `<FieldLabel>`.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['SearchableSelect']} baseUi="combobox" />
+
+## Related
+
+- [Select](/ui/docs/components/forms/select) — Standard dropdown menu for short option sets.
+- [Combobox](/ui/docs/components/forms/combobox) — High-performance searchable autocomplete for massive datasets.
+- [LocaleSelect](/ui/docs/components/forms/locale-select) — Specialized country, currency, and timezone selectors.

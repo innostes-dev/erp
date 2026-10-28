@@ -1,10 +1,15 @@
 ---
 title: Checkbox
-description: A box that is checked, unchecked or indeterminate.
+description: Binary choice and multi-item selection controls supporting checked, unchecked, and indeterminate states.
 icon: SquareCheck
 status: Stable
-summary: Single checkboxes and groups with a "select all" parent.
+summary: Accessible checkbox primitive supporting single agreement boxes, multi-select tables, and indeterminate "select all" parent groups.
+install: pnpm add @innostes/ui
 ---
+
+import { CheckboxPlayground } from '@/components/docs/checkbox-playground';
+
+`Checkbox` allows users to select one or multiple items from a list, toggle optional settings, or confirm legal agreements. Built on Base UI's checkbox primitive, it supports three visual and semantic states: checked, unchecked, and indeterminate (mixed).
 
 <ComponentPreview name="forms/checkbox/basic" />
 
@@ -14,32 +19,112 @@ summary: Single checkboxes and groups with a "select all" parent.
 import { Checkbox, CheckboxGroup } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Checkbox** when users can select multiple options independently from a list, or toggle an isolated agreement (e.g. "I accept the delivery terms").
+- **Use Switch** for binary options that take effect immediately without requiring form submission.
+- **Use RadioGroup** when users must choose exactly one option from a mutually exclusive set.
+
+## Examples
+
+### Interactive playground
+
+Experiment with checked, indeterminate, and disabled states:
+
+<CheckboxPlayground />
+
+### Single checkbox in a field
+
+Wrap a checkbox inside `<Field>` with an accessible label:
 
 ```tsx
-<label className="flex items-center gap-2">
-  <Checkbox name="terms" required /> I accept the terms
-</label>
-
-// Controlled
-<Checkbox checked={value} onCheckedChange={setValue} aria-label="Select row" />
-
-// Indeterminate (e.g. "some rows selected")
-<Checkbox indeterminate aria-label="Select all" />
+<Field>
+  <label className="flex items-center gap-2.5 text-sm cursor-pointer">
+    <Checkbox name="expressDelivery" />
+    <span>Enable express carrier dispatch (Karnataka Hub)</span>
+  </label>
+  <FieldDescription>Guarantees delivery within 24 hours.</FieldDescription>
+</Field>
 ```
 
-## Groups
+### Indeterminate select all group
 
-`CheckboxGroup` manages several checkboxes as one array value. Pass `allValues` and add a
-`parent` checkbox to get a working "select all" with the indeterminate state.
+`CheckboxGroup` coordinates multiple child checkboxes and exposes a parent "select all" trigger that enters an indeterminate state when a partial subset of rows is selected:
 
 <ComponentPreview name="forms/checkbox/group" />
 
+```tsx
+<CheckboxGroup
+  value={selectedOrders}
+  onValueChange={setSelectedOrders}
+  allValues={['PO-101', 'PO-102', 'PO-103']}
+>
+  {({ isAllSelected, isSomeSelected, selectAll, unselectAll }) => (
+    <div className="space-y-3">
+      <label className="flex items-center gap-2 font-medium">
+        <Checkbox
+          checked={isAllSelected}
+          indeterminate={isSomeSelected && !isAllSelected}
+          onCheckedChange={(checked) => (checked ? selectAll() : unselectAll())}
+        />
+        <span>Select all purchase orders</span>
+      </label>
+      <div className="ms-6 space-y-2">
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox value="PO-101" /> PO-101 (₹45,000)
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox value="PO-102" /> PO-102 (₹82,400)
+        </label>
+      </div>
+    </div>
+  )}
+</CheckboxGroup>
+```
+
 ## Accessibility
 
-- Announced as a checkbox with `aria-checked` (`mixed` when indeterminate).
-- Space toggles it. Label every checkbox, by wrapping it in a `<label>` or with `aria-label`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Space', action: 'Toggles the checkbox between checked and unchecked.' },
+    { key: 'Tab', action: 'Moves focus to the checkbox or moves to the next focusable element.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="checkbox"`**: Emits standard checkbox semantics.
+- **`aria-checked`**: Sets `aria-checked="true"`, `false`, or `"mixed"` when in the indeterminate state.
+- **Label coupling**: Wrapping the checkbox inside `<label>` or associating via `aria-label` ensures screen readers announce the label clearly upon focus.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use positive phrasing for checkbox labels (e.g. "Send shipment status notifications via SMS").
+  </Do>
+  <Dont>
+    Never use negative phrasing such as "Do not notify me via SMS" which creates double-negative confusion.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use the indeterminate state exclusively on parent checkboxes to indicate partial selection of a child set.
+  </Do>
+  <Dont>
+    Never use indeterminate as an independent "maybe" or "unknown" choice for standalone user input.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Checkbox', 'CheckboxGroup']} baseUi="checkbox" />
+
+## Related
+
+- [Switch](/ui/docs/components/forms/switch) — Instant-acting binary switch toggle.
+- [RadioGroup](/ui/docs/components/forms/radio-group) — Mutually exclusive option selection.
+- [DataTable](/ui/docs/components/data-display/data-table) — High-density data grid with built-in checkbox row selection.

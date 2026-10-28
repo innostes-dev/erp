@@ -1,10 +1,13 @@
 ---
 title: Combobox
-description: A searchable select.
+description: High-performance autocomplete search input with floating listbox results and custom item rendering.
 icon: Search
 status: Beta
-summary: Type to filter, arrow keys to move, Enter to pick. For long lists like countries or customers.
+summary: Accessible combobox input for filtering and selecting values from extensive or remote dataset collections.
+install: pnpm add @innostes/ui
 ---
+
+`Combobox` combines a text input with a floating listbox popup. Built on Base UI's combobox primitive, it allows operators to type to filter large datasets, traverse options using arrow keys, and select records with keyboard or pointer input. It is designed for searching customer records, product SKUs, and general ledgers across Northwind Traders systems.
 
 <ComponentPreview name="forms/combobox/basic" />
 
@@ -24,20 +27,52 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass all options as `items`. `ComboboxList` takes a function and renders it for each item that
-matches the filter.
+- **Use Combobox** when users need to filter through extensive datasets (50 to 10,000+ items) or query remote server endpoints asynchronously.
+- **Use SearchableSelect** for moderate client-side lists (15 to 100 items) where a standard select trigger is preferred.
+- **Use Select** when the list of options is short (under 15 items) and typing to filter is unnecessary.
+- **Use TagInput** when users select and manage multiple tags or keywords concurrently.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **Combobox** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Moderate lists requiring fast dropdown filter search |
+| **[Select](/ui/docs/components/forms/select)** | Single or Multi | 5 to 15 | No (type-ahead) | Compact predefined lists (e.g. status, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Object collections with custom labels
+
+When working with complex domain objects, supply `itemToStringLabel` to tell the combobox which property represents the human-readable string:
 
 ```tsx
-<Combobox items={customers} itemToStringLabel={(c) => c.name}>
-  <ComboboxInput placeholder="Search customers…" aria-label="Customer" />
+interface Vendor {
+  id: string;
+  name: string;
+  gstin: string;
+}
+
+const vendors: Vendor[] = [
+  { id: 'v1', name: 'Hindustan Industrial Spares', gstin: '29AAAAA0000A1Z5' },
+  { id: 'v2', name: 'Bharat Electricals Ltd', gstin: '29BBBBB1111B2Z6' },
+];
+
+<Combobox items={vendors} itemToStringLabel={(v) => v.name}>
+  <ComboboxInput placeholder="Search supplier organisation..." />
   <ComboboxContent>
-    <ComboboxEmpty>No customer found.</ComboboxEmpty>
+    <ComboboxEmpty>No vendor found.</ComboboxEmpty>
     <ComboboxList>
-      {(customer: Customer) => (
-        <ComboboxItem key={customer.id} value={customer}>
-          {customer.name}
+      {(vendor: Vendor) => (
+        <ComboboxItem key={vendor.id} value={vendor}>
+          <div>
+            <div className="font-medium">{vendor.name}</div>
+            <div className="text-xs text-muted-foreground font-mono">{vendor.gstin}</div>
+          </div>
         </ComboboxItem>
       )}
     </ComboboxList>
@@ -45,15 +80,88 @@ matches the filter.
 </Combobox>
 ```
 
-- For objects, pass `itemToStringLabel` (shown text) and, if needed, `isItemEqualToValue`.
-- For server-side search, control the input with `onInputValueChange` and pass the results as `items`.
-- `showClear` and `showTrigger` on `ComboboxInput` toggle the clear and open buttons.
+### Server-side search filtering
+
+Control input queries using `onInputValueChange` to query remote backend endpoints with debounced network calls:
+
+```tsx
+const [query, setQuery] = useState('');
+const [items, setItems] = useState<Customer[]>([]);
+
+<Combobox
+  items={items}
+  onInputValueChange={(val) => {
+    setQuery(val);
+    fetchCustomersDebounced(val).then(setItems);
+  }}
+>
+  <ComboboxInput placeholder="Type customer name or GSTIN..." />
+  <ComboboxContent>
+    <ComboboxEmpty>No records matching search query.</ComboboxEmpty>
+    <ComboboxList>
+      {(item) => <ComboboxItem key={item.id} value={item}>{item.name}</ComboboxItem>}
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
 
 ## Accessibility
 
-- Follows the WAI-ARIA combobox pattern: the input owns a listbox, and the highlighted option is
-  announced as you move.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowDown', action: 'Opens the listbox if closed, or highlights the subsequent option.' },
+    { key: 'ArrowUp', action: 'Highlights the preceding option, or closes the popup when at the top.' },
+    { key: 'Enter', action: 'Selects the currently highlighted option and closes the listbox.' },
+    { key: 'Escape', action: 'Dismisses the listbox popup without changing the selected value.' },
+  ]}
+/>
 
-<ApiTable components={['ComboboxInput', 'ComboboxContent', 'ComboboxList', 'ComboboxItem', 'ComboboxEmpty', 'ComboboxGroup', 'ComboboxGroupLabel', 'ComboboxSeparator']} baseUi="combobox" />
+### Screen readers and ARIA
+
+- **WAI-ARIA Combobox pattern**: The `<ComboboxInput>` acts as `role="combobox"` linked to the floating `<ComboboxContent>` which acts as `role="listbox"`.
+- **`aria-activedescendant`**: Updated dynamically as keyboard arrows cycle highlighted items so screen readers announce each option without shifting native DOM focus from the text input.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an informative `<ComboboxEmpty>` state informing the user when no search results match.
+  </Do>
+  <Dont>
+    Never show an empty, blank floating container when a search yields zero matches.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use debounced asynchronous fetching when searching massive datasets over the network.
+  </Do>
+  <Dont>
+    Never trigger an unthrottled HTTP request on every individual keystroke.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Combobox',
+    'ComboboxInput',
+    'ComboboxContent',
+    'ComboboxList',
+    'ComboboxItem',
+    'ComboboxEmpty',
+    'ComboboxGroup',
+    'ComboboxGroupLabel',
+    'ComboboxSeparator',
+  ]}
+  baseUi="combobox"
+/>
+
+## Related
+
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Filterable dropdown menu for medium option lists.
+- [Select](/ui/docs/components/forms/select) — Standard dropdown select for short, static option lists.
+- [TagInput](/ui/docs/components/forms/tag-input) — Multi-tag entry and keyword selection.

@@ -228,7 +228,9 @@ Chart components deliver accessible, responsive data visualisations across North
 
 ## Button Group (https://innostes.com/ui/docs/components/actions/button-group)
 
-Merges borders and corners of adjacent buttons, horizontally or vertically.
+Segmented container joining adjacent buttons horizontally or vertically for pagers and split actions.
+
+ButtonGroup organizes a collection of related button triggers into a cohesive segmented bar, collapsing adjacent borders and rounding only the outer corners. It is commonly used for date pagination controls, multi-part save buttons, and table view switchers.
 
 <ComponentPreview name="actions/button-group/basic" />
 
@@ -238,70 +240,127 @@ Merges borders and corners of adjacent buttons, horizontally or vertically.
 import { Button, ButtonGroup } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Use a group for actions that belong together: a pager, a split button, or a set of views.
-For buttons that toggle state, use [Toggle Group](/ui/docs/components/actions/toggle-group) instead.
+- **Use ButtonGroup** when grouping related triggers such as pagination controls (Previous / Today / Next) or split action menus (Save / More options).
+- **Use ToggleGroup** when buttons toggle pressed states or select mutually exclusive options.
+- **Use FormActions** when laying out separate form submission buttons (e.g. Save and Cancel) across a footer.
+
+## Examples
+
+### Basic usage
+
+Wrap adjacent buttons with `ButtonGroup` and assign an accessible label:
 
 ```tsx
-<ButtonGroup aria-label="Pager">
-  <Button variant="outline">Previous</Button>
-  <Button variant="outline">Next</Button>
+<ButtonGroup aria-label="Order pagination">
+  <Button variant="outline" size="sm">Previous</Button>
+  <Button variant="outline" size="sm">Next</Button>
+</ButtonGroup>
+```
+
+### Split button
+
+Combine a primary action trigger with a contextual dropdown menu button:
+
+```tsx
+<ButtonGroup aria-label="Invoice settlement actions">
+  <Button variant="primary">Approve and remit</Button>
+  <Button
+    variant="primary"
+    iconOnly
+    aria-label="Additional remittance options"
+    className="border-s border-s-primary-foreground/20"
+  >
+    <ChevronDown className="size-4" />
+  </Button>
+</ButtonGroup>
+```
+
+### Orientation
+
+Arrange buttons vertically when building sidebar toolbars:
+
+```tsx
+<ButtonGroup orientation="vertical" aria-label="Document view tools">
+  <Button variant="outline" size="sm">Zoom in</Button>
+  <Button variant="outline" size="sm">Zoom out</Button>
+  <Button variant="outline" size="sm">Reset</Button>
 </ButtonGroup>
 ```
 
 ## Accessibility
 
-- Renders `role="group"`. Give it an `aria-label` that describes the set.
-- Focus outlines stay on top of neighbouring buttons.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus sequentially between the individual buttons inside the group.' },
+    { key: 'Enter / Space', action: 'Activates the currently focused button.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="group"`**: Automatically applied to the wrapper container.
+- **`aria-label` requirement**: You **must** provide `aria-label` or `aria-labelledby` describing the collection of buttons (e.g. `aria-label="Pagination controls"`).
+- **Z-index focus stacking**: Focus rings are rendered with elevated z-index so the active button outline is never clipped by neighbouring buttons.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always provide an `aria-label` on `ButtonGroup` explaining the shared purpose of the grouped actions.
+  </Do>
+  <Dont>
+    Never use `ButtonGroup` for mutually exclusive selection; use `ToggleGroup` or `RadioGroup` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Maintain consistent button variants and sizes inside a single group container.
+  </Do>
+  <Dont>
+    Never mix conflicting heights (`size="sm"` with `size="lg"`) within the same button group.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['ButtonGroup']} />
+
+## Related
+
+- [Button](/ui/docs/components/actions/button) — Individual interactive action trigger.
+- [ToggleGroup](/ui/docs/components/actions/toggle-group) — Connected group of toggle buttons for selection states.
+- [Pagination](/ui/docs/components/navigation/pagination) — High-level navigation control for multi-page data sets.
 
 ---
 
 ## Button (https://innostes.com/ui/docs/components/actions/button)
 
-A flexible button component with multiple variants, sizes, and states.
+Foundation action trigger supporting multiple semantic variants, sizes, loading spinners, and render polymorphism.
 
-<PageTabs
-  items={[
-    { label: 'Overview', href: 'preview' },
-    { label: 'Examples', href: 'examples' },
-    { label: 'API', href: 'api-reference' },
-    { label: 'Customization', href: 'theming' },
-    { label: 'Accessibility', href: 'accessibility' },
-  ]}
-/>
+import { ButtonPlayground } from '@/components/docs/button-playground';
+import { VariantCards, SizesDemo, IconsDemo, LoadingDemo, DisabledDemo, AsLinkDemo } from '@/components/docs/button-demos';
 
-## Preview
+Buttons allow users to execute single-tap operations, submit forms, confirm transactions, and trigger dialogues. Built on Base UI's button primitive, `@innostes/ui` buttons guarantee visible keyboard focus rings, proper disabled state semantics, and render polymorphism without invalid DOM nesting.
 
-Different variants, sizes and states of the button component.
+<ComponentPreview name="actions/button/basic" />
 
-<ButtonShowcase />
+## Import
 
-## Usage
-
-Import the Button component and use it in your application.
-
-<UsageGrid>
-
-```tsx title="example.tsx"
-import { Button } from '@innostes/ui';
-
-export function Example() {
-  return (
-    <Button variant="primary" size="md">
-      Click me
-    </Button>
-  );
-}
+```tsx
+import { Button, buttonVariants } from '@innostes/ui';
 ```
 
-<ButtonPlayground />
+## When to use
 
-</UsageGrid>
+- **Use Button** for operational actions such as saving records, approving purchase orders, opening modals, or deleting items.
+- **Use Link or Button with `render`** when navigating to a new URL or page route.
+- **Use ButtonGroup** when grouping closely related actions into a single segmented bar (e.g. Save, Save and submit).
+- **Use Toggle or ToggleGroup** when switching a two-state option on or off, or selecting from a mutual exclusion set.
 
 ## Anatomy
 
@@ -314,186 +373,112 @@ export function Example() {
   ]}
 />
 
-## Variants
+## Examples
 
-Use `variant` to change the visual style of the button.
+### Interactive playground
+
+Experiment with button props, variants, and interactive states:
+
+<ButtonPlayground />
+
+### Variants
+
+Use `variant` to express visual hierarchy:
 
 <VariantCards />
 
 ```tsx
-<Button variant="primary">Primary</Button>
-<Button variant="secondary">Secondary</Button>
-<Button variant="outline">Outline</Button>
-<Button variant="ghost">Ghost</Button>
-<Button variant="destructive">Destructive</Button>
-<Button variant="link">Link</Button>
+<Button variant="primary">Approve PO</Button>
+<Button variant="secondary">Filter view</Button>
+<Button variant="outline">Export CSV</Button>
+<Button variant="ghost">Cancel</Button>
+<Button variant="destructive">Void invoice</Button>
+<Button variant="link">Terms of supply</Button>
 ```
 
-## Sizes
+### Sizes
 
-Use `size` to change the height and padding: `sm` (32px), `md` (40px, default) or `lg` (48px).
+Choose from three standardized heights: `sm` (32px), `md` (40px, default), and `lg` (48px):
 
 <SizesDemo />
 
 ```tsx
-<Button size="sm">Small</Button>
-<Button size="md">Medium</Button>
-<Button size="lg">Large</Button>
+<Button size="sm">Compact (32px)</Button>
+<Button size="md">Default (40px)</Button>
+<Button size="lg">Large (48px)</Button>
 ```
 
-## With Icons
+### With icons
 
-Use `startIcon` and `endIcon` for icons next to the label. For a square button with only an icon,
-use `iconOnly` and always add an `aria-label`.
+Add leading or trailing icons using `startIcon` and `endIcon`. For icon-only triggers, use `iconOnly` alongside an explicit `aria-label`:
 
 <IconsDemo />
 
-```tsx
-<Button startIcon={<Plus />}>Add item</Button>
-<Button variant="outline" endIcon={<ArrowRight />}>Continue</Button>
-<Button variant="ghost" iconOnly aria-label="Close">
-  <X />
-</Button>
-```
+### Loading state
 
-SVG icons are 16px by default. Give an icon a `size-*` class to change it.
-
-## Loading State
-
-`loading` shows a spinner and blocks clicks. The button stays focusable and announces
-`aria-busy`, so keyboard and screen reader users don't lose their place.
-Use `loadingText` to change the label while loading.
+Display a spinning indicator and prevent accidental duplicate submissions:
 
 <LoadingDemo />
 
-```tsx
-<Button loading>Save</Button>
-<Button loading loadingText="Saving…">Save</Button>
-```
+### Disabled state
 
-## Disabled State
-
-`disabled` blocks interaction. Add `focusableWhenDisabled` to keep the button in the tab order,
-for example when a tooltip explains why it's disabled.
+Deactivate interactions during invalid preconditions:
 
 <DisabledDemo />
 
-```tsx
-<Button disabled>Disabled</Button>
-<Button disabled focusableWhenDisabled>Focusable when disabled</Button>
-```
+### As link
 
-## Full Width
-
-`fullWidth` stretches the button to fill its container.
-
-<FullWidthDemo />
-
-```tsx
-<Button fullWidth>Sign in</Button>
-```
-
-## Examples
-
-### As a link
-
-Use `render` to output a different element while keeping the button styles and behaviour.
-Set `nativeButton={false}` when the element is not a `<button>`.
+Render the button visually while rendering an underlying framework router link:
 
 <AsLinkDemo />
 
-```tsx
-<Button render={<a href="/pricing" />} nativeButton={false}>
-  See pricing
-</Button>
-```
-
-### With a router link
-
-`buttonVariants()` returns the button classes, so any element can look like a button.
-
-```tsx
-import Link from 'next/link';
-import { buttonVariants } from '@innostes/ui';
-
-<Link href="/dashboard" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-  Dashboard
-</Link>
-```
-
-### In a form
-
-Buttons default to `type="button"`, so they never submit a form by accident. Set `type="submit"` for the submit button.
-
-```tsx
-<form onSubmit={save}>
-  <Button type="submit" loading={isSaving}>Save</Button>
-  <Button variant="ghost" onClick={cancel}>Cancel</Button>
-</form>
-```
-
-## API Reference
-
-<ApiTable components={['Button']} baseUi="button" />
-
-
-### Data attributes
-
-| Attribute | When |
-| --- | --- |
-| `data-variant` | Always, with the variant name |
-| `data-disabled` | The button is disabled or loading |
-| `data-loading` | The button is loading |
-
 ## Accessibility
 
-- Renders a native `<button>` with `type="button"` by default.
-- Built on [Base UI Button](https://base-ui.com/react/components/button): keyboard activation with
-  <kbd>Enter</kbd> and <kbd>Space</kbd>, and correct roles when rendered as another element.
-- Visible focus ring from the `--color-ring` token.
-- `loading` sets `aria-busy` and keeps focus, so the user isn't moved away.
-- Icon-only buttons need an `aria-label`. Icons inside buttons are hidden from screen readers.
-
-### Keyboard interaction
+### Keyboard navigation
 
 <KeyboardTable
   rows={[
-    [['Enter'], 'Activates the button and triggers its click handler.'],
-    [['Space'], 'Activates the button and triggers its click handler.'],
+    { key: 'Enter', action: 'Triggers the button click action or submits the enclosing form.' },
+    { key: 'Space', action: 'Triggers the button click action and emits active button states.' },
+    { key: 'Tab', action: 'Moves keyboard focus onto or away from the button in sequential reading order.' },
   ]}
 />
+
+### Screen readers and ARIA
+
+- **Native `<button>` element**: Guarantees standard button accessibility semantics in the accessibility tree.
+- **Icon-only requirement**: When `iconOnly` is enabled, an accessible name **must** be provided via `aria-label`.
+- **Loading state**: When `loading={true}` is set, the button receives `aria-busy="true"` and `disabled={true}`, preventing duplicate network invocations.
 
 ## Guidelines
 
 <DoDont>
-  <Do caption="Use primary buttons for the main action on a screen, with at most one primary action per view.">
-    <Button variant="primary">Create order</Button>
+  <Do>
+    Use descriptive, action-oriented verbs such as "Approve purchase order", "Save changes", or "Void invoice".
   </Do>
-  <Dont caption="Do not use multiple primary buttons in the same container.">
-    <div className="flex gap-2">
-      <Button variant="primary">Submit</Button>
-      <Button variant="primary">Save draft</Button>
-    </div>
+  <Dont>
+    Never use vague labels such as "Click here", "Submit", or "OK" on enterprise action buttons.
   </Dont>
 </DoDont>
 
-## Theming
+<DoDont>
+  <Do>
+    Always supply an `aria-label` when using the `iconOnly` prop so screen readers describe the operation.
+  </Do>
+  <Dont>
+    Never leave icon-only buttons unlabelled, or use decorative icons that duplicate neighbouring text labels.
+  </Dont>
+</DoDont>
 
-The button uses the `primary`, `secondary`, `muted`, `destructive`, `border` and `ring` tokens.
-Change them in your theme to restyle every button. See [Theming](/ui/docs/theming).
+## API reference
 
-```css
-@theme {
-  --color-primary: var(--color-violet-600);
-  --color-primary-hover: var(--color-violet-700);
-}
-```
+<ApiTable components={['Button']} baseUi="button" />
 
-Or change one button with `className`:
+## Related
 
-```tsx
-<Button className="rounded-full px-6">Rounded</Button>
-```
+- [ButtonGroup](/ui/docs/components/actions/button-group) — Segmented button container for grouped operational triggers.
+- [Toggle](/ui/docs/components/actions/toggle) — Two-state pressed toggle button.
+- [FormActions](/ui/docs/components/forms/field) — Responsive footer container for form submission buttons.
 
 ---
 
@@ -521,7 +506,9 @@ Actions are the primary interactive building blocks across Northwind Traders Pvt
 
 ## Toggle Group (https://innostes.com/ui/docs/components/actions/toggle-group)
 
-Single or multiple selection with roving focus and arrow-key navigation.
+Segmented control managing single or multiple active states with roving tabindex and arrow-key navigation.
+
+ToggleGroup coordinates a set of two-state toggle buttons. Built on Base UI's toggle group primitive, it supports both single-selection (e.g. text alignment, view modes) and multi-selection (e.g. text formatting options) with built-in roving focus management and keyboard arrow navigation.
 
 <ComponentPreview name="actions/toggle-group/basic" />
 
@@ -531,68 +518,222 @@ Single or multiple selection with roving focus and arrow-key navigation.
 import { ToggleGroup, ToggleGroupItem } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-`value` is always an array of the pressed items' values. Add `multiple` to allow several.
+- **Use ToggleGroup** when users need to switch between related view layouts (e.g. List vs Grid) or apply multiple independent formatting options (e.g. Bold, Italic, Underline).
+- **Use RadioGroup** when selecting one option from a list within a standard form where standard radio button styling is required.
+- **Use Tabs** when selecting an option switches an entire underlying panel or page view.
+- **Use ButtonGroup** when grouping operational action buttons that trigger commands rather than maintaining state.
+
+## Examples
+
+### Single selection
+
+In default mode, ToggleGroup operates with single selection:
 
 ```tsx
-const [view, setView] = useState(['list']);
+const [view, setView] = useState(['table']);
 
-<ToggleGroup value={view} onValueChange={setView} aria-label="View">
-  <ToggleGroupItem value="list">List</ToggleGroupItem>
-  <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
+<ToggleGroup value={view} onValueChange={setView} aria-label="Inventory layout">
+  <ToggleGroupItem value="table">Table view</ToggleGroupItem>
+  <ToggleGroupItem value="kanban">Kanban board</ToggleGroupItem>
 </ToggleGroup>
 ```
 
-`variant` and `size` set on the group apply to every item.
+### Multiple selection
+
+Enable the `multiple` prop to permit selecting more than one option concurrently:
+
+```tsx
+const [formatting, setFormatting] = useState(['bold', 'italic']);
+
+<ToggleGroup
+  multiple
+  value={formatting}
+  onValueChange={setFormatting}
+  aria-label="Rich text formatting"
+>
+  <ToggleGroupItem value="bold" aria-label="Bold"><Bold className="size-4" /></ToggleGroupItem>
+  <ToggleGroupItem value="italic" aria-label="Italic"><Italic className="size-4" /></ToggleGroupItem>
+  <ToggleGroupItem value="underline" aria-label="Underline"><Underline className="size-4" /></ToggleGroupItem>
+</ToggleGroup>
+```
+
+### Attached outline styling
+
+Use `variant="outline"` to merge borders and join the items into a solid segmented control:
+
+```tsx
+<ToggleGroup variant="outline" defaultValue={['all']} aria-label="Status filter">
+  <ToggleGroupItem value="all">All orders</ToggleGroupItem>
+  <ToggleGroupItem value="pending">Pending</ToggleGroupItem>
+  <ToggleGroupItem value="dispatched">Dispatched</ToggleGroupItem>
+</ToggleGroup>
+```
 
 ## Accessibility
 
-- Arrow keys move focus between items; Tab leaves the group.
-- Each item exposes `aria-pressed`. Label the group with `aria-label`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowRight / ArrowDown', action: 'Moves focus to the next item in the group, wrapping to the start.' },
+    { key: 'ArrowLeft / ArrowUp', action: 'Moves focus to the previous item in the group, wrapping to the end.' },
+    { key: 'Space / Enter', action: 'Toggles the pressed state of the currently focused item.' },
+    { key: 'Home / End', action: 'Jumps focus directly to the first or last item in the group.' },
+    { key: 'Tab', action: 'Leaves the toggle group and moves focus to the next control outside the group.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Roving tabindex**: Only the active or focused item has `tabIndex={0}`; remaining items receive `tabIndex={-1}`, ensuring the entire group acts as a single tab stop in the DOM.
+- **`role="group"`**: Automatically applied to the container alongside the provided `aria-label`.
+- **`aria-pressed`**: Emitted on each item to announce active state changes to screen readers.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always provide an `aria-label` on `ToggleGroup` describing the group purpose (e.g. `aria-label="View mode"`).
+  </Do>
+  <Dont>
+    Never use `ToggleGroup` for navigating between separate URLs; use `Tabs` or standard navigation links instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide an `aria-label` on each `ToggleGroupItem` when items contain only icons without text labels.
+  </Do>
+  <Dont>
+    Never mix mutually exclusive options with multi-select toggles inside the same group container.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['ToggleGroup', 'ToggleGroupItem']} baseUi="toggle-group" />
+
+## Related
+
+- [Toggle](/ui/docs/components/actions/toggle) — Standalone two-state button.
+- [ButtonGroup](/ui/docs/components/actions/button-group) — Connected container for operational command buttons.
+- [Tabs](/ui/docs/components/navigation/tabs) — Tabbed interface for swapping content panels.
 
 ---
 
 ## Toggle (https://innostes.com/ui/docs/components/actions/toggle)
 
-Two-state button for formatting, favourites and view options.
+Accessible two-state pressed button primitive for formatting toolbars, favorites, and view modes.
+
+Toggle is a two-state interactive control built on Base UI's toggle primitive. Unlike a standard button that triggers an action and immediately resets, Toggle maintains a pressed or unpressed state reflected via `aria-pressed`. It is ideal for rich text editor toolbars, bookmarking records, and filtering table views.
 
 <ComponentPreview name="actions/toggle/basic" />
 
 ## Import
 
 ```tsx
-import { Toggle } from '@innostes/ui';
+import { Toggle, toggleVariants } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Toggle** for binary options where the button itself displays its active state (e.g. bold formatting, bookmarking an invoice).
+- **Use Switch** for binary preferences inside configuration forms where a toggle switch with a distinct track and thumb is expected.
+- **Use Checkbox** for multi-item selection in data tables or form agreements.
+- **Use ToggleGroup** when grouping multiple toggle buttons into a toolbar or single-choice segmented control.
+
+## Examples
+
+### Basic usage
+
+Toggle supports both uncontrolled (`defaultPressed`) and controlled (`pressed`, `onPressedChange`) modes:
 
 ```tsx
 // Uncontrolled
-<Toggle aria-label="Bold" defaultPressed><BoldIcon /></Toggle>
+<Toggle defaultPressed aria-label="Toggle bold text">
+  <Bold className="size-4" />
+</Toggle>
 
 // Controlled
-const [starred, setStarred] = useState(false);
-<Toggle pressed={starred} onPressedChange={setStarred} aria-label="Star">
-  <StarIcon />
+<Toggle
+  pressed={isBookmarked}
+  onPressedChange={setIsBookmarked}
+  aria-label="Bookmark purchase order"
+>
+  <Bookmark className="size-4" />
 </Toggle>
 ```
 
-Use `Toggle` for state that applies immediately and is shown by the button itself.
-For settings in a form, use [Switch](/ui/docs/components/forms/switch).
+### With text label
+
+Toggles can pair icons with visible textual descriptions:
+
+```tsx
+<Toggle variant="outline" aria-label="Mark invoice as urgent">
+  <AlertCircle className="size-4 me-1.5 text-amber-500" />
+  <span>Mark urgent</span>
+</Toggle>
+```
+
+### Sizes
+
+Toggles support the standard `sm` (32px), `md` (40px, default), and `lg` (48px) size scale:
+
+```tsx
+<Toggle size="sm" aria-label="Compact toggle"><Pin className="size-3.5" /></Toggle>
+<Toggle size="md" aria-label="Default toggle"><Pin className="size-4" /></Toggle>
+<Toggle size="lg" aria-label="Large toggle"><Pin className="size-5" /></Toggle>
+```
 
 ## Accessibility
 
-- Exposes `aria-pressed`, so screen readers announce "pressed" / "not pressed".
-- Icon-only toggles need an `aria-label`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Space', action: 'Toggles the pressed state between on and off.' },
+    { key: 'Enter', action: 'Toggles the pressed state between on and off.' },
+    { key: 'Tab', action: 'Moves focus to the toggle or away to the next interactive control.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`aria-pressed`**: Emits `aria-pressed="true"` when active and `aria-pressed="false"` when inactive. Screen readers announce "pressed" or "not pressed" immediately.
+- **Icon-only requirement**: When a toggle contains only an icon glyph, an accessible name **must** be provided via `aria-label`.
+- **Disabled state**: Applies `disabled` and `aria-disabled="true"` to prevent state changes.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an `aria-label` describing the state being toggled when no visible text is present (e.g. `aria-label="Toggle italic text"`).
+  </Do>
+  <Dont>
+    Never use `Toggle` for irreversible operational actions such as deleting records or submitting forms; use `Button` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use `Toggle` when changes take effect immediately without requiring a separate "Save" form submission.
+  </Do>
+  <Dont>
+    Never nest a `Toggle` inside a standard form where users expect explicit submit button confirmation.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Toggle']} baseUi="toggle" />
+
+## Related
+
+- [ToggleGroup](/ui/docs/components/actions/toggle-group) — Grouped collection of toggle buttons for toolbar selection.
+- [Switch](/ui/docs/components/forms/switch) — Binary on/off control with physical switch semantics.
+- [Button](/ui/docs/components/actions/button) — Foundation action trigger.
 
 ---
 
@@ -1338,64 +1479,222 @@ toast.dismiss(id);
 
 ## Calendar (https://innostes.com/ui/docs/components/forms/calendar)
 
-Single and range modes, min/max and disabled days, one or two months, locale-aware, fully keyboard accessible.
+Single and range modes, min/max bounds, disabled dates, one or two month views, and Intl-based locale formatting.
 
 <ComponentPreview name="forms/calendar/basic" />
 
 ## Import
 
 ```tsx
-import { Calendar, type DateRange } from '@innostes/ui';
+import { Calendar, type DateRange, type Weekday } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Calendar` when users need to see an inline month view to choose a single calendar day or an inclusive date range:
+
+- Displaying booking schedules, dispatch timetables, or delivery cutoffs directly on an ERP dashboard.
+- Selecting ranges across one or two months when visualising calendar context is essential.
+- Building custom date filter panels.
+
+When choosing between date selection patterns:
+- Use [Date Picker](/ui/docs/components/forms/date-picker) if the calendar should appear within a compact popover triggered from a form field or table toolbar.
+- Use [Date Range Picker](/ui/docs/components/forms/date-picker#date-range-picker-with-presets) if you need preset ranges (such as "Last 30 days" or "This quarter") attached to a popover trigger.
+- Use [Input](/ui/docs/components/forms/input) with `type="date"` only when native mobile OS date pickers are explicitly preferred over consistent cross-browser styling.
+
+## Examples
+
+### Single date
+
+By default, `Calendar` runs in single-date mode (`mode="single"`). Provide `value` and `onValueChange` for controlled operation.
 
 ```tsx
-<Calendar value={date} onValueChange={setDate} />
-<Calendar mode="range" numberOfMonths={2} value={range} onValueChange={setRange} />
-<Calendar isDateDisabled={(d) => d.getDay() === 0 || d.getDay() === 6} min={new Date()} />
-<Calendar captionLayout="dropdown" fromYear={1950} toYear={2010} />   {/* month & year selects */}
+'use client';
+
+import { useState } from 'react';
+import { Calendar } from '@innostes/ui';
+
+export function DispatchDateSelector() {
+  const [dispatchDate, setDispatchDate] = useState<Date | null>(new Date());
+
+  return (
+    <Calendar
+      value={dispatchDate}
+      onValueChange={setDispatchDate}
+      aria-label="Dispatch schedule"
+    />
+  );
+}
 ```
 
-For a field that opens a calendar, use [Date Picker](/ui/docs/components/forms/date-picker).
+### Date range
 
-## Locale
+Set `mode="range"` to allow selecting a start date and an end date. Setting `numberOfMonths={2}` renders two consecutive months side-by-side, which simplifies picking cross-month accounting or reporting cycles.
 
-Month and weekday names come from `Intl` in the user's language. The first day of the week follows
-the locale (Monday for most of the world, Sunday for `en-US`); override it with `weekStartsOn`.
-Labels of the navigation buttons can be translated with `labels`.
+```tsx
+'use client';
 
-## Dates and time zones
+import { useState } from 'react';
+import { Calendar, type DateRange } from '@innostes/ui';
 
-The calendar works with **local calendar days**: values are `Date` objects at local midnight.
-Convert to and from your API's format at the edges, e.g. with `toISOString().slice(0, 10)` or the
-`YYYY-MM-DD` value the date pickers submit.
+export function AuditRangeCalendar() {
+  const [range, setRange] = useState<DateRange>({
+    from: new Date(2026, 3, 1),
+    to: new Date(2026, 3, 15),
+  });
 
-## Keyboard
+  return (
+    <Calendar
+      mode="range"
+      numberOfMonths={2}
+      value={range}
+      onValueChange={setRange}
+      aria-label="Audit observation period"
+    />
+  );
+}
+```
 
-| Key | Action |
-| --- | --- |
-| Arrow keys | Previous / next day and week |
-| Home / End | Start / end of the week |
-| Page Up / Page Down | Previous / next month |
-| Shift + Page Up / Page Down | Previous / next year |
-| Enter / Space | Select the focused day |
+### Date constraints and disabled dates
+
+Pass `min` and `max` bounds to prevent selecting dates outside allowable fiscal limits. Use `isDateDisabled` to disable specific calendar dates, such as gazetted public holidays or weekend warehouse closures.
+
+```tsx
+import { Calendar } from '@innostes/ui';
+
+const isWeekend = (date: Date) => date.getDay() === 0 || date.getDay() === 6;
+
+export function WarehouseCutoffCalendar() {
+  return (
+    <Calendar
+      min={new Date(2026, 0, 1)}
+      max={new Date(2026, 11, 31)}
+      isDateDisabled={isWeekend}
+      aria-label="Warehouse loading date"
+    />
+  );
+}
+```
+
+### Dropdown year and month navigation
+
+For dates far in the past or future (such as incorporation dates or employee date of birth), set `captionLayout="dropdown"`. This substitutes plain month header text with accessible select dropdowns for rapid jumping.
+
+```tsx
+import { Calendar } from '@innostes/ui';
+
+export function IncorporationCalendar() {
+  return (
+    <Calendar
+      captionLayout="dropdown"
+      fromYear={1990}
+      toYear={2030}
+      aria-label="Entity incorporation date"
+    />
+  );
+}
+```
+
+### Locale and week start
+
+Month and weekday labels automatically derive from the user's browser runtime through `Intl.DateTimeFormat`. You can pass an explicit BCP 47 locale tag (`locale="en-IN"`) or override the first day of the week with `weekStartsOn` (where `0` is Sunday and `1` is Monday).
+
+```tsx
+import { Calendar } from '@innostes/ui';
+
+export function IndianFiscalCalendar() {
+  return (
+    <Calendar
+      locale="en-IN"
+      weekStartsOn={1}
+      aria-label="GST filing schedule"
+    />
+  );
+}
+```
+
+### Time zones
+
+`Calendar` operates strictly on **local calendar days**:
+- Values are native JavaScript `Date` instances clamped to midnight in the local browser runtime.
+- The component does not apply UTC hour offsets or time zone translations.
+- When sending values to an ERP API, serialise the calendar day to an ISO date string format (`YYYY-MM-DD`) at the application boundary, rather than sending a raw UTC timestamp that could shift the calendar day across midnight in eastern or western longitudes.
 
 ## Accessibility
 
-- Follows the WAI-ARIA date picker grid pattern: one tab stop, roving focus, `aria-selected`,
-  `aria-current="date"` for today, and full dates as labels ("Thursday, October 15, 2026").
-- Disabled days stay focusable (so keyboard users can move past them) and are marked `aria-disabled`.
+`Calendar` implements the W3C WAI-ARIA Date Picker Grid design pattern.
 
-## API Reference
+### Keyboard navigation
+
+The calendar grid is a single tab stop with roving tabindex across days.
+
+<KeyboardTable
+  entries={[
+    { key: 'Left Arrow', action: 'Moves focus to the previous day.' },
+    { key: 'Right Arrow', action: 'Moves focus to the next day.' },
+    { key: 'Up Arrow', action: 'Moves focus to the same weekday in the previous week.' },
+    { key: 'Down Arrow', action: 'Moves focus to the same weekday in the next week.' },
+    { key: 'Home', action: 'Moves focus to the first day of the current week.' },
+    { key: 'End', action: 'Moves focus to the last day of the current week.' },
+    { key: 'Page Up', action: 'Navigates to the previous month.' },
+    { key: 'Page Down', action: 'Navigates to the next month.' },
+    { key: 'Shift + Page Up', action: 'Navigates to the previous calendar year.' },
+    { key: 'Shift + Page Down', action: 'Navigates to the next calendar year.' },
+    { key: 'Enter / Space', action: 'Selects the currently focused day.' },
+  ]}
+/>
+
+### Screen readers
+
+- The month table uses `role="grid"` with column headers denoting abbreviated and full weekday names (`abbr` attribute).
+- Each cell has a full textual accessible label (e.g., "Thursday, 15 October 2026").
+- The current calendar date is marked with `aria-current="date"`.
+- Selected dates communicate their status through `aria-selected="true"`.
+- Disabled days maintain keyboard focusability to allow navigating across weeks without breaking roving focus, marked with `aria-disabled="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Clamp dates to midnight (00:00:00) in local time when computing boundaries to avoid subtle 1-hour daylight saving or offset mismatches.',
+    code: `const start = new Date(2026, 3, 1, 0, 0, 0, 0);`,
+  }}
+  dont={{
+    description: 'Do not pass raw UTC timestamps from an API directly into min or max props without converting to local calendar days.',
+    code: `// Can cause boundary skew across timezones\n<Calendar min={new Date('2026-04-01T00:00:00.000Z')} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use `numberOfMonths={2}` when rendering range mode on desktop screens so users can inspect start and end dates spanning consecutive months.',
+    code: `<Calendar mode="range" numberOfMonths={2} value={range} onValueChange={setRange} />`,
+  }}
+  dont={{
+    description: 'Do not use multi-month layouts inside narrow mobile dialogs or sidebars where horizontal scrolling would be required.',
+    code: `<div className="w-64">\n  <Calendar numberOfMonths={2} />\n</div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Calendar']} />
+
+## Related
+
+- [Date Picker](/ui/docs/components/forms/date-picker) — Popover-wrapped calendar for form inputs.
+- [Field](/ui/docs/components/forms/field) — Accessible container with labels, descriptions, and error messages.
+- [Locale Selects](/ui/docs/components/forms/locale-select) — Regional preference dropdowns for timezones, countries, and date formats.
 
 ---
 
 ## Checkbox (https://innostes.com/ui/docs/components/forms/checkbox)
 
-Single checkboxes and groups with a "select all" parent.
+Accessible checkbox primitive supporting single agreement boxes, multi-select tables, and indeterminate "select all" parent groups.
+
+import { CheckboxPlayground } from '@/components/docs/checkbox-playground';
+
+`Checkbox` allows users to select one or multiple items from a list, toggle optional settings, or confirm legal agreements. Built on Base UI's checkbox primitive, it supports three visual and semantic states: checked, unchecked, and indeterminate (mixed).
 
 <ComponentPreview name="forms/checkbox/basic" />
 
@@ -1405,41 +1704,123 @@ Single checkboxes and groups with a "select all" parent.
 import { Checkbox, CheckboxGroup } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Checkbox** when users can select multiple options independently from a list, or toggle an isolated agreement (e.g. "I accept the delivery terms").
+- **Use Switch** for binary options that take effect immediately without requiring form submission.
+- **Use RadioGroup** when users must choose exactly one option from a mutually exclusive set.
+
+## Examples
+
+### Interactive playground
+
+Experiment with checked, indeterminate, and disabled states:
+
+<CheckboxPlayground />
+
+### Single checkbox in a field
+
+Wrap a checkbox inside `<Field>` with an accessible label:
 
 ```tsx
-<label className="flex items-center gap-2">
-  <Checkbox name="terms" required /> I accept the terms
-</label>
-
-// Controlled
-<Checkbox checked={value} onCheckedChange={setValue} aria-label="Select row" />
-
-// Indeterminate (e.g. "some rows selected")
-<Checkbox indeterminate aria-label="Select all" />
+<Field>
+  <label className="flex items-center gap-2.5 text-sm cursor-pointer">
+    <Checkbox name="expressDelivery" />
+    <span>Enable express carrier dispatch (Karnataka Hub)</span>
+  </label>
+  <FieldDescription>Guarantees delivery within 24 hours.</FieldDescription>
+</Field>
 ```
 
-## Groups
+### Indeterminate select all group
 
-`CheckboxGroup` manages several checkboxes as one array value. Pass `allValues` and add a
-`parent` checkbox to get a working "select all" with the indeterminate state.
+`CheckboxGroup` coordinates multiple child checkboxes and exposes a parent "select all" trigger that enters an indeterminate state when a partial subset of rows is selected:
 
 <ComponentPreview name="forms/checkbox/group" />
 
+```tsx
+<CheckboxGroup
+  value={selectedOrders}
+  onValueChange={setSelectedOrders}
+  allValues={['PO-101', 'PO-102', 'PO-103']}
+>
+  {({ isAllSelected, isSomeSelected, selectAll, unselectAll }) => (
+    <div className="space-y-3">
+      <label className="flex items-center gap-2 font-medium">
+        <Checkbox
+          checked={isAllSelected}
+          indeterminate={isSomeSelected && !isAllSelected}
+          onCheckedChange={(checked) => (checked ? selectAll() : unselectAll())}
+        />
+        <span>Select all purchase orders</span>
+      </label>
+      <div className="ms-6 space-y-2">
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox value="PO-101" /> PO-101 (₹45,000)
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox value="PO-102" /> PO-102 (₹82,400)
+        </label>
+      </div>
+    </div>
+  )}
+</CheckboxGroup>
+```
+
 ## Accessibility
 
-- Announced as a checkbox with `aria-checked` (`mixed` when indeterminate).
-- Space toggles it. Label every checkbox, by wrapping it in a `<label>` or with `aria-label`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Space', action: 'Toggles the checkbox between checked and unchecked.' },
+    { key: 'Tab', action: 'Moves focus to the checkbox or moves to the next focusable element.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="checkbox"`**: Emits standard checkbox semantics.
+- **`aria-checked`**: Sets `aria-checked="true"`, `false`, or `"mixed"` when in the indeterminate state.
+- **Label coupling**: Wrapping the checkbox inside `<label>` or associating via `aria-label` ensures screen readers announce the label clearly upon focus.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use positive phrasing for checkbox labels (e.g. "Send shipment status notifications via SMS").
+  </Do>
+  <Dont>
+    Never use negative phrasing such as "Do not notify me via SMS" which creates double-negative confusion.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use the indeterminate state exclusively on parent checkboxes to indicate partial selection of a child set.
+  </Do>
+  <Dont>
+    Never use indeterminate as an independent "maybe" or "unknown" choice for standalone user input.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Checkbox', 'CheckboxGroup']} baseUi="checkbox" />
+
+## Related
+
+- [Switch](/ui/docs/components/forms/switch) — Instant-acting binary switch toggle.
+- [RadioGroup](/ui/docs/components/forms/radio-group) — Mutually exclusive option selection.
+- [DataTable](/ui/docs/components/data-display/data-table) — High-density data grid with built-in checkbox row selection.
 
 ---
 
 ## Combobox (https://innostes.com/ui/docs/components/forms/combobox)
 
-Type to filter, arrow keys to move, Enter to pick. For long lists like countries or customers.
+Accessible combobox input for filtering and selecting values from extensive or remote dataset collections.
+
+`Combobox` combines a text input with a floating listbox popup. Built on Base UI's combobox primitive, it allows operators to type to filter large datasets, traverse options using arrow keys, and select records with keyboard or pointer input. It is designed for searching customer records, product SKUs, and general ledgers across Northwind Traders systems.
 
 <ComponentPreview name="forms/combobox/basic" />
 
@@ -1459,20 +1840,52 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass all options as `items`. `ComboboxList` takes a function and renders it for each item that
-matches the filter.
+- **Use Combobox** when users need to filter through extensive datasets (50 to 10,000+ items) or query remote server endpoints asynchronously.
+- **Use SearchableSelect** for moderate client-side lists (15 to 100 items) where a standard select trigger is preferred.
+- **Use Select** when the list of options is short (under 15 items) and typing to filter is unnecessary.
+- **Use TagInput** when users select and manage multiple tags or keywords concurrently.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **Combobox** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Moderate lists requiring fast dropdown filter search |
+| **[Select](/ui/docs/components/forms/select)** | Single or Multi | 5 to 15 | No (type-ahead) | Compact predefined lists (e.g. status, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Object collections with custom labels
+
+When working with complex domain objects, supply `itemToStringLabel` to tell the combobox which property represents the human-readable string:
 
 ```tsx
-<Combobox items={customers} itemToStringLabel={(c) => c.name}>
-  <ComboboxInput placeholder="Search customers…" aria-label="Customer" />
+interface Vendor {
+  id: string;
+  name: string;
+  gstin: string;
+}
+
+const vendors: Vendor[] = [
+  { id: 'v1', name: 'Hindustan Industrial Spares', gstin: '29AAAAA0000A1Z5' },
+  { id: 'v2', name: 'Bharat Electricals Ltd', gstin: '29BBBBB1111B2Z6' },
+];
+
+<Combobox items={vendors} itemToStringLabel={(v) => v.name}>
+  <ComboboxInput placeholder="Search supplier organisation..." />
   <ComboboxContent>
-    <ComboboxEmpty>No customer found.</ComboboxEmpty>
+    <ComboboxEmpty>No vendor found.</ComboboxEmpty>
     <ComboboxList>
-      {(customer: Customer) => (
-        <ComboboxItem key={customer.id} value={customer}>
-          {customer.name}
+      {(vendor: Vendor) => (
+        <ComboboxItem key={vendor.id} value={vendor}>
+          <div>
+            <div className="font-medium">{vendor.name}</div>
+            <div className="text-xs text-muted-foreground font-mono">{vendor.gstin}</div>
+          </div>
         </ComboboxItem>
       )}
     </ComboboxList>
@@ -1480,77 +1893,343 @@ matches the filter.
 </Combobox>
 ```
 
-- For objects, pass `itemToStringLabel` (shown text) and, if needed, `isItemEqualToValue`.
-- For server-side search, control the input with `onInputValueChange` and pass the results as `items`.
-- `showClear` and `showTrigger` on `ComboboxInput` toggle the clear and open buttons.
+### Server-side search filtering
+
+Control input queries using `onInputValueChange` to query remote backend endpoints with debounced network calls:
+
+```tsx
+const [query, setQuery] = useState('');
+const [items, setItems] = useState<Customer[]>([]);
+
+<Combobox
+  items={items}
+  onInputValueChange={(val) => {
+    setQuery(val);
+    fetchCustomersDebounced(val).then(setItems);
+  }}
+>
+  <ComboboxInput placeholder="Type customer name or GSTIN..." />
+  <ComboboxContent>
+    <ComboboxEmpty>No records matching search query.</ComboboxEmpty>
+    <ComboboxList>
+      {(item) => <ComboboxItem key={item.id} value={item}>{item.name}</ComboboxItem>}
+    </ComboboxList>
+  </ComboboxContent>
+</Combobox>
+```
 
 ## Accessibility
 
-- Follows the WAI-ARIA combobox pattern: the input owns a listbox, and the highlighted option is
-  announced as you move.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowDown', action: 'Opens the listbox if closed, or highlights the subsequent option.' },
+    { key: 'ArrowUp', action: 'Highlights the preceding option, or closes the popup when at the top.' },
+    { key: 'Enter', action: 'Selects the currently highlighted option and closes the listbox.' },
+    { key: 'Escape', action: 'Dismisses the listbox popup without changing the selected value.' },
+  ]}
+/>
 
-<ApiTable components={['ComboboxInput', 'ComboboxContent', 'ComboboxList', 'ComboboxItem', 'ComboboxEmpty', 'ComboboxGroup', 'ComboboxGroupLabel', 'ComboboxSeparator']} baseUi="combobox" />
+### Screen readers and ARIA
+
+- **WAI-ARIA Combobox pattern**: The `<ComboboxInput>` acts as `role="combobox"` linked to the floating `<ComboboxContent>` which acts as `role="listbox"`.
+- **`aria-activedescendant`**: Updated dynamically as keyboard arrows cycle highlighted items so screen readers announce each option without shifting native DOM focus from the text input.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an informative `<ComboboxEmpty>` state informing the user when no search results match.
+  </Do>
+  <Dont>
+    Never show an empty, blank floating container when a search yields zero matches.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use debounced asynchronous fetching when searching massive datasets over the network.
+  </Do>
+  <Dont>
+    Never trigger an unthrottled HTTP request on every individual keystroke.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Combobox',
+    'ComboboxInput',
+    'ComboboxContent',
+    'ComboboxList',
+    'ComboboxItem',
+    'ComboboxEmpty',
+    'ComboboxGroup',
+    'ComboboxGroupLabel',
+    'ComboboxSeparator',
+  ]}
+  baseUi="combobox"
+/>
+
+## Related
+
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Filterable dropdown menu for medium option lists.
+- [Select](/ui/docs/components/forms/select) — Standard dropdown select for short, static option lists.
+- [TagInput](/ui/docs/components/forms/tag-input) — Multi-tag entry and keyword selection.
 
 ---
 
 ## Date Picker (https://innostes.com/ui/docs/components/forms/date-picker)
 
-DatePicker and DateRangePicker with presets, min/max, clearing, and plain-form submission.
+DatePicker and DateRangePicker with built-in presets, min/max bounds, clearing triggers, and standard YYYY-MM-DD form submissions.
 
 <ComponentPreview name="forms/date-picker/basic" />
 
 ## Import
 
 ```tsx
-import { DatePicker, DateRangePicker, defaultDateRangePresets, type DateRange } from '@innostes/ui';
+import {
+  DatePicker,
+  DateRangePicker,
+  defaultDateRangePresets,
+  type DateRange,
+  type DateRangePreset,
+} from '@innostes/ui';
 ```
 
-## DatePicker
+## When to use
+
+Use `DatePicker` or `DateRangePicker` when users need to select dates within forms, query bars, or filter headers without taking up permanent layout space:
+
+- Setting invoice due dates, quotation validity periods, or purchase order delivery dates.
+- Selecting custom reporting intervals or quick presets (such as "Last 30 days" or "This month") in financial analytics.
+- Capturing personal dates like date of birth using year/month dropdown navigation.
+
+When choosing between date components:
+- Use [Calendar](/ui/docs/components/forms/calendar) directly when you want the month grid permanently visible inline on the page (such as a resource booking calendar or dispatch dashboard).
+- Use `DatePicker` for selecting an isolated point in time (e.g. `dueDate`).
+- Use `DateRangePicker` when querying date spans bounded by start and end dates.
+- Use [Input](/ui/docs/components/forms/input) with `type="date"` if minimal JavaScript bundle size on legacy mobile browsers takes precedence over styling consistency.
+
+## Examples
+
+### Basic date picker
+
+Render `DatePicker` with an accessible label or `aria-label`. Use `value` and `onValueChange` for controlled state.
 
 ```tsx
-<Label htmlFor="due">Due date</Label>
-<DatePicker id="due" name="dueDate" value={due} onValueChange={setDue} min={new Date()} />
+'use client';
+
+import { useState } from 'react';
+import { DatePicker, Label } from '@innostes/ui';
+
+export function InvoiceDueDate() {
+  const [dueDate, setDueDate] = useState<Date | null>(new Date());
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="invoice-due">Payment due date</Label>
+      <DatePicker
+        id="invoice-due"
+        name="dueDate"
+        value={dueDate}
+        onValueChange={setDueDate}
+      />
+    </div>
+  );
+}
 ```
 
-- Shows the date with `Intl` (`dateStyle: 'medium'` by default); change it with `format`
-  (`Intl.DateTimeFormat` options or a function).
-- `name` submits the date as `YYYY-MM-DD`, so it works with plain forms and server actions.
-- `captionLayout="dropdown"` adds month and year selects, for dates of birth.
-- `clearable` (default `true`) shows a clear button.
+### Date formatting and locale
 
-## DateRangePicker
+The trigger formats dates using `Intl.DateTimeFormat` with `dateStyle: 'medium'` by default. You can supply custom `Intl.DateTimeFormatOptions` or a custom formatting function via the `format` prop. Pass `locale` to ensure month and day names correspond to the user's regional dialect.
 
 ```tsx
-<DateRangePicker aria-label="Report period" value={range} onValueChange={setRange} startName="from" endName="to" />
+import { DatePicker } from '@innostes/ui';
+
+export function FormattedDatePicker() {
+  return (
+    <DatePicker
+      locale="en-IN"
+      format={{ day: '2-digit', month: 'short', year: 'numeric' }}
+      aria-label="Voucher date"
+    />
+  );
+}
 ```
 
-- `onValueChange` fires once both ends are picked, or when a preset is chosen.
-- `presets` defaults to Today, Yesterday, Last 7 / 30 days, This / Last month and This year.
-  Pass your own (with translated labels), or `[]` to hide them:
+### Date constraints and disabled days
+
+Bound selectable dates using `min` and `max`. Use `isDateDisabled` to disable specific dates such as regional holidays or non-working days.
 
 ```tsx
-const presets = [
-  { label: 'Q1', range: () => ({ from: new Date(2026, 0, 1), to: new Date(2026, 2, 31) }) },
+import { DatePicker } from '@innostes/ui';
+
+const isSunday = (date: Date) => date.getDay() === 0;
+
+export function DeliverySlotPicker() {
+  return (
+    <DatePicker
+      min={new Date()}
+      isDateDisabled={isSunday}
+      placeholder="Select working day"
+      aria-label="Delivery slot"
+    />
+  );
+}
+```
+
+### Month and year dropdown navigation
+
+Set `captionLayout="dropdown"` to display dropdown selectors for year and month inside the popover calendar. This is ideal for historical dates such as employee date of birth or company incorporation.
+
+```tsx
+import { DatePicker } from '@innostes/ui';
+
+export function DateOfBirthPicker() {
+  return (
+    <DatePicker
+      captionLayout="dropdown"
+      fromYear={1950}
+      toYear={2010}
+      placeholder="Select date of birth"
+      aria-label="Date of birth"
+    />
+  );
+}
+```
+
+### Date range picker with presets
+
+`DateRangePicker` renders a popover with dual-month navigation alongside quick preset selections (e.g., "Today", "Last 7 days", "Last 30 days", "This month"). The `onValueChange` callback triggers when both `from` and `to` dates are chosen, or immediately when a preset button is clicked.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { DateRangePicker, type DateRange } from '@innostes/ui';
+
+export function TaxPeriodFilter() {
+  const [period, setPeriod] = useState<DateRange>({
+    from: new Date(2026, 3, 1),
+    to: new Date(2026, 3, 30),
+  });
+
+  return (
+    <DateRangePicker
+      value={period}
+      onValueChange={setPeriod}
+      startName="startDate"
+      endName="endDate"
+      aria-label="GST tax period"
+    />
+  );
+}
+```
+
+You can define custom presets or pass an empty array (`presets={[]}`) to remove the preset column:
+
+```tsx
+import { DateRangePicker, defaultDateRangePresets } from '@innostes/ui';
+
+const fiscalPresets = [
+  {
+    label: 'Q1 (Apr–Jun)',
+    range: () => ({ from: new Date(2026, 3, 1), to: new Date(2026, 5, 30) }),
+  },
   ...defaultDateRangePresets,
 ];
+
+export function CustomPresetsDemo() {
+  return <DateRangePicker presets={fiscalPresets} aria-label="Fiscal period" />;
+}
+```
+
+### Form integration and submission
+
+`DatePicker` renders a hidden `<input type="hidden">` with the chosen date formatted as `YYYY-MM-DD` under the given `name` prop. `DateRangePicker` accepts `startName` and `endName` to submit both dates in standard HTML forms and server actions.
+
+```tsx
+import { DatePicker, Field, FieldLabel, FieldError } from '@innostes/ui';
+
+export function FormDatePickerExample() {
+  return (
+    <form action="/api/v1/invoices" method="POST">
+      <Field>
+        <FieldLabel htmlFor="due-date">Invoice due date</FieldLabel>
+        <DatePicker id="due-date" name="dueDate" required />
+        <FieldError />
+      </Field>
+    </form>
+  );
+}
 ```
 
 ## Accessibility
 
-- The trigger is a button. Label it with `<Label htmlFor>` + `id`, or `aria-label`.
-- The calendar gets focus when it opens; Escape closes it and returns focus to the trigger.
+`DatePicker` and `DateRangePicker` follow WAI-ARIA combobox and popover dialog specifications.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens the calendar popover when focused on the trigger button.' },
+    { key: 'Down Arrow', action: 'Opens the calendar popover and shifts keyboard focus to the calendar grid.' },
+    { key: 'Escape', action: 'Closes the popover calendar and restores focus to the trigger button.' },
+    { key: 'Tab', action: 'Navigates focus within the popover between the calendar grid, presets, and month controls.' },
+  ]}
+/>
+
+### Screen readers
+
+- The trigger element is an accessible button rendered with `aria-haspopup="dialog"`.
+- When opened, focus moves into the calendar grid, which announces the currently focused day with day of week, day number, month, and year.
+- Selected dates are announced with `aria-selected="true"`.
+- The clear button includes a localized `aria-label` ("Clear date" by default).
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an explicit label using FieldLabel or an aria-label attribute so screen reader users understand what date is requested.',
+    code: `<Label htmlFor="dispatch">Dispatch date</Label>\n<DatePicker id="dispatch" name="dispatchDate" />`,
+  }}
+  dont={{
+    description: 'Do not rely solely on placeholder text as a field label; placeholders vanish once a date is picked.',
+    code: `<DatePicker placeholder="Dispatch date" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Specify startName and endName on DateRangePicker so HTML form submissions submit cleanly separated ISO dates without extra parsing.',
+    code: `<DateRangePicker startName="startDate" endName="endDate" />`,
+  }}
+  dont={{
+    description: 'Do not parse a composite string manually on the server when separate hidden inputs are already provided.',
+    code: `// Avoid manual string splitting of "01/04/2026 - 30/04/2026"`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['DatePicker', 'DateRangePicker']} baseUi="popover" />
 
+## Related
+
+- [Calendar](/ui/docs/components/forms/calendar) — Inline calendar month grid for dashboards and date visualization.
+- [Field](/ui/docs/components/forms/field) — Form field container with label, description, and error messaging.
+- [Input](/ui/docs/components/forms/input) — Standard text, numeric, and native date inputs.
+
 ---
 
-## Field & Form (https://innostes.com/ui/docs/components/forms/field)
+## Field and Form (https://innostes.com/ui/docs/components/forms/field)
 
-Accessible wiring between label, control, help text and errors, with native and custom validation.
+Accessible form container linking labels, descriptions, and errors with native constraint validation and server error mapping.
+
+`Field` and `Form` provide the foundational scaffolding for all enterprise forms in `@innostes/ui`. Built on Base UI's field primitive, `Field` automatically links labels to controls via `htmlFor`, connects descriptive notes and error messages via `aria-describedby`, and manages `aria-invalid` without manual ID wiring.
 
 <ComponentPreview name="forms/field/basic" />
 
@@ -1566,112 +2245,343 @@ import {
   Fieldset,
   FieldsetLegend,
   Form,
-  Label,
+  FormActions,
+  FormGrid,
+  FormSection,
 } from '@innostes/ui';
 ```
 
-## Anatomy
+## When to use
+
+- **Use Field** around any input, select, textarea, or checkbox to automatically manage accessible names, helper text, and validation feedback.
+- **Use Form** to coordinate form submission, capture values as keyed objects, map server validation errors, and focus the first invalid control automatically.
+- **Use FormGrid and FormSection** to arrange complex ERP forms into structured, responsive multi-column layouts.
+
+## Examples
+
+### Purchase order header
+
+A realistic ERP purchase order header combining `Form`, `FormGrid`, `Field`, `Select`, `Input`, and `FormActions`:
+
+<ComponentPreview name="forms/field/purchase-order-header" />
+
+### Native constraint validation
+
+`Field` integrates with standard browser HTML5 constraint validation attributes (`required`, `minLength`, `pattern`, `min`, `max`):
 
 ```tsx
-<Form>
-  <Fieldset>
-    <FieldsetLegend />
-    <Field>
-      <FieldLabel />
-      {/* Input, Textarea, Select, Checkbox, … */}
-      <FieldDescription />
-      <FieldError />
-    </Field>
-  </Fieldset>
-</Form>
-```
-
-Every innostes form control works inside `Field`: the label, description and error are linked to
-it automatically (`for`/`id`, `aria-describedby`, `aria-invalid`).
-
-## Validation and server errors
-
-Validation uses native constraints (`required`, `type`, `minLength`, `pattern`, …) and the
-`validate` prop. Server errors go to `Form`'s `errors` prop, keyed by field `name`, and show in the
-matching `FieldError`.
-
-<ComponentPreview name="forms/field/form" />
-
-- Use `match` on `FieldError` to show your own message per constraint
-  (`valueMissing`, `typeMismatch`, `tooShort`, …). Without children it shows the browser message.
-- `validationMode` on `Field` (`onSubmit` by default, or `onBlur` / `onChange`) controls when it runs.
-- `onFormSubmit` receives the values as an object, keyed by `name`.
-
-## With React Hook Form or TanStack Form
-
-The controls are regular inputs, so form libraries work as usual. Pass their error state to the field:
-
-```tsx
-<Field name="email" invalid={!!errors.email}>
-  <FieldLabel>Email</FieldLabel>
-  <Input {...register('email')} />
-  <FieldError match={!!errors.email}>{errors.email?.message}</FieldError>
+<Field name="email">
+  <FieldLabel required>Work email</FieldLabel>
+  <Input type="email" required />
+  <FieldError match="valueMissing">Email address is required.</FieldError>
+  <FieldError match="typeMismatch">Enter a valid email address.</FieldError>
 </Field>
 ```
 
-## Label
+### Custom and asynchronous validation
 
-`Label` is a standalone `<label>` for controls outside a `Field`. Inside a `Field`, use `FieldLabel`.
+Supply a custom validator function via the `validate` prop on `Field`. The function receives the control value and returns an error message string or `null`:
+
+```tsx
+<Field
+  name="poNumber"
+  validate={async (value) => {
+    if (!value) return 'PO number is required';
+    const exists = await checkPoExistsOnServer(String(value));
+    return exists ? 'This purchase order number already exists.' : null;
+  }}
+>
+  <FieldLabel required>PO number</FieldLabel>
+  <Input placeholder="PO-2026-0000" />
+  <FieldError match="customError" />
+</Field>
+```
+
+### Server errors mapped to fields
+
+When a backend API rejects a submission, pass the returned error record to `Form`'s `errors` prop. Each error maps automatically to the matching `<FieldError>` child:
+
+<ComponentPreview name="forms/field/form" />
+
+### Validation timing and focus management
+
+By default, validation runs when the form is submitted (`validationMode="onSubmit"`). You can configure `validationMode` on individual fields or across the entire `Form`:
+
+- `onSubmit`: Validates only upon form submission (avoids premature nagging).
+- `onBlur`: Validates when the user tabs out of the input.
+- `onChange`: Re-validates immediately on keystroke once the field is dirty.
+
+When a submission fails validation, `Form` automatically moves keyboard focus to the **first invalid field** in DOM order, allowing keyboard and screen-reader users to remediate mistakes immediately.
 
 ## Accessibility
 
-- Errors set `aria-invalid` on the control and are announced through `aria-describedby`.
-- `required` on `FieldLabel` adds a visual `*` hidden from screen readers. Set `required` on the
-  control as well so it's announced and validated.
-- `Fieldset` renders a native `<fieldset>`; `disabled` disables every control inside.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus sequentially across interactive controls inside the form.' },
+    { key: 'Enter', action: 'Submits the form when focused inside a single-line input field.' },
+    { key: 'Escape', action: 'Dismisses active select dropdowns or combobox popups without closing the form.' },
+  ]}
+/>
 
-<ApiTable components={['Field', 'FieldLabel', 'FieldDescription', 'FieldError', 'FieldItem', 'Fieldset', 'FieldsetLegend', 'Form', 'Label']} baseUi="field" />
+### Screen readers and ARIA
+
+- **Automatic `aria-describedby`**: `Field` computes unique internal IDs and sets `aria-describedby` pointing to both `<FieldDescription>` and `<FieldError>`.
+- **`aria-invalid`**: Automatically set to `true` on the enclosed input whenever validation fails.
+- **Live region error announcements**: `<FieldError>` emits errors in an ARIA live region so screen readers announce corrections without requiring navigation away from the current field.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always wrap interactive form inputs inside a `<Field>` with a visible `<FieldLabel>` for sustained accessibility.
+  </Do>
+  <Dont>
+    Never rely on input `placeholder` text as a substitute for a visible `<FieldLabel>`.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Write specific, constructive error messages explaining how to resolve the issue (e.g. "Enter an 8-character GSTIN number").
+  </Do>
+  <Dont>
+    Never emit vague errors such as "Invalid input" or "Field error".
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Field',
+    'FieldLabel',
+    'FieldDescription',
+    'FieldError',
+    'FieldItem',
+    'Fieldset',
+    'FieldsetLegend',
+    'Form',
+    'FormActions',
+    'FormGrid',
+    'FormSection',
+  ]}
+  baseUi="field"
+/>
+
+## Related
+
+- [Input](/ui/docs/components/forms/input) — Single-line text input primitives.
+- [Select](/ui/docs/components/forms/select) — Dropdown menu selection.
+- [FormLayout](/ui/docs/components/layout/form-layout) — High-level multi-step form layout container.
 
 ---
 
 ## File Dropzone (https://innostes.com/ui/docs/components/forms/file-dropzone)
 
-Type, size and count checks, image thumbnails, and native form submission.
+MIME type and extension checking, file size and count constraints, image thumbnails, and native form integration.
 
 <ComponentPreview name="forms/file-dropzone/basic" />
 
 ## Import
 
 ```tsx
-import { FileDropzone, formatBytes } from '@innostes/ui';
+import {
+  FileDropzone,
+  formatBytes,
+  type FileDropzoneProps,
+  type FileRejection,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `FileDropzone` when users need to attach documents, images, spreadsheets, or archives to records:
+
+- Attaching purchase order receipts, vendor contracts, or shipping manifests.
+- Uploading batch CSV or XLSX files for bulk inventory or price list imports.
+- Adding company logos, user avatars, or product catalogue photography.
+
+When choosing between file input patterns:
+- Use `FileDropzone` when users benefit from a prominent drag target, thumbnail previews, and instant client-side file rejection messages.
+- Use a standard [Button](/ui/docs/components/actions/button) wrapping a visually hidden native `<input type="file">` if screen real estate is constrained to a single compact row.
+
+## Examples
+
+### Basic upload zone
+
+Provide `name`, `accept`, `maxSize`, and a helpful `hint` describing allowed extensions and file sizes.
 
 ```tsx
-<FileDropzone
-  name="attachments"
-  accept="image/*,.pdf"
-  maxSize={5_000_000}
-  maxFiles={5}
-  hint="PDF or images, up to 5 MB"
-  value={files}
-  onValueChange={setFiles}
-/>
+'use client';
+
+import { useState } from 'react';
+import { FileDropzone } from '@innostes/ui';
+
+export function ReceiptAttachment() {
+  const [files, setFiles] = useState<File[]>([]);
+
+  return (
+    <FileDropzone
+      name="receipts"
+      accept="image/*,.pdf"
+      maxSize={5_000_000}
+      maxFiles={3}
+      hint="PDF or images, up to 5 MB each"
+      value={files}
+      onValueChange={setFiles}
+    />
+  );
+}
 ```
 
-- `accept` uses the native syntax: extensions (`.csv`), MIME types (`application/pdf`) and wildcards (`image/*`).
-- Rejected files are listed under the zone with the reason, and passed to `onReject` as `{ file, reasons }`, where reasons are `type`, `size` or `count`.
-- `multiple={false}` keeps one file; a new one replaces it.
-- The files are mirrored into a real `<input type="file" name>`, so a plain `<form>` submits them. For uploads with progress, read `value` and upload it yourself.
-- `showFileList={false}` hides the built-in list so you can render your own (e.g. with upload progress). `formatBytes` formats sizes.
+### File constraints and validation
+
+`FileDropzone` validates dropped or selected files against `accept`, `maxSize`, and `maxFiles`. Invalid files trigger `onReject` with an array of `FileRejection` objects explaining why each file was disallowed (`type`, `size`, or `count`).
+
+```tsx
+'use client';
+
+import { FileDropzone, type FileRejection } from '@innostes/ui';
+
+export function StrictDropzone() {
+  const handleReject = (rejections: FileRejection[]) => {
+    rejections.forEach(({ file, reasons }) => {
+      console.warn(`Rejected ${file.name}: ${reasons.join(', ')}`);
+    });
+  };
+
+  return (
+    <FileDropzone
+      accept=".csv,.xlsx"
+      maxSize={2_000_000}
+      maxFiles={1}
+      multiple={false}
+      hint="Single CSV or XLSX file up to 2 MB"
+      onReject={handleReject}
+    />
+  );
+}
+```
+
+### Custom file list with upload progress
+
+Set `showFileList={false}` to hide the built-in static list and render a custom file queue with live progress bars (e.g. while uploading chunks to Amazon S3 or Google Cloud Storage).
+
+<ComponentPreview name="forms/file-dropzone/upload-progress" />
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { FileDropzone, Progress, formatBytes } from '@innostes/ui';
+
+export function UploadWithProgress() {
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(65);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <FileDropzone
+        name="contract"
+        accept=".pdf"
+        showFileList={false}
+        onValueChange={setFiles}
+        hint="PDF documents up to 10 MB"
+      />
+      {files.map((file) => (
+        <div key={file.name} className="flex flex-col gap-1.5 rounded-lg border p-3">
+          <div className="flex justify-between text-sm">
+            <span>{file.name}</span>
+            <span>{formatBytes(file.size)}</span>
+          </div>
+          <Progress value={uploadProgress} aria-label={`Uploading ${file.name}`} />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Form integration and submission
+
+`FileDropzone` syncs its internal file list to a real, hidden `<input type="file" name="...">` element. This allows standard `multipart/form-data` form submissions and Next.js server actions to read uploaded files directly without manual FormData wiring.
+
+```tsx
+import { FileDropzone, Field, FieldLabel } from '@innostes/ui';
+
+export function VendorVerificationForm() {
+  return (
+    <form action="/api/v1/vendors/verify" method="POST" encType="multipart/form-data">
+      <Field>
+        <FieldLabel htmlFor="gst-cert">GST registration certificate</FieldLabel>
+        <FileDropzone
+          id="gst-cert"
+          name="certificate"
+          accept=".pdf"
+          maxFiles={1}
+          required
+        />
+      </Field>
+    </form>
+  );
+}
+```
 
 ## Accessibility
 
-- The "Browse files" button opens the native picker, so keyboard and screen-reader users never need drag and drop.
-- `hint` is linked to the button with `aria-describedby`.
-- Rejections are announced with `role="alert"`.
+`FileDropzone` complies with WCAG 2.2 AA non-text contrast, keyboard access, and assistive technology requirements.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus to the "Browse files" button inside the zone or removal buttons in the list.' },
+    { key: 'Enter / Space', action: 'Activates the focused "Browse files" trigger, opening the native operating system file picker.' },
+  ]}
+/>
+
+### Screen readers
+
+- The file input and browse action are exposed via an accessible `<button>` connected to the hidden file input. Users never need drag-and-drop gestures to upload files.
+- The `hint` text is linked to the browse trigger via `aria-describedby`.
+- When files are rejected due to invalid extensions, exceeding byte counts, or count limits, error notifications are injected inside an ARIA live region (`role="alert"`).
+- Remove buttons in the file list provide explicit accessible labels including the file name (e.g., `Remove invoice-001.pdf`).
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always validate file MIME types, byte sizes, and magic numbers on the backend server before storage.',
+    code: `// Express / Fastify / FastAPI server check\nif (file.size > 5_000_000) raise_error();`,
+  }}
+  dont={{
+    description: 'Never trust client-side accept filters as a security boundary against malicious executables or payloads.',
+    code: `// INSECURE: Assuming accept=".pdf" prevents malicious file execution\nconst saveToDisk = (file) => fs.writeFileSync(file.name, file.buffer);`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always display explicit file size and format limits in the hint so users know constraints beforehand.',
+    code: `<FileDropzone hint="PDF or PNG up to 10 MB each, maximum 3 files" />`,
+  }}
+  dont={{
+    description: 'Do not hide size and type constraints until after the user attempts a failed upload.',
+    code: `<FileDropzone /> // Missing guidance`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['FileDropzone']} />
+
+## Related
+
+- [Button](/ui/docs/components/actions/button) — Compact trigger for custom file picker patterns.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress indicator for asynchronous file transfers.
+- [Field](/ui/docs/components/forms/field) — Accessible form field container with label, description, and error state.
 
 ---
 
@@ -1699,7 +2609,9 @@ Enterprise applications rely heavily on accurate, structured data entry. innoste
 
 ## Input Group (https://innostes.com/ui/docs/components/forms/input-group)
 
-InputGroup, SearchInput (clear, Escape, shortcut hint) and PasswordInput (show/hide).
+Unified input container merging leading and trailing addons, copy triggers, and currency labels.
+
+`InputGroup` merges single-line inputs with leading and trailing addons into a single contiguous bordered track. It is designed for URL prefixes, monetary currency denominations (e.g. `₹` and `INR`), unit indicators (e.g. `kg`, `litres`), and inline copy buttons.
 
 <ComponentPreview name="forms/input-group/basic" />
 
@@ -1715,94 +2627,239 @@ import {
 } from '@innostes/ui';
 ```
 
-## InputGroup
+## When to use
+
+- **Use InputGroup** when an input requires an explicit unit of measurement, protocol prefix (`https://`), currency symbol, or action button directly attached to the input boundary.
+- **Use Input** for plain text fields that do not require affixed addons.
+- **Use NumberField** when capturing numbers that require stepper up/down buttons and automatic locale formatting.
+
+## Examples
+
+### Currency and unit addons
+
+Add static currency glyphs and unit labels:
 
 ```tsx
-<InputGroup>
-  <InputGroupAddon>https://</InputGroupAddon>
-  <InputGroupInput placeholder="acme" aria-label="Workspace" />
-  <InputGroupAddon>.innostes.app</InputGroupAddon>
-</InputGroup>
+<Field>
+  <FieldLabel>Procurement unit price</FieldLabel>
+  <InputGroup>
+    <InputGroupAddon>₹</InputGroupAddon>
+    <InputGroupInput inputMode="decimal" placeholder="0.00" />
+    <InputGroupAddon>INR</InputGroupAddon>
+  </InputGroup>
+</Field>
 ```
 
-`InputGroupAddon` has two looks: `variant="text"` (default) for units and domains, and
-`variant="icon"` for icons and small buttons.
+### URL protocol prefix
 
-## SearchInput
+Affix domain and protocol prefixes:
 
 ```tsx
-<SearchInput aria-label="Search orders" placeholder="Search orders…" onValueChange={setQuery} shortcut="⌘K" />
+<Field>
+  <FieldLabel>Tenant portal address</FieldLabel>
+  <InputGroup>
+    <InputGroupAddon>https://</InputGroupAddon>
+    <InputGroupInput placeholder="northwind" />
+    <InputGroupAddon>.innostes.com</InputGroupAddon>
+  </InputGroup>
+</Field>
 ```
 
-Escape and the × button clear it. `onValueChange` fires on every keystroke; debounce in your data
-layer if each change triggers a request.
+### Icon addon with inline action button
 
-## PasswordInput
+Combine an icon prefix with a trailing copy trigger button:
 
 ```tsx
-<PasswordInput name="password" autoComplete="current-password" required />
+<Field>
+  <FieldLabel>ERP webhook key</FieldLabel>
+  <InputGroup>
+    <InputGroupAddon variant="icon">
+      <Key className="size-4 text-muted-foreground" />
+    </InputGroupAddon>
+    <InputGroupInput defaultValue="whsec_908234892019" readOnly font-mono />
+    <InputGroupAddon variant="icon" className="pe-1">
+      <Button
+        size="sm"
+        variant="ghost"
+        iconOnly
+        aria-label="Copy webhook secret"
+        onClick={() => navigator.clipboard.writeText('whsec_908234892019')}
+      >
+        <Copy className="size-3.5" />
+      </Button>
+    </InputGroupAddon>
+  </InputGroup>
+</Field>
 ```
 
-The toggle button has `aria-pressed` and a label that changes ("Show password" / "Hide password").
-Translate it with `toggleLabels`.
+## Accessibility
 
-## API Reference
+### Keyboard navigation
 
-<ApiTable components={['InputGroup', 'InputGroupAddon', 'SearchInput', 'PasswordInput']} baseUi="input" />
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Focuses the inner input field, or moves to the interactive addon button if present.' },
+    { key: 'Space / Enter', action: 'Triggers action buttons housed within the addon slots.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Focus containment**: Clicking on a static text or icon addon transfers focus automatically to the nested input element.
+- **Semantic grouping**: The container groups visual addons without fragmenting the accessibility tree, preserving standard `aria-describedby` associations from `<Field>`.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use `InputGroupAddon` for short units (e.g. `₹`, `kg`, `cm`, `https://`) that provide immediate formatting context.
+  </Do>
+  <Dont>
+    Never place lengthy prose or instructional sentences inside an addon slot; use `<FieldDescription>` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Always supply an explicit `aria-label` when placing an icon-only button inside an addon slot.
+  </Do>
+  <Dont>
+    Never attach multiple overlapping action buttons to a single input track; limit addons to one clear secondary trigger.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable components={['InputGroup', 'InputGroupAddon', 'InputGroupInput', 'SearchInput', 'PasswordInput']} baseUi="input" />
+
+## Related
+
+- [Input](/ui/docs/components/forms/input) — Base single-line text input field.
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form layout and validation wrapper.
+- [NumberField](/ui/docs/components/forms/number-field) — Specialized numerical input with step buttons.
 
 ---
 
 ## Input (https://innostes.com/ui/docs/components/forms/input)
 
-Three sizes, invalid and disabled states, file inputs, and automatic Field wiring.
+Accessible single-line input field supporting multiple types, clear buttons, password visibility toggles, and automatic Field wiring.
+
+import { InputPlayground } from '@/components/docs/input-playground';
+
+`Input` is the primary single-line text entry primitive in `@innostes/ui`. Built on Base UI's input primitive, it automatically coordinates validation states (`aria-invalid`), disabled styling, focus rings, and font metrics across three standardized enterprise size scales.
 
 <ComponentPreview name="forms/input/basic" />
 
 ## Import
 
 ```tsx
-import { Input } from '@innostes/ui';
+import { Input, SearchInput, PasswordInput, inputVariants } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Use it inside a [Field](/ui/docs/components/forms/field) so it gets a label and validation:
+- **Use Input** for brief, single-line textual data such as names, email addresses, phone numbers, codes, or URL slugs.
+- **Use Textarea** when users need to enter multiline sentences, remarks, or notes.
+- **Use NumberField** when capturing numeric data that requires stepping, bounds checking, or currency formatting.
+- **Use InputGroup** when prepending or appending icons, currency symbols, or action buttons directly to the field track.
+
+## Examples
+
+### Interactive playground
+
+Customize sizes, HTML types, and validation states in real time:
+
+<InputPlayground />
+
+### Sizes
+
+Inputs support three standardized heights aligning with buttons and selects:
 
 ```tsx
-<Field>
-  <FieldLabel>Email</FieldLabel>
-  <Input type="email" name="email" required />
-  <FieldError />
-</Field>
+<Input size="sm" placeholder="Compact input (32px)" />
+<Input size="md" placeholder="Default input (40px)" />
+<Input size="lg" placeholder="Comfortable input (48px)" />
 ```
 
-`size` changes the height (`sm` 32px, `md` 40px, `lg` 48px). The native `size` attribute is
-available as `htmlSize`.
+### Search input
 
-## Styling other controls like an input
-
-`inputVariants()` returns the input classes, for building custom controls that match:
+`SearchInput` provides an integrated search glyph, clear button, and accessible keyboard shortcut styling:
 
 ```tsx
-import { inputVariants } from '@innostes/ui';
+<SearchInput
+  placeholder="Search purchase orders or vendor codes..."
+  onClear={() => console.log('Search cleared')}
+/>
+```
 
-<div className={inputVariants({ size: 'sm' })}>…</div>
+### Password input
+
+`PasswordInput` includes an accessible password visibility toggle button with eye icons:
+
+```tsx
+<PasswordInput placeholder="Enter ERP account password" />
+```
+
+### File upload input
+
+Inputs with `type="file"` inherit proper custom file-picker button styling:
+
+```tsx
+<Input type="file" aria-label="Upload supplier invoice PDF" />
 ```
 
 ## Accessibility
 
-- Always give the input a label: `FieldLabel`, a `<label>`, or `aria-label`.
-- Invalid styles come from `aria-invalid` (set automatically inside `Field`).
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus into the text field or moves forward to the next form element.' },
+    { key: 'Shift + Tab', action: 'Moves focus back to the preceding form control.' },
+    { key: 'Escape', action: 'Clears search text when focused inside a SearchInput.' },
+  ]}
+/>
 
-<ApiTable components={['Input']} baseUi="input" />
+### Screen readers and ARIA
+
+- **Accessible naming**: An input must always be associated with a label using `<FieldLabel>`, a native `<label htmlFor="...">`, or an explicit `aria-label`.
+- **Validation state**: When wrapped inside `<Field>`, `aria-invalid="true"` is automatically populated upon validation failure, triggering red border rings and auditory error feedback.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use placeholder text only for formatting examples (e.g. `PO-2026-0001`), never as a replacement for a visible label.
+  </Do>
+  <Dont>
+    Never rely on placeholder text to convey instructions, because placeholders disappear once the user begins typing.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Set appropriate `type`, `inputMode`, and `autoComplete` attributes (such as `type="email"` or `inputMode="numeric"`).
+  </Do>
+  <Dont>
+    Never disable autocomplete on standard login or address fields unless required by strict security policies.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable components={['Input', 'SearchInput', 'PasswordInput']} baseUi="input" />
+
+## Related
+
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form container managing labels, descriptions, and errors.
+- [InputGroup](/ui/docs/components/forms/input-group) — Prepend and append icons or currency symbols to input fields.
+- [NumberField](/ui/docs/components/forms/number-field) — Specialized numerical input with step increment buttons.
 
 ---
 
 ## Locale Selects (https://innostes.com/ui/docs/components/forms/locale-select)
 
-Names come from the browser's Intl API in the user's language. No data files to bundle or update.
+Pre-configured searchable select components returning standard ISO and IANA codes with zero third-party dataset bundle overhead.
 
 <ComponentPreview name="forms/locale-select/basic" />
 
@@ -1815,41 +2872,235 @@ import {
   LanguageSelect,
   CurrencySelect,
   DateFormatSelect,
+  type CountrySelectProps,
+  type TimezoneSelectProps,
+  type LanguageSelectProps,
+  type CurrencySelectProps,
+  type DateFormatSelectProps,
 } from '@innostes/ui';
 ```
 
-## Values
+## When to use
 
-| Component | Value | Example |
-| --- | --- | --- |
-| `CountrySelect` | ISO 3166-1 alpha-2 | `"IN"` |
-| `TimezoneSelect` | IANA time zone | `"Asia/Kolkata"` |
-| `LanguageSelect` | BCP 47 tag | `"en-IN"` |
-| `CurrencySelect` | ISO 4217 | `"INR"` |
-| `DateFormatSelect` | Pattern | `"DD/MM/YYYY"` |
+Use the locale select family when capturing regional and internationalisation configuration on settings pages, customer onboarding screens, or vendor registries:
 
-These are the standard codes your backend and `Intl` already use.
+- **CountrySelect**: Assigning registered business addresses, shipping destinations, or tax jurisdictions using ISO 3166-1 alpha-2 codes (e.g. `"IN"`, `"DE"`, `"US"`).
+- **TimezoneSelect**: Configuring tenant business hours, shift rosters, or automated invoice generation schedules using IANA time zone identifiers (e.g. `"Asia/Kolkata"`).
+- **LanguageSelect**: Setting user interface preferences or customer notification templates using BCP 47 language tags (e.g. `"en-IN"`, `"hi"`).
+- **CurrencySelect**: Defining multi-currency pricing, base accounting ledgers, or payment gateway currencies using ISO 4217 codes (e.g. `"INR"`, `"USD"`).
+- **DateFormatSelect**: Letting users configure their preferred display format for calendar and invoice dates (e.g. `"DD/MM/YYYY"`).
 
-## Options
+When choosing between locale components and general selects:
+- Use `LocaleSelect` components when selecting from standard international registries—names automatically localise to the user's browser runtime through `Intl.DisplayNames` without downloading megabytes of static JSON files.
+- Use [SearchableSelect](/ui/docs/components/forms/searchable-select) or [Combobox](/ui/docs/components/forms/combobox) when presenting domain-specific datasets (such as warehouse bins, internal cost centres, or custom product groups).
 
-- `locale` sets the language of the names: `<CountrySelect locale="de" />` shows "Deutschland".
-- `priority` lists some values first, e.g. the countries you operate in: `priority={['IN', 'US']}`.
-- `include` limits the list, e.g. to the currencies you support.
-- `TimezoneSelect` is sorted by UTC offset and labelled `(GMT+05:30) Asia/Kolkata`; search matches the
-  city and the offset. Renamed zones (Calcutta → Kolkata, Kiev → Kyiv) show their current name.
-- `LanguageSelect` shows each language's own name too ("German · Deutsch"); pass `languages` for your list.
-- `CountrySelect` uses emoji flags. Windows shows these as two letters; pass `renderFlag` to use an
-  image or icon library instead.
+## Examples
 
-## API Reference
+### Country selection
 
-<ApiTable components={['CountrySelect', 'TimezoneSelect', 'LanguageSelect', 'CurrencySelect', 'DateFormatSelect']} baseUi="combobox" />
+`CountrySelect` provides searchable country names accompanied by flag indicators. You can specify `priority` to pin operational jurisdictions to the top of the list.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { CountrySelect, Label } from '@innostes/ui';
+
+export function CompanyRegistrationCountry() {
+  const [country, setCountry] = useState('IN');
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="registered-country">Country of incorporation</Label>
+      <CountrySelect
+        id="registered-country"
+        name="countryCode"
+        value={country}
+        onValueChange={setCountry}
+        priority={['IN', 'AE', 'SG', 'GB', 'US']}
+      />
+    </div>
+  );
+}
+```
+
+### Time zone selection
+
+`TimezoneSelect` lists IANA time zone names sorted by UTC offset, formatting each item with its current offset (e.g., `(GMT+05:30) Asia/Kolkata`). Search matches both city names and GMT offset numerals.
+
+```tsx
+import { TimezoneSelect, Label } from '@innostes/ui';
+
+export function WarehouseTimezone() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="warehouse-tz">Operating time zone</Label>
+      <TimezoneSelect
+        id="warehouse-tz"
+        name="timeZone"
+        defaultValue="Asia/Kolkata"
+      />
+    </div>
+  );
+}
+```
+
+### Language selection
+
+`LanguageSelect` displays language names in both the active user's language and the native autonym (e.g. "German · Deutsch").
+
+```tsx
+import { LanguageSelect, Label } from '@innostes/ui';
+
+export function DocumentLanguage() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="doc-lang">Invoice template language</Label>
+      <LanguageSelect
+        id="doc-lang"
+        name="language"
+        defaultValue="en-IN"
+        priority={['en-IN', 'hi', 'ta', 'te']}
+      />
+    </div>
+  );
+}
+```
+
+### Currency selection
+
+`CurrencySelect` resolves ISO 4217 currency names and symbols through `Intl.DisplayNames`.
+
+```tsx
+import { CurrencySelect, Label } from '@innostes/ui';
+
+export function LedgerCurrency() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="ledger-curr">Functional currency</Label>
+      <CurrencySelect
+        id="ledger-curr"
+        name="currency"
+        defaultValue="INR"
+        priority={['INR', 'USD', 'EUR', 'GBP', 'AED']}
+      />
+    </div>
+  );
+}
+```
+
+### Date format selection
+
+`DateFormatSelect` presents common regional date patterns (e.g. `DD/MM/YYYY`, `MM/DD/YYYY`, `YYYY-MM-DD`).
+
+```tsx
+import { DateFormatSelect, Label } from '@innostes/ui';
+
+export function DisplayDateFormat() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="date-fmt">Preferred date format</Label>
+      <DateFormatSelect
+        id="date-fmt"
+        name="dateFormat"
+        defaultValue="DD/MM/YYYY"
+      />
+    </div>
+  );
+}
+```
+
+### Prioritised options and inclusion filters
+
+Use `include` to restrict options to an approved whitelist (e.g. only countries where your logistics network operates), and `priority` to pin preferred items to the top of the dropdown menu:
+
+```tsx
+import { CountrySelect } from '@innostes/ui';
+
+export function ShippingJurisdictions() {
+  return (
+    <CountrySelect
+      include={['IN', 'AE', 'SG', 'MY']}
+      priority={['IN']}
+      placeholder="Select shipping destination"
+      aria-label="Shipping country"
+    />
+  );
+}
+```
+
+## Accessibility
+
+All locale pickers are built on top of [SearchableSelect](/ui/docs/components/forms/searchable-select) and Base UI Combobox/Select primitives.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Down Arrow / Up Arrow', action: 'Navigates through the list of countries, currencies, time zones, or languages.' },
+    { key: 'Enter', action: 'Selects the currently focused locale option and closes the popover.' },
+    { key: 'Escape', action: 'Closes the popup menu and returns focus to the search input.' },
+    { key: 'Character keys', action: 'Filters options dynamically in real time.' },
+  ]}
+/>
+
+### Screen readers
+
+- Triggers announce their expanded/collapsed state via `aria-expanded`.
+- Search inputs carry `role="combobox"` with `aria-autocomplete="list"`.
+- Options are marked with `role="option"` and `aria-selected` indicates current selection.
+- List filtering announces matched option counts to assistive technology.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use the priority prop to place the home country and major trading partners at the top of long lists.',
+    code: `<CountrySelect priority={['IN', 'AE', 'US']} />`,
+  }}
+  dont={{
+    description: 'Do not force users to scroll through 200+ alphabetically ordered countries to select their domestic region.',
+    code: `<CountrySelect /> // Without priority in a localized Indian ERP context`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Store standard ISO/IANA codes in your database (e.g., "Asia/Kolkata", "INR", "IN").',
+    code: `const payload = { currency: 'INR', country: 'IN' };`,
+  }}
+  dont={{
+    description: 'Do not store localized display names like "Indian Rupee" or "India" in transaction tables.',
+    code: `// Flaky and difficult to query across localized tenants\nconst payload = { currency: 'Indian Rupee' };`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'CountrySelect',
+    'TimezoneSelect',
+    'LanguageSelect',
+    'CurrencySelect',
+    'DateFormatSelect',
+  ]}
+  baseUi="combobox"
+/>
+
+## Related
+
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Generic searchable single-select component.
+- [Select](/ui/docs/components/forms/select) — Standard select dropdown for concise lists.
+- [Combobox](/ui/docs/components/forms/combobox) — Typeahead combobox with autocomplete.
 
 ---
 
 ## Number Field (https://innostes.com/ui/docs/components/forms/number-field)
 
-Min/max clamping, keyboard and wheel stepping, currency and percent formats.
+Accessible numeric input field supporting min/max bounds, wheel stepping, and en-IN currency and percent formats.
+
+`NumberField` provides a precision numerical input control. Built on Base UI's number field primitive, it manages numeric stepping, bounds clamping (`min`, `max`), keyboard increment shortcuts, and automatic `Intl.NumberFormat` localization for Indian Rupees (`INR`), percentages, and quantities.
 
 <ComponentPreview name="forms/number-field/basic" />
 
@@ -1859,36 +3110,125 @@ Min/max clamping, keyboard and wheel stepping, currency and percent formats.
 import { NumberField } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use NumberField** when capturing quantitative figures that benefit from stepping, bounds clamping, or locale-aware currency formatting (e.g. order quantities, prices, discount rates).
+- **Use Input** with `type="number"` only for simple unbounded numbers without stepping or formatting needs.
+- **Use Slider** when visual spatial selection along a continuous track is preferred over typed numeric input.
+
+## Examples
+
+### Currency formatting in en-IN
+
+`NumberField` formats numbers according to Indian numbering grouping rules (thousands, lakhs, crores) when supplied with `locale="en-IN"`:
 
 ```tsx
-<NumberField defaultValue={1} min={0} max={99} aria-label="Quantity" />
+<Field>
+  <FieldLabel>Procurement invoice total</FieldLabel>
+  <NumberField
+    defaultValue={145280.50}
+    step={100}
+    locale="en-IN"
+    format={{ style: 'currency', currency: 'INR' }}
+  />
+  <FieldDescription>Displays as ₹1,45,280.50 with proper Indian digit grouping.</FieldDescription>
+</Field>
+```
 
+### Percentage calculation
+
+When formatting percentages, supply a decimal fraction (e.g. `0.18` for 18%):
+
+```tsx
+<Field>
+  <FieldLabel>GST tax slab</FieldLabel>
+  <NumberField
+    defaultValue={0.18}
+    min={0}
+    max={0.28}
+    step={0.01}
+    locale="en-IN"
+    format={{ style: 'percent' }}
+  />
+</Field>
+```
+
+### Bounds and step behavior
+
+Enforce minimum, maximum, and step increments:
+
+```tsx
 <NumberField
-  value={price}
-  onValueChange={setPrice}
-  step={0.01}
-  format={{ style: 'currency', currency: 'EUR' }}
-  aria-label="Price"
+  defaultValue={10}
+  min={1}
+  max={100}
+  step={5}
+  largeStep={25}
+  aria-label="Pallet batch quantity"
 />
 ```
 
-`format` takes [`Intl.NumberFormat` options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#options)
-and formats for the user's locale. The value stays a plain `number` (or `null` when empty).
+- **`step`**: Determines the increment for Up/Down arrow keys and stepper buttons (defaults to `1`).
+- **`largeStep`**: Determines the increment for `PageUp` and `PageDown` keys (defaults to `10`).
+- **Clamping**: Typing a number outside `[min, max]` automatically clamps to the boundary when the field loses focus.
 
 ## Accessibility
 
-- Arrow Up/Down step by `step`; Page Up/Down by `largeStep`; Home/End jump to `min`/`max`.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowUp', action: 'Increments the current value by one step.' },
+    { key: 'ArrowDown', action: 'Decrements the current value by one step.' },
+    { key: 'PageUp', action: 'Increments the current value by largeStep.' },
+    { key: 'PageDown', action: 'Decrements the current value by largeStep.' },
+    { key: 'Home', action: 'Jumps directly to the min bound value if defined.' },
+    { key: 'End', action: 'Jumps directly to the max bound value if defined.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="spinbutton"`**: Identifies the control as an accessible numeric spinner.
+- **ARIA attributes**: Automatically exposes `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, and `aria-valuetext` (reflecting localized formatted currency or percentages).
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Specify `locale="en-IN"` and `currency="INR"` for Indian enterprise ERP applications to guarantee correct rupee symbols and lakh/crore commas.
+  </Do>
+  <Dont>
+    Never hardcode currency symbols into input value strings manually; let `NumberField`'s `format` prop handle internationalisation.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Set sensible `min` bounds (such as `min={0}` or `min={1}`) to prevent invalid negative quantities on purchase orders.
+  </Do>
+  <Dont>
+    Never leave numeric bounds open when negative values would break downstream accounting workflows.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['NumberField']} baseUi="number-field" />
+
+## Related
+
+- [Slider](/ui/docs/components/forms/slider) — Interactive sliding track selector for numeric ranges.
+- [InputGroup](/ui/docs/components/forms/input-group) — Affix currency symbols or units to standard text fields.
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form validation container.
 
 ---
 
 ## Radio Group (https://innostes.com/ui/docs/components/forms/radio-group)
 
-Arrow-key navigation, form submission and Field support.
+Accessible radio group primitive for selecting exactly one option from a visible set of choices.
+
+`RadioGroup` allows operators to select exactly one option from a set of mutually exclusive choices. Built on Base UI's radio primitive, it manages roving tabindex across options, coordinates native arrow-key navigation, and automatically exposes checked state attributes (`has-data-checked`) for custom card-style radio controls.
 
 <ComponentPreview name="forms/radio-group/basic" />
 
@@ -1898,100 +3238,351 @@ Arrow-key navigation, form submission and Field support.
 import { Radio, RadioGroup } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use RadioGroup** when users must select exactly one option from a visible list of 2 to 5 options.
+- **Use Select** when screen real estate is limited or the list contains 5 to 15 options.
+- **Use Checkbox** when users can select multiple options independently or toggle a single agreement.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **RadioGroup** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential (e.g. shipping tier) |
+| **[Select](/ui/docs/components/forms/select)** | Single | 5 to 15 | No | Compact dropdown selection with a predefined list (e.g. payment terms) |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Long lists requiring keyboard search filtering (e.g. warehouse depot) |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Card-style radio options
+
+Style entire card containers using CSS `has-data-checked:` variants:
 
 ```tsx
-<RadioGroup name="plan" defaultValue="business" aria-label="Plan">
-  <label className="flex items-center gap-2"><Radio value="starter" /> Starter</label>
-  <label className="flex items-center gap-2"><Radio value="business" /> Business</label>
+<RadioGroup defaultValue="express" aria-label="Carrier shipping tier">
+  <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer has-data-checked:border-primary has-data-checked:bg-primary/5">
+    <Radio value="standard" className="mt-0.5" />
+    <div>
+      <span className="text-sm font-medium">Standard Road Transport</span>
+      <p className="text-xs text-muted-foreground">3-5 business days via Blue Dart</p>
+    </div>
+  </label>
+  <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer has-data-checked:border-primary has-data-checked:bg-primary/5">
+    <Radio value="express" className="mt-0.5" />
+    <div>
+      <span className="text-sm font-medium">Express Air Cargo</span>
+      <p className="text-xs text-muted-foreground">Next-day arrival at Bengaluru Airport</p>
+    </div>
+  </label>
 </RadioGroup>
 ```
 
-Use radios for 2–6 visible options. For longer lists, use [Select](/ui/docs/components/forms/select).
-Style a selected option's wrapper with `has-data-checked:` (as in the demo).
+### Form integration with field
+
+Coordinate radio groups inside `<Field>`:
+
+```tsx
+<Field name="settlementType">
+  <FieldLabel required>Settlement method</FieldLabel>
+  <RadioGroup defaultValue="neft">
+    <label className="flex items-center gap-2 text-sm"><Radio value="neft" /> NEFT / RTGS</label>
+    <label className="flex items-center gap-2 text-sm"><Radio value="upi" /> Corporate UPI</label>
+    <label className="flex items-center gap-2 text-sm"><Radio value="letter-of-credit" /> Letter of credit</label>
+  </RadioGroup>
+  <FieldError />
+</Field>
+```
 
 ## Accessibility
 
-- Arrow keys move and select; Tab enters and leaves the group.
-- Label the group (`aria-label`, or `aria-labelledby` pointing at a heading).
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowDown / ArrowRight', action: 'Moves selection and focus to the next radio option, wrapping to the first.' },
+    { key: 'ArrowUp / ArrowLeft', action: 'Moves selection and focus to the previous radio option, wrapping to the last.' },
+    { key: 'Space', action: 'Selects the currently focused radio button if not already selected.' },
+    { key: 'Tab', action: 'Enters or exits the radio group as a single combined tab stop.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="radiogroup"`**: Automatically applied to the wrapper container.
+- **Roving focus**: Only the selected radio button has `tabIndex={0}`, allowing the user to tab directly past the entire group once an option is set.
+- **`aria-checked`**: Screen readers announce "checked" or "not checked" automatically as arrow keys cycle options.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide a default selected value whenever possible so the form state is always deterministic.
+  </Do>
+  <Dont>
+    Never use `RadioGroup` for multi-item selection; use `Checkbox` or `CheckboxGroup` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Limit radio groups to 5 or fewer options to preserve vertical screen space in complex ERP layouts.
+  </Do>
+  <Dont>
+    Never present 10+ options in a radio group; use `Select` or `SearchableSelect` instead.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['RadioGroup', 'Radio']} baseUi="radio" />
+
+## Related
+
+- [Select](/ui/docs/components/forms/select) — Dropdown menu selection for medium option lists.
+- [Checkbox](/ui/docs/components/forms/checkbox) — Independent multi-item selection.
+- [ToggleGroup](/ui/docs/components/actions/toggle-group) — Connected segmented buttons for view toggling.
 
 ---
 
 ## Rich Text Editor (https://innostes.com/ui/docs/components/forms/rich-text-editor)
 
-Bold, headings, lists, quotes, links and undo, with Markdown shortcuts. Built on Tiptap, in a separate entry point.
+Bold, headings, lists, quotes, links, and history shortcuts packaged in a modular entry point with form validation support.
 
 <ComponentPreview name="forms/rich-text-editor/basic" />
 
-The editor lives in a **separate entry point** (`@innostes/ui/editor`), so apps without rich text never load it.
-
-## Installation
-
-It is built on [Tiptap](https://tiptap.dev) 3 (MIT), which works with React 17, 18 and 19. Install its peer dependencies:
-
-```sh
-pnpm add @tiptap/react @tiptap/pm @tiptap/core @tiptap/starter-kit @tiptap/extensions
-```
+The editor lives in a **separate entry point** (`@innostes/ui/editor`) so applications that do not require rich text editing do not bundle Tiptap dependencies.
 
 ## Import
 
 ```tsx
-import { RichTextEditor } from '@innostes/ui/editor';
+import {
+  RichTextEditor,
+  type RichTextEditorProps,
+  type RichTextEditorLabels,
+  type RichTextTool,
+} from '@innostes/ui/editor';
 ```
 
-## Usage
+## When to use
+
+Use `RichTextEditor` when users need to author formatted prose beyond the limits of a plain text area:
+
+- Adding warehouse delivery instructions, packing specifications, or special handling notes on purchase orders.
+- Editing product catalogue marketing descriptions with bolding, lists, and external reference links.
+- Authoring internal standard operating procedures (SOPs) or supplier terms and conditions.
+
+When choosing between text inputs:
+- Use [Textarea](/ui/docs/components/forms/textarea) for plain, unformatted multiline input (e.g. shipping street address, feedback comments, or remarks).
+- Use `RichTextEditor` when users require formatted structure such as bulleted lists, headings, and inline links.
+
+## Examples
+
+### Installation
+
+`RichTextEditor` is built on [Tiptap](https://tiptap.dev) 3. Install its peer dependencies in your application:
+
+```bash
+pnpm add @tiptap/react @tiptap/pm @tiptap/core @tiptap/starter-kit @tiptap/extensions
+```
+
+### Basic editor
+
+Provide `value` and `onValueChange` for controlled operation. An empty editor normalises to an empty string `""`, making standard form validation checks straightforward.
 
 ```tsx
-<Field>
-  <FieldLabel id="notes-label">Delivery notes</FieldLabel>
-  <RichTextEditor
-    aria-labelledby="notes-label"
-    placeholder="Gate code, contact person, unloading hours…"
-    value={notes}
-    onValueChange={setNotes}
-  />
-</Field>
+'use client';
+
+import { useState } from 'react';
+import { Field, FieldLabel } from '@innostes/ui';
+import { RichTextEditor } from '@innostes/ui/editor';
+
+export function PurchaseOrderNotes() {
+  const [content, setContent] = useState('');
+
+  return (
+    <Field>
+      <FieldLabel id="po-notes">Delivery and unloading notes</FieldLabel>
+      <RichTextEditor
+        aria-labelledby="po-notes"
+        placeholder="Specify delivery bay, contact numbers, and unloading hours…"
+        value={content}
+        onValueChange={setContent}
+      />
+    </Field>
+  );
+}
 ```
 
-- The value is **HTML**. An empty editor gives `''`, so required checks are simple.
-- `name` submits the HTML in a hidden input, for plain `<form>` posts.
-- `toolbar` picks and orders the buttons (`'|'` adds a divider), or `false` hides it. Markdown shortcuts still work: `**bold**`, `_italic_`, `## heading`, `- list`, `1. list`, `> quote`.
-- `readOnly` shows saved content without the toolbar or border, e.g. on a detail page.
-- `extensions` adds Tiptap extensions (character count, mentions, tables). `onReady` gives you the Tiptap `editor` for advanced control.
-- `labels` translates the toolbar and link form.
+### Form validation and error state
 
-## Security
+Pass `invalid={true}` (or integrate inside `Field` with validation errors) to apply the semantic destructive border and ring tokens, setting `data-invalid` and `aria-invalid`.
 
-Content is parsed against the editor's schema, so pasted or loaded HTML loses everything it doesn't support: scripts, event handlers, styles, images and unknown tags. Links only accept safe protocols (`javascript:` is refused).
+```tsx
+'use client';
 
-The HTML still comes from users. Sanitize it on the server before storing it, and again (or render it through this editor in `readOnly` mode) wherever you display it.
+import { useState } from 'react';
+import { Field, FieldLabel, FieldError } from '@innostes/ui';
+import { RichTextEditor } from '@innostes/ui/editor';
 
-## Keyboard
+export function ValidatedEditor() {
+  const [html, setHtml] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const isInvalid = hasSubmitted && html.trim().length === 0;
 
-| Shortcut | Action |
-| --- | --- |
-| Ctrl/⌘ + B, I, U | Bold, italic, underline |
-| Ctrl/⌘ + Shift + S | Strikethrough |
-| Ctrl/⌘ + Shift + 7 / 8 | Numbered / bulleted list |
-| Ctrl/⌘ + Shift + B | Quote |
-| Ctrl/⌘ + E | Inline code |
-| Ctrl/⌘ + Z / Shift + Z | Undo / redo |
+  return (
+    <Field invalid={isInvalid}>
+      <FieldLabel id="scope-label">Work scope description</FieldLabel>
+      <RichTextEditor
+        aria-labelledby="scope-label"
+        value={html}
+        onValueChange={setHtml}
+        invalid={isInvalid}
+      />
+      {isInvalid && <FieldError>Work scope description is required.</FieldError>}
+    </Field>
+  );
+}
+```
 
-The toolbar is one tab stop; arrow keys move between its buttons. Each formatting button reports whether it's on with `aria-pressed`.
+### Custom toolbar configuration
 
-## API Reference
+Customise the visible toolbar actions using the `toolbar` prop, or pass `false` to hide the visual toolbar while preserving keyboard and Markdown shortcuts. Use `'|'` to insert visual dividers between action groups.
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+
+export function MinimalEditor() {
+  return (
+    <RichTextEditor
+      toolbar={['bold', 'italic', '|', 'bulletList', 'orderedList', '|', 'link']}
+      placeholder="Type notes or use Markdown shortcuts like **bold** or - list"
+      aria-label="Terms summary"
+    />
+  );
+}
+```
+
+### Read-only content display
+
+Pass `readOnly={true}` to display saved HTML content safely without the editing chrome or toolbar.
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+
+const savedHtml = '<p>Goods must be delivered to <strong>Bay 4</strong>.</p>';
+
+export function ReadOnlyNotice() {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <RichTextEditor
+        value={savedHtml}
+        readOnly
+        aria-label="Saved instructions"
+      />
+    </div>
+  );
+}
+```
+
+### Tiptap extensions and editor instance
+
+Pass custom extensions through the `extensions` prop, and access the raw Tiptap instance via `onReady` for advanced programmatic manipulation.
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+import CharacterCount from '@tiptap/extension-character-count';
+import type { Editor } from '@tiptap/react';
+
+export function ExtendedEditor() {
+  const handleReady = (editor: Editor) => {
+    // Programmatic access to Tiptap editor API
+    console.info('Editor initialized', editor.getHTML());
+  };
+
+  return (
+    <RichTextEditor
+      extensions={[CharacterCount.configure({ limit: 1000 })]}
+      onReady={handleReady}
+      aria-label="Character counted specification"
+    />
+  );
+}
+```
+
+## Accessibility
+
+`RichTextEditor` uses Base UI Toolbar primitives to provide an accessible formatting experience.
+
+### Keyboard navigation
+
+The toolbar forms a single tab stop with horizontal arrow navigation.
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus from the toolbar into the document editing canvas.' },
+    { key: 'Left Arrow / Right Arrow', action: 'Navigates between formatting buttons within the toolbar.' },
+    { key: 'Mod + B', action: 'Toggles bold on selected text (Cmd+B on macOS, Ctrl+B on Windows/Linux).' },
+    { key: 'Mod + I', action: 'Toggles italic on selected text.' },
+    { key: 'Mod + U', action: 'Toggles underline on selected text.' },
+    { key: 'Mod + Shift + S', action: 'Toggles strikethrough formatting.' },
+    { key: 'Mod + Shift + 8', action: 'Converts current paragraph to an unordered bulleted list.' },
+    { key: 'Mod + Shift + 7', action: 'Converts current paragraph to an ordered numbered list.' },
+    { key: 'Mod + Shift + B', action: 'Converts current block into a blockquote.' },
+    { key: 'Mod + E', action: 'Toggles inline code formatting.' },
+    { key: 'Mod + Z', action: 'Undoes the previous editing action.' },
+    { key: 'Mod + Shift + Z', action: 'Redoes the previously undone editing action.' },
+  ]}
+/>
+
+### Screen readers
+
+- Formatting buttons include descriptive `aria-label` attributes and stateful `aria-pressed` values indicating whether the active selection carries that style.
+- The link configuration popover traps focus until applied or dismissed with Escape.
+- Form validation errors are associated with the editor via `aria-describedby` when wrapped in a `Field`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always sanitize user-submitted HTML on your server before persisting it or re-rendering it elsewhere.',
+    code: `// Sanitize with DOMPurify or sanitize-html on server\nconst cleanHtml = sanitizeHtml(dirtyHtml, allowedTagsConfig);`,
+  }}
+  dont={{
+    description: 'Never render saved HTML directly into other views using dangerouslySetInnerHTML without sanitisation.',
+    code: `// INSECURE: Risk of cross-site scripting (XSS)\n<div dangerouslySetInnerHTML={{ __html: unverifiedPayload }} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an accessible label using FieldLabel with id or aria-label so screen reader users understand the field purpose.',
+    code: `<FieldLabel id="spec-label">Item specification</FieldLabel>\n<RichTextEditor aria-labelledby="spec-label" />`,
+  }}
+  dont={{
+    description: 'Do not rely entirely on the placeholder text as the only descriptor of the required input.',
+    code: `<RichTextEditor placeholder="Item specification" />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['RichTextEditor']} />
+
+## Related
+
+- [Textarea](/ui/docs/components/forms/textarea) — Plain text multiline input for unformatted remarks.
+- [Field](/ui/docs/components/forms/field) — Accessible field container with labels, descriptions, and error states.
+- [Button](/ui/docs/components/actions/button) — Interactive button component.
 
 ---
 
 ## Searchable Select (https://innostes.com/ui/docs/components/forms/searchable-select)
 
-For long lists of simple options. Matches labels and keywords, accent-insensitive.
+Filterable single-select dropdown matching labels and keywords with accent-insensitive search.
+
+`SearchableSelect` wraps an accessible listbox with a searchable text filter. It is designed for medium-length client-side option sets (15 to 100+ items) such as warehouse branches, account owners, country destinations, or currency codes where users benefit from typing to instantly narrow the list.
 
 <ComponentPreview name="forms/searchable-select/basic" />
 
@@ -2001,36 +3592,120 @@ For long lists of simple options. Matches labels and keywords, accent-insensitiv
 import { SearchableSelect, type SearchableSelectOption } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use SearchableSelect** when selecting one option from a medium-sized list (15 to 100+ items) that can be filtered locally in the browser.
+- **Use Combobox** when the dataset is very large (hundreds or thousands of records), requires asynchronous server pagination, or allows freeform user-created tags.
+- **Use Select** when the list of options is small (under 15 items) and instant type-ahead suffices.
+- **Use RadioGroup** when comparing 2 to 5 options side-by-side.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **SearchableSelect** | Single | 15 to 100+ | Yes | Moderate lists requiring fast dropdown filter search (e.g. warehouse depot) |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[Select](/ui/docs/components/forms/select)** | Single or Multi | 5 to 15 | No (type-ahead) | Compact predefined lists (e.g. status, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Basic usage
+
+Provide an array of `SearchableSelectOption` objects with `value`, `label`, and optional `keywords`:
 
 ```tsx
-const options: SearchableSelectOption[] = warehouses.map((w) => ({
-  value: w.id,
-  label: w.name,
-  keywords: [w.city, w.code],   // also matched by the search
-  trailing: w.city,             // shown at the end of the option
-}));
+const options: SearchableSelectOption[] = [
+  { value: 'blr-hub', label: 'Bengaluru Central Hub', keywords: ['Karnataka', 'BLR'], trailing: 'Karnataka' },
+  { value: 'bom-jnpt', label: 'Mumbai JNPT Logistics', keywords: ['Maharashtra', 'BOM'], trailing: 'Maharashtra' },
+  { value: 'del-depot', label: 'Delhi NCR Freight Terminal', keywords: ['Delhi', 'DEL'], trailing: 'Delhi' },
+];
 
-<SearchableSelect aria-label="Warehouse" options={options} value={id} onValueChange={setId} name="warehouseId" />
+<SearchableSelect
+  options={options}
+  value={selectedDepot}
+  onValueChange={setSelectedDepot}
+  placeholder="Search depot by name or state..."
+  aria-label="Destination warehouse depot"
+/>
 ```
 
-- `value` is the option's `value` string (or `null`), so it fits straight into forms and APIs.
-- Search ignores case and accents ("sao" finds "São Paulo") and matches `keywords` too.
-- `leading` shows an element before the label (an avatar, a flag), also inside the input once selected.
+### Leading icons and avatars
 
-Use [Select](/ui/docs/components/forms/select) for short lists (under ~10 options), and
-[Combobox](/ui/docs/components/forms/combobox) when you need custom item rendering, groups or
-server-side search.
+Options support custom `leading` React nodes (such as icons or avatars) that render inside both the dropdown menu and the collapsed trigger:
 
-## API Reference
+```tsx
+const operatorOptions = operators.map((op) => ({
+  value: op.id,
+  label: op.name,
+  trailing: op.role,
+  leading: (
+    <Avatar size="xs">
+      <AvatarFallback>{op.initials}</AvatarFallback>
+    </Avatar>
+  ),
+}));
+
+<SearchableSelect options={operatorOptions} aria-label="Assign procurement officer" />
+```
+
+## Accessibility
+
+### Keyboard navigation
+
+<KeyboardTable
+  rows={[
+    { key: 'Enter / Space', action: 'Opens the filter popup when focused on the trigger; selects the highlighted option when open.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Cycles through filtered options sequentially.' },
+    { key: 'Escape', action: 'Closes the search dropdown and restores focus to the trigger button.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **ARIA Combobox pattern**: Uses `role="combobox"` with `aria-expanded` and `aria-controls`.
+- **Search filtering announcements**: Screen readers announce the count of matching options as the search string changes.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Include common abbreviations and alternate names in the `keywords` array (e.g. `keywords: ['KA', 'Bangalore']`).
+  </Do>
+  <Dont>
+    Never use `SearchableSelect` for massive collections of 1,000+ items that should be paginated on the server; use `Combobox` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide an informative placeholder indicating what fields are searchable (e.g. "Search by depot code or city...").
+  </Do>
+  <Dont>
+    Never omit the accessible label when placing `SearchableSelect` inside custom toolbars without a `<FieldLabel>`.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['SearchableSelect']} baseUi="combobox" />
+
+## Related
+
+- [Select](/ui/docs/components/forms/select) — Standard dropdown menu for short option sets.
+- [Combobox](/ui/docs/components/forms/combobox) — High-performance searchable autocomplete for massive datasets.
+- [LocaleSelect](/ui/docs/components/forms/locale-select) — Specialized country, currency, and timezone selectors.
 
 ---
 
 ## Select (https://innostes.com/ui/docs/components/forms/select)
 
-Groups, separators, multiple selection, type-ahead and form submission.
+Accessible dropdown selection menu with groups, separators, multiple selection, type-ahead, and automatic Field wiring.
+
+import { SelectPlayground } from '@/components/docs/select-playground';
+
+`Select` displays a collapsed trigger button that opens a floating menu of options. Built on Base UI's select primitive, it supports type-ahead search, roving keyboard focus, group dividers, and multi-selection, while integrating directly into `<Field>` for validation.
 
 <ComponentPreview name="forms/select/basic" />
 
@@ -2049,49 +3724,144 @@ import {
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass `items` so `SelectValue` can show the selected label (not just the value):
+- **Use Select** when users need to choose from a predefined list of 5 to 15 items in a compact form layout.
+- **Use RadioGroup** when choices are few (2 to 5) and comparing options side-by-side without opening a menu is beneficial.
+- **Use SearchableSelect or Combobox** when the list contains more than 15 items or requires fast keyboard typing search.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **Select** | Single or Multi | 5 to 15 | No (type-ahead only) | Compact predefined lists (e.g. status, tax rate, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Long lists requiring keyboard search filtering (e.g. warehouse depot) |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[TagInput](/ui/docs/components/forms/tag-input)** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+
+## Examples
+
+### Interactive playground
+
+Experiment with select trigger sizes and disabled states:
+
+<SelectPlayground />
+
+### Grouped options with separators
+
+Organize related choices using `SelectGroup` and `SelectSeparator`:
 
 ```tsx
-const statuses = [
-  { value: 'active', label: 'Active' },
-  { value: 'archived', label: 'Archived' },
-];
-
-<Select items={statuses} defaultValue="active" name="status">
-  <SelectTrigger aria-label="Status">
-    <SelectValue />
+<Select defaultValue="blr-central">
+  <SelectTrigger aria-label="Depot">
+    <SelectValue placeholder="Select warehouse depot..." />
   </SelectTrigger>
   <SelectContent>
-    {statuses.map((s) => (
-      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-    ))}
+    <SelectGroup>
+      <SelectGroupLabel>Karnataka Facilities</SelectGroupLabel>
+      <SelectItem value="blr-central">Bengaluru Central Hub</SelectItem>
+      <SelectItem value="whitefield">Whitefield Logistics Center</SelectItem>
+    </SelectGroup>
+    <SelectSeparator />
+    <SelectGroup>
+      <SelectGroupLabel>Maharashtra Facilities</SelectGroupLabel>
+      <SelectItem value="mumbai-port">Mumbai JNPT Port Depot</SelectItem>
+      <SelectItem value="pune-chakan">Pune Chakan Industrial Hub</SelectItem>
+    </SelectGroup>
   </SelectContent>
 </Select>
 ```
 
-- Add `placeholder` to `SelectValue` for an empty state.
-- Add `multiple` to `Select` to pick several values (`value` becomes an array).
-- The list opens below the trigger. Set `alignItemWithTrigger` on `SelectContent` for the
-  macOS-style list that overlaps the trigger.
+### Multiple selection
 
-For long or searchable lists, use [Combobox](/ui/docs/components/forms/combobox).
+Set `multiple` on the root `Select` component to allow choosing multiple items:
+
+```tsx
+const [selectedCurrencies, setSelectedCurrencies] = useState(['INR', 'USD']);
+
+<Select multiple value={selectedCurrencies} onValueChange={setSelectedCurrencies}>
+  <SelectTrigger aria-label="Settlement currencies">
+    <SelectValue placeholder="Select currencies..." />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="INR">Indian Rupee (INR)</SelectItem>
+    <SelectItem value="USD">US Dollar (USD)</SelectItem>
+    <SelectItem value="EUR">Euro (EUR)</SelectItem>
+    <SelectItem value="GBP">British Pound (GBP)</SelectItem>
+  </SelectContent>
+</Select>
+```
 
 ## Accessibility
 
-- Arrow keys, Home/End and type-ahead move through options; Enter selects; Escape closes.
-- Label it with `FieldLabel` inside a `Field`, or `aria-label` on the trigger.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Enter / Space', action: 'Opens the select menu when focused on the trigger; selects the highlighted item when open.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Navigates focus between menu items sequentially.' },
+    { key: 'Home / End', action: 'Jumps directly to the first or last selectable option.' },
+    { key: 'Type-ahead', action: 'Typing characters jumps focus directly to the matching option label.' },
+    { key: 'Escape', action: 'Dismisses the open dropdown menu and returns focus to the trigger button.' },
+  ]}
+/>
 
-<ApiTable components={['SelectTrigger', 'SelectValue', 'SelectContent', 'SelectItem', 'SelectGroup', 'SelectGroupLabel', 'SelectSeparator']} baseUi="select" />
+### Screen readers and ARIA
+
+- **`role="combobox"`**: Emitted on `<SelectTrigger>` alongside `aria-expanded` and `aria-haspopup="listbox"`.
+- **`role="listbox"` & `role="option"`**: Assigned to the content popup and individual items.
+- **Active descendant**: Communicates the currently focused option to screen readers using standard ARIA patterns.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use `Select` for bounded, predictable lists where users already know what options to expect.
+  </Do>
+  <Dont>
+    Never use `Select` for massive datasets (e.g. 500+ postal codes); use `Combobox` or `SearchableSelect` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide an informative placeholder on `<SelectValue placeholder="Select supplier..." />`.
+  </Do>
+  <Dont>
+    Never leave the trigger blank when no default value is selected.
+  </Dont>
+</DoDont>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Select',
+    'SelectTrigger',
+    'SelectValue',
+    'SelectContent',
+    'SelectItem',
+    'SelectGroup',
+    'SelectGroupLabel',
+    'SelectSeparator',
+  ]}
+  baseUi="select"
+/>
+
+## Related
+
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Filterable dropdown selection for longer lists.
+- [Combobox](/ui/docs/components/forms/combobox) — High-performance autocomplete input with virtualized options.
+- [RadioGroup](/ui/docs/components/forms/radio-group) — Mutually exclusive visible option cards.
 
 ---
 
 ## Slider (https://innostes.com/ui/docs/components/forms/slider)
 
-Single values and ranges, keyboard support, form submission.
+Accessible slider component supporting single values, dual-thumb price ranges, keyboard stepping, and form submission.
+
+`Slider` allows users to select a single numerical value or a bounded numerical range by dragging thumbs along a horizontal track or adjusting values via keyboard arrows. Built on Base UI's slider primitive, it supports dual-thumb range filtering, custom stepping, and automatic accessibility announcements.
 
 <ComponentPreview name="forms/slider/basic" />
 
@@ -2101,39 +3871,108 @@ Single values and ranges, keyboard support, form submission.
 import { Slider } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Slider** for selecting approximate numeric values along a continuous range (e.g. percentage volumes, price range filters, inspection sample thresholds).
+- **Use NumberField** when exact numerical precision is required (e.g. entering invoice currency totals or unit quantities).
+- **Use Progress or Meter** when displaying a read-only visual measurement without user dragging interaction.
+
+## Examples
+
+### Single value slider
+
+Select a discrete numeric value along a defined boundary:
 
 ```tsx
-<Slider defaultValue={40} aria-label="Volume" />
-
-// A range: pass an array
-<Slider
-  value={range}
-  onValueChange={setRange}
-  min={0}
-  max={1000}
-  step={10}
-  thumbLabels={['Minimum price', 'Maximum price']}
-/>
+<Field>
+  <FieldLabel>Warehouse humidity threshold (%)</FieldLabel>
+  <Slider defaultValue={45} min={20} max={80} step={5} aria-label="Humidity threshold" />
+</Field>
 ```
 
-Show the selected value next to the slider when exact numbers matter, or use a
-[Number Field](/ui/docs/components/forms/number-field) instead.
+### Dual-thumb range selection
+
+Pass an array of two numbers (`[min, max]`) to enable dual-thumb range mode:
+
+```tsx
+const [priceRange, setPriceRange] = useState<number[]>([2500, 8000]);
+
+<div className="space-y-2">
+  <div className="flex justify-between text-sm font-medium">
+    <span>Procurement budget</span>
+    <span className="font-mono text-muted-foreground">₹{priceRange[0]} – ₹{priceRange[1]}</span>
+  </div>
+  <Slider
+    value={priceRange}
+    onValueChange={(val) => setPriceRange(val as number[])}
+    min={1000}
+    max={15000}
+    step={250}
+    thumbLabels={['Minimum budget rate', 'Maximum budget rate']}
+  />
+</div>
+```
 
 ## Accessibility
 
-- Each thumb is a `role="slider"` with `aria-valuenow`. Arrow keys step; Page Up/Down step by `largeStep`.
-- Ranges need `thumbLabels` so each thumb has its own name.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'ArrowRight / ArrowUp', action: 'Increments the slider value by one step.' },
+    { key: 'ArrowLeft / ArrowDown', action: 'Decrements the slider value by one step.' },
+    { key: 'PageUp', action: 'Increments the slider value by largeStep.' },
+    { key: 'PageDown', action: 'Decrements the slider value by largeStep.' },
+    { key: 'Home', action: 'Jumps directly to the minimum bound value.' },
+    { key: 'End', action: 'Jumps directly to the maximum bound value.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="slider"`**: Emitted on each thumb element.
+- **ARIA synchronization**: Exposes `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- **`thumbLabels` requirement**: In dual-thumb range mode, `thumbLabels` **must** be provided so screen readers announce which thumb is being adjusted (e.g. `thumbLabels={['Minimum rate', 'Maximum rate']}`).
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Always display the currently selected value numerically beside the slider when exact figures matter to the operator.
+  </Do>
+  <Dont>
+    Never use `Slider` without a visible numerical readout when users need to select precise monetary amounts.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Provide descriptive `thumbLabels` for dual-thumb range sliders.
+  </Do>
+  <Dont>
+    Never allow the minimum thumb to cross past the maximum thumb; `@innostes/ui` automatically clamps thumbs to prevent inversion.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Slider']} baseUi="slider" />
+
+## Related
+
+- [NumberField](/ui/docs/components/forms/number-field) — Typed numerical input with precision steppers.
+- [Progress](/ui/docs/components/feedback/progress) — Read-only task progress bar.
+- [Meter](/ui/docs/components/feedback/meter) — Read-only capacity and quota gauge.
 
 ---
 
 ## Switch (https://innostes.com/ui/docs/components/forms/switch)
 
-Two sizes, form submission and Field support.
+Accessible binary switch primitive with animated thumb sliding, sizes, and instant state synchronization.
+
+import { SwitchPlayground } from '@/components/docs/switch-playground';
+
+`Switch` provides a physical toggle slider for binary configuration options. Built on Base UI's switch primitive, it emits `role="switch"` semantics and smooth CSS sliding transitions. It is designed for preferences and live operational flags (e.g. enabling automatic replenishment) where changes activate immediately without a manual save step.
 
 <ComponentPreview name="forms/switch/basic" />
 
@@ -2143,30 +3982,104 @@ Two sizes, form submission and Field support.
 import { Switch } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Switch** for standalone configuration toggles that apply immediately (e.g. "Dark mode", "SMS dispatch alerts").
+- **Use Checkbox** for form fields where selections require an explicit "Submit" button, or when multi-item table selection is required.
+- **Use Toggle** for styling buttons inside rich text toolbars or view filters.
+
+## Examples
+
+### Interactive playground
+
+Experiment with switch sizes, states, and disabled attributes:
+
+<SwitchPlayground />
+
+### Inside a field with description
+
+Pair the switch with a clear label and operational explanation:
 
 ```tsx
-<label className="flex items-center gap-3">
-  <Switch name="notifications" defaultChecked /> Email notifications
-</label>
+<Field>
+  <label className="flex items-start gap-3 cursor-pointer">
+    <Switch name="autoReorder" defaultChecked className="mt-0.5" />
+    <div>
+      <span className="text-sm font-medium text-foreground">
+        Automated replenishment
+      </span>
+      <p className="text-xs text-muted-foreground">
+        Automatically draft purchase orders when inventory falls below minimum buffer.
+      </p>
+    </div>
+  </label>
+</Field>
 ```
 
-Use a switch when the change takes effect right away. When the user must press Save, a
-[Checkbox](/ui/docs/components/forms/checkbox) is clearer.
+### Sizes
+
+Switches are available in `sm` and `md` (default) sizes:
+
+```tsx
+<Switch size="sm" aria-label="Compact switch" />
+<Switch size="md" aria-label="Default switch" />
+```
 
 ## Accessibility
 
-- Announced as `role="switch"` with `aria-checked`. Space toggles it.
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Space', action: 'Toggles the switch between on (checked) and off (unchecked).' },
+    { key: 'Enter', action: 'Toggles the switch state in standard browser form contexts.' },
+    { key: 'Tab', action: 'Moves focus to or away from the switch element.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **`role="switch"`**: Emitted automatically to ensure assistive technologies announce "switch, on" or "switch, off" rather than generic checkboxes.
+- **`aria-checked`**: Synchronized dynamically with the active state.
+- **Required labelling**: Ensure the switch is enclosed within a `<label>` or provided an explicit `aria-label`.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Use `Switch` when toggling the setting takes immediate effect in the system.
+  </Do>
+  <Dont>
+    Never use `Switch` in standard forms where the user must still click an external "Save" or "Submit" button; use `Checkbox` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Pair the switch with clear textual labels that explain what feature is enabled when turned on.
+  </Do>
+  <Dont>
+    Never change the label text based on state (e.g. changing "Off" to "On"); keep the label static.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Switch']} baseUi="switch" />
+
+## Related
+
+- [Checkbox](/ui/docs/components/forms/checkbox) — Standard checkbox for form agreements.
+- [Toggle](/ui/docs/components/actions/toggle) — Two-state pressed button.
+- [RadioGroup](/ui/docs/components/forms/radio-group) — Mutually exclusive multi-option selection.
 
 ---
 
 ## Tag Input (https://innostes.com/ui/docs/components/forms/tag-input)
 
-Labels, skills, recipients and SKUs as chips, with suggestions, paste splitting, limits and validation.
+Removable chip tag entry control supporting autocomplete suggestions, delimiter pasting, maximum bounds, and validation.
+
+`TagInput` captures and organizes multiple keywords, product SKUs, tax categories, or email recipients as removable chips. Built on Base UI's multi-select Combobox primitive, it supports comma-separated text pasting, custom tag validation, maximum limits, and keyboard arrow traversal across existing tags.
 
 <ComponentPreview name="forms/tag-input/basic" />
 
@@ -2176,39 +4089,128 @@ Labels, skills, recipients and SKUs as chips, with suggestions, paste splitting,
 import { TagInput } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use TagInput** when users need to assign multiple freeform or suggested tags (such as product categories, logistics tags, or notification recipients).
+- **Use Combobox** when selecting items from a large database where items represent fixed single entities.
+- **Use Select** with `multiple` when users pick from a small fixed list of options without typing custom tags.
+
+### Selection control comparison
+
+| Control | Selection count | Number of options | Search filter | Best suited for |
+| :--- | :--- | :--- | :--- | :--- |
+| **TagInput** | Multi | Variable | Yes | Categorical metadata, SKU keywords, and multi-tag filtering |
+| **[Combobox](/ui/docs/components/forms/combobox)** | Single or Multi | 50 to 10,000+ | Yes | Large async remote datasets or autocomplete with custom item creation |
+| **[SearchableSelect](/ui/docs/components/forms/searchable-select)** | Single | 15 to 100+ | Yes | Moderate lists requiring fast dropdown filter search |
+| **[Select](/ui/docs/components/forms/select)** | Single or Multi | 5 to 15 | No (type-ahead) | Compact predefined lists (e.g. status, payment terms) |
+| **[RadioGroup](/ui/docs/components/forms/radio-group)** | Single | 2 to 5 | No | Visible choices where side-by-side comparison is essential |
+
+## Examples
+
+### Autocomplete suggestions with limits
+
+Limit the total number of allowed tags and suggest existing values:
+
+```tsx
+const departmentTags = ['Procurement', 'Inventory', 'GST Compliance', 'Logistics', 'Quality Audit'];
+
+<Field>
+  <FieldLabel>Operational tags</FieldLabel>
+  <TagInput
+    suggestions={departmentTags}
+    defaultValue={['Procurement', 'GST Compliance']}
+    placeholder="Add tag (e.g. Logistics)..."
+    max={5}
+    aria-label="Department tags"
+  />
+  <FieldDescription>Maximum 5 tags allowed per consignment.</FieldDescription>
+</Field>
+```
+
+### Custom tag validation and pasting
+
+Enforce regex pattern validation on tags and parse comma-delimited clipboard text:
+
+```tsx
+<Field>
+  <FieldLabel>Notification recipients</FieldLabel>
+  <TagInput
+    placeholder="officer@northwind.in..."
+    validate={(tag) => /^\S+@\S+\.\S+$/.test(tag)}
+    delimiters={[',', ';', ' ']}
+    aria-label="Notification email addresses"
+  />
+  <FieldDescription>Type or paste comma-separated corporate email addresses.</FieldDescription>
+</Field>
+```
+
+### Closed suggestion lists
+
+Set `allowCustom={false}` to restrict selections exclusively to predefined suggestions:
 
 ```tsx
 <TagInput
-  aria-label="Labels"
-  suggestions={labels}
-  value={value}
-  onValueChange={setValue}
-  max={10}
+  allowCustom={false}
+  suggestions={['Warehouse-A', 'Warehouse-B', 'Transit-Hub']}
+  placeholder="Select warehouse zones..."
 />
 ```
 
-- **Adding**: Enter or a delimiter (`,` by default; change with `delimiters`). Pasting `a, b, c` adds three tags.
-- **Suggestions**: pass `suggestions` to show a filtered list. Typing a known tag in any case uses the suggestion's casing.
-- **Closed lists**: `allowCustom={false}` only accepts suggestions.
-- **Rules**: `validate` rejects tags (e.g. invalid emails); `max` caps the count and disables the input when reached. Duplicates are ignored, case-insensitively.
-- **Forms**: `name` submits each tag, like a multi-select.
-
 ## Accessibility
 
-- Built on Base UI's multi-select Combobox: the input is a `combobox`, and suggestions are a `listbox`.
-- From the start of the input, Left Arrow moves to the tags; Backspace or Delete removes the focused tag.
-- Each remove button is labelled (`removeLabel`, default `Remove <tag>`).
+### Keyboard navigation
 
-## API Reference
+<KeyboardTable
+  rows={[
+    { key: 'Enter / Comma', action: 'Converts current input text into a committed tag chip.' },
+    { key: 'ArrowLeft', action: 'From the start of the text input, moves focus backward into the preceding tag chips.' },
+    { key: 'ArrowRight', action: 'Moves focus forward across tags back to the text entry field.' },
+    { key: 'Backspace / Delete', action: 'Removes the currently focused tag chip, or removes the last tag when input is empty.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Combobox & Listbox roles**: The text input operates as `role="combobox"` controlling an ARIA listbox popup for suggestions.
+- **Accessible removal buttons**: Each chip contains an inline dismissal button labelled via `removeLabel` (defaults to `"Remove <tag>"`).
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an informative `placeholder` and helper description explaining how to commit tags (e.g. "Press Enter or comma to add").
+  </Do>
+  <Dont>
+    Never use `TagInput` when users can only pick one single value; use `Select` or `SearchableSelect` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use `validate` to reject malformed input strings (such as invalid email formats or disallowed characters).
+  </Do>
+  <Dont>
+    Never allow duplicate tags; `@innostes/ui` automatically deduplicates entries case-insensitively.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['TagInput']} />
+
+## Related
+
+- [Combobox](/ui/docs/components/forms/combobox) — Autocomplete input with floating listbox results.
+- [SearchableSelect](/ui/docs/components/forms/searchable-select) — Filterable dropdown selector.
+- [Badge](/ui/docs/components/data-display/badge) — Static metadata and status indicators.
 
 ---
 
 ## Textarea (https://innostes.com/ui/docs/components/forms/textarea)
 
-Optional auto-resize, and automatic Field wiring.
+Accessible multiline text input supporting field-sizing auto-resize, rows configuration, and automatic Field wiring.
+
+`Textarea` provides multiline text input for customer remarks, delivery instructions, procurement notes, and descriptions. Built on standard HTML5 textarea ergonomics, it supports automatic vertical resizing via CSS `field-sizing: content` while integrating directly with `<Field>` for validation and error reporting.
 
 <ComponentPreview name="forms/textarea/basic" />
 
@@ -2218,19 +4220,102 @@ Optional auto-resize, and automatic Field wiring.
 import { Textarea } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+- **Use Textarea** for multiline text entries such as shipping instructions, invoice notes, or bug reports.
+- **Use Input** for single-line values such as customer names, email addresses, or phone numbers.
+- **Use RichTextEditor** when formatted text (bold, lists, links, headers) or document authoring is required.
+
+## Examples
+
+### Basic usage
+
+Specify the initial visible height using the `rows` prop:
 
 ```tsx
-<Textarea name="notes" rows={4} />
-<Textarea autoResize rows={2} />  {/* grows with the content */}
+<Field>
+  <FieldLabel>Dispatch instructions</FieldLabel>
+  <Textarea rows={4} placeholder="Gate delivery instructions, bay access codes..." />
+  <FieldDescription>Max 500 characters.</FieldDescription>
+</Field>
 ```
 
-`autoResize` uses CSS `field-sizing: content`. Browsers without support fall back to a normal,
-vertically resizable textarea.
+### Auto-resize
 
-## API Reference
+Enable `autoResize` to allow the textarea to grow vertically as the operator types:
+
+```tsx
+<Field>
+  <FieldLabel>Internal procurement note</FieldLabel>
+  <Textarea
+    autoResize
+    rows={2}
+    placeholder="Describe vendor negotiation terms..."
+  />
+  <FieldDescription>Grows smoothly with content using CSS field-sizing.</FieldDescription>
+</Field>
+```
+
+Browsers without native `field-sizing: content` support gracefully fall back to standard vertical drag-resizing.
+
+### Validation state
+
+When used inside `<Field>`, validation errors trigger error rings and ARIA live announcements:
+
+```tsx
+<Field name="justification" required>
+  <FieldLabel required>Order cancellation reason</FieldLabel>
+  <Textarea required minLength={10} />
+  <FieldError match="valueMissing">Please state a reason for cancelling this order.</FieldError>
+  <FieldError match="tooShort">Please provide at least 10 characters of explanation.</FieldError>
+</Field>
+```
+
+## Accessibility
+
+### Keyboard navigation
+
+<KeyboardTable
+  rows={[
+    { key: 'Tab', action: 'Moves focus to the textarea or away to the subsequent interactive control.' },
+    { key: 'Enter', action: 'Inserts a new line character within the text content.' },
+  ]}
+/>
+
+### Screen readers and ARIA
+
+- **Automatic labelling**: When wrapped inside `<Field>`, the `<FieldLabel>` is programmatically coupled via `htmlFor`/`id`.
+- **Validation binding**: Error and helper descriptions connect via `aria-describedby` and set `aria-invalid="true"` when invalid.
+
+## Guidelines
+
+<DoDont>
+  <Do>
+    Provide an initial `rows` value (typically 3 to 5) that accommodates expected content without overwhelming the screen.
+  </Do>
+  <Dont>
+    Never use a `Textarea` for single-line values like titles, email addresses, or tax numbers; use `Input` instead.
+  </Dont>
+</DoDont>
+
+<DoDont>
+  <Do>
+    Use `autoResize` for compact comment forms to keep the initial footprint minimal.
+  </Do>
+  <Dont>
+    Never hide the scrollbar or restrict manual resizing when `autoResize` is disabled.
+  </Dont>
+</DoDont>
+
+## API reference
 
 <ApiTable components={['Textarea']} />
+
+## Related
+
+- [Input](/ui/docs/components/forms/input) — Single-line text input field.
+- [Field and Form](/ui/docs/components/forms/field) — Accessible form layout and error handling container.
+- [RichTextEditor](/ui/docs/components/forms/rich-text-editor) — Formatted document and markup editor.
 
 ---
 
