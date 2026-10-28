@@ -1,0 +1,261 @@
+---
+title: Creating a Business Module
+description: Step-by-step guide for scaffolding a fresh business module (e.g. HRMS, CRM, Finance) across backend and frontend.
+icon: LayoutGrid
+---
+
+A **Business Module** is a first-class business domain application in the Innostes ERP platform (e.g., `hrms`, `crm`, `finance`).
+Modules are isolated, tenant-aware, discoverable via Python entry points, and rendered in dedicated responsive application shells with the top-level **App Switcher**.
+
+Super Admins can activate or deactivate modules per tenant via `/modules`. On initial deployment, 0 modules are active, providing an empty-state activation prompt.
+
+---
+
+## Architecture & Directory Layout
+
+Every business module lives under `modules/<name>/` with decoupled backend and frontend packages:
+
+```text
+modules/hrms/
+├── backend/
+│   ├── pyproject.toml
+│   ├── hrms/
+│   │   ├── __init__.py          # Exports HrmsModule(BaseModule)
+│   │   ├── router.py            # FastAPI APIRouter
+│   │   ├── models/              # SQLAlchemy domain models
+│   │   ├── schemas/             # Pydantic schemas
+│   │   └── services/            # Domain business logic
+│   └── tests/
+│       └── test_hrms.py         # Pytest test suite
+└── frontend/
+    ├── package.json             # @innostes/hrms
+    ├── tsconfig.json
+    └── src/
+        ├── manifest.ts          # Catalog manifest & metadata
+        ├── HrmsPage.tsx         # Page component with @innostes/ui
+        └── index.ts             # Public exports
+```
+
+---
+
+<Steps>
+<Step>
+
+### Configure Workspace Paths
+
+Ensure `pnpm-workspace.yaml` includes module glob patterns:
+
+```yaml title="pnpm-workspace.yaml"
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'kernel/*'
+  - 'modules/*/*'
+  - 'plugins/*/*'
+```
+
+</Step>
+<Step>
+
+### Scaffold Backend Package
+
+Create `modules/<name>/backend/pyproject.toml` registering the entry point in `innostes.modules`:
+
+```toml title="modules/<name>/backend/pyproject.toml"
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "innostes-hrms"
+version = "0.1.0"
+description = "HRMS business module for Innostes ERP"
+dependencies = ["fastapi", "kernel"]
+
+[project.entry-points."innostes.modules"]
+hrms = "hrms:module"
+
+[tool.setuptools.packages.find]
+where = ["."]
+```
+
+Create the module class implementing `BaseModule`:
+
+```python title="modules/<name>/backend/hrms/__init__.py"
+from kernel.core.module import BaseModule
+from .router import router
+
+class HrmsModule(BaseModule):
+    name = "hrms"
+    version = "0.1.0"
+    description = "Human Resources & Payroll management module"
+    router = router
+    openapi_tags = [{"name": "HRMS", "description": "Human Resources & Payroll operations"}]
+
+module = HrmsModule()
+```
+
+Define the initial router skeleton:
+
+```python title="modules/<name>/backend/hrms/router.py"
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/hrms", tags=["HRMS"])
+
+@router.get("/info")
+def get_info():
+    return {
+        "module": "hrms",
+        "name": "Human Resource Management System",
+        "status": "ready",
+        "features": ["employees", "leave", "payroll", "attendance"],
+    }
+```
+
+Add the backend package to `apps/api-server/requirements.txt`:
+
+```text title="apps/api-server/requirements.txt"
+-e ../../modules/hrms/backend
+```
+
+Install into the virtualenv:
+
+```bash
+pnpm nx run api-server:install
+```
+
+</Step>
+<Step>
+
+### Scaffold Frontend Package
+
+Create `modules/<name>/frontend/package.json`:
+
+```json title="modules/<name>/frontend/package.json"
+{
+  "name": "@innostes/hrms",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@innostes/ui": "workspace:*",
+    "lucide-react": "^1.60.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  }
+}
+```
+
+Define the module manifest:
+
+```typescript title="modules/<name>/frontend/src/manifest.ts"
+export interface ModuleManifest {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  type: 'module';
+  tags: string[];
+  tone: 'chart-1' | 'chart-2' | 'chart-3' | 'chart-4' | 'chart-5';
+  href: string;
+  subFeatures: { id: string; label: string; description: string }[];
+}
+
+export const hrmsManifest: ModuleManifest = {
+  id: 'hrms',
+  name: 'HRMS',
+  version: '0.1.0',
+  description: 'Manage employees, leave balances, attendance tracking, and payroll runs.',
+  type: 'module',
+  tags: ['hr', 'employees', 'payroll', 'attendance'],
+  tone: 'chart-3',
+  href: '/modules/hrms',
+  subFeatures: [
+    { id: 'overview', label: 'Overview', description: 'Headcount metrics and upcoming leaves' },
+    { id: 'employees', label: 'Employees', description: 'Staff directory and records' },
+    { id: 'leave', label: 'Leave', description: 'PTO requests and approvals' },
+    { id: 'payroll', label: 'Payroll', description: 'Compensation processing' },
+  ],
+};
+```
+
+Build the page component using `@innostes/ui` primitives:
+
+```tsx title="modules/<name>/frontend/src/HrmsPage.tsx"
+import React, { useState } from 'react';
+import { PageHeader, Tabs, TabsList, TabsTab, TabsPanel, Card, CardHeader, CardTitle } from '@innostes/ui';
+
+export function HrmsPage() {
+  const [tab, setTab] = useState('overview');
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Human Resources (HRMS)"
+        description="Employee lifecycle, attendance, and payroll processing."
+      />
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList>
+          <TabsTab value="overview">Overview</TabsTab>
+          <TabsTab value="employees">Employees</TabsTab>
+        </TabsList>
+        <TabsPanel value="overview">
+          <Card>
+            <CardHeader><CardTitle>Workforce Overview</CardTitle></CardHeader>
+          </Card>
+        </TabsPanel>
+      </Tabs>
+    </div>
+  );
+}
+```
+
+Export everything in `src/index.ts`:
+
+```typescript title="modules/<name>/frontend/src/index.ts"
+export { HrmsPage } from './HrmsPage';
+export { hrmsManifest } from './manifest';
+```
+
+</Step>
+<Step>
+
+### Connect to Web App
+
+1. Add `@innostes/hrms` to `apps/web-app/package.json`:
+   ```bash
+   pnpm --filter @innostes/web-app add @innostes/hrms@workspace:*
+   ```
+
+2. Register the manifest in `apps/web-app/src/app/catalog.ts`:
+   ```typescript
+   import { hrmsManifest } from '@innostes/hrms';
+
+   export const BUSINESS_MODULES_CATALOG = [
+     hrmsManifest,
+     // ...
+   ];
+   ```
+
+3. Mount in `apps/web-app/src/app/components/ModuleShellLayout.tsx`:
+   ```tsx
+   {moduleId === 'hrms' ? <HrmsPage /> : ...}
+   ```
+
+</Step>
+<Step>
+
+### Verify Build and Tests
+
+Run the verification suite:
+
+```bash
+# Test backend module
+pytest modules/hrms/backend/tests
+
+# Build web application
+pnpm nx build web-app
+```
+
+</Step>
+</Steps>

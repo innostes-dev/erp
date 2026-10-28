@@ -1,9 +1,8 @@
 """FastAPI application entry point for the backend engine.
 
-
-Plug-in modules (kernel, ERP modules) are installed packages that register
-under the `innostes.modules` entry-point group; `loader.discover()` loads
-them all. Nothing here needs to change when a module is added.
+Plug-in modules and extensible plugins are installed packages that register
+under the `innostes.modules` and `innostes.plugins` entry-point groups;
+`loader.discover()` loads them all. Nothing here needs to change when a module is added.
 """
 
 from pathlib import Path
@@ -21,9 +20,10 @@ from kernel.core.config import get_settings
 settings = get_settings()
 engine = ServerEngine(settings=settings)
 
-# Module loader for registering ERP feature modules
+# Module loader for registering ERP feature modules and extensible plugins
 loader = ModuleLoader(engine.registry)
-loader.discover()
+loader.discover("innostes.modules")
+loader.discover("innostes.plugins")
 
 # Expose standard FastAPI app instance for ASGI servers (uvicorn / fastapi dev)
 app = engine.create_app()

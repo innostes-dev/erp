@@ -1,3 +1,9 @@
+from kernel.tenancy.schemas.modules_and_plugins import (
+    ActivationResponse,
+    ItemCatalogRead,
+    ModuleListResponse,
+    PluginListResponse,
+)
 from kernel.tenancy.schemas.settings import (
     AuthSettings,
     BrandingSettings,
@@ -16,4 +22,8 @@ __all__ = [
     "BrandingSettings",
     "AuthSettings",
     "LocalizationSettings",
+    "ItemCatalogRead",
+    "ModuleListResponse",
+    "PluginListResponse",
+    "ActivationResponse",
 ]

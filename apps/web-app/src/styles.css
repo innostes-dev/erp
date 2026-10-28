@@ -5,3 +5,5 @@
 /* Let Tailwind find the classes used by workspace packages (read from source, see vite.config.mts). */
 @source '../../../packages/ui/src';
 @source '../../../kernel/frontend/src';
+@source '../../../modules/*/frontend/src';
+@source '../../../plugins/*/frontend/src';

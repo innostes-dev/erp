@@ -1,0 +1,255 @@
+---
+title: Creating an Extensible Plugin
+description: Step-by-step guide for building and integrating extensible plugins (e.g. API Logger, Webhooks, Dev Tools) across backend and frontend.
+icon: Puzzle
+---
+
+An **Extensible Plugin** is a system utility, developer tool, telemetry provider, or integration package (e.g., `api-logger`, `webhook-hub`, `audit-export`).
+Unlike core business modules, plugins provide auxiliary platform capabilities and are managed under the **Plugins Catalog** (`/plugins`) with their own dedicated **Plugin Switcher**.
+
+Super Admins can activate or deactivate plugins independently per tenant.
+
+---
+
+## Architecture & Directory Layout
+
+Every plugin is stored in the `plugins/<name>/` directory:
+
+```text
+plugins/api-logger/
+├── backend/
+│   ├── pyproject.toml
+│   ├── api_logger/
+│   │   ├── __init__.py          # Exports ApiLoggerPlugin(BaseModule)
+│   │   ├── router.py            # FastAPI APIRouter prefix /plugins/api-logger
+│   │   └── middleware.py        # Request interception middleware
+│   └── tests/
+│       └── test_api_logger.py   # Plugin tests
+└── frontend/
+    ├── package.json             # @innostes/api-logger
+    ├── tsconfig.json
+    └── src/
+        ├── manifest.ts          # Catalog manifest (type: 'plugin')
+        ├── ApiLoggerPage.tsx    # Responsive UI with @innostes/ui
+        └── index.ts             # Public exports
+```
+
+---
+
+<Steps>
+<Step>
+
+### Configure Workspace Paths
+
+Ensure `plugins/*/*` is in `pnpm-workspace.yaml`:
+
+```yaml title="pnpm-workspace.yaml"
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'kernel/*'
+  - 'modules/*/*'
+  - 'plugins/*/*'
+```
+
+</Step>
+<Step>
+
+### Scaffold Backend Plugin
+
+Create `plugins/<name>/backend/pyproject.toml` registering the entry point in `innostes.plugins`:
+
+```toml title="plugins/<name>/backend/pyproject.toml"
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "innostes-api-logger"
+version = "0.1.0"
+description = "Tracura API request logger and monitoring plugin"
+dependencies = ["fastapi", "kernel"]
+
+[project.entry-points."innostes.plugins"]
+api_logger = "api_logger:plugin"
+
+[tool.setuptools.packages.find]
+where = ["."]
+```
+
+Create the plugin class extending `BaseModule`:
+
+```python title="plugins/<name>/backend/api_logger/__init__.py"
+from kernel.core.module import BaseModule
+from .router import router
+
+class ApiLoggerPlugin(BaseModule):
+    name = "api_logger"
+    version = "0.1.0"
+    description = "Tracura API telemetry and request logger plugin"
+    router = router
+    openapi_tags = [{"name": "Plugins: API Logger", "description": "Telemetry and logging endpoints"}]
+
+plugin = ApiLoggerPlugin()
+```
+
+Define the router mounted under `/plugins/<name>`:
+
+```python title="plugins/<name>/backend/api_logger/router.py"
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/plugins/api-logger", tags=["Plugins: API Logger"])
+
+@router.get("/info")
+def get_info():
+    return {
+        "plugin": "api_logger",
+        "name": "Tracura API Logger",
+        "status": "active",
+        "capabilities": ["request-logging", "payload-inspection", "webhook-triggers"],
+    }
+```
+
+Add the package to `apps/api-server/requirements.txt`:
+
+```text title="apps/api-server/requirements.txt"
+-e ../../plugins/api-logger/backend
+```
+
+Install into the virtualenv:
+
+```bash
+pnpm nx run api-server:install
+```
+
+</Step>
+<Step>
+
+### Scaffold Frontend Plugin
+
+Create `plugins/<name>/frontend/package.json`:
+
+```json title="plugins/<name>/frontend/package.json"
+{
+  "name": "@innostes/api-logger",
+  "version": "0.1.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@innostes/ui": "workspace:*",
+    "lucide-react": "^1.60.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  }
+}
+```
+
+Define the plugin manifest:
+
+```typescript title="plugins/<name>/frontend/src/manifest.ts"
+export interface PluginManifest {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  type: 'plugin';
+  tags: string[];
+  tone: 'chart-1' | 'chart-2' | 'chart-3' | 'chart-4' | 'chart-5';
+  href: string;
+  subFeatures: { id: string; label: string; description: string }[];
+}
+
+export const apiLoggerManifest: PluginManifest = {
+  id: 'api-logger',
+  name: 'Tracura API Logger',
+  version: '0.1.0',
+  description: 'Real-time API request logging, header inspection, latency metrics, and webhook dispatch.',
+  type: 'plugin',
+  tags: ['logging', 'developer-tools', 'observability', 'webhooks'],
+  tone: 'chart-4',
+  href: '/plugins/api-logger',
+  subFeatures: [
+    { id: 'overview', label: 'Overview', description: 'Real-time throughput and error rate' },
+    { id: 'logs', label: 'Request Logs', description: 'Live streaming incoming and outgoing requests' },
+    { id: 'webhooks', label: 'Webhooks', description: 'Event dispatch telemetry' },
+  ],
+};
+```
+
+Build the plugin page component using `@innostes/ui` primitives:
+
+```tsx title="plugins/<name>/frontend/src/ApiLoggerPage.tsx"
+import React, { useState } from 'react';
+import { PageHeader, Tabs, TabsList, TabsTab, TabsPanel, Card, CardHeader, CardTitle } from '@innostes/ui';
+
+export function ApiLoggerPage() {
+  const [tab, setTab] = useState('overview');
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Tracura API Logger"
+        description="Inspect API traffic, payloads, response codes, and latency in real time."
+      />
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList>
+          <TabsTab value="overview">Overview</TabsTab>
+          <TabsTab value="logs">Request Logs</TabsTab>
+        </TabsList>
+        <TabsPanel value="overview">
+          <Card>
+            <CardHeader><CardTitle>Throughput & Health</CardTitle></CardHeader>
+          </Card>
+        </TabsPanel>
+      </Tabs>
+    </div>
+  );
+}
+```
+
+Export in `src/index.ts`:
+
+```typescript title="plugins/<name>/frontend/src/index.ts"
+export { ApiLoggerPage } from './ApiLoggerPage';
+export { apiLoggerManifest } from './manifest';
+```
+
+</Step>
+<Step>
+
+### Connect to Web App
+
+1. Add `@innostes/api-logger` to `apps/web-app/package.json`:
+   ```bash
+   pnpm --filter @innostes/web-app add @innostes/api-logger@workspace:*
+   ```
+
+2. Register in `apps/web-app/src/app/catalog.ts`:
+   ```typescript
+   import { apiLoggerManifest } from '@innostes/api-logger';
+
+   export const PLUGINS_CATALOG = [
+     apiLoggerManifest,
+   ];
+   ```
+
+3. Mount in `apps/web-app/src/app/components/PluginShellLayout.tsx`:
+   ```tsx
+   {pluginId === 'api-logger' ? <ApiLoggerPage /> : ...}
+   ```
+
+</Step>
+<Step>
+
+### Verify Build and Tests
+
+```bash
+# Test backend plugin
+pytest plugins/api-logger/backend/tests
+
+# Build web application
+pnpm nx build web-app
+```
+
+</Step>
+</Steps>

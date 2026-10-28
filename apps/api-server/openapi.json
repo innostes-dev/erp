@@ -450,6 +450,50 @@
         ]
       }
     },
+    "/crm/info": {
+      "get": {
+        "tags": [
+          "CRM"
+        ],
+        "summary": "Get CRM module metadata and scaffold status",
+        "description": "Return CRM module metadata and scaffold status.",
+        "operationId": "crm_get_info",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hrms/info": {
+      "get": {
+        "tags": [
+          "HRMS"
+        ],
+        "summary": "Get HRMS module metadata and scaffold status",
+        "description": "Return HRMS module metadata and scaffold status.",
+        "operationId": "hrms_get_info",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HrmsInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/setup/status": {
       "get": {
         "tags": [
@@ -1032,6 +1076,252 @@
         }
       }
     },
+    "/tenants/current/modules": {
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "List business modules with tenant activation status",
+        "description": "Return catalog of business modules and which ones are activated for the current tenant.",
+        "operationId": "tenants_list_modules",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleListResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/tenants/current/modules/{module_id}/activate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Activate a business module for tenant",
+        "description": "Activate a business module for the current tenant (Super Admin only).",
+        "operationId": "tenants_activate_module",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Module Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/modules/{module_id}/deactivate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Deactivate a business module for tenant",
+        "description": "Deactivate a business module for the current tenant (Super Admin only).",
+        "operationId": "tenants_deactivate_module",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Module Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/plugins": {
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "List extensible plugins with tenant activation status",
+        "description": "Return catalog of extensible plugins and which ones are activated for the current tenant.",
+        "operationId": "tenants_list_plugins",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginListResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/tenants/current/plugins/{plugin_id}/activate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Activate an extensible plugin for tenant",
+        "description": "Activate an extensible plugin for the current tenant (Super Admin only).",
+        "operationId": "tenants_activate_plugin",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plugin_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plugin Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/plugins/{plugin_id}/deactivate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Deactivate an extensible plugin for tenant",
+        "description": "Deactivate an extensible plugin for the current tenant (Super Admin only).",
+        "operationId": "tenants_deactivate_plugin",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plugin_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plugin Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users": {
       "post": {
         "tags": [
@@ -1137,10 +1427,56 @@
           }
         }
       }
+    },
+    "/plugins/api-logger/info": {
+      "get": {
+        "tags": [
+          "API Logger"
+        ],
+        "summary": "Get API Logger plugin metadata and status",
+        "description": "Return API Logger plugin metadata and status.",
+        "operationId": "api_logger_get_info",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiLoggerInfoResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ActivationResponse": {
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "is_active",
+          "message"
+        ],
+        "title": "ActivationResponse",
+        "description": "Response returned upon activation or deactivation."
+      },
       "AdminUserInput": {
         "properties": {
           "first_name": {
@@ -1211,6 +1547,56 @@
         "title": "AdminUserInput",
         "description": "Administrator credentials and profile collected during first-run setup."
       },
+      "ApiLoggerInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "default": "api-logger"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "API Logger"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "0.1.0"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "scaffold_ready"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "plugin"
+          },
+          "features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Features",
+            "default": [
+              "requests",
+              "webhooks",
+              "analytics",
+              "filters"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": "API request logging, webhook inspection, and debugging"
+          }
+        },
+        "type": "object",
+        "title": "ApiLoggerInfoResponse",
+        "description": "Information schema for API Logger plugin."
+      },
       "ChangePasswordRequest": {
         "properties": {
           "current_password": {
@@ -1233,6 +1619,51 @@
         ],
         "title": "ChangePasswordRequest",
         "description": "Authenticated request to update credentials (or complete first-login reset)."
+      },
+      "CrmInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "default": "crm"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "CRM"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "0.1.0"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "scaffold_ready"
+          },
+          "sub_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sub Features",
+            "default": [
+              "leads",
+              "deals",
+              "pipeline",
+              "contacts"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": "Customer relationship management and sales pipeline"
+          }
+        },
+        "type": "object",
+        "title": "CrmInfoResponse",
+        "description": "Information schema for CRM scaffold module."
       },
       "DeviceType": {
         "type": "string",
@@ -1316,6 +1747,123 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HrmsInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "default": "hrms"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "HRMS"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": "0.1.0"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "scaffold_ready"
+          },
+          "sub_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sub Features",
+            "default": [
+              "employees",
+              "leave",
+              "payroll",
+              "attendance"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": "People and human resources management"
+          }
+        },
+        "type": "object",
+        "title": "HrmsInfoResponse",
+        "description": "Information schema for HRMS scaffold module."
+      },
+      "ItemCatalogRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier (e.g. 'hrms', 'crm', 'api-logger')"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable title"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "'module' or 'plugin'"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Short description"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "Categorical tags"
+          },
+          "tone": {
+            "type": "string",
+            "title": "Tone",
+            "description": "Design system color tone",
+            "default": "primary"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Whether currently activated for the tenant",
+            "default": false
+          },
+          "activated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated At",
+            "description": "Activation timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "version",
+          "type",
+          "description"
+        ],
+        "title": "ItemCatalogRead",
+        "description": "Metadata describing an installed module or plugin in the catalog."
       },
       "LoginRequest": {
         "properties": {
@@ -1406,6 +1954,33 @@
         "title": "MessageResponse",
         "description": "Standard operation message response."
       },
+      "ModuleListResponse": {
+        "properties": {
+          "installed": {
+            "items": {
+              "$ref": "#/components/schemas/ItemCatalogRead"
+            },
+            "type": "array",
+            "title": "Installed",
+            "description": "List of all installed modules"
+          },
+          "active_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Active Ids",
+            "description": "List of activated module IDs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "installed",
+          "active_ids"
+        ],
+        "title": "ModuleListResponse",
+        "description": "Catalog of business modules with current tenant activation status."
+      },
       "Page_TenantRead_": {
         "properties": {
           "items": {
@@ -1443,6 +2018,33 @@
           "limit"
         ],
         "title": "Page[TenantRead]"
+      },
+      "PluginListResponse": {
+        "properties": {
+          "installed": {
+            "items": {
+              "$ref": "#/components/schemas/ItemCatalogRead"
+            },
+            "type": "array",
+            "title": "Installed",
+            "description": "List of all installed plugins"
+          },
+          "active_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Active Ids",
+            "description": "List of activated plugin IDs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "installed",
+          "active_ids"
+        ],
+        "title": "PluginListResponse",
+        "description": "Catalog of extensible plugins with current tenant activation status."
       },
       "RefreshTokenRequest": {
         "properties": {
@@ -2326,6 +2928,10 @@
         "description": "One-time setup token: printed in the API server log on first start, or SETUP_TOKEN in .env.",
         "in": "header",
         "name": "X-Setup-Token"
+      },
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   },
@@ -2343,6 +2949,14 @@
       "description": "User login, refresh token rotation, anti-enumeration forgot-password, and credential updates."
     },
     {
+      "name": "CRM",
+      "description": "Customer Relationship Management endpoints."
+    },
+    {
+      "name": "HRMS",
+      "description": "Human Resource Management System endpoints."
+    },
+    {
       "name": "Setup",
       "description": "First-run installation. `GET /setup/status` tells the UI whether to show the setup wizard. `GET /setup/checks` and `POST /setup` require the `X-Setup-Token` header (printed in the server log on first start) and return 404 once setup is complete. Until then, other routes return 503 with `code: setup_required`."
     },
@@ -2353,6 +2967,10 @@
     {
       "name": "User Management",
       "description": "User identity management, authentication credentials, and device controls."
+    },
+    {
+      "name": "API Logger",
+      "description": "API Logger extensible plugin endpoints."
     }
   ]
 }

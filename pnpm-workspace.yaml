@@ -3,6 +3,8 @@ packages:
   - 'packages/*'
   - 'kernel/*'
   - 'tests/*'
+  - 'modules/*/*'
+  - 'plugins/*/*'
 allowBuilds:
   '@swc/core': true
   nx: true

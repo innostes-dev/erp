@@ -1,2 +1,5 @@
 -e ../../kernel/backend
+-e ../../modules/hrms/backend
+-e ../../modules/crm/backend
+-e ../../plugins/api-logger/backend
 fastapi[standard]>=0.158

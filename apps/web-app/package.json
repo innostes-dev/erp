@@ -6,6 +6,9 @@
     "name": "web-app"
   },
   "dependencies": {
+    "@innostes/api-logger": "workspace:*",
+    "@innostes/crm": "workspace:*",
+    "@innostes/hrms": "workspace:*",
     "@innostes/kernel": "workspace:*",
     "@innostes/ui": "workspace:*",
     "lucide-react": "^1.60.0"
