@@ -1,5 +1,6 @@
 // Feedback: alerts, toasts, progress and loading states.
 export * from './alert/alert';
+export * from './gauge/gauge';
 export * from './meter/meter';
 export * from './progress/progress';
 export * from './skeleton/skeleton';

@@ -1,0 +1,69 @@
+---
+title: Rich Text Editor
+description: Formatted text for notes, descriptions and comments.
+icon: TextCursorInput
+status: Beta
+summary: Bold, headings, lists, quotes, links and undo, with Markdown shortcuts. Built on Tiptap, in a separate entry point.
+---
+
+<ComponentPreview name="forms/rich-text-editor/basic" />
+
+The editor lives in a **separate entry point** (`@innostes/ui/editor`), so apps without rich text never load it.
+
+## Installation
+
+It is built on [Tiptap](https://tiptap.dev) 3 (MIT), which works with React 17, 18 and 19. Install its peer dependencies:
+
+```sh
+pnpm add @tiptap/react @tiptap/pm @tiptap/core @tiptap/starter-kit @tiptap/extensions
+```
+
+## Import
+
+```tsx
+import { RichTextEditor } from '@innostes/ui/editor';
+```
+
+## Usage
+
+```tsx
+<Field>
+  <FieldLabel id="notes-label">Delivery notes</FieldLabel>
+  <RichTextEditor
+    aria-labelledby="notes-label"
+    placeholder="Gate code, contact person, unloading hours…"
+    value={notes}
+    onValueChange={setNotes}
+  />
+</Field>
+```
+
+- The value is **HTML**. An empty editor gives `''`, so required checks are simple.
+- `name` submits the HTML in a hidden input, for plain `<form>` posts.
+- `toolbar` picks and orders the buttons (`'|'` adds a divider), or `false` hides it. Markdown shortcuts still work: `**bold**`, `_italic_`, `## heading`, `- list`, `1. list`, `> quote`.
+- `readOnly` shows saved content without the toolbar or border, e.g. on a detail page.
+- `extensions` adds Tiptap extensions (character count, mentions, tables). `onReady` gives you the Tiptap `editor` for advanced control.
+- `labels` translates the toolbar and link form.
+
+## Security
+
+Content is parsed against the editor's schema, so pasted or loaded HTML loses everything it doesn't support: scripts, event handlers, styles, images and unknown tags. Links only accept safe protocols (`javascript:` is refused).
+
+The HTML still comes from users. Sanitize it on the server before storing it, and again (or render it through this editor in `readOnly` mode) wherever you display it.
+
+## Keyboard
+
+| Shortcut | Action |
+| --- | --- |
+| Ctrl/⌘ + B, I, U | Bold, italic, underline |
+| Ctrl/⌘ + Shift + S | Strikethrough |
+| Ctrl/⌘ + Shift + 7 / 8 | Numbered / bulleted list |
+| Ctrl/⌘ + Shift + B | Quote |
+| Ctrl/⌘ + E | Inline code |
+| Ctrl/⌘ + Z / Shift + Z | Undo / redo |
+
+The toolbar is one tab stop; arrow keys move between its buttons. Each formatting button reports whether it's on with `aria-pressed`.
+
+## API Reference
+
+<ApiTable components={['RichTextEditor']} />

@@ -1,0 +1,44 @@
+---
+title: Split Pane
+description: Two resizable panes for master-detail screens.
+icon: Columns2
+status: Beta
+summary: A list beside its detail, with a draggable, keyboard-resizable divider.
+---
+
+<ComponentPreview name="layout/split-pane/basic" />
+
+## Import
+
+```tsx
+import { SplitPane } from '@innostes/ui';
+```
+
+## Usage
+
+Pass exactly two children and give the pane a height.
+
+```tsx
+<SplitPane defaultSize={35} minSize={20} maxSize={60} className="h-[calc(100dvh-8rem)]">
+  <OrderList />
+  <OrderDetail />
+</SplitPane>
+```
+
+- `size` and the limits are percentages of the first pane. Control it with `size` / `onSizeChange`, e.g. to save the user's layout.
+- `orientation="vertical"` stacks the panes.
+- Double-clicking the divider restores `defaultSize`.
+- On small screens, consider rendering the detail in a `Sheet` instead.
+
+## Accessibility
+
+The divider is a focusable `separator` with its value and range, and `aria-controls` pointing at the first pane.
+
+| Key | Action |
+| --- | --- |
+| Left / Right (Up / Down when stacked) | Resize by `step` (Shift: 4×) |
+| Home / End | Smallest / largest size |
+
+## API Reference
+
+<ApiTable components={['SplitPane']} />

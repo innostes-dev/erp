@@ -1,0 +1,41 @@
+---
+title: Gauge
+description: A radial dial for one value in a range.
+icon: Gauge
+status: Beta
+summary: KPI dials for budget use, capacity, SLA and quota, with value-based colours.
+---
+
+<ComponentPreview name="feedback/gauge/basic" />
+
+## Import
+
+```tsx
+import { Gauge } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<Gauge
+  value={82}
+  label="Budget used"
+  description="₹49L of ₹60L"
+  format={{ style: 'percent' }}
+  tone={(v) => (v > 90 ? 'destructive' : v > 75 ? 'warning' : 'success')}
+/>
+```
+
+- `min` and `max` set the range (default 0–100). `format` takes `Intl.NumberFormat` options.
+- Without `format`, or with `style: 'percent'`, the number shown is the share of the range (312 of 400 shows "78%"). Other formats, e.g. `{ style: 'currency', currency: 'INR' }`, apply to the value itself.
+- `tone` is a colour, or a function of the value for thresholds.
+- `size` sets the width (default `10rem`).
+- For a compact bar, use [Meter](/ui/docs/components/feedback/meter). For task progress, use [Progress](/ui/docs/components/feedback/progress).
+
+## Accessibility
+
+Built on Base UI's Meter: it has `role="meter"`, is named by `label` (or `aria-label`), and exposes the value and range. The arc is decorative.
+
+## API Reference
+
+<ApiTable components={['Gauge']} />

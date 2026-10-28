@@ -1,0 +1,44 @@
+---
+title: Change Log
+description: Who changed which fields of a record, and when.
+icon: History
+status: Beta
+summary: An audit trail with field-level before and after values, notes and day groups.
+---
+
+<ComponentPreview name="widgets/change-log/basic" />
+
+## Import
+
+```tsx
+import { ChangeLog } from '@innostes/ui';
+```
+
+## Usage
+
+Map your audit records to entries, newest first:
+
+```tsx
+<ChangeLog
+  groupByDay
+  entries={audit.map((a) => ({
+    id: a.id,
+    actor: a.user.name,
+    action: a.summary, // "updated the invoice"
+    time: new Date(a.at),
+    changes: a.diff.map((d) => ({ field: d.label, from: d.old, to: d.new })),
+    note: a.comment,
+  }))}
+/>
+```
+
+- `from` and `to` take any content, e.g. status badges. Empty values show `emptyValue` (default "—").
+- Built on `ActivityFeed`'s timeline, so it takes the same `groupByDay`, `locale` and `now` props. Use `ActivityFeed` for event streams without field changes.
+
+## Accessibility
+
+Changes are a description list; old values use `<del>` and new values `<ins>`, with hidden "from" / "to" labels (`diffLabels` to translate).
+
+## API Reference
+
+<ApiTable components={['ChangeLog']} />

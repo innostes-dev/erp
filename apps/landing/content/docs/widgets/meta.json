@@ -4,6 +4,9 @@
     "metric-card",
     "widget-card",
     "sparkline",
+    "kanban-board",
+    "permission-matrix",
+    "change-log",
     "app-switcher",
     "notification-bell",
     "user-menu"

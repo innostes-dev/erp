@@ -5,16 +5,19 @@
     "input",
     "input-group",
     "textarea",
+    "rich-text-editor",
     "checkbox",
     "radio-group",
     "switch",
     "select",
     "searchable-select",
     "combobox",
+    "tag-input",
     "locale-select",
     "number-field",
     "slider",
     "calendar",
-    "date-picker"
+    "date-picker",
+    "file-dropzone"
   ]
 }

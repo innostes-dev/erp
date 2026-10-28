@@ -1,0 +1,47 @@
+---
+title: Permission Matrix
+description: Role permissions as a grid of checkboxes.
+icon: ShieldCheck
+status: Beta
+summary: Resources by actions, grouped by module, with row and column "all" toggles.
+---
+
+<ComponentPreview name="widgets/permission-matrix/basic" />
+
+## Import
+
+```tsx
+import { PermissionMatrix, permissionKey } from '@innostes/ui';
+```
+
+## Usage
+
+```tsx
+<PermissionMatrix
+  aria-label={`Permissions for ${role.name}`}
+  actions={[
+    { id: 'view', label: 'View' },
+    { id: 'edit', label: 'Edit' },
+    { id: 'approve', label: 'Approve' },
+  ]}
+  resources={[
+    { id: 'invoices', label: 'Invoices', group: 'Finance' },
+    { id: 'payroll', label: 'Payroll', group: 'HR', actions: ['view', 'approve'] },
+  ]}
+  value={role.permissions}
+  onValueChange={(permissions) => save({ ...role, permissions })}
+/>
+```
+
+- The value is a flat list of `"resource:action"` keys. `permissionKey(resource, action)` builds one.
+- `actions` on a resource limits which actions apply; other cells show a dash.
+- `group` lists rows under section headings, in the order they first appear.
+- `readOnly` shows the permissions without bulk toggles or changes, e.g. for system roles.
+
+## Accessibility
+
+A real `<table>` with row and column headers. Every checkbox is named after its action and resource ("Edit Invoices"); bulk toggles show a mixed state when only some permissions are granted.
+
+## API Reference
+
+<ApiTable components={['PermissionMatrix']} />

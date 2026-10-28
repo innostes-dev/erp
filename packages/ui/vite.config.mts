@@ -41,8 +41,8 @@ export default defineConfig(() => ({
     emptyOutDir: true,
     reportCompressedSize: true,
     lib: {
-      // Two entry points: the main package, and the optional charts (needs recharts).
-      entry: ['src/index.ts', 'src/charts/index.ts'],
+      // Entry points: the main package, plus the optional charts (needs recharts) and editor (needs Tiptap).
+      entry: ['src/index.ts', 'src/charts/index.ts', 'src/editor/index.ts'],
       formats: ['es' as const],
     },
     rolldownOptions: {
@@ -54,6 +54,7 @@ export default defineConfig(() => ({
         'tailwind-merge',
         'class-variance-authority',
         /^recharts(\/.*)?$/,
+        /^@tiptap\//,
         'react-is',
       ],
       output: {
@@ -72,6 +73,7 @@ export default defineConfig(() => ({
     alias: [
       { find: /^@innostes\/ui$/, replacement: path.join(import.meta.dirname, 'src/index.ts') },
       { find: /^@innostes\/ui\/charts$/, replacement: path.join(import.meta.dirname, 'src/charts/index.ts') },
+      { find: /^@innostes\/ui\/editor$/, replacement: path.join(import.meta.dirname, 'src/editor/index.ts') },
     ],
   },
   test: {

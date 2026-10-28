@@ -14,7 +14,7 @@ import { globSync } from 'node:fs';
 import docgen from 'react-docgen-typescript';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const files = ['src/components/**/*.tsx', 'src/widgets/**/*.tsx', 'src/charts/**/*.tsx']
+const files = ['src/components/**/*.tsx', 'src/widgets/**/*.tsx', 'src/charts/**/*.tsx', 'src/editor/**/*.tsx']
   .flatMap((pattern) => globSync(pattern, { cwd: root }))
   .filter((file) => !file.endsWith('.test.tsx'))
   .map((file) => join(root, file));
@@ -47,7 +47,7 @@ for (const doc of parser.parse(files)) {
   components[name] = {
     description: doc.description,
     file,
-    category: ['widgets', 'charts'].includes(file.split('/')[1]) ? file.split('/')[1] : file.split('/')[2],
+    category: ['widgets', 'charts', 'editor'].includes(file.split('/')[1]) ? file.split('/')[1] : file.split('/')[2],
     props: Object.fromEntries(
       Object.entries(doc.props)
         .sort(([a], [b]) => a.localeCompare(b))

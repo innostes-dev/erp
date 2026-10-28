@@ -17,9 +17,11 @@ import Demo_data_display_icon_tile_basic_tsx from './data-display/icon-tile/basi
 import Demo_data_display_kbd_basic_tsx from './data-display/kbd/basic';
 import Demo_data_display_stat_basic_tsx from './data-display/stat/basic';
 import Demo_data_display_table_basic_tsx from './data-display/table/basic';
+import Demo_data_display_tree_view_basic_tsx from './data-display/tree-view/basic';
 import Demo_examples_dashboard_tsx from './examples/dashboard';
 import Demo_examples_setup_wizard_tsx from './examples/setup-wizard';
 import Demo_feedback_alert_basic_tsx from './feedback/alert/basic';
+import Demo_feedback_gauge_basic_tsx from './feedback/gauge/basic';
 import Demo_feedback_meter_basic_tsx from './feedback/meter/basic';
 import Demo_feedback_progress_basic_tsx from './feedback/progress/basic';
 import Demo_feedback_skeleton_basic_tsx from './feedback/skeleton/basic';
@@ -32,15 +34,18 @@ import Demo_forms_combobox_basic_tsx from './forms/combobox/basic';
 import Demo_forms_date_picker_basic_tsx from './forms/date-picker/basic';
 import Demo_forms_field_basic_tsx from './forms/field/basic';
 import Demo_forms_field_form_tsx from './forms/field/form';
+import Demo_forms_file_dropzone_basic_tsx from './forms/file-dropzone/basic';
 import Demo_forms_input_group_basic_tsx from './forms/input-group/basic';
 import Demo_forms_input_basic_tsx from './forms/input/basic';
 import Demo_forms_locale_select_basic_tsx from './forms/locale-select/basic';
 import Demo_forms_number_field_basic_tsx from './forms/number-field/basic';
 import Demo_forms_radio_group_basic_tsx from './forms/radio-group/basic';
+import Demo_forms_rich_text_editor_basic_tsx from './forms/rich-text-editor/basic';
 import Demo_forms_searchable_select_basic_tsx from './forms/searchable-select/basic';
 import Demo_forms_select_basic_tsx from './forms/select/basic';
 import Demo_forms_slider_basic_tsx from './forms/slider/basic';
 import Demo_forms_switch_basic_tsx from './forms/switch/basic';
+import Demo_forms_tag_input_basic_tsx from './forms/tag-input/basic';
 import Demo_forms_textarea_basic_tsx from './forms/textarea/basic';
 import Demo_layout_app_rail_basic_tsx from './layout/app-rail/basic';
 import Demo_layout_form_layout_basic_tsx from './layout/form-layout/basic';
@@ -51,6 +56,7 @@ import Demo_layout_sidebar_basic_tsx from './layout/sidebar/basic';
 import Demo_layout_sidebar_nav_submenu_tsx from './layout/sidebar/nav-submenu';
 import Demo_layout_sidebar_variants_tsx from './layout/sidebar/variants';
 import Demo_layout_sidebar_width_tsx from './layout/sidebar/width';
+import Demo_layout_split_pane_basic_tsx from './layout/split-pane/basic';
 import Demo_layout_top_bar_basic_tsx from './layout/top-bar/basic';
 import Demo_navigation_accordion_basic_tsx from './navigation/accordion/basic';
 import Demo_navigation_breadcrumb_basic_tsx from './navigation/breadcrumb/basic';
@@ -68,9 +74,12 @@ import Demo_overlays_popover_basic_tsx from './overlays/popover/basic';
 import Demo_overlays_sheet_basic_tsx from './overlays/sheet/basic';
 import Demo_overlays_tooltip_basic_tsx from './overlays/tooltip/basic';
 import Demo_widgets_app_switcher_basic_tsx from './widgets/app-switcher/basic';
+import Demo_widgets_change_log_basic_tsx from './widgets/change-log/basic';
+import Demo_widgets_kanban_board_basic_tsx from './widgets/kanban-board/basic';
 import Demo_widgets_metric_card_states_tsx from './widgets/metric-card/states';
 import Demo_widgets_metric_card_variants_tsx from './widgets/metric-card/variants';
 import Demo_widgets_notification_bell_basic_tsx from './widgets/notification-bell/basic';
+import Demo_widgets_permission_matrix_basic_tsx from './widgets/permission-matrix/basic';
 import Demo_widgets_sparkline_basic_tsx from './widgets/sparkline/basic';
 import Demo_widgets_user_menu_basic_tsx from './widgets/user-menu/basic';
 import Demo_widgets_widget_card_basic_tsx from './widgets/widget-card/basic';
@@ -93,9 +102,11 @@ export const demos: Record<string, ComponentType> = {
   'data-display/kbd/basic': Demo_data_display_kbd_basic_tsx,
   'data-display/stat/basic': Demo_data_display_stat_basic_tsx,
   'data-display/table/basic': Demo_data_display_table_basic_tsx,
+  'data-display/tree-view/basic': Demo_data_display_tree_view_basic_tsx,
   'examples/dashboard': Demo_examples_dashboard_tsx,
   'examples/setup-wizard': Demo_examples_setup_wizard_tsx,
   'feedback/alert/basic': Demo_feedback_alert_basic_tsx,
+  'feedback/gauge/basic': Demo_feedback_gauge_basic_tsx,
   'feedback/meter/basic': Demo_feedback_meter_basic_tsx,
   'feedback/progress/basic': Demo_feedback_progress_basic_tsx,
   'feedback/skeleton/basic': Demo_feedback_skeleton_basic_tsx,
@@ -108,15 +119,18 @@ export const demos: Record<string, ComponentType> = {
   'forms/date-picker/basic': Demo_forms_date_picker_basic_tsx,
   'forms/field/basic': Demo_forms_field_basic_tsx,
   'forms/field/form': Demo_forms_field_form_tsx,
+  'forms/file-dropzone/basic': Demo_forms_file_dropzone_basic_tsx,
   'forms/input-group/basic': Demo_forms_input_group_basic_tsx,
   'forms/input/basic': Demo_forms_input_basic_tsx,
   'forms/locale-select/basic': Demo_forms_locale_select_basic_tsx,
   'forms/number-field/basic': Demo_forms_number_field_basic_tsx,
   'forms/radio-group/basic': Demo_forms_radio_group_basic_tsx,
+  'forms/rich-text-editor/basic': Demo_forms_rich_text_editor_basic_tsx,
   'forms/searchable-select/basic': Demo_forms_searchable_select_basic_tsx,
   'forms/select/basic': Demo_forms_select_basic_tsx,
   'forms/slider/basic': Demo_forms_slider_basic_tsx,
   'forms/switch/basic': Demo_forms_switch_basic_tsx,
+  'forms/tag-input/basic': Demo_forms_tag_input_basic_tsx,
   'forms/textarea/basic': Demo_forms_textarea_basic_tsx,
   'layout/app-rail/basic': Demo_layout_app_rail_basic_tsx,
   'layout/form-layout/basic': Demo_layout_form_layout_basic_tsx,
@@ -127,6 +141,7 @@ export const demos: Record<string, ComponentType> = {
   'layout/sidebar/nav-submenu': Demo_layout_sidebar_nav_submenu_tsx,
   'layout/sidebar/variants': Demo_layout_sidebar_variants_tsx,
   'layout/sidebar/width': Demo_layout_sidebar_width_tsx,
+  'layout/split-pane/basic': Demo_layout_split_pane_basic_tsx,
   'layout/top-bar/basic': Demo_layout_top_bar_basic_tsx,
   'navigation/accordion/basic': Demo_navigation_accordion_basic_tsx,
   'navigation/breadcrumb/basic': Demo_navigation_breadcrumb_basic_tsx,
@@ -144,9 +159,12 @@ export const demos: Record<string, ComponentType> = {
   'overlays/sheet/basic': Demo_overlays_sheet_basic_tsx,
   'overlays/tooltip/basic': Demo_overlays_tooltip_basic_tsx,
   'widgets/app-switcher/basic': Demo_widgets_app_switcher_basic_tsx,
+  'widgets/change-log/basic': Demo_widgets_change_log_basic_tsx,
+  'widgets/kanban-board/basic': Demo_widgets_kanban_board_basic_tsx,
   'widgets/metric-card/states': Demo_widgets_metric_card_states_tsx,
   'widgets/metric-card/variants': Demo_widgets_metric_card_variants_tsx,
   'widgets/notification-bell/basic': Demo_widgets_notification_bell_basic_tsx,
+  'widgets/permission-matrix/basic': Demo_widgets_permission_matrix_basic_tsx,
   'widgets/sparkline/basic': Demo_widgets_sparkline_basic_tsx,
   'widgets/user-menu/basic': Demo_widgets_user_menu_basic_tsx,
   'widgets/widget-card/basic': Demo_widgets_widget_card_basic_tsx,
