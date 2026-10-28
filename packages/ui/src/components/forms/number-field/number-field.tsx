@@ -22,6 +22,16 @@ export interface NumberFieldProps extends BaseNumberField.Root.Props {
   placeholder?: string;
   /** Accessible label when there's no visible `FieldLabel`. */
   'aria-label'?: string;
+  /**
+   * Accessible label for the decrement button.
+   * @default 'Decrease'
+   */
+  decrementLabel?: string;
+  /**
+   * Accessible label for the increment button.
+   * @default 'Increase'
+   */
+  incrementLabel?: string;
 }
 
 /**
@@ -40,6 +50,8 @@ export const NumberField = forwardRef<HTMLDivElement, NumberFieldProps>(
       showSteppers = true,
       placeholder,
       'aria-label': ariaLabel,
+      decrementLabel = 'Decrease',
+      incrementLabel = 'Increase',
       ...props
     },
     ref,
@@ -65,7 +77,7 @@ export const NumberField = forwardRef<HTMLDivElement, NumberFieldProps>(
         >
           {showSteppers && (
             <BaseNumberField.Decrement
-              aria-label="Decrease"
+              aria-label={decrementLabel}
               className={cn(stepper, 'border-e border-input')}
             >
               <MinusIcon className="size-4" />
@@ -82,7 +94,7 @@ export const NumberField = forwardRef<HTMLDivElement, NumberFieldProps>(
           />
           {showSteppers && (
             <BaseNumberField.Increment
-              aria-label="Increase"
+              aria-label={incrementLabel}
               className={cn(stepper, 'border-s border-input')}
             >
               <PlusIcon className="size-4" />

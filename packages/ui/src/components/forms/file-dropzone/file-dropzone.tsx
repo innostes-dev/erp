@@ -57,6 +57,8 @@ export interface FileDropzoneProps
   name?: string;
   /** Requires at least one file for native form validation. @default false */
   required?: boolean;
+  /** Mark the field as invalid (e.g. when used inside Field with validation errors). @default false */
+  invalid?: boolean;
   /** Disables dropping and picking. @default false */
   disabled?: boolean;
   /** Small text under the title, e.g. "PDF or PNG, up to 5 MB". */
@@ -105,6 +107,7 @@ export const FileDropzone = forwardRef<HTMLDivElement, FileDropzoneProps>(functi
     maxFiles,
     name,
     required = false,
+    invalid = false,
     disabled = false,
     hint,
     showFileList = true,
@@ -183,6 +186,11 @@ export const FileDropzone = forwardRef<HTMLDivElement, FileDropzoneProps>(functi
     labels?.rejection ??
     ((r: FileRejection) => `${r.file.name}: ${r.reasons.map((x) => reasonText[x]).join(', ')}`);
 
+  const isInvalid = invalid || rejections.length > 0;
+  const describedBy = [hint ? hintId : null, props['aria-describedby']]
+    .filter(Boolean)
+    .join(' ') || undefined;
+
   return (
     <div
       ref={ref}
@@ -194,7 +202,7 @@ export const FileDropzone = forwardRef<HTMLDivElement, FileDropzoneProps>(functi
         data-slot="file-dropzone-zone"
         data-dragging={dragging ? '' : undefined}
         data-disabled={disabled ? '' : undefined}
-        data-invalid={rejections.length ? '' : undefined}
+        data-invalid={isInvalid ? '' : undefined}
         onDragEnter={onDragOver}
         onDragOver={onDragOver}
         onDragLeave={(e) => {
@@ -222,7 +230,8 @@ export const FileDropzone = forwardRef<HTMLDivElement, FileDropzoneProps>(functi
             variant="link"
             disabled={disabled}
             onClick={() => inputRef.current?.click()}
-            aria-describedby={hint ? hintId : undefined}
+            aria-invalid={isInvalid || undefined}
+            aria-describedby={describedBy}
           >
             {labels?.browse ?? 'Browse files'}
           </Button>
@@ -241,6 +250,8 @@ export const FileDropzone = forwardRef<HTMLDivElement, FileDropzoneProps>(functi
           multiple={multiple}
           required={required && files.length === 0}
           disabled={disabled}
+          aria-invalid={isInvalid || undefined}
+          aria-describedby={describedBy}
           tabIndex={-1}
           aria-hidden="true"
           className="sr-only"

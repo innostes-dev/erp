@@ -51,6 +51,11 @@ export interface SearchableSelectProps {
   'aria-label'?: string;
   /** Show the selected option's `leading` element inside the input. @default true */
   showLeadingInInput?: boolean;
+  /**
+   * Accessible label for the dropdown trigger button.
+   * @default 'Show options'
+   */
+  openLabel?: string;
   /** Extra classes for the input wrapper. */
   className?: string;
 }
@@ -85,6 +90,7 @@ export const SearchableSelect = forwardRef<
     invalid,
     id,
     'aria-label': ariaLabel,
+    openLabel = 'Show options',
     showLeadingInInput = true,
     className,
   },
@@ -145,7 +151,7 @@ export const SearchableSelect = forwardRef<
           )}
         />
         <BaseCombobox.Trigger
-          aria-label="Show options"
+          aria-label={openLabel}
           className="absolute end-1 flex size-7 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring"
         >
           <ChevronsUpDownIcon className="size-4" />

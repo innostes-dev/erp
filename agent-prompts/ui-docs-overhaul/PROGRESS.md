@@ -91,3 +91,29 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: AUDIT items mapped to prompts 03–19.
+
+
+## 03 – Library: Actions and Forms – 2026-10-29
+
+**Summary**: Hardened all 19 components across `packages/ui/src/components/actions` and `packages/ui/src/components/forms`. Configured customizable a11y labels in Combobox, Select, SearchableSelect, DatePicker, DateRangePicker, and NumberField (LIB-003 partial). Added `invalid` prop and Field integration to FileDropzone. Ensured explicit `data-slot` coverage across all components and expanded form test coverage with comprehensive test suites.
+**Changed**:
+- `packages/ui/src/components/forms/combobox/combobox.tsx`: added `clearLabel` and `openLabel` customizable props.
+- `packages/ui/src/components/forms/number-field/number-field.tsx`: added `decrementLabel` and `incrementLabel` props.
+- `packages/ui/src/components/forms/searchable-select/searchable-select.tsx`: added `openLabel` prop.
+- `packages/ui/src/components/forms/date-picker/date-picker.tsx`: added `clearLabel` and `presetsLabel` props.
+- `packages/ui/src/components/forms/file-dropzone/file-dropzone.tsx`: added `invalid` prop, `aria-invalid` and `aria-describedby` Field context bindings.
+- `packages/ui/src/components/forms/locale-select/locale-select.tsx`: verified explicit `data-slot` attributes.
+- `packages/ui/src/components/forms/forms-coverage.test.tsx`: created comprehensive suite testing Select/Combobox anatomy, subcomponents, Fieldset, CheckboxGroup, NumberField labels, FileDropzone validation, and locale select presets.
+**API changes**:
+- Added optional label props with backwards-compatible defaults: `clearLabel`, `openLabel`, `decrementLabel`, `incrementLabel`, `presetsLabel`.
+- Added optional `invalid?: boolean` prop to `FileDropzoneProps`.
+**Decisions**:
+- Preserved existing defaults for all customizable accessibility strings to prevent breaking consumer markup.
+- `FileDropzone` automatically checks `aria-invalid` from enclosing `Field` context while honoring explicit `invalid` prop overrides.
+**Verification**:
+- `pnpm nx test ui`: PASS (25 test files, 194 tests)
+- `pnpm nx build ui`: PASS (all 237 components compiled cleanly)
+- `pnpm nx run landing:docs-check`: PASS (0.10s)
+**Open issues**:
+- Blocking: none.
+- Non-blocking: remaining items in `AUDIT.md` for prompts 04–19.

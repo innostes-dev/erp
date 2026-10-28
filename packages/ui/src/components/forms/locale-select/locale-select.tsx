@@ -133,6 +133,7 @@ export const CountrySelect = forwardRef<HTMLInputElement, CountrySelectProps>(
     return (
       <SearchableSelect
         ref={ref}
+        data-slot="country-select"
         options={options}
         placeholder={placeholder}
         {...props}
@@ -193,6 +194,7 @@ export const TimezoneSelect = forwardRef<HTMLInputElement, LocaleSelectProps>(
     return (
       <SearchableSelect
         ref={ref}
+        data-slot="timezone-select"
         options={options}
         placeholder={placeholder}
         {...props}
@@ -249,6 +251,7 @@ export const LanguageSelect = forwardRef<HTMLInputElement, LanguageSelectProps>(
     return (
       <SearchableSelect
         ref={ref}
+        data-slot="language-select"
         options={options}
         placeholder={placeholder}
         {...props}
@@ -300,6 +303,7 @@ export const CurrencySelect = forwardRef<HTMLInputElement, LocaleSelectProps>(
     return (
       <SearchableSelect
         ref={ref}
+        data-slot="currency-select"
         options={options}
         placeholder={placeholder}
         {...props}
@@ -420,6 +424,7 @@ export const DateFormatSelect = forwardRef<
       <SelectTrigger
         ref={ref}
         id={id}
+        data-slot="date-format-select"
         aria-label={ariaLabel}
         size={size}
         className={cn(className)}

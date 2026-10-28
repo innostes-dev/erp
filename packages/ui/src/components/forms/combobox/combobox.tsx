@@ -54,12 +54,30 @@ export interface ComboboxInputProps extends Omit<
    * @default true
    */
   showTrigger?: boolean;
+  /**
+   * Accessible label for the clear button.
+   * @default 'Clear'
+   */
+  clearLabel?: string;
+  /**
+   * Accessible label for the open button.
+   * @default 'Open'
+   */
+  openLabel?: string;
 }
 
 /** The text input, with optional clear and open buttons. */
 export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
   function ComboboxInput(
-    { className, size, showClear = true, showTrigger = true, ...props },
+    {
+      className,
+      size,
+      showClear = true,
+      showTrigger = true,
+      clearLabel = 'Clear',
+      openLabel = 'Open',
+      ...props
+    },
     ref,
   ) {
     return (
@@ -82,7 +100,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
         <div className="absolute end-1 flex items-center gap-0.5">
           {showClear && (
             <BaseCombobox.Clear
-              aria-label="Clear"
+              aria-label={clearLabel}
               className="flex size-7 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring"
             >
               <XIcon className="size-4" />
@@ -90,7 +108,7 @@ export const ComboboxInput = forwardRef<HTMLInputElement, ComboboxInputProps>(
           )}
           {showTrigger && (
             <BaseCombobox.Trigger
-              aria-label="Open"
+              aria-label={openLabel}
               className="flex size-7 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring"
             >
               <ChevronsUpDownIcon className="size-4" />

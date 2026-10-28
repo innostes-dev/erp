@@ -41,6 +41,8 @@ interface PickerTriggerProps {
   invalid?: boolean;
   /** Show a button that clears the value. @default true */
   clearable?: boolean;
+  /** Accessible label for the clear button. @default 'Clear date' */
+  clearLabel?: string;
   /** Id of the trigger button, for `<Label htmlFor>`. */
   id?: string;
   /** Accessible name when there's no visible label. */
@@ -107,15 +109,17 @@ function PickerTrigger({
 function ClearButton({
   onClear,
   hidden,
+  ariaLabel = 'Clear date',
 }: {
   onClear: () => void;
   hidden: boolean;
+  ariaLabel?: string;
 }) {
   if (hidden) return null;
   return (
     <button
       type="button"
-      aria-label="Clear date"
+      aria-label={ariaLabel}
       onClick={onClear}
       className="absolute end-1.5 top-1/2 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring"
     >
@@ -173,6 +177,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
       name,
       placeholder = 'Pick a date',
       clearable = true,
+      clearLabel = 'Clear date',
       open: openProp,
       onOpenChange,
       align = 'start',
@@ -241,6 +246,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(
           </BasePopover.Portal>
         </BasePopover.Root>
         <ClearButton
+          ariaLabel={clearLabel}
           hidden={!clearable || !value || !!disabled}
           onClear={() => setValue(null)}
         />
@@ -283,6 +289,8 @@ export interface DateRangePickerProps
   startName?: string;
   /** Form field name for the end date (`YYYY-MM-DD`). */
   endName?: string;
+  /** Accessible label for the presets list. @default 'Presets' */
+  presetsLabel?: string;
 }
 
 /**
@@ -305,6 +313,8 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
       endName,
       placeholder = 'Pick a date range',
       clearable = true,
+      clearLabel = 'Clear date',
+      presetsLabel = 'Presets',
       open: openProp,
       onOpenChange,
       align = 'start',
@@ -385,7 +395,7 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
                 {presets.length > 0 && (
                   <div
                     role="group"
-                    aria-label="Presets"
+                    aria-label={presetsLabel}
                     className="flex gap-1 overflow-x-auto border-b border-border p-2 sm:w-40 sm:flex-col sm:border-e sm:border-b-0"
                   >
                     {presets.map((preset) => (
@@ -417,6 +427,7 @@ export const DateRangePicker = forwardRef<HTMLDivElement, DateRangePickerProps>(
           </BasePopover.Portal>
         </BasePopover.Root>
         <ClearButton
+          ariaLabel={clearLabel}
           hidden={!clearable || !value.from || !!disabled}
           onClear={() => setValue({ from: null, to: null })}
         />
