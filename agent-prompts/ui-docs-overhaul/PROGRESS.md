@@ -117,3 +117,34 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: remaining items in `AUDIT.md` for prompts 04–19.
+
+
+## 04 – Library: data display and feedback – 2026-10-29
+
+**Summary**: Hardened all 17 components across `packages/ui/src/components/data-display` and `packages/ui/src/components/feedback`. Fixed Meter and Progress percent formatting (LIB-002) to normalize shares against min/max matching Gauge. Added customizable a11y labels in DataTable (`selectAllLabel`, `selectRowLabel`, `selectedCountText`, `paginationRangeText`), AvatarGroup (`moreLabel`, RTL reverse spacing), and TreeView (`loadingLabel`, RTL keyboard handling). Replaced physical directional positioning with logical inline utilities in Toaster (LIB-007). Expanded test coverage across both folders to >90% with comprehensive benchmark and unit tests.
+**Changed**:
+- `packages/ui/src/components/feedback/meter/meter.tsx`: normalized percent values to format share of range; updated TSDoc example.
+- `packages/ui/src/components/feedback/progress/progress.tsx`: normalized percent values matching Meter and Gauge.
+- `packages/ui/src/components/feedback/toast/toast.tsx`: implemented logical inline positions (`start-4`, `end-4`, `top-start`, `bottom-end`) and added `closeLabel` prop.
+- `packages/ui/src/components/data-display/data-table/data-table.tsx`: added customizable label props, converted line endings to LF.
+- `packages/ui/src/components/data-display/tree-view/tree-view.tsx`: added RTL arrow key support, `loading` state support with Spinner indicator and `loadingLabel`.
+- `packages/ui/src/components/data-display/avatar/avatar.tsx`: added `moreLabel` and `rtl:space-x-reverse`.
+- Created `packages/ui/src/components/data-display/data-display-coverage.test.tsx` (1,000-row benchmark, custom labels, TreeView RTL/loading, Card/Table/Kbd/IconTile subcomponents).
+- Created `packages/ui/src/components/feedback/feedback-coverage.test.tsx` (Meter/Progress/Gauge percent format regression, Toast promise/action/update lifecycle).
+**API changes**:
+- `MeterProps` & `ProgressProps`: normalizes `format={{ style: 'percent' }}` against min/max; accepts custom Intl options without RangeError.
+- `DataTableProps`: added `selectAllLabel`, `selectRowLabel`, `selectedCountText`, `paginationRangeText`.
+- `TreeViewProps`: added `loadingLabel`; `TreeNode` added `loading?: boolean`.
+- `ToasterProps`: added `closeLabel`, added `'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'` to `position`.
+- `AvatarGroupProps`: added `moreLabel`.
+**Decisions**:
+- Meter and Progress format the fraction of the span for percent styles, resolving the 7,200% defect (LIB-002).
+- DataTable renders 1,000 rows cleanly with pagination under 150ms budget.
+- TreeView automatically detects element or document `dir="rtl"` to flip ArrowLeft (expand) and ArrowRight (collapse).
+**Verification**:
+- `pnpm nx test ui`: PASS (27 test files, 209 tests)
+- `pnpm nx build ui`: PASS (all 237 components compiled cleanly)
+- `pnpm nx run landing:docs-check`: PASS (0.09s)
+**Open issues**:
+- Blocking: none.
+- Non-blocking: remaining items in `AUDIT.md` for prompts 05–19.

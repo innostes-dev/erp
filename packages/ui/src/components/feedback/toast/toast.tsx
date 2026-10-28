@@ -140,23 +140,36 @@ export interface ToasterProps {
     | 'top-right'
     | 'bottom-left'
     | 'bottom-center'
-    | 'bottom-right';
+    | 'bottom-right'
+    | 'top-start'
+    | 'top-end'
+    | 'bottom-start'
+    | 'bottom-end';
   /** Max toasts visible at once; older ones wait. @default 3 */
   limit?: number;
   /** Default auto-dismiss delay in ms. @default 5000 */
   timeout?: number;
+  /**
+   * Accessible label for the dismiss button.
+   * @default 'Dismiss notification'
+   */
+  closeLabel?: string;
   /** Class for the toast list container. */
   className?: string;
 }
 
 const positionClass: Record<NonNullable<ToasterProps['position']>, string> = {
-  'top-left': 'top-4 left-4 items-start',
+  'top-left': 'top-4 start-4 items-start',
+  'top-start': 'top-4 start-4 items-start',
   'top-center': 'top-4 left-1/2 -translate-x-1/2 items-center',
-  'top-right': 'top-4 right-4 items-end',
-  'bottom-left': 'bottom-4 left-4 items-start flex-col-reverse',
+  'top-right': 'top-4 end-4 items-end',
+  'top-end': 'top-4 end-4 items-end',
+  'bottom-left': 'bottom-4 start-4 items-start flex-col-reverse',
+  'bottom-start': 'bottom-4 start-4 items-start flex-col-reverse',
   'bottom-center':
     'bottom-4 left-1/2 -translate-x-1/2 items-center flex-col-reverse',
-  'bottom-right': 'bottom-4 right-4 items-end flex-col-reverse',
+  'bottom-right': 'bottom-4 end-4 items-end flex-col-reverse',
+  'bottom-end': 'bottom-4 end-4 items-end flex-col-reverse',
 };
 
 const typeIcon: Partial<Record<ToastType, ReactNode>> = {
@@ -167,7 +180,7 @@ const typeIcon: Partial<Record<ToastType, ReactNode>> = {
   loading: <Spinner label={null} className="text-muted-foreground" />,
 };
 
-function ToastList() {
+function ToastList({ closeLabel }: { closeLabel?: string }) {
   const { toasts } = BaseToast.useToastManager();
   return toasts.map((t) => (
     <BaseToast.Root
@@ -196,7 +209,7 @@ function ToastList() {
         )}
       </BaseToast.Content>
       <BaseToast.Close
-        aria-label="Dismiss notification"
+        aria-label={closeLabel ?? 'Dismiss notification'}
         className="-me-1 -mt-1 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring"
       >
         <XIcon className="size-4" />
@@ -215,7 +228,7 @@ function ToastList() {
  */
 export const Toaster = forwardRef<HTMLDivElement, ToasterProps>(
   function Toaster(
-    { position = 'bottom-right', limit = 3, timeout = 5000, className },
+    { position = 'bottom-right', limit = 3, timeout = 5000, closeLabel, className },
     ref,
   ) {
     return (
@@ -234,7 +247,7 @@ export const Toaster = forwardRef<HTMLDivElement, ToasterProps>(
               className,
             )}
           >
-            <ToastList />
+            <ToastList closeLabel={closeLabel} />
           </BaseToast.Viewport>
         </BaseToast.Portal>
       </BaseToast.Provider>

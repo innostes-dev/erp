@@ -14,6 +14,7 @@ import { cn } from '../../../lib/cn';
 import { ChevronRightIcon } from '../../../lib/icons';
 import type { SlotClassNames } from '../../../lib/slots';
 import { useControllableState } from '../../../lib/use-controllable-state';
+import { Spinner } from '../../feedback/spinner/spinner';
 
 /** One node of a `TreeView`. */
 export interface TreeNode {
@@ -31,6 +32,8 @@ export interface TreeNode {
   children?: TreeNode[];
   /** Can be focused but not selected. @default false */
   disabled?: boolean;
+  /** Indicates child nodes are currently loading asynchronously. @default false */
+  loading?: boolean;
 }
 
 export type TreeViewSlot = 'root' | 'item' | 'row' | 'toggle' | 'icon' | 'label' | 'meta' | 'group';
@@ -55,6 +58,8 @@ export interface TreeViewProps
   onSelectedChange?: (id: string, node: TreeNode) => void;
   /** Row height and text size. @default 'md' */
   size?: 'sm' | 'md';
+  /** Accessible label displayed while a node's children are loading. @default 'Loading…' */
+  loadingLabel?: string;
   /** Classes for inner parts. */
   classNames?: SlotClassNames<TreeViewSlot>;
 }
@@ -92,6 +97,7 @@ export const TreeView = forwardRef<HTMLUListElement, TreeViewProps>(function Tre
     defaultSelected = null,
     onSelectedChange,
     size = 'md',
+    loadingLabel = 'Loading…',
     className,
     classNames,
     ...props
@@ -160,6 +166,12 @@ export const TreeView = forwardRef<HTMLUListElement, TreeViewProps>(function Tre
     const { node } = item;
     const hasChildren = !!node.children;
     let handled = true;
+    const isRtl =
+      event.currentTarget.closest('[dir="rtl"]') !== null ||
+      (typeof document !== 'undefined' && document.dir === 'rtl');
+    const expandKey = isRtl ? 'ArrowLeft' : 'ArrowRight';
+    const collapseKey = isRtl ? 'ArrowRight' : 'ArrowLeft';
+
     switch (event.key) {
       case 'ArrowDown':
         moveTo(visible[index + 1]?.node.id);
@@ -173,11 +185,11 @@ export const TreeView = forwardRef<HTMLUListElement, TreeViewProps>(function Tre
       case 'End':
         moveTo(visible[visible.length - 1]?.node.id);
         break;
-      case 'ArrowRight':
+      case expandKey:
         if (hasChildren && !openSet.has(node.id)) toggle(node.id, true);
         else if (hasChildren && node.children!.length) moveTo(node.children![0]!.id);
         break;
-      case 'ArrowLeft':
+      case collapseKey:
         if (hasChildren && openSet.has(node.id)) toggle(node.id, false);
         else if (item.parentId) moveTo(item.parentId);
         break;
@@ -287,9 +299,21 @@ export const TreeView = forwardRef<HTMLUListElement, TreeViewProps>(function Tre
               </span>
             )}
           </div>
-          {isOpen && node.children!.length > 0 && (
+          {isOpen && node.loading && (
             <ul role="group" data-slot="tree-view-group" className={cn('flex flex-col', classNames?.group)}>
-              {renderNodes(node.children!, level + 1)}
+              <li
+                role="none"
+                className="flex items-center gap-2 py-1 text-xs text-muted-foreground"
+                style={{ paddingInlineStart: `${level * 1.25 + 0.25}rem` }}
+              >
+                <Spinner className="size-3" label={null} />
+                <span>{loadingLabel}</span>
+              </li>
+            </ul>
+          )}
+          {isOpen && !node.loading && node.children && node.children.length > 0 && (
+            <ul role="group" data-slot="tree-view-group" className={cn('flex flex-col', classNames?.group)}>
+              {renderNodes(node.children, level + 1)}
             </ul>
           )}
         </li>

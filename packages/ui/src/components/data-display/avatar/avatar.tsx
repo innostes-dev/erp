@@ -85,6 +85,11 @@ export const AvatarFallback = forwardRef<
 export interface AvatarGroupProps extends ComponentProps<'div'> {
   /** Show at most this many children, then a "+N" counter. */
   max?: number;
+  /**
+   * Accessible label for the overflow indicator.
+   * @default (n) => `${n} more`
+   */
+  moreLabel?: (count: number) => string;
 }
 
 /**
@@ -94,7 +99,7 @@ export interface AvatarGroupProps extends ComponentProps<'div'> {
  * <AvatarGroup max={3}>{users.map((u) => <Avatar key={u.id}>…</Avatar>)}</AvatarGroup>
  */
 export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(
-  function AvatarGroup({ className, max, children, ...props }, ref) {
+  function AvatarGroup({ className, max, moreLabel, children, ...props }, ref) {
     const items = Children.toArray(children);
     const visible = max !== undefined ? items.slice(0, max) : items;
     const hidden = items.length - visible.length;
@@ -104,7 +109,7 @@ export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(
         ref={ref}
         data-slot="avatar-group"
         className={cn(
-          'flex items-center -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background',
+          'flex items-center -space-x-2 rtl:space-x-reverse *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background',
           className,
         )}
         {...props}
@@ -117,7 +122,7 @@ export const AvatarGroup = forwardRef<HTMLDivElement, AvatarGroupProps>(
               avatarVariants({ size: 'md' }),
               'text-xs ring-2 ring-background',
             )}
-            aria-label={`${hidden} more`}
+            aria-label={moreLabel ? moreLabel(hidden) : `${hidden} more`}
           >
             +{hidden}
           </span>

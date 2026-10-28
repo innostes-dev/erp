@@ -115,6 +115,18 @@ export interface DataTableProps<TRow> {
   loadingRowCount?: number;
   /** Shown when there are no rows. @default "No results." */
   emptyState?: ReactNode;
+  /** Accessible label for the select-all-rows checkbox. @default "Select all rows on this page" */
+  selectAllLabel?: string;
+  /** Accessible label for each row selection checkbox. @default "Select row" */
+  selectRowLabel?: string | ((row: TRow) => string);
+  /** Text or element showing the number of selected rows. @default (n) => `${n} selected` */
+  selectedCountText?: (selectedCount: number) => ReactNode;
+  /** Text or element showing the current pagination range. @default (start, end, total) => `Showing ${start}–${end} of ${total}` */
+  paginationRangeText?: (
+    rangeStart: number,
+    rangeEnd: number,
+    total: number,
+  ) => ReactNode;
   /** Called when a row is clicked. Make sure the same action is reachable by keyboard. */
   onRowClick?: (row: TRow) => void;
   /** Accessible name for the table. Required unless the table is labelled another way. */
@@ -187,6 +199,10 @@ function DataTableImpl<TRow>(
     loading = false,
     loadingRowCount = 5,
     emptyState = 'No results.',
+    selectAllLabel = 'Select all rows on this page',
+    selectRowLabel = 'Select row',
+    selectedCountText,
+    paginationRangeText,
     onRowClick,
     'aria-label': ariaLabel,
     stickyHeader = false,
@@ -296,7 +312,7 @@ function DataTableImpl<TRow>(
               {selectable && (
                 <TableHead className="w-10">
                   <Checkbox
-                    aria-label="Select all rows on this page"
+                    aria-label={selectAllLabel}
                     checked={allOnPageSelected}
                     indeterminate={someOnPageSelected}
                     disabled={loading || visibleIds.length === 0}
@@ -396,7 +412,11 @@ function DataTableImpl<TRow>(
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Checkbox
-                          aria-label="Select row"
+                          aria-label={
+                            typeof selectRowLabel === 'function'
+                              ? selectRowLabel(row)
+                              : selectRowLabel
+                          }
                           checked={isSelected}
                           onCheckedChange={(checked) => toggleRow(id, checked)}
                         />
@@ -434,8 +454,13 @@ function DataTableImpl<TRow>(
         >
           <div aria-live="polite">
             {selectable && selected.length > 0
-              ? `${selected.length} selected`
-              : paginated && `Showing ${rangeStart}–${rangeEnd} of ${total}`}
+              ? selectedCountText
+                ? selectedCountText(selected.length)
+                : `${selected.length} selected`
+              : paginated &&
+                (paginationRangeText
+                  ? paginationRangeText(rangeStart, rangeEnd, total)
+                  : `Showing ${rangeStart}–${rangeEnd} of ${total}`)}
           </div>
           {paginated && pageCount > 1 && (
             <Pagination
