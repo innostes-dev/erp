@@ -1,9 +1,9 @@
 ---
 title: Avatar
-description: A user or entity image with a fallback.
+description: User or entity visual representation with automatic fallback initials and stacked group layouts.
 icon: CircleUser
 status: Stable
-summary: Image with initials fallback, four sizes, round or square, and stacked groups.
+summary: Image avatar with graceful fallback initials, circular and square geometries, and overlapping avatar groups built on Base UI.
 ---
 
 <ComponentPreview name="data-display/avatar/basic" />
@@ -11,26 +11,159 @@ summary: Image with initials fallback, four sizes, round or square, and stacked 
 ## Import
 
 ```tsx
-import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@innostes/ui';
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+  AvatarGroup,
+  type AvatarProps,
+  type AvatarGroupProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Avatar` to visually represent individual team members, users, organizations, or products:
+
+- Displaying user profiles in top navigation headers, comment threads, and activity logs.
+- Indicating assignees on purchase orders, warehouse tasks, and approval chains.
+- Representing vendors or partner organizations with square company logos.
+
+When choosing avatar components:
+- Use `Avatar` for user portraits and fallback initials.
+- Use `shape="circle"` for individuals and `shape="square"` for enterprise entities, business units, or product lines.
+- Use [IconTile](/ui/docs/components/data-display/icon-tile) when presenting a category or system module with a Lucide icon rather than a personal photo or initials.
+
+## Examples
+
+### Basic avatar with image and fallback
+
+Compose `Avatar` with `AvatarImage` and `AvatarFallback`. If the image URL fails to load or is loading over a slow connection, `AvatarFallback` renders smoothly in its place.
 
 ```tsx
-<Avatar>
-  <AvatarImage src={user.photoUrl} alt="" />
-  <AvatarFallback>{initials(user.name)}</AvatarFallback>
-</Avatar>
+import { Avatar, AvatarImage, AvatarFallback } from '@innostes/ui';
+
+export function UserAvatar() {
+  return (
+    <Avatar>
+      <AvatarImage
+        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face"
+        alt="Priya Sharma"
+      />
+      <AvatarFallback>PS</AvatarFallback>
+    </Avatar>
+  );
+}
 ```
 
-The fallback shows while the image loads and if it fails. Use `delay` on `AvatarFallback` (ms) to
-avoid a flash of initials on fast connections.
+### Avatar sizes and shapes
+
+`Avatar` provides four standard sizes: `xs` (24px), `sm` (32px), `md` (40px, default), and `lg` (56px). Use `shape="square"` with rounded corners for companies and tenant workspaces:
+
+```tsx
+import { Avatar, AvatarFallback } from '@innostes/ui';
+
+export function AvatarVariants() {
+  return (
+    <div className="flex items-center gap-4">
+      <Avatar size="xs"><AvatarFallback>XS</AvatarFallback></Avatar>
+      <Avatar size="sm"><AvatarFallback>SM</AvatarFallback></Avatar>
+      <Avatar size="md"><AvatarFallback>MD</AvatarFallback></Avatar>
+      <Avatar size="lg" shape="square"><AvatarFallback>NW</AvatarFallback></Avatar>
+    </div>
+  );
+}
+```
+
+### Avatar fallback delay
+
+Provide a `delay` (in milliseconds) on `AvatarFallback` to prevent a brief visual flash of initials when images load quickly from browser cache.
+
+```tsx
+import { Avatar, AvatarImage, AvatarFallback } from '@innostes/ui';
+
+export function DelayedFallbackAvatar() {
+  return (
+    <Avatar>
+      <AvatarImage src="/photos/rajesh-nair.jpg" alt="Rajesh Nair" />
+      <AvatarFallback delay={300}>RN</AvatarFallback>
+    </Avatar>
+  );
+}
+```
+
+### Overlapping avatar groups
+
+Wrap multiple avatars inside `AvatarGroup` to render an overlapping stack. Set `max` to limit the visible avatars, automatically rendering a trailing "+N" overflow counter pill.
+
+```tsx
+import { Avatar, AvatarFallback, AvatarGroup } from '@innostes/ui';
+
+const assignees = ['Priya Sharma', 'Rajesh Nair', 'Ananya Rao', 'Vikram Patel'];
+
+export function TaskAssignees() {
+  return (
+    <AvatarGroup max={3}>
+      {assignees.map((name) => (
+        <Avatar key={name} title={name}>
+          <AvatarFallback>
+            {name.split(' ').map((n) => n[0]).join('')}
+          </AvatarFallback>
+        </Avatar>
+      ))}
+    </AvatarGroup>
+  );
+}
+```
 
 ## Accessibility
 
-- When the person's name is shown next to the avatar, use `alt=""` so it isn't read twice.
-- `AvatarGroup` labels its "+N" counter (e.g. "2 more").
+`Avatar` is built on Base UI Avatar primitives (`@base-ui/react/avatar`).
 
-## API Reference
+### Accessible naming and decorative images
 
-<ApiTable components={['Avatar', 'AvatarImage', 'AvatarFallback', 'AvatarGroup']} baseUi="avatar" />
+- When an avatar appears next to a visible username or textual label (such as in a user menu or table row), set `alt=""` on `AvatarImage`. This marks the image as decorative, preventing screen readers from announcing redundant duplicate names.
+- When an avatar appears as a standalone element without adjacent text, provide a descriptive `alt` attribute on `AvatarImage` (e.g. `alt="Priya Sharma"`) or pass an `aria-label` on `Avatar`.
+- The overflow counter in `AvatarGroup` renders with an accessible label (`moreLabel`, defaulting to `(n) => "${n} more"`).
+
+### Screen readers
+
+- Fallback initials are rendered in uppercase and announced plainly.
+- If an image fails to load, the DOM smoothly switches to the fallback element without breaking focus or emitting broken image placeholder graphics.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use two uppercase initials for fallback avatars derived from the user’s first and last names (e.g., "PS").',
+    code: `<AvatarFallback>{getInitials(user.fullName)}</AvatarFallback>`,
+  }}
+  dont={{
+    description: 'Do not render long strings or full email addresses inside avatar fallback containers.',
+    code: `<AvatarFallback>{user.email}</AvatarFallback> // Text overflows container`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Set shape="square" for company brands, vendor logos, or warehouse entities, reserving circles for people.',
+    code: `<Avatar shape="square"><AvatarFallback>NW</AvatarFallback></Avatar>`,
+  }}
+  dont={{
+    description: 'Do not use circular portraits for corporate entity logos with rectangular aspect ratios.',
+    code: `<Avatar shape="circle"><AvatarImage src="/logos/vendor.png" /></Avatar>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={['Avatar', 'AvatarImage', 'AvatarFallback', 'AvatarGroup']}
+  baseUi="avatar"
+/>
+
+## Related
+
+- [Card](/ui/docs/components/data-display/card) — Bordered container for user profiles and team member listings.
+- [Badge](/ui/docs/components/data-display/badge) — Compact label for roles and status pills.
+- [IconTile](/ui/docs/components/data-display/icon-tile) — Structured tile for displaying icons rather than user photos.

@@ -16,20 +16,20 @@ import {
 import { UserPlus } from 'lucide-react';
 
 const members = [
-  { name: 'Ada Lovelace', email: 'ada@acme.com', role: 'Owner' },
-  { name: 'Grace Hopper', email: 'grace@acme.com', role: 'Admin' },
-  { name: 'Alan Turing', email: 'alan@acme.com', role: 'Member' },
+  { name: 'Priya Sharma', email: 'priya.sharma@northwindtraders.in', role: 'Owner' },
+  { name: 'Rajesh Nair', email: 'rajesh.nair@northwindtraders.in', role: 'Admin' },
+  { name: 'Ananya Rao', email: 'ananya.rao@northwindtraders.in', role: 'Operator' },
 ];
 
 export default function CardDemo() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Team members</CardTitle>
-        <CardDescription>People with access to this workspace.</CardDescription>
+        <CardTitle>Warehouse operators</CardTitle>
+        <CardDescription>Personnel with dispatch clearance at Bengaluru depot.</CardDescription>
         <CardAction>
           <Button size="sm" variant="outline" startIcon={<UserPlus />}>
-            Invite
+            Assign
           </Button>
         </CardAction>
       </CardHeader>
@@ -57,7 +57,7 @@ export default function CardDemo() {
         ))}
       </CardContent>
       <CardFooter className="text-xs text-muted-foreground">
-        3 of 10 seats used
+        3 of 8 dispatch licenses active
       </CardFooter>
     </Card>
   );

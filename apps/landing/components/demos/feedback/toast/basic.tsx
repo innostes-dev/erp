@@ -2,14 +2,14 @@
 
 import { Button, toast } from '@innostes/ui';
 
-const saveOrder = () =>
+const savePurchaseOrder = () =>
   new Promise<{ id: string }>((resolve, reject) =>
     setTimeout(
       () =>
-        Math.random() > 0.3
-          ? resolve({ id: 'ORD-1042' })
-          : reject(new Error('Network error')),
-      1500,
+        Math.random() > 0.2
+          ? resolve({ id: 'PO-8410' })
+          : reject(new Error('GSTN service timed out')),
+      1200,
     ),
   );
 
@@ -19,8 +19,8 @@ export default function ToastDemo() {
       <Button
         variant="outline"
         onClick={() =>
-          toast('Order archived', {
-            action: { label: 'Undo', onClick: () => toast('Restored') },
+          toast('Purchase order archived', {
+            action: { label: 'Undo', onClick: () => toast.success('Order restored to active queue') },
           })
         }
       >
@@ -29,8 +29,8 @@ export default function ToastDemo() {
       <Button
         variant="outline"
         onClick={() =>
-          toast.success('Invoice sent', {
-            description: 'Sent to billing@acme.com',
+          toast.success('Tax invoice generated', {
+            description: 'Dispatched to accounts.payable@tataconsumer.com',
           })
         }
       >
@@ -39,8 +39,8 @@ export default function ToastDemo() {
       <Button
         variant="outline"
         onClick={() =>
-          toast.error('Could not save', {
-            description: 'Check your connection and try again.',
+          toast.error('Payment reconciliation failed', {
+            description: 'Bank transaction ID was not recognized.',
           })
         }
       >
@@ -48,21 +48,25 @@ export default function ToastDemo() {
       </Button>
       <Button
         variant="outline"
-        onClick={() => toast.warning('Storage almost full')}
+        onClick={() =>
+          toast.warning('Warehouse space quota warning', {
+            description: 'Depot capacity has reached 90%.',
+          })
+        }
       >
         Warning
       </Button>
       <Button
         variant="outline"
         onClick={() =>
-          toast.promise(saveOrder(), {
-            loading: 'Saving order…',
-            success: (order) => `${order.id} saved`,
-            error: (err) => `Failed: ${(err as Error).message}`,
+          toast.promise(savePurchaseOrder(), {
+            loading: 'Transmitting purchase order to GSTN…',
+            success: (order) => `${order.id} verified and dispatched`,
+            error: (err) => `Transmission failed: ${(err as Error).message}`,
           })
         }
       >
-        Promise
+        Promise status
       </Button>
     </div>
   );

@@ -1,9 +1,9 @@
 ---
 title: Table
-description: Styled table parts for tabular data.
+description: Semantic HTML table primitives with consistent spacing, hover highlights, and horizontal scrolling.
 icon: Table
 status: Stable
-summary: Native table markup with consistent spacing, hover and selected rows, and horizontal scrolling.
+summary: Accessible HTML table building blocks for displaying custom tabular breakdowns, invoice summaries, and financial ledger items.
 ---
 
 <ComponentPreview name="data-display/table/basic" />
@@ -20,19 +20,223 @@ import {
   TableHead,
   TableCell,
   TableCaption,
+  type TableProps,
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Use `Table` when you render rows yourself. For sorting, selection and pagination, use
-[Data Table](/ui/docs/components/data-display/data-table), which is built from these parts.
+Use `Table` when you need direct, unopinionated JSX control over tabular markup for small, static datasets:
 
-- Right-align numbers with `className="text-end"` and use `tabular-nums` so digits line up.
-- Mark a selected row with `data-state="selected"`.
+- Rendering invoice line item breakdowns, tax computation schedules, or cost allocations.
+- Presenting simple reference charts or tabular key-value matrices (such as shipping fee tiers).
+- Displaying short summaries (fewer than 20 rows) where dynamic column sorting, client pagination, and batch checkbox selection are not required.
 
-## API Reference
+When choosing between table components:
+- Use `Table` when you want zero runtime overhead (< 1.5 KB), direct JSX composition, and complete freedom over row and column spans.
+- Use [Data Table](/ui/docs/components/data-display/data-table) when you need column sorting, pagination, multi-row selection, search filtering, empty states, or mobile card transformations.
 
-<ApiTable components={['Table']} />
+## Examples
 
-The other parts take the props of their HTML element (`thead`, `tbody`, `tr`, `th`, `td`, …).
+### Basic table structure
+
+Compose `Table` using standard HTML hierarchy: `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, and `TableCell`.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@innostes/ui';
+
+export function SimpleSchedule() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Delivery slot</TableHead>
+          <TableHead>Driver name</TableHead>
+          <TableHead>Vehicle number</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>Morning (08:00 - 12:00)</TableCell>
+          <TableCell>Ramesh Kumar</TableCell>
+          <TableCell className="font-mono">KA-01-MJ-4021</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}
+```
+
+### Number and currency alignment
+
+Numerical figures, quantities, and currency amounts should align to the right (`className="text-end"`). Pair with `tabular-nums` or `font-mono` to ensure numerals align consistently along decimal places.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@innostes/ui';
+
+export function TaxBreakdown() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Tax type</TableHead>
+          <TableHead className="text-end">Rate</TableHead>
+          <TableHead className="text-end">Amount</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>CGST (9%)</TableCell>
+          <TableCell className="text-end tabular-nums">9.00%</TableCell>
+          <TableCell className="text-end font-mono">₹12,780.00</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>SGST (9%)</TableCell>
+          <TableCell className="text-end tabular-nums">9.00%</TableCell>
+          <TableCell className="text-end font-mono">₹12,780.00</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}
+```
+
+### Row selection highlighting
+
+Set `data-state="selected"` on a `TableRow` to apply design-token selection styling (`bg-muted`).
+
+```tsx
+import { Table, TableBody, TableRow, TableCell } from '@innostes/ui';
+
+export function HighlightedRow() {
+  return (
+    <Table>
+      <TableBody>
+        <TableRow data-state="selected">
+          <TableCell className="font-medium">Active ledger entry</TableCell>
+          <TableCell>Reconciled</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}
+```
+
+### Table captions and footer summaries
+
+Include `TableCaption` to provide accessible context and `TableFooter` for aggregate summary rows.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from '@innostes/ui';
+
+export function AccountSummary() {
+  return (
+    <Table>
+      <TableCaption>Quarterly freight expenses summary</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Month</TableHead>
+          <TableHead className="text-end">Dispatches</TableHead>
+          <TableHead className="text-end">Freight total</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>April 2026</TableCell>
+          <TableCell className="text-end tabular-nums">142</TableCell>
+          <TableCell className="text-end font-mono">₹4,28,000</TableCell>
+        </TableRow>
+      </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell>Total</TableCell>
+          <TableCell className="text-end tabular-nums">142</TableCell>
+          <TableCell className="text-end font-mono">₹4,28,000</TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
+  );
+}
+```
+
+## Accessibility
+
+`Table` uses semantic HTML5 elements that assistive technologies recognize natively without additional ARIA roles.
+
+### Semantic markup
+
+- The parent wrapper automatically introduces `overflow-x-auto` to allow horizontal scrolling on smaller screens without clipping content.
+- `TableHeader` renders a native `<thead>` and `TableHead` renders `<th>` with appropriate header cell semantics.
+- `TableCaption` renders a native `<caption>` element, announcing the table's purpose to screen readers upon focus.
+
+### Screen readers
+
+Assistive technologies announce row and column counts automatically. When navigating through cells, screen readers announce the corresponding column header associated with the cell.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Table for static or simple breakdowns (under 20 rows) where custom cell layout and footers are needed.',
+    code: `<Table>\n  <TableHeader>...</TableHeader>\n  <TableBody>...</TableBody>\n</Table>`,
+  }}
+  dont={{
+    description: 'Do not re-implement sorting, filtering, and pagination from scratch with Table; use DataTable instead.',
+    code: `// Anti-pattern: Hand-rolling complex pagination with raw Table\n<Table>{manualSortedRows.map(...)}</Table>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always align numerical values to the right (className="text-end") and use tabular-nums.',
+    code: `<TableCell className="text-end tabular-nums">₹4,500.00</TableCell>`,
+  }}
+  dont={{
+    description: 'Do not left-align currency figures or numerical quantities.',
+    code: `<TableCell>₹4,500.00</TableCell>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Table',
+    'TableHeader',
+    'TableBody',
+    'TableFooter',
+    'TableRow',
+    'TableHead',
+    'TableCell',
+    'TableCaption',
+  ]}
+/>
+
+## Related
+
+- [Data Table](/ui/docs/components/data-display/data-table) — Full-featured data grid with sorting, selection, and pagination.
+- [Card](/ui/docs/components/data-display/card) — Grouped container for structured content.
+- [Badge](/ui/docs/components/data-display/badge) — Status indicators and tags.

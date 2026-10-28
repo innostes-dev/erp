@@ -3,12 +3,13 @@
 import { Avatar, AvatarFallback, AvatarGroup, AvatarImage } from '@innostes/ui';
 
 const team = [
-  'Ada Lovelace',
-  'Grace Hopper',
-  'Alan Turing',
-  'Katherine Johnson',
-  'Linus Torvalds',
+  'Priya Sharma',
+  'Rajesh Nair',
+  'Ananya Rao',
+  'Vikram Patel',
+  'Deepa Menon',
 ];
+
 const initials = (name: string) =>
   name
     .split(' ')
@@ -17,20 +18,20 @@ const initials = (name: string) =>
 
 export default function AvatarDemo() {
   return (
-    <div className="flex flex-wrap items-center gap-8">
+    <div className="flex flex-wrap items-center justify-center gap-8">
       <div className="flex items-center gap-3">
         <Avatar size="xs">
-          <AvatarFallback>XS</AvatarFallback>
+          <AvatarFallback>PS</AvatarFallback>
         </Avatar>
         <Avatar size="sm">
-          <AvatarFallback>SM</AvatarFallback>
+          <AvatarFallback>RN</AvatarFallback>
         </Avatar>
-        <Avatar>
-          <AvatarImage src="https://i.pravatar.cc/80?img=47" alt="" />
-          <AvatarFallback>AL</AvatarFallback>
+        <Avatar size="md">
+          <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face" alt="Priya Sharma" />
+          <AvatarFallback>PS</AvatarFallback>
         </Avatar>
         <Avatar size="lg" shape="square">
-          <AvatarFallback>AC</AvatarFallback>
+          <AvatarFallback>NW</AvatarFallback>
         </Avatar>
       </div>
 

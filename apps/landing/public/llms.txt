@@ -27,25 +27,25 @@
 - [Actions](https://innostes.com/ui/docs/components/actions/index) [Stable]: Core interactive controls for submitting forms, triggering commands, and toggling states.
 - [Toggle Group](https://innostes.com/ui/docs/components/actions/toggle-group) [Stable]: Segmented control managing single or multiple active states with roving tabindex and arrow-key navigation.
 - [Toggle](https://innostes.com/ui/docs/components/actions/toggle) [Stable]: Accessible two-state pressed button primitive for formatting toolbars, favorites, and view modes.
-- [Avatar](https://innostes.com/ui/docs/components/data-display/avatar) [Stable]: Image with initials fallback, four sizes, round or square, and stacked groups.
-- [Badge](https://innostes.com/ui/docs/components/data-display/badge) [Stable]: Semantic colours for statuses, with an optional dot.
-- [Card](https://innostes.com/ui/docs/components/data-display/card) [Stable]: Header with title, description and actions, plus content and footer areas.
-- [Data Table](https://innostes.com/ui/docs/components/data-display/data-table) [Beta]: Sorting, row selection, pagination, loading and empty states. Client-side or server-side.
-- [Empty State](https://innostes.com/ui/docs/components/data-display/empty-state) [Stable]: Icon, title, explanation and next actions for empty lists and searches.
-- [Icon Tile](https://innostes.com/ui/docs/components/data-display/icon-tile) [Stable]: 14 colours, soft or solid, four sizes. Used by metric cards, lists and feature grids.
+- [Avatar](https://innostes.com/ui/docs/components/data-display/avatar) [Stable]: Image avatar with graceful fallback initials, circular and square geometries, and overlapping avatar groups built on Base UI.
+- [Badge](https://innostes.com/ui/docs/components/data-display/badge) [Stable]: Semantic status indicators with soft tinted backgrounds, contrast-hardened ring tokens, and optional pulse dots.
+- [Card](https://innostes.com/ui/docs/components/data-display/card) [Stable]: Structured card container composed of header, title, description, actions, content, and footer primitives.
+- [Data Table](https://innostes.com/ui/docs/components/data-display/data-table) [Stable]: Rich data grid supporting typed columns, multi-row selection, server-side data fetching, skeleton loading, and container-query mobile card transformations.
+- [Empty State](https://innostes.com/ui/docs/components/data-display/empty-state) [Stable]: Clean empty state representation with icon container, title, explanatory description, and primary/secondary action triggers.
+- [Icon Tile](https://innostes.com/ui/docs/components/data-display/icon-tile) [Stable]: Visual icon container offering semantic and categorical chart tones, soft/solid treatments, and four standard sizes.
 - [Data display](https://innostes.com/ui/docs/components/data-display/index) [Stable]: Components for structured record presentation, hierarchies, and metric highlights.
-- [Kbd](https://innostes.com/ui/docs/components/data-display/kbd) [Stable]: For shortcuts in tooltips, menus and help text.
-- [Stat](https://innostes.com/ui/docs/components/data-display/stat) [Stable]: Label, value and trend, with colours that know whether "up" is good.
-- [Table](https://innostes.com/ui/docs/components/data-display/table) [Stable]: Native table markup with consistent spacing, hover and selected rows, and horizontal scrolling.
-- [Tree View](https://innostes.com/ui/docs/components/data-display/tree-view) [Beta]: Departments, chart of accounts, categories and folders, with full WAI-ARIA tree keyboard support.
-- [Alert](https://innostes.com/ui/docs/components/feedback/alert) [Stable]: Info, success, warning and error messages with matching icons and live-region roles.
-- [Gauge](https://innostes.com/ui/docs/components/feedback/gauge) [Beta]: KPI dials for budget use, capacity, SLA and quota, with value-based colours.
-- [Feedback](https://innostes.com/ui/docs/components/feedback/index) [Stable]: Components for communicating system status, background task progress, and operation outcomes.
-- [Meter](https://innostes.com/ui/docs/components/feedback/meter) [Stable]: Storage, seats or quota usage, with tone colours for limits.
-- [Progress](https://innostes.com/ui/docs/components/feedback/progress) [Stable]: Determinate and indeterminate bars with an optional label and value.
-- [Skeleton](https://innostes.com/ui/docs/components/feedback/skeleton) [Stable]: Pulsing shapes sized with utility classes. Respects reduced motion.
-- [Spinner](https://innostes.com/ui/docs/components/feedback/spinner) [Stable]: Inherits the text colour; sized with utility classes.
-- [Toast](https://innostes.com/ui/docs/components/feedback/toast) [Stable]: Success, error, warning, loading and promise toasts with actions, swipe to dismiss and a queue limit.
+- [Kbd](https://innostes.com/ui/docs/components/data-display/kbd) [Stable]: Monospace key badge styled with borders and subtle elevation for communicating shortcuts in tooltips, menus, and help docs.
+- [Stat](https://innostes.com/ui/docs/components/data-display/stat) [Stable]: Compact KPI summary tile with automatic trend direction inference, customizable sentiment polarities, and icon slots.
+- [Table](https://innostes.com/ui/docs/components/data-display/table) [Stable]: Accessible HTML table building blocks for displaying custom tabular breakdowns, invoice summaries, and financial ledger items.
+- [Tree View](https://innostes.com/ui/docs/components/data-display/tree-view) [Stable]: Nested tree structure featuring roving focus keyboard navigation, type-ahead search, expandable child levels, and loading spinners.
+- [Alert](https://innostes.com/ui/docs/components/feedback/alert) [Stable]: In-flow status callout with semantic variants, automatic ARIA role management (alert vs status), and integrated iconography.
+- [Gauge](https://innostes.com/ui/docs/components/feedback/gauge) [Stable]: Accessible SVG radial meter with dynamic threshold coloring, customizable radius dimensions, and normalized range calculations.
+- [Feedback](https://innostes.com/ui/docs/components/feedback/index) [Stable]: Decision guides, severity wording principles, and UI components for communicating system status, background tasks, and operation outcomes.
+- [Meter](https://innostes.com/ui/docs/components/feedback/meter) [Stable]: Scalar measurement indicator with semantic tones, normalized percent calculations, and full WAI-ARIA meter semantics.
+- [Progress](https://innostes.com/ui/docs/components/feedback/progress) [Stable]: Accessible progress indicator supporting determinate progress, indeterminate pulse animations, and normalized percent formatting.
+- [Skeleton](https://innostes.com/ui/docs/components/feedback/skeleton) [Stable]: Accessible content loading placeholder that prevents Cumulative Layout Shift (CLS) and respects reduced motion preferences.
+- [Spinner](https://innostes.com/ui/docs/components/feedback/spinner) [Stable]: Circular loading glyph with automatic aria-status management, size utilities, and decorative hiding toggles.
+- [Toast](https://innostes.com/ui/docs/components/feedback/toast) [Stable]: Framework-agnostic imperative toast manager with success/error shortcuts, promise resolution tracking, and accessible politeness priority queues.
 - [Calendar](https://innostes.com/ui/docs/components/forms/calendar) [Stable]: Single and range modes, min/max bounds, disabled dates, one or two month views, and Intl-based locale formatting.
 - [Checkbox](https://innostes.com/ui/docs/components/forms/checkbox) [Stable]: Accessible checkbox primitive supporting single agreement boxes, multi-select tables, and indeterminate "select all" parent groups.
 - [Combobox](https://innostes.com/ui/docs/components/forms/combobox) [Beta]: Accessible combobox input for filtering and selecting values from extensive or remote dataset collections.

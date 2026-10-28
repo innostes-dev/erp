@@ -1,9 +1,9 @@
 ---
 title: Empty State
-description: What to show when there's nothing to show.
+description: Informative placeholder view for lists, tables, and views with zero items or no matching filter results.
 icon: Inbox
 status: Stable
-summary: Icon, title, explanation and next actions for empty lists and searches.
+summary: Clean empty state representation with icon container, title, explanatory description, and primary/secondary action triggers.
 ---
 
 <ComponentPreview name="data-display/empty-state/basic" />
@@ -11,19 +11,168 @@ summary: Icon, title, explanation and next actions for empty lists and searches.
 ## Import
 
 ```tsx
-import { EmptyState } from '@innostes/ui';
+import { EmptyState, type EmptyStateProps, type EmptyStateSlot } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Say what's empty, why, and what to do next:
+Use `EmptyState` when a view, list, table, or search panel contains no records to present:
 
-- **First use**: "No invoices yet" + "Create invoice".
-- **No results**: "No orders match ‘acme’" + "Clear filters".
-- **No access**: explain who can grant it.
+- **First-use onboarding**: Introducing a blank module (e.g. "No purchase orders yet") and guiding the user to create their first record.
+- **Zero search or filter matches**: Explaining that a query returned no results and providing a one-click action to reset active filters.
+- **Completed queues**: Congratulating an operator when an inbox or approval queue has been fully cleared.
+- **Permission boundaries**: Explaining that the current user account does not have authorization to view records in this section.
 
-Pass it to `DataTable` as `emptyState` for empty tables.
+When choosing empty representation:
+- Use `EmptyState` inside tables, cards, and page views when space permits an icon, title, and action buttons.
+- Use a concise string or empty message inside small dropdown menus (such as [Select](/ui/docs/components/forms/select) or [Combobox](/ui/docs/components/forms/combobox)).
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback) for cross-component guidance on when to choose between alerts, empty states, and dialogs.
 
-## API Reference
+## Examples
+
+### First use / blank canvas
+
+Provide a welcoming title, a brief explanation of how records are populated, and primary action buttons to create or import records:
+
+```tsx
+import { Button, EmptyState } from '@innostes/ui';
+import { FilePlus, Upload } from 'lucide-react';
+
+export function InitialInvoicesEmptyState() {
+  return (
+    <EmptyState
+      icon={<FilePlus />}
+      title="No purchase orders created"
+      description="Create your first purchase order or import batch requisitions from your ERP spreadsheet."
+      actions={
+        <>
+          <Button variant="outline" startIcon={<Upload />}>
+            Import CSV
+          </Button>
+          <Button startIcon={<FilePlus />}>
+            Create purchase order
+          </Button>
+        </>
+      }
+    />
+  );
+}
+```
+
+### No search or filter results
+
+When active filters produce zero records, reassure the operator that data exists and offer a clear filter reset trigger:
+
+```tsx
+'use client';
+
+import { Button, EmptyState } from '@innostes/ui';
+import { SearchX } from 'lucide-react';
+
+export function FilterEmptyState({ onReset }: { onReset: () => void }) {
+  return (
+    <EmptyState
+      icon={<SearchX />}
+      title="No matching invoices found"
+      description="No records match your active date range and vendor filters. Try clearing filters to see all invoices."
+      actions={
+        <Button variant="outline" onClick={onReset}>
+          Reset active filters
+        </Button>
+      }
+    />
+  );
+}
+```
+
+### Permission or access restriction
+
+When an operator lacks role-based permissions, clarify the restriction and indicate which department or administrator can grant access:
+
+```tsx
+import { Button, EmptyState } from '@innostes/ui';
+import { ShieldAlert } from 'lucide-react';
+
+export function RestrictedEmptyState() {
+  return (
+    <EmptyState
+      icon={<ShieldAlert />}
+      title="Restricted ledger view"
+      description="Your user profile does not have clearance to view executive payroll ledgers. Contact your compliance administrator to request access."
+      actions={
+        <Button variant="outline" onClick={() => window.location.href = 'mailto:compliance@northwindtraders.in'}>
+          Request clearance
+        </Button>
+      }
+    />
+  );
+}
+```
+
+### Data table integration
+
+Pass `EmptyState` directly to `DataTable` via its `emptyState` prop:
+
+```tsx
+<DataTable
+  aria-label="Purchase requisitions"
+  data={[]}
+  columns={columns}
+  getRowId={(r) => r.id}
+  emptyState={
+    <EmptyState
+      title="No open requisitions"
+      description="All procurement requisitions for this quarter have been processed."
+    />
+  }
+/>
+```
+
+## Accessibility
+
+`EmptyState` uses accessible heading structure and semantic action layout.
+
+### Heading hierarchy
+
+- `title` renders inside an `<h3>` heading element by default.
+- When placed within a top-level page landmark that lacks intermediate headings, you can customize the title element using `classNames.title` or nest an appropriate heading level (`<h2>`) within `title`.
+
+### Focus management and action clarity
+
+- Action buttons inside `actions` receive standard keyboard tab navigation.
+- Ensure action button labels clearly communicate destination or consequence (e.g. "Create purchase order" instead of generic "Create").
+- Icons are wrapped in an `aria-hidden` container to avoid announcing decorative icon names to screen reader users.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always provide an actionable next step, such as a "Create record" or "Reset filters" button.',
+    code: `<EmptyState title="No vendors found" actions={<Button>Add vendor</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not leave the user at a dead end with passive text like "No data" and no recovery action.',
+    code: `<EmptyState title="No data" /> // No guidance or recovery action`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Distinguish clearly between initial first-use (no records created yet) and zero search results (data exists, but query matched nothing).',
+    code: `const title = hasFilter ? "No matching orders" : "No orders yet";`,
+  }}
+  dont={{
+    description: 'Do not display "Create your first order" when a user simply mistyped an order number in a search bar.',
+    code: `// Confusing: Tells user to create an order when search returns 0 results`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['EmptyState']} />
+
+## Related
+
+- [Data Table](/ui/docs/components/data-display/data-table) — Interactive data grid supporting custom empty states.
+- [Button](/ui/docs/components/actions/button) — Action buttons embedded in empty states.
+- [Alert](/ui/docs/components/feedback/alert) — Persistent banners for operational warnings and messages.

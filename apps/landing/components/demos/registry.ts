@@ -13,6 +13,7 @@ import Demo_data_display_badge_basic_tsx from './data-display/badge/basic';
 import Demo_data_display_card_basic_tsx from './data-display/card/basic';
 import Demo_data_display_data_table_basic_tsx from './data-display/data-table/basic';
 import Demo_data_display_data_table_loading_tsx from './data-display/data-table/loading';
+import Demo_data_display_data_table_server_side_tsx from './data-display/data-table/server-side';
 import Demo_data_display_empty_state_basic_tsx from './data-display/empty-state/basic';
 import Demo_data_display_icon_tile_basic_tsx from './data-display/icon-tile/basic';
 import Demo_data_display_kbd_basic_tsx from './data-display/kbd/basic';
@@ -101,6 +102,7 @@ export const demos: Record<string, ComponentType> = {
   'data-display/card/basic': Demo_data_display_card_basic_tsx,
   'data-display/data-table/basic': Demo_data_display_data_table_basic_tsx,
   'data-display/data-table/loading': Demo_data_display_data_table_loading_tsx,
+  'data-display/data-table/server-side': Demo_data_display_data_table_server_side_tsx,
   'data-display/empty-state/basic': Demo_data_display_empty_state_basic_tsx,
   'data-display/icon-tile/basic': Demo_data_display_icon_tile_basic_tsx,
   'data-display/kbd/basic': Demo_data_display_kbd_basic_tsx,

@@ -1,9 +1,9 @@
 ---
 title: Skeleton
-description: A placeholder that mirrors content while it loads.
+description: Animated pulsing placeholder mirroring the shape and size of incoming content.
 icon: RectangleHorizontal
 status: Stable
-summary: Pulsing shapes sized with utility classes. Respects reduced motion.
+summary: Accessible content loading placeholder that prevents Cumulative Layout Shift (CLS) and respects reduced motion preferences.
 ---
 
 <ComponentPreview name="feedback/skeleton/basic" />
@@ -14,22 +14,132 @@ summary: Pulsing shapes sized with utility classes. Respects reduced motion.
 import { Skeleton } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Match the shape of the real content so the layout doesn't jump when it loads:
+Use `Skeleton` to provide a low-contrast visual preview of content geometry while asynchronous data fetches are in flight:
+
+- Mirroring cards, user profiles, or dashboard tiles on initial page load.
+- Rendering placeholder rows in [DataTable](/ui/docs/components/data-display/data-table) or lists during search queries.
+- Preventing Cumulative Layout Shift (CLS) as images, fonts, and API payloads hydrate into view.
+
+When choosing loading representations:
+- Use `Skeleton` when you know the approximate dimensions of the incoming layout structure (cards, tables, lists).
+- Use [Spinner](/ui/docs/components/feedback/spinner) inside action buttons or compact controls during quick submission operations (< 1s).
+- Use [Progress](/ui/docs/components/feedback/progress) when tracking a background upload or multi-step batch job.
+
+## Examples
+
+### Basic card placeholder
+
+Size `Skeleton` components using standard Tailwind width and height utilities to match the expected content proportions:
 
 ```tsx
-<div aria-busy="true" aria-label="Loading profile" className="flex items-center gap-3">
-  <Skeleton className="size-10 rounded-full" />
-  <Skeleton className="h-4 w-40" />
-</div>
+import { Skeleton } from '@innostes/ui';
+
+export function ProfileCardSkeleton() {
+  return (
+    <div
+      aria-busy="true"
+      aria-label="Loading vendor profile"
+      className="flex flex-col gap-4 rounded-xl border p-6"
+    >
+      <div className="flex items-center gap-3">
+        <Skeleton className="size-12 rounded-full" />
+        <div className="flex flex-1 flex-col gap-2">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-3 w-1/4" />
+        </div>
+      </div>
+      <Skeleton className="h-20 w-full" />
+    </div>
+  );
+}
+```
+
+### Table row skeletons
+
+Render multiple skeleton rows to indicate that a data table is actively fetching its next page:
+
+```tsx
+import { Skeleton } from '@innostes/ui';
+
+export function TableLoadingRows() {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-3">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex items-center justify-between gap-4 py-2 border-b">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Layout shift prevention
+
+Mirror typography heights (`h-4` for `text-sm`, `h-5` for `text-base`, `h-8` for `text-2xl`) so the layout remains steady when real content mounts:
+
+```tsx
+import { Skeleton } from '@innostes/ui';
+
+export function StatTileSkeleton() {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-2 rounded-xl border p-5">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-8 w-32" />
+      <Skeleton className="h-3 w-40" />
+    </div>
+  );
+}
 ```
 
 ## Accessibility
 
-- Skeletons are hidden from screen readers. Mark the container with `aria-busy="true"`.
-- The pulse stops for users who prefer reduced motion.
+`Skeleton` is carefully designed to avoid distracting screen reader chatter during network fetches.
 
-## API Reference
+### Container aria-busy and aria-live
 
-`Skeleton` takes the props of a `<div>`.
+- `Skeleton` elements are marked with `aria-hidden="true"`, ensuring assistive technologies do not announce every individual placeholder bar.
+- Always add `aria-busy="true"` and an `aria-label` (e.g. `aria-label="Loading purchase orders"`) on the parent container enclosing the skeletons. Remove `aria-busy` once real data has populated the DOM.
+
+### Reduced motion support
+
+When a user enables `prefers-reduced-motion: reduce` in their operating system accessibility settings, the pulsing animation is automatically disabled (`motion-reduce:animate-none`), displaying a steady muted background.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Match the approximate height and border radius of the real component to prevent layout jumping.',
+    code: `<Skeleton className="h-10 w-full rounded-md" /> // Matches Button or Input`,
+  }}
+  dont={{
+    description: 'Do not render generic fixed-size rectangles that differ significantly from the hydrated content shape.',
+    code: `<Skeleton className="h-40 w-40" /> // In an inline text field`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Apply aria-busy="true" to the parent landmark or container holding the skeletons.',
+    code: `<div aria-busy="true" aria-label="Loading orders"><Skeleton ... /></div>`,
+  }}
+  dont={{
+    description: 'Do not omit aria-busy on the loading container, leaving screen reader users unaware that data is in flight.',
+    code: `<div><Skeleton ... /></div>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Skeleton']} />
+
+## Related
+
+- [Spinner](/ui/docs/components/feedback/spinner) — Circular spinner for inline buttons and compact loading states.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress bar for known percentages.
+- [Data Table](/ui/docs/components/data-display/data-table) — Data grid with built-in skeleton loading rows.

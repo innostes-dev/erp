@@ -1,9 +1,9 @@
 ---
 title: Badge
-description: A short label for status, category or count.
+description: Compact status pill for labeling entity states, numeric counts, and categorical tags.
 icon: Tag
 status: Stable
-summary: Semantic colours for statuses, with an optional dot.
+summary: Semantic status indicators with soft tinted backgrounds, contrast-hardened ring tokens, and optional pulse dots.
 ---
 
 <ComponentPreview name="data-display/badge/basic" />
@@ -11,26 +11,146 @@ summary: Semantic colours for statuses, with an optional dot.
 ## Import
 
 ```tsx
-import { Badge, badgeVariants } from '@innostes/ui';
+import { Badge, badgeVariants, type BadgeProps, type BadgeVariant } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Map your domain statuses to a variant once, and reuse it:
+Use `Badge` to communicate entity lifecycle states, categories, or numeric item counts:
+
+- Displaying transaction states: Paid, Pending, Reconciled, Dispatched, or Overdue.
+- Tagging categories or product groups (e.g. "Consumables", "Raw Materials").
+- Showing auxiliary count indicators on tabs, table filters, or list items.
+
+When choosing status components:
+- Use `Badge` for passive inline status indicators and non-clickable labels.
+- Use [TagInput](/ui/docs/components/forms/tag-input) when users need to create, type, and dismiss removable keyword tags.
+- Use [StatusBadge](/ui/docs/components/actions/button) or [Alert](/ui/docs/components/feedback/alert) when displaying high-priority system announcements that require user remediation.
+
+## Examples
+
+### Semantic variants
+
+`Badge` provides semantic variants aligned to administrative task statuses: `default`, `secondary`, `outline`, `success`, `warning`, `destructive`, and `info`. Soft variants use a tinted background combined with an inset ring token to maintain high visual contrast in dense tables without visual clutter.
 
 ```tsx
-const statusVariant = {
-  paid: 'success',
-  pending: 'warning',
-  overdue: 'destructive',
-  draft: 'info',
-} as const satisfies Record<InvoiceStatus, BadgeVariant>;
+import { Badge } from '@innostes/ui';
 
-<Badge variant={statusVariant[invoice.status]} dot>{invoice.status}</Badge>
+export function StatusVariants() {
+  return (
+    <div className="flex gap-2">
+      <Badge variant="success">Completed</Badge>
+      <Badge variant="warning">Awaiting approval</Badge>
+      <Badge variant="destructive">Payment failed</Badge>
+      <Badge variant="info">In review</Badge>
+    </div>
+  );
+}
 ```
 
-Don't rely on colour alone: the text says what the status is.
+### Status indicator dot
 
-## API Reference
+Add `dot={true}` to render a small circular indicator preceding the label text. This reinforces live or operational state (e.g. online servers, open dispatches).
+
+```tsx
+import { Badge } from '@innostes/ui';
+
+export function LiveStatusBadges() {
+  return (
+    <div className="flex gap-2">
+      <Badge variant="success" dot>Live node</Badge>
+      <Badge variant="warning" dot>Syncing</Badge>
+      <Badge variant="destructive" dot>Offline</Badge>
+    </div>
+  );
+}
+```
+
+### Sizes and count badges
+
+Choose between `size="md"` (default, 24px height) for general pages and `size="sm"` (20px height) for dense tables and compact count indicators:
+
+```tsx
+import { Badge } from '@innostes/ui';
+
+export function CountBadges() {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium">Pending requisitions</span>
+      <Badge size="sm" variant="secondary">
+        14
+      </Badge>
+    </div>
+  );
+}
+```
+
+### Table cell status mapping
+
+Define a type-safe mapping dictionary once in your domain types to translate backend entity statuses directly into badge variants:
+
+```tsx
+import { Badge, type BadgeVariant } from '@innostes/ui';
+
+type OrderStatus = 'Draft' | 'Confirmed' | 'Dispatched' | 'Cancelled';
+
+const statusMap: Record<OrderStatus, { variant: BadgeVariant; label: string }> = {
+  Draft: { variant: 'secondary', label: 'Draft' },
+  Confirmed: { variant: 'info', label: 'Confirmed' },
+  Dispatched: { variant: 'success', label: 'Dispatched' },
+  Cancelled: { variant: 'destructive', label: 'Cancelled' },
+};
+
+export function OrderStatusCell({ status }: { status: OrderStatus }) {
+  const { variant, label } = statusMap[status];
+  return <Badge variant={variant} dot>{label}</Badge>;
+}
+```
+
+## Accessibility
+
+`Badge` complies with WCAG 2.2 AA contrast standards across all semantic variants.
+
+### Contrast and color independence
+
+- Never rely exclusively on background color to communicate status. Always provide unambiguous text labels (e.g. "Overdue" rather than just a red dot or empty square).
+- Every variant pairs text color and background tint with an inset ring token to guarantee 4.5:1 text-to-background contrast in both light and dark display modes.
+- The indicator dot includes `aria-hidden="true"`, ensuring screen readers announce the semantic text directly without reading spurious bullet symbols.
+
+### Screen readers
+
+When badges are used as standalone status indicators without adjoining explanatory text, ensure parent containers or table cells provide adequate context via table headers or surrounding descriptions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use explicit, unambiguous text labels for every status badge (e.g. "Payment cleared", "Failed verification").',
+    code: `<Badge variant="success">Cleared</Badge>`,
+  }}
+  dont={{
+    description: 'Do not use badges with cryptic numeric codes or isolated colored dots without explanatory text.',
+    code: `<Badge variant="destructive">ERR_504</Badge>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the dot prop to signal real-time connectivity or operational lifecycle state.',
+    code: `<Badge variant="success" dot>Active webhook</Badge>`,
+  }}
+  dont={{
+    description: 'Do not use dot badges for static categories or unchanging product tags.',
+    code: `<Badge dot>Beverages</Badge> // Static category does not need a live status dot`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Badge']} />
+
+## Related
+
+- [Data Table](/ui/docs/components/data-display/data-table) — Interactive data grid where badges represent row statuses.
+- [TagInput](/ui/docs/components/forms/tag-input) — Removable keyword tags for categorization.
+- [Alert](/ui/docs/components/feedback/alert) — Prominent contextual message banners.

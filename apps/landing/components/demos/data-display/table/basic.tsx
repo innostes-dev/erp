@@ -13,9 +13,9 @@ import {
 } from '@innostes/ui';
 
 const invoices = [
-  { id: 'INV-001', customer: 'Acme Corp', status: 'Paid', amount: 1250 },
-  { id: 'INV-002', customer: 'Globex', status: 'Pending', amount: 840 },
-  { id: 'INV-003', customer: 'Initech', status: 'Overdue', amount: 2300 },
+  { id: 'INV-2026-081', customer: 'Tata Consumer Products', status: 'Paid', amount: 142500 },
+  { id: 'INV-2026-082', customer: 'Reliance Retail Ltd', status: 'Pending', amount: 89400 },
+  { id: 'INV-2026-083', customer: 'ITC Paperboards', status: 'Overdue', amount: 231000 },
 ] as const;
 
 const tone = {
@@ -23,15 +23,17 @@ const tone = {
   Pending: 'warning',
   Overdue: 'destructive',
 } as const;
-const money = new Intl.NumberFormat('en', {
+
+const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
-  currency: 'EUR',
+  currency: 'INR',
+  maximumFractionDigits: 0,
 });
 
 export default function TableDemo() {
   return (
     <Table className="max-w-xl">
-      <TableCaption>Recent invoices</TableCaption>
+      <TableCaption>Recent tax invoices for Northwind Traders Pvt Ltd</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead>Invoice</TableHead>
@@ -43,14 +45,14 @@ export default function TableDemo() {
       <TableBody>
         {invoices.map((inv) => (
           <TableRow key={inv.id}>
-            <TableCell className="font-medium">{inv.id}</TableCell>
+            <TableCell className="font-mono font-medium">{inv.id}</TableCell>
             <TableCell>{inv.customer}</TableCell>
             <TableCell>
               <Badge variant={tone[inv.status]} dot>
                 {inv.status}
               </Badge>
             </TableCell>
-            <TableCell className="text-end tabular-nums">
+            <TableCell className="text-end font-mono">
               {money.format(inv.amount)}
             </TableCell>
           </TableRow>
@@ -59,8 +61,8 @@ export default function TableDemo() {
       <TableFooter>
         <TableRow>
           <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-end tabular-nums">
-            {money.format(4390)}
+          <TableCell className="text-end font-mono">
+            {money.format(462900)}
           </TableCell>
         </TableRow>
       </TableFooter>

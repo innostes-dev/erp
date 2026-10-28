@@ -1,9 +1,9 @@
 ---
 title: Meter
-description: A measurement within a known range.
+description: Linear scalar measurement bar for displaying values in a known finite range (storage, quotas, capacities).
 icon: Gauge
 status: Stable
-summary: Storage, seats or quota usage, with tone colours for limits.
+summary: Scalar measurement indicator with semantic tones, normalized percent calculations, and full WAI-ARIA meter semantics.
 ---
 
 <ComponentPreview name="feedback/meter/basic" />
@@ -11,26 +11,134 @@ summary: Storage, seats or quota usage, with tone colours for limits.
 ## Import
 
 ```tsx
-import { Meter } from '@innostes/ui';
+import { Meter, type MeterProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Meter` to communicate an existing scalar measurement or capacity against known numerical bounds:
+
+- Displaying storage consumption, memory usage, or compute quotas.
+- Tracking organization seat license utilization (e.g. 8 of 10 operator licenses used).
+- Monitoring warehouse bin volume or tank fuel levels.
+
+When choosing scalar components:
+- Use `Meter` (`role="meter"`) for static capacity or volume measurements within a fixed range.
+- Use [Progress](/ui/docs/components/feedback/progress) (`role="progressbar"`) when an active task is advancing toward completion.
+- Use [Gauge](/ui/docs/components/feedback/gauge) when you need an executive radial dial display on KPI dashboards.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for guidance on all feedback mechanisms.
+
+## Examples
+
+### Basic capacity measurement
+
+Provide `value`, `min`, `max`, and a descriptive `label`:
 
 ```tsx
-<Meter
-  value={used}
-  max={limit}
-  label="Seats"
-  tone={used / limit > 0.9 ? 'destructive' : used / limit > 0.75 ? 'warning' : 'primary'}
-/>
+import { Meter } from '@innostes/ui';
+
+export function StorageMeter() {
+  return (
+    <Meter
+      value={64}
+      max={100}
+      label="Cloud document storage"
+      format={{ style: 'unit', unit: 'gigabyte' }}
+    />
+  );
+}
 ```
 
-`format` takes `Intl.NumberFormat` options, e.g. `{ style: 'percent' }` with `max={1}`.
+### Warning and destructive tones
+
+Set `tone` to `primary`, `success`, `warning`, or `destructive` to communicate status severity as a metric approaches full capacity:
+
+```tsx
+import { Meter } from '@innostes/ui';
+
+export function CapacityTones() {
+  const usedSeats = 9;
+  const maxSeats = 10;
+  const isCritical = usedSeats / maxSeats > 0.85;
+
+  return (
+    <Meter
+      value={usedSeats}
+      max={maxSeats}
+      label="Dispatch operator licenses"
+      tone={isCritical ? 'destructive' : 'primary'}
+      showValue
+    />
+  );
+}
+```
+
+### Normalized percentage formatting
+
+When `format={{ style: 'percent' }}` is specified, `Meter` normalizes `value` against `min` and `max` so that `value={72}` with `max={100}` renders `"72%"` (rather than `"7,200%"`):
+
+```tsx
+import { Meter } from '@innostes/ui';
+
+export function NormalizedQuotaMeter() {
+  return (
+    <Meter
+      value={84}
+      min={0}
+      max={100}
+      label="Monthly API rate limit"
+      format={{ style: 'percent' }}
+      tone="warning"
+    />
+  );
+}
+```
 
 ## Accessibility
 
-- `role="meter"` with `aria-valuenow`, `aria-valuemin` and `aria-valuemax`.
+`Meter` is built on Base UI Meter primitives (`@base-ui/react/meter`).
 
-## API Reference
+### Screen readers and meter semantics
+
+- Renders with native `role="meter"`.
+- Sets `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` automatically.
+- Screen readers announce the current reading in relation to the upper and lower boundaries (e.g., "Cloud document storage, 64 gigabytes, 64%").
+- When `format={{ style: 'percent' }}` is used, `aria-valuetext` announces the correct computed percentage string.
+
+### Color independence
+
+Avoid relying strictly on the bar color to communicate limit risks. Always provide clear numerical text or helper copy indicating proximity to the maximum capacity.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Meter for scalar measurements (such as memory, disk storage, or budget consumed).',
+    code: `<Meter value={45} max={100} label="Storage" />`,
+  }}
+  dont={{
+    description: 'Do not use Meter to indicate file download or data export progress (use Progress instead).',
+    code: `// Semantically incorrect: Download is a task advancing in time\n<Meter value={downloadedBytes} label="Downloading" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Switch tone to "warning" or "destructive" dynamically when usage approaches 80% or 95% capacity.',
+    code: `<Meter value={used} max={max} tone={used / max > 0.9 ? 'destructive' : 'primary'} />`,
+  }}
+  dont={{
+    description: 'Do not leave critical quota overflow states styled in neutral primary blue without visual distinction.',
+    code: `<Meter value={99} max={100} tone="primary" />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Meter']} baseUi="meter" />
+
+## Related
+
+- [Progress](/ui/docs/components/feedback/progress) — Task advancement indicator for uploads and jobs.
+- [Gauge](/ui/docs/components/feedback/gauge) — Radial dial gauge for operational dashboards.
+- [Stat](/ui/docs/components/data-display/stat) — Metric display card with trends.

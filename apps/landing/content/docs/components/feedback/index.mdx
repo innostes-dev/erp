@@ -1,22 +1,66 @@
 ---
 title: Feedback
-description: Status indicators, alerts, progress bars, and toast notifications.
+description: System status indicators, alerts, progress bars, meters, and toast notifications.
 status: Stable
-summary: Components for communicating system status, background task progress, and operation outcomes.
+summary: Decision guides, severity wording principles, and UI components for communicating system status, background tasks, and operation outcomes.
 ---
 
 import { CategoryGrid } from '@/components/docs/category-grid';
 
 # Feedback
 
-Feedback components keep operators at Northwind Traders Pvt Ltd informed about task status, background processes, system health, and operational outcomes. They provide immediate, accessible status communication across the platform.
+Feedback components inform operators at Northwind Traders Pvt Ltd about system status, background processes, verification failures, and operation outcomes. Choosing the correct communication pattern prevents alert fatigue while ensuring critical errors are never overlooked.
 
 ## Components
 
 <CategoryGrid category="components/feedback" />
 
-## Usage guidelines
+## Feedback decision guide
 
-- **Tone matching**: Use info for contextual guidance, success for completed operations, warning for non-blocking concerns, and destructive/error for failed tasks or critical disruptions.
-- **Duration**: Reserve persistent banners (`Alert`) for system-wide notices or section errors that require resolution. Use transient toasts (`Toast`) for operation confirmations.
-- **Accessibility**: All feedback components emit appropriate ARIA live regions (`polite` for progress/alerts, `assertive` for urgent errors) and support high-contrast mode tokens.
+Use this decision matrix to determine which feedback mechanism matches your application scenario:
+
+| Mechanism | Placement | Persistence | Interruption level | Ideal use case |
+| --- | --- | --- | --- | --- |
+| **[Toast](/ui/docs/components/feedback/toast)** | Floating viewport corner | Transient (auto-dismiss 4–6s) | Non-blocking | Success confirmations ("Invoice INV-8402 created"), non-critical updates. |
+| **[Alert](/ui/docs/components/feedback/alert)** | In-page banner directly above content | Persistent until resolved or dismissed | Non-blocking | Section-level notices, scheduled maintenance warnings, fiscal year closing notices. |
+| **[Field error](/ui/docs/components/forms/field)** | Directly underneath the invalid input | Persistent until input value changes | Focused | Form validation errors (invalid GSTIN, missing PO line item, overdue date). |
+| **[EmptyState](/ui/docs/components/data-display/empty-state)** | Replacing empty lists or tables | Persistent | Contextual | Zero results, blank initial modules, cleared queues. |
+| **[Alert Dialog](/ui/docs/components/overlays/alert-dialog)** | Centered modal overlay | Blocking modal dialog | Disruptive modal | Irreversible actions requiring explicit confirmation (deleting a vendor, voiding a fiscal ledger). |
+
+## Severity wording guidelines
+
+Match the severity tone to the true operational consequence:
+
+### Informational (`info`)
+- **Tone**: Neutral, informative, helpful.
+- **Guidance**: Explain background events or helpful workflow hints that require no immediate action.
+- **Example**: *"GST e-invoicing portal auto-sync is scheduled for 11:00 PM IST."*
+
+### Success (`success`)
+- **Tone**: Positive, succinct, affirming.
+- **Guidance**: Confirm that the user's action completed successfully. State what was achieved.
+- **Example**: *"Purchase order PO-8410 approved and dispatched to vendor."*
+
+### Warning (`warning`)
+- **Tone**: Cautionary, proactive, advisory.
+- **Guidance**: Alert the user to a non-blocking condition that may cause failure if ignored. State the consequence.
+- **Example**: *"Warehouse bin B-12 is at 94% capacity. Additional stock receipts may require re-routing."*
+
+### Destructive / Error (`destructive`)
+- **Tone**: Clear, calm, actionable. Never blame the user.
+- **Guidance**: Explain plainly what failed, why it failed, and how the user can resolve the issue. Avoid cryptic error codes.
+- **Example**: *"Unable to reconcile bank statement. The transaction date falls outside the active accounting period."*
+
+## Progress versus meter versus gauge
+
+The design system provides three distinct scalar indicators:
+
+1. **[Progress](/ui/docs/components/feedback/progress)** (`role="progressbar"`):
+   - Indicates **task completion** or workflow transition over time.
+   - Example: Uploading vendor attachments, compiling monthly GST reports, processing batch invoice PDFs.
+2. **[Meter](/ui/docs/components/feedback/meter)** (`role="meter"`):
+   - Measures a **scalar value within a fixed range** where the quantity represents an existing measurement rather than progress toward a goal.
+   - Example: Storage disk quota utilized, memory footprint, cold-room warehouse temperature.
+3. **[Gauge](/ui/docs/components/feedback/gauge)**:
+   - A **radial visual meter** with customizable threshold zones (normal, warning, critical) for operational dashboards.
+   - Example: Fleet delivery on-time performance, server health score, SLA compliance percentage.

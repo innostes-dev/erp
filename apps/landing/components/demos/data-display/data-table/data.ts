@@ -12,14 +12,14 @@ export interface Order {
 }
 
 const customers = [
-  ['Acme Corp', 'billing@acme.com'],
-  ['Globex', 'ap@globex.com'],
-  ['Initech', 'finance@initech.com'],
-  ['Umbrella', 'pay@umbrella.com'],
-  ['Hooli', 'accounts@hooli.com'],
-  ['Stark Industries', 'ap@stark.com'],
-  ['Wayne Enterprises', 'billing@wayne.com'],
-  ['Soylent', 'finance@soylent.com'],
+  ['Tata Consumer Products', 'procurement@tataconsumer.com'],
+  ['Reliance Retail Ltd', 'vendor.desk@relianceretail.com'],
+  ['ITC Paperboards', 'accounts.payable@itc.in'],
+  ['Hindustan Unilever Ltd', 'commercial@hul.co.in'],
+  ['Godrej Agrovet', 'billing@godrejagrovet.com'],
+  ['Infosys Cafeteria Services', 'vendor.pay@infosys.com'],
+  ['Wipro Infrastructure', 'finance@wipro.com'],
+  ['Titan Industries Ltd', 'procure@titan.co.in'],
 ] as const;
 
 const statuses: OrderStatus[] = [
@@ -33,15 +33,15 @@ const statuses: OrderStatus[] = [
   'Pending',
 ];
 
-export const orders: Order[] = Array.from({ length: 23 }, (_, i) => {
+export const orders: Order[] = Array.from({ length: 48 }, (_, i) => {
   const [customer, email] = customers[i % customers.length]!;
   return {
-    id: `ORD-${String(1024 + i)}`,
+    id: `PO-${String(8400 + i)}`,
     customer,
     email,
     status: statuses[(i * 3) % statuses.length]!,
-    total: Math.round(((i * 7919) % 4800) + 120),
-    date: new Date(Date.UTC(2026, 9, 21 - i)),
+    total: Math.round(((i * 14820) % 285000) + 12500),
+    date: new Date(Date.UTC(2026, 9, 28 - (i % 28))),
   };
 });
 
@@ -52,11 +52,13 @@ export const statusTone = {
   Failed: 'destructive',
 } as const;
 
-export const money = new Intl.NumberFormat('en', {
+export const money = new Intl.NumberFormat('en-IN', {
   style: 'currency',
-  currency: 'EUR',
+  currency: 'INR',
+  maximumFractionDigits: 0,
 });
-export const shortDate = new Intl.DateTimeFormat('en', {
+
+export const shortDate = new Intl.DateTimeFormat('en-IN', {
   month: 'short',
   day: 'numeric',
   year: 'numeric',

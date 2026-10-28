@@ -1,9 +1,9 @@
 ---
 title: Progress
-description: Shows how far a task has progressed.
+description: Linear progress bar indicating task completion, upload percentages, or indeterminate loading states.
 icon: Loader
 status: Stable
-summary: Determinate and indeterminate bars with an optional label and value.
+summary: Accessible progress indicator supporting determinate progress, indeterminate pulse animations, and normalized percent formatting.
 ---
 
 <ComponentPreview name="feedback/progress/basic" />
@@ -11,23 +11,132 @@ summary: Determinate and indeterminate bars with an optional label and value.
 ## Import
 
 ```tsx
-import { Progress } from '@innostes/ui';
+import { Progress, type ProgressProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Progress` to visualize task advancement toward completion over time:
+
+- Tracking multi-file uploads or bulk CSV imports.
+- Displaying batch background processing (e.g. generating monthly GST e-invoices).
+- Indicating indeterminate loading when the total duration cannot be predicted.
+
+When choosing between scalar indicators:
+- Use `Progress` (`role="progressbar"`) when tracking an active task advancing toward completion over time.
+- Use [Meter](/ui/docs/components/feedback/meter) (`role="meter"`) when measuring an existing static scalar value in a fixed range (such as storage capacity, memory usage, or user seat licenses).
+- Use [Gauge](/ui/docs/components/feedback/gauge) when displaying an executive radial dial on operational KPI dashboards.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for full details.
+
+## Examples
+
+### Determinate task progress
+
+Supply `value`, `min`, `max`, and a descriptive `label`. Enable `showValue={true}` to render the formatted numerical value or percentage alongside the label:
 
 ```tsx
-<Progress value={uploaded} max={total} label="Uploading invoices" showValue />
-<Progress value={null} aria-label="Loading data" />  {/* indeterminate */}
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Progress } from '@innostes/ui';
+
+export function DocumentUploadProgress() {
+  const [percent, setPercent] = useState(45);
+
+  return (
+    <Progress
+      value={percent}
+      label="Uploading consignment manifests"
+      format={{ style: 'percent' }}
+      showValue
+    />
+  );
+}
 ```
 
-Use `Progress` for tasks that finish. For a level within a range (storage, quota), use
-[Meter](/ui/docs/components/feedback/meter).
+### Indeterminate loading state
+
+When background task duration or payload size is unknown, pass `value={null}`. The component renders an animated sweeping pulse across the track:
+
+```tsx
+import { Progress } from '@innostes/ui';
+
+export function IndeterminateReportProgress() {
+  return (
+    <Progress
+      value={null}
+      label="Compiling quarterly GST reconciliation…"
+      aria-label="Compiling GST report"
+    />
+  );
+}
+```
+
+### Custom value formatting
+
+Pass `Intl.NumberFormatOptions` via the `format` prop to format units such as bytes, files, or custom numbers:
+
+```tsx
+import { Progress } from '@innostes/ui';
+
+export function BatchExportProgress() {
+  return (
+    <Progress
+      value={142}
+      max={500}
+      label="Processed purchase orders"
+      format={{ style: 'decimal' }}
+      showValue
+    />
+  );
+}
+```
 
 ## Accessibility
 
-- `role="progressbar"` with `aria-valuenow`. Without a visible `label`, set `aria-label`.
+`Progress` wraps Base UI Progress primitives (`@base-ui/react/progress`).
 
-## API Reference
+### Screen readers and progressbar semantics
+
+- The element carries `role="progressbar"`.
+- When determinate (`value != null`), `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are maintained automatically.
+- When `format={{ style: 'percent' }}` is passed, `Progress` computes the percentage fraction relative to `min` and `max`, ensuring `value={45}` out of `100` announces "45%" to screen readers rather than "4,500%".
+- Indeterminate state removes `aria-valuenow`, signaling to assistive technologies that progress is active without a known percentage.
+
+### Reduced motion
+
+When the user specifies `prefers-reduced-motion: reduce` in system settings, `Progress` disables continuous animations on the indeterminate track and suppresses width transitions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Progress for active tasks advancing toward completion (such as file uploads or batch exports).',
+    code: `<Progress value={transferred} max={totalBytes} label="Uploading" />`,
+  }}
+  dont={{
+    description: 'Do not use Progress to display static capacity or remaining quota measurements (use Meter instead).',
+    code: `// Semantically incorrect: Quota is a scalar measurement, not a task in progress\n<Progress value={storageUsed} max={storageQuota} label="Disk usage" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always provide an explicit label prop or aria-label attribute explaining what task is in progress.',
+    code: `<Progress value={65} label="Generating invoices" />`,
+  }}
+  dont={{
+    description: 'Do not render a bare progress bar without accessible naming.',
+    code: `<Progress value={65} /> // Unlabeled progress bar`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Progress']} baseUi="progress" />
+
+## Related
+
+- [Meter](/ui/docs/components/feedback/meter) — Linear bar for scalar capacity and quota measurements.
+- [Gauge](/ui/docs/components/feedback/gauge) — Radial dial gauge for operational dashboard KPIs.
+- [Spinner](/ui/docs/components/feedback/spinner) — Compact circular loading indicator.

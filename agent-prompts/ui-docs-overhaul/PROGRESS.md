@@ -340,3 +340,30 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: Prompt 10 (Data display and feedback component pages overhaul).
+
+
+## 10 – Component pages: data display and feedback – 2026-10-29
+
+**Summary**: Overhauled all 17 data display and feedback component pages and the Feedback category overview page. Transformed DataTable documentation with deep coverage of typed columns, client vs server modes, a live server-side pagination/sorting demo (`server-side.tsx`), selection/bulk actions, row actions, empty/loading states, and container-query mobile stack cards. Added clear decision guidance between semantic HTML Table and TanStack-powered DataTable. Authored a cross-component Feedback Decision Guide across Alert, Toast, inline Field errors, EmptyState, and AlertDialog, including severity tone guidelines (Info, Success, Warning, Destructive). Clarified semantic differences between Progress (`progressbar`), Meter (`meter`), and Gauge (radial dial). Documented imperative Toast API methods, options, queueing, and accessible politeness priority. Updated all demos to Northwind Traders Pvt Ltd with realistic Indian personnel and INR (`₹`) currency.
+
+**Changed**:
+- `apps/landing/components/demos/data-display/data-table/data.ts`: updated customer entities, email addresses, order IDs (`PO-8400`), and currency to INR (`₹`).
+- `apps/landing/components/demos/data-display/data-table/server-side.tsx`: created live server-side simulation demo with `manualPagination` and `manualSorting`.
+- `apps/landing/components/demos/data-display/table/basic.tsx`: updated to Northwind Traders tax invoice breakdown in INR (`₹`).
+- `apps/landing/components/demos/data-display/card/basic.tsx`: updated to warehouse operators at Bengaluru depot.
+- `apps/landing/components/demos/data-display/stat/basic.tsx`: updated to monthly revenue, dispatches, and return rates in INR (`₹`).
+- `apps/landing/components/demos/data-display/avatar/basic.tsx`: updated team member initials and names to Northwind Traders staff.
+- `apps/landing/components/demos/feedback/alert/basic.tsx`: updated to GST e-way bill notices and RTGS vendor payout transfers.
+- `apps/landing/components/demos/feedback/toast/basic.tsx`: updated to purchase order confirmation and GSTN transmission alerts.
+- `apps/landing/content/docs/components/feedback/index.mdx`: added comprehensive Feedback Decision Matrix across Alert, Toast, Field, EmptyState, and AlertDialog, plus severity wording guidelines and Progress vs Meter vs Gauge breakdown.
+- `apps/landing/content/docs/components/data-display/`: rewrote `data-table.mdx`, `table.mdx`, `card.mdx`, `stat.mdx`, `badge.mdx`, `avatar.mdx`, `empty-state.mdx`, `icon-tile.mdx`, `kbd.mdx`, and `tree-view.mdx`.
+- `apps/landing/content/docs/components/feedback/`: rewrote `alert.mdx`, `toast.mdx`, `progress.mdx`, `meter.mdx`, `gauge.mdx`, `skeleton.mdx`, and `spinner.mdx`.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.17s, all 6 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (136 static pages, `_not-found`, `sitemap.xml`, `robots.txt`, `api/og`, `api/search`).
+- Multi-runtime suites verified green.
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 11 (Component pages: overlays, navigation, and layout).

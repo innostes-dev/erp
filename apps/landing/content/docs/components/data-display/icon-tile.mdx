@@ -1,9 +1,9 @@
 ---
 title: Icon Tile
-description: A coloured square or circle holding an icon.
+description: Color-backed square or circular badge container holding an icon for visual module categorization.
 icon: SquareDashed
 status: Stable
-summary: 14 colours, soft or solid, four sizes. Used by metric cards, lists and feature grids.
+summary: Visual icon container offering semantic and categorical chart tones, soft/solid treatments, and four standard sizes.
 ---
 
 <ComponentPreview name="data-display/icon-tile/basic" />
@@ -11,21 +11,145 @@ summary: 14 colours, soft or solid, four sizes. Used by metric cards, lists and 
 ## Import
 
 ```tsx
-import { IconTile, type IconTileTone } from '@innostes/ui';
+import { IconTile, type IconTileProps, type IconTileTone } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `IconTile` to highlight an icon with a tinted or solid background container in dashboard summaries, module navigation lists, or feature cards:
+
+- Categorizing ERP modules (Procurement, Inventory, Ledgers, Logistics) with dedicated palette colors.
+- Visually anchoring metric tiles ([MetricCard](/ui/docs/widgets/metric-card) and [Stat](/ui/docs/components/data-display/stat)).
+- Reinforcing empty state or workflow step headers with prominent iconography.
+
+When choosing icon components:
+- Use `IconTile` when an icon needs a dedicated square or circular background surface to aid visual scanning.
+- Use raw SVG icons (from `lucide-react`) directly when rendering inline icon buttons or standard form input adornments.
+- Use [Avatar](/ui/docs/components/data-display/avatar) when representing people, team members, or company logos.
+
+## Examples
+
+### Semantic and categorical tones
+
+`IconTile` provides both semantic roles (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) and eight categorical chart tones (`chart-1` through `chart-8`). Categorical tones match design system charts, allowing dashboards to share uniform color coding across charts and tiles.
 
 ```tsx
-<IconTile tone="chart-2"><UsersIcon /></IconTile>
-<IconTile tone="success" variant="solid" shape="circle" size="sm"><CheckIcon /></IconTile>
+import { IconTile } from '@innostes/ui';
+import { Truck, ShieldCheck, AlertTriangle } from 'lucide-react';
+
+export function SemanticTiles() {
+  return (
+    <div className="flex gap-3">
+      <IconTile tone="primary"><Truck /></IconTile>
+      <IconTile tone="success"><ShieldCheck /></IconTile>
+      <IconTile tone="warning"><AlertTriangle /></IconTile>
+    </div>
+  );
+}
 ```
 
-- **Semantic tones** (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) carry meaning.
-- **Categorical tones** (`chart-1` … `chart-8`) tell items apart, e.g. one colour per module.
-  They're the same colours the charts use, so a module looks the same everywhere.
-- The tile is decorative (`aria-hidden`); put the meaning in the text next to it.
+### Soft and solid variants
 
-## API Reference
+Choose between `variant="soft"` (default, tinted background with colored foreground icon) for subtle dashboard lists, and `variant="solid"` (bold, opaque fill) for primary callouts:
+
+```tsx
+import { IconTile } from '@innostes/ui';
+import { Package, Warehouse } from 'lucide-react';
+
+export function TileVariants() {
+  return (
+    <div className="flex gap-4">
+      <IconTile tone="chart-1" variant="soft"><Package /></IconTile>
+      <IconTile tone="chart-1" variant="solid"><Warehouse /></IconTile>
+    </div>
+  );
+}
+```
+
+### Sizes and shapes
+
+`IconTile` supports four sizes: `sm` (32px), `md` (40px, default), `lg` (48px), and `xl` (56px). Set `shape="circle"` to render circular badges:
+
+```tsx
+import { IconTile } from '@innostes/ui';
+import { Check, Shield } from 'lucide-react';
+
+export function ShapeSizes() {
+  return (
+    <div className="flex items-center gap-3">
+      <IconTile size="sm" shape="circle" tone="success" variant="solid">
+        <Check />
+      </IconTile>
+      <IconTile size="lg" shape="square" tone="info">
+        <Shield />
+      </IconTile>
+    </div>
+  );
+}
+```
+
+### Bordered tiles on tinted surfaces
+
+When placing an icon tile on a tinted or card surface, add `bordered={true}` to introduce an inset ring token that maintains crisp silhouette definition:
+
+```tsx
+import { IconTile } from '@innostes/ui';
+import { Bell } from 'lucide-react';
+
+export function BorderedTile() {
+  return (
+    <div className="rounded-lg bg-muted/40 p-4">
+      <IconTile tone="destructive" bordered>
+        <Bell />
+      </IconTile>
+    </div>
+  );
+}
+```
+
+## Accessibility
+
+`IconTile` is strictly a presentation component.
+
+### Decorative icons and aria-hidden
+
+- Embedded icons render with `aria-hidden="true"` by default.
+- `IconTile` itself is decorative. Never use an isolated `IconTile` without adjacent descriptive text (such as a card title or list label) or an explicit `aria-label` when wrapped inside an interactive container.
+
+### Color contrast
+
+All `soft` and `solid` variants meet WCAG 2.2 AA non-text contrast requirements (> 3:1 for graphical objects and boundaries) across light and dark display modes.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Maintain uniform categorical chart tones (chart-1 through chart-8) for specific ERP modules across navigation and charts.',
+    code: `<IconTile tone="chart-2"><Package /></IconTile> // Consistent procurement blue`,
+  }}
+  dont={{
+    description: 'Do not randomize categorical tones across different pages for the same business entity.',
+    code: `// Confusing: changing module colors arbitrarily across screens\n<IconTile tone="chart-5"><Package /></IconTile>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always accompany IconTile with descriptive text, such as a metric label or navigation title.',
+    code: `<div className="flex items-center gap-3">\n  <IconTile tone="primary"><Truck /></IconTile>\n  <span>Fleet dispatches</span>\n</div>`,
+  }}
+  dont={{
+    description: 'Do not render bare icon tiles without adjoining labels or accessible text.',
+    code: `<IconTile tone="primary"><Truck /></IconTile> // What does this tile represent?`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['IconTile']} />
+
+## Related
+
+- [Stat](/ui/docs/components/data-display/stat) — Metric tiles that embed icon adornments.
+- [MetricCard](/ui/docs/widgets/metric-card) — Interactive dashboard cards featuring icon tiles and sparklines.
+- [Badge](/ui/docs/components/data-display/badge) — Textual status tags and pills.

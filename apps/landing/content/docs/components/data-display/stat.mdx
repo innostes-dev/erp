@@ -1,9 +1,9 @@
 ---
 title: Stat
-description: A KPI tile for dashboards.
+description: Key performance indicator card displaying labels, values, trend indicators, and comparison helper text.
 icon: TrendingUp
 status: Stable
-summary: Label, value and trend, with colours that know whether "up" is good.
+summary: Compact KPI summary tile with automatic trend direction inference, customizable sentiment polarities, and icon slots.
 ---
 
 <ComponentPreview name="data-display/stat/basic" />
@@ -11,20 +11,165 @@ summary: Label, value and trend, with colours that know whether "up" is good.
 ## Import
 
 ```tsx
-import { Stat } from '@innostes/ui';
+import { Stat, type StatProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Stat` to display high-level numeric metrics, KPIs, and summary totals on executive summaries or operational dashboards:
+
+- Displaying monthly revenue, active purchase orders, warehouse dispatch volume, and inventory turnover.
+- Presenting delta comparisons against a previous accounting period or baseline forecast.
+- Highlighting operational metrics where an upward increase can represent either a positive gain or an unfavorable cost spike.
+
+When choosing metric display components:
+- Use `Stat` for single-value numeric summaries with delta arrows and contextual helper notes.
+- Use [MetricCard](/ui/docs/widgets/metric-card) when you need to embed an inline sparkline or area chart directly inside the KPI tile.
+- Use [Badge](/ui/docs/components/data-display/badge) when displaying a concise status or count directly inside a table cell or page header.
+
+## Examples
+
+### Basic metric tile
+
+Provide a `label`, formatted numeric `value`, optional `delta` string (such as `"+12.5%"`), and `helper` text explaining the comparison baseline:
 
 ```tsx
-<Stat label="Revenue" value="€48,250" delta="+12.5%" helper="vs last month" />
-<Stat label="Churn" value="2.1%" delta="+0.4%" upIsGood={false} />
+import { Stat } from '@innostes/ui';
+
+export function RevenueStat() {
+  return (
+    <Stat
+      label="Gross revenue"
+      value="₹84,50,000"
+      delta="+18.4%"
+      helper="vs previous fiscal quarter"
+    />
+  );
+}
 ```
 
-- `trend` is inferred from a leading `+` or `-` in `delta`; pass it explicitly when `delta` isn't a string.
-- Set `upIsGood={false}` for metrics where an increase is bad (churn, refunds, response time).
-- Format values yourself (e.g. with `Intl.NumberFormat`), so they match the user's locale.
+### Inverted trends with upIsGood
 
-## API Reference
+By default, an upward delta (`+`) is treated as positive (styled in `text-success` with a green arrow). For metrics where an increase is undesirable—such as warehouse return rates, defect counts, or average delivery delays—set `upIsGood={false}`. This renders an upward delta with a red arrow in `text-destructive`.
+
+```tsx
+import { Stat } from '@innostes/ui';
+
+export function ReturnRateStat() {
+  return (
+    <Stat
+      label="Consignment return rate"
+      value="2.8%"
+      delta="+0.6%"
+      upIsGood={false}
+      helper="exceeds target ceiling of 2.0%"
+    />
+  );
+}
+```
+
+### Neutral trends and target comparisons
+
+For metrics with negligible percentage deviation or when no direction arrow is desired, explicitly set `trend="neutral"`:
+
+```tsx
+import { Stat } from '@innostes/ui';
+
+export function InventoryFillRate() {
+  return (
+    <Stat
+      label="Warehouse fill rate"
+      value="99.4%"
+      delta="0.0%"
+      trend="neutral"
+      helper="unchanged from last week"
+    />
+  );
+}
+```
+
+### Dashboard metric grid
+
+Organize multiple `Stat` tiles in a responsive CSS grid layout:
+
+```tsx
+import { Stat } from '@innostes/ui';
+import { Package, Truck, Clock } from 'lucide-react';
+
+export function OperationsOverview() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Stat
+        label="Pending orders"
+        value="142"
+        delta="-8"
+        helper="vs yesterday"
+        icon={<Package />}
+      />
+      <Stat
+        label="In-transit dispatches"
+        value="58"
+        delta="+12"
+        helper="on schedule"
+        icon={<Truck />}
+      />
+      <Stat
+        label="Average turnaround"
+        value="4.2 hrs"
+        delta="-0.6 hrs"
+        upIsGood={true}
+        helper="dock-to-truck time"
+        icon={<Clock />}
+      />
+    </div>
+  );
+}
+```
+
+## Accessibility
+
+`Stat` uses semantic markup and tabular numbers for readable metric presentations.
+
+### Screen readers and trend indicators
+
+- Trend arrows (`ArrowUpIcon`, `ArrowDownIcon`) are rendered with `aria-hidden="true"`.
+- When delta text includes a leading `+` or `-` symbol, screen readers announce the numeric polarity cleanly without relying exclusively on color.
+- Avoid using color alone to communicate whether a trend is favorable or unfavorable; ensure the helper text or label provides adequate context.
+
+### Numerical tabular formatting
+
+The big metric value renders with `tabular-nums` by default, ensuring monospace numeral widths that prevent layout jitter during dynamic ticker updates or real-time polling.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Set `upIsGood={false}` for negative business metrics like server errors, return rates, or customer churn.',
+    code: `<Stat label="Rejection rate" delta="+1.2%" upIsGood={false} />`,
+  }}
+  dont={{
+    description: 'Do not allow an increase in customer complaints or shipping damages to display with a green success arrow.',
+    code: `<Stat label="Damaged cartons" delta="+14" /> // Defaults to green upward arrow`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide explicit helper text describing the reference baseline period (e.g. "vs previous month").',
+    code: `<Stat label="Dispatched orders" value="1,240" delta="+8%" helper="vs previous month" />`,
+  }}
+  dont={{
+    description: 'Do not present isolated delta percentages without clarifying what time window is being compared.',
+    code: `<Stat label="Dispatched orders" value="1,240" delta="+8%" /> // Lacks baseline context`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Stat']} />
+
+## Related
+
+- [Card](/ui/docs/components/data-display/card) — Bordered content container.
+- [Badge](/ui/docs/components/data-display/badge) — Status and numeric tags.
+- [MetricCard](/ui/docs/widgets/metric-card) — Dashboard metric tile with embedded chart sparklines.

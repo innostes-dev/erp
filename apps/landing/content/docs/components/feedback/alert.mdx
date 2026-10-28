@@ -1,9 +1,9 @@
 ---
 title: Alert
-description: A message in the page flow.
-icon: TriangleAlert
+description: Prominent banner for persistent system notices, operational warnings, and error messages.
+icon: BellRing
 status: Stable
-summary: Info, success, warning and error messages with matching icons and live-region roles.
+summary: In-flow status callout with semantic variants, automatic ARIA role management (alert vs status), and integrated iconography.
 ---
 
 <ComponentPreview name="feedback/alert/basic" />
@@ -11,26 +11,161 @@ summary: Info, success, warning and error messages with matching icons and live-
 ## Import
 
 ```tsx
-import { Alert, AlertTitle, AlertDescription } from '@innostes/ui';
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  type AlertProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Alert` when an important message requires persistent visibility in the page flow directly above relevant content:
+
+- Announcing planned server maintenance, downtime windows, or fiscal year cutoff dates.
+- Displaying critical prerequisite warnings before an irreversible action (e.g. "GST e-invoicing portal offline").
+- Warning operators about section-level configuration errors or unverified business credentials.
+
+When choosing feedback mechanisms:
+- Use `Alert` for persistent, non-modal notices that should stay visible until resolved or dismissed.
+- Use [Toast](/ui/docs/components/feedback/toast) for transient confirmations that automatically disappear after a few seconds.
+- Use [Field error](/ui/docs/components/forms/field) when an issue belongs directly to a single form input.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for an overview of all feedback channels.
+
+## Examples
+
+### Semantic variants
+
+`Alert` provides four semantic variants: `info`, `success`, `warning`, and `destructive`. Each variant renders an appropriate default icon and sets semantic border and background tints.
 
 ```tsx
-<Alert variant="warning">
-  <AlertTitle>Your trial ends in 3 days</AlertTitle>
-  <AlertDescription>Add a payment method to keep your data.</AlertDescription>
-</Alert>
+import { Alert, AlertTitle, AlertDescription } from '@innostes/ui';
+
+export function MaintenanceAlert() {
+  return (
+    <Alert variant="warning">
+      <AlertTitle>Tax filing deadline approaching</AlertTitle>
+      <AlertDescription>
+        GSTR-1 filing for the month of September must be completed by 11 October 2026.
+      </AlertDescription>
+    </Alert>
+  );
+}
 ```
 
-- Each variant has a default icon. Pass `icon={<MyIcon />}` to change it, or `icon={null}` to hide it.
-- Use an alert for messages tied to the page. For short-lived confirmations, use [Toast](/ui/docs/components/feedback/toast).
+### Custom icon and titleless alerts
+
+Pass a custom React node to `icon` to override the default variant icon, or pass `icon={null}` to omit the icon entirely. Alerts can also render simple text without an explicit `AlertTitle`:
+
+```tsx
+import { Alert, AlertDescription } from '@innostes/ui';
+import { ShieldCheck } from 'lucide-react';
+
+export function VerifiedAlert() {
+  return (
+    <Alert variant="success" icon={<ShieldCheck />}>
+      <AlertDescription>
+        Vendor bank account verified via penny-drop validation.
+      </AlertDescription>
+    </Alert>
+  );
+}
+```
+
+### Form warning integration
+
+Place an `Alert` directly above form fields to explain global prerequisites or non-field constraints:
+
+```tsx
+import { Alert, AlertTitle, AlertDescription, Field, Input, Label } from '@innostes/ui';
+
+export function PurchaseOrderForm() {
+  return (
+    <form className="flex flex-col gap-4">
+      <Alert variant="info">
+        <AlertTitle>Exchange rate notice</AlertTitle>
+        <AlertDescription>
+          International purchase orders will lock currency conversions at RBI benchmark rates upon submission.
+        </AlertDescription>
+      </Alert>
+
+      <Field>
+        <Label htmlFor="vendor">Vendor name</Label>
+        <Input id="vendor" defaultValue="Tata Consumer Products" />
+      </Field>
+    </form>
+  );
+}
+```
+
+### Inline action links
+
+Include action links or buttons within `AlertDescription` to provide direct recovery paths:
+
+```tsx
+import { Alert, AlertTitle, AlertDescription, Button } from '@innostes/ui';
+
+export function QuotaAlert() {
+  return (
+    <Alert variant="warning">
+      <AlertTitle>Warehouse storage quota</AlertTitle>
+      <AlertDescription className="flex items-center justify-between">
+        <span>Depot capacity has reached 92%. Allocate additional space to continue receiving pallets.</span>
+        <Button size="sm" variant="outline" className="shrink-0 ml-4">
+          Request expansion
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
+```
 
 ## Accessibility
 
-- `destructive` and `warning` use `role="alert"` (announced immediately). Others use `role="status"`.
-  Override with `role` if needed.
+`Alert` automatically manages ARIA live regions and accessibility roles based on the selected variant.
 
-## API Reference
+### Live regions and ARIA roles
 
-<ApiTable components={['Alert']} />
+- For `variant="destructive"` and `variant="warning"`, `Alert` automatically sets `role="alert"`. This instructs assistive technologies to announce the message immediately (assertive live region), interrupting other speech.
+- For `variant="default"`, `variant="info"`, and `variant="success"`, `Alert` sets `role="status"`. This announces the message politely once the user finishes their current reading stream.
+- Icons are rendered with `aria-hidden="true"` to prevent screen readers from announcing decorative icon names.
+
+### Screen readers
+
+- When alerts mount dynamically (e.g. after a form submission or failed API call), placing them in the DOM triggers automatic screen reader announcement.
+- Avoid updating alert contents continuously in real time to prevent confusing audio chatter for screen reader users.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Alert for persistent section or page notices that require user awareness before proceeding.',
+    code: `<Alert variant="warning"><AlertTitle>Account unverified</AlertTitle></Alert>`,
+  }}
+  dont={{
+    description: 'Do not use Alert for short-lived operation confirmations like "Item saved" (use Toast instead).',
+    code: `<Alert variant="success"><AlertTitle>Saved!</AlertTitle></Alert> // Clutters layout permanently`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Include an actionable recovery step or explanatory description alongside the title.',
+    code: `<Alert variant="destructive">\n  <AlertTitle>Payment failed</AlertTitle>\n  <AlertDescription>Update your billing card in settings.</AlertDescription>\n</Alert>`,
+  }}
+  dont={{
+    description: 'Do not post vague alerts that explain an error occurred without explaining how to fix it.',
+    code: `<Alert variant="destructive"><AlertTitle>Error 500</AlertTitle></Alert>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Alert', 'AlertTitle', 'AlertDescription']} />
+
+## Related
+
+- [Toast](/ui/docs/components/feedback/toast) — Transient notifications that auto-dismiss.
+- [Field](/ui/docs/components/forms/field) — Form field container with inline error messages.
+- [Alert Dialog](/ui/docs/components/overlays/alert-dialog) — Modal dialog for critical confirmation prompts.

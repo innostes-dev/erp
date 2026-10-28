@@ -1,9 +1,9 @@
 ---
 title: Gauge
-description: A radial dial for one value in a range.
+description: Radial dial meter for visualizing single scalar metrics against limits on operational dashboards.
 icon: Gauge
-status: Beta
-summary: KPI dials for budget use, capacity, SLA and quota, with value-based colours.
+status: Stable
+summary: Accessible SVG radial meter with dynamic threshold coloring, customizable radius dimensions, and normalized range calculations.
 ---
 
 <ComponentPreview name="feedback/gauge/basic" />
@@ -11,31 +11,134 @@ summary: KPI dials for budget use, capacity, SLA and quota, with value-based col
 ## Import
 
 ```tsx
-import { Gauge } from '@innostes/ui';
+import { Gauge, type GaugeProps, type GaugeTone, type GaugeSlot } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Gauge` when an executive dashboard requires a circular dial to communicate an operational metric, utilization rate, or SLA compliance score:
+
+- Showing warehouse storage capacity utilization or truck fleet availability.
+- Displaying SLA fulfillment percentages or customer satisfaction ratings.
+- Visualizing annual budget expenditure versus fiscal limits.
+
+When choosing scalar components:
+- Use `Gauge` for prominent, radial visual dials on operational and executive dashboards.
+- Use [Meter](/ui/docs/components/feedback/meter) for compact, linear horizontal bars in dense tables or cards.
+- Use [Progress](/ui/docs/components/feedback/progress) for active workflows or tasks advancing toward completion.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for full guidance.
+
+## Examples
+
+### Basic radial dial
+
+Provide `value`, `min`, `max`, and a descriptive `label`:
 
 ```tsx
-<Gauge
-  value={82}
-  label="Budget used"
-  description="₹49L of ₹60L"
-  format={{ style: 'percent' }}
-  tone={(v) => (v > 90 ? 'destructive' : v > 75 ? 'warning' : 'success')}
-/>
+import { Gauge } from '@innostes/ui';
+
+export function DispatchGauge() {
+  return (
+    <Gauge
+      value={84}
+      max={100}
+      label="Daily dispatch target"
+      description="840 of 1,000 pallets loaded"
+      format={{ style: 'percent' }}
+    />
+  );
+}
 ```
 
-- `min` and `max` set the range (default 0–100). `format` takes `Intl.NumberFormat` options.
-- Without `format`, or with `style: 'percent'`, the number shown is the share of the range (312 of 400 shows "78%"). Other formats, e.g. `{ style: 'currency', currency: 'INR' }`, apply to the value itself.
-- `tone` is a colour, or a function of the value for thresholds.
-- `size` sets the width (default `10rem`).
-- For a compact bar, use [Meter](/ui/docs/components/feedback/meter). For task progress, use [Progress](/ui/docs/components/feedback/progress).
+### Dynamic threshold coloring
+
+Pass a function to `tone` to change the arc color dynamically as the measured metric enters warning or critical bands:
+
+```tsx
+import { Gauge } from '@innostes/ui';
+
+const computeTone = (val: number) => {
+  if (val > 90) return 'destructive';
+  if (val > 75) return 'warning';
+  return 'success';
+};
+
+export function StorageGauge() {
+  return (
+    <Gauge
+      value={92}
+      max={100}
+      label="Cold storage utilization"
+      description="Zone B Freezers"
+      tone={computeTone}
+    />
+  );
+}
+```
+
+### Metric descriptions and sizing
+
+Control the overall dial width using `size` (e.g. `'12rem'` or `200`). Add a secondary `description` under the label:
+
+```tsx
+import { Gauge } from '@innostes/ui';
+
+export function SlaComplianceGauge() {
+  return (
+    <Gauge
+      value={99.2}
+      max={100}
+      size="12rem"
+      label="Order delivery SLA"
+      description="Last 30 days rolling"
+      format={{ style: 'percent', maximumFractionDigits: 1 }}
+      tone="success"
+    />
+  );
+}
+```
 
 ## Accessibility
 
-Built on Base UI's Meter: it has `role="meter"`, is named by `label` (or `aria-label`), and exposes the value and range. The arc is decorative.
+`Gauge` wraps Base UI Meter primitives (`@base-ui/react/meter`).
 
-## API Reference
+### Screen readers and meter semantics
 
-<ApiTable components={['Gauge']} />
+- Renders with `role="meter"` and sets `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- The `label` prop is connected to the meter as its accessible name.
+- Percentage calculations are normalized against the span between `min` and `max` so screen readers announce human-readable fractions (e.g., "Daily dispatch target, 84%").
+- The SVG arc elements include `aria-hidden="true"`, ensuring assistive technologies rely exclusively on the semantic meter attributes.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use a dynamic tone function to clearly differentiate normal, warning, and critical operating thresholds.',
+    code: `<Gauge tone={(v) => (v > 90 ? 'destructive' : 'primary')} />`,
+  }}
+  dont={{
+    description: 'Do not render gauges with uniform coloring when the metric represents an urgent threshold limit.',
+    code: `<Gauge value={98} max={100} tone="primary" /> // Fails to signal critical threshold`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always provide a clear label and description so operators understand what the dial measures.',
+    code: `<Gauge value={78} label="Fleet active" description="78 of 100 trucks in transit" />`,
+  }}
+  dont={{
+    description: 'Do not present isolated numeric percentages without clarifying the measured dimension.',
+    code: `<Gauge value={78} /> // Unlabeled dial`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Gauge']} baseUi="meter" />
+
+## Related
+
+- [Meter](/ui/docs/components/feedback/meter) — Linear horizontal measurement bar.
+- [Progress](/ui/docs/components/feedback/progress) — Task advancement indicator for uploads and jobs.
+- [Stat](/ui/docs/components/data-display/stat) — Metric display card with trends.

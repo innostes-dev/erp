@@ -1,9 +1,9 @@
 ---
 title: Card
-description: A surface that groups related content.
+description: Bordered container surface that groups related information, media, and actions.
 icon: SquareStack
 status: Stable
-summary: Header with title, description and actions, plus content and footer areas.
+summary: Structured card container composed of header, title, description, actions, content, and footer primitives.
 ---
 
 <ComponentPreview name="data-display/card/basic" />
@@ -22,23 +22,195 @@ import {
 } from '@innostes/ui';
 ```
 
-## Anatomy
+## When to use
+
+Use `Card` to visually group related information, media, and actions into a distinct thematic container:
+
+- Displaying overview KPI metrics, summary dashboards, and warehouse station cards.
+- Segmenting settings panels, user profile details, and account configuration blocks.
+- Grouping entity summaries, such as vendor profiles, customer order headers, and shipment tracking cards.
+
+When choosing container components:
+- Use `Card` when content needs a distinct bordered boundary with structured header, body, and footer areas.
+- Use [Fieldset](/ui/docs/components/forms/field) when grouping form input controls under a semantic HTML `<legend>`.
+- Use [WidgetCard](/ui/docs/widgets/widget-card) when building interactive dashboard widgets with built-in refresh actions, collapse controls, and loading overlays.
+
+## Examples
+
+### Basic card structure
+
+Compose `Card` with `CardHeader`, `CardTitle`, `CardDescription`, and `CardContent`:
 
 ```tsx
-<Card>
-  <CardHeader>
-    <CardTitle />
-    <CardDescription />
-    <CardAction />   {/* aligned to the top end of the header */}
-  </CardHeader>
-  <CardContent />
-  <CardFooter />
-</Card>
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@innostes/ui';
+
+export function StorageLocationCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Bengaluru Central Warehouse</CardTitle>
+        <CardDescription>Zone B · Cold Storage Facility</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">Current temperature: -18°C. Capacity utilization: 82%.</p>
+      </CardContent>
+    </Card>
+  );
+}
 ```
 
-`CardTitle` renders a `<div>`. Put an `<h2>`/`<h3>` inside when the card title belongs in the
-page's heading outline.
+### Header actions
 
-## API Reference
+Place buttons, icon triggers, or dropdown menus inside `CardAction`. The card header uses an internal CSS grid layout that automatically positions actions in the top-end corner alongside title and description.
 
-All parts take the props of a `<div>`.
+```tsx
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+} from '@innostes/ui';
+
+export function ActionableCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>GST compliance certificate</CardTitle>
+        <CardDescription>Valid through 31 March 2027</CardDescription>
+        <CardAction>
+          <Button size="sm" variant="outline">
+            Renew
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Filing status: Verified by GSTN authority.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Content with footer metadata
+
+Use `CardFooter` to display auxiliary metadata, timestamps, or secondary action buttons along the bottom margin.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  Button,
+} from '@innostes/ui';
+
+export function ShipmentSummary() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Consignment #KA-8902</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">Carrier: Blue Dart Express. Destination: Whitefield Depot.</p>
+      </CardContent>
+      <CardFooter className="flex justify-between items-center text-xs text-muted-foreground">
+        <span>Updated 12 minutes ago</span>
+        <Button size="sm" variant="ghost">Track manifest</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Document heading hierarchy
+
+`CardTitle` renders a `<div>` element by default to avoid dictating document heading levels. When the title represents a structural section of the document, nest an appropriate heading tag (`<h2>`, `<h3>`) inside `CardTitle`:
+
+```tsx
+import { Card, CardHeader, CardTitle, CardContent } from '@innostes/ui';
+
+export function AccessibleHeadingCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <h2 className="text-base font-semibold">Security credentials</h2>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">Two-factor authentication is enabled for all administrators.</p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Accessibility
+
+`Card` components provide flexible container semantics without enforcing rigid landmark structures.
+
+### Semantic heading structure
+
+- Because cards can be used anywhere from top-level page views to deeply nested sidebars, `CardTitle` renders an unstyled container by default. Nest an `<h2>`, `<h3>`, or `<h4>` element inside `CardTitle` to ensure screen reader users can navigate through cards via standard heading rotor shortcuts.
+- Avoid nesting interactive cards inside another clickable card to prevent nested interactive controls (`button` inside `button`).
+
+### Screen readers
+
+- When actions are embedded in `CardAction`, ensure buttons include explicit accessible names (e.g. `aria-label="Edit warehouse settings"` instead of a bare icon).
+- Cards with critical status indicators should pair visual badges with descriptive textual context.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Place primary section triggers or menus inside CardAction to guarantee consistent top-end alignment.',
+    code: `<CardHeader>\n  <CardTitle>Billing</CardTitle>\n  <CardAction><Button size="sm">Manage</Button></CardAction>\n</CardHeader>`,
+  }}
+  dont={{
+    description: 'Do not position action buttons manually with absolute coordinates inside the card container.',
+    code: `<div className="relative">\n  <button className="absolute top-2 right-2">Edit</button>\n</div>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Nest semantic HTML heading tags (such as <h3>) inside CardTitle when the card represents a section in document flow.',
+    code: `<CardTitle><h3>Tax settings</h3></CardTitle>`,
+  }}
+  dont={{
+    description: 'Do not skip heading hierarchy levels on the host page when authoring card titles.',
+    code: `// Avoid placing <h5> immediately following an <h1>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Card',
+    'CardHeader',
+    'CardTitle',
+    'CardDescription',
+    'CardAction',
+    'CardContent',
+    'CardFooter',
+  ]}
+/>
+
+## Related
+
+- [Stat](/ui/docs/components/data-display/stat) — Metric display card with trends and indicators.
+- [Table](/ui/docs/components/data-display/table) — Semantic HTML table for tabular summaries.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Dashboard widget card with collapse and loading states.

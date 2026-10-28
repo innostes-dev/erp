@@ -1,21 +1,49 @@
 ---
 title: Toast
-description: Temporary notifications you can trigger from anywhere.
-icon: BellRing
+description: Imperative notification toast dispatched to a floating screen corner with queueing and action buttons.
+icon: MessageSquare
 status: Stable
-summary: Success, error, warning, loading and promise toasts with actions, swipe to dismiss and a queue limit.
+summary: Framework-agnostic imperative toast manager with success/error shortcuts, promise resolution tracking, and accessible politeness priority queues.
 ---
 
 <ComponentPreview name="feedback/toast/basic" />
 
-## Setup
+## Import
 
-Mount `Toaster` once, near the root of your app:
+```tsx
+import {
+  toast,
+  Toaster,
+  type ToastOptions,
+  type ToastType,
+  type ToasterProps,
+} from '@innostes/ui';
+```
 
-```tsx title="app/layout.tsx"
+## When to use
+
+Use `toast` to communicate transient outcomes of user-initiated operations without interrupting workflow:
+
+- Confirming successful record creation, deletion, or archival ("PO-8410 created").
+- Providing short-lived "Undo" buttons after bulk batch actions.
+- Tracking asynchronous background mutations via `toast.promise`.
+
+When deciding between feedback mechanisms:
+- Use `toast` for transient, non-critical confirmations that do not require explicit operator acknowledgement.
+- Use [Alert](/ui/docs/components/feedback/alert) for persistent warnings that remain in the page flow until resolved.
+- Use [Alert Dialog](/ui/docs/components/overlays/alert-dialog) for high-stakes, irreversible confirmations.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for full guidance.
+
+## Examples
+
+### Toaster configuration
+
+Mount `<Toaster />` once near the root of your application (typically in `layout.tsx` or `App.tsx`):
+
+```tsx
 import { Toaster } from '@innostes/ui';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -27,40 +55,148 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-## Usage
+### Toast triggers and shortcuts
 
-`toast` works anywhere, including outside React (API clients, stores, event handlers):
+Call `toast` imperatively from anywhere in your codebase—including asynchronous handlers, store callbacks, or API clients:
 
 ```tsx
 import { toast } from '@innostes/ui';
 
-toast('Order archived', { action: { label: 'Undo', onClick: restore } });
-toast.success('Invoice sent');
-toast.error('Could not save', { description: error.message });
+// Direct notification
+toast('Draft saved automatically');
 
-// Loading → success / error
-await toast.promise(saveOrder(), {
-  loading: 'Saving order…',
-  success: (order) => `${order.id} saved`,
-  error: (err) => `Failed: ${err.message}`,
+// Semantic shortcuts
+toast.success('Invoice INV-8402 generated');
+toast.info('Export queue is processing 42 records');
+toast.warning('Warehouse quota exceeds 90%');
+toast.error('Failed to sync GSTN data', {
+  description: 'Network gateway timed out. Please retry shortly.',
 });
+```
 
-// Manual control
-const id = toast.loading('Uploading…');
-toast.update(id, { title: 'Uploaded', type: 'success', timeout: 4000 });
-toast.dismiss(id);
+### Action buttons and undo patterns
+
+Attach an interactive action button to the toast notification by passing the `action` property:
+
+```tsx
+import { toast } from '@innostes/ui';
+
+export function archivePurchaseOrder(id: string) {
+  // Archive mutation logic...
+
+  toast('Purchase order archived', {
+    action: {
+      label: 'Undo',
+      onClick: () => restorePurchaseOrder(id),
+    },
+    timeout: 6000,
+  });
+}
+```
+
+### Async promise tracking
+
+Use `toast.promise` to automatically transition a toast through loading, success, and error states as an asynchronous promise resolves:
+
+```tsx
+import { toast } from '@innostes/ui';
+
+async function handleSubmitQuotation(quotationData: FormData) {
+  await toast.promise(
+    fetch('/api/v1/quotations', { method: 'POST', body: quotationData }),
+    {
+      loading: 'Submitting quotation to procurement portal…',
+      success: 'Quotation submitted successfully.',
+      error: (err) => `Failed to submit: ${(err as Error).message}`,
+    }
+  );
+}
+```
+
+### Updating and dismiss controls
+
+Every toast call returns a unique string identifier. Use `toast.update` to modify an active toast or `toast.dismiss` to close it programmatically:
+
+```tsx
+import { toast } from '@innostes/ui';
+
+const toastId = toast.loading('Exporting ledger CSV…');
+
+try {
+  await exportLedger();
+  toast.update(toastId, {
+    type: 'success',
+    title: 'Ledger export complete',
+    timeout: 4000,
+  });
+} catch {
+  toast.update(toastId, {
+    type: 'error',
+    title: 'Export interrupted',
+    timeout: 5000,
+  });
+}
 ```
 
 ## Accessibility
 
-- Toasts are announced politely; `error` toasts use high priority and are announced immediately.
-- Keyboard users can jump to the toasts with <kbd>F6</kbd>. Toasts pause while hovered or focused.
-- Toasts disappear, so don't put anything the user must act on only in a toast. Use an
-  [Alert](/ui/docs/components/feedback/alert) for that.
+`Toast` is built on Base UI Toast primitives (`@base-ui/react/toast`).
 
-## API Reference
+### Politeness and ARIA live regions
+
+- Standard notifications (`default`, `info`, `success`) use `priority="low"`, emitting `aria-live="polite"`. The screen reader announces the notification when the user pauses their current interaction.
+- Errors (`type="error"`) automatically set `priority="high"`, emitting `aria-live="assertive"`. The screen reader announces error notifications immediately, ensuring operators are alerted to failures.
+- Hovering or shifting keyboard focus to the toaster pauses the auto-dismiss timer, allowing users sufficient time to read messages or click actions.
+
+### Focus management and dismiss actions
+
+- Toasts include an accessible close button (`aria-label="Close"`) with keyboard accessibility.
+- When an `action` button is present, operators can press `Tab` into the toast region to trigger it without losing their previous document position.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep toast messages concise, ideally under 10 words (e.g. "Invoice sent to billing desk").',
+    code: `toast.success('Invoice sent to billing desk');`,
+  }}
+  dont={{
+    description: 'Do not place multi-paragraph instructions or technical stack traces inside transient toasts.',
+    code: `toast.error('Exception in Thread "main": java.lang.NullPointer...'); // Unreadable in 5s`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use toast.promise for background mutations to provide instant feedback while saving.',
+    code: `toast.promise(save(), { loading: 'Saving...', success: 'Saved', error: 'Failed' });`,
+  }}
+  dont={{
+    description: 'Do not fire successive unlinked toasts that flood the screen with duplicate notifications.',
+    code: `// Flood: creates 3 stacked toasts\ntoast('1/3'); toast('2/3'); toast('3/3');`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Toaster']} baseUi="toast" />
 
-`toast(title, options)` options: `description`, `type`, `timeout` (ms, `0` = until dismissed),
-`priority`, `action` (`{ label, onClick }`) and `onClose`.
+### Imperative toast methods
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `toast` | `(title, options?) => string` | Dispatches a default toast notification. |
+| `toast.success` | `(title, options?) => string` | Dispatches a success toast with checkmark icon. |
+| `toast.error` | `(title, options?) => string` | Dispatches an assertive error toast. |
+| `toast.warning` | `(title, options?) => string` | Dispatches a warning toast with alert triangle. |
+| `toast.info` | `(title, options?) => string` | Dispatches an informational toast. |
+| `toast.loading` | `(title, options?) => string` | Dispatches a persistent loading toast with spinner. |
+| `toast.update` | `(id, options) => void` | Updates an existing toast's title, description, or type. |
+| `toast.dismiss` | `(id?) => void` | Closes a specific toast, or all toasts when called without ID. |
+| `toast.promise` | `(promise, messages) => Promise<T>` | Binds toast status to a Promise's lifecycle. |
+
+## Related
+
+- [Alert](/ui/docs/components/feedback/alert) — Persistent banners for non-transient warnings.
+- [Spinner](/ui/docs/components/feedback/spinner) — Loading spinners for inline UI elements.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress bar for measurable task completion.

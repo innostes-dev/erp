@@ -1,9 +1,9 @@
 ---
 title: Kbd
-description: A keyboard key or shortcut.
+description: Visual representation of a physical keyboard key or shortcut combination.
 icon: Keyboard
 status: Stable
-summary: For shortcuts in tooltips, menus and help text.
+summary: Monospace key badge styled with borders and subtle elevation for communicating shortcuts in tooltips, menus, and help docs.
 ---
 
 <ComponentPreview name="data-display/kbd/basic" />
@@ -14,14 +14,134 @@ summary: For shortcuts in tooltips, menus and help text.
 import { Kbd } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Kbd` to visually indicate keyboard shortcuts, keypress combinations, or hotkeys across the user interface:
+
+- Displaying global shortcuts inside search triggers (e.g. `⌘` `K` or `Ctrl` `K`).
+- Indicating keyboard actions in [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) items.
+- Formatting keyboard shortcut reference tables in administrative documentation.
+
+When choosing text formatting:
+- Use `Kbd` for physical hardware keys (`Enter`, `Esc`, `Tab`).
+- Use inline `<code>` tags for code tokens, JSON keys, variable names, or CLI commands.
+
+## Examples
+
+### Single key and combinations
+
+Render individual keys in separate `<Kbd>` components to indicate sequential or simultaneous keystrokes:
 
 ```tsx
-<Kbd>⌘</Kbd> <Kbd>K</Kbd>
+import { Kbd } from '@innostes/ui';
+
+export function NavigationShortcuts() {
+  return (
+    <p className="text-sm text-muted-foreground">
+      Press <Kbd>Shift</Kbd> + <Kbd>?</Kbd> to open shortcut help, or <Kbd>Esc</Kbd> to dismiss.
+    </p>
+  );
+}
 ```
 
-Renders a native `<kbd>`, which screen readers treat as keyboard input.
+### Modifiers and cross-platform representations
 
-## API Reference
+Present modifier keys clearly. You can render macOS glyphs (`⌘`, `⌥`, `⇧`) or standard PC keys (`Ctrl`, `Alt`, `Shift`):
 
-`Kbd` takes the props of a `<kbd>` element.
+```tsx
+import { Kbd } from '@innostes/ui';
+
+export function CrossPlatformShortcuts() {
+  return (
+    <div className="flex flex-col gap-2 text-sm">
+      <div className="flex items-center gap-2">
+        <span className="w-24 text-muted-foreground">macOS:</span>
+        <Kbd>⌘</Kbd> <Kbd>K</Kbd>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="w-24 text-muted-foreground">Windows/Linux:</span>
+        <Kbd>Ctrl</Kbd> + <Kbd>K</Kbd>
+      </div>
+    </div>
+  );
+}
+```
+
+### Shortcuts inside menus and tooltips
+
+Combine `Kbd` within dropdown menus or tooltips to inform operators of available accelerators:
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Button,
+  Kbd,
+} from '@innostes/ui';
+
+export function ShortcutMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<Button size="sm">File</Button>} />
+      <DropdownMenuContent className="w-48">
+        <DropdownMenuItem className="flex justify-between items-center">
+          <span>Quick search</span>
+          <div className="flex gap-1">
+            <Kbd>⌘</Kbd><Kbd>K</Kbd>
+          </div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+## Accessibility
+
+`Kbd` renders a native HTML `<kbd>` element.
+
+### Semantic kbd element
+
+- The native `<kbd>` tag conveys keyboard input semantics to assistive technologies and web crawlers.
+- `Kbd` components feature `select-none` and `pointer-events-none` styling so dragging across lines does not unintentionally highlight individual key caps.
+
+### Screen readers and modifier announcements
+
+- Screen readers announce the textual contents of `<kbd>` tags directly (e.g., "Control plus K").
+- When using special symbol characters like `⌘` or `⌥`, ensure the parent container or surrounding prose includes an accessible label or textual clarification for screen readers that do not announce mathematical or typographical glyphs.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Render separate keys inside their own Kbd components (e.g. <Kbd>Ctrl</Kbd> + <Kbd>P</Kbd>).',
+    code: `<Kbd>Ctrl</Kbd> + <Kbd>P</Kbd>`,
+  }}
+  dont={{
+    description: 'Do not bundle key combinations into a single Kbd element.',
+    code: `<Kbd>Ctrl + P</Kbd> // Renders as one monolithic key cap`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use standard keyboard abbreviations (Ctrl, Alt, Shift, Esc, Tab, Enter).',
+    code: `<Kbd>Esc</Kbd>`,
+  }}
+  dont={{
+    description: 'Do not use colloquial names like "Escape Key" inside a small key cap.',
+    code: `<Kbd>Escape Key</Kbd>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Kbd']} />
+
+## Related
+
+- [CommandPalette](/ui/docs/components/overlays/command-palette) — Shortcut-driven global action launcher.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Menu lists that display hotkey accelerators.
+- [Tooltip](/ui/docs/components/overlays/tooltip) — Hover tips containing keyboard shortcut reminders.

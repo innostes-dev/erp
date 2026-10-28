@@ -1,9 +1,9 @@
 ---
 title: Spinner
-description: An animated loading indicator.
+description: Compact animated SVG loading indicator inheriting current text color and fontSize.
 icon: LoaderCircle
 status: Stable
-summary: Inherits the text colour; sized with utility classes.
+summary: Circular loading glyph with automatic aria-status management, size utilities, and decorative hiding toggles.
 ---
 
 <ComponentPreview name="feedback/spinner/basic" />
@@ -11,19 +11,131 @@ summary: Inherits the text colour; sized with utility classes.
 ## Import
 
 ```tsx
-import { Spinner } from '@innostes/ui';
+import { Spinner, type SpinnerProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Spinner` to indicate localized asynchronous activity when space does not permit a full skeleton or progress bar:
+
+- Indicating asynchronous background sync in table headers or stat cards.
+- Rendering an inline indicator next to a "Saving draft…" status note.
+- Showing loading spinners in asynchronous dropdown search results.
+
+When choosing loading components:
+- Use `Spinner` for compact inline loading indicators and isolated status chips.
+- Use `Button loading` directly on buttons rather than nesting a manual `<Spinner />` inside the button label.
+- Use [Skeleton](/ui/docs/components/feedback/skeleton) when fetching initial page layouts or table records.
+- Use [Progress](/ui/docs/components/feedback/progress) for determinate task progression (uploads, exports).
+
+## Examples
+
+### Basic spinner
+
+By default, `Spinner` renders at `size-4` (16px) and carries an accessible label of `"Loading"` with `role="status"`:
 
 ```tsx
-<Spinner />                                   {/* announced as "Loading" */}
-<Spinner className="size-6 text-primary" label="Loading orders" />
-<span><Spinner label={null} /> Syncing…</span> {/* text already says it */}
+import { Spinner } from '@innostes/ui';
+
+export function DefaultSpinner() {
+  return <Spinner aria-label="Loading purchase orders" />;
+}
 ```
 
-For buttons, use `<Button loading>` instead; it handles the spinner and the busy state.
+### Sizing and color inheritance
 
-## API Reference
+`Spinner` uses `stroke="currentColor"` so it automatically matches the text color of its parent container. Adjust its dimensions using standard Tailwind `size-*` utilities:
+
+```tsx
+import { Spinner } from '@innostes/ui';
+
+export function SizedSpinners() {
+  return (
+    <div className="flex items-center gap-4">
+      <Spinner className="size-4" />
+      <Spinner className="size-6 text-primary" />
+      <Spinner className="size-8 text-muted-foreground" />
+    </div>
+  );
+}
+```
+
+### Inlined with status text
+
+When a spinner sits directly beside descriptive text (such as "Syncing ledger..."), pass `label={null}`. This marks the spinner as decorative (`aria-hidden="true"`), preventing screen readers from announcing duplicate loading messages:
+
+```tsx
+import { Spinner } from '@innostes/ui';
+
+export function InlineStatus() {
+  return (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <Spinner label={null} />
+      <span>Reconciling bank transactions…</span>
+    </div>
+  );
+}
+```
+
+### Inside buttons and controls
+
+For interactive buttons, always prefer the built-in `loading` prop on [Button](/ui/docs/components/actions/button). It automatically manages focus, disables pointer events, and injects a spinner with proper ARIA attributes:
+
+```tsx
+import { Button } from '@innostes/ui';
+
+export function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
+  return (
+    <Button loading={isSubmitting} type="submit">
+      Approve purchase order
+    </Button>
+  );
+}
+```
+
+## Accessibility
+
+`Spinner` handles assistive technology notifications gracefully.
+
+### Accessible labels versus decorative hiding
+
+- When `label` is provided (defaults to `"Loading"`), `Spinner` sets `role="status"` and `aria-label={label}`. Screen readers announce the status update politely.
+- When `label={null}` is explicitly passed, `Spinner` removes `role="status"` and sets `aria-hidden="true"`, ensuring no extraneous speech is triggered when accompanying text already explains the state.
+
+### Screen readers and role="status"
+
+- By using `role="status"`, screen readers wait until the current utterance completes before announcing the loading state, preventing jarring speech interruptions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Set `label={null}` when the spinner is paired with visible explanatory text (e.g. "Syncing...").',
+    code: `<span className="flex items-center gap-2"><Spinner label={null} /> Saving…</span>`,
+  }}
+  dont={{
+    description: 'Do not omit `label={null}` next to text; screen readers will announce "Loading Saving…".',
+    code: `<span className="flex items-center gap-2"><Spinner /> Saving…</span>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the loading prop on Button rather than manually placing a Spinner inside button children.',
+    code: `<Button loading={isSubmitting}>Submit</Button>`,
+  }}
+  dont={{
+    description: 'Do not manually place a bare Spinner inside a button without disabling click events.',
+    code: `<Button><Spinner /> Submit</Button> // Allows double-clicks while loading`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Spinner']} />
+
+## Related
+
+- [Button](/ui/docs/components/actions/button) — Action button with built-in loading spinner support.
+- [Skeleton](/ui/docs/components/feedback/skeleton) — Placeholder shapes for incoming content.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress bar for measurable task progression.

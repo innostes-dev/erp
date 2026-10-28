@@ -1,9 +1,9 @@
 ---
 title: Tree View
-description: A hierarchy that expands and collapses.
+description: Hierarchical tree list with collapsible branches, keyboard navigation, and asynchronous node loading.
 icon: ListTree
-status: Beta
-summary: Departments, chart of accounts, categories and folders, with full WAI-ARIA tree keyboard support.
+status: Stable
+summary: Nested tree structure featuring roving focus keyboard navigation, type-ahead search, expandable child levels, and loading spinners.
 ---
 
 <ComponentPreview name="data-display/tree-view/basic" />
@@ -11,50 +11,219 @@ summary: Departments, chart of accounts, categories and folders, with full WAI-A
 ## Import
 
 ```tsx
-import { TreeView, type TreeNode } from '@innostes/ui';
+import {
+  TreeView,
+  type TreeNode,
+  type TreeViewProps,
+  type TreeViewSlot,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass nested `TreeNode`s. A node with `children` (even an empty array) can be expanded.
+Use `TreeView` to present deeply nested, hierarchical structures where users navigate between parent categories and child entities:
+
+- Displaying general ledger Chart of Accounts (Assets > Current Assets > Bank Accounts).
+- Navigating organizational structures (Departments > Divisions > Regional Teams).
+- Browsing product catalogue taxonomy (Electronics > Industrial Automation > Sensors).
+- Exploring multi-level warehouse bin and racking locations.
+
+When choosing hierarchical components:
+- Use `TreeView` when the hierarchy contains multiple levels and operators need to expand and collapse branches selectively.
+- Use [Breadcrumb](/ui/docs/components/navigation/breadcrumb) to show an operator their current position within a linear ancestral hierarchy.
+- Use [Accordion](/ui/docs/components/navigation/accordion) when presenting stacked sections of content that expand to reveal detailed panels.
+
+## Examples
+
+### Basic hierarchy
+
+Construct a tree by passing an array of `TreeNode` objects to `items`. Any node with a `children` property is treated as a branch node and displays a collapsible chevron toggle.
 
 ```tsx
+'use client';
+
+import { useState } from 'react';
+import { TreeView, type TreeNode } from '@innostes/ui';
+
 const accounts: TreeNode[] = [
   {
     id: 'assets',
-    label: 'Assets',
+    label: 'Current assets',
     children: [
-      { id: 'cash', label: 'Cash', meta: '₹4.2L' },
-      { id: 'ar', label: 'Accounts receivable', meta: '₹12.8L' },
+      { id: 'bank-hdfc', label: 'HDFC Operating Account' },
+      { id: 'bank-sbi', label: 'SBI Forex Treasury' },
+    ],
+  },
+  {
+    id: 'liabilities',
+    label: 'Current liabilities',
+    children: [
+      { id: 'ap-domestic', label: 'Domestic Trade Payables' },
+      { id: 'tax-gst', label: 'GST Output Liability' },
     ],
   },
 ];
 
-<TreeView
-  aria-label="Chart of accounts"
-  items={accounts}
-  expanded={expanded}
-  onExpandedChange={setExpanded}
-  selected={account}
-  onSelectedChange={setAccount}
-/>
+export function ChartOfAccounts() {
+  const [selected, setSelected] = useState<string | null>('bank-hdfc');
+
+  return (
+    <TreeView
+      aria-label="Chart of accounts"
+      items={accounts}
+      defaultExpanded={['assets']}
+      selected={selected}
+      onSelectedChange={setSelected}
+    />
+  );
+}
 ```
 
-- `icon` goes before the label, `meta` (a count, an amount) at the end.
-- `disabled` nodes can be focused but not selected.
-- For lazy loading, give a node `children: []`, load its children in `onExpandedChange`, then update `items`.
+### Asynchronous node loading
 
-## Keyboard
+To load child nodes on demand (e.g. from a backend API when a warehouse zone is clicked), set `loading={true}` on the parent node while the network request is in flight. A spinner automatically displays in place of the chevron toggle.
 
-| Key | Action |
-| --- | --- |
-| Up / Down | Previous / next visible node |
-| Right | Expand; if expanded, go to the first child |
-| Left | Collapse; if collapsed, go to the parent |
-| Home / End | First / last visible node |
-| Enter / Space | Select |
-| Letters | Jump to the next node starting with them |
+```tsx
+'use client';
 
-## API Reference
+import { useState } from 'react';
+import { TreeView, type TreeNode } from '@innostes/ui';
+
+export function LazyWarehouseTree() {
+  const [items, setItems] = useState<TreeNode[]>([
+    { id: 'blr', label: 'Bengaluru Logistics Center', children: [] },
+  ]);
+
+  const handleExpandedChange = async (expandedIds: string[]) => {
+    if (expandedIds.includes('blr')) {
+      // Mark node as loading
+      setItems((prev) =>
+        prev.map((n) => (n.id === 'blr' ? { ...n, loading: true } : n))
+      );
+
+      // Simulate remote fetch
+      const bins = await fetch('/api/v1/warehouses/blr/bins').then((r) => r.json());
+
+      setItems((prev) =>
+        prev.map((n) =>
+          n.id === 'blr' ? { ...n, loading: false, children: bins } : n
+        )
+      );
+    }
+  };
+
+  return (
+    <TreeView
+      aria-label="Warehouse storage tree"
+      items={items}
+      onExpandedChange={handleExpandedChange}
+    />
+  );
+}
+```
+
+### Icons and metadata badges
+
+Enhance nodes by providing leading `icon` elements and trailing `meta` content (such as item counts or currency totals):
+
+```tsx
+import { Badge, TreeView, type TreeNode } from '@innostes/ui';
+import { Folder, FolderTree } from 'lucide-react';
+
+const catalog: TreeNode[] = [
+  {
+    id: 'packaging',
+    label: 'Packaging materials',
+    icon: <FolderTree className="size-4" />,
+    meta: <Badge size="sm" variant="secondary">48 SKUs</Badge>,
+    children: [
+      {
+        id: 'corrugated',
+        label: 'Corrugated boxes',
+        icon: <Folder className="size-4" />,
+        meta: <span className="font-mono text-xs text-muted-foreground">₹1,42,000</span>,
+      },
+    ],
+  },
+];
+
+export function CatalogTree() {
+  return <TreeView aria-label="Inventory catalog" items={catalog} />;
+}
+```
+
+### Compact sizing
+
+Set `size="sm"` to reduce row height (from 36px to 28px) and font size, making the tree suitable for narrow sidebars and dense file tree palettes.
+
+```tsx
+import { TreeView } from '@innostes/ui';
+
+export function DenseTree() {
+  return (
+    <TreeView
+      aria-label="Compact project tree"
+      items={accounts}
+      size="sm"
+    />
+  );
+}
+```
+
+## Accessibility
+
+`TreeView` strictly adheres to the W3C WAI-ARIA Treeview Design Pattern.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Up Arrow / Down Arrow', action: 'Moves focus to the previous or next visible node in the tree.' },
+    { key: 'Right Arrow', action: 'Expands a collapsed branch node, or moves focus to the first child of an expanded branch.' },
+    { key: 'Left Arrow', action: 'Collapses an expanded branch node, or moves focus up to the parent node.' },
+    { key: 'Home / End', action: 'Moves focus to the first or last visible node in the entire tree.' },
+    { key: 'Enter / Space', action: 'Selects the currently focused node.' },
+    { key: 'Character keys', action: 'Type-ahead search jumps focus to the next node starting with the typed letter.' },
+  ]}
+/>
+
+### Screen readers and tree semantics
+
+- The root element uses `role="tree"` with `aria-label` defining the tree's purpose.
+- Each branch node has `role="treeitem"`, carrying `aria-expanded="true"` or `aria-expanded="false"`, along with `aria-level` denoting depth in the hierarchy.
+- The tree represents a single tab stop with roving tabindex across nodes.
+- When `loading={true}`, the node announces the `loadingLabel` ("Loading…" by default) to assistive technologies.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Ensure every TreeNode has a globally unique, stable id attribute (e.g. database UUID or slug).',
+    code: `{ id: 'dept-finance', label: 'Finance' }`,
+  }}
+  dont={{
+    description: 'Do not generate random or index-based IDs on every render; this breaks keyboard focus tracking.',
+    code: `{ id: Math.random().toString(), label: 'Finance' } // Causes focus loss`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the textValue prop if label contains complex JSX, ensuring type-ahead search functions properly.',
+    code: `{ id: 'tax', label: <span>GST (18%)</span>, textValue: 'GST' }`,
+  }}
+  dont={{
+    description: 'Do not omit textValue when passing custom JSX labels; type-ahead keyboard navigation will fail.',
+    code: `{ id: 'tax', label: <CustomBadge>GST</CustomBadge> }`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['TreeView']} />
+
+## Related
+
+- [Accordion](/ui/docs/components/navigation/accordion) — Vertically stacked collapsible panels.
+- [Breadcrumb](/ui/docs/components/navigation/breadcrumb) — Linear ancestral navigation path.
+- [Data Table](/ui/docs/components/data-display/data-table) — Tabular presentation for flat datasets.

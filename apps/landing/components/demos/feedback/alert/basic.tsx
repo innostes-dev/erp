@@ -5,34 +5,28 @@ import { Alert, AlertDescription, AlertTitle } from '@innostes/ui';
 export default function AlertDemo() {
   return (
     <div className="flex w-full max-w-xl flex-col gap-3">
-      <Alert>
-        <AlertTitle>New version available</AlertTitle>
-        <AlertDescription>
-          Reload the page to get the latest features.
-        </AlertDescription>
-      </Alert>
       <Alert variant="info">
-        <AlertTitle>Scheduled maintenance</AlertTitle>
+        <AlertTitle>GST e-way bill maintenance</AlertTitle>
         <AlertDescription>
-          Sunday 02:00–04:00 CET. Exports are paused during this window.
+          Scheduled server maintenance on Sunday between 02:00 and 04:00 IST. Dispatch consignments should be generated prior to this window.
         </AlertDescription>
       </Alert>
       <Alert variant="success">
-        <AlertTitle>Payout sent</AlertTitle>
+        <AlertTitle>Vendor payout processed</AlertTitle>
         <AlertDescription>
-          €12,480.00 is on its way to your bank account.
+          ₹14,25,000 has been transferred to Reliance Retail Ltd via RTGS transfer reference #NWT-84920.
         </AlertDescription>
       </Alert>
       <Alert variant="warning">
-        <AlertTitle>Your trial ends in 3 days</AlertTitle>
+        <AlertTitle>Warehouse quota warning</AlertTitle>
         <AlertDescription>
-          Add a payment method to keep your data.
+          Bengaluru Central Warehouse has reached 88% capacity. Consider re-routing upcoming pallets to Whitefield Depot.
         </AlertDescription>
       </Alert>
       <Alert variant="destructive">
-        <AlertTitle>Payment failed</AlertTitle>
+        <AlertTitle>GSTIN validation failed</AlertTitle>
         <AlertDescription>
-          The card ending 4242 was declined. Update it to avoid interruption.
+          The vendor GSTIN checksum could not be verified against the GSTN master ledger. Please review the 15-character identifier.
         </AlertDescription>
       </Alert>
     </div>

@@ -739,77 +739,330 @@ Toggles support the standard `sm` (32px), `md` (40px, default), and `lg` (48px) 
 
 ## Avatar (https://innostes.com/ui/docs/components/data-display/avatar)
 
-Image with initials fallback, four sizes, round or square, and stacked groups.
+Image avatar with graceful fallback initials, circular and square geometries, and overlapping avatar groups built on Base UI.
 
 <ComponentPreview name="data-display/avatar/basic" />
 
 ## Import
 
 ```tsx
-import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@innostes/ui';
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+  AvatarGroup,
+  type AvatarProps,
+  type AvatarGroupProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Avatar` to visually represent individual team members, users, organizations, or products:
+
+- Displaying user profiles in top navigation headers, comment threads, and activity logs.
+- Indicating assignees on purchase orders, warehouse tasks, and approval chains.
+- Representing vendors or partner organizations with square company logos.
+
+When choosing avatar components:
+- Use `Avatar` for user portraits and fallback initials.
+- Use `shape="circle"` for individuals and `shape="square"` for enterprise entities, business units, or product lines.
+- Use [IconTile](/ui/docs/components/data-display/icon-tile) when presenting a category or system module with a Lucide icon rather than a personal photo or initials.
+
+## Examples
+
+### Basic avatar with image and fallback
+
+Compose `Avatar` with `AvatarImage` and `AvatarFallback`. If the image URL fails to load or is loading over a slow connection, `AvatarFallback` renders smoothly in its place.
 
 ```tsx
-<Avatar>
-  <AvatarImage src={user.photoUrl} alt="" />
-  <AvatarFallback>{initials(user.name)}</AvatarFallback>
-</Avatar>
+import { Avatar, AvatarImage, AvatarFallback } from '@innostes/ui';
+
+export function UserAvatar() {
+  return (
+    <Avatar>
+      <AvatarImage
+        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face"
+        alt="Priya Sharma"
+      />
+      <AvatarFallback>PS</AvatarFallback>
+    </Avatar>
+  );
+}
 ```
 
-The fallback shows while the image loads and if it fails. Use `delay` on `AvatarFallback` (ms) to
-avoid a flash of initials on fast connections.
+### Avatar sizes and shapes
+
+`Avatar` provides four standard sizes: `xs` (24px), `sm` (32px), `md` (40px, default), and `lg` (56px). Use `shape="square"` with rounded corners for companies and tenant workspaces:
+
+```tsx
+import { Avatar, AvatarFallback } from '@innostes/ui';
+
+export function AvatarVariants() {
+  return (
+    <div className="flex items-center gap-4">
+      <Avatar size="xs"><AvatarFallback>XS</AvatarFallback></Avatar>
+      <Avatar size="sm"><AvatarFallback>SM</AvatarFallback></Avatar>
+      <Avatar size="md"><AvatarFallback>MD</AvatarFallback></Avatar>
+      <Avatar size="lg" shape="square"><AvatarFallback>NW</AvatarFallback></Avatar>
+    </div>
+  );
+}
+```
+
+### Avatar fallback delay
+
+Provide a `delay` (in milliseconds) on `AvatarFallback` to prevent a brief visual flash of initials when images load quickly from browser cache.
+
+```tsx
+import { Avatar, AvatarImage, AvatarFallback } from '@innostes/ui';
+
+export function DelayedFallbackAvatar() {
+  return (
+    <Avatar>
+      <AvatarImage src="/photos/rajesh-nair.jpg" alt="Rajesh Nair" />
+      <AvatarFallback delay={300}>RN</AvatarFallback>
+    </Avatar>
+  );
+}
+```
+
+### Overlapping avatar groups
+
+Wrap multiple avatars inside `AvatarGroup` to render an overlapping stack. Set `max` to limit the visible avatars, automatically rendering a trailing "+N" overflow counter pill.
+
+```tsx
+import { Avatar, AvatarFallback, AvatarGroup } from '@innostes/ui';
+
+const assignees = ['Priya Sharma', 'Rajesh Nair', 'Ananya Rao', 'Vikram Patel'];
+
+export function TaskAssignees() {
+  return (
+    <AvatarGroup max={3}>
+      {assignees.map((name) => (
+        <Avatar key={name} title={name}>
+          <AvatarFallback>
+            {name.split(' ').map((n) => n[0]).join('')}
+          </AvatarFallback>
+        </Avatar>
+      ))}
+    </AvatarGroup>
+  );
+}
+```
 
 ## Accessibility
 
-- When the person's name is shown next to the avatar, use `alt=""` so it isn't read twice.
-- `AvatarGroup` labels its "+N" counter (e.g. "2 more").
+`Avatar` is built on Base UI Avatar primitives (`@base-ui/react/avatar`).
 
-## API Reference
+### Accessible naming and decorative images
 
-<ApiTable components={['Avatar', 'AvatarImage', 'AvatarFallback', 'AvatarGroup']} baseUi="avatar" />
+- When an avatar appears next to a visible username or textual label (such as in a user menu or table row), set `alt=""` on `AvatarImage`. This marks the image as decorative, preventing screen readers from announcing redundant duplicate names.
+- When an avatar appears as a standalone element without adjacent text, provide a descriptive `alt` attribute on `AvatarImage` (e.g. `alt="Priya Sharma"`) or pass an `aria-label` on `Avatar`.
+- The overflow counter in `AvatarGroup` renders with an accessible label (`moreLabel`, defaulting to `(n) => "${n} more"`).
+
+### Screen readers
+
+- Fallback initials are rendered in uppercase and announced plainly.
+- If an image fails to load, the DOM smoothly switches to the fallback element without breaking focus or emitting broken image placeholder graphics.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use two uppercase initials for fallback avatars derived from the user’s first and last names (e.g., "PS").',
+    code: `<AvatarFallback>{getInitials(user.fullName)}</AvatarFallback>`,
+  }}
+  dont={{
+    description: 'Do not render long strings or full email addresses inside avatar fallback containers.',
+    code: `<AvatarFallback>{user.email}</AvatarFallback> // Text overflows container`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Set shape="square" for company brands, vendor logos, or warehouse entities, reserving circles for people.',
+    code: `<Avatar shape="square"><AvatarFallback>NW</AvatarFallback></Avatar>`,
+  }}
+  dont={{
+    description: 'Do not use circular portraits for corporate entity logos with rectangular aspect ratios.',
+    code: `<Avatar shape="circle"><AvatarImage src="/logos/vendor.png" /></Avatar>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={['Avatar', 'AvatarImage', 'AvatarFallback', 'AvatarGroup']}
+  baseUi="avatar"
+/>
+
+## Related
+
+- [Card](/ui/docs/components/data-display/card) — Bordered container for user profiles and team member listings.
+- [Badge](/ui/docs/components/data-display/badge) — Compact label for roles and status pills.
+- [IconTile](/ui/docs/components/data-display/icon-tile) — Structured tile for displaying icons rather than user photos.
 
 ---
 
 ## Badge (https://innostes.com/ui/docs/components/data-display/badge)
 
-Semantic colours for statuses, with an optional dot.
+Semantic status indicators with soft tinted backgrounds, contrast-hardened ring tokens, and optional pulse dots.
 
 <ComponentPreview name="data-display/badge/basic" />
 
 ## Import
 
 ```tsx
-import { Badge, badgeVariants } from '@innostes/ui';
+import { Badge, badgeVariants, type BadgeProps, type BadgeVariant } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Map your domain statuses to a variant once, and reuse it:
+Use `Badge` to communicate entity lifecycle states, categories, or numeric item counts:
+
+- Displaying transaction states: Paid, Pending, Reconciled, Dispatched, or Overdue.
+- Tagging categories or product groups (e.g. "Consumables", "Raw Materials").
+- Showing auxiliary count indicators on tabs, table filters, or list items.
+
+When choosing status components:
+- Use `Badge` for passive inline status indicators and non-clickable labels.
+- Use [TagInput](/ui/docs/components/forms/tag-input) when users need to create, type, and dismiss removable keyword tags.
+- Use [StatusBadge](/ui/docs/components/actions/button) or [Alert](/ui/docs/components/feedback/alert) when displaying high-priority system announcements that require user remediation.
+
+## Examples
+
+### Semantic variants
+
+`Badge` provides semantic variants aligned to administrative task statuses: `default`, `secondary`, `outline`, `success`, `warning`, `destructive`, and `info`. Soft variants use a tinted background combined with an inset ring token to maintain high visual contrast in dense tables without visual clutter.
 
 ```tsx
-const statusVariant = {
-  paid: 'success',
-  pending: 'warning',
-  overdue: 'destructive',
-  draft: 'info',
-} as const satisfies Record<InvoiceStatus, BadgeVariant>;
+import { Badge } from '@innostes/ui';
 
-<Badge variant={statusVariant[invoice.status]} dot>{invoice.status}</Badge>
+export function StatusVariants() {
+  return (
+    <div className="flex gap-2">
+      <Badge variant="success">Completed</Badge>
+      <Badge variant="warning">Awaiting approval</Badge>
+      <Badge variant="destructive">Payment failed</Badge>
+      <Badge variant="info">In review</Badge>
+    </div>
+  );
+}
 ```
 
-Don't rely on colour alone: the text says what the status is.
+### Status indicator dot
 
-## API Reference
+Add `dot={true}` to render a small circular indicator preceding the label text. This reinforces live or operational state (e.g. online servers, open dispatches).
+
+```tsx
+import { Badge } from '@innostes/ui';
+
+export function LiveStatusBadges() {
+  return (
+    <div className="flex gap-2">
+      <Badge variant="success" dot>Live node</Badge>
+      <Badge variant="warning" dot>Syncing</Badge>
+      <Badge variant="destructive" dot>Offline</Badge>
+    </div>
+  );
+}
+```
+
+### Sizes and count badges
+
+Choose between `size="md"` (default, 24px height) for general pages and `size="sm"` (20px height) for dense tables and compact count indicators:
+
+```tsx
+import { Badge } from '@innostes/ui';
+
+export function CountBadges() {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium">Pending requisitions</span>
+      <Badge size="sm" variant="secondary">
+        14
+      </Badge>
+    </div>
+  );
+}
+```
+
+### Table cell status mapping
+
+Define a type-safe mapping dictionary once in your domain types to translate backend entity statuses directly into badge variants:
+
+```tsx
+import { Badge, type BadgeVariant } from '@innostes/ui';
+
+type OrderStatus = 'Draft' | 'Confirmed' | 'Dispatched' | 'Cancelled';
+
+const statusMap: Record<OrderStatus, { variant: BadgeVariant; label: string }> = {
+  Draft: { variant: 'secondary', label: 'Draft' },
+  Confirmed: { variant: 'info', label: 'Confirmed' },
+  Dispatched: { variant: 'success', label: 'Dispatched' },
+  Cancelled: { variant: 'destructive', label: 'Cancelled' },
+};
+
+export function OrderStatusCell({ status }: { status: OrderStatus }) {
+  const { variant, label } = statusMap[status];
+  return <Badge variant={variant} dot>{label}</Badge>;
+}
+```
+
+## Accessibility
+
+`Badge` complies with WCAG 2.2 AA contrast standards across all semantic variants.
+
+### Contrast and color independence
+
+- Never rely exclusively on background color to communicate status. Always provide unambiguous text labels (e.g. "Overdue" rather than just a red dot or empty square).
+- Every variant pairs text color and background tint with an inset ring token to guarantee 4.5:1 text-to-background contrast in both light and dark display modes.
+- The indicator dot includes `aria-hidden="true"`, ensuring screen readers announce the semantic text directly without reading spurious bullet symbols.
+
+### Screen readers
+
+When badges are used as standalone status indicators without adjoining explanatory text, ensure parent containers or table cells provide adequate context via table headers or surrounding descriptions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use explicit, unambiguous text labels for every status badge (e.g. "Payment cleared", "Failed verification").',
+    code: `<Badge variant="success">Cleared</Badge>`,
+  }}
+  dont={{
+    description: 'Do not use badges with cryptic numeric codes or isolated colored dots without explanatory text.',
+    code: `<Badge variant="destructive">ERR_504</Badge>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the dot prop to signal real-time connectivity or operational lifecycle state.',
+    code: `<Badge variant="success" dot>Active webhook</Badge>`,
+  }}
+  dont={{
+    description: 'Do not use dot badges for static categories or unchanging product tags.',
+    code: `<Badge dot>Beverages</Badge> // Static category does not need a live status dot`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Badge']} />
+
+## Related
+
+- [Data Table](/ui/docs/components/data-display/data-table) — Interactive data grid where badges represent row statuses.
+- [TagInput](/ui/docs/components/forms/tag-input) — Removable keyword tags for categorization.
+- [Alert](/ui/docs/components/feedback/alert) — Prominent contextual message banners.
 
 ---
 
 ## Card (https://innostes.com/ui/docs/components/data-display/card)
 
-Header with title, description and actions, plus content and footer areas.
+Structured card container composed of header, title, description, actions, content, and footer primitives.
 
 <ComponentPreview name="data-display/card/basic" />
 
@@ -827,189 +1080,850 @@ import {
 } from '@innostes/ui';
 ```
 
-## Anatomy
+## When to use
+
+Use `Card` to visually group related information, media, and actions into a distinct thematic container:
+
+- Displaying overview KPI metrics, summary dashboards, and warehouse station cards.
+- Segmenting settings panels, user profile details, and account configuration blocks.
+- Grouping entity summaries, such as vendor profiles, customer order headers, and shipment tracking cards.
+
+When choosing container components:
+- Use `Card` when content needs a distinct bordered boundary with structured header, body, and footer areas.
+- Use [Fieldset](/ui/docs/components/forms/field) when grouping form input controls under a semantic HTML `<legend>`.
+- Use [WidgetCard](/ui/docs/widgets/widget-card) when building interactive dashboard widgets with built-in refresh actions, collapse controls, and loading overlays.
+
+## Examples
+
+### Basic card structure
+
+Compose `Card` with `CardHeader`, `CardTitle`, `CardDescription`, and `CardContent`:
 
 ```tsx
-<Card>
-  <CardHeader>
-    <CardTitle />
-    <CardDescription />
-    <CardAction />   {/* aligned to the top end of the header */}
-  </CardHeader>
-  <CardContent />
-  <CardFooter />
-</Card>
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@innostes/ui';
+
+export function StorageLocationCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Bengaluru Central Warehouse</CardTitle>
+        <CardDescription>Zone B · Cold Storage Facility</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">Current temperature: -18°C. Capacity utilization: 82%.</p>
+      </CardContent>
+    </Card>
+  );
+}
 ```
 
-`CardTitle` renders a `<div>`. Put an `<h2>`/`<h3>` inside when the card title belongs in the
-page's heading outline.
+### Header actions
 
-## API Reference
+Place buttons, icon triggers, or dropdown menus inside `CardAction`. The card header uses an internal CSS grid layout that automatically positions actions in the top-end corner alongside title and description.
 
-All parts take the props of a `<div>`.
+```tsx
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+} from '@innostes/ui';
+
+export function ActionableCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>GST compliance certificate</CardTitle>
+        <CardDescription>Valid through 31 March 2027</CardDescription>
+        <CardAction>
+          <Button size="sm" variant="outline">
+            Renew
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Filing status: Verified by GSTN authority.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+### Content with footer metadata
+
+Use `CardFooter` to display auxiliary metadata, timestamps, or secondary action buttons along the bottom margin.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  Button,
+} from '@innostes/ui';
+
+export function ShipmentSummary() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Consignment #KA-8902</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">Carrier: Blue Dart Express. Destination: Whitefield Depot.</p>
+      </CardContent>
+      <CardFooter className="flex justify-between items-center text-xs text-muted-foreground">
+        <span>Updated 12 minutes ago</span>
+        <Button size="sm" variant="ghost">Track manifest</Button>
+      </CardFooter>
+    </Card>
+  );
+}
+```
+
+### Document heading hierarchy
+
+`CardTitle` renders a `<div>` element by default to avoid dictating document heading levels. When the title represents a structural section of the document, nest an appropriate heading tag (`<h2>`, `<h3>`) inside `CardTitle`:
+
+```tsx
+import { Card, CardHeader, CardTitle, CardContent } from '@innostes/ui';
+
+export function AccessibleHeadingCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <h2 className="text-base font-semibold">Security credentials</h2>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm">Two-factor authentication is enabled for all administrators.</p>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Accessibility
+
+`Card` components provide flexible container semantics without enforcing rigid landmark structures.
+
+### Semantic heading structure
+
+- Because cards can be used anywhere from top-level page views to deeply nested sidebars, `CardTitle` renders an unstyled container by default. Nest an `<h2>`, `<h3>`, or `<h4>` element inside `CardTitle` to ensure screen reader users can navigate through cards via standard heading rotor shortcuts.
+- Avoid nesting interactive cards inside another clickable card to prevent nested interactive controls (`button` inside `button`).
+
+### Screen readers
+
+- When actions are embedded in `CardAction`, ensure buttons include explicit accessible names (e.g. `aria-label="Edit warehouse settings"` instead of a bare icon).
+- Cards with critical status indicators should pair visual badges with descriptive textual context.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Place primary section triggers or menus inside CardAction to guarantee consistent top-end alignment.',
+    code: `<CardHeader>\n  <CardTitle>Billing</CardTitle>\n  <CardAction><Button size="sm">Manage</Button></CardAction>\n</CardHeader>`,
+  }}
+  dont={{
+    description: 'Do not position action buttons manually with absolute coordinates inside the card container.',
+    code: `<div className="relative">\n  <button className="absolute top-2 right-2">Edit</button>\n</div>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Nest semantic HTML heading tags (such as <h3>) inside CardTitle when the card represents a section in document flow.',
+    code: `<CardTitle><h3>Tax settings</h3></CardTitle>`,
+  }}
+  dont={{
+    description: 'Do not skip heading hierarchy levels on the host page when authoring card titles.',
+    code: `// Avoid placing <h5> immediately following an <h1>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Card',
+    'CardHeader',
+    'CardTitle',
+    'CardDescription',
+    'CardAction',
+    'CardContent',
+    'CardFooter',
+  ]}
+/>
+
+## Related
+
+- [Stat](/ui/docs/components/data-display/stat) — Metric display card with trends and indicators.
+- [Table](/ui/docs/components/data-display/table) — Semantic HTML table for tabular summaries.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Dashboard widget card with collapse and loading states.
 
 ---
 
 ## Data Table (https://innostes.com/ui/docs/components/data-display/data-table)
 
-Sorting, row selection, pagination, loading and empty states. Client-side or server-side.
+Rich data grid supporting typed columns, multi-row selection, server-side data fetching, skeleton loading, and container-query mobile card transformations.
 
 <ComponentPreview name="data-display/data-table/basic" align="start" />
 
 ## Import
 
 ```tsx
-import { DataTable, type DataTableColumn, type SortState } from '@innostes/ui';
+import {
+  DataTable,
+  type DataTableColumn,
+  type DataTableProps,
+  type DataTableSlot,
+  type SortState,
+  type SortValue,
+} from '@innostes/ui';
 ```
 
-## Columns
+## When to use
 
-Columns are typed against your row type. `accessor` returns the raw value (used for sorting and
-as the default cell text); `cell` renders anything.
+Use `DataTable` when operators need to browse, filter, sort, select, and manage structured tabular datasets in administrative interfaces:
+
+- Managing core business entities: sales orders, inventory balances, purchase requisitions, and vendor master data.
+- Handling paginated server records with sorting, pagination, and bulk batch actions.
+- Displaying tabular data that transforms into responsive stacked cards on mobile devices.
+
+When deciding between table implementations:
+- Use [Table](/ui/docs/components/data-display/table) when rendering static, short tabular data (such as invoice line item breakdowns or tax summary blocks) where column sorting, multi-selection, and pagination controls are unnecessary.
+- Use `DataTable` for entity listings, audit logs, and search results requiring pagination, multi-row selection, or dynamic sorting.
+- For extremely large datasets with more than 1,000 simultaneous unpaginated rows rendered in the DOM, combine `Table` with virtual scrolling (`@tanstack/react-virtual`).
+
+## Examples
+
+### Typed columns and accessor mapping
+
+Columns are generic over your row type `TRow`. Define `id`, `header`, `accessor` (used for sorting and default text extraction), and optional custom `cell` render functions.
 
 ```tsx
-const columns: DataTableColumn<Invoice>[] = [
-  { id: 'number', header: 'Invoice', accessor: (r) => r.number, sortable: true },
-  { id: 'status', header: 'Status', cell: (r) => <Badge variant={tone[r.status]}>{r.status}</Badge> },
+import { Badge, DataTable, type DataTableColumn } from '@innostes/ui';
+
+interface PurchaseOrder {
+  id: string;
+  vendor: string;
+  status: 'Draft' | 'Approved' | 'Dispatched';
+  totalAmount: number;
+}
+
+const columns: DataTableColumn<PurchaseOrder>[] = [
   {
-    id: 'amount',
+    id: 'id',
+    header: 'PO number',
+    accessor: (row) => row.id,
+    sortable: true,
+    cell: (row) => <span className="font-mono font-medium">{row.id}</span>,
+  },
+  {
+    id: 'vendor',
+    header: 'Vendor name',
+    accessor: (row) => row.vendor,
+    sortable: true,
+  },
+  {
+    id: 'status',
+    header: 'Status',
+    accessor: (row) => row.status,
+    cell: (row) => (
+      <Badge variant={row.status === 'Approved' ? 'success' : 'secondary'}>
+        {row.status}
+      </Badge>
+    ),
+  },
+  {
+    id: 'totalAmount',
     header: 'Amount',
-    accessor: (r) => r.amount,
+    accessor: (row) => row.totalAmount,
     sortable: true,
     align: 'end',
-    cell: (r) => money.format(r.amount),
+    cell: (row) => (
+      <span className="font-mono">
+        ₹{row.totalAmount.toLocaleString('en-IN')}
+      </span>
+    ),
   },
 ];
-
-<DataTable aria-label="Invoices" data={invoices} columns={columns} getRowId={(r) => r.id} />
 ```
 
-Sorting is natural and locale-aware ("Item 2" before "Item 10"); dates and numbers sort by value;
-empty values always go last.
+### Number and currency alignment
 
-## Selection, sorting and pagination
-
-Each piece of state can be uncontrolled (`defaultSort`, `defaultSelectedIds`, `defaultPage`) or
-controlled (`sort` + `onSortChange`, `selectedIds` + `onSelectedIdsChange`, `page` + `onPageChange`),
-so you can keep it in the URL or a store.
+Numerical quantities, percentages, and monetary values must always align to the right (`align="end"`). This ensures decimal points and magnitude digits align vertically for rapid visual scanning by accounting operators.
 
 ```tsx
-<DataTable
-  aria-label="Orders"
-  data={orders}
-  columns={columns}
-  getRowId={(o) => o.id}
-  selectable
-  selectedIds={selected}
-  onSelectedIdsChange={setSelected}
-  defaultSort={{ columnId: 'date', direction: 'desc' }}
-  pageSize={20}
-/>
+const columns: DataTableColumn<InvoiceItem>[] = [
+  {
+    id: 'quantity',
+    header: 'Quantity',
+    accessor: (r) => r.quantity,
+    align: 'end',
+    cell: (r) => <span className="tabular-nums">{r.quantity}</span>,
+  },
+  {
+    id: 'unitPrice',
+    header: 'Unit price',
+    accessor: (r) => r.unitPrice,
+    align: 'end',
+    cell: (r) => (
+      <span className="tabular-nums">₹{r.unitPrice.toFixed(2)}</span>
+    ),
+  },
+];
 ```
 
-## Server-side data
+### Server-side pagination and sorting
 
-Turn on `manualSorting` and `manualPagination`, pass the current page of rows as `data`, and fetch
-in the change handlers. `totalCount` tells the table how many pages exist.
+When operating on database datasets with thousands of records, set `manualSorting={true}` and `manualPagination={true}`. Pass the current slice of data as `data`, the overall record count as `totalCount`, and handle state transitions through `onSortChange` and `onPageChange`.
+
+<ComponentPreview name="data-display/data-table/server-side" align="start" />
 
 ```tsx
-const [sort, setSort] = useState<SortState | null>({ columnId: 'date', direction: 'desc' });
-const [page, setPage] = useState(1);
-const { data, isLoading } = useOrders({ sort, page, pageSize: 20 }); // your data hook
+'use client';
 
-<DataTable
-  aria-label="Orders"
-  data={data?.rows ?? []}
-  totalCount={data?.total}
-  columns={columns}
-  getRowId={(o) => o.id}
-  manualSorting
-  sort={sort}
-  onSortChange={setSort}
-  manualPagination
-  page={page}
-  onPageChange={setPage}
-  pageSize={20}
-  loading={isLoading}
-/>
+import { useState, useEffect } from 'react';
+import { DataTable, type SortState } from '@innostes/ui';
+
+export function ServerOrdersTable() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<SortState | null>({
+    columnId: 'date',
+    direction: 'desc',
+  });
+  const [totalCount, setTotalCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    fetch(`/api/v1/orders?page=${page}&sort=${sort?.columnId}&dir=${sort?.direction}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (!cancelled) {
+          setData(json.items);
+          setTotalCount(json.total);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, sort]);
+
+  return (
+    <DataTable
+      aria-label="Server purchase orders"
+      data={data}
+      columns={columns}
+      getRowId={(row) => row.id}
+      loading={loading}
+      page={page}
+      onPageChange={setPage}
+      pageSize={10}
+      manualPagination
+      totalCount={totalCount}
+      sort={sort}
+      onSortChange={setSort}
+      manualSorting
+    />
+  );
+}
 ```
 
-## Loading and empty states
+### Selection and bulk actions
+
+Enable multi-row checkbox selection by setting `selectable={true}`. Pass `selectedIds` and `onSelectedIdsChange` to control the active set of selected IDs.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button, DataTable, toast } from '@innostes/ui';
+
+export function BulkDispatchTable({ orders, columns }) {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const handleBulkDispatch = () => {
+    toast.success(`Dispatched ${selectedIds.length} orders successfully.`);
+    setSelectedIds([]);
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-muted-foreground">
+          {selectedIds.length} orders selected
+        </span>
+        <Button
+          size="sm"
+          disabled={selectedIds.length === 0}
+          onClick={handleBulkDispatch}
+        >
+          Dispatch selected
+        </Button>
+      </div>
+
+      <DataTable
+        aria-label="Orders awaiting dispatch"
+        data={orders}
+        columns={columns}
+        getRowId={(row) => row.id}
+        selectable
+        selectedIds={selectedIds}
+        onSelectedIdsChange={setSelectedIds}
+      />
+    </div>
+  );
+}
+```
+
+### Loading and empty states
+
+Supply custom `emptyState` messages or let `DataTable` display animated skeleton rows when `loading={true}`.
 
 <ComponentPreview name="data-display/data-table/loading" align="start" />
 
+```tsx
+<DataTable
+  aria-label="Pending payments"
+  data={[]}
+  columns={columns}
+  getRowId={(r) => r.id}
+  loading={isLoading}
+  loadingRowCount={6}
+  emptyState="No pending payments found for this ledger period."
+/>
+```
+
+### Responsive stack mode
+
+On narrow mobile displays or tight dashboard containers, set `responsive="stack"`. The table uses container queries (`@container`) to automatically transform horizontal table rows into card-based key-value pairs without requiring viewport breakpoint hacks.
+
+```tsx
+<DataTable
+  aria-label="Mobile inventory list"
+  data={stockItems}
+  columns={columns}
+  getRowId={(r) => r.id}
+  responsive="stack"
+/>
+```
+
 ## Accessibility
 
-- Real `<table>` markup with `aria-sort` on sortable headers and sort buttons inside them.
-- The table needs a name: pass `aria-label`.
-- Selection checkboxes are labelled; the selected count is announced politely.
-- `onRowClick` is for convenience only. Keep the same action reachable by keyboard (e.g. a link in
-  the first cell, or the row actions menu).
+`DataTable` adheres to W3C WAI-ARIA Table and Grid accessibility standards.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between sortable column header buttons, row selection checkboxes, row action triggers, and pagination buttons.' },
+    { key: 'Enter / Space', action: 'Toggles sorting on a focused header button or toggles row selection on a checkbox.' },
+  ]}
+/>
+
+### Screen readers and announcements
+
+- Real semantic HTML `<table>`, `<thead>`, `<tbody>`, `<th>`, and `<td>` elements ensure assistive technologies correctly identify row and column counts.
+- Column headers with sorting enabled render an embedded `<button>` element with `aria-sort="ascending"`, `aria-sort="descending"`, or `aria-sort="none"`.
+- Row selection checkboxes carry localized accessible labels (e.g. "Select row PO-8410").
+- The master checkbox uses `aria-label="Select all rows on this page"` and reflects indeterminate state when a subset of page rows is selected.
+- A live region announces changes in selection counts politely.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always align numerical values, currency figures, and quantities to the right (align="end") and wrap them with tabular-nums.',
+    code: `{ id: 'amount', header: 'Total', align: 'end', accessor: (r) => r.amount }`,
+  }}
+  dont={{
+    description: 'Do not left-align currency figures or numerical measurements in data tables, as jagged digits impede visual comparison.',
+    code: `{ id: 'amount', header: 'Total', align: 'start' }`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an aria-label attribute describing the table contents (e.g., aria-label="Customer invoices").',
+    code: `<DataTable aria-label="Vendor purchase orders" data={orders} ... />`,
+  }}
+  dont={{
+    description: 'Do not omit accessible naming on tables; screen readers will identify them merely as generic unnamed tables.',
+    code: `<DataTable data={orders} ... />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use manualPagination and manualSorting when querying database tables with more than 100 rows.',
+    code: `<DataTable manualPagination manualSorting totalCount={totalCount} ... />`,
+  }}
+  dont={{
+    description: 'Do not download 10,000 records to the client browser to perform client-side sorting and pagination.',
+    code: `// Anti-pattern: High network transfer and memory overhead\nconst allRecords = await fetchAllRecords();`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['DataTable']} />
 
-`DataTableColumn<TRow>` fields: `id`, `header`, `accessor`, `cell`, `sortable`, `align`, `width`,
-`className`, `headerClassName`. They're documented with TSDoc, so your editor shows them on hover.
+## Related
+
+- [Table](/ui/docs/components/data-display/table) — Semantic HTML table primitives for simple tabular content.
+- [Pagination](/ui/docs/components/navigation/pagination) — Standalone pagination controls.
+- [Badge](/ui/docs/components/data-display/badge) — Status and category indicators for table cells.
+- [Empty State](/ui/docs/components/data-display/empty-state) — Empty placeholder representations.
 
 ---
 
 ## Empty State (https://innostes.com/ui/docs/components/data-display/empty-state)
 
-Icon, title, explanation and next actions for empty lists and searches.
+Clean empty state representation with icon container, title, explanatory description, and primary/secondary action triggers.
 
 <ComponentPreview name="data-display/empty-state/basic" />
 
 ## Import
 
 ```tsx
-import { EmptyState } from '@innostes/ui';
+import { EmptyState, type EmptyStateProps, type EmptyStateSlot } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Say what's empty, why, and what to do next:
+Use `EmptyState` when a view, list, table, or search panel contains no records to present:
 
-- **First use**: "No invoices yet" + "Create invoice".
-- **No results**: "No orders match ‘acme’" + "Clear filters".
-- **No access**: explain who can grant it.
+- **First-use onboarding**: Introducing a blank module (e.g. "No purchase orders yet") and guiding the user to create their first record.
+- **Zero search or filter matches**: Explaining that a query returned no results and providing a one-click action to reset active filters.
+- **Completed queues**: Congratulating an operator when an inbox or approval queue has been fully cleared.
+- **Permission boundaries**: Explaining that the current user account does not have authorization to view records in this section.
 
-Pass it to `DataTable` as `emptyState` for empty tables.
+When choosing empty representation:
+- Use `EmptyState` inside tables, cards, and page views when space permits an icon, title, and action buttons.
+- Use a concise string or empty message inside small dropdown menus (such as [Select](/ui/docs/components/forms/select) or [Combobox](/ui/docs/components/forms/combobox)).
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback) for cross-component guidance on when to choose between alerts, empty states, and dialogs.
 
-## API Reference
+## Examples
+
+### First use / blank canvas
+
+Provide a welcoming title, a brief explanation of how records are populated, and primary action buttons to create or import records:
+
+```tsx
+import { Button, EmptyState } from '@innostes/ui';
+import { FilePlus, Upload } from 'lucide-react';
+
+export function InitialInvoicesEmptyState() {
+  return (
+    <EmptyState
+      icon={<FilePlus />}
+      title="No purchase orders created"
+      description="Create your first purchase order or import batch requisitions from your ERP spreadsheet."
+      actions={
+        <>
+          <Button variant="outline" startIcon={<Upload />}>
+            Import CSV
+          </Button>
+          <Button startIcon={<FilePlus />}>
+            Create purchase order
+          </Button>
+        </>
+      }
+    />
+  );
+}
+```
+
+### No search or filter results
+
+When active filters produce zero records, reassure the operator that data exists and offer a clear filter reset trigger:
+
+```tsx
+'use client';
+
+import { Button, EmptyState } from '@innostes/ui';
+import { SearchX } from 'lucide-react';
+
+export function FilterEmptyState({ onReset }: { onReset: () => void }) {
+  return (
+    <EmptyState
+      icon={<SearchX />}
+      title="No matching invoices found"
+      description="No records match your active date range and vendor filters. Try clearing filters to see all invoices."
+      actions={
+        <Button variant="outline" onClick={onReset}>
+          Reset active filters
+        </Button>
+      }
+    />
+  );
+}
+```
+
+### Permission or access restriction
+
+When an operator lacks role-based permissions, clarify the restriction and indicate which department or administrator can grant access:
+
+```tsx
+import { Button, EmptyState } from '@innostes/ui';
+import { ShieldAlert } from 'lucide-react';
+
+export function RestrictedEmptyState() {
+  return (
+    <EmptyState
+      icon={<ShieldAlert />}
+      title="Restricted ledger view"
+      description="Your user profile does not have clearance to view executive payroll ledgers. Contact your compliance administrator to request access."
+      actions={
+        <Button variant="outline" onClick={() => window.location.href = 'mailto:compliance@northwindtraders.in'}>
+          Request clearance
+        </Button>
+      }
+    />
+  );
+}
+```
+
+### Data table integration
+
+Pass `EmptyState` directly to `DataTable` via its `emptyState` prop:
+
+```tsx
+<DataTable
+  aria-label="Purchase requisitions"
+  data={[]}
+  columns={columns}
+  getRowId={(r) => r.id}
+  emptyState={
+    <EmptyState
+      title="No open requisitions"
+      description="All procurement requisitions for this quarter have been processed."
+    />
+  }
+/>
+```
+
+## Accessibility
+
+`EmptyState` uses accessible heading structure and semantic action layout.
+
+### Heading hierarchy
+
+- `title` renders inside an `<h3>` heading element by default.
+- When placed within a top-level page landmark that lacks intermediate headings, you can customize the title element using `classNames.title` or nest an appropriate heading level (`<h2>`) within `title`.
+
+### Focus management and action clarity
+
+- Action buttons inside `actions` receive standard keyboard tab navigation.
+- Ensure action button labels clearly communicate destination or consequence (e.g. "Create purchase order" instead of generic "Create").
+- Icons are wrapped in an `aria-hidden` container to avoid announcing decorative icon names to screen reader users.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always provide an actionable next step, such as a "Create record" or "Reset filters" button.',
+    code: `<EmptyState title="No vendors found" actions={<Button>Add vendor</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not leave the user at a dead end with passive text like "No data" and no recovery action.',
+    code: `<EmptyState title="No data" /> // No guidance or recovery action`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Distinguish clearly between initial first-use (no records created yet) and zero search results (data exists, but query matched nothing).',
+    code: `const title = hasFilter ? "No matching orders" : "No orders yet";`,
+  }}
+  dont={{
+    description: 'Do not display "Create your first order" when a user simply mistyped an order number in a search bar.',
+    code: `// Confusing: Tells user to create an order when search returns 0 results`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['EmptyState']} />
+
+## Related
+
+- [Data Table](/ui/docs/components/data-display/data-table) — Interactive data grid supporting custom empty states.
+- [Button](/ui/docs/components/actions/button) — Action buttons embedded in empty states.
+- [Alert](/ui/docs/components/feedback/alert) — Persistent banners for operational warnings and messages.
 
 ---
 
 ## Icon Tile (https://innostes.com/ui/docs/components/data-display/icon-tile)
 
-14 colours, soft or solid, four sizes. Used by metric cards, lists and feature grids.
+Visual icon container offering semantic and categorical chart tones, soft/solid treatments, and four standard sizes.
 
 <ComponentPreview name="data-display/icon-tile/basic" />
 
 ## Import
 
 ```tsx
-import { IconTile, type IconTileTone } from '@innostes/ui';
+import { IconTile, type IconTileProps, type IconTileTone } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `IconTile` to highlight an icon with a tinted or solid background container in dashboard summaries, module navigation lists, or feature cards:
+
+- Categorizing ERP modules (Procurement, Inventory, Ledgers, Logistics) with dedicated palette colors.
+- Visually anchoring metric tiles ([MetricCard](/ui/docs/widgets/metric-card) and [Stat](/ui/docs/components/data-display/stat)).
+- Reinforcing empty state or workflow step headers with prominent iconography.
+
+When choosing icon components:
+- Use `IconTile` when an icon needs a dedicated square or circular background surface to aid visual scanning.
+- Use raw SVG icons (from `lucide-react`) directly when rendering inline icon buttons or standard form input adornments.
+- Use [Avatar](/ui/docs/components/data-display/avatar) when representing people, team members, or company logos.
+
+## Examples
+
+### Semantic and categorical tones
+
+`IconTile` provides both semantic roles (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) and eight categorical chart tones (`chart-1` through `chart-8`). Categorical tones match design system charts, allowing dashboards to share uniform color coding across charts and tiles.
 
 ```tsx
-<IconTile tone="chart-2"><UsersIcon /></IconTile>
-<IconTile tone="success" variant="solid" shape="circle" size="sm"><CheckIcon /></IconTile>
+import { IconTile } from '@innostes/ui';
+import { Truck, ShieldCheck, AlertTriangle } from 'lucide-react';
+
+export function SemanticTiles() {
+  return (
+    <div className="flex gap-3">
+      <IconTile tone="primary"><Truck /></IconTile>
+      <IconTile tone="success"><ShieldCheck /></IconTile>
+      <IconTile tone="warning"><AlertTriangle /></IconTile>
+    </div>
+  );
+}
 ```
 
-- **Semantic tones** (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) carry meaning.
-- **Categorical tones** (`chart-1` … `chart-8`) tell items apart, e.g. one colour per module.
-  They're the same colours the charts use, so a module looks the same everywhere.
-- The tile is decorative (`aria-hidden`); put the meaning in the text next to it.
+### Soft and solid variants
 
-## API Reference
+Choose between `variant="soft"` (default, tinted background with colored foreground icon) for subtle dashboard lists, and `variant="solid"` (bold, opaque fill) for primary callouts:
+
+```tsx
+import { IconTile } from '@innostes/ui';
+import { Package, Warehouse } from 'lucide-react';
+
+export function TileVariants() {
+  return (
+    <div className="flex gap-4">
+      <IconTile tone="chart-1" variant="soft"><Package /></IconTile>
+      <IconTile tone="chart-1" variant="solid"><Warehouse /></IconTile>
+    </div>
+  );
+}
+```
+
+### Sizes and shapes
+
+`IconTile` supports four sizes: `sm` (32px), `md` (40px, default), `lg` (48px), and `xl` (56px). Set `shape="circle"` to render circular badges:
+
+```tsx
+import { IconTile } from '@innostes/ui';
+import { Check, Shield } from 'lucide-react';
+
+export function ShapeSizes() {
+  return (
+    <div className="flex items-center gap-3">
+      <IconTile size="sm" shape="circle" tone="success" variant="solid">
+        <Check />
+      </IconTile>
+      <IconTile size="lg" shape="square" tone="info">
+        <Shield />
+      </IconTile>
+    </div>
+  );
+}
+```
+
+### Bordered tiles on tinted surfaces
+
+When placing an icon tile on a tinted or card surface, add `bordered={true}` to introduce an inset ring token that maintains crisp silhouette definition:
+
+```tsx
+import { IconTile } from '@innostes/ui';
+import { Bell } from 'lucide-react';
+
+export function BorderedTile() {
+  return (
+    <div className="rounded-lg bg-muted/40 p-4">
+      <IconTile tone="destructive" bordered>
+        <Bell />
+      </IconTile>
+    </div>
+  );
+}
+```
+
+## Accessibility
+
+`IconTile` is strictly a presentation component.
+
+### Decorative icons and aria-hidden
+
+- Embedded icons render with `aria-hidden="true"` by default.
+- `IconTile` itself is decorative. Never use an isolated `IconTile` without adjacent descriptive text (such as a card title or list label) or an explicit `aria-label` when wrapped inside an interactive container.
+
+### Color contrast
+
+All `soft` and `solid` variants meet WCAG 2.2 AA non-text contrast requirements (> 3:1 for graphical objects and boundaries) across light and dark display modes.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Maintain uniform categorical chart tones (chart-1 through chart-8) for specific ERP modules across navigation and charts.',
+    code: `<IconTile tone="chart-2"><Package /></IconTile> // Consistent procurement blue`,
+  }}
+  dont={{
+    description: 'Do not randomize categorical tones across different pages for the same business entity.',
+    code: `// Confusing: changing module colors arbitrarily across screens\n<IconTile tone="chart-5"><Package /></IconTile>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always accompany IconTile with descriptive text, such as a metric label or navigation title.',
+    code: `<div className="flex items-center gap-3">\n  <IconTile tone="primary"><Truck /></IconTile>\n  <span>Fleet dispatches</span>\n</div>`,
+  }}
+  dont={{
+    description: 'Do not render bare icon tiles without adjoining labels or accessible text.',
+    code: `<IconTile tone="primary"><Truck /></IconTile> // What does this tile represent?`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['IconTile']} />
+
+## Related
+
+- [Stat](/ui/docs/components/data-display/stat) — Metric tiles that embed icon adornments.
+- [MetricCard](/ui/docs/widgets/metric-card) — Interactive dashboard cards featuring icon tiles and sparklines.
+- [Badge](/ui/docs/components/data-display/badge) — Textual status tags and pills.
 
 ---
 
@@ -1037,7 +1951,7 @@ Data display components structure and present information with high information 
 
 ## Kbd (https://innostes.com/ui/docs/components/data-display/kbd)
 
-For shortcuts in tooltips, menus and help text.
+Monospace key badge styled with borders and subtle elevation for communicating shortcuts in tooltips, menus, and help docs.
 
 <ComponentPreview name="data-display/kbd/basic" />
 
@@ -1047,52 +1961,317 @@ For shortcuts in tooltips, menus and help text.
 import { Kbd } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Kbd` to visually indicate keyboard shortcuts, keypress combinations, or hotkeys across the user interface:
+
+- Displaying global shortcuts inside search triggers (e.g. `⌘` `K` or `Ctrl` `K`).
+- Indicating keyboard actions in [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) items.
+- Formatting keyboard shortcut reference tables in administrative documentation.
+
+When choosing text formatting:
+- Use `Kbd` for physical hardware keys (`Enter`, `Esc`, `Tab`).
+- Use inline `<code>` tags for code tokens, JSON keys, variable names, or CLI commands.
+
+## Examples
+
+### Single key and combinations
+
+Render individual keys in separate `<Kbd>` components to indicate sequential or simultaneous keystrokes:
 
 ```tsx
-<Kbd>⌘</Kbd> <Kbd>K</Kbd>
+import { Kbd } from '@innostes/ui';
+
+export function NavigationShortcuts() {
+  return (
+    <p className="text-sm text-muted-foreground">
+      Press <Kbd>Shift</Kbd> + <Kbd>?</Kbd> to open shortcut help, or <Kbd>Esc</Kbd> to dismiss.
+    </p>
+  );
+}
 ```
 
-Renders a native `<kbd>`, which screen readers treat as keyboard input.
+### Modifiers and cross-platform representations
 
-## API Reference
+Present modifier keys clearly. You can render macOS glyphs (`⌘`, `⌥`, `⇧`) or standard PC keys (`Ctrl`, `Alt`, `Shift`):
 
-`Kbd` takes the props of a `<kbd>` element.
+```tsx
+import { Kbd } from '@innostes/ui';
+
+export function CrossPlatformShortcuts() {
+  return (
+    <div className="flex flex-col gap-2 text-sm">
+      <div className="flex items-center gap-2">
+        <span className="w-24 text-muted-foreground">macOS:</span>
+        <Kbd>⌘</Kbd> <Kbd>K</Kbd>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="w-24 text-muted-foreground">Windows/Linux:</span>
+        <Kbd>Ctrl</Kbd> + <Kbd>K</Kbd>
+      </div>
+    </div>
+  );
+}
+```
+
+### Shortcuts inside menus and tooltips
+
+Combine `Kbd` within dropdown menus or tooltips to inform operators of available accelerators:
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Button,
+  Kbd,
+} from '@innostes/ui';
+
+export function ShortcutMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<Button size="sm">File</Button>} />
+      <DropdownMenuContent className="w-48">
+        <DropdownMenuItem className="flex justify-between items-center">
+          <span>Quick search</span>
+          <div className="flex gap-1">
+            <Kbd>⌘</Kbd><Kbd>K</Kbd>
+          </div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+## Accessibility
+
+`Kbd` renders a native HTML `<kbd>` element.
+
+### Semantic kbd element
+
+- The native `<kbd>` tag conveys keyboard input semantics to assistive technologies and web crawlers.
+- `Kbd` components feature `select-none` and `pointer-events-none` styling so dragging across lines does not unintentionally highlight individual key caps.
+
+### Screen readers and modifier announcements
+
+- Screen readers announce the textual contents of `<kbd>` tags directly (e.g., "Control plus K").
+- When using special symbol characters like `⌘` or `⌥`, ensure the parent container or surrounding prose includes an accessible label or textual clarification for screen readers that do not announce mathematical or typographical glyphs.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Render separate keys inside their own Kbd components (e.g. <Kbd>Ctrl</Kbd> + <Kbd>P</Kbd>).',
+    code: `<Kbd>Ctrl</Kbd> + <Kbd>P</Kbd>`,
+  }}
+  dont={{
+    description: 'Do not bundle key combinations into a single Kbd element.',
+    code: `<Kbd>Ctrl + P</Kbd> // Renders as one monolithic key cap`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use standard keyboard abbreviations (Ctrl, Alt, Shift, Esc, Tab, Enter).',
+    code: `<Kbd>Esc</Kbd>`,
+  }}
+  dont={{
+    description: 'Do not use colloquial names like "Escape Key" inside a small key cap.',
+    code: `<Kbd>Escape Key</Kbd>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Kbd']} />
+
+## Related
+
+- [CommandPalette](/ui/docs/components/overlays/command-palette) — Shortcut-driven global action launcher.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Menu lists that display hotkey accelerators.
+- [Tooltip](/ui/docs/components/overlays/tooltip) — Hover tips containing keyboard shortcut reminders.
 
 ---
 
 ## Stat (https://innostes.com/ui/docs/components/data-display/stat)
 
-Label, value and trend, with colours that know whether "up" is good.
+Compact KPI summary tile with automatic trend direction inference, customizable sentiment polarities, and icon slots.
 
 <ComponentPreview name="data-display/stat/basic" />
 
 ## Import
 
 ```tsx
-import { Stat } from '@innostes/ui';
+import { Stat, type StatProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Stat` to display high-level numeric metrics, KPIs, and summary totals on executive summaries or operational dashboards:
+
+- Displaying monthly revenue, active purchase orders, warehouse dispatch volume, and inventory turnover.
+- Presenting delta comparisons against a previous accounting period or baseline forecast.
+- Highlighting operational metrics where an upward increase can represent either a positive gain or an unfavorable cost spike.
+
+When choosing metric display components:
+- Use `Stat` for single-value numeric summaries with delta arrows and contextual helper notes.
+- Use [MetricCard](/ui/docs/widgets/metric-card) when you need to embed an inline sparkline or area chart directly inside the KPI tile.
+- Use [Badge](/ui/docs/components/data-display/badge) when displaying a concise status or count directly inside a table cell or page header.
+
+## Examples
+
+### Basic metric tile
+
+Provide a `label`, formatted numeric `value`, optional `delta` string (such as `"+12.5%"`), and `helper` text explaining the comparison baseline:
 
 ```tsx
-<Stat label="Revenue" value="€48,250" delta="+12.5%" helper="vs last month" />
-<Stat label="Churn" value="2.1%" delta="+0.4%" upIsGood={false} />
+import { Stat } from '@innostes/ui';
+
+export function RevenueStat() {
+  return (
+    <Stat
+      label="Gross revenue"
+      value="₹84,50,000"
+      delta="+18.4%"
+      helper="vs previous fiscal quarter"
+    />
+  );
+}
 ```
 
-- `trend` is inferred from a leading `+` or `-` in `delta`; pass it explicitly when `delta` isn't a string.
-- Set `upIsGood={false}` for metrics where an increase is bad (churn, refunds, response time).
-- Format values yourself (e.g. with `Intl.NumberFormat`), so they match the user's locale.
+### Inverted trends with upIsGood
 
-## API Reference
+By default, an upward delta (`+`) is treated as positive (styled in `text-success` with a green arrow). For metrics where an increase is undesirable—such as warehouse return rates, defect counts, or average delivery delays—set `upIsGood={false}`. This renders an upward delta with a red arrow in `text-destructive`.
+
+```tsx
+import { Stat } from '@innostes/ui';
+
+export function ReturnRateStat() {
+  return (
+    <Stat
+      label="Consignment return rate"
+      value="2.8%"
+      delta="+0.6%"
+      upIsGood={false}
+      helper="exceeds target ceiling of 2.0%"
+    />
+  );
+}
+```
+
+### Neutral trends and target comparisons
+
+For metrics with negligible percentage deviation or when no direction arrow is desired, explicitly set `trend="neutral"`:
+
+```tsx
+import { Stat } from '@innostes/ui';
+
+export function InventoryFillRate() {
+  return (
+    <Stat
+      label="Warehouse fill rate"
+      value="99.4%"
+      delta="0.0%"
+      trend="neutral"
+      helper="unchanged from last week"
+    />
+  );
+}
+```
+
+### Dashboard metric grid
+
+Organize multiple `Stat` tiles in a responsive CSS grid layout:
+
+```tsx
+import { Stat } from '@innostes/ui';
+import { Package, Truck, Clock } from 'lucide-react';
+
+export function OperationsOverview() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Stat
+        label="Pending orders"
+        value="142"
+        delta="-8"
+        helper="vs yesterday"
+        icon={<Package />}
+      />
+      <Stat
+        label="In-transit dispatches"
+        value="58"
+        delta="+12"
+        helper="on schedule"
+        icon={<Truck />}
+      />
+      <Stat
+        label="Average turnaround"
+        value="4.2 hrs"
+        delta="-0.6 hrs"
+        upIsGood={true}
+        helper="dock-to-truck time"
+        icon={<Clock />}
+      />
+    </div>
+  );
+}
+```
+
+## Accessibility
+
+`Stat` uses semantic markup and tabular numbers for readable metric presentations.
+
+### Screen readers and trend indicators
+
+- Trend arrows (`ArrowUpIcon`, `ArrowDownIcon`) are rendered with `aria-hidden="true"`.
+- When delta text includes a leading `+` or `-` symbol, screen readers announce the numeric polarity cleanly without relying exclusively on color.
+- Avoid using color alone to communicate whether a trend is favorable or unfavorable; ensure the helper text or label provides adequate context.
+
+### Numerical tabular formatting
+
+The big metric value renders with `tabular-nums` by default, ensuring monospace numeral widths that prevent layout jitter during dynamic ticker updates or real-time polling.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Set `upIsGood={false}` for negative business metrics like server errors, return rates, or customer churn.',
+    code: `<Stat label="Rejection rate" delta="+1.2%" upIsGood={false} />`,
+  }}
+  dont={{
+    description: 'Do not allow an increase in customer complaints or shipping damages to display with a green success arrow.',
+    code: `<Stat label="Damaged cartons" delta="+14" /> // Defaults to green upward arrow`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide explicit helper text describing the reference baseline period (e.g. "vs previous month").',
+    code: `<Stat label="Dispatched orders" value="1,240" delta="+8%" helper="vs previous month" />`,
+  }}
+  dont={{
+    description: 'Do not present isolated delta percentages without clarifying what time window is being compared.',
+    code: `<Stat label="Dispatched orders" value="1,240" delta="+8%" /> // Lacks baseline context`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Stat']} />
+
+## Related
+
+- [Card](/ui/docs/components/data-display/card) — Bordered content container.
+- [Badge](/ui/docs/components/data-display/badge) — Status and numeric tags.
+- [MetricCard](/ui/docs/widgets/metric-card) — Dashboard metric tile with embedded chart sparklines.
 
 ---
 
 ## Table (https://innostes.com/ui/docs/components/data-display/table)
 
-Native table markup with consistent spacing, hover and selected rows, and horizontal scrolling.
+Accessible HTML table building blocks for displaying custom tabular breakdowns, invoice summaries, and financial ledger items.
 
 <ComponentPreview name="data-display/table/basic" />
 
@@ -1108,251 +2287,1123 @@ import {
   TableHead,
   TableCell,
   TableCaption,
+  type TableProps,
 } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Use `Table` when you render rows yourself. For sorting, selection and pagination, use
-[Data Table](/ui/docs/components/data-display/data-table), which is built from these parts.
+Use `Table` when you need direct, unopinionated JSX control over tabular markup for small, static datasets:
 
-- Right-align numbers with `className="text-end"` and use `tabular-nums` so digits line up.
-- Mark a selected row with `data-state="selected"`.
+- Rendering invoice line item breakdowns, tax computation schedules, or cost allocations.
+- Presenting simple reference charts or tabular key-value matrices (such as shipping fee tiers).
+- Displaying short summaries (fewer than 20 rows) where dynamic column sorting, client pagination, and batch checkbox selection are not required.
 
-## API Reference
+When choosing between table components:
+- Use `Table` when you want zero runtime overhead (< 1.5 KB), direct JSX composition, and complete freedom over row and column spans.
+- Use [Data Table](/ui/docs/components/data-display/data-table) when you need column sorting, pagination, multi-row selection, search filtering, empty states, or mobile card transformations.
 
-<ApiTable components={['Table']} />
+## Examples
 
-The other parts take the props of their HTML element (`thead`, `tbody`, `tr`, `th`, `td`, …).
+### Basic table structure
+
+Compose `Table` using standard HTML hierarchy: `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, and `TableCell`.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@innostes/ui';
+
+export function SimpleSchedule() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Delivery slot</TableHead>
+          <TableHead>Driver name</TableHead>
+          <TableHead>Vehicle number</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>Morning (08:00 - 12:00)</TableCell>
+          <TableCell>Ramesh Kumar</TableCell>
+          <TableCell className="font-mono">KA-01-MJ-4021</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}
+```
+
+### Number and currency alignment
+
+Numerical figures, quantities, and currency amounts should align to the right (`className="text-end"`). Pair with `tabular-nums` or `font-mono` to ensure numerals align consistently along decimal places.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@innostes/ui';
+
+export function TaxBreakdown() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Tax type</TableHead>
+          <TableHead className="text-end">Rate</TableHead>
+          <TableHead className="text-end">Amount</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>CGST (9%)</TableCell>
+          <TableCell className="text-end tabular-nums">9.00%</TableCell>
+          <TableCell className="text-end font-mono">₹12,780.00</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>SGST (9%)</TableCell>
+          <TableCell className="text-end tabular-nums">9.00%</TableCell>
+          <TableCell className="text-end font-mono">₹12,780.00</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}
+```
+
+### Row selection highlighting
+
+Set `data-state="selected"` on a `TableRow` to apply design-token selection styling (`bg-muted`).
+
+```tsx
+import { Table, TableBody, TableRow, TableCell } from '@innostes/ui';
+
+export function HighlightedRow() {
+  return (
+    <Table>
+      <TableBody>
+        <TableRow data-state="selected">
+          <TableCell className="font-medium">Active ledger entry</TableCell>
+          <TableCell>Reconciled</TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  );
+}
+```
+
+### Table captions and footer summaries
+
+Include `TableCaption` to provide accessible context and `TableFooter` for aggregate summary rows.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from '@innostes/ui';
+
+export function AccountSummary() {
+  return (
+    <Table>
+      <TableCaption>Quarterly freight expenses summary</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Month</TableHead>
+          <TableHead className="text-end">Dispatches</TableHead>
+          <TableHead className="text-end">Freight total</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>April 2026</TableCell>
+          <TableCell className="text-end tabular-nums">142</TableCell>
+          <TableCell className="text-end font-mono">₹4,28,000</TableCell>
+        </TableRow>
+      </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell>Total</TableCell>
+          <TableCell className="text-end tabular-nums">142</TableCell>
+          <TableCell className="text-end font-mono">₹4,28,000</TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
+  );
+}
+```
+
+## Accessibility
+
+`Table` uses semantic HTML5 elements that assistive technologies recognize natively without additional ARIA roles.
+
+### Semantic markup
+
+- The parent wrapper automatically introduces `overflow-x-auto` to allow horizontal scrolling on smaller screens without clipping content.
+- `TableHeader` renders a native `<thead>` and `TableHead` renders `<th>` with appropriate header cell semantics.
+- `TableCaption` renders a native `<caption>` element, announcing the table's purpose to screen readers upon focus.
+
+### Screen readers
+
+Assistive technologies announce row and column counts automatically. When navigating through cells, screen readers announce the corresponding column header associated with the cell.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Table for static or simple breakdowns (under 20 rows) where custom cell layout and footers are needed.',
+    code: `<Table>\n  <TableHeader>...</TableHeader>\n  <TableBody>...</TableBody>\n</Table>`,
+  }}
+  dont={{
+    description: 'Do not re-implement sorting, filtering, and pagination from scratch with Table; use DataTable instead.',
+    code: `// Anti-pattern: Hand-rolling complex pagination with raw Table\n<Table>{manualSortedRows.map(...)}</Table>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always align numerical values to the right (className="text-end") and use tabular-nums.',
+    code: `<TableCell className="text-end tabular-nums">₹4,500.00</TableCell>`,
+  }}
+  dont={{
+    description: 'Do not left-align currency figures or numerical quantities.',
+    code: `<TableCell>₹4,500.00</TableCell>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable
+  components={[
+    'Table',
+    'TableHeader',
+    'TableBody',
+    'TableFooter',
+    'TableRow',
+    'TableHead',
+    'TableCell',
+    'TableCaption',
+  ]}
+/>
+
+## Related
+
+- [Data Table](/ui/docs/components/data-display/data-table) — Full-featured data grid with sorting, selection, and pagination.
+- [Card](/ui/docs/components/data-display/card) — Grouped container for structured content.
+- [Badge](/ui/docs/components/data-display/badge) — Status indicators and tags.
 
 ---
 
 ## Tree View (https://innostes.com/ui/docs/components/data-display/tree-view)
 
-Departments, chart of accounts, categories and folders, with full WAI-ARIA tree keyboard support.
+Nested tree structure featuring roving focus keyboard navigation, type-ahead search, expandable child levels, and loading spinners.
 
 <ComponentPreview name="data-display/tree-view/basic" />
 
 ## Import
 
 ```tsx
-import { TreeView, type TreeNode } from '@innostes/ui';
+import {
+  TreeView,
+  type TreeNode,
+  type TreeViewProps,
+  type TreeViewSlot,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Pass nested `TreeNode`s. A node with `children` (even an empty array) can be expanded.
+Use `TreeView` to present deeply nested, hierarchical structures where users navigate between parent categories and child entities:
+
+- Displaying general ledger Chart of Accounts (Assets > Current Assets > Bank Accounts).
+- Navigating organizational structures (Departments > Divisions > Regional Teams).
+- Browsing product catalogue taxonomy (Electronics > Industrial Automation > Sensors).
+- Exploring multi-level warehouse bin and racking locations.
+
+When choosing hierarchical components:
+- Use `TreeView` when the hierarchy contains multiple levels and operators need to expand and collapse branches selectively.
+- Use [Breadcrumb](/ui/docs/components/navigation/breadcrumb) to show an operator their current position within a linear ancestral hierarchy.
+- Use [Accordion](/ui/docs/components/navigation/accordion) when presenting stacked sections of content that expand to reveal detailed panels.
+
+## Examples
+
+### Basic hierarchy
+
+Construct a tree by passing an array of `TreeNode` objects to `items`. Any node with a `children` property is treated as a branch node and displays a collapsible chevron toggle.
 
 ```tsx
+'use client';
+
+import { useState } from 'react';
+import { TreeView, type TreeNode } from '@innostes/ui';
+
 const accounts: TreeNode[] = [
   {
     id: 'assets',
-    label: 'Assets',
+    label: 'Current assets',
     children: [
-      { id: 'cash', label: 'Cash', meta: '₹4.2L' },
-      { id: 'ar', label: 'Accounts receivable', meta: '₹12.8L' },
+      { id: 'bank-hdfc', label: 'HDFC Operating Account' },
+      { id: 'bank-sbi', label: 'SBI Forex Treasury' },
+    ],
+  },
+  {
+    id: 'liabilities',
+    label: 'Current liabilities',
+    children: [
+      { id: 'ap-domestic', label: 'Domestic Trade Payables' },
+      { id: 'tax-gst', label: 'GST Output Liability' },
     ],
   },
 ];
 
-<TreeView
-  aria-label="Chart of accounts"
-  items={accounts}
-  expanded={expanded}
-  onExpandedChange={setExpanded}
-  selected={account}
-  onSelectedChange={setAccount}
-/>
+export function ChartOfAccounts() {
+  const [selected, setSelected] = useState<string | null>('bank-hdfc');
+
+  return (
+    <TreeView
+      aria-label="Chart of accounts"
+      items={accounts}
+      defaultExpanded={['assets']}
+      selected={selected}
+      onSelectedChange={setSelected}
+    />
+  );
+}
 ```
 
-- `icon` goes before the label, `meta` (a count, an amount) at the end.
-- `disabled` nodes can be focused but not selected.
-- For lazy loading, give a node `children: []`, load its children in `onExpandedChange`, then update `items`.
+### Asynchronous node loading
 
-## Keyboard
+To load child nodes on demand (e.g. from a backend API when a warehouse zone is clicked), set `loading={true}` on the parent node while the network request is in flight. A spinner automatically displays in place of the chevron toggle.
 
-| Key | Action |
-| --- | --- |
-| Up / Down | Previous / next visible node |
-| Right | Expand; if expanded, go to the first child |
-| Left | Collapse; if collapsed, go to the parent |
-| Home / End | First / last visible node |
-| Enter / Space | Select |
-| Letters | Jump to the next node starting with them |
+```tsx
+'use client';
 
-## API Reference
+import { useState } from 'react';
+import { TreeView, type TreeNode } from '@innostes/ui';
+
+export function LazyWarehouseTree() {
+  const [items, setItems] = useState<TreeNode[]>([
+    { id: 'blr', label: 'Bengaluru Logistics Center', children: [] },
+  ]);
+
+  const handleExpandedChange = async (expandedIds: string[]) => {
+    if (expandedIds.includes('blr')) {
+      // Mark node as loading
+      setItems((prev) =>
+        prev.map((n) => (n.id === 'blr' ? { ...n, loading: true } : n))
+      );
+
+      // Simulate remote fetch
+      const bins = await fetch('/api/v1/warehouses/blr/bins').then((r) => r.json());
+
+      setItems((prev) =>
+        prev.map((n) =>
+          n.id === 'blr' ? { ...n, loading: false, children: bins } : n
+        )
+      );
+    }
+  };
+
+  return (
+    <TreeView
+      aria-label="Warehouse storage tree"
+      items={items}
+      onExpandedChange={handleExpandedChange}
+    />
+  );
+}
+```
+
+### Icons and metadata badges
+
+Enhance nodes by providing leading `icon` elements and trailing `meta` content (such as item counts or currency totals):
+
+```tsx
+import { Badge, TreeView, type TreeNode } from '@innostes/ui';
+import { Folder, FolderTree } from 'lucide-react';
+
+const catalog: TreeNode[] = [
+  {
+    id: 'packaging',
+    label: 'Packaging materials',
+    icon: <FolderTree className="size-4" />,
+    meta: <Badge size="sm" variant="secondary">48 SKUs</Badge>,
+    children: [
+      {
+        id: 'corrugated',
+        label: 'Corrugated boxes',
+        icon: <Folder className="size-4" />,
+        meta: <span className="font-mono text-xs text-muted-foreground">₹1,42,000</span>,
+      },
+    ],
+  },
+];
+
+export function CatalogTree() {
+  return <TreeView aria-label="Inventory catalog" items={catalog} />;
+}
+```
+
+### Compact sizing
+
+Set `size="sm"` to reduce row height (from 36px to 28px) and font size, making the tree suitable for narrow sidebars and dense file tree palettes.
+
+```tsx
+import { TreeView } from '@innostes/ui';
+
+export function DenseTree() {
+  return (
+    <TreeView
+      aria-label="Compact project tree"
+      items={accounts}
+      size="sm"
+    />
+  );
+}
+```
+
+## Accessibility
+
+`TreeView` strictly adheres to the W3C WAI-ARIA Treeview Design Pattern.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Up Arrow / Down Arrow', action: 'Moves focus to the previous or next visible node in the tree.' },
+    { key: 'Right Arrow', action: 'Expands a collapsed branch node, or moves focus to the first child of an expanded branch.' },
+    { key: 'Left Arrow', action: 'Collapses an expanded branch node, or moves focus up to the parent node.' },
+    { key: 'Home / End', action: 'Moves focus to the first or last visible node in the entire tree.' },
+    { key: 'Enter / Space', action: 'Selects the currently focused node.' },
+    { key: 'Character keys', action: 'Type-ahead search jumps focus to the next node starting with the typed letter.' },
+  ]}
+/>
+
+### Screen readers and tree semantics
+
+- The root element uses `role="tree"` with `aria-label` defining the tree's purpose.
+- Each branch node has `role="treeitem"`, carrying `aria-expanded="true"` or `aria-expanded="false"`, along with `aria-level` denoting depth in the hierarchy.
+- The tree represents a single tab stop with roving tabindex across nodes.
+- When `loading={true}`, the node announces the `loadingLabel` ("Loading…" by default) to assistive technologies.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Ensure every TreeNode has a globally unique, stable id attribute (e.g. database UUID or slug).',
+    code: `{ id: 'dept-finance', label: 'Finance' }`,
+  }}
+  dont={{
+    description: 'Do not generate random or index-based IDs on every render; this breaks keyboard focus tracking.',
+    code: `{ id: Math.random().toString(), label: 'Finance' } // Causes focus loss`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the textValue prop if label contains complex JSX, ensuring type-ahead search functions properly.',
+    code: `{ id: 'tax', label: <span>GST (18%)</span>, textValue: 'GST' }`,
+  }}
+  dont={{
+    description: 'Do not omit textValue when passing custom JSX labels; type-ahead keyboard navigation will fail.',
+    code: `{ id: 'tax', label: <CustomBadge>GST</CustomBadge> }`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['TreeView']} />
+
+## Related
+
+- [Accordion](/ui/docs/components/navigation/accordion) — Vertically stacked collapsible panels.
+- [Breadcrumb](/ui/docs/components/navigation/breadcrumb) — Linear ancestral navigation path.
+- [Data Table](/ui/docs/components/data-display/data-table) — Tabular presentation for flat datasets.
 
 ---
 
 ## Alert (https://innostes.com/ui/docs/components/feedback/alert)
 
-Info, success, warning and error messages with matching icons and live-region roles.
+In-flow status callout with semantic variants, automatic ARIA role management (alert vs status), and integrated iconography.
 
 <ComponentPreview name="feedback/alert/basic" />
 
 ## Import
 
 ```tsx
-import { Alert, AlertTitle, AlertDescription } from '@innostes/ui';
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  type AlertProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Alert` when an important message requires persistent visibility in the page flow directly above relevant content:
+
+- Announcing planned server maintenance, downtime windows, or fiscal year cutoff dates.
+- Displaying critical prerequisite warnings before an irreversible action (e.g. "GST e-invoicing portal offline").
+- Warning operators about section-level configuration errors or unverified business credentials.
+
+When choosing feedback mechanisms:
+- Use `Alert` for persistent, non-modal notices that should stay visible until resolved or dismissed.
+- Use [Toast](/ui/docs/components/feedback/toast) for transient confirmations that automatically disappear after a few seconds.
+- Use [Field error](/ui/docs/components/forms/field) when an issue belongs directly to a single form input.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for an overview of all feedback channels.
+
+## Examples
+
+### Semantic variants
+
+`Alert` provides four semantic variants: `info`, `success`, `warning`, and `destructive`. Each variant renders an appropriate default icon and sets semantic border and background tints.
 
 ```tsx
-<Alert variant="warning">
-  <AlertTitle>Your trial ends in 3 days</AlertTitle>
-  <AlertDescription>Add a payment method to keep your data.</AlertDescription>
-</Alert>
+import { Alert, AlertTitle, AlertDescription } from '@innostes/ui';
+
+export function MaintenanceAlert() {
+  return (
+    <Alert variant="warning">
+      <AlertTitle>Tax filing deadline approaching</AlertTitle>
+      <AlertDescription>
+        GSTR-1 filing for the month of September must be completed by 11 October 2026.
+      </AlertDescription>
+    </Alert>
+  );
+}
 ```
 
-- Each variant has a default icon. Pass `icon={<MyIcon />}` to change it, or `icon={null}` to hide it.
-- Use an alert for messages tied to the page. For short-lived confirmations, use [Toast](/ui/docs/components/feedback/toast).
+### Custom icon and titleless alerts
+
+Pass a custom React node to `icon` to override the default variant icon, or pass `icon={null}` to omit the icon entirely. Alerts can also render simple text without an explicit `AlertTitle`:
+
+```tsx
+import { Alert, AlertDescription } from '@innostes/ui';
+import { ShieldCheck } from 'lucide-react';
+
+export function VerifiedAlert() {
+  return (
+    <Alert variant="success" icon={<ShieldCheck />}>
+      <AlertDescription>
+        Vendor bank account verified via penny-drop validation.
+      </AlertDescription>
+    </Alert>
+  );
+}
+```
+
+### Form warning integration
+
+Place an `Alert` directly above form fields to explain global prerequisites or non-field constraints:
+
+```tsx
+import { Alert, AlertTitle, AlertDescription, Field, Input, Label } from '@innostes/ui';
+
+export function PurchaseOrderForm() {
+  return (
+    <form className="flex flex-col gap-4">
+      <Alert variant="info">
+        <AlertTitle>Exchange rate notice</AlertTitle>
+        <AlertDescription>
+          International purchase orders will lock currency conversions at RBI benchmark rates upon submission.
+        </AlertDescription>
+      </Alert>
+
+      <Field>
+        <Label htmlFor="vendor">Vendor name</Label>
+        <Input id="vendor" defaultValue="Tata Consumer Products" />
+      </Field>
+    </form>
+  );
+}
+```
+
+### Inline action links
+
+Include action links or buttons within `AlertDescription` to provide direct recovery paths:
+
+```tsx
+import { Alert, AlertTitle, AlertDescription, Button } from '@innostes/ui';
+
+export function QuotaAlert() {
+  return (
+    <Alert variant="warning">
+      <AlertTitle>Warehouse storage quota</AlertTitle>
+      <AlertDescription className="flex items-center justify-between">
+        <span>Depot capacity has reached 92%. Allocate additional space to continue receiving pallets.</span>
+        <Button size="sm" variant="outline" className="shrink-0 ml-4">
+          Request expansion
+        </Button>
+      </AlertDescription>
+    </Alert>
+  );
+}
+```
 
 ## Accessibility
 
-- `destructive` and `warning` use `role="alert"` (announced immediately). Others use `role="status"`.
-  Override with `role` if needed.
+`Alert` automatically manages ARIA live regions and accessibility roles based on the selected variant.
 
-## API Reference
+### Live regions and ARIA roles
 
-<ApiTable components={['Alert']} />
+- For `variant="destructive"` and `variant="warning"`, `Alert` automatically sets `role="alert"`. This instructs assistive technologies to announce the message immediately (assertive live region), interrupting other speech.
+- For `variant="default"`, `variant="info"`, and `variant="success"`, `Alert` sets `role="status"`. This announces the message politely once the user finishes their current reading stream.
+- Icons are rendered with `aria-hidden="true"` to prevent screen readers from announcing decorative icon names.
+
+### Screen readers
+
+- When alerts mount dynamically (e.g. after a form submission or failed API call), placing them in the DOM triggers automatic screen reader announcement.
+- Avoid updating alert contents continuously in real time to prevent confusing audio chatter for screen reader users.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Alert for persistent section or page notices that require user awareness before proceeding.',
+    code: `<Alert variant="warning"><AlertTitle>Account unverified</AlertTitle></Alert>`,
+  }}
+  dont={{
+    description: 'Do not use Alert for short-lived operation confirmations like "Item saved" (use Toast instead).',
+    code: `<Alert variant="success"><AlertTitle>Saved!</AlertTitle></Alert> // Clutters layout permanently`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Include an actionable recovery step or explanatory description alongside the title.',
+    code: `<Alert variant="destructive">\n  <AlertTitle>Payment failed</AlertTitle>\n  <AlertDescription>Update your billing card in settings.</AlertDescription>\n</Alert>`,
+  }}
+  dont={{
+    description: 'Do not post vague alerts that explain an error occurred without explaining how to fix it.',
+    code: `<Alert variant="destructive"><AlertTitle>Error 500</AlertTitle></Alert>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Alert', 'AlertTitle', 'AlertDescription']} />
+
+## Related
+
+- [Toast](/ui/docs/components/feedback/toast) — Transient notifications that auto-dismiss.
+- [Field](/ui/docs/components/forms/field) — Form field container with inline error messages.
+- [Alert Dialog](/ui/docs/components/overlays/alert-dialog) — Modal dialog for critical confirmation prompts.
 
 ---
 
 ## Gauge (https://innostes.com/ui/docs/components/feedback/gauge)
 
-KPI dials for budget use, capacity, SLA and quota, with value-based colours.
+Accessible SVG radial meter with dynamic threshold coloring, customizable radius dimensions, and normalized range calculations.
 
 <ComponentPreview name="feedback/gauge/basic" />
 
 ## Import
 
 ```tsx
-import { Gauge } from '@innostes/ui';
+import { Gauge, type GaugeProps, type GaugeTone, type GaugeSlot } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Gauge` when an executive dashboard requires a circular dial to communicate an operational metric, utilization rate, or SLA compliance score:
+
+- Showing warehouse storage capacity utilization or truck fleet availability.
+- Displaying SLA fulfillment percentages or customer satisfaction ratings.
+- Visualizing annual budget expenditure versus fiscal limits.
+
+When choosing scalar components:
+- Use `Gauge` for prominent, radial visual dials on operational and executive dashboards.
+- Use [Meter](/ui/docs/components/feedback/meter) for compact, linear horizontal bars in dense tables or cards.
+- Use [Progress](/ui/docs/components/feedback/progress) for active workflows or tasks advancing toward completion.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for full guidance.
+
+## Examples
+
+### Basic radial dial
+
+Provide `value`, `min`, `max`, and a descriptive `label`:
 
 ```tsx
-<Gauge
-  value={82}
-  label="Budget used"
-  description="₹49L of ₹60L"
-  format={{ style: 'percent' }}
-  tone={(v) => (v > 90 ? 'destructive' : v > 75 ? 'warning' : 'success')}
-/>
+import { Gauge } from '@innostes/ui';
+
+export function DispatchGauge() {
+  return (
+    <Gauge
+      value={84}
+      max={100}
+      label="Daily dispatch target"
+      description="840 of 1,000 pallets loaded"
+      format={{ style: 'percent' }}
+    />
+  );
+}
 ```
 
-- `min` and `max` set the range (default 0–100). `format` takes `Intl.NumberFormat` options.
-- Without `format`, or with `style: 'percent'`, the number shown is the share of the range (312 of 400 shows "78%"). Other formats, e.g. `{ style: 'currency', currency: 'INR' }`, apply to the value itself.
-- `tone` is a colour, or a function of the value for thresholds.
-- `size` sets the width (default `10rem`).
-- For a compact bar, use [Meter](/ui/docs/components/feedback/meter). For task progress, use [Progress](/ui/docs/components/feedback/progress).
+### Dynamic threshold coloring
+
+Pass a function to `tone` to change the arc color dynamically as the measured metric enters warning or critical bands:
+
+```tsx
+import { Gauge } from '@innostes/ui';
+
+const computeTone = (val: number) => {
+  if (val > 90) return 'destructive';
+  if (val > 75) return 'warning';
+  return 'success';
+};
+
+export function StorageGauge() {
+  return (
+    <Gauge
+      value={92}
+      max={100}
+      label="Cold storage utilization"
+      description="Zone B Freezers"
+      tone={computeTone}
+    />
+  );
+}
+```
+
+### Metric descriptions and sizing
+
+Control the overall dial width using `size` (e.g. `'12rem'` or `200`). Add a secondary `description` under the label:
+
+```tsx
+import { Gauge } from '@innostes/ui';
+
+export function SlaComplianceGauge() {
+  return (
+    <Gauge
+      value={99.2}
+      max={100}
+      size="12rem"
+      label="Order delivery SLA"
+      description="Last 30 days rolling"
+      format={{ style: 'percent', maximumFractionDigits: 1 }}
+      tone="success"
+    />
+  );
+}
+```
 
 ## Accessibility
 
-Built on Base UI's Meter: it has `role="meter"`, is named by `label` (or `aria-label`), and exposes the value and range. The arc is decorative.
+`Gauge` wraps Base UI Meter primitives (`@base-ui/react/meter`).
 
-## API Reference
+### Screen readers and meter semantics
 
-<ApiTable components={['Gauge']} />
+- Renders with `role="meter"` and sets `aria-valuenow`, `aria-valuemin`, and `aria-valuemax`.
+- The `label` prop is connected to the meter as its accessible name.
+- Percentage calculations are normalized against the span between `min` and `max` so screen readers announce human-readable fractions (e.g., "Daily dispatch target, 84%").
+- The SVG arc elements include `aria-hidden="true"`, ensuring assistive technologies rely exclusively on the semantic meter attributes.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use a dynamic tone function to clearly differentiate normal, warning, and critical operating thresholds.',
+    code: `<Gauge tone={(v) => (v > 90 ? 'destructive' : 'primary')} />`,
+  }}
+  dont={{
+    description: 'Do not render gauges with uniform coloring when the metric represents an urgent threshold limit.',
+    code: `<Gauge value={98} max={100} tone="primary" /> // Fails to signal critical threshold`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always provide a clear label and description so operators understand what the dial measures.',
+    code: `<Gauge value={78} label="Fleet active" description="78 of 100 trucks in transit" />`,
+  }}
+  dont={{
+    description: 'Do not present isolated numeric percentages without clarifying the measured dimension.',
+    code: `<Gauge value={78} /> // Unlabeled dial`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Gauge']} baseUi="meter" />
+
+## Related
+
+- [Meter](/ui/docs/components/feedback/meter) — Linear horizontal measurement bar.
+- [Progress](/ui/docs/components/feedback/progress) — Task advancement indicator for uploads and jobs.
+- [Stat](/ui/docs/components/data-display/stat) — Metric display card with trends.
 
 ---
 
 ## Feedback (https://innostes.com/ui/docs/components/feedback/index)
 
-Components for communicating system status, background task progress, and operation outcomes.
+Decision guides, severity wording principles, and UI components for communicating system status, background tasks, and operation outcomes.
 
 import { CategoryGrid } from '@/components/docs/category-grid';
 
 # Feedback
 
-Feedback components keep operators at Northwind Traders Pvt Ltd informed about task status, background processes, system health, and operational outcomes. They provide immediate, accessible status communication across the platform.
+Feedback components inform operators at Northwind Traders Pvt Ltd about system status, background processes, verification failures, and operation outcomes. Choosing the correct communication pattern prevents alert fatigue while ensuring critical errors are never overlooked.
 
 ## Components
 
 <CategoryGrid category="components/feedback" />
 
-## Usage guidelines
+## Feedback decision guide
 
-- **Tone matching**: Use info for contextual guidance, success for completed operations, warning for non-blocking concerns, and destructive/error for failed tasks or critical disruptions.
-- **Duration**: Reserve persistent banners (`Alert`) for system-wide notices or section errors that require resolution. Use transient toasts (`Toast`) for operation confirmations.
-- **Accessibility**: All feedback components emit appropriate ARIA live regions (`polite` for progress/alerts, `assertive` for urgent errors) and support high-contrast mode tokens.
+Use this decision matrix to determine which feedback mechanism matches your application scenario:
+
+| Mechanism | Placement | Persistence | Interruption level | Ideal use case |
+| --- | --- | --- | --- | --- |
+| **[Toast](/ui/docs/components/feedback/toast)** | Floating viewport corner | Transient (auto-dismiss 4–6s) | Non-blocking | Success confirmations ("Invoice INV-8402 created"), non-critical updates. |
+| **[Alert](/ui/docs/components/feedback/alert)** | In-page banner directly above content | Persistent until resolved or dismissed | Non-blocking | Section-level notices, scheduled maintenance warnings, fiscal year closing notices. |
+| **[Field error](/ui/docs/components/forms/field)** | Directly underneath the invalid input | Persistent until input value changes | Focused | Form validation errors (invalid GSTIN, missing PO line item, overdue date). |
+| **[EmptyState](/ui/docs/components/data-display/empty-state)** | Replacing empty lists or tables | Persistent | Contextual | Zero results, blank initial modules, cleared queues. |
+| **[Alert Dialog](/ui/docs/components/overlays/alert-dialog)** | Centered modal overlay | Blocking modal dialog | Disruptive modal | Irreversible actions requiring explicit confirmation (deleting a vendor, voiding a fiscal ledger). |
+
+## Severity wording guidelines
+
+Match the severity tone to the true operational consequence:
+
+### Informational (`info`)
+- **Tone**: Neutral, informative, helpful.
+- **Guidance**: Explain background events or helpful workflow hints that require no immediate action.
+- **Example**: *"GST e-invoicing portal auto-sync is scheduled for 11:00 PM IST."*
+
+### Success (`success`)
+- **Tone**: Positive, succinct, affirming.
+- **Guidance**: Confirm that the user's action completed successfully. State what was achieved.
+- **Example**: *"Purchase order PO-8410 approved and dispatched to vendor."*
+
+### Warning (`warning`)
+- **Tone**: Cautionary, proactive, advisory.
+- **Guidance**: Alert the user to a non-blocking condition that may cause failure if ignored. State the consequence.
+- **Example**: *"Warehouse bin B-12 is at 94% capacity. Additional stock receipts may require re-routing."*
+
+### Destructive / Error (`destructive`)
+- **Tone**: Clear, calm, actionable. Never blame the user.
+- **Guidance**: Explain plainly what failed, why it failed, and how the user can resolve the issue. Avoid cryptic error codes.
+- **Example**: *"Unable to reconcile bank statement. The transaction date falls outside the active accounting period."*
+
+## Progress versus meter versus gauge
+
+The design system provides three distinct scalar indicators:
+
+1. **[Progress](/ui/docs/components/feedback/progress)** (`role="progressbar"`):
+   - Indicates **task completion** or workflow transition over time.
+   - Example: Uploading vendor attachments, compiling monthly GST reports, processing batch invoice PDFs.
+2. **[Meter](/ui/docs/components/feedback/meter)** (`role="meter"`):
+   - Measures a **scalar value within a fixed range** where the quantity represents an existing measurement rather than progress toward a goal.
+   - Example: Storage disk quota utilized, memory footprint, cold-room warehouse temperature.
+3. **[Gauge](/ui/docs/components/feedback/gauge)**:
+   - A **radial visual meter** with customizable threshold zones (normal, warning, critical) for operational dashboards.
+   - Example: Fleet delivery on-time performance, server health score, SLA compliance percentage.
 
 ---
 
 ## Meter (https://innostes.com/ui/docs/components/feedback/meter)
 
-Storage, seats or quota usage, with tone colours for limits.
+Scalar measurement indicator with semantic tones, normalized percent calculations, and full WAI-ARIA meter semantics.
 
 <ComponentPreview name="feedback/meter/basic" />
 
 ## Import
 
 ```tsx
-import { Meter } from '@innostes/ui';
+import { Meter, type MeterProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Meter` to communicate an existing scalar measurement or capacity against known numerical bounds:
+
+- Displaying storage consumption, memory usage, or compute quotas.
+- Tracking organization seat license utilization (e.g. 8 of 10 operator licenses used).
+- Monitoring warehouse bin volume or tank fuel levels.
+
+When choosing scalar components:
+- Use `Meter` (`role="meter"`) for static capacity or volume measurements within a fixed range.
+- Use [Progress](/ui/docs/components/feedback/progress) (`role="progressbar"`) when an active task is advancing toward completion.
+- Use [Gauge](/ui/docs/components/feedback/gauge) when you need an executive radial dial display on KPI dashboards.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for guidance on all feedback mechanisms.
+
+## Examples
+
+### Basic capacity measurement
+
+Provide `value`, `min`, `max`, and a descriptive `label`:
 
 ```tsx
-<Meter
-  value={used}
-  max={limit}
-  label="Seats"
-  tone={used / limit > 0.9 ? 'destructive' : used / limit > 0.75 ? 'warning' : 'primary'}
-/>
+import { Meter } from '@innostes/ui';
+
+export function StorageMeter() {
+  return (
+    <Meter
+      value={64}
+      max={100}
+      label="Cloud document storage"
+      format={{ style: 'unit', unit: 'gigabyte' }}
+    />
+  );
+}
 ```
 
-`format` takes `Intl.NumberFormat` options, e.g. `{ style: 'percent' }` with `max={1}`.
+### Warning and destructive tones
+
+Set `tone` to `primary`, `success`, `warning`, or `destructive` to communicate status severity as a metric approaches full capacity:
+
+```tsx
+import { Meter } from '@innostes/ui';
+
+export function CapacityTones() {
+  const usedSeats = 9;
+  const maxSeats = 10;
+  const isCritical = usedSeats / maxSeats > 0.85;
+
+  return (
+    <Meter
+      value={usedSeats}
+      max={maxSeats}
+      label="Dispatch operator licenses"
+      tone={isCritical ? 'destructive' : 'primary'}
+      showValue
+    />
+  );
+}
+```
+
+### Normalized percentage formatting
+
+When `format={{ style: 'percent' }}` is specified, `Meter` normalizes `value` against `min` and `max` so that `value={72}` with `max={100}` renders `"72%"` (rather than `"7,200%"`):
+
+```tsx
+import { Meter } from '@innostes/ui';
+
+export function NormalizedQuotaMeter() {
+  return (
+    <Meter
+      value={84}
+      min={0}
+      max={100}
+      label="Monthly API rate limit"
+      format={{ style: 'percent' }}
+      tone="warning"
+    />
+  );
+}
+```
 
 ## Accessibility
 
-- `role="meter"` with `aria-valuenow`, `aria-valuemin` and `aria-valuemax`.
+`Meter` is built on Base UI Meter primitives (`@base-ui/react/meter`).
 
-## API Reference
+### Screen readers and meter semantics
+
+- Renders with native `role="meter"`.
+- Sets `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` automatically.
+- Screen readers announce the current reading in relation to the upper and lower boundaries (e.g., "Cloud document storage, 64 gigabytes, 64%").
+- When `format={{ style: 'percent' }}` is used, `aria-valuetext` announces the correct computed percentage string.
+
+### Color independence
+
+Avoid relying strictly on the bar color to communicate limit risks. Always provide clear numerical text or helper copy indicating proximity to the maximum capacity.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Meter for scalar measurements (such as memory, disk storage, or budget consumed).',
+    code: `<Meter value={45} max={100} label="Storage" />`,
+  }}
+  dont={{
+    description: 'Do not use Meter to indicate file download or data export progress (use Progress instead).',
+    code: `// Semantically incorrect: Download is a task advancing in time\n<Meter value={downloadedBytes} label="Downloading" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Switch tone to "warning" or "destructive" dynamically when usage approaches 80% or 95% capacity.',
+    code: `<Meter value={used} max={max} tone={used / max > 0.9 ? 'destructive' : 'primary'} />`,
+  }}
+  dont={{
+    description: 'Do not leave critical quota overflow states styled in neutral primary blue without visual distinction.',
+    code: `<Meter value={99} max={100} tone="primary" />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Meter']} baseUi="meter" />
+
+## Related
+
+- [Progress](/ui/docs/components/feedback/progress) — Task advancement indicator for uploads and jobs.
+- [Gauge](/ui/docs/components/feedback/gauge) — Radial dial gauge for operational dashboards.
+- [Stat](/ui/docs/components/data-display/stat) — Metric display card with trends.
 
 ---
 
 ## Progress (https://innostes.com/ui/docs/components/feedback/progress)
 
-Determinate and indeterminate bars with an optional label and value.
+Accessible progress indicator supporting determinate progress, indeterminate pulse animations, and normalized percent formatting.
 
 <ComponentPreview name="feedback/progress/basic" />
 
 ## Import
 
 ```tsx
-import { Progress } from '@innostes/ui';
+import { Progress, type ProgressProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Progress` to visualize task advancement toward completion over time:
+
+- Tracking multi-file uploads or bulk CSV imports.
+- Displaying batch background processing (e.g. generating monthly GST e-invoices).
+- Indicating indeterminate loading when the total duration cannot be predicted.
+
+When choosing between scalar indicators:
+- Use `Progress` (`role="progressbar"`) when tracking an active task advancing toward completion over time.
+- Use [Meter](/ui/docs/components/feedback/meter) (`role="meter"`) when measuring an existing static scalar value in a fixed range (such as storage capacity, memory usage, or user seat licenses).
+- Use [Gauge](/ui/docs/components/feedback/gauge) when displaying an executive radial dial on operational KPI dashboards.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for full details.
+
+## Examples
+
+### Determinate task progress
+
+Supply `value`, `min`, `max`, and a descriptive `label`. Enable `showValue={true}` to render the formatted numerical value or percentage alongside the label:
 
 ```tsx
-<Progress value={uploaded} max={total} label="Uploading invoices" showValue />
-<Progress value={null} aria-label="Loading data" />  {/* indeterminate */}
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Progress } from '@innostes/ui';
+
+export function DocumentUploadProgress() {
+  const [percent, setPercent] = useState(45);
+
+  return (
+    <Progress
+      value={percent}
+      label="Uploading consignment manifests"
+      format={{ style: 'percent' }}
+      showValue
+    />
+  );
+}
 ```
 
-Use `Progress` for tasks that finish. For a level within a range (storage, quota), use
-[Meter](/ui/docs/components/feedback/meter).
+### Indeterminate loading state
+
+When background task duration or payload size is unknown, pass `value={null}`. The component renders an animated sweeping pulse across the track:
+
+```tsx
+import { Progress } from '@innostes/ui';
+
+export function IndeterminateReportProgress() {
+  return (
+    <Progress
+      value={null}
+      label="Compiling quarterly GST reconciliation…"
+      aria-label="Compiling GST report"
+    />
+  );
+}
+```
+
+### Custom value formatting
+
+Pass `Intl.NumberFormatOptions` via the `format` prop to format units such as bytes, files, or custom numbers:
+
+```tsx
+import { Progress } from '@innostes/ui';
+
+export function BatchExportProgress() {
+  return (
+    <Progress
+      value={142}
+      max={500}
+      label="Processed purchase orders"
+      format={{ style: 'decimal' }}
+      showValue
+    />
+  );
+}
+```
 
 ## Accessibility
 
-- `role="progressbar"` with `aria-valuenow`. Without a visible `label`, set `aria-label`.
+`Progress` wraps Base UI Progress primitives (`@base-ui/react/progress`).
 
-## API Reference
+### Screen readers and progressbar semantics
+
+- The element carries `role="progressbar"`.
+- When determinate (`value != null`), `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` are maintained automatically.
+- When `format={{ style: 'percent' }}` is passed, `Progress` computes the percentage fraction relative to `min` and `max`, ensuring `value={45}` out of `100` announces "45%" to screen readers rather than "4,500%".
+- Indeterminate state removes `aria-valuenow`, signaling to assistive technologies that progress is active without a known percentage.
+
+### Reduced motion
+
+When the user specifies `prefers-reduced-motion: reduce` in system settings, `Progress` disables continuous animations on the indeterminate track and suppresses width transitions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Use Progress for active tasks advancing toward completion (such as file uploads or batch exports).',
+    code: `<Progress value={transferred} max={totalBytes} label="Uploading" />`,
+  }}
+  dont={{
+    description: 'Do not use Progress to display static capacity or remaining quota measurements (use Meter instead).',
+    code: `// Semantically incorrect: Quota is a scalar measurement, not a task in progress\n<Progress value={storageUsed} max={storageQuota} label="Disk usage" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Always provide an explicit label prop or aria-label attribute explaining what task is in progress.',
+    code: `<Progress value={65} label="Generating invoices" />`,
+  }}
+  dont={{
+    description: 'Do not render a bare progress bar without accessible naming.',
+    code: `<Progress value={65} /> // Unlabeled progress bar`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Progress']} baseUi="progress" />
+
+## Related
+
+- [Meter](/ui/docs/components/feedback/meter) — Linear bar for scalar capacity and quota measurements.
+- [Gauge](/ui/docs/components/feedback/gauge) — Radial dial gauge for operational dashboard KPIs.
+- [Spinner](/ui/docs/components/feedback/spinner) — Compact circular loading indicator.
 
 ---
 
 ## Skeleton (https://innostes.com/ui/docs/components/feedback/skeleton)
 
-Pulsing shapes sized with utility classes. Respects reduced motion.
+Accessible content loading placeholder that prevents Cumulative Layout Shift (CLS) and respects reduced motion preferences.
 
 <ComponentPreview name="feedback/skeleton/basic" />
 
@@ -1362,70 +3413,320 @@ Pulsing shapes sized with utility classes. Respects reduced motion.
 import { Skeleton } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Match the shape of the real content so the layout doesn't jump when it loads:
+Use `Skeleton` to provide a low-contrast visual preview of content geometry while asynchronous data fetches are in flight:
+
+- Mirroring cards, user profiles, or dashboard tiles on initial page load.
+- Rendering placeholder rows in [DataTable](/ui/docs/components/data-display/data-table) or lists during search queries.
+- Preventing Cumulative Layout Shift (CLS) as images, fonts, and API payloads hydrate into view.
+
+When choosing loading representations:
+- Use `Skeleton` when you know the approximate dimensions of the incoming layout structure (cards, tables, lists).
+- Use [Spinner](/ui/docs/components/feedback/spinner) inside action buttons or compact controls during quick submission operations (< 1s).
+- Use [Progress](/ui/docs/components/feedback/progress) when tracking a background upload or multi-step batch job.
+
+## Examples
+
+### Basic card placeholder
+
+Size `Skeleton` components using standard Tailwind width and height utilities to match the expected content proportions:
 
 ```tsx
-<div aria-busy="true" aria-label="Loading profile" className="flex items-center gap-3">
-  <Skeleton className="size-10 rounded-full" />
-  <Skeleton className="h-4 w-40" />
-</div>
+import { Skeleton } from '@innostes/ui';
+
+export function ProfileCardSkeleton() {
+  return (
+    <div
+      aria-busy="true"
+      aria-label="Loading vendor profile"
+      className="flex flex-col gap-4 rounded-xl border p-6"
+    >
+      <div className="flex items-center gap-3">
+        <Skeleton className="size-12 rounded-full" />
+        <div className="flex flex-1 flex-col gap-2">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-3 w-1/4" />
+        </div>
+      </div>
+      <Skeleton className="h-20 w-full" />
+    </div>
+  );
+}
+```
+
+### Table row skeletons
+
+Render multiple skeleton rows to indicate that a data table is actively fetching its next page:
+
+```tsx
+import { Skeleton } from '@innostes/ui';
+
+export function TableLoadingRows() {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-3">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex items-center justify-between gap-4 py-2 border-b">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### Layout shift prevention
+
+Mirror typography heights (`h-4` for `text-sm`, `h-5` for `text-base`, `h-8` for `text-2xl`) so the layout remains steady when real content mounts:
+
+```tsx
+import { Skeleton } from '@innostes/ui';
+
+export function StatTileSkeleton() {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-2 rounded-xl border p-5">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="h-8 w-32" />
+      <Skeleton className="h-3 w-40" />
+    </div>
+  );
+}
 ```
 
 ## Accessibility
 
-- Skeletons are hidden from screen readers. Mark the container with `aria-busy="true"`.
-- The pulse stops for users who prefer reduced motion.
+`Skeleton` is carefully designed to avoid distracting screen reader chatter during network fetches.
 
-## API Reference
+### Container aria-busy and aria-live
 
-`Skeleton` takes the props of a `<div>`.
+- `Skeleton` elements are marked with `aria-hidden="true"`, ensuring assistive technologies do not announce every individual placeholder bar.
+- Always add `aria-busy="true"` and an `aria-label` (e.g. `aria-label="Loading purchase orders"`) on the parent container enclosing the skeletons. Remove `aria-busy` once real data has populated the DOM.
+
+### Reduced motion support
+
+When a user enables `prefers-reduced-motion: reduce` in their operating system accessibility settings, the pulsing animation is automatically disabled (`motion-reduce:animate-none`), displaying a steady muted background.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Match the approximate height and border radius of the real component to prevent layout jumping.',
+    code: `<Skeleton className="h-10 w-full rounded-md" /> // Matches Button or Input`,
+  }}
+  dont={{
+    description: 'Do not render generic fixed-size rectangles that differ significantly from the hydrated content shape.',
+    code: `<Skeleton className="h-40 w-40" /> // In an inline text field`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Apply aria-busy="true" to the parent landmark or container holding the skeletons.',
+    code: `<div aria-busy="true" aria-label="Loading orders"><Skeleton ... /></div>`,
+  }}
+  dont={{
+    description: 'Do not omit aria-busy on the loading container, leaving screen reader users unaware that data is in flight.',
+    code: `<div><Skeleton ... /></div>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['Skeleton']} />
+
+## Related
+
+- [Spinner](/ui/docs/components/feedback/spinner) — Circular spinner for inline buttons and compact loading states.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress bar for known percentages.
+- [Data Table](/ui/docs/components/data-display/data-table) — Data grid with built-in skeleton loading rows.
 
 ---
 
 ## Spinner (https://innostes.com/ui/docs/components/feedback/spinner)
 
-Inherits the text colour; sized with utility classes.
+Circular loading glyph with automatic aria-status management, size utilities, and decorative hiding toggles.
 
 <ComponentPreview name="feedback/spinner/basic" />
 
 ## Import
 
 ```tsx
-import { Spinner } from '@innostes/ui';
+import { Spinner, type SpinnerProps } from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Spinner` to indicate localized asynchronous activity when space does not permit a full skeleton or progress bar:
+
+- Indicating asynchronous background sync in table headers or stat cards.
+- Rendering an inline indicator next to a "Saving draft…" status note.
+- Showing loading spinners in asynchronous dropdown search results.
+
+When choosing loading components:
+- Use `Spinner` for compact inline loading indicators and isolated status chips.
+- Use `Button loading` directly on buttons rather than nesting a manual `<Spinner />` inside the button label.
+- Use [Skeleton](/ui/docs/components/feedback/skeleton) when fetching initial page layouts or table records.
+- Use [Progress](/ui/docs/components/feedback/progress) for determinate task progression (uploads, exports).
+
+## Examples
+
+### Basic spinner
+
+By default, `Spinner` renders at `size-4` (16px) and carries an accessible label of `"Loading"` with `role="status"`:
 
 ```tsx
-<Spinner />                                   {/* announced as "Loading" */}
-<Spinner className="size-6 text-primary" label="Loading orders" />
-<span><Spinner label={null} /> Syncing…</span> {/* text already says it */}
+import { Spinner } from '@innostes/ui';
+
+export function DefaultSpinner() {
+  return <Spinner aria-label="Loading purchase orders" />;
+}
 ```
 
-For buttons, use `<Button loading>` instead; it handles the spinner and the busy state.
+### Sizing and color inheritance
 
-## API Reference
+`Spinner` uses `stroke="currentColor"` so it automatically matches the text color of its parent container. Adjust its dimensions using standard Tailwind `size-*` utilities:
+
+```tsx
+import { Spinner } from '@innostes/ui';
+
+export function SizedSpinners() {
+  return (
+    <div className="flex items-center gap-4">
+      <Spinner className="size-4" />
+      <Spinner className="size-6 text-primary" />
+      <Spinner className="size-8 text-muted-foreground" />
+    </div>
+  );
+}
+```
+
+### Inlined with status text
+
+When a spinner sits directly beside descriptive text (such as "Syncing ledger..."), pass `label={null}`. This marks the spinner as decorative (`aria-hidden="true"`), preventing screen readers from announcing duplicate loading messages:
+
+```tsx
+import { Spinner } from '@innostes/ui';
+
+export function InlineStatus() {
+  return (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <Spinner label={null} />
+      <span>Reconciling bank transactions…</span>
+    </div>
+  );
+}
+```
+
+### Inside buttons and controls
+
+For interactive buttons, always prefer the built-in `loading` prop on [Button](/ui/docs/components/actions/button). It automatically manages focus, disables pointer events, and injects a spinner with proper ARIA attributes:
+
+```tsx
+import { Button } from '@innostes/ui';
+
+export function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
+  return (
+    <Button loading={isSubmitting} type="submit">
+      Approve purchase order
+    </Button>
+  );
+}
+```
+
+## Accessibility
+
+`Spinner` handles assistive technology notifications gracefully.
+
+### Accessible labels versus decorative hiding
+
+- When `label` is provided (defaults to `"Loading"`), `Spinner` sets `role="status"` and `aria-label={label}`. Screen readers announce the status update politely.
+- When `label={null}` is explicitly passed, `Spinner` removes `role="status"` and sets `aria-hidden="true"`, ensuring no extraneous speech is triggered when accompanying text already explains the state.
+
+### Screen readers and role="status"
+
+- By using `role="status"`, screen readers wait until the current utterance completes before announcing the loading state, preventing jarring speech interruptions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Set `label={null}` when the spinner is paired with visible explanatory text (e.g. "Syncing...").',
+    code: `<span className="flex items-center gap-2"><Spinner label={null} /> Saving…</span>`,
+  }}
+  dont={{
+    description: 'Do not omit `label={null}` next to text; screen readers will announce "Loading Saving…".',
+    code: `<span className="flex items-center gap-2"><Spinner /> Saving…</span>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the loading prop on Button rather than manually placing a Spinner inside button children.',
+    code: `<Button loading={isSubmitting}>Submit</Button>`,
+  }}
+  dont={{
+    description: 'Do not manually place a bare Spinner inside a button without disabling click events.',
+    code: `<Button><Spinner /> Submit</Button> // Allows double-clicks while loading`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Spinner']} />
+
+## Related
+
+- [Button](/ui/docs/components/actions/button) — Action button with built-in loading spinner support.
+- [Skeleton](/ui/docs/components/feedback/skeleton) — Placeholder shapes for incoming content.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress bar for measurable task progression.
 
 ---
 
 ## Toast (https://innostes.com/ui/docs/components/feedback/toast)
 
-Success, error, warning, loading and promise toasts with actions, swipe to dismiss and a queue limit.
+Framework-agnostic imperative toast manager with success/error shortcuts, promise resolution tracking, and accessible politeness priority queues.
 
 <ComponentPreview name="feedback/toast/basic" />
 
-## Setup
+## Import
 
-Mount `Toaster` once, near the root of your app:
+```tsx
+import {
+  toast,
+  Toaster,
+  type ToastOptions,
+  type ToastType,
+  type ToasterProps,
+} from '@innostes/ui';
+```
 
-```tsx title="app/layout.tsx"
+## When to use
+
+Use `toast` to communicate transient outcomes of user-initiated operations without interrupting workflow:
+
+- Confirming successful record creation, deletion, or archival ("PO-8410 created").
+- Providing short-lived "Undo" buttons after bulk batch actions.
+- Tracking asynchronous background mutations via `toast.promise`.
+
+When deciding between feedback mechanisms:
+- Use `toast` for transient, non-critical confirmations that do not require explicit operator acknowledgement.
+- Use [Alert](/ui/docs/components/feedback/alert) for persistent warnings that remain in the page flow until resolved.
+- Use [Alert Dialog](/ui/docs/components/overlays/alert-dialog) for high-stakes, irreversible confirmations.
+- Refer to the [Feedback decision guide](/ui/docs/components/feedback#feedback-decision-guide) for full guidance.
+
+## Examples
+
+### Toaster configuration
+
+Mount `<Toaster />` once near the root of your application (typically in `layout.tsx` or `App.tsx`):
+
+```tsx
 import { Toaster } from '@innostes/ui';
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -1437,43 +3738,151 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-## Usage
+### Toast triggers and shortcuts
 
-`toast` works anywhere, including outside React (API clients, stores, event handlers):
+Call `toast` imperatively from anywhere in your codebase—including asynchronous handlers, store callbacks, or API clients:
 
 ```tsx
 import { toast } from '@innostes/ui';
 
-toast('Order archived', { action: { label: 'Undo', onClick: restore } });
-toast.success('Invoice sent');
-toast.error('Could not save', { description: error.message });
+// Direct notification
+toast('Draft saved automatically');
 
-// Loading → success / error
-await toast.promise(saveOrder(), {
-  loading: 'Saving order…',
-  success: (order) => `${order.id} saved`,
-  error: (err) => `Failed: ${err.message}`,
+// Semantic shortcuts
+toast.success('Invoice INV-8402 generated');
+toast.info('Export queue is processing 42 records');
+toast.warning('Warehouse quota exceeds 90%');
+toast.error('Failed to sync GSTN data', {
+  description: 'Network gateway timed out. Please retry shortly.',
 });
+```
 
-// Manual control
-const id = toast.loading('Uploading…');
-toast.update(id, { title: 'Uploaded', type: 'success', timeout: 4000 });
-toast.dismiss(id);
+### Action buttons and undo patterns
+
+Attach an interactive action button to the toast notification by passing the `action` property:
+
+```tsx
+import { toast } from '@innostes/ui';
+
+export function archivePurchaseOrder(id: string) {
+  // Archive mutation logic...
+
+  toast('Purchase order archived', {
+    action: {
+      label: 'Undo',
+      onClick: () => restorePurchaseOrder(id),
+    },
+    timeout: 6000,
+  });
+}
+```
+
+### Async promise tracking
+
+Use `toast.promise` to automatically transition a toast through loading, success, and error states as an asynchronous promise resolves:
+
+```tsx
+import { toast } from '@innostes/ui';
+
+async function handleSubmitQuotation(quotationData: FormData) {
+  await toast.promise(
+    fetch('/api/v1/quotations', { method: 'POST', body: quotationData }),
+    {
+      loading: 'Submitting quotation to procurement portal…',
+      success: 'Quotation submitted successfully.',
+      error: (err) => `Failed to submit: ${(err as Error).message}`,
+    }
+  );
+}
+```
+
+### Updating and dismiss controls
+
+Every toast call returns a unique string identifier. Use `toast.update` to modify an active toast or `toast.dismiss` to close it programmatically:
+
+```tsx
+import { toast } from '@innostes/ui';
+
+const toastId = toast.loading('Exporting ledger CSV…');
+
+try {
+  await exportLedger();
+  toast.update(toastId, {
+    type: 'success',
+    title: 'Ledger export complete',
+    timeout: 4000,
+  });
+} catch {
+  toast.update(toastId, {
+    type: 'error',
+    title: 'Export interrupted',
+    timeout: 5000,
+  });
+}
 ```
 
 ## Accessibility
 
-- Toasts are announced politely; `error` toasts use high priority and are announced immediately.
-- Keyboard users can jump to the toasts with <kbd>F6</kbd>. Toasts pause while hovered or focused.
-- Toasts disappear, so don't put anything the user must act on only in a toast. Use an
-  [Alert](/ui/docs/components/feedback/alert) for that.
+`Toast` is built on Base UI Toast primitives (`@base-ui/react/toast`).
 
-## API Reference
+### Politeness and ARIA live regions
+
+- Standard notifications (`default`, `info`, `success`) use `priority="low"`, emitting `aria-live="polite"`. The screen reader announces the notification when the user pauses their current interaction.
+- Errors (`type="error"`) automatically set `priority="high"`, emitting `aria-live="assertive"`. The screen reader announces error notifications immediately, ensuring operators are alerted to failures.
+- Hovering or shifting keyboard focus to the toaster pauses the auto-dismiss timer, allowing users sufficient time to read messages or click actions.
+
+### Focus management and dismiss actions
+
+- Toasts include an accessible close button (`aria-label="Close"`) with keyboard accessibility.
+- When an `action` button is present, operators can press `Tab` into the toast region to trigger it without losing their previous document position.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep toast messages concise, ideally under 10 words (e.g. "Invoice sent to billing desk").',
+    code: `toast.success('Invoice sent to billing desk');`,
+  }}
+  dont={{
+    description: 'Do not place multi-paragraph instructions or technical stack traces inside transient toasts.',
+    code: `toast.error('Exception in Thread "main": java.lang.NullPointer...'); // Unreadable in 5s`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use toast.promise for background mutations to provide instant feedback while saving.',
+    code: `toast.promise(save(), { loading: 'Saving...', success: 'Saved', error: 'Failed' });`,
+  }}
+  dont={{
+    description: 'Do not fire successive unlinked toasts that flood the screen with duplicate notifications.',
+    code: `// Flood: creates 3 stacked toasts\ntoast('1/3'); toast('2/3'); toast('3/3');`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Toaster']} baseUi="toast" />
 
-`toast(title, options)` options: `description`, `type`, `timeout` (ms, `0` = until dismissed),
-`priority`, `action` (`{ label, onClick }`) and `onClose`.
+### Imperative toast methods
+
+| Method | Signature | Description |
+| --- | --- | --- |
+| `toast` | `(title, options?) => string` | Dispatches a default toast notification. |
+| `toast.success` | `(title, options?) => string` | Dispatches a success toast with checkmark icon. |
+| `toast.error` | `(title, options?) => string` | Dispatches an assertive error toast. |
+| `toast.warning` | `(title, options?) => string` | Dispatches a warning toast with alert triangle. |
+| `toast.info` | `(title, options?) => string` | Dispatches an informational toast. |
+| `toast.loading` | `(title, options?) => string` | Dispatches a persistent loading toast with spinner. |
+| `toast.update` | `(id, options) => void` | Updates an existing toast's title, description, or type. |
+| `toast.dismiss` | `(id?) => void` | Closes a specific toast, or all toasts when called without ID. |
+| `toast.promise` | `(promise, messages) => Promise<T>` | Binds toast status to a Promise's lifecycle. |
+
+## Related
+
+- [Alert](/ui/docs/components/feedback/alert) — Persistent banners for non-transient warnings.
+- [Spinner](/ui/docs/components/feedback/spinner) — Loading spinners for inline UI elements.
+- [Progress](/ui/docs/components/feedback/progress) — Linear progress bar for measurable task completion.
 
 ---
 

@@ -1,9 +1,9 @@
 ---
 title: Data Table
-description: A typed data grid for admin lists.
+description: Enterprise data grid with typed columns, sorting, selection, client and server pagination, and responsive stacking.
 icon: Sheet
-status: Beta
-summary: Sorting, row selection, pagination, loading and empty states. Client-side or server-side.
+status: Stable
+summary: Rich data grid supporting typed columns, multi-row selection, server-side data fetching, skeleton loading, and container-query mobile card transformations.
 ---
 
 <ComponentPreview name="data-display/data-table/basic" align="start" />
@@ -11,96 +11,312 @@ summary: Sorting, row selection, pagination, loading and empty states. Client-si
 ## Import
 
 ```tsx
-import { DataTable, type DataTableColumn, type SortState } from '@innostes/ui';
+import {
+  DataTable,
+  type DataTableColumn,
+  type DataTableProps,
+  type DataTableSlot,
+  type SortState,
+  type SortValue,
+} from '@innostes/ui';
 ```
 
-## Columns
+## When to use
 
-Columns are typed against your row type. `accessor` returns the raw value (used for sorting and
-as the default cell text); `cell` renders anything.
+Use `DataTable` when operators need to browse, filter, sort, select, and manage structured tabular datasets in administrative interfaces:
+
+- Managing core business entities: sales orders, inventory balances, purchase requisitions, and vendor master data.
+- Handling paginated server records with sorting, pagination, and bulk batch actions.
+- Displaying tabular data that transforms into responsive stacked cards on mobile devices.
+
+When deciding between table implementations:
+- Use [Table](/ui/docs/components/data-display/table) when rendering static, short tabular data (such as invoice line item breakdowns or tax summary blocks) where column sorting, multi-selection, and pagination controls are unnecessary.
+- Use `DataTable` for entity listings, audit logs, and search results requiring pagination, multi-row selection, or dynamic sorting.
+- For extremely large datasets with more than 1,000 simultaneous unpaginated rows rendered in the DOM, combine `Table` with virtual scrolling (`@tanstack/react-virtual`).
+
+## Examples
+
+### Typed columns and accessor mapping
+
+Columns are generic over your row type `TRow`. Define `id`, `header`, `accessor` (used for sorting and default text extraction), and optional custom `cell` render functions.
 
 ```tsx
-const columns: DataTableColumn<Invoice>[] = [
-  { id: 'number', header: 'Invoice', accessor: (r) => r.number, sortable: true },
-  { id: 'status', header: 'Status', cell: (r) => <Badge variant={tone[r.status]}>{r.status}</Badge> },
+import { Badge, DataTable, type DataTableColumn } from '@innostes/ui';
+
+interface PurchaseOrder {
+  id: string;
+  vendor: string;
+  status: 'Draft' | 'Approved' | 'Dispatched';
+  totalAmount: number;
+}
+
+const columns: DataTableColumn<PurchaseOrder>[] = [
   {
-    id: 'amount',
+    id: 'id',
+    header: 'PO number',
+    accessor: (row) => row.id,
+    sortable: true,
+    cell: (row) => <span className="font-mono font-medium">{row.id}</span>,
+  },
+  {
+    id: 'vendor',
+    header: 'Vendor name',
+    accessor: (row) => row.vendor,
+    sortable: true,
+  },
+  {
+    id: 'status',
+    header: 'Status',
+    accessor: (row) => row.status,
+    cell: (row) => (
+      <Badge variant={row.status === 'Approved' ? 'success' : 'secondary'}>
+        {row.status}
+      </Badge>
+    ),
+  },
+  {
+    id: 'totalAmount',
     header: 'Amount',
-    accessor: (r) => r.amount,
+    accessor: (row) => row.totalAmount,
     sortable: true,
     align: 'end',
-    cell: (r) => money.format(r.amount),
+    cell: (row) => (
+      <span className="font-mono">
+        ₹{row.totalAmount.toLocaleString('en-IN')}
+      </span>
+    ),
   },
 ];
-
-<DataTable aria-label="Invoices" data={invoices} columns={columns} getRowId={(r) => r.id} />
 ```
 
-Sorting is natural and locale-aware ("Item 2" before "Item 10"); dates and numbers sort by value;
-empty values always go last.
+### Number and currency alignment
 
-## Selection, sorting and pagination
-
-Each piece of state can be uncontrolled (`defaultSort`, `defaultSelectedIds`, `defaultPage`) or
-controlled (`sort` + `onSortChange`, `selectedIds` + `onSelectedIdsChange`, `page` + `onPageChange`),
-so you can keep it in the URL or a store.
+Numerical quantities, percentages, and monetary values must always align to the right (`align="end"`). This ensures decimal points and magnitude digits align vertically for rapid visual scanning by accounting operators.
 
 ```tsx
-<DataTable
-  aria-label="Orders"
-  data={orders}
-  columns={columns}
-  getRowId={(o) => o.id}
-  selectable
-  selectedIds={selected}
-  onSelectedIdsChange={setSelected}
-  defaultSort={{ columnId: 'date', direction: 'desc' }}
-  pageSize={20}
-/>
+const columns: DataTableColumn<InvoiceItem>[] = [
+  {
+    id: 'quantity',
+    header: 'Quantity',
+    accessor: (r) => r.quantity,
+    align: 'end',
+    cell: (r) => <span className="tabular-nums">{r.quantity}</span>,
+  },
+  {
+    id: 'unitPrice',
+    header: 'Unit price',
+    accessor: (r) => r.unitPrice,
+    align: 'end',
+    cell: (r) => (
+      <span className="tabular-nums">₹{r.unitPrice.toFixed(2)}</span>
+    ),
+  },
+];
 ```
 
-## Server-side data
+### Server-side pagination and sorting
 
-Turn on `manualSorting` and `manualPagination`, pass the current page of rows as `data`, and fetch
-in the change handlers. `totalCount` tells the table how many pages exist.
+When operating on database datasets with thousands of records, set `manualSorting={true}` and `manualPagination={true}`. Pass the current slice of data as `data`, the overall record count as `totalCount`, and handle state transitions through `onSortChange` and `onPageChange`.
+
+<ComponentPreview name="data-display/data-table/server-side" align="start" />
 
 ```tsx
-const [sort, setSort] = useState<SortState | null>({ columnId: 'date', direction: 'desc' });
-const [page, setPage] = useState(1);
-const { data, isLoading } = useOrders({ sort, page, pageSize: 20 }); // your data hook
+'use client';
 
-<DataTable
-  aria-label="Orders"
-  data={data?.rows ?? []}
-  totalCount={data?.total}
-  columns={columns}
-  getRowId={(o) => o.id}
-  manualSorting
-  sort={sort}
-  onSortChange={setSort}
-  manualPagination
-  page={page}
-  onPageChange={setPage}
-  pageSize={20}
-  loading={isLoading}
-/>
+import { useState, useEffect } from 'react';
+import { DataTable, type SortState } from '@innostes/ui';
+
+export function ServerOrdersTable() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<SortState | null>({
+    columnId: 'date',
+    direction: 'desc',
+  });
+  const [totalCount, setTotalCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    fetch(`/api/v1/orders?page=${page}&sort=${sort?.columnId}&dir=${sort?.direction}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (!cancelled) {
+          setData(json.items);
+          setTotalCount(json.total);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, sort]);
+
+  return (
+    <DataTable
+      aria-label="Server purchase orders"
+      data={data}
+      columns={columns}
+      getRowId={(row) => row.id}
+      loading={loading}
+      page={page}
+      onPageChange={setPage}
+      pageSize={10}
+      manualPagination
+      totalCount={totalCount}
+      sort={sort}
+      onSortChange={setSort}
+      manualSorting
+    />
+  );
+}
 ```
 
-## Loading and empty states
+### Selection and bulk actions
+
+Enable multi-row checkbox selection by setting `selectable={true}`. Pass `selectedIds` and `onSelectedIdsChange` to control the active set of selected IDs.
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Button, DataTable, toast } from '@innostes/ui';
+
+export function BulkDispatchTable({ orders, columns }) {
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const handleBulkDispatch = () => {
+    toast.success(`Dispatched ${selectedIds.length} orders successfully.`);
+    setSelectedIds([]);
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-muted-foreground">
+          {selectedIds.length} orders selected
+        </span>
+        <Button
+          size="sm"
+          disabled={selectedIds.length === 0}
+          onClick={handleBulkDispatch}
+        >
+          Dispatch selected
+        </Button>
+      </div>
+
+      <DataTable
+        aria-label="Orders awaiting dispatch"
+        data={orders}
+        columns={columns}
+        getRowId={(row) => row.id}
+        selectable
+        selectedIds={selectedIds}
+        onSelectedIdsChange={setSelectedIds}
+      />
+    </div>
+  );
+}
+```
+
+### Loading and empty states
+
+Supply custom `emptyState` messages or let `DataTable` display animated skeleton rows when `loading={true}`.
 
 <ComponentPreview name="data-display/data-table/loading" align="start" />
 
+```tsx
+<DataTable
+  aria-label="Pending payments"
+  data={[]}
+  columns={columns}
+  getRowId={(r) => r.id}
+  loading={isLoading}
+  loadingRowCount={6}
+  emptyState="No pending payments found for this ledger period."
+/>
+```
+
+### Responsive stack mode
+
+On narrow mobile displays or tight dashboard containers, set `responsive="stack"`. The table uses container queries (`@container`) to automatically transform horizontal table rows into card-based key-value pairs without requiring viewport breakpoint hacks.
+
+```tsx
+<DataTable
+  aria-label="Mobile inventory list"
+  data={stockItems}
+  columns={columns}
+  getRowId={(r) => r.id}
+  responsive="stack"
+/>
+```
+
 ## Accessibility
 
-- Real `<table>` markup with `aria-sort` on sortable headers and sort buttons inside them.
-- The table needs a name: pass `aria-label`.
-- Selection checkboxes are labelled; the selected count is announced politely.
-- `onRowClick` is for convenience only. Keep the same action reachable by keyboard (e.g. a link in
-  the first cell, or the row actions menu).
+`DataTable` adheres to W3C WAI-ARIA Table and Grid accessibility standards.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between sortable column header buttons, row selection checkboxes, row action triggers, and pagination buttons.' },
+    { key: 'Enter / Space', action: 'Toggles sorting on a focused header button or toggles row selection on a checkbox.' },
+  ]}
+/>
+
+### Screen readers and announcements
+
+- Real semantic HTML `<table>`, `<thead>`, `<tbody>`, `<th>`, and `<td>` elements ensure assistive technologies correctly identify row and column counts.
+- Column headers with sorting enabled render an embedded `<button>` element with `aria-sort="ascending"`, `aria-sort="descending"`, or `aria-sort="none"`.
+- Row selection checkboxes carry localized accessible labels (e.g. "Select row PO-8410").
+- The master checkbox uses `aria-label="Select all rows on this page"` and reflects indeterminate state when a subset of page rows is selected.
+- A live region announces changes in selection counts politely.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always align numerical values, currency figures, and quantities to the right (align="end") and wrap them with tabular-nums.',
+    code: `{ id: 'amount', header: 'Total', align: 'end', accessor: (r) => r.amount }`,
+  }}
+  dont={{
+    description: 'Do not left-align currency figures or numerical measurements in data tables, as jagged digits impede visual comparison.',
+    code: `{ id: 'amount', header: 'Total', align: 'start' }`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an aria-label attribute describing the table contents (e.g., aria-label="Customer invoices").',
+    code: `<DataTable aria-label="Vendor purchase orders" data={orders} ... />`,
+  }}
+  dont={{
+    description: 'Do not omit accessible naming on tables; screen readers will identify them merely as generic unnamed tables.',
+    code: `<DataTable data={orders} ... />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use manualPagination and manualSorting when querying database tables with more than 100 rows.',
+    code: `<DataTable manualPagination manualSorting totalCount={totalCount} ... />`,
+  }}
+  dont={{
+    description: 'Do not download 10,000 records to the client browser to perform client-side sorting and pagination.',
+    code: `// Anti-pattern: High network transfer and memory overhead\nconst allRecords = await fetchAllRecords();`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['DataTable']} />
 
-`DataTableColumn<TRow>` fields: `id`, `header`, `accessor`, `cell`, `sortable`, `align`, `width`,
-`className`, `headerClassName`. They're documented with TSDoc, so your editor shows them on hover.
+## Related
+
+- [Table](/ui/docs/components/data-display/table) — Semantic HTML table primitives for simple tabular content.
+- [Pagination](/ui/docs/components/navigation/pagination) — Standalone pagination controls.
+- [Badge](/ui/docs/components/data-display/badge) — Status and category indicators for table cells.
+- [Empty State](/ui/docs/components/data-display/empty-state) — Empty placeholder representations.
