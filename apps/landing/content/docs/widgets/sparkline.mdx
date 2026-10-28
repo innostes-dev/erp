@@ -1,9 +1,9 @@
 ---
 title: Sparkline
-description: A tiny trend line for cards and table cells.
+description: Lightweight SVG trendline for cards, tables, and compact metrics.
 icon: Activity
 status: Stable
-summary: Pure SVG, no chart library, server-safe.
+summary: Zero-dependency SVG trendline rendering clean fills and strokes without external chart libraries.
 ---
 
 <ComponentPreview name="widgets/sparkline/basic" />
@@ -11,26 +11,96 @@ summary: Pure SVG, no chart library, server-safe.
 ## Import
 
 ```tsx
-import { Sparkline } from '@innostes/ui';
+import {
+  Sparkline,
+  type SparklineProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Sparkline` to display immediate trajectory context in compact environments where full chart axes would overwhelm the layout:
+
+- **Data table cells**: Showing 7-day sales trends alongside inventory rows.
+- **KPI cards**: Showing monthly cash flow trajectory in [MetricCard](/ui/docs/widgets/metric-card).
+- **Stat summary tiles**: Visualizing delivery performance or return rates.
+
+**Do not use Sparkline for:**
+- Interactive data analysis requiring hover tooltips, axis labels, or multiple series — use [CartesianChart](/ui/docs/charts/cartesian).
+- Part-to-whole categorical breakdowns — use [DonutChart](/ui/docs/charts/donut).
+- Progress completion toward a fixed target — use [Progress](/ui/docs/components/feedback/progress).
+
+## Examples
+
+### Trendline with gradient area fill
+
+Displaying 7-day revenue trend with accessible status tones:
 
 ```tsx
-<Sparkline data={[12, 18, 15, 22, 28]} tone="success" label="Orders, last 5 days, rising" />
+<Sparkline
+  data={[42000, 48000, 45000, 52000, 61000, 58000, 69000]}
+  tone="success"
+  label="7-day revenue trajectory, rising"
+  height={40}
+/>
 ```
 
-- It fills the width of its container; set the height with `height` (default 40px).
-- `area={false}` draws only the line, which suits table cells.
-- Without `label` it's decorative and hidden from screen readers. Add a `label` when the trend
-  carries information that isn't written next to it.
+### Table cell line-only variant
 
-For full charts with axes and tooltips, use the chart components (coming next).
+Set `area={false}` to draw a minimal stroke-only line without gradient shading:
 
-## Customization
+```tsx
+<Sparkline
+  data={[12, 18, 15, 22, 28]}
+  area={false}
+  height={24}
+  className="w-24"
+/>
+```
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
+## Accessibility
 
-## API Reference
+`Sparkline` generates accessible SVG elements with screen reader labels.
+
+### Keyboard navigation
+
+Sparklines are non-interactive graphical representations. Keyboard focus naturally moves past them unless wrapped in an interactive element.
+
+### ARIA attributes
+
+- When the `label` prop is provided, the SVG renders `role="img"` with `aria-label={label}`.
+- If `label` is omitted, the SVG renders `aria-hidden="true"` so decorative sparklines do not distract screen reader operators when the trend metric is already articulated in text.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always provide an explicit label (e.g. "Revenue, last 7 days, rising") when the sparkline conveys standalone trend meaning.',
+    code: `<Sparkline label="7-day revenue, rising" data={data} />`,
+  }}
+  dont={{
+    description: 'Do not rely on the sparkline visual alone to communicate critical business decreases without text or accessible labels.',
+    code: `<Sparkline data={[100, 20]} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use `area={false}` in tight table cells to preserve clean visual vertical rhythm.',
+    code: `<Sparkline area={false} height={20} className="w-20" />`,
+  }}
+  dont={{
+    description: 'Do not force large 100px area fills into compact 36px table row cells.',
+    code: `<Sparkline height={100} area />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Sparkline']} />
+
+## Related
+
+- [MetricCard](/ui/docs/widgets/metric-card) — KPI card featuring built-in sparkline support.
+- [CartesianChart](/ui/docs/charts/cartesian) — Full-featured chart component with tooltips and axes.
+- [Stat](/ui/docs/components/data-display/stat) — Statistical display tile paired with trend indicators.

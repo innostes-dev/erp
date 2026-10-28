@@ -1,9 +1,9 @@
 ---
 title: Widget Card
-description: The frame for every dashboard widget.
+description: The outer frame and lifecycle container for every dashboard widget.
 icon: LayoutPanelTop
 status: Stable
-summary: Header with title, count, actions and "View all", plus built-in loading, empty and error states.
+summary: Standardized dashboard card frame with headers, count badges, actions, view-all links, and built-in loading, empty, and error states.
 ---
 
 <ComponentPreview name="widgets/widget-card/basic" />
@@ -11,46 +11,123 @@ summary: Header with title, count, actions and "View all", plus built-in loading
 ## Import
 
 ```tsx
-import { WidgetCard } from '@innostes/ui';
+import {
+  WidgetCard,
+  type WidgetCardProps,
+  type WidgetCardViewAll,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Wrap any dashboard content (a list, a table, a chart) to give it a consistent header and the
-three states every data widget needs:
+Use `WidgetCard` as the outer container for every component or visualization placed on an administrative dashboard:
+
+- **Asynchronous data widgets**: Housing lists, charts, and metrics fetching from backend APIs.
+- **Task queues and alerts**: Presenting pending approval lists with real-time count badges.
+- **Embedded tabular summaries**: Presenting top vendors or recent invoices.
+
+**Do not use WidgetCard for:**
+- Standard static article cards — use [Card](/ui/docs/components/data-display/card).
+- In-form field groups — use [FormSection](/ui/docs/components/layout/form-layout).
+- Slide-over inspection drawers — use [Sheet](/ui/docs/components/overlays/sheet).
+
+## Examples
+
+### Complete async lifecycle states
+
+Wrap any content to provide consistent loading, error with retry, and empty state handling:
 
 ```tsx
-const { data, isLoading, error, refetch } = usePendingActions();
+'use client';
 
+import { WidgetCard, ActionList, PeriodSelect } from '@innostes/ui';
+
+export function PendingApprovalsWidget() {
+  const { data, isLoading, error, refetch } = usePendingApprovals();
+
+  return (
+    <WidgetCard
+      title="Pending authorizations"
+      description="Purchase orders and credit notes awaiting review"
+      count={data?.length}
+      countTone="primary"
+      viewAll={{ href: '/approvals', label: 'View all authorizations' }}
+      actions={<PeriodSelect />}
+      loading={isLoading}
+      loadingRows={4}
+      error={error ? 'Unable to load pending approvals from server.' : undefined}
+      onRetry={refetch}
+      empty={data?.length === 0}
+      emptyState="All procurement authorizations have been cleared."
+    >
+      <ActionList items={data ?? []} divided />
+    </WidgetCard>
+  );
+}
+```
+
+### Full-bleed content with padding="none"
+
+Set `padding="none"` when embedding tables, charts, or maps so their edges align cleanly with the card boundaries:
+
+```tsx
 <WidgetCard
-  title="Pending actions"
-  count={data?.length}
-  viewAll={{ href: '/approvals' }}
-  actions={<PeriodSelect />}
-  loading={isLoading}
-  error={error ? 'Could not load pending actions.' : undefined}
-  onRetry={refetch}
-  empty={data?.length === 0}
-  emptyState="You're all caught up."
+  title="Recent consignments"
+  padding="none"
+  viewAll={{ href: '/logistics/consignments' }}
 >
-  <PendingActionList items={data} />
+  <Table>{/* Full-bleed table */}</Table>
 </WidgetCard>
 ```
 
-- `viewAll` takes `href`, `onClick` or `render={<Link href="…" />}` for your router.
-- `padding="none"` lets tables and charts reach the card edges.
-- `count` shows a badge next to the title (`99+` above 99); `countTone` changes its colour.
-
 ## Accessibility
 
-- Renders a `<section>` labelled by its title, so screen-reader users can jump between widgets.
-- `headingLevel` (default `h2`) keeps the page outline correct.
-- Loading sets `aria-busy`; errors use `role="alert"`.
+`WidgetCard` renders semantic HTML5 `<section>` landmarks.
 
-## Customization
+### Keyboard navigation
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus into the card, cycling through header actions, view-all links, and body controls.' },
+  ]}
+/>
 
-## API Reference
+### ARIA attributes
+
+- The container renders as a `<section>` labelled by its heading via `aria-labelledby`, allowing screen reader operators to jump between dashboard widgets using standard landmark shortcuts.
+- Loading states use `aria-busy="true"` and accessible skeleton elements.
+- Error states render with `role="alert"` so network failures are announced promptly.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an onRetry callback when passing an error to give operators a direct way to recover.',
+    code: `<WidgetCard error={error} onRetry={refetch} />`,
+  }}
+  dont={{
+    description: 'Do not render raw error traces or leave users stranded on failed data queries without a retry button.',
+    code: `<WidgetCard error={String(err.stack)} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use padding="none" for tables and charts to let data grids reach the card perimeter.',
+    code: `<WidgetCard padding="none"><DataTable /></WidgetCard>`,
+  }}
+  dont={{
+    description: 'Do not introduce double padding by combining standard card padding with padded tables.',
+    code: `<WidgetCard padding="default"><div className="p-6"><DataTable /></div></WidgetCard>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['WidgetCard']} />
+
+## Related
+
+- [Card](/ui/docs/components/data-display/card) — General-purpose card container primitive.
+- [Skeleton](/ui/docs/components/feedback/skeleton) — Placeholder primitive used during WidgetCard loading states.
+- [EmptyState](/ui/docs/components/data-display/empty-state) — Empty state primitive used inside WidgetCard.

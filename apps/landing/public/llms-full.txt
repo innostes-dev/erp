@@ -85,122 +85,301 @@ If you discover an accessibility barrier or an unannounced state in any `@innost
 
 ## Cartesian Charts (https://innostes.com/ui/docs/charts/cartesian)
 
-Bar, Line, and Area charts for visualizing categorical data series.
+Bar, Line, and Area charts for categorical business analytics with accessible hidden tables, en-IN formatting, and Recharts integration.
 
-Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
-
-## Installation
-
-Charts are built on top of [Recharts](https://recharts.org/). You must install it as a peer dependency alongside `@innostes/ui`.
-
-**Important Version Guidance:**
-Due to a transitive peer dependency conflict, you must match the Recharts version to your React version:
-- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
-- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
-
-```bash
-# For React 18 / 19
-pnpm add recharts@^3.0.0
-
-# For React 17
-pnpm add recharts@^2.15.0
-```
+<ComponentPreview name="charts/cartesian/bar" />
 
 ## Import
 
-Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+Charts are exported from `@innostes/ui/charts` to isolate Recharts from your main application bundle:
 
 ```tsx
 import { BarChart, LineChart, AreaChart } from '@innostes/ui/charts';
 ```
 
-## Accessibility
+## When to use
 
-A core differentiator of our chart components is their built-in accessibility. Every chart renders an accessible, visually-hidden `<table>` alongside the visual SVG representation (via the internal `ChartFrame` wrapper).
+Cartesian charts plot quantitative values across categorical dimensions (such as months, quarters, or product categories):
 
-This means screen reader users are not presented with an opaque graphic. Instead, they can navigate the actual tabular data using standard table commands, providing a significantly superior, first-class experience for assistive technology. The `aria-label` prop you provide is used to name this hidden table.
+- **BarChart**: Comparing discrete, independent categories (e.g. quarterly spend per vendor or monthly dispatch volume).
+- **LineChart**: Tracking continuous trends over time (e.g. daily inventory stock balance or invoice settlement times).
+- **AreaChart**: Emphasizing cumulative volume or part-to-whole accumulation over continuous time intervals.
 
-## Props Overview
+**Do not use Cartesian charts for:**
+- Proportional parts of a single whole — use [DonutChart](/ui/docs/charts/donut).
+- Minimal inline trendlines in tables or cards — use [Sparkline](/ui/docs/widgets/sparkline).
+- Single KPI numbers — use [MetricCard](/ui/docs/widgets/metric-card).
 
-- **`data`**: An array of objects representing your dataset.
-- **`categoryKey`**: The key in your data objects that represents the categories along the X-axis (e.g., `'month'`, `'quarter'`).
-- **`series`**: An array of objects defining which keys from the data to plot, shaped as `{ key: string, label: string }`. The `label` is used in legends and tooltips.
-- **`valueFormatter`**: An optional function to format the numeric values (e.g., adding currency symbols) for tooltips and axes.
-- **`locale`**: Passed to handle localization formatting within the accessible table and tooltips.
-- **`aria-label`**: Required string to name the underlying hidden data table for screen readers.
+## Examples
 
-## Theming & Interactions
+### Installation and React version guidance
 
-Colors are automatically assigned from the `chart-1` to `chart-8` categorical tokens defined in `theme.css` and `dark.css`. You can also override colors per series using these tokens or semantic tones (e.g., `success`, `destructive`).
+Install `recharts` as a peer dependency matched to your project's React runtime:
 
-Legends are fully interactive out-of-the-box. Clicking a legend entry toggles the visibility of that data series. If a chart contains only a single series, the legend is automatically hidden to save space and reduce clutter.
+- **React 18 / 19**: `pnpm add recharts@^3.0.0`
+- **React 17**: `pnpm add recharts@^2.15.0`
 
-## Bar Chart
+### BarChart for categorical comparisons
 
-<ComponentPreview name="charts/cartesian/bar" />
+Comparing quarterly procurement spend across Northwind Traders divisions:
 
-## Line Chart
+```tsx
+const quarterlySpend = [
+  { quarter: 'Q1 FY26', procurement: 4200000, logistics: 850000 },
+  { quarter: 'Q2 FY26', procurement: 4900000, logistics: 920000 },
+  { quarter: 'Q3 FY26', procurement: 5400000, logistics: 1100000 },
+  { quarter: 'Q4 FY26', procurement: 6100000, logistics: 1250000 },
+];
+
+<BarChart
+  aria-label="Quarterly procurement and logistics expenditure"
+  data={quarterlySpend}
+  categoryKey="quarter"
+  series={[
+    { key: 'procurement', label: 'Procurement (INR)', color: 'chart-1' },
+    { key: 'logistics', label: 'Logistics (INR)', color: 'chart-2' },
+  ]}
+  valueFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`}
+/>
+```
+
+### LineChart for continuous operational trends
+
+Tracking inventory turnover over 12 months:
 
 <ComponentPreview name="charts/cartesian/line" />
 
-## Area Chart
+```tsx
+<LineChart
+  aria-label="12-month inventory stock balance"
+  data={monthlyInventory}
+  categoryKey="month"
+  series={[
+    { key: 'spices', label: 'Spices & Condiments', color: 'chart-1' },
+    { key: 'dryFruits', label: 'Dry Fruits & Nuts', color: 'chart-3' },
+  ]}
+  valueFormatter={(val) => `${val.toLocaleString('en-IN')} units`}
+/>
+```
+
+### AreaChart for cumulative volume
+
+Visualizing total dispatched tonnage from the Bengaluru hub:
 
 <ComponentPreview name="charts/cartesian/area" />
 
-## API
+### Indian fiscal formatting and en-IN localization
 
-<ApiTable components={['BarChart', 'LineChart', 'AreaChart']} />
+Use `Intl.NumberFormat` with `en-IN` to format currency and quantities correctly according to Indian numbering standards (lakhs and crores):
+
+```tsx
+const inrFormatter = (val: number) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(val);
+
+<BarChart
+  aria-label="Annual vendor payouts"
+  data={vendorPayouts}
+  categoryKey="vendor"
+  series={[{ key: 'amount', label: 'Payout' }]}
+  valueFormatter={inrFormatter}
+  locale="en-IN"
+/>
+```
+
+### Empty and loading states inside WidgetCard
+
+Wrap charts in `WidgetCard` with `padding="none"` to maintain clean edges and handle asynchronous fetch lifecycles:
+
+```tsx
+<WidgetCard
+  title="Monthly revenue trend"
+  padding="none"
+  loading={isLoading}
+  empty={data.length === 0}
+  emptyState="No transaction data recorded for this fiscal quarter."
+>
+  <AreaChart
+    aria-label="Monthly revenue trend"
+    data={data}
+    categoryKey="period"
+    series={[{ key: 'revenue', label: 'Revenue (₹)' }]}
+  />
+</WidgetCard>
+```
+
+## Accessibility
+
+Every Cartesian chart automatically renders an accessible, visually-hidden `<table>` element alongside the visual SVG graphic via the internal `ChartFrame` wrapper.
+
+### Screen reader table navigation
+
+Assistive technologies do not encounter an unlabelled opaque canvas. Instead, screen reader operators navigate the underlying tabular dataset using standard table keyboard commands (such as Control + Option + Arrow keys in VoiceOver):
+
+- The table is given an accessible name using the required `aria-label` prop.
+- Category keys render as column headers (`<th>`).
+- Data series render as structured rows (`<tr>`) with localized numeric values formatted via `valueFormatter`.
+
+### Colour and contrast
+
+Chart colours are mapped directly from semantic design tokens (`--color-chart-1` through `--color-chart-8`), ensuring minimum 4.5:1 contrast against both light and dark card backgrounds. Interactive legends allow operators to toggle individual data series visibility.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always supply an explicit, descriptive aria-label naming the chart data table.',
+    code: `<BarChart aria-label="Quarterly vendor spend (Q1-Q4 FY26)" data={data} />`,
+  }}
+  dont={{
+    description: 'Do not omit the aria-label, leaving assistive technology users with an unlabelled data table.',
+    code: `<BarChart data={data} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use token-based palette colours (chart-1 through chart-8) to guarantee automatic dark mode contrast.',
+    code: `<series color="chart-2" />`,
+  }}
+  dont={{
+    description: 'Do not hardcode unverified hex colours that become invisible in dark themes.',
+    code: `<series color="#1e293b" />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['BarChart', 'LineChart', 'AreaChart', 'ChartTooltipContent', 'ChartLegend', 'ChartFrame']} />
+
+## Related
+
+- [DonutChart](/ui/docs/charts/donut) — Proportion and composition chart for categorical shares.
+- [Sparkline](/ui/docs/widgets/sparkline) — Lightweight inline trendline without Recharts dependency.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing charts.
 
 ---
 
 ## Donut Chart (https://innostes.com/ui/docs/charts/donut)
 
-A Donut chart for visualizing proportions with a prominent center metric.
+Donut chart for visualizing proportions and percentage shares with prominent center metrics, en-IN formatting, and accessible hidden tables.
 
-Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
-
-## Installation
-
-As with all charts, `DonutChart` requires Recharts as a peer dependency.
-
-**Important Version Guidance:**
-- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
-- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
+<ComponentPreview name="charts/donut/basic" />
 
 ## Import
 
-Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+Charts are exported from `@innostes/ui/charts` to isolate Recharts from your main application bundle:
 
 ```tsx
-import { DonutChart } from '@innostes/ui/charts';
+import { DonutChart, type DonutChartProps } from '@innostes/ui/charts';
+```
+
+## When to use
+
+Use `DonutChart` when visualizing the proportional breakdown of a finite total across 2 to 7 categories:
+
+- **Procurement expenditure by category**: Spices (42%), Dry Fruits (28%), Packaging Materials (18%), Logistics (12%).
+- **Warehouse capacity allocation**: Occupied pallet bays versus available storage.
+- **Invoice status distribution**: Paid, pending authorization, in-dispute, and overdue.
+
+**Do not use DonutChart for:**
+- More than 7 discrete categories — slices become too thin to distinguish visually; use a sorted horizontal [BarChart](/ui/docs/charts/cartesian) instead.
+- Time-series or trend progression — use [LineChart](/ui/docs/charts/cartesian).
+- Continuous cumulative flow — use [AreaChart](/ui/docs/charts/cartesian).
+
+## Examples
+
+### Category distribution with center metric
+
+Displaying total annual expenditure with prominent center KPI callouts:
+
+```tsx
+const spendDistribution = [
+  { key: 'spices', label: 'Spices & Condiments', value: 4280000, color: 'chart-1' },
+  { key: 'dryfruits', label: 'Dry Fruits & Nuts', value: 2850000, color: 'chart-2' },
+  { key: 'packaging', label: 'Packaging Materials', value: 1840000, color: 'chart-3' },
+  { key: 'logistics', label: 'Freight & Logistics', value: 1220000, color: 'chart-4' },
+];
+
+<DonutChart
+  aria-label="Annual expenditure breakdown by category"
+  data={spendDistribution}
+  centerLabel="Total spend"
+  centerValue="₹1.02 Cr"
+  valueFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`}
+  locale="en-IN"
+/>
+```
+
+### Semantic tone mapping
+
+Assign semantic tones (`success`, `warning`, `destructive`) to individual slices to reflect compliance status:
+
+```tsx
+const auditBreakdown = [
+  { key: 'passed', label: 'Compliant consignments', value: 840, color: 'success' },
+  { key: 'pending', label: 'Awaiting e-way bills', value: 120, color: 'warning' },
+  { key: 'rejected', label: 'Damaged / rejected', value: 40, color: 'destructive' },
+];
+
+<DonutChart
+  aria-label="Consignment compliance status"
+  data={auditBreakdown}
+  centerLabel="Audited"
+  centerValue="1,000"
+/>
 ```
 
 ## Accessibility
 
-Just like Cartesian charts, the `DonutChart` automatically renders an accessible, visually-hidden `<table>` containing the raw data and percentage shares. This allows screen readers to navigate the data easily. The `aria-label` prop is required and is used to name this hidden table.
+`DonutChart` renders an accessible, visually-hidden `<table>` element via `ChartFrame` alongside the visual SVG rendering.
 
-## Center Metric
+### Screen reader table navigation
 
-The `DonutChart` supports a distinct API for displaying a prominent metric in the center of the ring via the `centerValue` and `centerLabel` props. This is ideal for highlighting the primary takeaway of the chart (e.g., total volume, overall percentage).
+- The required `aria-label` provides an accessible title for the data table.
+- Each slice is tabulated with its category name, absolute numeric value (formatted via `valueFormatter`), and calculated percentage share.
+- Screen reader operators can review the exact breakdown sequentially without needing pointer coordinates.
 
-## Props Overview
+### Colour contrast
 
-- **`data`**: An array of slices to render, each defined as `{ key: string, label: string, value: number, color?: ChartColor }`.
-- **`valueFormatter`**: Optional function to format the values displayed in tooltips and the accessible table.
-- **`locale`**: Optional locale string for number formatting in the accessible table.
-- **`aria-label`**: Required string to name the underlying hidden data table.
+Slices consume token-based colors (`chart-1` through `chart-8` or semantic tones) designed to maintain distinct contrast boundaries in both light and dark modes.
 
-## Theming
+## Guidelines
 
-Slices can be colored automatically using the `chart-1` to `chart-8` categorical tokens, or you can assign specific semantic tones like `success`, `destructive`, or `warning` to individual slices via the `color` property in the data objects.
+<DoDont
+  do={{
+    description: 'Use the center metric (centerValue and centerLabel) to emphasize the primary takeaway of the chart.',
+    code: `<DonutChart centerLabel="Total budget" centerValue="₹50L" />`,
+  }}
+  dont={{
+    description: 'Do not crowd the donut with more than 7 slices (use horizontal BarChart for large category sets).',
+    code: `<DonutChart data={twentySlices} />`,
+  }}
+/>
 
-## Usage
+<DoDont
+  do={{
+    description: 'Use semantic tones (success, warning, destructive) when slices represent compliance or status tiers.',
+    code: `<DonutSlice color="success" label="Approved" />`,
+  }}
+  dont={{
+    description: 'Do not assign positive green colours to negative categories like "Damaged goods".',
+    code: `<DonutSlice color="success" label="Defects" />`,
+  }}
+/>
 
-<ComponentPreview name="charts/donut/basic" />
-
-## API
+## API reference
 
 <ApiTable components={['DonutChart']} />
+
+## Related
+
+- [CartesianChart](/ui/docs/charts/cartesian) — Bar, Line, and Area charts for categorical trends.
+- [MetricCard](/ui/docs/widgets/metric-card) — KPI metric card with progress or sparkline styles.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Outer frame for housing donut charts on dashboards.
 
 ---
 
@@ -4766,6 +4945,7 @@ When a submission fails validation, `Form` automatically moves keyboard focus to
   components={[
     'Field',
     'FieldLabel',
+    'Label',
     'FieldDescription',
     'FieldError',
     'FieldItem',
@@ -7840,6 +8020,7 @@ The sidebar consumes dedicated CSS colour tokens, allowing a distinct brand surf
     'SidebarTrigger',
     'SidebarRail',
     'SidebarInset',
+    'SkipLink',
   ]}
 />
 
@@ -10784,7 +10965,7 @@ This reference example combines our layout and widget components into a responsi
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Global Navigation**    | [`AppRail`](/ui/docs/components/layout/app-rail) on the far left with `AppRailItem`                                                                                                                                         |
 | **Workspace Navigation** | [`SidebarProvider`](/ui/docs/components/layout/sidebar), `Sidebar` (icon collapsible), `SidebarMenu`                                                                                                                        |
-| **Top Header**           | [`TopBar`](/ui/docs/components/layout/top-bar) with [`AppSwitcher`](/ui/docs/widgets/app-switcher), [`NotificationBell`](/ui/docs/widgets/notification-bell), and [`UserMenu`](/ui/docs/widgets/user-menu)               |
+| **Top Header**           | [`TopBar`](/ui/docs/components/layout/top-bar) with [`AppSwitcher`](/ui/docs/widgets/app-switcher), [`NotificationBell`](/ui/docs/widgets/notifications), and [`UserMenu`](/ui/docs/widgets/user-menu)               |
 | **Content Area**         | `SidebarInset` containing the main content                                                                                                                                                                                  |
 | **Welcome**              | `WelcomeBanner`                                                                                                                                                                                                             |
 | **KPIs**                 | [`MetricCard`](/ui/docs/widgets/metric-card) and `MetricGrid`                                                                                                                                                                |
@@ -12705,518 +12886,2003 @@ The table below is generated directly from `theme.css` and `dark.css` at build t
 
 ---
 
+## Action List (https://innostes.com/ui/docs/widgets/action-list)
+
+Actionable task queues pairing descriptions, status icons, and dedicated resolution buttons.
+
+<ComponentPreview name="widgets/action-list/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  ActionList,
+  type ActionListItem,
+  type ActionListProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `ActionList` when presenting a queue of distinct tasks that need operator decision or approval:
+
+- **Pending managerial authorizations**: Approving purchase orders, expense claims, or credit notes.
+- **Compliance review queues**: Reconciling GSTIN discrepancies or reviewing vendor TDS declarations.
+- **Operational triage lists**: Discrepancies flagged during warehouse receiving.
+
+**Do not use ActionList for:**
+- Non-actionable audit logs without buttons — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+- Full enterprise bulk approvals — use [DataTable](/ui/docs/components/data-display/data-table) with row selection.
+- General application shortcut triggers — use [QuickActions](/ui/docs/widgets/quick-actions).
+
+## Examples
+
+### Pending purchase order approvals inside WidgetCard
+
+Pairing `ActionList` with `WidgetCard` and an unread count badge:
+
+```tsx
+<WidgetCard
+  title="Pending authorizations"
+  description="Procurement requests requiring managerial sign-off"
+  count={3}
+  countTone="primary"
+>
+  <ActionList
+    divided
+    items={[
+      {
+        id: '1',
+        title: 'Approve purchase order PO-2026-081',
+        description: 'Bengaluru Spices Pvt Ltd · ₹89,400',
+        icon: <Clock className="size-4" />,
+        tone: 'primary',
+        action: {
+          label: 'Approve',
+          variant: 'primary',
+          onClick: () => handleApprove('PO-2026-081'),
+        },
+      },
+      {
+        id: '2',
+        title: 'Review GSTIN reconciliation mismatch',
+        description: 'Invoice INV-2026-074 requires e-way bill re-validation',
+        icon: <AlertTriangle className="size-4" />,
+        tone: 'warning',
+        action: {
+          label: 'Review',
+          variant: 'secondary',
+          onClick: () => openReview('INV-2026-074'),
+        },
+      },
+    ]}
+  />
+</WidgetCard>
+```
+
+### Empty state handling
+
+When all pending tasks are resolved, `ActionList` automatically renders a clean empty state:
+
+```tsx
+<ActionList
+  items={[]}
+  emptyText="All pending approvals have been resolved."
+/>
+```
+
+## Accessibility
+
+`ActionList` renders semantic list structures with accessible action targets.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between the action buttons across each task row.' },
+    { key: 'Enter / Space', action: 'Activates the focused task action button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Rows render inside semantic `<ul>` and `<li>` elements.
+- Each action button maintains distinct accessible context linking the button label with the task title.
+- Empty states render with accessible text containers announced cleanly to screen readers.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide clear, imperative action labels like "Approve", "Review", or "Verify".',
+    code: `<ActionListItem action={{ label: 'Approve' }} />`,
+  }}
+  dont={{
+    description: 'Do not use vague labels like "Click here" or "Go".',
+    code: `<ActionListItem action={{ label: 'Click' }} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Pair ActionList with WidgetCard count to highlight the exact number of pending items.',
+    code: `<WidgetCard count={items.length}><ActionList items={items} /></WidgetCard>`,
+  }}
+  dont={{
+    description: 'Do not hide task counts when operators rely on them to gauge urgency.',
+    code: `<WidgetCard><ActionList items={items} /></WidgetCard>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['ActionList']} />
+
+## Related
+
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing task lists.
+- [ActivityFeed](/ui/docs/widgets/activity-feed) — Read-only chronological timeline of events.
+- [Button](/ui/docs/components/actions/button) — Action button component used for row actions.
+
+---
+
+## Activity Feed (https://innostes.com/ui/docs/widgets/activity-feed)
+
+Compact list and connected timeline views with relative timestamps, day groupings, and status tones.
+
+<ComponentPreview name="widgets/activity-feed/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  ActivityFeed,
+  type ActivityItem,
+  type ActivityFeedProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `ActivityFeed` to communicate operational history, audit trails, and collaborative milestones:
+
+- **ERP record history**: Purchase order lifecycles (Draft → Approved → Dispatched → Invoiced).
+- **Consignment tracking**: Shipments moving between distribution hubs.
+- **System audit trails**: Documenting changes made to GST returns or tax configurations.
+
+**Do not use ActivityFeed for:**
+- Interactive task lists requiring immediate completion buttons — use [ActionList](/ui/docs/widgets/action-list).
+- Standalone unread alerts — use [Notifications](/ui/docs/widgets/notifications).
+- Multi-step sequential progress inputs — use [Stepper](/ui/docs/components/navigation/stepper).
+
+## Examples
+
+### Connected timeline with day grouping
+
+Set `variant="timeline"` and `groupByDay={true}` to join items with a vertical connecting stem grouped under "Today", "Yesterday", and calendar dates:
+
+```tsx
+<ActivityFeed
+  variant="timeline"
+  groupByDay
+  items={[
+    {
+      id: '1',
+      title: 'Consignment DISP-2026-992 in transit',
+      description: 'Dispatched via Blue Dart to Mumbai central warehouse.',
+      time: new Date(Date.now() - 1000 * 60 * 18),
+      icon: <Truck className="size-4" />,
+      tone: 'primary',
+    },
+    {
+      id: '2',
+      title: 'Tax invoice approved',
+      description: 'Priya Sharma verified ₹89,400 with GST e-invoicing.',
+      time: new Date(Date.now() - 1000 * 60 * 120),
+      icon: <CheckCircle2 className="size-4" />,
+      tone: 'success',
+    },
+  ]}
+/>
+```
+
+### Compact list variant
+
+Use `variant="list"` inside narrow cards or sidebars:
+
+```tsx
+<ActivityFeed
+  variant="list"
+  items={activities}
+/>
+```
+
+## Accessibility
+
+`ActivityFeed` renders semantic ordered list elements.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially across interactive links or action buttons within feed items.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Feed items render inside semantic `<ul>` lists with `role="list"`.
+- Relative timestamps use semantic `<time dateTime="...">` tags containing ISO 8601 strings for assistive readers.
+- Icons use decorative attributes, ensuring screen readers prioritize event titles and descriptions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide proper ISO dates to the time prop so relative time formatting updates automatically.',
+    code: `<ActivityItem time={new Date(event.timestamp)} />`,
+  }}
+  dont={{
+    description: 'Do not pass unformatted ambiguous numbers or static strings to time.',
+    code: `<ActivityItem time="3 hours" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the timeline variant for historical record audits and the list variant for compact dashboard widgets.',
+    code: `<ActivityFeed variant="timeline" groupByDay />`,
+  }}
+  dont={{
+    description: 'Do not enable day grouping when feed items lack valid Date objects.',
+    code: `<ActivityFeed groupByDay items={stringDateItems} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['ActivityFeed']} />
+
+## Related
+
+- [ChangeLog](/ui/docs/widgets/change-log) — Deep diff view built on top of ActivityFeed.
+- [ActionList](/ui/docs/widgets/action-list) — Task-oriented list with actionable buttons.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing activity feeds.
+
+---
+
 ## App Switcher (https://innostes.com/ui/docs/widgets/app-switcher)
 
-A rich popover menu designed for the ECOSYSTEM module launcher, featuring grouped apps, descriptions, icons, and built-in search functionality.
+Popover launcher with grouped application sections, descriptions, status icons, and built-in search.
 
 <ComponentPreview name="widgets/app-switcher/basic" align="center" className="p-4 sm:p-4" />
 
 ## Import
 
 ```tsx
-import { AppSwitcher } from '@innostes/ui';
+import {
+  AppSwitcher,
+  type AppSwitcherProps,
+  type AppSwitcherSection,
+  type AppSwitcherApp,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `AppSwitcher` is primarily used in the top bar as a way to navigate between large, distinct parts of an ecosystem (e.g., switching from the HRMS module to the ERP module).
+Use `AppSwitcher` in the top application bar to enable direct transitions between major ERP business systems:
 
-It accepts an array of `sections`, where each section contains a list of `apps`.
+- **Ecosystem module navigation**: Jumping between Procurement, Warehousing, Invoicing, and Human Resources.
+- **Multi-tenant portal switching**: Switching between Northwind Traders distribution entities.
+- **Developer tools and settings**: Moving from core operational views to analytics consoles.
+
+**Do not use AppSwitcher for:**
+- Page-level sub-navigation within a single module — use [Sidebar](/ui/docs/components/layout/sidebar).
+- Flat icon navigation rails — use [AppRail](/ui/docs/components/layout/app-rail).
+- Standalone command execution — use [CommandPalette](/ui/docs/components/overlays/command-palette).
+
+## Examples
+
+### Grouped modules with search filter
+
+Organising business modules under titled sections with built-in search:
 
 ```tsx
-function TopNavigation() {
-  const sections = [
-    {
-      label: 'Modules',
-      apps: [
-        {
-          id: 'erp',
-          name: 'ERP',
-          description: 'Business operations',
-          icon: <BuildingIcon />,
-          tone: 'chart-1',
-          href: '/erp'
-        },
-        {
-          id: 'hrms',
-          name: 'HRMS',
-          description: 'People & HR',
-          icon: <UsersIcon />,
-          tone: 'chart-3',
-          href: '/hrms'
-        },
-      ]
-    },
-  ];
+const sections: AppSwitcherSection[] = [
+  {
+    label: 'Supply chain & operations',
+    apps: [
+      {
+        id: 'procurement',
+        name: 'Procurement',
+        description: 'Purchase orders, vendors, and RFQs',
+        icon: <ShoppingCart className="size-5" />,
+        tone: 'chart-1',
+        href: '/procurement',
+      },
+      {
+        id: 'inventory',
+        name: 'Warehousing & inventory',
+        description: 'Stock management, bins, and e-way bills',
+        icon: <Package className="size-5" />,
+        tone: 'chart-2',
+        href: '/inventory',
+      },
+    ],
+  },
+  {
+    label: 'Finance & compliance',
+    apps: [
+      {
+        id: 'billing',
+        name: 'Invoices & GST',
+        description: 'Tax invoices, credit notes, and GSTR-1',
+        icon: <FileText className="size-5" />,
+        tone: 'chart-3',
+        href: '/finance',
+      },
+    ],
+  },
+];
 
-  return <AppSwitcher value="hrms" sections={sections} />;
-}
+<AppSwitcher sections={sections} />
 ```
 
-### Routing
+## Accessibility
 
-You can handle navigation in three ways:
+`AppSwitcher` is built on Base UI Popover primitives (`@base-ui/react/popover`).
 
-1. Provide an `href` to each app. The item will render as an `<a>` tag.
-2. Provide a `render` element (e.g., `render={<Link href="/hrms" />}`). The component will merge its props into your custom link component.
-3. Use the controlled `value` and `onValueChange` props to navigate programmatically when an app is selected.
+### Keyboard navigation
 
-### Search
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens or closes the application switcher popover.' },
+    { key: 'Tab', action: 'Moves focus into the search input and across module application links.' },
+    { key: 'Escape', action: 'Dismisses the open switcher popover and returns focus to the trigger button.' },
+  ]}
+/>
 
-The component automatically includes a search input if there are more than 6 applications provided across all sections. You can manually force it to show or hide by setting the `searchable` boolean prop.
+### ARIA attributes
 
-## API Reference
+- The trigger button receives `aria-haspopup="dialog"` and `aria-expanded="true | false"`.
+- Application tiles use semantic anchor links (`<a>`) with accessible titles and descriptions.
+- The built-in search filter uses `role="searchbox"` to filter apps dynamically without losing keyboard focus.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide meaningful descriptions for each application so operators know which module to select.',
+    code: `<AppSwitcherApp name="Procurement" description="Purchase orders and RFQs" />`,
+  }}
+  dont={{
+    description: 'Do not overload sections with dozens of obscure sub-links (link to module homepages only).',
+    code: `<AppSwitcherSection apps={fortySubpages} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Place the AppSwitcher in TopBarStart alongside branding for instant wayfinding.',
+    code: `<TopBarStart><AppSwitcher sections={sections} /></TopBarStart>`,
+  }}
+  dont={{
+    description: 'Do not bury the app switcher deep within in-page body content.',
+    code: `<div className="mt-96"><AppSwitcher /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['AppSwitcher']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar hosting AppSwitcher.
+- [AppRail](/ui/docs/components/layout/app-rail) — Persistent vertical navigation rail for module switching.
+- [CommandPalette](/ui/docs/components/overlays/command-palette) — Search overlay for jumping directly to deep records.
 
 ---
 
 ## Change Log (https://innostes.com/ui/docs/widgets/change-log)
 
-An audit trail with field-level before and after values, notes and day groups.
+Audit trail with field-level before and after values, notes, actor identities, and day grouping.
 
 <ComponentPreview name="widgets/change-log/basic" />
 
 ## Import
 
 ```tsx
-import { ChangeLog } from '@innostes/ui';
+import {
+  ChangeLog,
+  type ChangeLogEntry,
+  type ChangeLogProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Map your audit records to entries, newest first:
+Use `ChangeLog` when providing immutable historical inspection of record modifications:
+
+- **ERP record revision history**: Tracking revisions to purchase orders, contracts, and vendor profiles.
+- **Statutory tax modifications**: Logging alterations to GSTIN registrations, PAN details, and bank mandates.
+- **Security credential adjustments**: Showing permission modifications made to operator roles.
+
+**Do not use ChangeLog for:**
+- High-level event timelines without field-level diffs — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+- Pending authorization task queues — use [ActionList](/ui/docs/widgets/action-list).
+- Ephemeral toast notifications — use [Toast](/ui/docs/components/feedback/toast).
+
+## Examples
+
+### Field-level diffs with day grouping
+
+Mapping audit records to structured entries with `from` and `to` values:
 
 ```tsx
 <ChangeLog
   groupByDay
-  entries={audit.map((a) => ({
-    id: a.id,
-    actor: a.user.name,
-    action: a.summary, // "updated the invoice"
-    time: new Date(a.at),
-    changes: a.diff.map((d) => ({ field: d.label, from: d.old, to: d.new })),
-    note: a.comment,
-  }))}
+  entries={[
+    {
+      id: '1',
+      actor: 'Priya Sharma',
+      action: 'updated purchase order terms',
+      time: new Date(Date.now() - 1000 * 60 * 30),
+      changes: [
+        { field: 'Payment terms', from: 'Net 30', to: 'Net 60' },
+        { field: 'Delivery depot', from: 'Koramangala Hub', to: 'Whitefield Central Depot' },
+      ],
+      note: 'Adjusted per vendor renegotiation meeting.',
+    },
+    {
+      id: '2',
+      actor: 'Ramesh Kumar',
+      action: 'authorized discount rate',
+      time: new Date(Date.now() - 1000 * 60 * 180),
+      changes: [
+        { field: 'Trade discount', from: '0%', to: '5%' },
+      ],
+    },
+  ]}
 />
 ```
 
-- `from` and `to` take any content, e.g. status badges. Empty values show `emptyValue` (default "—").
-- Built on `ActivityFeed`'s timeline, so it takes the same `groupByDay`, `locale` and `now` props. Use `ActivityFeed` for event streams without field changes.
+### Badges and custom diff elements
+
+`from` and `to` accept arbitrary React nodes, enabling live status badge diffs:
+
+```tsx
+<ChangeLog
+  entries={[
+    {
+      id: '3',
+      actor: 'System Automation',
+      action: 'reconciled e-way bill status',
+      time: new Date(),
+      changes: [
+        {
+          field: 'GST Status',
+          from: <Badge variant="warning">Generated</Badge>,
+          to: <Badge variant="success">Validated</Badge>,
+        },
+      ],
+    },
+  ]}
+/>
+```
 
 ## Accessibility
 
-Changes are a description list; old values use `<del>` and new values `<ins>`, with hidden "from" / "to" labels (`diffLabels` to translate).
+`ChangeLog` renders semantic description lists with accessible diff tags.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive links or user profile buttons in the log.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Differences use semantic `<del>` (for previous values) and `<ins>` (for updated values).
+- Visually hidden labels (`diffLabels`, customizable for localization) announce "from" and "to" explicitly to screen readers.
+- Day headers group revisions cleanly under accessible regional landmarks.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide clear, contextual notes explaining why critical regulatory fields were updated.',
+    code: `<ChangeLogEntry note="GST circular compliance update" />`,
+  }}
+  dont={{
+    description: 'Do not omit previous values (from) when documenting audited business changes.',
+    code: `<ChangeLogEntry changes={[{ field: 'Amount', from: undefined, to: '₹50,000' }]} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use ActivityFeed when events do not involve discrete field diffs (e.g. "Consignment arrived").',
+    code: `<ActivityFeed items={events} />`,
+  }}
+  dont={{
+    description: 'Do not abuse ChangeLog for generic activity logs without before/after comparisons.',
+    code: `<ChangeLog entries={eventsWithoutChanges} />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['ChangeLog']} />
+
+## Related
+
+- [ActivityFeed](/ui/docs/widgets/activity-feed) — Chronological event stream primitive upon which ChangeLog is built.
+- [Badge](/ui/docs/components/data-display/badge) — Status badge frequently rendered inside ChangeLog diffs.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing audit history.
+
+---
+
+## Entity List (https://innostes.com/ui/docs/widgets/entity-list)
+
+High-density business entity rows with avatars, status metadata, and row actions.
+
+<ComponentPreview name="widgets/entity-list/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  EntityList,
+  type EntityListItem,
+  type EntityListProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `EntityList` to present curated collections of business records within dashboard cards or drawers:
+
+- **Key vendor rankings**: Top suppliers by spend or pending invoice balance.
+- **Customer account summaries**: Recent high-value corporate buyers.
+- **Warehouse personnel rosters**: On-duty supervisors at regional depots.
+
+**Do not use EntityList for:**
+- Full-page searchable and sortable enterprise records — use [DataTable](/ui/docs/components/data-display/data-table).
+- Pure task checklists with action buttons — use [ActionList](/ui/docs/widgets/action-list).
+- Event audit feeds — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+
+## Examples
+
+### Business vendor roster with status badges and actions
+
+Presenting primary ERP suppliers with initials avatars, financial totals, and direct action triggers:
+
+```tsx
+<EntityList
+  divided
+  items={[
+    {
+      id: '1',
+      title: 'Bengaluru Spices Pvt Ltd',
+      subtitle: 'GSTIN: 29ABCDE1234F1Z5 · Koramangala Hub',
+      initials: 'BS',
+      tone: 'primary',
+      meta: <span className="font-semibold">₹4,28,900</span>,
+      action: (
+        <Button size="sm" variant="ghost" iconOnly aria-label="View ledger">
+          <ExternalLink className="size-4" />
+        </Button>
+      ),
+    },
+    {
+      id: '2',
+      title: 'Malabar Cardamom Producers',
+      subtitle: 'GSTIN: 32AABCM5678K1Z2 · Kochi Depot',
+      initials: 'MC',
+      tone: 'success',
+      meta: <span className="font-semibold">₹2,85,000</span>,
+    },
+  ]}
+/>
+```
+
+### Compact density for sidebars
+
+Set `density="sm"` when placing the list inside narrow navigation drawers or secondary panels:
+
+```tsx
+<EntityList
+  density="sm"
+  items={recentCustomers}
+  onItemClick={(item) => navigateToCustomer(item.id)}
+/>
+```
+
+## Accessibility
+
+`EntityList` implements semantic list patterns with interactive row semantics.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive row buttons or links.' },
+    { key: 'Enter / Space', action: 'Activates the focused entity row or row action button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Rows render inside semantic `<ul>` and `<li>` elements.
+- When `onItemClick` is supplied, each item renders an accessible button element with full keyboard support.
+- Action buttons inside rows maintain distinct accessible labels via `aria-label`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide meaningful subtitles (such as GSTIN or depot location) to help operators distinguish similar vendor entities.',
+    code: `<EntityListItem title="Acme India" subtitle="GSTIN: 27AABCA1234F1Z1" />`,
+  }}
+  dont={{
+    description: 'Do not crowd entity rows with dozens of dense data columns (use DataTable for wide tabular data).',
+    code: `<EntityListItem meta={<Table>{allFiftyFields}</Table>} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use initials avatars with distinct tones (primary, success, neutral) to provide quick visual recognition.',
+    code: `<EntityListItem initials="BS" tone="primary" />`,
+  }}
+  dont={{
+    description: 'Do not leave avatars blank when customer profile photos are unavailable.',
+    code: `<EntityListItem avatarSrc="" />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['EntityList']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Tabular enterprise data grid with sorting and pagination.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing entity lists.
+- [Avatar](/ui/docs/components/data-display/avatar) — Profile photo and initials indicator used inside EntityList.
 
 ---
 
 ## Widgets (https://innostes.com/ui/docs/widgets/index)
 
-High-level business components combining multiple primitives for enterprise ERP patterns.
+High-level business blocks combining primitives with built-in loading, empty, and error contracts.
 
 import { CategoryGrid } from '@/components/docs/category-grid';
 
 # Widgets
 
-Widgets are domain-ready, composite enterprise components designed specifically for Northwind Traders Pvt Ltd's ERP operations. From role-based access matrixes to drag-and-drop Kanban logistics boards, widgets assemble primitives into production-ready business blocks.
+Widgets are domain-ready, composite business blocks designed for enterprise ERP applications at Northwind Traders Pvt Ltd. While primitive components (such as buttons, inputs, and dialogs) provide isolated UI elements, widgets assemble multiple primitives into complete functional modules with predictable asynchronous data contracts.
 
 ## Components
 
 <CategoryGrid category="widgets" />
 
-## Usage guidelines
+## Widgets versus components
 
-- **Business logic separation**: Widgets encapsulate UI interactions and visual states while accepting pure data props and callback handlers for business operations.
-- **Data density**: Widgets support compact display modes to present high-density business intelligence without visual clutter.
-- **Touch and keyboard**: All widgets include accessible touch targets and keyboard alternatives for mouse-intensive operations.
+Understanding when to reach for a primitive component versus a composed widget:
+
+| Dimension | Primitive components | Composed widgets |
+| :--- | :--- | :--- |
+| **Scope** | Atomic building blocks (`Button`, `Input`, `Dialog`, `Badge`). | Domain-specific blocks (`MetricCard`, `KanbanBoard`, `ActivityFeed`). |
+| **State management** | Local interactive UI state (open/closed, focus, active). | Async business data states (`loading`, `empty`, `error`, retry). |
+| **Layout integration** | Sits inside forms, toolbars, and cards. | Forms entire dashboard cards, kanban boards, or navigation shells. |
+| **Composition** | Extended via standard props and Tailwind classes. | Enclosed inside `WidgetCard` with consistent headers and actions. |
+
+## The shared data contract
+
+Every dashboard widget in `@innostes/ui` adheres to a shared three-state lifecycle:
+
+1. **`loading`**: When asynchronous fetches are in flight, the widget displays skeleton placeholders matching the exact geometry of expected content, eliminating layout shifts.
+2. **`empty`**: When a query resolves with zero matching records, the widget renders a clean, accessible empty state prompt rather than a broken or blank canvas.
+3. **`error`**: When network requests or API authorizations fail, the widget displays a localized error indicator alongside an optional retry action (`onRetry`).
+
+## Composing custom widgets with WidgetCard
+
+`WidgetCard` provides the standardized outer shell for all widgets. Use it to compose custom ERP dashboard widgets that directly inherit the standard header, actions, count badges, and state handling:
+
+```tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { WidgetCard, Button } from '@innostes/ui';
+
+export function WarehouseStockWidget({ warehouseId }: { warehouseId: string }) {
+  const [data, setData] = useState<StockRecord[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStock = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/warehouses/${warehouseId}/stock`);
+      if (!res.ok) throw new Error('Failed to load stock data');
+      const json = await res.json();
+      setData(json);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStock();
+  }, [warehouseId]);
+
+  return (
+    <WidgetCard
+      title="Warehouse stock balance"
+      description="Bengaluru Central Hub · Koramangala"
+      count={data?.length}
+      countTone="primary"
+      loading={loading}
+      loadingRows={4}
+      error={error}
+      onRetry={fetchStock}
+      empty={data?.length === 0}
+      emptyState="No inventory items allocated to this depot."
+      viewAll={{ href: `/inventory/warehouses/${warehouseId}` }}
+    >
+      <div className="space-y-2">
+        {data?.map((item) => (
+          <div key={item.id} className="flex justify-between text-sm py-1 border-b">
+            <span>{item.name}</span>
+            <span className="font-semibold">{item.quantity} units</span>
+          </div>
+        ))}
+      </div>
+    </WidgetCard>
+  );
+}
+```
 
 ---
 
 ## Kanban Board (https://innostes.com/ui/docs/widgets/kanban-board)
 
-Pipelines, deals, tickets and approval stages, with drag and drop, keyboard moves and WIP limits.
+Interactive multi-column board with optimistic drag-and-drop moves, WIP limits, touch support, and full keyboard navigation.
 
 <ComponentPreview name="widgets/kanban-board/basic" />
 
 ## Import
 
 ```tsx
-import { KanbanBoard, moveKanbanItem, type KanbanColumn } from '@innostes/ui';
+import {
+  KanbanBoard,
+  moveKanbanItem,
+  type KanbanColumn,
+  type KanbanMove,
+  type KanbanBoardProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Cards need a string `id`. The board renders the card frame; `renderCard` renders what's inside.
+Use `KanbanBoard` when managing visual work pipelines where records transition across discrete sequential stages:
+
+- **Purchase order approvals**: Draft → Verification → Manager Review → Authorized.
+- **Logistics consignment pipeline**: Booked → Packed → Dispatched → In Transit → Delivered.
+- **Vendor KYC onboarding**: Applied → Documents Submitted → Bank Verification → Approved.
+
+**Do not use KanbanBoard for:**
+- Standard multi-column tabular data with sorting and filtering — use [DataTable](/ui/docs/components/data-display/data-table).
+- Linear step-by-step form wizards — use [Stepper](/ui/docs/components/navigation/stepper).
+- Flat chronological event streams — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+
+## Examples
+
+### The move contract and optimistic updates
+
+`onValueChange` fires when a card is dropped or moved via keyboard, providing the next column array and a `KanbanMove` descriptor:
 
 ```tsx
-<KanbanBoard
-  aria-label="Deals"
-  value={columns}
-  onValueChange={(next, move) => {
-    setColumns(next);
-    api.updateDealStage(move.itemId, move.toColumnId, move.toIndex);
-  }}
-  canMove={(move) => !(move.fromColumnId === 'lead' && move.toColumnId === 'won')}
-  getItemLabel={(deal) => deal.name}
-  renderCard={(deal) => <DealCard deal={deal} />}
-  onCardOpen={(deal) => router.push(`/deals/${deal.id}`)}
-/>
+'use client';
+
+import { useState } from 'react';
+import { KanbanBoard, moveKanbanItem, type KanbanColumn, type KanbanMove, toast } from '@innostes/ui';
+
+export function ProcurementPipeline({ initialColumns }: { initialColumns: KanbanColumn<Order>[] }) {
+  const [columns, setColumns] = useState(initialColumns);
+
+  const handleMove = async (nextColumns: KanbanColumn<Order>[], move: KanbanMove) => {
+    // 1. Optimistically apply change to local state immediately
+    const previousColumns = columns;
+    setColumns(nextColumns);
+
+    try {
+      // 2. Persist to API
+      const response = await fetch(`/api/orders/${move.itemId}/stage`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toStage: move.toColumnId,
+          toIndex: move.toIndex,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Stage transition rejected by server');
+      toast.success('Purchase order moved');
+    } catch (err) {
+      // 3. Rollback immediately on server failure
+      setColumns(previousColumns);
+      toast.error('Failed to update stage. Reverting position.');
+    }
+  };
+
+  return (
+    <KanbanBoard
+      aria-label="Procurement pipeline"
+      value={columns}
+      onValueChange={handleMove}
+      canMove={(move) => {
+        // Enforce stage constraints: cannot jump directly from Draft to Authorized
+        if (move.fromColumnId === 'draft' && move.toColumnId === 'authorized') {
+          toast.warning('Draft orders must undergo verification before authorization.');
+          return false;
+        }
+        return true;
+      }}
+      getItemLabel={(order) => `${order.id} · ${order.supplier}`}
+      renderCard={(order) => <OrderCard order={order} />}
+      onCardOpen={(order) => router.push(`/purchases/${order.id}`)}
+    />
+  );
+}
 ```
 
-- `onValueChange` gets the new columns and the move (`itemId`, `fromColumnId`, `fromIndex`, `toColumnId`, `toIndex`).
-- `canMove` blocks moves, e.g. skipping a required stage.
-- `limit` on a column shows `count/limit` and turns red above it.
-- `columnActions` adds buttons to column headers.
-- `moveKanbanItem(columns, itemId, toColumnId, toIndex)` applies a move to plain data, e.g. for optimistic updates or real-time sync.
+### Column WIP limits
 
-Mouse dragging uses native HTML drag and drop, which doesn't work on touch screens. On phones, let people open the card (`onCardOpen`) and change its stage there.
+Set `limit={5}` on a column to enforce Work In Progress (WIP) bounds. The column header automatically renders a badge showing `count / limit` and turns warning/destructive when capacity is exceeded:
+
+```tsx
+const columns: KanbanColumn<Order>[] = [
+  { id: 'review', title: 'Under review', limit: 4, items: reviewOrders },
+  { id: 'dispatched', title: 'Dispatched', limit: 8, items: dispatchedOrders },
+];
+```
+
+### Touch devices and mobile strategy
+
+On mobile touch devices where native HTML drag-and-drop is limited, `KanbanBoard` provides a built-in touch column selector, allowing users to tap a card and pick its destination column directly from a native select control, or trigger `onCardOpen` to update the stage from an inspection drawer.
 
 ## Accessibility
 
-Drag and drop isn't required. Each card is focusable, and every step is announced:
+`KanbanBoard` provides complete non-pointer keyboard operation and screen reader announcements.
 
-| Key | Action |
-| --- | --- |
-| Arrows | Move focus between cards and columns |
-| Space | Pick up the card, then drop it |
-| Arrows (holding) | Move the card up, down or to another column |
-| Escape | Cancel the move |
-| Enter | `onCardOpen` |
+### Keyboard navigation
 
-Pass `labels` to translate the instructions and announcements.
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus into the board and between cards and column action controls.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Moves keyboard focus to the next or previous card in the current column.' },
+    { key: 'ArrowRight / ArrowLeft', action: 'Moves keyboard focus to the adjacent column at the same relative height.' },
+    { key: 'Space', action: 'Picks up the focused card to begin a keyboard move.' },
+    { key: 'Arrow keys (while holding)', action: 'Repositions the held card within or across columns.' },
+    { key: 'Enter / Space', action: 'Drops the held card into its new position and announces the move.' },
+    { key: 'Escape', action: 'Cancels the active keyboard move and returns the card to its original position.' },
+  ]}
+/>
 
-## API Reference
+### ARIA attributes
+
+- Columns render as semantic `<section>` regions with `aria-labelledby` referencing column titles.
+- Cards maintain `role="button"` or `role="article"` with clear `aria-roledescription="Draggable card"`.
+- Live region announcements notify screen readers when a card is grabbed, moved, dropped, or blocked by `canMove`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Enforce optimistic rollbacks with try/catch to maintain data integrity when network calls fail.',
+    code: `try { setColumns(next); await api.save(); } catch { setColumns(prev); }`,
+  }}
+  dont={{
+    description: 'Do not update server data without reverting UI state if the backend rejects the stage transition.',
+    code: `setColumns(next); api.save(); // Ignored error leaves UI out of sync`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use canMove to validate business logic before allowing invalid state jumps.',
+    code: `canMove={(m) => !(m.fromColumnId === 'draft' && m.toColumnId === 'paid')}`,
+  }}
+  dont={{
+    description: 'Do not allow arbitrary transitions that violate regulatory ERP stage gates.',
+    code: `canMove={() => true}`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['KanbanBoard']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Tabular view for bulk ERP record operations.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression wizard.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing board views.
 
 ---
 
 ## Metric Card (https://innostes.com/ui/docs/widgets/metric-card)
 
-One component, seven designs: default, compact, sparkline, progress, comparison, split and accent.
+High-density business metric cards with delta indicators, comparison baselines, sparklines, and progress bars.
 
 <ComponentPreview name="widgets/metric-card/variants" align="start" />
 
 ## Import
 
 ```tsx
-import { MetricCard, MetricGrid, MetricDelta } from '@innostes/ui';
+import {
+  MetricCard,
+  MetricGrid,
+  MetricDelta,
+  type MetricCardProps,
+} from '@innostes/ui';
 ```
 
-## Choosing a variant
+## When to use
 
-| Variant | Use it for |
-| --- | --- |
-| `default` | The standard KPI row: icon, value, trend and comparison. |
-| `compact` | Many metrics in little space, e.g. a sidebar or a dense ops dashboard. |
-| `accent` | The one or two metrics that matter most on the page. |
-| `sparkline` | When the direction over time matters more than one number. |
-| `progress` | Progress towards a target: sales quota, budget, OKR. |
-| `comparison` | This period next to the previous one, side by side. |
-| `split` | One total broken down into a few parts, e.g. attendance by status. |
+Use `MetricCard` to display primary Key Performance Indicators (KPIs) across executive and operational dashboards:
 
-Use one variant per row so the row lines up.
+- **Executive overview**: Total revenue, gross margin, accounts receivable, and net profit.
+- **Logistics operations**: On-time dispatches, warehouse capacity, and fleet turnaround.
+- **Procurement metrics**: Open purchase order spend, vendor fulfilment rate, and average lead time.
 
-## Deltas and trends
+**Do not use MetricCard for:**
+- Long tabular data rows — use [DataTable](/ui/docs/components/data-display/data-table).
+- Multi-step interactive wizards — use [Stepper](/ui/docs/components/navigation/stepper).
+- Detailed multi-dimensional data charts — use [CartesianChart](/ui/docs/charts/cartesian).
+
+## Examples
+
+### Seven design variants
+
+Select from seven specialized variants to match the density and focus of each dashboard row:
+
+| Variant | Best for |
+| :--- | :--- |
+| `default` | Standard KPI with icon, primary value, delta badge, and comparison period. |
+| `compact` | High-density grids, sidebars, or auxiliary operational cards. |
+| `accent` | Highlighting the single most vital metric on the page. |
+| `sparkline` | Emphasizing trajectory over time rather than a single static number. |
+| `progress` | Tracking achievement toward an explicit quota or quarterly target. |
+| `comparison` | Side-by-side contrast between current period and historical benchmark. |
+| `split` | Decomposing a total into segmented parts (e.g. order status distribution). |
+
+### Deltas, trends, and Indian fiscal formatting
+
+Format numeric deltas as fractional values (e.g. `0.125` formats as `+12.5%`) and format rupee values in `en-IN`:
 
 ```tsx
-<MetricCard label="Revenue" value="€48,250" delta={0.125} comparison="vs last month" />   // ↑ +12.5% (green)
-<MetricCard label="Refund rate" value="1.2%" delta={0.2} upIsGood={false} />              // ↑ +20% (red)
-<MetricCard label="Team" value="42" delta="+3 people" />                                  // string, shown as is
+<MetricGrid columns={3}>
+  <MetricCard
+    label="Monthly procurement"
+    value="₹48,25,000"
+    delta={0.142}
+    comparison="vs last month"
+  />
+  <MetricCard
+    label="Average lead time"
+    value="3.2 days"
+    delta={-0.18}
+    upIsGood={false}
+    comparison="vs target"
+  />
+  <MetricCard
+    variant="sparkline"
+    label="Daily order volume"
+    value="142 orders"
+    sparklineData={[110, 118, 125, 130, 138, 142]}
+  />
+</MetricGrid>
 ```
 
-- A **number** `delta` is a fraction: `0.125` shows as `+12.5%`, formatted for the user's locale.
-  Change it with `deltaFormat` (any `Intl.NumberFormat` options).
-- A **string** `delta` is shown as is. A leading `+` or `-` sets the arrow.
-- `upIsGood={false}` flips the colours for metrics where an increase is bad.
-- The arrow is announced to screen readers ("Up", "Down"), so colour isn't the only signal.
+### Progress toward quarterly quota
 
-## Formatting values
-
-`value` is a `ReactNode`: format it yourself so it matches the rest of your app.
+Track goal completion percentages with `variant="progress"`:
 
 ```tsx
-const money = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-<MetricCard label="Revenue" value={money.format(revenue)} />
+<MetricCard
+  variant="progress"
+  label="FY 2026 Q3 dispatch target"
+  value="₹1.84 Cr"
+  progress={82}
+  comparison="Target: ₹2.25 Cr"
+/>
 ```
 
-## Links, menus and loading
+### Loading and empty states
 
-<ComponentPreview name="widgets/metric-card/states" align="start" />
+Metric cards reflect loading and zero-value states consistently:
 
-- `render={<Link href="/orders" />}` makes the whole card a link (with hover and focus styles).
-- `action` adds a control in the corner, e.g. a `DropdownMenu`. (Not with `render`, because a link
-  can't contain a button.)
-- `loading` shows a skeleton in place of the value and sets `aria-busy`.
+<ComponentPreview name="widgets/metric-card/states" />
 
-## Layout
+## Accessibility
 
-`MetricGrid` fits as many equal columns as there's room for. Set `minCardWidth` (default `14rem`)
-to control when it wraps.
+`MetricCard` formats values and delta directions with accessible announcements.
 
-## `MetricDelta` on its own
+### Keyboard navigation
 
-The coloured trend is exported for tables and lists:
+Metric cards render as readable informational blocks. When rendered with an `href` or interactive action, cards receive standard keyboard focus with Enter/Space triggers.
 
-```tsx
-<MetricDelta delta={-0.04} upIsGood={false} />
-```
+### ARIA attributes
 
-`getTrend`, `getSentiment` and `formatDelta` are exported too. They have no React code, so they
-work anywhere.
+- Directional delta arrows announce their trajectory ("Up", "Down") explicitly to screen readers so meaning is not conveyed by colour alone.
+- Progress bars inside `variant="progress"` use semantic `role="progressbar"` with `aria-valuenow`, `aria-valuemin="0"`, and `aria-valuemax="100"`.
+- Cards render within semantic `<section>` or `<article>` landmarks.
 
-## Customization
+## Guidelines
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
+<DoDont
+  do={{
+    description: 'Set `upIsGood={false}` for metrics where an increase is undesirable (e.g. return rate, late dispatches).',
+    code: `<MetricCard label="Late dispatches" delta={0.15} upIsGood={false} />`,
+  }}
+  dont={{
+    description: 'Do not leave upIsGood true when an increase signifies a defect or operational failure.',
+    code: `<MetricCard label="Late dispatches" delta={0.15} />`,
+  }}
+/>
 
-## API Reference
+<DoDont
+  do={{
+    description: 'Maintain uniform variants across a single horizontal MetricGrid row for balanced visual alignment.',
+    code: `<MetricGrid columns={3}><MetricCard variant="default" /><MetricCard variant="default" /><MetricCard variant="default" /></MetricGrid>`,
+  }}
+  dont={{
+    description: 'Do not randomly mix different variants with uneven card heights in the same horizontal row.',
+    code: `<MetricGrid><MetricCard variant="split" /><MetricCard variant="compact" /></MetricGrid>`,
+  }}
+/>
 
-<ApiTable components={['MetricCard', 'MetricGrid']} />
+## API reference
+
+<ApiTable components={['MetricCard', 'MetricGrid', 'MetricDelta']} />
+
+## Related
+
+- [Sparkline](/ui/docs/widgets/sparkline) — Lightweight SVG trendline component used inside MetricCard.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing dashboard metrics.
+- [Stat](/ui/docs/components/data-display/stat) — Atomic numerical statistic display tile.
 
 ---
 
-## Notification Bell (https://innostes.com/ui/docs/widgets/notification-bell)
+## Notifications (https://innostes.com/ui/docs/widgets/notifications)
 
-A rich popover component to display recent notifications, relative timestamps, and unread statuses, usually placed in the TopBar.
+Popover notification trigger with unread badge counter, relative timestamps, and standalone list component.
 
 <ComponentPreview name="widgets/notification-bell/basic" align="center" className="p-4 sm:p-4" />
 
 ## Import
 
 ```tsx
-import { NotificationBell, NotificationList, NotificationItem } from '@innostes/ui';
+import {
+  NotificationBell,
+  NotificationList,
+  type NotificationItem,
+  type NotificationBellProps,
+  type NotificationListProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `NotificationBell` is primarily used in the top bar. It wraps a trigger and a popover containing a `NotificationList`.
+Use `NotificationBell` and `NotificationList` to keep operators informed of high-priority system events without disrupting their active workflow:
 
-It automatically calculates the unread count based on the `items` provided (items where `read` is falsy or `undefined`), or you can explicitly provide an `unreadCount`.
+- **Top navigation bar alerts**: Persistent notification badge with dropdown menu in [TopBar](/ui/docs/components/layout/top-bar).
+- **Dedicated notifications center**: Full-page notifications feed using `NotificationList`.
+- **Dashboard alert widgets**: Embedding `NotificationList` inside [WidgetCard](/ui/docs/widgets/widget-card).
+
+**Do not use NotificationBell for:**
+- Immediate transient feedback to direct user actions — use [Toast](/ui/docs/components/feedback/toast).
+- Persistent in-page warning messages — use [Alert](/ui/docs/components/feedback/alert).
+- High-stakes modal confirmations — use [AlertDialog](/ui/docs/components/overlays/alert-dialog).
+
+## Examples
+
+### Top navigation bell popover
+
+The standard top-bar bell with unread badge counter and action callbacks:
 
 ```tsx
-function TopNavigation() {
-  const notifications: NotificationItem[] = [
+'use client';
+
+import { useState } from 'react';
+import { NotificationBell, type NotificationItem, toast } from '@innostes/ui';
+import { FileText, Truck, AlertTriangle } from 'lucide-react';
+
+export function NavigationNotifications() {
+  const [items, setItems] = useState<NotificationItem[]>([
     {
       id: '1',
-      title: 'New message from Sarah',
-      description: 'Can we review the latest designs?',
-      time: new Date(),
-      icon: <MessageSquareIcon />,
+      title: 'Tax invoice approved',
+      description: 'Priya Sharma verified INV-2026-081 for ₹89,400',
+      time: new Date(Date.now() - 1000 * 60 * 15),
+      icon: <FileText className="size-4" />,
+      tone: 'success',
+      read: false,
+    },
+    {
+      id: '2',
+      title: 'Consignment DISP-2026-992 in transit',
+      description: 'E-way bill Ka-01-AB-1234 validated',
+      time: new Date(Date.now() - 1000 * 60 * 60 * 2),
+      icon: <Truck className="size-4" />,
       tone: 'primary',
       read: false,
     },
-    // ...
-  ];
+  ]);
+
+  const markAllRead = () => {
+    setItems((prev) => prev.map((item) => ({ ...item, read: true })));
+    toast.success('Marked all notifications as read');
+  };
 
   return (
     <NotificationBell
-      items={notifications}
-      onMarkAllRead={() => markAllRead()}
-      viewAll={{ href: '/notifications' }}
+      items={items}
+      onMarkAllRead={markAllRead}
+      viewAll={{ label: 'View all notifications', href: '/notifications' }}
     />
   );
 }
 ```
 
-### Notification List
+### Standalone NotificationList inside WidgetCard
 
-If you need to render the list of notifications outside of the bell popover (for example, on a dedicated full-page notifications view or inside a widget card), you can use the `NotificationList` component directly.
+Embed the raw notification list inside a dashboard card or dedicated full-page audit view:
 
 ```tsx
-<NotificationList
-  items={notifications}
-  onItemClick={(item) => markRead(item.id)}
-/>
+<WidgetCard title="System alerts" count={unreadCount} countTone="destructive">
+  <NotificationList
+    items={notifications}
+    onItemClick={(item) => navigateToRecord(item.id)}
+  />
+</WidgetCard>
 ```
 
-## API Reference
+## Accessibility
+
+`NotificationBell` is built on Base UI Popover primitives (`@base-ui/react/popover`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens or closes the notification popover from the bell trigger.' },
+    { key: 'Tab', action: 'Moves focus into the notification list and across action links.' },
+    { key: 'Escape', action: 'Dismisses the open popover and restores focus to the bell button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The trigger button has `aria-label="Notifications, N unread"` (or `aria-label="Notifications"` when all caught up).
+- When opened, `aria-expanded="true"` announces the open popover surface.
+- Unread status dots include hidden `<span className="sr-only">Unread</span>` elements so screen reader operators are immediately informed of unread state.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an onMarkAllRead handler so operators can quickly clear notification queues.',
+    code: `<NotificationBell items={items} onMarkAllRead={handleMarkAll} />`,
+  }}
+  dont={{
+    description: 'Do not omit action links when operators have dozens of queued notifications.',
+    code: `<NotificationBell items={fiftyItems} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use clear, specific tones (primary, success, warning, destructive) to visually distinguish alert categories.',
+    code: `<NotificationItem tone="warning" title="TDS mismatch" />`,
+  }}
+  dont={{
+    description: 'Do not render all notifications with identical icons and colours.',
+    code: `<NotificationItem tone="neutral" />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['NotificationBell', 'NotificationList']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar hosting the notification bell.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Dashboard container for embedding standalone notification lists.
+- [Toast](/ui/docs/components/feedback/toast) — Ephemeral notifications appearing in response to direct actions.
 
 ---
 
 ## Permission Matrix (https://innostes.com/ui/docs/widgets/permission-matrix)
 
-Resources by actions, grouped by module, with row and column "all" toggles.
+Interactive permission grid with module grouping, row and column bulk toggles, read-only roles, and sticky headers.
 
 <ComponentPreview name="widgets/permission-matrix/basic" />
 
 ## Import
 
 ```tsx
-import { PermissionMatrix, permissionKey } from '@innostes/ui';
+import {
+  PermissionMatrix,
+  permissionKey,
+  type PermissionMatrixAction,
+  type PermissionMatrixResource,
+  type PermissionMatrixProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `PermissionMatrix` for Role-Based Access Control (RBAC) administration in enterprise ERP setups:
+
+- **Role authorization configurations**: Assigning Create, Read, Update, Delete, and Approve rights to operator roles.
+- **Auditing system privileges**: Inspecting immutable read-only permissions on default admin profiles.
+- **Tenant permissions**: Multi-tenant access controls across finance, logistics, and inventory modules.
+
+**Do not use PermissionMatrix for:**
+- Single-permission toggles on user profiles — use [Switch](/ui/docs/components/forms/switch).
+- Flat lists of checkboxes — use [CheckboxGroup](/ui/docs/components/forms/checkbox).
+- Data records with varying row heights — use [DataTable](/ui/docs/components/data-display/data-table).
+
+## Examples
+
+### Value format and API persistence
+
+The value format is a flat array of `"resource:action"` strings. Use `permissionKey(resource, action)` to construct or parse keys safely:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { PermissionMatrix, permissionKey, toast } from '@innostes/ui';
+
+export function RolePermissionsManager({ roleId, initialPermissions }: { roleId: string; initialPermissions: string[] }) {
+  const [permissions, setPermissions] = useState<string[]>(initialPermissions);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (updated: string[]) => {
+    setPermissions(updated);
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/roles/${roleId}/permissions`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ permissions: updated }),
+      });
+      if (!res.ok) throw new Error('Failed to update permissions');
+      toast.success('Role permissions updated successfully');
+    } catch (err) {
+      toast.error('Failed to persist permissions to backend');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <PermissionMatrix
+      aria-label="Procurement Officer Permissions"
+      actions={[
+        { id: 'view', label: 'View' },
+        { id: 'create', label: 'Create' },
+        { id: 'edit', label: 'Edit' },
+        { id: 'approve', label: 'Approve' },
+      ]}
+      resources={[
+        { id: 'purchase_orders', label: 'Purchase orders', group: 'Procurement' },
+        { id: 'vendor_profiles', label: 'Vendor profiles', group: 'Procurement' },
+        { id: 'tax_invoices', label: 'Tax invoices', group: 'Finance & GST', actions: ['view', 'approve'] },
+        { id: 'e_way_bills', label: 'E-Way bills', group: 'Logistics', actions: ['view', 'create'] },
+      ]}
+      value={permissions}
+      onValueChange={handleSave}
+    />
+  );
+}
+```
+
+### Read-only system roles
+
+System-defined roles (like `Super Administrator` or `Auditor`) should not be editable. Pass `readOnly={true}` to lock all checkboxes and suppress bulk row/column toggles:
 
 ```tsx
 <PermissionMatrix
-  aria-label={`Permissions for ${role.name}`}
-  actions={[
-    { id: 'view', label: 'View' },
-    { id: 'edit', label: 'Edit' },
-    { id: 'approve', label: 'Approve' },
-  ]}
-  resources={[
-    { id: 'invoices', label: 'Invoices', group: 'Finance' },
-    { id: 'payroll', label: 'Payroll', group: 'HR', actions: ['view', 'approve'] },
-  ]}
-  value={role.permissions}
-  onValueChange={(permissions) => save({ ...role, permissions })}
+  readOnly
+  aria-label="Statutory Auditor (Read-only)"
+  actions={actions}
+  resources={resources}
+  value={auditorPermissions}
 />
 ```
 
-- The value is a flat list of `"resource:action"` keys. `permissionKey(resource, action)` builds one.
-- `actions` on a resource limits which actions apply; other cells show a dash.
-- `group` lists rows under section headings, in the order they first appear.
-- `readOnly` shows the permissions without bulk toggles or changes, e.g. for system roles.
+### Large matrices and sticky scrolling
+
+For large ERP suites with 50+ resources and 8+ actions, wrap `PermissionMatrix` inside a scrollable container with a fixed height. The component headers and resource label columns are styled with CSS sticky positioning, ensuring row and column labels remain pinned in place as operators scroll.
 
 ## Accessibility
 
-A real `<table>` with row and column headers. Every checkbox is named after its action and resource ("Edit Invoices"); bulk toggles show a mixed state when only some permissions are granted.
+`PermissionMatrix` renders a semantic HTML `<table>` with complete row and column header associations.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive checkboxes across the grid.' },
+    { key: 'Space', action: 'Toggles the focused permission checkbox on or off.' },
+    { key: 'Arrow keys', action: 'Navigates focus between adjacent grid cells.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as a `<table>` with `role="table"`.
+- Each checkbox is labelled with both its resource and action via `aria-label` (e.g. `aria-label="Approve Tax invoices"`).
+- Row and column bulk checkboxes receive `aria-checked="mixed"` when only a partial subset of permissions is selected.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Group related resources logically by module (Procurement, Finance, Warehousing) to simplify scanning.',
+    code: `<Resource label="Purchase orders" group="Procurement" />`,
+  }}
+  dont={{
+    description: 'Do not dump dozens of ungrouped resources into an arbitrary alphabetical list.',
+    code: `<Resource label="Purchase orders" group={undefined} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use readOnly for system roles that must not be altered by tenant administrators.',
+    code: `<PermissionMatrix readOnly value={immutableSystemPermissions} />`,
+  }}
+  dont={{
+    description: 'Do not leave checkboxes active for roles that will reject updates upon saving.',
+    code: `<PermissionMatrix value={systemPermissions} onValueChange={noOp} />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['PermissionMatrix']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component for tabular record listings.
+- [Checkbox](/ui/docs/components/forms/checkbox) — Checkbox component used inside matrix cells.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing administrative tools.
+
+---
+
+## Quick Actions (https://innostes.com/ui/docs/widgets/quick-actions)
+
+Shortcut launcher cards for high-frequency tasks such as creating orders, invoices, or dispatch notes.
+
+<ComponentPreview name="widgets/quick-actions/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  QuickActions,
+  type QuickAction,
+  type QuickActionsProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `QuickActions` on administrative dashboards to provide instant one-click access to repetitive enterprise tasks:
+
+- **ERP procurement launchers**: "Create Purchase Order", "Issue Tax Invoice", "Log Consignment".
+- **Inventory shortcuts**: "Stock Transfer", "Physical Count Audit", "Reorder Low Stock".
+- **HRMS actions**: "Record Attendance", "Apply Leave", "Initiate Payroll".
+
+**Do not use QuickActions for:**
+- Global application search — use [CommandPalette](/ui/docs/components/overlays/command-palette).
+- Table row action menus — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- Linear step-by-step wizard progress — use [Stepper](/ui/docs/components/navigation/stepper).
+
+## Examples
+
+### Row layout for dashboard cards
+
+Displaying shortcuts horizontally with descriptions alongside icons:
+
+```tsx
+<QuickActions
+  layout="row"
+  items={[
+    {
+      id: 'po',
+      label: 'Create purchase order',
+      description: 'Procure goods from registered vendors',
+      icon: <ShoppingCart className="size-5" />,
+      tone: 'primary',
+      onClick: () => router.push('/purchases/new'),
+    },
+    {
+      id: 'inv',
+      label: 'Issue tax invoice',
+      description: 'GST-compliant B2B e-invoice with IRN',
+      icon: <FileText className="size-5" />,
+      tone: 'success',
+      onClick: () => router.push('/invoices/new'),
+    },
+  ]}
+/>
+```
+
+### Tile layout for top-level launchers
+
+Use `layout="tile"` (default) for grid arrangements where icons sit directly above titles:
+
+```tsx
+<QuickActions
+  layout="tile"
+  minItemWidth="8rem"
+  items={shortcuts}
+/>
+```
+
+## Accessibility
+
+`QuickActions` renders accessible navigation triggers.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between shortcut tiles.' },
+    { key: 'Enter / Space', action: 'Activates the focused action tile.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Shortcuts render inside semantic `<ul>` and `<li>` elements.
+- When an item provides an `href` or `render` prop, it renders an accessible `<a>` tag; when it provides `onClick`, it renders an accessible `<button>` tag.
+- Disabled shortcuts receive `aria-disabled="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide short descriptions when using the row layout to explain what each shortcut accomplishes.',
+    code: `<QuickAction layout="row" label="Issue invoice" description="GST B2B e-invoice" />`,
+  }}
+  dont={{
+    description: 'Do not overload dashboards with more than 6–8 shortcuts in a single card.',
+    code: `<QuickActions items={twentyFourActions} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the render prop with framework router links for smooth client-side page transitions.',
+    code: `<QuickAction render={<Link href="/purchases/new" />} />`,
+  }}
+  dont={{
+    description: 'Do not trigger hard full-page browser reloads for internal application links.',
+    code: `<QuickAction onClick={() => { window.location.href = '/purchases/new'; }} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['QuickActions']} />
+
+## Related
+
+- [CommandPalette](/ui/docs/components/overlays/command-palette) — Modal keyboard palette for searching commands globally.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing quick action groups.
+- [AppSwitcher](/ui/docs/widgets/app-switcher) — High-level enterprise module launcher.
 
 ---
 
 ## Sparkline (https://innostes.com/ui/docs/widgets/sparkline)
 
-Pure SVG, no chart library, server-safe.
+Zero-dependency SVG trendline rendering clean fills and strokes without external chart libraries.
 
 <ComponentPreview name="widgets/sparkline/basic" />
 
 ## Import
 
 ```tsx
-import { Sparkline } from '@innostes/ui';
+import {
+  Sparkline,
+  type SparklineProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `Sparkline` to display immediate trajectory context in compact environments where full chart axes would overwhelm the layout:
+
+- **Data table cells**: Showing 7-day sales trends alongside inventory rows.
+- **KPI cards**: Showing monthly cash flow trajectory in [MetricCard](/ui/docs/widgets/metric-card).
+- **Stat summary tiles**: Visualizing delivery performance or return rates.
+
+**Do not use Sparkline for:**
+- Interactive data analysis requiring hover tooltips, axis labels, or multiple series — use [CartesianChart](/ui/docs/charts/cartesian).
+- Part-to-whole categorical breakdowns — use [DonutChart](/ui/docs/charts/donut).
+- Progress completion toward a fixed target — use [Progress](/ui/docs/components/feedback/progress).
+
+## Examples
+
+### Trendline with gradient area fill
+
+Displaying 7-day revenue trend with accessible status tones:
 
 ```tsx
-<Sparkline data={[12, 18, 15, 22, 28]} tone="success" label="Orders, last 5 days, rising" />
+<Sparkline
+  data={[42000, 48000, 45000, 52000, 61000, 58000, 69000]}
+  tone="success"
+  label="7-day revenue trajectory, rising"
+  height={40}
+/>
 ```
 
-- It fills the width of its container; set the height with `height` (default 40px).
-- `area={false}` draws only the line, which suits table cells.
-- Without `label` it's decorative and hidden from screen readers. Add a `label` when the trend
-  carries information that isn't written next to it.
+### Table cell line-only variant
 
-For full charts with axes and tooltips, use the chart components (coming next).
+Set `area={false}` to draw a minimal stroke-only line without gradient shading:
 
-## Customization
+```tsx
+<Sparkline
+  data={[12, 18, 15, 22, 28]}
+  area={false}
+  height={24}
+  className="w-24"
+/>
+```
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
+## Accessibility
 
-## API Reference
+`Sparkline` generates accessible SVG elements with screen reader labels.
+
+### Keyboard navigation
+
+Sparklines are non-interactive graphical representations. Keyboard focus naturally moves past them unless wrapped in an interactive element.
+
+### ARIA attributes
+
+- When the `label` prop is provided, the SVG renders `role="img"` with `aria-label={label}`.
+- If `label` is omitted, the SVG renders `aria-hidden="true"` so decorative sparklines do not distract screen reader operators when the trend metric is already articulated in text.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always provide an explicit label (e.g. "Revenue, last 7 days, rising") when the sparkline conveys standalone trend meaning.',
+    code: `<Sparkline label="7-day revenue, rising" data={data} />`,
+  }}
+  dont={{
+    description: 'Do not rely on the sparkline visual alone to communicate critical business decreases without text or accessible labels.',
+    code: `<Sparkline data={[100, 20]} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use `area={false}` in tight table cells to preserve clean visual vertical rhythm.',
+    code: `<Sparkline area={false} height={20} className="w-20" />`,
+  }}
+  dont={{
+    description: 'Do not force large 100px area fills into compact 36px table row cells.',
+    code: `<Sparkline height={100} area />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['Sparkline']} />
+
+## Related
+
+- [MetricCard](/ui/docs/widgets/metric-card) — KPI card featuring built-in sparkline support.
+- [CartesianChart](/ui/docs/charts/cartesian) — Full-featured chart component with tooltips and axes.
+- [Stat](/ui/docs/components/data-display/stat) — Statistical display tile paired with trend indicators.
 
 ---
 
 ## User Menu (https://innostes.com/ui/docs/widgets/user-menu)
 
-A user profile button that opens a dropdown menu. Typically used in the top bar or sidebar footer to access profile settings and sign out.
+User profile button that opens a dropdown menu with avatar fallbacks, status subtitles, and account actions.
 
 <ComponentPreview name="widgets/user-menu/basic" align="center" className="p-4 sm:p-4" />
 
 ## Import
 
 ```tsx
-import { UserMenu } from '@innostes/ui';
+import {
+  UserMenu,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  type UserMenuProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `UserMenu` provides a consistent trigger showing the user's avatar and details. It wraps a dropdown menu, so you can pass standard `DropdownMenuItem` components as children.
+Use `UserMenu` in primary navigation headers or sidebar footers to provide operator account management and session termination:
+
+- **Top navigation bar end slot**: Quick access to personal settings, company switcher, and sign out in [TopBar](/ui/docs/components/layout/top-bar).
+- **Sidebar footer**: Grounding the desktop application layout in [Sidebar](/ui/docs/components/layout/sidebar).
+- **Branch switching**: Switching active warehouse division or operational role.
+
+**Do not use UserMenu for:**
+- Static non-interactive team rosters — use [AvatarGroup](/ui/docs/components/data-display/avatar) or [EntityList](/ui/docs/widgets/entity-list).
+- Standalone button menus without user profile metadata — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- In-form user selection — use [Select](/ui/docs/components/forms/select).
+
+## Examples
+
+### Basic usage with avatar fallback and menu items
+
+If `avatarSrc` is omitted, `UserMenu` automatically derives initials from the `name` prop:
 
 ```tsx
-function AppHeader() {
-  return (
-    <UserMenu
-      name="Arun Kumar"
-      subtitle="Acme Corp"
-      email="arun@acme.com"
-      avatarSrc={user.photoUrl}
-    >
-      <DropdownMenuItem>Profile</DropdownMenuItem>
-      <DropdownMenuItem>Settings</DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem variant="destructive" onClick={signOut}>
-        Sign out
-      </DropdownMenuItem>
-    </UserMenu>
-  );
-}
+<UserMenu
+  name="Priya Sharma"
+  subtitle="Northwind Traders · Bengaluru Hub"
+  email="priya.sharma@northwind.in"
+  avatarSrc="/avatars/priya.jpg"
+>
+  <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
+    Profile & preferences
+  </DropdownMenuItem>
+  <DropdownMenuItem onClick={() => router.push('/settings/security')}>
+    Security & 2FA
+  </DropdownMenuItem>
+  <DropdownMenuSeparator />
+  <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+    Sign out
+  </DropdownMenuItem>
+</UserMenu>
 ```
 
-### Avatar fallback
+### In sidebar footer
 
-If `avatarSrc` is not provided, the component automatically generates initials based on the `name` prop (e.g., "Arun Kumar" -> "AK"). You can override this behavior by explicitly passing an `initials` string.
+Placing `UserMenu` at the bottom of the application sidebar:
 
-## API Reference
+```tsx
+<SidebarFooter>
+  <UserMenu
+    name="Ramesh Kumar"
+    subtitle="Logistics Manager"
+    email="ramesh.k@northwind.in"
+  >
+    <DropdownMenuItem>Switch depot</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+  </UserMenu>
+</SidebarFooter>
+```
+
+## Accessibility
+
+`UserMenu` is built on Base UI Menu primitives (`@base-ui/react/menu`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space / DownArrow', action: 'Opens the user account menu and focuses the first item.' },
+    { key: 'DownArrow / UpArrow', action: 'Cycles focus between account menu items.' },
+    { key: 'Enter / Space', action: 'Activates the focused menu item and dismisses the menu.' },
+    { key: 'Escape', action: 'Dismisses the menu and restores focus to the user menu trigger button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The trigger button receives `aria-haspopup="menu"`, `aria-expanded="true | false"`, and an accessible name incorporating the user's name.
+- The dropdown container has `role="menu"`.
+- Action items have `role="menuitem"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always use variant="destructive" on the Sign out action item.',
+    code: `<DropdownMenuItem variant="destructive" onClick={signOut}>Sign out</DropdownMenuItem>`,
+  }}
+  dont={{
+    description: 'Do not style the destructive sign-out action as a regular harmless menu option.',
+    code: `<DropdownMenuItem onClick={signOut}>Sign out</DropdownMenuItem>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an email or subtitle to help operators verify their active organizational tenant and login identity.',
+    code: `<UserMenu name="Priya Sharma" subtitle="Northwind Traders (Karnataka)" />`,
+  }}
+  dont={{
+    description: 'Do not render completely blank user buttons with no accessible name.',
+    code: `<UserMenu name="" />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['UserMenu']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar hosting UserMenu.
+- [Sidebar](/ui/docs/components/layout/sidebar) — Application sidebar hosting UserMenu in SidebarFooter.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Underlying dropdown menu primitive.
+
+---
+
+## Welcome Banner (https://innostes.com/ui/docs/widgets/welcome-banner)
+
+Top-of-dashboard greeting card with container-query responsiveness, background variants, and quick action buttons.
+
+<ComponentPreview name="widgets/welcome-banner/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  WelcomeBanner,
+  type WelcomeBannerProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `WelcomeBanner` as the welcoming centerpiece at the top of high-level role dashboards:
+
+- **Department hubs**: Greeting procurement managers, warehouse leads, or finance officers.
+- **Onboarding dashboards**: Welcoming newly joined staff with links to initial setup tasks.
+- **Executive summaries**: Presenting high-level fiscal dates alongside organizational mottos.
+
+**Do not use WelcomeBanner for:**
+- Entity record detail pages (like a specific purchase order or invoice) — use [PageHeader](/ui/docs/components/layout/page-header).
+- Compact KPI metric displays — use [MetricCard](/ui/docs/widgets/metric-card).
+- In-form instructional callouts — use [Alert](/ui/docs/components/feedback/alert).
+
+## Examples
+
+### Gradient variant with action buttons and inspirational quote
+
+The standard administrative dashboard greeting:
+
+```tsx
+<WelcomeBanner
+  eyebrow="Fiscal Year 2026-27 · Bengaluru Division"
+  title="Welcome back, Priya Sharma"
+  description="You have 3 purchase orders pending approval and 1 GST filing discrepancy to resolve."
+  variant="gradient"
+  quote="Integrity in procurement delivers resilience in supply."
+  actions={
+    <div className="flex flex-wrap gap-2">
+      <Button size="sm">Create PO</Button>
+      <Button size="sm" variant="outline">Export tax report</Button>
+    </div>
+  }
+/>
+```
+
+### Brand and plain variants
+
+- `variant="gradient"` (default): Uses a gentle wash of the primary theme tint.
+- `variant="brand"`: Solid primary background with light text for high-contrast executive portals.
+- `variant="plain"`: Clean card surface with standard border.
+
+```tsx
+<WelcomeBanner
+  variant="brand"
+  title="Supply Chain Operations"
+  description="Northwind Traders Bengaluru Central Depot"
+/>
+```
+
+## Accessibility
+
+`WelcomeBanner` renders semantic section landmarks.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive action buttons inside the banner.' },
+    { key: 'Enter / Space', action: 'Triggers the focused action button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as a `<section data-slot="welcome-banner">`.
+- Heading titles render with semantic hierarchy appropriate for top-of-page introductions.
+- Decorative illustrations render with `aria-hidden="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep the description concise (1–2 sentences) highlighting actionable summary numbers.',
+    code: `<WelcomeBanner description="3 purchase orders awaiting your approval today." />`,
+  }}
+  dont={{
+    description: 'Do not overload the banner with multi-paragraph operational documentation.',
+    code: `<WelcomeBanner description="Paragraph 1... Paragraph 2... Paragraph 3..." />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Include 1–3 primary action buttons that directly resolve common daily tasks.',
+    code: `<WelcomeBanner actions={<Button>Create PO</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not embed complex multi-field input forms inside the welcome banner.',
+    code: `<WelcomeBanner actions={<Form>{twentyFields}</Form>} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['WelcomeBanner']} />
+
+## Related
+
+- [PageHeader](/ui/docs/components/layout/page-header) — Administrative page header for record views.
+- [MetricCard](/ui/docs/widgets/metric-card) — KPI metric cards placed directly beneath welcome banners.
+- [QuickActions](/ui/docs/widgets/quick-actions) — Grid of task shortcuts.
 
 ---
 
 ## Widget Card (https://innostes.com/ui/docs/widgets/widget-card)
 
-Header with title, count, actions and "View all", plus built-in loading, empty and error states.
+Standardized dashboard card frame with headers, count badges, actions, view-all links, and built-in loading, empty, and error states.
 
 <ComponentPreview name="widgets/widget-card/basic" />
 
 ## Import
 
 ```tsx
-import { WidgetCard } from '@innostes/ui';
+import {
+  WidgetCard,
+  type WidgetCardProps,
+  type WidgetCardViewAll,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Wrap any dashboard content (a list, a table, a chart) to give it a consistent header and the
-three states every data widget needs:
+Use `WidgetCard` as the outer container for every component or visualization placed on an administrative dashboard:
+
+- **Asynchronous data widgets**: Housing lists, charts, and metrics fetching from backend APIs.
+- **Task queues and alerts**: Presenting pending approval lists with real-time count badges.
+- **Embedded tabular summaries**: Presenting top vendors or recent invoices.
+
+**Do not use WidgetCard for:**
+- Standard static article cards — use [Card](/ui/docs/components/data-display/card).
+- In-form field groups — use [FormSection](/ui/docs/components/layout/form-layout).
+- Slide-over inspection drawers — use [Sheet](/ui/docs/components/overlays/sheet).
+
+## Examples
+
+### Complete async lifecycle states
+
+Wrap any content to provide consistent loading, error with retry, and empty state handling:
 
 ```tsx
-const { data, isLoading, error, refetch } = usePendingActions();
+'use client';
 
+import { WidgetCard, ActionList, PeriodSelect } from '@innostes/ui';
+
+export function PendingApprovalsWidget() {
+  const { data, isLoading, error, refetch } = usePendingApprovals();
+
+  return (
+    <WidgetCard
+      title="Pending authorizations"
+      description="Purchase orders and credit notes awaiting review"
+      count={data?.length}
+      countTone="primary"
+      viewAll={{ href: '/approvals', label: 'View all authorizations' }}
+      actions={<PeriodSelect />}
+      loading={isLoading}
+      loadingRows={4}
+      error={error ? 'Unable to load pending approvals from server.' : undefined}
+      onRetry={refetch}
+      empty={data?.length === 0}
+      emptyState="All procurement authorizations have been cleared."
+    >
+      <ActionList items={data ?? []} divided />
+    </WidgetCard>
+  );
+}
+```
+
+### Full-bleed content with padding="none"
+
+Set `padding="none"` when embedding tables, charts, or maps so their edges align cleanly with the card boundaries:
+
+```tsx
 <WidgetCard
-  title="Pending actions"
-  count={data?.length}
-  viewAll={{ href: '/approvals' }}
-  actions={<PeriodSelect />}
-  loading={isLoading}
-  error={error ? 'Could not load pending actions.' : undefined}
-  onRetry={refetch}
-  empty={data?.length === 0}
-  emptyState="You're all caught up."
+  title="Recent consignments"
+  padding="none"
+  viewAll={{ href: '/logistics/consignments' }}
 >
-  <PendingActionList items={data} />
+  <Table>{/* Full-bleed table */}</Table>
 </WidgetCard>
 ```
 
-- `viewAll` takes `href`, `onClick` or `render={<Link href="…" />}` for your router.
-- `padding="none"` lets tables and charts reach the card edges.
-- `count` shows a badge next to the title (`99+` above 99); `countTone` changes its colour.
-
 ## Accessibility
 
-- Renders a `<section>` labelled by its title, so screen-reader users can jump between widgets.
-- `headingLevel` (default `h2`) keeps the page outline correct.
-- Loading sets `aria-busy`; errors use `role="alert"`.
+`WidgetCard` renders semantic HTML5 `<section>` landmarks.
 
-## Customization
+### Keyboard navigation
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus into the card, cycling through header actions, view-all links, and body controls.' },
+  ]}
+/>
 
-## API Reference
+### ARIA attributes
+
+- The container renders as a `<section>` labelled by its heading via `aria-labelledby`, allowing screen reader operators to jump between dashboard widgets using standard landmark shortcuts.
+- Loading states use `aria-busy="true"` and accessible skeleton elements.
+- Error states render with `role="alert"` so network failures are announced promptly.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an onRetry callback when passing an error to give operators a direct way to recover.',
+    code: `<WidgetCard error={error} onRetry={refetch} />`,
+  }}
+  dont={{
+    description: 'Do not render raw error traces or leave users stranded on failed data queries without a retry button.',
+    code: `<WidgetCard error={String(err.stack)} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use padding="none" for tables and charts to let data grids reach the card perimeter.',
+    code: `<WidgetCard padding="none"><DataTable /></WidgetCard>`,
+  }}
+  dont={{
+    description: 'Do not introduce double padding by combining standard card padding with padded tables.',
+    code: `<WidgetCard padding="default"><div className="p-6"><DataTable /></div></WidgetCard>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['WidgetCard']} />
+
+## Related
+
+- [Card](/ui/docs/components/data-display/card) — General-purpose card container primitive.
+- [Skeleton](/ui/docs/components/feedback/skeleton) — Placeholder primitive used during WidgetCard loading states.
+- [EmptyState](/ui/docs/components/data-display/empty-state) — Empty state primitive used inside WidgetCard.
 
 ---

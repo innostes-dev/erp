@@ -1,9 +1,9 @@
 ---
 title: App Switcher
-description: A popover for moving between top-level modules or tools.
+description: Popover menu for switching between high-level enterprise application modules.
 icon: LayoutGrid
 status: Stable
-summary: A rich popover menu designed for the ECOSYSTEM module launcher, featuring grouped apps, descriptions, icons, and built-in search functionality.
+summary: Popover launcher with grouped application sections, descriptions, status icons, and built-in search.
 ---
 
 <ComponentPreview name="widgets/app-switcher/basic" align="center" className="p-4 sm:p-4" />
@@ -11,57 +11,124 @@ summary: A rich popover menu designed for the ECOSYSTEM module launcher, featuri
 ## Import
 
 ```tsx
-import { AppSwitcher } from '@innostes/ui';
+import {
+  AppSwitcher,
+  type AppSwitcherProps,
+  type AppSwitcherSection,
+  type AppSwitcherApp,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `AppSwitcher` is primarily used in the top bar as a way to navigate between large, distinct parts of an ecosystem (e.g., switching from the HRMS module to the ERP module).
+Use `AppSwitcher` in the top application bar to enable direct transitions between major ERP business systems:
 
-It accepts an array of `sections`, where each section contains a list of `apps`.
+- **Ecosystem module navigation**: Jumping between Procurement, Warehousing, Invoicing, and Human Resources.
+- **Multi-tenant portal switching**: Switching between Northwind Traders distribution entities.
+- **Developer tools and settings**: Moving from core operational views to analytics consoles.
+
+**Do not use AppSwitcher for:**
+- Page-level sub-navigation within a single module — use [Sidebar](/ui/docs/components/layout/sidebar).
+- Flat icon navigation rails — use [AppRail](/ui/docs/components/layout/app-rail).
+- Standalone command execution — use [CommandPalette](/ui/docs/components/overlays/command-palette).
+
+## Examples
+
+### Grouped modules with search filter
+
+Organising business modules under titled sections with built-in search:
 
 ```tsx
-function TopNavigation() {
-  const sections = [
-    {
-      label: 'Modules',
-      apps: [
-        {
-          id: 'erp',
-          name: 'ERP',
-          description: 'Business operations',
-          icon: <BuildingIcon />,
-          tone: 'chart-1',
-          href: '/erp'
-        },
-        {
-          id: 'hrms',
-          name: 'HRMS',
-          description: 'People & HR',
-          icon: <UsersIcon />,
-          tone: 'chart-3',
-          href: '/hrms'
-        },
-      ]
-    },
-  ];
+const sections: AppSwitcherSection[] = [
+  {
+    label: 'Supply chain & operations',
+    apps: [
+      {
+        id: 'procurement',
+        name: 'Procurement',
+        description: 'Purchase orders, vendors, and RFQs',
+        icon: <ShoppingCart className="size-5" />,
+        tone: 'chart-1',
+        href: '/procurement',
+      },
+      {
+        id: 'inventory',
+        name: 'Warehousing & inventory',
+        description: 'Stock management, bins, and e-way bills',
+        icon: <Package className="size-5" />,
+        tone: 'chart-2',
+        href: '/inventory',
+      },
+    ],
+  },
+  {
+    label: 'Finance & compliance',
+    apps: [
+      {
+        id: 'billing',
+        name: 'Invoices & GST',
+        description: 'Tax invoices, credit notes, and GSTR-1',
+        icon: <FileText className="size-5" />,
+        tone: 'chart-3',
+        href: '/finance',
+      },
+    ],
+  },
+];
 
-  return <AppSwitcher value="hrms" sections={sections} />;
-}
+<AppSwitcher sections={sections} />
 ```
 
-### Routing
+## Accessibility
 
-You can handle navigation in three ways:
+`AppSwitcher` is built on Base UI Popover primitives (`@base-ui/react/popover`).
 
-1. Provide an `href` to each app. The item will render as an `<a>` tag.
-2. Provide a `render` element (e.g., `render={<Link href="/hrms" />}`). The component will merge its props into your custom link component.
-3. Use the controlled `value` and `onValueChange` props to navigate programmatically when an app is selected.
+### Keyboard navigation
 
-### Search
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens or closes the application switcher popover.' },
+    { key: 'Tab', action: 'Moves focus into the search input and across module application links.' },
+    { key: 'Escape', action: 'Dismisses the open switcher popover and returns focus to the trigger button.' },
+  ]}
+/>
 
-The component automatically includes a search input if there are more than 6 applications provided across all sections. You can manually force it to show or hide by setting the `searchable` boolean prop.
+### ARIA attributes
 
-## API Reference
+- The trigger button receives `aria-haspopup="dialog"` and `aria-expanded="true | false"`.
+- Application tiles use semantic anchor links (`<a>`) with accessible titles and descriptions.
+- The built-in search filter uses `role="searchbox"` to filter apps dynamically without losing keyboard focus.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide meaningful descriptions for each application so operators know which module to select.',
+    code: `<AppSwitcherApp name="Procurement" description="Purchase orders and RFQs" />`,
+  }}
+  dont={{
+    description: 'Do not overload sections with dozens of obscure sub-links (link to module homepages only).',
+    code: `<AppSwitcherSection apps={fortySubpages} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Place the AppSwitcher in TopBarStart alongside branding for instant wayfinding.',
+    code: `<TopBarStart><AppSwitcher sections={sections} /></TopBarStart>`,
+  }}
+  dont={{
+    description: 'Do not bury the app switcher deep within in-page body content.',
+    code: `<div className="mt-96"><AppSwitcher /></div>`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['AppSwitcher']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar hosting AppSwitcher.
+- [AppRail](/ui/docs/components/layout/app-rail) — Persistent vertical navigation rail for module switching.
+- [CommandPalette](/ui/docs/components/overlays/command-palette) — Search overlay for jumping directly to deep records.

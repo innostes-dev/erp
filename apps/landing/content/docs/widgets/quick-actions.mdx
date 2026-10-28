@@ -1,0 +1,127 @@
+---
+title: Quick Actions
+description: Grid or row layout of primary business shortcuts.
+icon: Zap
+status: Stable
+summary: Shortcut launcher cards for high-frequency tasks such as creating orders, invoices, or dispatch notes.
+---
+
+<ComponentPreview name="widgets/quick-actions/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  QuickActions,
+  type QuickAction,
+  type QuickActionsProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `QuickActions` on administrative dashboards to provide instant one-click access to repetitive enterprise tasks:
+
+- **ERP procurement launchers**: "Create Purchase Order", "Issue Tax Invoice", "Log Consignment".
+- **Inventory shortcuts**: "Stock Transfer", "Physical Count Audit", "Reorder Low Stock".
+- **HRMS actions**: "Record Attendance", "Apply Leave", "Initiate Payroll".
+
+**Do not use QuickActions for:**
+- Global application search — use [CommandPalette](/ui/docs/components/overlays/command-palette).
+- Table row action menus — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- Linear step-by-step wizard progress — use [Stepper](/ui/docs/components/navigation/stepper).
+
+## Examples
+
+### Row layout for dashboard cards
+
+Displaying shortcuts horizontally with descriptions alongside icons:
+
+```tsx
+<QuickActions
+  layout="row"
+  items={[
+    {
+      id: 'po',
+      label: 'Create purchase order',
+      description: 'Procure goods from registered vendors',
+      icon: <ShoppingCart className="size-5" />,
+      tone: 'primary',
+      onClick: () => router.push('/purchases/new'),
+    },
+    {
+      id: 'inv',
+      label: 'Issue tax invoice',
+      description: 'GST-compliant B2B e-invoice with IRN',
+      icon: <FileText className="size-5" />,
+      tone: 'success',
+      onClick: () => router.push('/invoices/new'),
+    },
+  ]}
+/>
+```
+
+### Tile layout for top-level launchers
+
+Use `layout="tile"` (default) for grid arrangements where icons sit directly above titles:
+
+```tsx
+<QuickActions
+  layout="tile"
+  minItemWidth="8rem"
+  items={shortcuts}
+/>
+```
+
+## Accessibility
+
+`QuickActions` renders accessible navigation triggers.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between shortcut tiles.' },
+    { key: 'Enter / Space', action: 'Activates the focused action tile.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Shortcuts render inside semantic `<ul>` and `<li>` elements.
+- When an item provides an `href` or `render` prop, it renders an accessible `<a>` tag; when it provides `onClick`, it renders an accessible `<button>` tag.
+- Disabled shortcuts receive `aria-disabled="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide short descriptions when using the row layout to explain what each shortcut accomplishes.',
+    code: `<QuickAction layout="row" label="Issue invoice" description="GST B2B e-invoice" />`,
+  }}
+  dont={{
+    description: 'Do not overload dashboards with more than 6–8 shortcuts in a single card.',
+    code: `<QuickActions items={twentyFourActions} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the render prop with framework router links for smooth client-side page transitions.',
+    code: `<QuickAction render={<Link href="/purchases/new" />} />`,
+  }}
+  dont={{
+    description: 'Do not trigger hard full-page browser reloads for internal application links.',
+    code: `<QuickAction onClick={() => { window.location.href = '/purchases/new'; }} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['QuickActions']} />
+
+## Related
+
+- [CommandPalette](/ui/docs/components/overlays/command-palette) — Modal keyboard palette for searching commands globally.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing quick action groups.
+- [AppSwitcher](/ui/docs/widgets/app-switcher) — High-level enterprise module launcher.

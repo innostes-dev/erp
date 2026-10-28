@@ -63,20 +63,35 @@ if (proseErrors.length > 0) {
   console.log('✓ [PROSE] Zero banned marketing phrases, emoji, or invalid placeholders.');
 }
 
-// 2. Report-mode checks (tracked until prompts 12/17 switch them to enforce)
+const frontmatterErrors = runFrontmatterCheck({ enforce: true });
+if (frontmatterErrors.length > 0) {
+  console.error(`❌ [FRONTMATTER] ${frontmatterErrors.length} frontmatter issues:`);
+  for (const e of frontmatterErrors) console.error(`   ${e.file}:${e.line} - ${e.message}`);
+} else {
+  console.log('✓ [FRONTMATTER] All component, widget, and chart frontmatters are complete.');
+}
+
+const coverageErrors = runCoverageCheck({ enforce: true });
+if (coverageErrors.length > 0) {
+  console.error(`❌ [COVERAGE] ${coverageErrors.length} undocumented symbols:`);
+  for (const e of coverageErrors) console.error(`   ${e.message}`);
+} else {
+  console.log('✓ [COVERAGE] All exported components are documented in <ApiTable> or allowlisted.');
+}
+
+const templateErrors = runTemplateCheck({ enforce: true });
+if (templateErrors.length > 0) {
+  console.error(`❌ [TEMPLATE] ${templateErrors.length} template ordering or heading defects:`);
+  for (const e of templateErrors) console.error(`   ${e.file} - ${e.message}`);
+} else {
+  console.log('✓ [TEMPLATE] All component pages follow the 7-section template strictly.');
+}
+
+// 2. Report-mode checks (tracked until prompt 17 switches spelling to enforce)
 console.log('\n--- REPORT-MODE GATES (Defect metrics tracking to zero) ---');
 
-const frontmatterErrors = runFrontmatterCheck({ enforce: false });
-console.log(`ℹ️ [FRONTMATTER] ${frontmatterErrors.length} incomplete frontmatter entries (enforced in prompt 12)`);
-
-const coverageErrors = runCoverageCheck({ enforce: false });
-console.log(`ℹ️ [COVERAGE] ${coverageErrors.length} exported symbols lacking <ApiTable> or allowlist (enforced in prompt 12)`);
-
 const apiTableErrors = runApiTablesCheck({ enforce: false });
-console.log(`ℹ️ [API TABLES] ${apiTableErrors.length} <ApiTable> entries with 0 props or missing (enforced in prompt 12)`);
-
-const templateErrors = runTemplateCheck({ enforce: false });
-console.log(`ℹ️ [TEMPLATE] ${templateErrors.length} template ordering / heading case defects (enforced in prompt 12)`);
+console.log(`ℹ️ [API TABLES] ${apiTableErrors.length} <ApiTable> entries with 0 props or missing (enforced in prompt 13)`);
 
 console.log(`ℹ️ [SPELLING] ${spellingErrors.length} American spelling occurrences (enforced in prompt 17)`);
 
@@ -89,7 +104,10 @@ const totalEnforcedFailures =
   sidebarErrors.length +
   mdxSafetyErrors.length +
   consistencyErrors.length +
-  proseErrors.length;
+  proseErrors.length +
+  frontmatterErrors.length +
+  coverageErrors.length +
+  templateErrors.length;
 
 if (totalEnforcedFailures > 0) {
   console.error(`\n❌ Quality gates failed with ${totalEnforcedFailures} enforced defect(s).`);

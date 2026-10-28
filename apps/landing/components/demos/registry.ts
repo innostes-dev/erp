@@ -77,15 +77,20 @@ import Demo_overlays_dropdown_menu_basic_tsx from './overlays/dropdown-menu/basi
 import Demo_overlays_popover_basic_tsx from './overlays/popover/basic';
 import Demo_overlays_sheet_basic_tsx from './overlays/sheet/basic';
 import Demo_overlays_tooltip_basic_tsx from './overlays/tooltip/basic';
+import Demo_widgets_action_list_basic_tsx from './widgets/action-list/basic';
+import Demo_widgets_activity_feed_basic_tsx from './widgets/activity-feed/basic';
 import Demo_widgets_app_switcher_basic_tsx from './widgets/app-switcher/basic';
 import Demo_widgets_change_log_basic_tsx from './widgets/change-log/basic';
+import Demo_widgets_entity_list_basic_tsx from './widgets/entity-list/basic';
 import Demo_widgets_kanban_board_basic_tsx from './widgets/kanban-board/basic';
 import Demo_widgets_metric_card_states_tsx from './widgets/metric-card/states';
 import Demo_widgets_metric_card_variants_tsx from './widgets/metric-card/variants';
 import Demo_widgets_notification_bell_basic_tsx from './widgets/notification-bell/basic';
 import Demo_widgets_permission_matrix_basic_tsx from './widgets/permission-matrix/basic';
+import Demo_widgets_quick_actions_basic_tsx from './widgets/quick-actions/basic';
 import Demo_widgets_sparkline_basic_tsx from './widgets/sparkline/basic';
 import Demo_widgets_user_menu_basic_tsx from './widgets/user-menu/basic';
+import Demo_widgets_welcome_banner_basic_tsx from './widgets/welcome-banner/basic';
 import Demo_widgets_widget_card_basic_tsx from './widgets/widget-card/basic';
 
 export const demos: Record<string, ComponentType> = {
@@ -166,14 +171,19 @@ export const demos: Record<string, ComponentType> = {
   'overlays/popover/basic': Demo_overlays_popover_basic_tsx,
   'overlays/sheet/basic': Demo_overlays_sheet_basic_tsx,
   'overlays/tooltip/basic': Demo_overlays_tooltip_basic_tsx,
+  'widgets/action-list/basic': Demo_widgets_action_list_basic_tsx,
+  'widgets/activity-feed/basic': Demo_widgets_activity_feed_basic_tsx,
   'widgets/app-switcher/basic': Demo_widgets_app_switcher_basic_tsx,
   'widgets/change-log/basic': Demo_widgets_change_log_basic_tsx,
+  'widgets/entity-list/basic': Demo_widgets_entity_list_basic_tsx,
   'widgets/kanban-board/basic': Demo_widgets_kanban_board_basic_tsx,
   'widgets/metric-card/states': Demo_widgets_metric_card_states_tsx,
   'widgets/metric-card/variants': Demo_widgets_metric_card_variants_tsx,
   'widgets/notification-bell/basic': Demo_widgets_notification_bell_basic_tsx,
   'widgets/permission-matrix/basic': Demo_widgets_permission_matrix_basic_tsx,
+  'widgets/quick-actions/basic': Demo_widgets_quick_actions_basic_tsx,
   'widgets/sparkline/basic': Demo_widgets_sparkline_basic_tsx,
   'widgets/user-menu/basic': Demo_widgets_user_menu_basic_tsx,
+  'widgets/welcome-banner/basic': Demo_widgets_welcome_banner_basic_tsx,
   'widgets/widget-card/basic': Demo_widgets_widget_card_basic_tsx,
 };

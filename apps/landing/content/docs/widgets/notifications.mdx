@@ -1,0 +1,151 @@
+---
+title: Notifications
+description: Bell trigger popover and standalone notification list for enterprise alerts.
+icon: Bell
+status: Stable
+summary: Popover notification trigger with unread badge counter, relative timestamps, and standalone list component.
+---
+
+<ComponentPreview name="widgets/notification-bell/basic" align="center" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  NotificationBell,
+  NotificationList,
+  type NotificationItem,
+  type NotificationBellProps,
+  type NotificationListProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `NotificationBell` and `NotificationList` to keep operators informed of high-priority system events without disrupting their active workflow:
+
+- **Top navigation bar alerts**: Persistent notification badge with dropdown menu in [TopBar](/ui/docs/components/layout/top-bar).
+- **Dedicated notifications center**: Full-page notifications feed using `NotificationList`.
+- **Dashboard alert widgets**: Embedding `NotificationList` inside [WidgetCard](/ui/docs/widgets/widget-card).
+
+**Do not use NotificationBell for:**
+- Immediate transient feedback to direct user actions — use [Toast](/ui/docs/components/feedback/toast).
+- Persistent in-page warning messages — use [Alert](/ui/docs/components/feedback/alert).
+- High-stakes modal confirmations — use [AlertDialog](/ui/docs/components/overlays/alert-dialog).
+
+## Examples
+
+### Top navigation bell popover
+
+The standard top-bar bell with unread badge counter and action callbacks:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { NotificationBell, type NotificationItem, toast } from '@innostes/ui';
+import { FileText, Truck, AlertTriangle } from 'lucide-react';
+
+export function NavigationNotifications() {
+  const [items, setItems] = useState<NotificationItem[]>([
+    {
+      id: '1',
+      title: 'Tax invoice approved',
+      description: 'Priya Sharma verified INV-2026-081 for ₹89,400',
+      time: new Date(Date.now() - 1000 * 60 * 15),
+      icon: <FileText className="size-4" />,
+      tone: 'success',
+      read: false,
+    },
+    {
+      id: '2',
+      title: 'Consignment DISP-2026-992 in transit',
+      description: 'E-way bill Ka-01-AB-1234 validated',
+      time: new Date(Date.now() - 1000 * 60 * 60 * 2),
+      icon: <Truck className="size-4" />,
+      tone: 'primary',
+      read: false,
+    },
+  ]);
+
+  const markAllRead = () => {
+    setItems((prev) => prev.map((item) => ({ ...item, read: true })));
+    toast.success('Marked all notifications as read');
+  };
+
+  return (
+    <NotificationBell
+      items={items}
+      onMarkAllRead={markAllRead}
+      viewAll={{ label: 'View all notifications', href: '/notifications' }}
+    />
+  );
+}
+```
+
+### Standalone NotificationList inside WidgetCard
+
+Embed the raw notification list inside a dashboard card or dedicated full-page audit view:
+
+```tsx
+<WidgetCard title="System alerts" count={unreadCount} countTone="destructive">
+  <NotificationList
+    items={notifications}
+    onItemClick={(item) => navigateToRecord(item.id)}
+  />
+</WidgetCard>
+```
+
+## Accessibility
+
+`NotificationBell` is built on Base UI Popover primitives (`@base-ui/react/popover`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space', action: 'Opens or closes the notification popover from the bell trigger.' },
+    { key: 'Tab', action: 'Moves focus into the notification list and across action links.' },
+    { key: 'Escape', action: 'Dismisses the open popover and restores focus to the bell button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The trigger button has `aria-label="Notifications, N unread"` (or `aria-label="Notifications"` when all caught up).
+- When opened, `aria-expanded="true"` announces the open popover surface.
+- Unread status dots include hidden `<span className="sr-only">Unread</span>` elements so screen reader operators are immediately informed of unread state.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide an onMarkAllRead handler so operators can quickly clear notification queues.',
+    code: `<NotificationBell items={items} onMarkAllRead={handleMarkAll} />`,
+  }}
+  dont={{
+    description: 'Do not omit action links when operators have dozens of queued notifications.',
+    code: `<NotificationBell items={fiftyItems} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use clear, specific tones (primary, success, warning, destructive) to visually distinguish alert categories.',
+    code: `<NotificationItem tone="warning" title="TDS mismatch" />`,
+  }}
+  dont={{
+    description: 'Do not render all notifications with identical icons and colours.',
+    code: `<NotificationItem tone="neutral" />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['NotificationBell', 'NotificationList']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar hosting the notification bell.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Dashboard container for embedding standalone notification lists.
+- [Toast](/ui/docs/components/feedback/toast) — Ephemeral notifications appearing in response to direct actions.

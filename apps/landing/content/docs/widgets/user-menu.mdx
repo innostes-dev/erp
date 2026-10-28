@@ -1,9 +1,9 @@
 ---
 title: User Menu
-description: The signed-in user's avatar and name, opening a menu.
+description: The signed-in user's profile avatar and details opening an action menu.
 icon: CircleUser
 status: Stable
-summary: A user profile button that opens a dropdown menu. Typically used in the top bar or sidebar footer to access profile settings and sign out.
+summary: User profile button that opens a dropdown menu with avatar fallbacks, status subtitles, and account actions.
 ---
 
 <ComponentPreview name="widgets/user-menu/basic" align="center" className="p-4 sm:p-4" />
@@ -11,37 +11,122 @@ summary: A user profile button that opens a dropdown menu. Typically used in the
 ## Import
 
 ```tsx
-import { UserMenu } from '@innostes/ui';
+import {
+  UserMenu,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  type UserMenuProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-The `UserMenu` provides a consistent trigger showing the user's avatar and details. It wraps a dropdown menu, so you can pass standard `DropdownMenuItem` components as children.
+Use `UserMenu` in primary navigation headers or sidebar footers to provide operator account management and session termination:
+
+- **Top navigation bar end slot**: Quick access to personal settings, company switcher, and sign out in [TopBar](/ui/docs/components/layout/top-bar).
+- **Sidebar footer**: Grounding the desktop application layout in [Sidebar](/ui/docs/components/layout/sidebar).
+- **Branch switching**: Switching active warehouse division or operational role.
+
+**Do not use UserMenu for:**
+- Static non-interactive team rosters — use [AvatarGroup](/ui/docs/components/data-display/avatar) or [EntityList](/ui/docs/widgets/entity-list).
+- Standalone button menus without user profile metadata — use [DropdownMenu](/ui/docs/components/overlays/dropdown-menu).
+- In-form user selection — use [Select](/ui/docs/components/forms/select).
+
+## Examples
+
+### Basic usage with avatar fallback and menu items
+
+If `avatarSrc` is omitted, `UserMenu` automatically derives initials from the `name` prop:
 
 ```tsx
-function AppHeader() {
-  return (
-    <UserMenu
-      name="Arun Kumar"
-      subtitle="Acme Corp"
-      email="arun@acme.com"
-      avatarSrc={user.photoUrl}
-    >
-      <DropdownMenuItem>Profile</DropdownMenuItem>
-      <DropdownMenuItem>Settings</DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem variant="destructive" onClick={signOut}>
-        Sign out
-      </DropdownMenuItem>
-    </UserMenu>
-  );
-}
+<UserMenu
+  name="Priya Sharma"
+  subtitle="Northwind Traders · Bengaluru Hub"
+  email="priya.sharma@northwind.in"
+  avatarSrc="/avatars/priya.jpg"
+>
+  <DropdownMenuItem onClick={() => router.push('/settings/profile')}>
+    Profile & preferences
+  </DropdownMenuItem>
+  <DropdownMenuItem onClick={() => router.push('/settings/security')}>
+    Security & 2FA
+  </DropdownMenuItem>
+  <DropdownMenuSeparator />
+  <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+    Sign out
+  </DropdownMenuItem>
+</UserMenu>
 ```
 
-### Avatar fallback
+### In sidebar footer
 
-If `avatarSrc` is not provided, the component automatically generates initials based on the `name` prop (e.g., "Arun Kumar" -> "AK"). You can override this behavior by explicitly passing an `initials` string.
+Placing `UserMenu` at the bottom of the application sidebar:
 
-## API Reference
+```tsx
+<SidebarFooter>
+  <UserMenu
+    name="Ramesh Kumar"
+    subtitle="Logistics Manager"
+    email="ramesh.k@northwind.in"
+  >
+    <DropdownMenuItem>Switch depot</DropdownMenuItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+  </UserMenu>
+</SidebarFooter>
+```
+
+## Accessibility
+
+`UserMenu` is built on Base UI Menu primitives (`@base-ui/react/menu`).
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Enter / Space / DownArrow', action: 'Opens the user account menu and focuses the first item.' },
+    { key: 'DownArrow / UpArrow', action: 'Cycles focus between account menu items.' },
+    { key: 'Enter / Space', action: 'Activates the focused menu item and dismisses the menu.' },
+    { key: 'Escape', action: 'Dismisses the menu and restores focus to the user menu trigger button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The trigger button receives `aria-haspopup="menu"`, `aria-expanded="true | false"`, and an accessible name incorporating the user's name.
+- The dropdown container has `role="menu"`.
+- Action items have `role="menuitem"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always use variant="destructive" on the Sign out action item.',
+    code: `<DropdownMenuItem variant="destructive" onClick={signOut}>Sign out</DropdownMenuItem>`,
+  }}
+  dont={{
+    description: 'Do not style the destructive sign-out action as a regular harmless menu option.',
+    code: `<DropdownMenuItem onClick={signOut}>Sign out</DropdownMenuItem>`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Provide an email or subtitle to help operators verify their active organizational tenant and login identity.',
+    code: `<UserMenu name="Priya Sharma" subtitle="Northwind Traders (Karnataka)" />`,
+  }}
+  dont={{
+    description: 'Do not render completely blank user buttons with no accessible name.',
+    code: `<UserMenu name="" />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['UserMenu']} />
+
+## Related
+
+- [TopBar](/ui/docs/components/layout/top-bar) — Global application top bar hosting UserMenu.
+- [Sidebar](/ui/docs/components/layout/sidebar) — Application sidebar hosting UserMenu in SidebarFooter.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Underlying dropdown menu primitive.

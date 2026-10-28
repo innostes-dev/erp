@@ -1,0 +1,141 @@
+---
+title: Action List
+description: Task lists awaiting user completion, approval, or review.
+icon: SquareCheck
+status: Stable
+summary: Actionable task queues pairing descriptions, status icons, and dedicated resolution buttons.
+---
+
+<ComponentPreview name="widgets/action-list/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  ActionList,
+  type ActionListItem,
+  type ActionListProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `ActionList` when presenting a queue of distinct tasks that need operator decision or approval:
+
+- **Pending managerial authorizations**: Approving purchase orders, expense claims, or credit notes.
+- **Compliance review queues**: Reconciling GSTIN discrepancies or reviewing vendor TDS declarations.
+- **Operational triage lists**: Discrepancies flagged during warehouse receiving.
+
+**Do not use ActionList for:**
+- Non-actionable audit logs without buttons — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+- Full enterprise bulk approvals — use [DataTable](/ui/docs/components/data-display/data-table) with row selection.
+- General application shortcut triggers — use [QuickActions](/ui/docs/widgets/quick-actions).
+
+## Examples
+
+### Pending purchase order approvals inside WidgetCard
+
+Pairing `ActionList` with `WidgetCard` and an unread count badge:
+
+```tsx
+<WidgetCard
+  title="Pending authorizations"
+  description="Procurement requests requiring managerial sign-off"
+  count={3}
+  countTone="primary"
+>
+  <ActionList
+    divided
+    items={[
+      {
+        id: '1',
+        title: 'Approve purchase order PO-2026-081',
+        description: 'Bengaluru Spices Pvt Ltd · ₹89,400',
+        icon: <Clock className="size-4" />,
+        tone: 'primary',
+        action: {
+          label: 'Approve',
+          variant: 'primary',
+          onClick: () => handleApprove('PO-2026-081'),
+        },
+      },
+      {
+        id: '2',
+        title: 'Review GSTIN reconciliation mismatch',
+        description: 'Invoice INV-2026-074 requires e-way bill re-validation',
+        icon: <AlertTriangle className="size-4" />,
+        tone: 'warning',
+        action: {
+          label: 'Review',
+          variant: 'secondary',
+          onClick: () => openReview('INV-2026-074'),
+        },
+      },
+    ]}
+  />
+</WidgetCard>
+```
+
+### Empty state handling
+
+When all pending tasks are resolved, `ActionList` automatically renders a clean empty state:
+
+```tsx
+<ActionList
+  items={[]}
+  emptyText="All pending approvals have been resolved."
+/>
+```
+
+## Accessibility
+
+`ActionList` renders semantic list structures with accessible action targets.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between the action buttons across each task row.' },
+    { key: 'Enter / Space', action: 'Activates the focused task action button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Rows render inside semantic `<ul>` and `<li>` elements.
+- Each action button maintains distinct accessible context linking the button label with the task title.
+- Empty states render with accessible text containers announced cleanly to screen readers.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide clear, imperative action labels like "Approve", "Review", or "Verify".',
+    code: `<ActionListItem action={{ label: 'Approve' }} />`,
+  }}
+  dont={{
+    description: 'Do not use vague labels like "Click here" or "Go".',
+    code: `<ActionListItem action={{ label: 'Click' }} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Pair ActionList with WidgetCard count to highlight the exact number of pending items.',
+    code: `<WidgetCard count={items.length}><ActionList items={items} /></WidgetCard>`,
+  }}
+  dont={{
+    description: 'Do not hide task counts when operators rely on them to gauge urgency.',
+    code: `<WidgetCard><ActionList items={items} /></WidgetCard>`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['ActionList']} />
+
+## Related
+
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing task lists.
+- [ActivityFeed](/ui/docs/widgets/activity-feed) — Read-only chronological timeline of events.
+- [Button](/ui/docs/components/actions/button) — Action button component used for row actions.

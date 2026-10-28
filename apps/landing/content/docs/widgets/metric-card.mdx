@@ -1,9 +1,9 @@
 ---
 title: Metric Card
-description: KPI cards for dashboards, in seven layouts.
+description: KPI metric cards for enterprise dashboards across seven distinct layout styles.
 icon: ChartNoAxesColumnIncreasing
 status: Stable
-summary: 'One component, seven designs: default, compact, sparkline, progress, comparison, split and accent.'
+summary: High-density business metric cards with delta indicators, comparison baselines, sparklines, and progress bars.
 ---
 
 <ComponentPreview name="widgets/metric-card/variants" align="start" />
@@ -11,75 +11,135 @@ summary: 'One component, seven designs: default, compact, sparkline, progress, c
 ## Import
 
 ```tsx
-import { MetricCard, MetricGrid, MetricDelta } from '@innostes/ui';
+import {
+  MetricCard,
+  MetricGrid,
+  MetricDelta,
+  type MetricCardProps,
+} from '@innostes/ui';
 ```
 
-## Choosing a variant
+## When to use
 
-| Variant | Use it for |
-| --- | --- |
-| `default` | The standard KPI row: icon, value, trend and comparison. |
-| `compact` | Many metrics in little space, e.g. a sidebar or a dense ops dashboard. |
-| `accent` | The one or two metrics that matter most on the page. |
-| `sparkline` | When the direction over time matters more than one number. |
-| `progress` | Progress towards a target: sales quota, budget, OKR. |
-| `comparison` | This period next to the previous one, side by side. |
-| `split` | One total broken down into a few parts, e.g. attendance by status. |
+Use `MetricCard` to display primary Key Performance Indicators (KPIs) across executive and operational dashboards:
 
-Use one variant per row so the row lines up.
+- **Executive overview**: Total revenue, gross margin, accounts receivable, and net profit.
+- **Logistics operations**: On-time dispatches, warehouse capacity, and fleet turnaround.
+- **Procurement metrics**: Open purchase order spend, vendor fulfilment rate, and average lead time.
 
-## Deltas and trends
+**Do not use MetricCard for:**
+- Long tabular data rows — use [DataTable](/ui/docs/components/data-display/data-table).
+- Multi-step interactive wizards — use [Stepper](/ui/docs/components/navigation/stepper).
+- Detailed multi-dimensional data charts — use [CartesianChart](/ui/docs/charts/cartesian).
+
+## Examples
+
+### Seven design variants
+
+Select from seven specialized variants to match the density and focus of each dashboard row:
+
+| Variant | Best for |
+| :--- | :--- |
+| `default` | Standard KPI with icon, primary value, delta badge, and comparison period. |
+| `compact` | High-density grids, sidebars, or auxiliary operational cards. |
+| `accent` | Highlighting the single most vital metric on the page. |
+| `sparkline` | Emphasizing trajectory over time rather than a single static number. |
+| `progress` | Tracking achievement toward an explicit quota or quarterly target. |
+| `comparison` | Side-by-side contrast between current period and historical benchmark. |
+| `split` | Decomposing a total into segmented parts (e.g. order status distribution). |
+
+### Deltas, trends, and Indian fiscal formatting
+
+Format numeric deltas as fractional values (e.g. `0.125` formats as `+12.5%`) and format rupee values in `en-IN`:
 
 ```tsx
-<MetricCard label="Revenue" value="€48,250" delta={0.125} comparison="vs last month" />   // ↑ +12.5% (green)
-<MetricCard label="Refund rate" value="1.2%" delta={0.2} upIsGood={false} />              // ↑ +20% (red)
-<MetricCard label="Team" value="42" delta="+3 people" />                                  // string, shown as is
+<MetricGrid columns={3}>
+  <MetricCard
+    label="Monthly procurement"
+    value="₹48,25,000"
+    delta={0.142}
+    comparison="vs last month"
+  />
+  <MetricCard
+    label="Average lead time"
+    value="3.2 days"
+    delta={-0.18}
+    upIsGood={false}
+    comparison="vs target"
+  />
+  <MetricCard
+    variant="sparkline"
+    label="Daily order volume"
+    value="142 orders"
+    sparklineData={[110, 118, 125, 130, 138, 142]}
+  />
+</MetricGrid>
 ```
 
-- A **number** `delta` is a fraction: `0.125` shows as `+12.5%`, formatted for the user's locale.
-  Change it with `deltaFormat` (any `Intl.NumberFormat` options).
-- A **string** `delta` is shown as is. A leading `+` or `-` sets the arrow.
-- `upIsGood={false}` flips the colours for metrics where an increase is bad.
-- The arrow is announced to screen readers ("Up", "Down"), so colour isn't the only signal.
+### Progress toward quarterly quota
 
-## Formatting values
-
-`value` is a `ReactNode`: format it yourself so it matches the rest of your app.
+Track goal completion percentages with `variant="progress"`:
 
 ```tsx
-const money = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-<MetricCard label="Revenue" value={money.format(revenue)} />
+<MetricCard
+  variant="progress"
+  label="FY 2026 Q3 dispatch target"
+  value="₹1.84 Cr"
+  progress={82}
+  comparison="Target: ₹2.25 Cr"
+/>
 ```
 
-## Links, menus and loading
+### Loading and empty states
 
-<ComponentPreview name="widgets/metric-card/states" align="start" />
+Metric cards reflect loading and zero-value states consistently:
 
-- `render={<Link href="/orders" />}` makes the whole card a link (with hover and focus styles).
-- `action` adds a control in the corner, e.g. a `DropdownMenu`. (Not with `render`, because a link
-  can't contain a button.)
-- `loading` shows a skeleton in place of the value and sets `aria-busy`.
+<ComponentPreview name="widgets/metric-card/states" />
 
-## Layout
+## Accessibility
 
-`MetricGrid` fits as many equal columns as there's room for. Set `minCardWidth` (default `14rem`)
-to control when it wraps.
+`MetricCard` formats values and delta directions with accessible announcements.
 
-## `MetricDelta` on its own
+### Keyboard navigation
 
-The coloured trend is exported for tables and lists:
+Metric cards render as readable informational blocks. When rendered with an `href` or interactive action, cards receive standard keyboard focus with Enter/Space triggers.
 
-```tsx
-<MetricDelta delta={-0.04} upIsGood={false} />
-```
+### ARIA attributes
 
-`getTrend`, `getSentiment` and `formatDelta` are exported too. They have no React code, so they
-work anywhere.
+- Directional delta arrows announce their trajectory ("Up", "Down") explicitly to screen readers so meaning is not conveyed by colour alone.
+- Progress bars inside `variant="progress"` use semantic `role="progressbar"` with `aria-valuenow`, `aria-valuemin="0"`, and `aria-valuemax="100"`.
+- Cards render within semantic `<section>` or `<article>` landmarks.
 
-## Customization
+## Guidelines
 
-Like all innostes UI components, this widget supports overriding styles via `className`, `classNames` (where applicable), and swapping the root element via the `render` prop. See [Conventions](/ui/docs/resources/conventions#customisation) for the full customisation model.
+<DoDont
+  do={{
+    description: 'Set `upIsGood={false}` for metrics where an increase is undesirable (e.g. return rate, late dispatches).',
+    code: `<MetricCard label="Late dispatches" delta={0.15} upIsGood={false} />`,
+  }}
+  dont={{
+    description: 'Do not leave upIsGood true when an increase signifies a defect or operational failure.',
+    code: `<MetricCard label="Late dispatches" delta={0.15} />`,
+  }}
+/>
 
-## API Reference
+<DoDont
+  do={{
+    description: 'Maintain uniform variants across a single horizontal MetricGrid row for balanced visual alignment.',
+    code: `<MetricGrid columns={3}><MetricCard variant="default" /><MetricCard variant="default" /><MetricCard variant="default" /></MetricGrid>`,
+  }}
+  dont={{
+    description: 'Do not randomly mix different variants with uneven card heights in the same horizontal row.',
+    code: `<MetricGrid><MetricCard variant="split" /><MetricCard variant="compact" /></MetricGrid>`,
+  }}
+/>
 
-<ApiTable components={['MetricCard', 'MetricGrid']} />
+## API reference
+
+<ApiTable components={['MetricCard', 'MetricGrid', 'MetricDelta']} />
+
+## Related
+
+- [Sparkline](/ui/docs/widgets/sparkline) — Lightweight SVG trendline component used inside MetricCard.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing dashboard metrics.
+- [Stat](/ui/docs/components/data-display/stat) — Atomic numerical statistic display tile.

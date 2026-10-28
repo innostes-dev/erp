@@ -1,49 +1,121 @@
 ---
 title: Donut Chart
-description: A Donut chart for visualizing proportions with a prominent center metric.
+description: Proportion and composition chart for categorical distribution with prominent center metrics.
+icon: ChartPie
+status: Stable
+summary: Donut chart for visualizing proportions and percentage shares with prominent center metrics, en-IN formatting, and accessible hidden tables.
 ---
 
-Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
-
-## Installation
-
-As with all charts, `DonutChart` requires Recharts as a peer dependency.
-
-**Important Version Guidance:**
-- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
-- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
+<ComponentPreview name="charts/donut/basic" />
 
 ## Import
 
-Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+Charts are exported from `@innostes/ui/charts` to isolate Recharts from your main application bundle:
 
 ```tsx
-import { DonutChart } from '@innostes/ui/charts';
+import { DonutChart, type DonutChartProps } from '@innostes/ui/charts';
+```
+
+## When to use
+
+Use `DonutChart` when visualizing the proportional breakdown of a finite total across 2 to 7 categories:
+
+- **Procurement expenditure by category**: Spices (42%), Dry Fruits (28%), Packaging Materials (18%), Logistics (12%).
+- **Warehouse capacity allocation**: Occupied pallet bays versus available storage.
+- **Invoice status distribution**: Paid, pending authorization, in-dispute, and overdue.
+
+**Do not use DonutChart for:**
+- More than 7 discrete categories — slices become too thin to distinguish visually; use a sorted horizontal [BarChart](/ui/docs/charts/cartesian) instead.
+- Time-series or trend progression — use [LineChart](/ui/docs/charts/cartesian).
+- Continuous cumulative flow — use [AreaChart](/ui/docs/charts/cartesian).
+
+## Examples
+
+### Category distribution with center metric
+
+Displaying total annual expenditure with prominent center KPI callouts:
+
+```tsx
+const spendDistribution = [
+  { key: 'spices', label: 'Spices & Condiments', value: 4280000, color: 'chart-1' },
+  { key: 'dryfruits', label: 'Dry Fruits & Nuts', value: 2850000, color: 'chart-2' },
+  { key: 'packaging', label: 'Packaging Materials', value: 1840000, color: 'chart-3' },
+  { key: 'logistics', label: 'Freight & Logistics', value: 1220000, color: 'chart-4' },
+];
+
+<DonutChart
+  aria-label="Annual expenditure breakdown by category"
+  data={spendDistribution}
+  centerLabel="Total spend"
+  centerValue="₹1.02 Cr"
+  valueFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`}
+  locale="en-IN"
+/>
+```
+
+### Semantic tone mapping
+
+Assign semantic tones (`success`, `warning`, `destructive`) to individual slices to reflect compliance status:
+
+```tsx
+const auditBreakdown = [
+  { key: 'passed', label: 'Compliant consignments', value: 840, color: 'success' },
+  { key: 'pending', label: 'Awaiting e-way bills', value: 120, color: 'warning' },
+  { key: 'rejected', label: 'Damaged / rejected', value: 40, color: 'destructive' },
+];
+
+<DonutChart
+  aria-label="Consignment compliance status"
+  data={auditBreakdown}
+  centerLabel="Audited"
+  centerValue="1,000"
+/>
 ```
 
 ## Accessibility
 
-Just like Cartesian charts, the `DonutChart` automatically renders an accessible, visually-hidden `<table>` containing the raw data and percentage shares. This allows screen readers to navigate the data easily. The `aria-label` prop is required and is used to name this hidden table.
+`DonutChart` renders an accessible, visually-hidden `<table>` element via `ChartFrame` alongside the visual SVG rendering.
 
-## Center Metric
+### Screen reader table navigation
 
-The `DonutChart` supports a distinct API for displaying a prominent metric in the center of the ring via the `centerValue` and `centerLabel` props. This is ideal for highlighting the primary takeaway of the chart (e.g., total volume, overall percentage).
+- The required `aria-label` provides an accessible title for the data table.
+- Each slice is tabulated with its category name, absolute numeric value (formatted via `valueFormatter`), and calculated percentage share.
+- Screen reader operators can review the exact breakdown sequentially without needing pointer coordinates.
 
-## Props Overview
+### Colour contrast
 
-- **`data`**: An array of slices to render, each defined as `{ key: string, label: string, value: number, color?: ChartColor }`.
-- **`valueFormatter`**: Optional function to format the values displayed in tooltips and the accessible table.
-- **`locale`**: Optional locale string for number formatting in the accessible table.
-- **`aria-label`**: Required string to name the underlying hidden data table.
+Slices consume token-based colors (`chart-1` through `chart-8` or semantic tones) designed to maintain distinct contrast boundaries in both light and dark modes.
 
-## Theming
+## Guidelines
 
-Slices can be colored automatically using the `chart-1` to `chart-8` categorical tokens, or you can assign specific semantic tones like `success`, `destructive`, or `warning` to individual slices via the `color` property in the data objects.
+<DoDont
+  do={{
+    description: 'Use the center metric (centerValue and centerLabel) to emphasize the primary takeaway of the chart.',
+    code: `<DonutChart centerLabel="Total budget" centerValue="₹50L" />`,
+  }}
+  dont={{
+    description: 'Do not crowd the donut with more than 7 slices (use horizontal BarChart for large category sets).',
+    code: `<DonutChart data={twentySlices} />`,
+  }}
+/>
 
-## Usage
+<DoDont
+  do={{
+    description: 'Use semantic tones (success, warning, destructive) when slices represent compliance or status tiers.',
+    code: `<DonutSlice color="success" label="Approved" />`,
+  }}
+  dont={{
+    description: 'Do not assign positive green colours to negative categories like "Damaged goods".',
+    code: `<DonutSlice color="success" label="Defects" />`,
+  }}
+/>
 
-<ComponentPreview name="charts/donut/basic" />
-
-## API
+## API reference
 
 <ApiTable components={['DonutChart']} />
+
+## Related
+
+- [CartesianChart](/ui/docs/charts/cartesian) — Bar, Line, and Area charts for categorical trends.
+- [MetricCard](/ui/docs/widgets/metric-card) — KPI metric card with progress or sparkline styles.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Outer frame for housing donut charts on dashboards.

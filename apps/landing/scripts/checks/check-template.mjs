@@ -39,6 +39,11 @@ export function runTemplateCheck(options = { enforce: false }) {
     if (!fmMatch) continue;
 
     const fm = fmMatch[1];
+    // Skip category overview pages (index.mdx)
+    if (file.endsWith('/index.mdx') || file.endsWith('\\index.mdx')) {
+      continue;
+    }
+
     // Only check pages with 'status:' in frontmatter (component/widget/chart pages)
     if (!/status:\s*(Stable|Beta|Experimental)/.test(fm)) {
       continue;

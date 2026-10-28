@@ -1,22 +1,97 @@
 ---
 title: Widgets
 description: Composite business components for dashboards, task boards, and permission grids.
+icon: LayoutGrid
 status: Stable
-summary: High-level business components combining multiple primitives for enterprise ERP patterns.
+summary: High-level business blocks combining primitives with built-in loading, empty, and error contracts.
 ---
 
 import { CategoryGrid } from '@/components/docs/category-grid';
 
 # Widgets
 
-Widgets are domain-ready, composite enterprise components designed specifically for Northwind Traders Pvt Ltd's ERP operations. From role-based access matrixes to drag-and-drop Kanban logistics boards, widgets assemble primitives into production-ready business blocks.
+Widgets are domain-ready, composite business blocks designed for enterprise ERP applications at Northwind Traders Pvt Ltd. While primitive components (such as buttons, inputs, and dialogs) provide isolated UI elements, widgets assemble multiple primitives into complete functional modules with predictable asynchronous data contracts.
 
 ## Components
 
 <CategoryGrid category="widgets" />
 
-## Usage guidelines
+## Widgets versus components
 
-- **Business logic separation**: Widgets encapsulate UI interactions and visual states while accepting pure data props and callback handlers for business operations.
-- **Data density**: Widgets support compact display modes to present high-density business intelligence without visual clutter.
-- **Touch and keyboard**: All widgets include accessible touch targets and keyboard alternatives for mouse-intensive operations.
+Understanding when to reach for a primitive component versus a composed widget:
+
+| Dimension | Primitive components | Composed widgets |
+| :--- | :--- | :--- |
+| **Scope** | Atomic building blocks (`Button`, `Input`, `Dialog`, `Badge`). | Domain-specific blocks (`MetricCard`, `KanbanBoard`, `ActivityFeed`). |
+| **State management** | Local interactive UI state (open/closed, focus, active). | Async business data states (`loading`, `empty`, `error`, retry). |
+| **Layout integration** | Sits inside forms, toolbars, and cards. | Forms entire dashboard cards, kanban boards, or navigation shells. |
+| **Composition** | Extended via standard props and Tailwind classes. | Enclosed inside `WidgetCard` with consistent headers and actions. |
+
+## The shared data contract
+
+Every dashboard widget in `@innostes/ui` adheres to a shared three-state lifecycle:
+
+1. **`loading`**: When asynchronous fetches are in flight, the widget displays skeleton placeholders matching the exact geometry of expected content, eliminating layout shifts.
+2. **`empty`**: When a query resolves with zero matching records, the widget renders a clean, accessible empty state prompt rather than a broken or blank canvas.
+3. **`error`**: When network requests or API authorizations fail, the widget displays a localized error indicator alongside an optional retry action (`onRetry`).
+
+## Composing custom widgets with WidgetCard
+
+`WidgetCard` provides the standardized outer shell for all widgets. Use it to compose custom ERP dashboard widgets that directly inherit the standard header, actions, count badges, and state handling:
+
+```tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { WidgetCard, Button } from '@innostes/ui';
+
+export function WarehouseStockWidget({ warehouseId }: { warehouseId: string }) {
+  const [data, setData] = useState<StockRecord[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStock = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/warehouses/${warehouseId}/stock`);
+      if (!res.ok) throw new Error('Failed to load stock data');
+      const json = await res.json();
+      setData(json);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStock();
+  }, [warehouseId]);
+
+  return (
+    <WidgetCard
+      title="Warehouse stock balance"
+      description="Bengaluru Central Hub · Koramangala"
+      count={data?.length}
+      countTone="primary"
+      loading={loading}
+      loadingRows={4}
+      error={error}
+      onRetry={fetchStock}
+      empty={data?.length === 0}
+      emptyState="No inventory items allocated to this depot."
+      viewAll={{ href: `/inventory/warehouses/${warehouseId}` }}
+    >
+      <div className="space-y-2">
+        {data?.map((item) => (
+          <div key={item.id} className="flex justify-between text-sm py-1 border-b">
+            <span>{item.name}</span>
+            <span className="font-semibold">{item.quantity} units</span>
+          </div>
+        ))}
+      </div>
+    </WidgetCard>
+  );
+}
+```

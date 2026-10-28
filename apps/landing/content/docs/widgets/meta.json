@@ -2,14 +2,19 @@
   "title": "Widgets",
   "pages": [
     "index",
-    "metric-card",
     "widget-card",
+    "metric-card",
     "sparkline",
+    "activity-feed",
+    "entity-list",
+    "action-list",
+    "quick-actions",
+    "welcome-banner",
     "kanban-board",
     "permission-matrix",
     "change-log",
     "app-switcher",
-    "notification-bell",
+    "notifications",
     "user-menu"
   ]
 }

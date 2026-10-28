@@ -1,0 +1,132 @@
+---
+title: Entity List
+description: Structured lists of business entities such as suppliers, customers, and employees.
+icon: Users
+status: Stable
+summary: High-density business entity rows with avatars, status metadata, and row actions.
+---
+
+<ComponentPreview name="widgets/entity-list/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  EntityList,
+  type EntityListItem,
+  type EntityListProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `EntityList` to present curated collections of business records within dashboard cards or drawers:
+
+- **Key vendor rankings**: Top suppliers by spend or pending invoice balance.
+- **Customer account summaries**: Recent high-value corporate buyers.
+- **Warehouse personnel rosters**: On-duty supervisors at regional depots.
+
+**Do not use EntityList for:**
+- Full-page searchable and sortable enterprise records — use [DataTable](/ui/docs/components/data-display/data-table).
+- Pure task checklists with action buttons — use [ActionList](/ui/docs/widgets/action-list).
+- Event audit feeds — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+
+## Examples
+
+### Business vendor roster with status badges and actions
+
+Presenting primary ERP suppliers with initials avatars, financial totals, and direct action triggers:
+
+```tsx
+<EntityList
+  divided
+  items={[
+    {
+      id: '1',
+      title: 'Bengaluru Spices Pvt Ltd',
+      subtitle: 'GSTIN: 29ABCDE1234F1Z5 · Koramangala Hub',
+      initials: 'BS',
+      tone: 'primary',
+      meta: <span className="font-semibold">₹4,28,900</span>,
+      action: (
+        <Button size="sm" variant="ghost" iconOnly aria-label="View ledger">
+          <ExternalLink className="size-4" />
+        </Button>
+      ),
+    },
+    {
+      id: '2',
+      title: 'Malabar Cardamom Producers',
+      subtitle: 'GSTIN: 32AABCM5678K1Z2 · Kochi Depot',
+      initials: 'MC',
+      tone: 'success',
+      meta: <span className="font-semibold">₹2,85,000</span>,
+    },
+  ]}
+/>
+```
+
+### Compact density for sidebars
+
+Set `density="sm"` when placing the list inside narrow navigation drawers or secondary panels:
+
+```tsx
+<EntityList
+  density="sm"
+  items={recentCustomers}
+  onItemClick={(item) => navigateToCustomer(item.id)}
+/>
+```
+
+## Accessibility
+
+`EntityList` implements semantic list patterns with interactive row semantics.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive row buttons or links.' },
+    { key: 'Enter / Space', action: 'Activates the focused entity row or row action button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Rows render inside semantic `<ul>` and `<li>` elements.
+- When `onItemClick` is supplied, each item renders an accessible button element with full keyboard support.
+- Action buttons inside rows maintain distinct accessible labels via `aria-label`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide meaningful subtitles (such as GSTIN or depot location) to help operators distinguish similar vendor entities.',
+    code: `<EntityListItem title="Acme India" subtitle="GSTIN: 27AABCA1234F1Z1" />`,
+  }}
+  dont={{
+    description: 'Do not crowd entity rows with dozens of dense data columns (use DataTable for wide tabular data).',
+    code: `<EntityListItem meta={<Table>{allFiftyFields}</Table>} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use initials avatars with distinct tones (primary, success, neutral) to provide quick visual recognition.',
+    code: `<EntityListItem initials="BS" tone="primary" />`,
+  }}
+  dont={{
+    description: 'Do not leave avatars blank when customer profile photos are unavailable.',
+    code: `<EntityListItem avatarSrc="" />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['EntityList']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Tabular enterprise data grid with sorting and pagination.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing entity lists.
+- [Avatar](/ui/docs/components/data-display/avatar) — Profile photo and initials indicator used inside EntityList.

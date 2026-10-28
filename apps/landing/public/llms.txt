@@ -92,20 +92,25 @@
 - [Tooltip](https://innostes.com/ui/docs/components/overlays/tooltip) [Stable]: Names icon buttons and shows shortcut hints with shared warm-up delay across toolbars.
 
 ## Widgets
-- [App Switcher](https://innostes.com/ui/docs/widgets/app-switcher) [Stable]: A rich popover menu designed for the ECOSYSTEM module launcher, featuring grouped apps, descriptions, icons, and built-in search functionality.
-- [Change Log](https://innostes.com/ui/docs/widgets/change-log) [Beta]: An audit trail with field-level before and after values, notes and day groups.
-- [Widgets](https://innostes.com/ui/docs/widgets/index) [Stable]: High-level business components combining multiple primitives for enterprise ERP patterns.
-- [Kanban Board](https://innostes.com/ui/docs/widgets/kanban-board) [Beta]: Pipelines, deals, tickets and approval stages, with drag and drop, keyboard moves and WIP limits.
-- [Metric Card](https://innostes.com/ui/docs/widgets/metric-card) [Stable]: One component, seven designs: default, compact, sparkline, progress, comparison, split and accent.
-- [Notification Bell](https://innostes.com/ui/docs/widgets/notification-bell) [Stable]: A rich popover component to display recent notifications, relative timestamps, and unread statuses, usually placed in the TopBar.
-- [Permission Matrix](https://innostes.com/ui/docs/widgets/permission-matrix) [Beta]: Resources by actions, grouped by module, with row and column "all" toggles.
-- [Sparkline](https://innostes.com/ui/docs/widgets/sparkline) [Stable]: Pure SVG, no chart library, server-safe.
-- [User Menu](https://innostes.com/ui/docs/widgets/user-menu) [Stable]: A user profile button that opens a dropdown menu. Typically used in the top bar or sidebar footer to access profile settings and sign out.
-- [Widget Card](https://innostes.com/ui/docs/widgets/widget-card) [Stable]: Header with title, count, actions and "View all", plus built-in loading, empty and error states.
+- [Action List](https://innostes.com/ui/docs/widgets/action-list) [Stable]: Actionable task queues pairing descriptions, status icons, and dedicated resolution buttons.
+- [Activity Feed](https://innostes.com/ui/docs/widgets/activity-feed) [Stable]: Compact list and connected timeline views with relative timestamps, day groupings, and status tones.
+- [App Switcher](https://innostes.com/ui/docs/widgets/app-switcher) [Stable]: Popover launcher with grouped application sections, descriptions, status icons, and built-in search.
+- [Change Log](https://innostes.com/ui/docs/widgets/change-log) [Beta]: Audit trail with field-level before and after values, notes, actor identities, and day grouping.
+- [Entity List](https://innostes.com/ui/docs/widgets/entity-list) [Stable]: High-density business entity rows with avatars, status metadata, and row actions.
+- [Widgets](https://innostes.com/ui/docs/widgets/index) [Stable]: High-level business blocks combining primitives with built-in loading, empty, and error contracts.
+- [Kanban Board](https://innostes.com/ui/docs/widgets/kanban-board) [Beta]: Interactive multi-column board with optimistic drag-and-drop moves, WIP limits, touch support, and full keyboard navigation.
+- [Metric Card](https://innostes.com/ui/docs/widgets/metric-card) [Stable]: High-density business metric cards with delta indicators, comparison baselines, sparklines, and progress bars.
+- [Notifications](https://innostes.com/ui/docs/widgets/notifications) [Stable]: Popover notification trigger with unread badge counter, relative timestamps, and standalone list component.
+- [Permission Matrix](https://innostes.com/ui/docs/widgets/permission-matrix) [Beta]: Interactive permission grid with module grouping, row and column bulk toggles, read-only roles, and sticky headers.
+- [Quick Actions](https://innostes.com/ui/docs/widgets/quick-actions) [Stable]: Shortcut launcher cards for high-frequency tasks such as creating orders, invoices, or dispatch notes.
+- [Sparkline](https://innostes.com/ui/docs/widgets/sparkline) [Stable]: Zero-dependency SVG trendline rendering clean fills and strokes without external chart libraries.
+- [User Menu](https://innostes.com/ui/docs/widgets/user-menu) [Stable]: User profile button that opens a dropdown menu with avatar fallbacks, status subtitles, and account actions.
+- [Welcome Banner](https://innostes.com/ui/docs/widgets/welcome-banner) [Stable]: Top-of-dashboard greeting card with container-query responsiveness, background variants, and quick action buttons.
+- [Widget Card](https://innostes.com/ui/docs/widgets/widget-card) [Stable]: Standardized dashboard card frame with headers, count badges, actions, view-all links, and built-in loading, empty, and error states.
 
 ## Charts
-- [Cartesian Charts](https://innostes.com/ui/docs/charts/cartesian): Bar, Line, and Area charts for visualizing categorical data series.
-- [Donut Chart](https://innostes.com/ui/docs/charts/donut): A Donut chart for visualizing proportions with a prominent center metric.
+- [Cartesian Charts](https://innostes.com/ui/docs/charts/cartesian) [Stable]: Bar, Line, and Area charts for categorical business analytics with accessible hidden tables, en-IN formatting, and Recharts integration.
+- [Donut Chart](https://innostes.com/ui/docs/charts/donut) [Stable]: Donut chart for visualizing proportions and percentage shares with prominent center metrics, en-IN formatting, and accessible hidden tables.
 - [Charts](https://innostes.com/ui/docs/charts/index) [Stable]: Accessible, theme-aware charting primitives for financial summaries and inventory analytics.
 
 ## Patterns and Examples

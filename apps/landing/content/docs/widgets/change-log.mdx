@@ -1,9 +1,9 @@
 ---
 title: Change Log
-description: Who changed which fields of a record, and when.
+description: Field-level audit trail showing historical modifications to business records.
 icon: Clock
 status: Beta
-summary: An audit trail with field-level before and after values, notes and day groups.
+summary: Audit trail with field-level before and after values, notes, actor identities, and day grouping.
 ---
 
 <ComponentPreview name="widgets/change-log/basic" />
@@ -11,34 +11,132 @@ summary: An audit trail with field-level before and after values, notes and day 
 ## Import
 
 ```tsx
-import { ChangeLog } from '@innostes/ui';
+import {
+  ChangeLog,
+  type ChangeLogEntry,
+  type ChangeLogProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Map your audit records to entries, newest first:
+Use `ChangeLog` when providing immutable historical inspection of record modifications:
+
+- **ERP record revision history**: Tracking revisions to purchase orders, contracts, and vendor profiles.
+- **Statutory tax modifications**: Logging alterations to GSTIN registrations, PAN details, and bank mandates.
+- **Security credential adjustments**: Showing permission modifications made to operator roles.
+
+**Do not use ChangeLog for:**
+- High-level event timelines without field-level diffs — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+- Pending authorization task queues — use [ActionList](/ui/docs/widgets/action-list).
+- Ephemeral toast notifications — use [Toast](/ui/docs/components/feedback/toast).
+
+## Examples
+
+### Field-level diffs with day grouping
+
+Mapping audit records to structured entries with `from` and `to` values:
 
 ```tsx
 <ChangeLog
   groupByDay
-  entries={audit.map((a) => ({
-    id: a.id,
-    actor: a.user.name,
-    action: a.summary, // "updated the invoice"
-    time: new Date(a.at),
-    changes: a.diff.map((d) => ({ field: d.label, from: d.old, to: d.new })),
-    note: a.comment,
-  }))}
+  entries={[
+    {
+      id: '1',
+      actor: 'Priya Sharma',
+      action: 'updated purchase order terms',
+      time: new Date(Date.now() - 1000 * 60 * 30),
+      changes: [
+        { field: 'Payment terms', from: 'Net 30', to: 'Net 60' },
+        { field: 'Delivery depot', from: 'Koramangala Hub', to: 'Whitefield Central Depot' },
+      ],
+      note: 'Adjusted per vendor renegotiation meeting.',
+    },
+    {
+      id: '2',
+      actor: 'Ramesh Kumar',
+      action: 'authorized discount rate',
+      time: new Date(Date.now() - 1000 * 60 * 180),
+      changes: [
+        { field: 'Trade discount', from: '0%', to: '5%' },
+      ],
+    },
+  ]}
 />
 ```
 
-- `from` and `to` take any content, e.g. status badges. Empty values show `emptyValue` (default "—").
-- Built on `ActivityFeed`'s timeline, so it takes the same `groupByDay`, `locale` and `now` props. Use `ActivityFeed` for event streams without field changes.
+### Badges and custom diff elements
+
+`from` and `to` accept arbitrary React nodes, enabling live status badge diffs:
+
+```tsx
+<ChangeLog
+  entries={[
+    {
+      id: '3',
+      actor: 'System Automation',
+      action: 'reconciled e-way bill status',
+      time: new Date(),
+      changes: [
+        {
+          field: 'GST Status',
+          from: <Badge variant="warning">Generated</Badge>,
+          to: <Badge variant="success">Validated</Badge>,
+        },
+      ],
+    },
+  ]}
+/>
+```
 
 ## Accessibility
 
-Changes are a description list; old values use `<del>` and new values `<ins>`, with hidden "from" / "to" labels (`diffLabels` to translate).
+`ChangeLog` renders semantic description lists with accessible diff tags.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive links or user profile buttons in the log.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Differences use semantic `<del>` (for previous values) and `<ins>` (for updated values).
+- Visually hidden labels (`diffLabels`, customizable for localization) announce "from" and "to" explicitly to screen readers.
+- Day headers group revisions cleanly under accessible regional landmarks.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide clear, contextual notes explaining why critical regulatory fields were updated.',
+    code: `<ChangeLogEntry note="GST circular compliance update" />`,
+  }}
+  dont={{
+    description: 'Do not omit previous values (from) when documenting audited business changes.',
+    code: `<ChangeLogEntry changes={[{ field: 'Amount', from: undefined, to: '₹50,000' }]} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use ActivityFeed when events do not involve discrete field diffs (e.g. "Consignment arrived").',
+    code: `<ActivityFeed items={events} />`,
+  }}
+  dont={{
+    description: 'Do not abuse ChangeLog for generic activity logs without before/after comparisons.',
+    code: `<ChangeLog entries={eventsWithoutChanges} />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['ChangeLog']} />
+
+## Related
+
+- [ActivityFeed](/ui/docs/widgets/activity-feed) — Chronological event stream primitive upon which ChangeLog is built.
+- [Badge](/ui/docs/components/data-display/badge) — Status badge frequently rendered inside ChangeLog diffs.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing audit history.

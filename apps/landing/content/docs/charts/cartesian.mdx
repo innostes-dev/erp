@@ -1,68 +1,181 @@
 ---
 title: Cartesian Charts
-description: Bar, Line, and Area charts for visualizing categorical data series.
+description: Bar, Line, and Area charts for categorical business analytics.
+icon: ChartBar
+status: Stable
+summary: Bar, Line, and Area charts for categorical business analytics with accessible hidden tables, en-IN formatting, and Recharts integration.
 ---
 
-Charts live in a **separate entry point** (`@innostes/ui/charts`) to ensure that applications not utilizing charts do not incur the bundle size cost of Recharts.
-
-## Installation
-
-Charts are built on top of [Recharts](https://recharts.org/). You must install it as a peer dependency alongside `@innostes/ui`.
-
-**Important Version Guidance:**
-Due to a transitive peer dependency conflict, you must match the Recharts version to your React version:
-- **React 17:** Use Recharts **2.15.x** (`pnpm add recharts@^2.15.0`)
-- **React 18 / 19:** Use Recharts **3.x** (`pnpm add recharts@^3.0.0`)
-
-```bash
-# For React 18 / 19
-pnpm add recharts@^3.0.0
-
-# For React 17
-pnpm add recharts@^2.15.0
-```
+<ComponentPreview name="charts/cartesian/bar" />
 
 ## Import
 
-Explicitly import chart components from `@innostes/ui/charts`, **not** from `@innostes/ui` directly.
+Charts are exported from `@innostes/ui/charts` to isolate Recharts from your main application bundle:
 
 ```tsx
 import { BarChart, LineChart, AreaChart } from '@innostes/ui/charts';
 ```
 
-## Accessibility
+## When to use
 
-A core differentiator of our chart components is their built-in accessibility. Every chart renders an accessible, visually-hidden `<table>` alongside the visual SVG representation (via the internal `ChartFrame` wrapper).
+Cartesian charts plot quantitative values across categorical dimensions (such as months, quarters, or product categories):
 
-This means screen reader users are not presented with an opaque graphic. Instead, they can navigate the actual tabular data using standard table commands, providing a significantly superior, first-class experience for assistive technology. The `aria-label` prop you provide is used to name this hidden table.
+- **BarChart**: Comparing discrete, independent categories (e.g. quarterly spend per vendor or monthly dispatch volume).
+- **LineChart**: Tracking continuous trends over time (e.g. daily inventory stock balance or invoice settlement times).
+- **AreaChart**: Emphasizing cumulative volume or part-to-whole accumulation over continuous time intervals.
 
-## Props Overview
+**Do not use Cartesian charts for:**
+- Proportional parts of a single whole — use [DonutChart](/ui/docs/charts/donut).
+- Minimal inline trendlines in tables or cards — use [Sparkline](/ui/docs/widgets/sparkline).
+- Single KPI numbers — use [MetricCard](/ui/docs/widgets/metric-card).
 
-- **`data`**: An array of objects representing your dataset.
-- **`categoryKey`**: The key in your data objects that represents the categories along the X-axis (e.g., `'month'`, `'quarter'`).
-- **`series`**: An array of objects defining which keys from the data to plot, shaped as `{ key: string, label: string }`. The `label` is used in legends and tooltips.
-- **`valueFormatter`**: An optional function to format the numeric values (e.g., adding currency symbols) for tooltips and axes.
-- **`locale`**: Passed to handle localization formatting within the accessible table and tooltips.
-- **`aria-label`**: Required string to name the underlying hidden data table for screen readers.
+## Examples
 
-## Theming & Interactions
+### Installation and React version guidance
 
-Colors are automatically assigned from the `chart-1` to `chart-8` categorical tokens defined in `theme.css` and `dark.css`. You can also override colors per series using these tokens or semantic tones (e.g., `success`, `destructive`).
+Install `recharts` as a peer dependency matched to your project's React runtime:
 
-Legends are fully interactive out-of-the-box. Clicking a legend entry toggles the visibility of that data series. If a chart contains only a single series, the legend is automatically hidden to save space and reduce clutter.
+- **React 18 / 19**: `pnpm add recharts@^3.0.0`
+- **React 17**: `pnpm add recharts@^2.15.0`
 
-## Bar Chart
+### BarChart for categorical comparisons
 
-<ComponentPreview name="charts/cartesian/bar" />
+Comparing quarterly procurement spend across Northwind Traders divisions:
 
-## Line Chart
+```tsx
+const quarterlySpend = [
+  { quarter: 'Q1 FY26', procurement: 4200000, logistics: 850000 },
+  { quarter: 'Q2 FY26', procurement: 4900000, logistics: 920000 },
+  { quarter: 'Q3 FY26', procurement: 5400000, logistics: 1100000 },
+  { quarter: 'Q4 FY26', procurement: 6100000, logistics: 1250000 },
+];
+
+<BarChart
+  aria-label="Quarterly procurement and logistics expenditure"
+  data={quarterlySpend}
+  categoryKey="quarter"
+  series={[
+    { key: 'procurement', label: 'Procurement (INR)', color: 'chart-1' },
+    { key: 'logistics', label: 'Logistics (INR)', color: 'chart-2' },
+  ]}
+  valueFormatter={(v) => `₹${(v / 100000).toFixed(1)}L`}
+/>
+```
+
+### LineChart for continuous operational trends
+
+Tracking inventory turnover over 12 months:
 
 <ComponentPreview name="charts/cartesian/line" />
 
-## Area Chart
+```tsx
+<LineChart
+  aria-label="12-month inventory stock balance"
+  data={monthlyInventory}
+  categoryKey="month"
+  series={[
+    { key: 'spices', label: 'Spices & Condiments', color: 'chart-1' },
+    { key: 'dryFruits', label: 'Dry Fruits & Nuts', color: 'chart-3' },
+  ]}
+  valueFormatter={(val) => `${val.toLocaleString('en-IN')} units`}
+/>
+```
+
+### AreaChart for cumulative volume
+
+Visualizing total dispatched tonnage from the Bengaluru hub:
 
 <ComponentPreview name="charts/cartesian/area" />
 
-## API
+### Indian fiscal formatting and en-IN localization
 
-<ApiTable components={['BarChart', 'LineChart', 'AreaChart']} />
+Use `Intl.NumberFormat` with `en-IN` to format currency and quantities correctly according to Indian numbering standards (lakhs and crores):
+
+```tsx
+const inrFormatter = (val: number) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(val);
+
+<BarChart
+  aria-label="Annual vendor payouts"
+  data={vendorPayouts}
+  categoryKey="vendor"
+  series={[{ key: 'amount', label: 'Payout' }]}
+  valueFormatter={inrFormatter}
+  locale="en-IN"
+/>
+```
+
+### Empty and loading states inside WidgetCard
+
+Wrap charts in `WidgetCard` with `padding="none"` to maintain clean edges and handle asynchronous fetch lifecycles:
+
+```tsx
+<WidgetCard
+  title="Monthly revenue trend"
+  padding="none"
+  loading={isLoading}
+  empty={data.length === 0}
+  emptyState="No transaction data recorded for this fiscal quarter."
+>
+  <AreaChart
+    aria-label="Monthly revenue trend"
+    data={data}
+    categoryKey="period"
+    series={[{ key: 'revenue', label: 'Revenue (₹)' }]}
+  />
+</WidgetCard>
+```
+
+## Accessibility
+
+Every Cartesian chart automatically renders an accessible, visually-hidden `<table>` element alongside the visual SVG graphic via the internal `ChartFrame` wrapper.
+
+### Screen reader table navigation
+
+Assistive technologies do not encounter an unlabelled opaque canvas. Instead, screen reader operators navigate the underlying tabular dataset using standard table keyboard commands (such as Control + Option + Arrow keys in VoiceOver):
+
+- The table is given an accessible name using the required `aria-label` prop.
+- Category keys render as column headers (`<th>`).
+- Data series render as structured rows (`<tr>`) with localized numeric values formatted via `valueFormatter`.
+
+### Colour and contrast
+
+Chart colours are mapped directly from semantic design tokens (`--color-chart-1` through `--color-chart-8`), ensuring minimum 4.5:1 contrast against both light and dark card backgrounds. Interactive legends allow operators to toggle individual data series visibility.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Always supply an explicit, descriptive aria-label naming the chart data table.',
+    code: `<BarChart aria-label="Quarterly vendor spend (Q1-Q4 FY26)" data={data} />`,
+  }}
+  dont={{
+    description: 'Do not omit the aria-label, leaving assistive technology users with an unlabelled data table.',
+    code: `<BarChart data={data} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use token-based palette colours (chart-1 through chart-8) to guarantee automatic dark mode contrast.',
+    code: `<series color="chart-2" />`,
+  }}
+  dont={{
+    description: 'Do not hardcode unverified hex colours that become invisible in dark themes.',
+    code: `<series color="#1e293b" />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['BarChart', 'LineChart', 'AreaChart', 'ChartTooltipContent', 'ChartLegend', 'ChartFrame']} />
+
+## Related
+
+- [DonutChart](/ui/docs/charts/donut) — Proportion and composition chart for categorical shares.
+- [Sparkline](/ui/docs/widgets/sparkline) — Lightweight inline trendline without Recharts dependency.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing charts.

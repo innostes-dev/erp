@@ -1,0 +1,126 @@
+---
+title: Activity Feed
+description: Chronological timeline of audit events, record changes, and operational logs.
+icon: Activity
+status: Stable
+summary: Compact list and connected timeline views with relative timestamps, day groupings, and status tones.
+---
+
+<ComponentPreview name="widgets/activity-feed/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  ActivityFeed,
+  type ActivityItem,
+  type ActivityFeedProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `ActivityFeed` to communicate operational history, audit trails, and collaborative milestones:
+
+- **ERP record history**: Purchase order lifecycles (Draft → Approved → Dispatched → Invoiced).
+- **Consignment tracking**: Shipments moving between distribution hubs.
+- **System audit trails**: Documenting changes made to GST returns or tax configurations.
+
+**Do not use ActivityFeed for:**
+- Interactive task lists requiring immediate completion buttons — use [ActionList](/ui/docs/widgets/action-list).
+- Standalone unread alerts — use [Notifications](/ui/docs/widgets/notifications).
+- Multi-step sequential progress inputs — use [Stepper](/ui/docs/components/navigation/stepper).
+
+## Examples
+
+### Connected timeline with day grouping
+
+Set `variant="timeline"` and `groupByDay={true}` to join items with a vertical connecting stem grouped under "Today", "Yesterday", and calendar dates:
+
+```tsx
+<ActivityFeed
+  variant="timeline"
+  groupByDay
+  items={[
+    {
+      id: '1',
+      title: 'Consignment DISP-2026-992 in transit',
+      description: 'Dispatched via Blue Dart to Mumbai central warehouse.',
+      time: new Date(Date.now() - 1000 * 60 * 18),
+      icon: <Truck className="size-4" />,
+      tone: 'primary',
+    },
+    {
+      id: '2',
+      title: 'Tax invoice approved',
+      description: 'Priya Sharma verified ₹89,400 with GST e-invoicing.',
+      time: new Date(Date.now() - 1000 * 60 * 120),
+      icon: <CheckCircle2 className="size-4" />,
+      tone: 'success',
+    },
+  ]}
+/>
+```
+
+### Compact list variant
+
+Use `variant="list"` inside narrow cards or sidebars:
+
+```tsx
+<ActivityFeed
+  variant="list"
+  items={activities}
+/>
+```
+
+## Accessibility
+
+`ActivityFeed` renders semantic ordered list elements.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially across interactive links or action buttons within feed items.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- Feed items render inside semantic `<ul>` lists with `role="list"`.
+- Relative timestamps use semantic `<time dateTime="...">` tags containing ISO 8601 strings for assistive readers.
+- Icons use decorative attributes, ensuring screen readers prioritize event titles and descriptions.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Provide proper ISO dates to the time prop so relative time formatting updates automatically.',
+    code: `<ActivityItem time={new Date(event.timestamp)} />`,
+  }}
+  dont={{
+    description: 'Do not pass unformatted ambiguous numbers or static strings to time.',
+    code: `<ActivityItem time="3 hours" />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use the timeline variant for historical record audits and the list variant for compact dashboard widgets.',
+    code: `<ActivityFeed variant="timeline" groupByDay />`,
+  }}
+  dont={{
+    description: 'Do not enable day grouping when feed items lack valid Date objects.',
+    code: `<ActivityFeed groupByDay items={stringDateItems} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['ActivityFeed']} />
+
+## Related
+
+- [ChangeLog](/ui/docs/widgets/change-log) — Deep diff view built on top of ActivityFeed.
+- [ActionList](/ui/docs/widgets/action-list) — Task-oriented list with actionable buttons.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing activity feeds.

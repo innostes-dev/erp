@@ -1,9 +1,9 @@
 ---
 title: Kanban Board
-description: Cards that move between columns.
+description: Drag-and-drop task board for pipelines, delivery schedules, and stage-gate workflows.
 icon: SquareKanban
 status: Beta
-summary: Pipelines, deals, tickets and approval stages, with drag and drop, keyboard moves and WIP limits.
+summary: Interactive multi-column board with optimistic drag-and-drop moves, WIP limits, touch support, and full keyboard navigation.
 ---
 
 <ComponentPreview name="widgets/kanban-board/basic" />
@@ -11,50 +11,158 @@ summary: Pipelines, deals, tickets and approval stages, with drag and drop, keyb
 ## Import
 
 ```tsx
-import { KanbanBoard, moveKanbanItem, type KanbanColumn } from '@innostes/ui';
+import {
+  KanbanBoard,
+  moveKanbanItem,
+  type KanbanColumn,
+  type KanbanMove,
+  type KanbanBoardProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
 
-Cards need a string `id`. The board renders the card frame; `renderCard` renders what's inside.
+Use `KanbanBoard` when managing visual work pipelines where records transition across discrete sequential stages:
+
+- **Purchase order approvals**: Draft → Verification → Manager Review → Authorized.
+- **Logistics consignment pipeline**: Booked → Packed → Dispatched → In Transit → Delivered.
+- **Vendor KYC onboarding**: Applied → Documents Submitted → Bank Verification → Approved.
+
+**Do not use KanbanBoard for:**
+- Standard multi-column tabular data with sorting and filtering — use [DataTable](/ui/docs/components/data-display/data-table).
+- Linear step-by-step form wizards — use [Stepper](/ui/docs/components/navigation/stepper).
+- Flat chronological event streams — use [ActivityFeed](/ui/docs/widgets/activity-feed).
+
+## Examples
+
+### The move contract and optimistic updates
+
+`onValueChange` fires when a card is dropped or moved via keyboard, providing the next column array and a `KanbanMove` descriptor:
 
 ```tsx
-<KanbanBoard
-  aria-label="Deals"
-  value={columns}
-  onValueChange={(next, move) => {
-    setColumns(next);
-    api.updateDealStage(move.itemId, move.toColumnId, move.toIndex);
-  }}
-  canMove={(move) => !(move.fromColumnId === 'lead' && move.toColumnId === 'won')}
-  getItemLabel={(deal) => deal.name}
-  renderCard={(deal) => <DealCard deal={deal} />}
-  onCardOpen={(deal) => router.push(`/deals/${deal.id}`)}
-/>
+'use client';
+
+import { useState } from 'react';
+import { KanbanBoard, moveKanbanItem, type KanbanColumn, type KanbanMove, toast } from '@innostes/ui';
+
+export function ProcurementPipeline({ initialColumns }: { initialColumns: KanbanColumn<Order>[] }) {
+  const [columns, setColumns] = useState(initialColumns);
+
+  const handleMove = async (nextColumns: KanbanColumn<Order>[], move: KanbanMove) => {
+    // 1. Optimistically apply change to local state immediately
+    const previousColumns = columns;
+    setColumns(nextColumns);
+
+    try {
+      // 2. Persist to API
+      const response = await fetch(`/api/orders/${move.itemId}/stage`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toStage: move.toColumnId,
+          toIndex: move.toIndex,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Stage transition rejected by server');
+      toast.success('Purchase order moved');
+    } catch (err) {
+      // 3. Rollback immediately on server failure
+      setColumns(previousColumns);
+      toast.error('Failed to update stage. Reverting position.');
+    }
+  };
+
+  return (
+    <KanbanBoard
+      aria-label="Procurement pipeline"
+      value={columns}
+      onValueChange={handleMove}
+      canMove={(move) => {
+        // Enforce stage constraints: cannot jump directly from Draft to Authorized
+        if (move.fromColumnId === 'draft' && move.toColumnId === 'authorized') {
+          toast.warning('Draft orders must undergo verification before authorization.');
+          return false;
+        }
+        return true;
+      }}
+      getItemLabel={(order) => `${order.id} · ${order.supplier}`}
+      renderCard={(order) => <OrderCard order={order} />}
+      onCardOpen={(order) => router.push(`/purchases/${order.id}`)}
+    />
+  );
+}
 ```
 
-- `onValueChange` gets the new columns and the move (`itemId`, `fromColumnId`, `fromIndex`, `toColumnId`, `toIndex`).
-- `canMove` blocks moves, e.g. skipping a required stage.
-- `limit` on a column shows `count/limit` and turns red above it.
-- `columnActions` adds buttons to column headers.
-- `moveKanbanItem(columns, itemId, toColumnId, toIndex)` applies a move to plain data, e.g. for optimistic updates or real-time sync.
+### Column WIP limits
 
-Mouse dragging uses native HTML drag and drop, which doesn't work on touch screens. On phones, let people open the card (`onCardOpen`) and change its stage there.
+Set `limit={5}` on a column to enforce Work In Progress (WIP) bounds. The column header automatically renders a badge showing `count / limit` and turns warning/destructive when capacity is exceeded:
+
+```tsx
+const columns: KanbanColumn<Order>[] = [
+  { id: 'review', title: 'Under review', limit: 4, items: reviewOrders },
+  { id: 'dispatched', title: 'Dispatched', limit: 8, items: dispatchedOrders },
+];
+```
+
+### Touch devices and mobile strategy
+
+On mobile touch devices where native HTML drag-and-drop is limited, `KanbanBoard` provides a built-in touch column selector, allowing users to tap a card and pick its destination column directly from a native select control, or trigger `onCardOpen` to update the stage from an inspection drawer.
 
 ## Accessibility
 
-Drag and drop isn't required. Each card is focusable, and every step is announced:
+`KanbanBoard` provides complete non-pointer keyboard operation and screen reader announcements.
 
-| Key | Action |
-| --- | --- |
-| Arrows | Move focus between cards and columns |
-| Space | Pick up the card, then drop it |
-| Arrows (holding) | Move the card up, down or to another column |
-| Escape | Cancel the move |
-| Enter | `onCardOpen` |
+### Keyboard navigation
 
-Pass `labels` to translate the instructions and announcements.
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus into the board and between cards and column action controls.' },
+    { key: 'ArrowDown / ArrowUp', action: 'Moves keyboard focus to the next or previous card in the current column.' },
+    { key: 'ArrowRight / ArrowLeft', action: 'Moves keyboard focus to the adjacent column at the same relative height.' },
+    { key: 'Space', action: 'Picks up the focused card to begin a keyboard move.' },
+    { key: 'Arrow keys (while holding)', action: 'Repositions the held card within or across columns.' },
+    { key: 'Enter / Space', action: 'Drops the held card into its new position and announces the move.' },
+    { key: 'Escape', action: 'Cancels the active keyboard move and returns the card to its original position.' },
+  ]}
+/>
 
-## API Reference
+### ARIA attributes
+
+- Columns render as semantic `<section>` regions with `aria-labelledby` referencing column titles.
+- Cards maintain `role="button"` or `role="article"` with clear `aria-roledescription="Draggable card"`.
+- Live region announcements notify screen readers when a card is grabbed, moved, dropped, or blocked by `canMove`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Enforce optimistic rollbacks with try/catch to maintain data integrity when network calls fail.',
+    code: `try { setColumns(next); await api.save(); } catch { setColumns(prev); }`,
+  }}
+  dont={{
+    description: 'Do not update server data without reverting UI state if the backend rejects the stage transition.',
+    code: `setColumns(next); api.save(); // Ignored error leaves UI out of sync`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use canMove to validate business logic before allowing invalid state jumps.',
+    code: `canMove={(m) => !(m.fromColumnId === 'draft' && m.toColumnId === 'paid')}`,
+  }}
+  dont={{
+    description: 'Do not allow arbitrary transitions that violate regulatory ERP stage gates.',
+    code: `canMove={() => true}`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['KanbanBoard']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Tabular view for bulk ERP record operations.
+- [Stepper](/ui/docs/components/navigation/stepper) — Multi-step sequential progression wizard.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing board views.

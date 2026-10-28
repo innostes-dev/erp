@@ -24,5 +24,17 @@
   "ChartColor": "TypeScript type for chart palette keys.",
   "ChartLegendProps": "TypeScript interface for ChartLegend props.",
   "ChartSeries": "TypeScript interface for series configuration in cartesian charts.",
-  "ChartTooltipContentProps": "TypeScript interface for ChartTooltipContent props."
+  "ChartTooltipContentProps": "TypeScript interface for ChartTooltipContent props.",
+  "BoldIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "ItalicIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "UnderlineIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "StrikethroughIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "HeadingIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "ListIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "ListOrderedIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "QuoteIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "CodeIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "LinkIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "UndoIcon": "SVG icon helper component for the rich text editor toolbar.",
+  "RedoIcon": "SVG icon helper component for the rich text editor toolbar."
 }

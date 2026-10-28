@@ -1,0 +1,120 @@
+---
+title: Welcome Banner
+description: Greeting header for dashboards with illustration and action buttons.
+icon: Sparkles
+status: Stable
+summary: Top-of-dashboard greeting card with container-query responsiveness, background variants, and quick action buttons.
+---
+
+<ComponentPreview name="widgets/welcome-banner/basic" align="start" className="p-4 sm:p-4" />
+
+## Import
+
+```tsx
+import {
+  WelcomeBanner,
+  type WelcomeBannerProps,
+} from '@innostes/ui';
+```
+
+## When to use
+
+Use `WelcomeBanner` as the welcoming centerpiece at the top of high-level role dashboards:
+
+- **Department hubs**: Greeting procurement managers, warehouse leads, or finance officers.
+- **Onboarding dashboards**: Welcoming newly joined staff with links to initial setup tasks.
+- **Executive summaries**: Presenting high-level fiscal dates alongside organizational mottos.
+
+**Do not use WelcomeBanner for:**
+- Entity record detail pages (like a specific purchase order or invoice) — use [PageHeader](/ui/docs/components/layout/page-header).
+- Compact KPI metric displays — use [MetricCard](/ui/docs/widgets/metric-card).
+- In-form instructional callouts — use [Alert](/ui/docs/components/feedback/alert).
+
+## Examples
+
+### Gradient variant with action buttons and inspirational quote
+
+The standard administrative dashboard greeting:
+
+```tsx
+<WelcomeBanner
+  eyebrow="Fiscal Year 2026-27 · Bengaluru Division"
+  title="Welcome back, Priya Sharma"
+  description="You have 3 purchase orders pending approval and 1 GST filing discrepancy to resolve."
+  variant="gradient"
+  quote="Integrity in procurement delivers resilience in supply."
+  actions={
+    <div className="flex flex-wrap gap-2">
+      <Button size="sm">Create PO</Button>
+      <Button size="sm" variant="outline">Export tax report</Button>
+    </div>
+  }
+/>
+```
+
+### Brand and plain variants
+
+- `variant="gradient"` (default): Uses a gentle wash of the primary theme tint.
+- `variant="brand"`: Solid primary background with light text for high-contrast executive portals.
+- `variant="plain"`: Clean card surface with standard border.
+
+```tsx
+<WelcomeBanner
+  variant="brand"
+  title="Supply Chain Operations"
+  description="Northwind Traders Bengaluru Central Depot"
+/>
+```
+
+## Accessibility
+
+`WelcomeBanner` renders semantic section landmarks.
+
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive action buttons inside the banner.' },
+    { key: 'Enter / Space', action: 'Triggers the focused action button.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as a `<section data-slot="welcome-banner">`.
+- Heading titles render with semantic hierarchy appropriate for top-of-page introductions.
+- Decorative illustrations render with `aria-hidden="true"`.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Keep the description concise (1–2 sentences) highlighting actionable summary numbers.',
+    code: `<WelcomeBanner description="3 purchase orders awaiting your approval today." />`,
+  }}
+  dont={{
+    description: 'Do not overload the banner with multi-paragraph operational documentation.',
+    code: `<WelcomeBanner description="Paragraph 1... Paragraph 2... Paragraph 3..." />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Include 1–3 primary action buttons that directly resolve common daily tasks.',
+    code: `<WelcomeBanner actions={<Button>Create PO</Button>} />`,
+  }}
+  dont={{
+    description: 'Do not embed complex multi-field input forms inside the welcome banner.',
+    code: `<WelcomeBanner actions={<Form>{twentyFields}</Form>} />`,
+  }}
+/>
+
+## API reference
+
+<ApiTable components={['WelcomeBanner']} />
+
+## Related
+
+- [PageHeader](/ui/docs/components/layout/page-header) — Administrative page header for record views.
+- [MetricCard](/ui/docs/widgets/metric-card) — KPI metric cards placed directly beneath welcome banners.
+- [QuickActions](/ui/docs/widgets/quick-actions) — Grid of task shortcuts.

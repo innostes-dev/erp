@@ -1,9 +1,9 @@
 ---
 title: Permission Matrix
-description: Role permissions as a grid of checkboxes.
+description: Role-based access control grid mapping resources against actions.
 icon: ShieldCheck
 status: Beta
-summary: Resources by actions, grouped by module, with row and column "all" toggles.
+summary: Interactive permission grid with module grouping, row and column bulk toggles, read-only roles, and sticky headers.
 ---
 
 <ComponentPreview name="widgets/permission-matrix/basic" />
@@ -11,37 +11,152 @@ summary: Resources by actions, grouped by module, with row and column "all" togg
 ## Import
 
 ```tsx
-import { PermissionMatrix, permissionKey } from '@innostes/ui';
+import {
+  PermissionMatrix,
+  permissionKey,
+  type PermissionMatrixAction,
+  type PermissionMatrixResource,
+  type PermissionMatrixProps,
+} from '@innostes/ui';
 ```
 
-## Usage
+## When to use
+
+Use `PermissionMatrix` for Role-Based Access Control (RBAC) administration in enterprise ERP setups:
+
+- **Role authorization configurations**: Assigning Create, Read, Update, Delete, and Approve rights to operator roles.
+- **Auditing system privileges**: Inspecting immutable read-only permissions on default admin profiles.
+- **Tenant permissions**: Multi-tenant access controls across finance, logistics, and inventory modules.
+
+**Do not use PermissionMatrix for:**
+- Single-permission toggles on user profiles — use [Switch](/ui/docs/components/forms/switch).
+- Flat lists of checkboxes — use [CheckboxGroup](/ui/docs/components/forms/checkbox).
+- Data records with varying row heights — use [DataTable](/ui/docs/components/data-display/data-table).
+
+## Examples
+
+### Value format and API persistence
+
+The value format is a flat array of `"resource:action"` strings. Use `permissionKey(resource, action)` to construct or parse keys safely:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { PermissionMatrix, permissionKey, toast } from '@innostes/ui';
+
+export function RolePermissionsManager({ roleId, initialPermissions }: { roleId: string; initialPermissions: string[] }) {
+  const [permissions, setPermissions] = useState<string[]>(initialPermissions);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (updated: string[]) => {
+    setPermissions(updated);
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/roles/${roleId}/permissions`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ permissions: updated }),
+      });
+      if (!res.ok) throw new Error('Failed to update permissions');
+      toast.success('Role permissions updated successfully');
+    } catch (err) {
+      toast.error('Failed to persist permissions to backend');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <PermissionMatrix
+      aria-label="Procurement Officer Permissions"
+      actions={[
+        { id: 'view', label: 'View' },
+        { id: 'create', label: 'Create' },
+        { id: 'edit', label: 'Edit' },
+        { id: 'approve', label: 'Approve' },
+      ]}
+      resources={[
+        { id: 'purchase_orders', label: 'Purchase orders', group: 'Procurement' },
+        { id: 'vendor_profiles', label: 'Vendor profiles', group: 'Procurement' },
+        { id: 'tax_invoices', label: 'Tax invoices', group: 'Finance & GST', actions: ['view', 'approve'] },
+        { id: 'e_way_bills', label: 'E-Way bills', group: 'Logistics', actions: ['view', 'create'] },
+      ]}
+      value={permissions}
+      onValueChange={handleSave}
+    />
+  );
+}
+```
+
+### Read-only system roles
+
+System-defined roles (like `Super Administrator` or `Auditor`) should not be editable. Pass `readOnly={true}` to lock all checkboxes and suppress bulk row/column toggles:
 
 ```tsx
 <PermissionMatrix
-  aria-label={`Permissions for ${role.name}`}
-  actions={[
-    { id: 'view', label: 'View' },
-    { id: 'edit', label: 'Edit' },
-    { id: 'approve', label: 'Approve' },
-  ]}
-  resources={[
-    { id: 'invoices', label: 'Invoices', group: 'Finance' },
-    { id: 'payroll', label: 'Payroll', group: 'HR', actions: ['view', 'approve'] },
-  ]}
-  value={role.permissions}
-  onValueChange={(permissions) => save({ ...role, permissions })}
+  readOnly
+  aria-label="Statutory Auditor (Read-only)"
+  actions={actions}
+  resources={resources}
+  value={auditorPermissions}
 />
 ```
 
-- The value is a flat list of `"resource:action"` keys. `permissionKey(resource, action)` builds one.
-- `actions` on a resource limits which actions apply; other cells show a dash.
-- `group` lists rows under section headings, in the order they first appear.
-- `readOnly` shows the permissions without bulk toggles or changes, e.g. for system roles.
+### Large matrices and sticky scrolling
+
+For large ERP suites with 50+ resources and 8+ actions, wrap `PermissionMatrix` inside a scrollable container with a fixed height. The component headers and resource label columns are styled with CSS sticky positioning, ensuring row and column labels remain pinned in place as operators scroll.
 
 ## Accessibility
 
-A real `<table>` with row and column headers. Every checkbox is named after its action and resource ("Edit Invoices"); bulk toggles show a mixed state when only some permissions are granted.
+`PermissionMatrix` renders a semantic HTML `<table>` with complete row and column header associations.
 
-## API Reference
+### Keyboard navigation
+
+<KeyboardTable
+  entries={[
+    { key: 'Tab', action: 'Moves focus sequentially between interactive checkboxes across the grid.' },
+    { key: 'Space', action: 'Toggles the focused permission checkbox on or off.' },
+    { key: 'Arrow keys', action: 'Navigates focus between adjacent grid cells.' },
+  ]}
+/>
+
+### ARIA attributes
+
+- The container renders as a `<table>` with `role="table"`.
+- Each checkbox is labelled with both its resource and action via `aria-label` (e.g. `aria-label="Approve Tax invoices"`).
+- Row and column bulk checkboxes receive `aria-checked="mixed"` when only a partial subset of permissions is selected.
+
+## Guidelines
+
+<DoDont
+  do={{
+    description: 'Group related resources logically by module (Procurement, Finance, Warehousing) to simplify scanning.',
+    code: `<Resource label="Purchase orders" group="Procurement" />`,
+  }}
+  dont={{
+    description: 'Do not dump dozens of ungrouped resources into an arbitrary alphabetical list.',
+    code: `<Resource label="Purchase orders" group={undefined} />`,
+  }}
+/>
+
+<DoDont
+  do={{
+    description: 'Use readOnly for system roles that must not be altered by tenant administrators.',
+    code: `<PermissionMatrix readOnly value={immutableSystemPermissions} />`,
+  }}
+  dont={{
+    description: 'Do not leave checkboxes active for roles that will reject updates upon saving.',
+    code: `<PermissionMatrix value={systemPermissions} onValueChange={noOp} />`,
+  }}
+/>
+
+## API reference
 
 <ApiTable components={['PermissionMatrix']} />
+
+## Related
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component for tabular record listings.
+- [Checkbox](/ui/docs/components/forms/checkbox) — Checkbox component used inside matrix cells.
+- [WidgetCard](/ui/docs/widgets/widget-card) — Standard container card for housing administrative tools.

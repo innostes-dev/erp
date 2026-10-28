@@ -389,3 +389,46 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: Prompt 12 (Component pages: widgets, charts, and editor).
+
+
+## 12 – Pages: widgets, charts and editor (plus the missing pages) – 2026-10-29
+
+**Summary**: Completed documentation for all widgets, charts, and the rich text editor. Authored the five previously missing widget pages (`ActivityFeed`, `EntityList`, `QuickActions`, `WelcomeBanner`, and `ActionList`) along with comprehensive live demos and API tables. Renamed `notification-bell.mdx` to `notifications.mdx` to match code exports while comprehensively documenting both `NotificationBell` and `NotificationList`. Rewrote the Widgets overview with clear widget versus component distinctions, shared data lifecycle contracts (`loading`, `empty`, `error`), and custom widget composition guidance using `WidgetCard`. Brought `CartesianCharts` and `DonutChart` to the standard 7-section template with Indian fiscal formatting (`en-IN`), accessible hidden data table explanations, Recharts version guidance across React 17/18/19, and token-based palette mappings. Switched the `docs-check` quality gates for `template`, `frontmatter`, and `coverage` to strict **enforce** mode with zero defects across all 63 component pages.
+
+**Changed**:
+- Created new widget demos:
+  - `apps/landing/components/demos/widgets/activity-feed/basic.tsx`: timeline of procurement and transit milestones.
+  - `apps/landing/components/demos/widgets/entity-list/basic.tsx`: vendor ledger ranking with initials and actions.
+  - `apps/landing/components/demos/widgets/quick-actions/basic.tsx`: PO, invoice, and consignment shortcuts.
+  - `apps/landing/components/demos/widgets/welcome-banner/basic.tsx`: executive procurement greeting with actions.
+  - `apps/landing/components/demos/widgets/action-list/basic.tsx`: task authorization queue.
+- Created new widget documentation pages:
+  - `apps/landing/content/docs/widgets/activity-feed.mdx`
+  - `apps/landing/content/docs/widgets/entity-list.mdx`
+  - `apps/landing/content/docs/widgets/quick-actions.mdx`
+  - `apps/landing/content/docs/widgets/welcome-banner.mdx`
+  - `apps/landing/content/docs/widgets/action-list.mdx`
+- Renamed and overhauled:
+  - `apps/landing/content/docs/widgets/notifications.mdx`: renamed from `notification-bell.mdx` (DOC-004).
+  - `apps/landing/content/docs/widgets/index.mdx`: comprehensive widget architecture and lifecycle guide.
+  - `apps/landing/content/docs/widgets/kanban-board.mdx`: move contract, optimistic update rollback, and touch strategy.
+  - `apps/landing/content/docs/widgets/permission-matrix.mdx`: RBAC permissions, value formatting, and readOnly system roles.
+  - `apps/landing/content/docs/widgets/change-log.mdx`: field diff descriptions and valid icon token (DOC-016).
+  - `apps/landing/content/docs/widgets/app-switcher.mdx`: enterprise module navigation.
+  - `apps/landing/content/docs/widgets/user-menu.mdx`: account management dropdown.
+  - `apps/landing/content/docs/widgets/sparkline.mdx`: SVG trendlines.
+  - `apps/landing/content/docs/widgets/metric-card.mdx`: 7 layout variants and loading/empty states demo.
+  - `apps/landing/content/docs/widgets/widget-card.mdx`: outer frame and async states.
+  - `apps/landing/content/docs/charts/cartesian.mdx` & `donut.mdx`: brought to 7-section template with en-IN formatting.
+  - `apps/landing/content/docs/widgets/meta.json`: updated with all 14 widget pages.
+- Quality gates:
+  - `apps/landing/scripts/checks/run-all.mjs`: promoted `frontmatter`, `coverage`, and `template` checks to enforced gates.
+  - `apps/landing/scripts/checks/docs-coverage-allowlist.json`: added rich text editor icon helpers.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.20s, all 9 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (141 static pages compiled without errors).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 13 (Patterns and guides).
