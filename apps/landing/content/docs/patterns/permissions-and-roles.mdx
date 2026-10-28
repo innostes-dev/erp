@@ -1,0 +1,176 @@
+---
+title: Permissions and roles
+description: Access control UI design with PermissionMatrix, policy evaluation, and accessible disabled action guidance.
+icon: ShieldAlert
+---
+
+Enterprise software relies on strict Role-Based Access Control (RBAC) and Attribute-Based Access Control (ABAC) to enforce separation of duties, compliance audits, and statutory financial signoffs. This guide outlines how to represent permissions with [`PermissionMatrix`](/ui/docs/widgets/permission-matrix), decide between hiding versus disabling unauthorized controls, and communicate policy restrictions with accessible tooltips.
+
+## The problem
+
+Security implementations frequently introduce frustrating interface friction:
+1. **The "Disappearing Button" dilemma**: Hiding controls completely leaves operators wondering whether a capability exists, whether their system is broken, or if they lack clearance.
+2. **Dead-end disabled states**: Rendering a disabled button without contextual explanation leaves operators unable to diagnose why they cannot execute a workflow (e.g. "Why is Approve PO disabled?").
+3. **Complex permission configuration**: Administrators face incomprehensible sprawling permission tables without granular inheritance or role assignment clarity.
+4. **Client-side security assumptions**: Relying solely on client UI checks without matching server-side authorization enforcement opens severe privilege escalation vulnerabilities.
+
+## Recommended approach
+
+### Hiding vs disabling: The decision matrix
+
+Follow this deterministic rubric when determining whether to hide or disable a UI element:
+
+| Condition | UI Strategy | Implementation |
+| :--- | :--- | :--- |
+| **User lacks fundamental module access** | **Hide completely** | Do not render the route, sidebar navigation item, or page link. Prevents information disclosure about hidden capabilities. |
+| **User has role, but lacks specific permission** | **Disable with Tooltip** | Render the action in a disabled state wrapped with [`Tooltip`](/ui/docs/components/overlays/tooltip) explaining the policy restriction and required role. |
+| **Action blocked by business rule state** | **Disable with Tooltip** | Render disabled (e.g. "PO cannot be approved until two-way invoice match completes") to guide operator remediation. |
+| **Audit-critical regulatory function** | **Render read-only** | Render a static value badge or lock icon rather than an interactive form input. |
+
+## Explaining disabled actions accessibly
+
+Native HTML `<button disabled>` elements do not trigger standard pointer or focus events in many browsers, causing tooltips wrapped directly around them to fail for keyboard and screen reader operators.
+
+To ensure accessible tooltips on disabled actions:
+1. Wrap the disabled control in an inline container element (such as a `<span>`).
+2. Attach the `TooltipTrigger` to the wrapper container.
+3. Ensure the disabled button includes `aria-disabled="true"` rather than native `disabled` when keyboard focusability is required to read the explanation.
+
+```tsx
+import { Button, Tooltip, TooltipTrigger, TooltipContent } from '@innostes/ui';
+
+export function AuthorizeAction({ canAuthorize, reason }: { canAuthorize: boolean; reason?: string }) {
+  if (canAuthorize) {
+    return <Button variant="primary">Authorize disbursement</Button>;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {/* Wrapper span ensures pointer and focus events fire reliably */}
+        <span tabIndex={0} className="inline-block cursor-not-allowed">
+          <Button variant="primary" disabled className="pointer-events-none">
+            Authorize disbursement
+          </Button>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="text-xs">{reason || 'Requires Finance Controller or VP approval rights.'}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+```
+
+## Complete example: Northwind Role & Permission Management
+
+The following recipe demonstrates how Northwind Traders Pvt Ltd configures administrative access across procurement modules using [`PermissionMatrix`](/ui/docs/widgets/permission-matrix):
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  PermissionMatrix,
+  PermissionMatrixSubject,
+  PermissionMatrixAction,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Button,
+  toast,
+} from '@innostes/ui';
+import { ShieldCheck, Save } from 'lucide-react';
+
+const SYSTEM_SUBJECTS: PermissionMatrixSubject[] = [
+  { id: 'purchase_orders', label: 'Purchase Orders & Contracts' },
+  { id: 'vendor_invoices', label: 'Vendor Invoices & Three-Way Match' },
+  { id: 'inventory_adjustments', label: 'Warehouse Stock Adjustments' },
+  { id: 'tax_filings', label: 'GST & Statutory Compliance Reports' },
+];
+
+const SYSTEM_ACTIONS: PermissionMatrixAction[] = [
+  { id: 'view', label: 'View records' },
+  { id: 'create', label: 'Create drafts' },
+  { id: 'edit', label: 'Edit active' },
+  { id: 'approve', label: 'Approve & commit' },
+  { id: 'delete', label: 'Archive / Delete' },
+];
+
+export function RolePermissionsManager() {
+  // Current active permission matrix permissions map (subjectId -> actionId[])
+  const [permissions, setPermissions] = useState<Record<string, string[]>>({
+    purchase_orders: ['view', 'create', 'edit'],
+    vendor_invoices: ['view', 'create'],
+    inventory_adjustments: ['view'],
+    tax_filings: ['view'],
+  });
+
+  const handleToggle = (subjectId: string, actionId: string) => {
+    setPermissions((prev) => {
+      const current = prev[subjectId] || [];
+      const updated = current.includes(actionId)
+        ? current.filter((id) => id !== actionId)
+        : [...current, actionId];
+      return { ...prev, [subjectId]: updated };
+    });
+  };
+
+  const handleSave = () => {
+    toast({
+      title: 'Security policy updated',
+      description: 'Role permissions for Senior Procurement Officer have been committed.',
+    });
+  };
+
+  return (
+    <Card className="max-w-4xl">
+      <CardHeader className="flex flex-row items-start justify-between border-b pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            <CardTitle>Role access control</CardTitle>
+          </div>
+          <CardDescription>
+            Configuring operational boundaries for: <strong>Senior Procurement Officer</strong>
+          </CardDescription>
+        </div>
+        <Button variant="primary" size="sm" onClick={handleSave}>
+          <Save className="h-4 w-4 mr-2" />
+          Save policy
+        </Button>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <PermissionMatrix
+          subjects={SYSTEM_SUBJECTS}
+          actions={SYSTEM_ACTIONS}
+          value={permissions}
+          onChange={handleToggle}
+          caption="Senior Procurement Officer access matrix"
+        />
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Accessibility notes
+
+- **Interactive table semantics**: [`PermissionMatrix`](/ui/docs/widgets/permission-matrix) renders standard semantic `<table>` elements with accessible row headers (`scope="row"`) and column headers (`scope="col"`). Checkbox controls inside cells carry programmatic labels combining action and subject (e.g. `aria-label="Approve Purchase Orders & Contracts"`).
+- **Keyboard navigation**: Matrix checkboxes support keyboard navigation via <kbd>Tab</kbd> and toggling via <kbd>Space</kbd>.
+- **Screen reader announcements for disabled buttons**: For assistive technologies, pair disabled buttons with `aria-describedby` pointing to the explanatory guidance text or tooltip content ID.
+
+## Common mistakes
+
+- **Client-only gating**: Never rely exclusively on hiding a UI button for security. Malicious or compromised clients can forge HTTP requests directly to API routes. Client-side checks are purely ergonomics; all permissions must be verified on the server.
+- **Ambiguous disabled labels**: Disabling a button without explaining why ("Approve" button disabled with no message) forces users to raise IT support tickets.
+- **Hardcoding permissions in components**: Avoid hardcoding `role === 'admin'` checks across individual leaf components. Standardise checks behind declarative permission flags (e.g. `hasPermission('po.approve')`).
+
+## Related components
+
+- [`PermissionMatrix`](/ui/docs/widgets/permission-matrix) — Matrix grid for inspecting and toggling subject-action permission bindings.
+- [`Tooltip`](/ui/docs/components/overlays/tooltip) — Accessible contextual floating hints for disabled actions.
+- [`Badge`](/ui/docs/components/data-display/badge) — Status and security clearance level indicators.
+- [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) — High-privilege confirmation dialogues.

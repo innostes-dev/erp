@@ -1,0 +1,279 @@
+---
+title: Create, edit, and delete flows
+description: Enterprise CRUD workflows with optimistic state mutations, destructive confirmations, and rollback toasts.
+icon: Workflow
+---
+
+Enterprise ERP platforms handle business records—such as vendor purchase agreements, product inventories, and tax invoices—that require deterministic state transitions. This guide covers how to implement create, edit, and delete (CRUD) workflows using `@innostes/ui` primitives with optimistic updates, accessible confirmation dialogues, inline error recovery, and undo capabilities.
+
+## The problem
+
+CRUD workflows in mission-critical software encounter several recurring UX and operational hazards:
+1. **Destructive accidents without recourse**: Deleting a vendor agreement or archival record with a single click leads to immediate data loss and operational interruption.
+2. **Sluggish mutation feedback**: Waiting for round-trip network requests before reflecting UI state changes creates a perceived latency penalty for high-volume data clerks.
+3. **Disjointed error feedback**: Showing generic modal errors or ephemeral toasts when a specific field fails server-side validation disconnects the operator from the root cause.
+4. **Permanent vs soft deletions**: Lack of a short undo window prevents operators from recovering from unintended destructive gestures.
+
+## Recommended approach
+
+- **Two-phase destructive confirmation**: Always guard permanent removals behind an [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) with `variant="destructive"` to force deliberate cognitive confirmation.
+- **Optimistic UI with rollback**: Mutate local React state or query cache immediately upon user submission. If the server mutation rejects, revert state and surface an actionable error [`toast`](/ui/docs/components/feedback/toast).
+- **Inline errors for validation, toasts for system status**: Use [`FieldError`](/ui/docs/components/forms/field) within the active form for schema validation failures. Reserve toasts for asynchronous background events (e.g. "Vendor deleted", "Invoice draft saved").
+- **Transient undo windows**: When executing non-critical deletions, provide a 5-second `action` callback within the confirmation toast that restores the record before the mutation finalises.
+
+## Workflow architecture: List → Detail → Edit
+
+The canonical Northwind Traders Pvt Ltd record flow balances discoverability and focused data editing:
+
+```
+[List View (/vendors)]
+  │
+  ├─ [Create Drawer / Modal] ──(Save)──> Optimistic Insert → Background Sync
+  │
+  ▼
+[Detail View (/vendors/:id)]
+  │
+  ├─ [Inline / Sheet Edit] ─────(Save)──> Optimistic Patch → Rollback on Failure
+  │
+  └─ [Delete Button] ──────────(Trigger)
+        │
+        ▼
+     [AlertDialog] ──────────(Confirm)─> Optimistic Removal → Undo Toast
+```
+
+## Complete example: Vendor management with optimistic deletion and undo
+
+The following production recipe demonstrates an active vendor registry screen with optimistic deletions and undo toasts:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  Badge,
+  toast,
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogClose,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@innostes/ui';
+import { MoreHorizontal, Trash2, Edit2, RotateCcw, Building2 } from 'lucide-react';
+
+interface VendorRecord {
+  id: string;
+  name: string;
+  gstin: string;
+  category: string;
+  status: 'active' | 'archived';
+  outstandingBalance: number;
+}
+
+const INITIAL_VENDORS: VendorRecord[] = [
+  {
+    id: 'VND-2041',
+    name: 'Kirloskar Electric Co Ltd',
+    gstin: '29AAACK1940P1ZB',
+    category: 'Heavy Machinery',
+    status: 'active',
+    outstandingBalance: 485000,
+  },
+  {
+    id: 'VND-2042',
+    name: 'Mysore Sandal Oil Mills',
+    gstin: '29AABCM8291Q1ZH',
+    category: 'Raw Materials',
+    status: 'active',
+    outstandingBalance: 124000,
+  },
+  {
+    id: 'VND-2043',
+    name: 'Bengaluru Logistics Terminal',
+    gstin: '29AACBL3019R1ZM',
+    category: 'Freight Services',
+    status: 'active',
+    outstandingBalance: 67200,
+  },
+];
+
+export function VendorCrudScreen() {
+  const [vendors, setVendors] = useState<VendorRecord[]>(INITIAL_VENDORS);
+  const [vendorToDelete, setVendorToDelete] = useState<VendorRecord | null>(null);
+
+  // Optimistic delete with undo toast
+  const handleConfirmDelete = async () => {
+    if (!vendorToDelete) return;
+    const target = vendorToDelete;
+    const originalVendors = [...vendors];
+
+    // 1. Optimistic removal
+    setVendors((current) => current.filter((v) => v.id !== target.id));
+    setVendorToDelete(null);
+
+    // 2. Track undo status
+    let undone = false;
+
+    // 3. Trigger notification with undo action
+    toast({
+      title: 'Vendor archived',
+      description: `${target.name} (${target.id}) was moved to archives.`,
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          undone = true;
+          setVendors(originalVendors);
+          toast({
+            title: 'Action restored',
+            description: `${target.name} has been restored to active records.`,
+          });
+        },
+      },
+    });
+
+    // 4. Background server dispatch after undo window elapses
+    setTimeout(async () => {
+      if (undone) return;
+      try {
+        // Mock server mutation: await fetch(`/api/vendors/${target.id}`, { method: 'DELETE' });
+      } catch (err) {
+        // Rollback state if server mutation rejects
+        setVendors(originalVendors);
+        toast({
+          title: 'Mutation failed',
+          description: `Unable to archive ${target.name}. Server changes were reverted.`,
+          variant: 'destructive',
+        });
+      }
+    }, 5000);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">Vendor directory</h2>
+          <p className="text-sm text-muted-foreground">
+            Northwind Traders Pvt Ltd active vendor accounts and procurement contracts.
+          </p>
+        </div>
+        <Button variant="primary">Add vendor</Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {vendors.map((vendor) => (
+          <Card key={vendor.id}>
+            <CardHeader className="flex flex-row items-start justify-between pb-2">
+              <div className="space-y-1">
+                <CardTitle className="text-base font-medium">{vendor.name}</CardTitle>
+                <CardDescription>{vendor.gstin}</CardDescription>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" aria-label={`Actions for ${vendor.name}`}>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Edit2 className="mr-2 h-4 w-4" />
+                    Edit record
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={() => setVendorToDelete(vendor)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Archive vendor
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Outstanding</span>
+                <span className="font-semibold text-foreground">
+                  ₹{vendor.outstandingBalance.toLocaleString('en-IN')}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                <span>{vendor.category}</span>
+                <Badge variant="outline">{vendor.status}</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Accessible destructive confirmation dialogue */}
+      <AlertDialog
+        open={Boolean(vendorToDelete)}
+        onOpenChange={(open) => !open && setVendorToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive vendor account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will suspend purchase order authorisations for{' '}
+              <strong>{vendorToDelete?.name}</strong>. Pending invoices totaling ₹
+              {vendorToDelete?.outstandingBalance.toLocaleString('en-IN')} will remain in the settlement ledger.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </AlertDialogClose>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Confirm archive
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+```
+
+## Feedback matrix: Toasts vs inline messages
+
+Select the appropriate communication channel based on operational impact and urgency:
+
+| Scenario | Component | Placement | Rationale |
+| :--- | :--- | :--- | :--- |
+| **Validation failure** | [`FieldError`](/ui/docs/components/forms/field) | Directly beneath invalid input | Maintains visual focus and `aria-describedby` linkage. |
+| **Asynchronous success** | [`toast`](/ui/docs/components/feedback/toast) | Screen corner viewport | Unobtrusive notification confirming background completion without blocking screen tasks. |
+| **Destructive action** | [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) | Modal overlay with backdrop | Enforces modal focus trap and keyboard confirmation. |
+| **Systemic outage** | [`Alert`](/ui/docs/components/feedback/alert) | Page header banner | Persistent visibility for wide service degradation or read-only modes. |
+
+## Accessibility notes
+
+- **Focus restoration after deletion**: When removing an item from a list or grid, move keyboard focus to the next logical sibling item, or to the container header if the list becomes empty. Never drop focus to the root `<body>` element.
+- **Dialogue semantics**: Use [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) rather than generic [`Dialog`](/ui/docs/components/overlays/dialog) for destructive confirmations so assistive software identifies the role as `alertdialog` and announces the prompt with urgency.
+- **Undo notifications**: Ensure toast notifications containing interactive action buttons announce through polite live regions (`aria-live="polite"`), and provide keyboard access via the standard tab order.
+
+## Common mistakes
+
+- **Hiding deletion failures**: Swallowing network rejection errors after an optimistic removal causes the UI to drift out of sync with the database. Always retain the prior snapshot and restore it upon error.
+- **Using browser window alerts**: Calling native `window.confirm()` or `window.alert()` freezes script execution, breaks design system theming, and fails automated accessibility audits.
+- **Overusing toasts for form validation**: Emitting five separate toasts for five invalid fields clutters the interface and disorients the user. Keep field-level errors inline with inputs.
+
+## Related components
+
+- [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) — Accessible modal dialogues for high-stakes operational confirmations.
+- [`Toast`](/ui/docs/components/feedback/toast) — Non-modal notifications with optional action callbacks.
+- [`DropdownMenu`](/ui/docs/components/overlays/dropdown-menu) — Contextual action menus for record listings.
+- [`Card`](/ui/docs/components/data-display/card) — Structured containers for entity summaries.

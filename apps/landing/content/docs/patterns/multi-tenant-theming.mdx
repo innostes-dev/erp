@@ -1,0 +1,254 @@
+---
+title: Theming for multiple tenants
+description: Dynamic runtime brand token injection, multi-tenant CSS variables, WCAG AA contrast validation, and dark mode.
+icon: Palette
+---
+
+Multi-tenant software-as-a-service (SaaS) and white-label enterprise platforms allow distinct corporate client tenants to brand their workspaces with custom brand colours, typography accents, and logos. This guide explains how to inject runtime CSS brand tokens safely, compute accessible foreground contrast, and support independent light and dark themes per tenant.
+
+## The problem
+
+Multi-tenant UI theming introduces three dangerous engineering pitfalls:
+1. **Accessibility violations via arbitrary branding**: Tenants frequently choose brand colours (such as light yellow or pastel cyan) that produce illegible contrast ratios against white or dark text backgrounds, violating WCAG 2.1 AA mandates.
+2. **Build-time theme limitations**: Generating separate CSS bundles per tenant requires re-deploying code whenever an enterprise customer updates their brand hex code in their administrative portal.
+3. **Dark mode failures**: A brand colour optimized for a light surface often washes out or vibrates aggressively when rendered in dark mode.
+4. **CSS cascade leakage**: Overriding global CSS variables without proper scoping causes tenant brand styles to leak across administrative consoles or portal boundaries.
+
+## Recommended approach
+
+- **Runtime CSS variable injection**: Inject tenant-specific tokens directly into the HTML root style attribute or a tenant wrapper element (`style="--primary: 217 91% 60%"`).
+- **Automated contrast safety validation**: Calculate relative luminance from tenant hex values. If the tenant's chosen colour fails the 4.5:1 WCAG AA contrast ratio threshold against the foreground text, automatically calculate and apply the compliant accessible foreground token (`#ffffff` or `#09090b`).
+- **Dual-palette storage**: Persist separate light-mode and dark-mode brand values in the tenant profile table, or compute a calibrated dark-mode tone programmatically.
+- **Scoped container theming**: Wrap tenant workspaces in a dedicated container carrying tenant CSS custom properties, isolating client styles from system-wide administrative interfaces.
+
+## Contrast validation utility
+
+Use this mathematical contrast checker to validate tenant colours before persisting or injecting them:
+
+```ts
+/**
+ * Computes the relative luminance of an sRGB color.
+ * WCAG 2.1 Formula: https://www.w3.org/WAI/GL/wiki/Relative_luminance
+ */
+function getLuminance(r: number, g: number, b: number): number {
+  const [rs, gs, bs] = [r, g, b].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+/**
+ * Parses a hex string to RGB numbers.
+ */
+function hexToRgb(hex: string): [number, number, number] {
+  const clean = hex.replace('#', '');
+  const bigint = parseInt(clean, 16);
+  return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+}
+
+/**
+ * Returns the contrast ratio between two hex colours (1:1 to 21:1).
+ */
+export function getContrastRatio(hex1: string, hex2: string): number {
+  const rgb1 = hexToRgb(hex1);
+  const rgb2 = hexToRgb(hex2);
+  const lum1 = getLuminance(...rgb1);
+  const lum2 = getLuminance(...rgb2);
+
+  const brightest = Math.max(lum1, lum2);
+  const darkest = Math.min(lum1, lum2);
+  return (brightest + 0.05) / (darkest + 0.05);
+}
+
+/**
+ * Evaluates tenant primary color and determines the accessible foreground color.
+ * Ensures minimum 4.5:1 ratio (WCAG AA).
+ */
+export function getAccessibleForeground(primaryHex: string): '#ffffff' | '#0f172a' {
+  const whiteRatio = getContrastRatio(primaryHex, '#ffffff');
+  const darkRatio = getContrastRatio(primaryHex, '#0f172a');
+
+  // Choose the foreground that provides the strongest contrast
+  return whiteRatio >= darkRatio ? '#ffffff' : '#0f172a';
+}
+```
+
+## Complete example: Dynamic tenant brand injector
+
+Below is an implementation of a Next.js tenant layout wrapper that resolves the tenant profile and injects validated CSS custom properties:
+
+```tsx
+import { ReactNode } from 'react';
+import { getAccessibleForeground, getContrastRatio } from '@/lib/contrast';
+
+interface TenantTheme {
+  id: string;
+  name: string;
+  brandPrimary: string;       // e.g. "#1e40af"
+  brandAccent?: string;       // e.g. "#0284c7"
+  darkBrandPrimary?: string;  // e.g. "#3b82f6"
+}
+
+// Convert Hex to CSS HSL string values (e.g. "217 91% 60%")
+function hexToHslValues(hex: string): string {
+  const [r, g, b] = [0, 2, 4].map((p) => parseInt(hex.slice(p + 1, p + 3), 16) / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+
+  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
+
+export function TenantProvider({
+  tenant,
+  children,
+}: {
+  tenant: TenantTheme;
+  children: ReactNode;
+}) {
+  // Validate contrast safety: must be >= 4.5:1
+  const lightForeground = getAccessibleForeground(tenant.brandPrimary);
+  const lightHsl = hexToHslValues(tenant.brandPrimary);
+  const lightForegroundHsl = hexToHslValues(lightForeground);
+
+  const darkPrimary = tenant.darkBrandPrimary || tenant.brandPrimary;
+  const darkForeground = getAccessibleForeground(darkPrimary);
+  const darkHsl = hexToHslValues(darkPrimary);
+  const darkForegroundHsl = hexToHslValues(darkForeground);
+
+  // Generate CSS style string for scoped tenant container
+  const cssVariables = `
+    [data-tenant="${tenant.id}"] {
+      --primary: ${lightHsl};
+      --primary-foreground: ${lightForegroundHsl};
+      --ring: ${lightHsl};
+    }
+    .dark [data-tenant="${tenant.id}"],
+    [data-tenant="${tenant.id}"].dark {
+      --primary: ${darkHsl};
+      --primary-foreground: ${darkForegroundHsl};
+      --ring: ${darkHsl};
+    }
+  `;
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: cssVariables }} />
+      <div data-tenant={tenant.id} className="min-h-screen bg-background text-foreground">
+        {children}
+      </div>
+    </>
+  );
+}
+```
+
+## Administrative brand preview and safety audit
+
+In the tenant settings panel, provide real-time contrast auditing to prevent administrators from saving non-compliant color schemes:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, Input, Button, Badge, Alert } from '@innostes/ui';
+import { getContrastRatio, getAccessibleForeground } from '@/lib/contrast';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
+
+export function TenantThemeEditor() {
+  const [primaryHex, setPrimaryHex] = useState('#0f766e'); // Teal-700
+  const foreground = getAccessibleForeground(primaryHex);
+  const contrastAgainstWhite = getContrastRatio(primaryHex, '#ffffff');
+  const passesAA = contrastAgainstWhite >= 4.5;
+
+  return (
+    <Card className="max-w-xl">
+      <CardHeader>
+        <CardTitle>Tenant brand configuration</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <label className="text-sm font-medium text-foreground block mb-2">
+            Primary brand color (HEX)
+          </label>
+          <div className="flex gap-3">
+            <Input
+              type="text"
+              value={primaryHex}
+              onChange={(e) => setPrimaryHex(e.target.value)}
+              className="font-mono"
+            />
+            <div
+              className="w-10 h-10 rounded-md border flex-shrink-0"
+              style={{ backgroundColor: primaryHex }}
+            />
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg border bg-muted/20 space-y-2">
+          <div className="flex justify-between items-center text-sm">
+            <span>Contrast against white</span>
+            <span className="font-mono font-bold">{contrastAgainstWhite.toFixed(2)}:1</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant={passesAA ? 'default' : 'destructive'}>
+              {passesAA ? 'WCAG AA Compliant' : 'Insufficient Contrast (< 4.5:1)'}
+            </Badge>
+          </div>
+        </div>
+
+        {!passesAA && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <p className="text-xs">
+              This brand colour lacks sufficient luminance contrast. Text rendered on top of this button will be illegible to visually impaired operators.
+            </p>
+          </Alert>
+        )}
+
+        <div className="pt-2">
+          <Button
+            variant="primary"
+            disabled={!passesAA}
+            style={{ backgroundColor: primaryHex, color: foreground }}
+          >
+            Sample tenant button
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+## Accessibility notes
+
+- **Strict WCAG 2.1 compliance**: Enterprise business software requires a minimum 4.5:1 contrast ratio for regular body text and buttons, and 3:1 for large typography and essential user interface boundaries.
+- **Automated fallback enforcement**: If a tenant saves an invalid color below 4.5:1, adjust the lightness channel automatically in your theme parser to guarantee baseline compliance.
+- **Focus ring visibility**: Ensure `--ring` custom properties maintain a 3:1 contrast ratio against the page background so keyboard focus indicators remain distinct.
+
+## Common mistakes
+
+- **Saving unverified hex colors**: Allowing tenant admins to type arbitrary hex codes without validation leads to broken buttons with invisible text.
+- **Global `body` style overrides**: Injecting tenant styles onto the top-level `document.body` breaks multi-tenant tab switching or unified super-admin consoles where multiple tenants are inspected simultaneously.
+- **Ignoring dark mode inversion**: A dark navy blue works well as primary on white backgrounds, but becomes virtually invisible when rendered against a `#09090b` dark mode background. Always supply a distinct dark mode value.
+
+## Related components
+
+- [`Button`](/ui/docs/components/actions/button) — Uses `--primary` and `--primary-foreground` design tokens.
+- [`Badge`](/ui/docs/components/data-display/badge) — Brand-aware status indicator.
+- [`Alert`](/ui/docs/components/feedback/alert) — Accessible warning banner for theme safety validation.
+- [`Card`](/ui/docs/components/data-display/card) — Tenant branding container.

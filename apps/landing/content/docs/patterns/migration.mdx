@@ -1,0 +1,200 @@
+---
+title: Migrating from another library
+description: Migration guide and component mapping tables from shadcn/ui and Material UI (MUI) to @innostes/ui.
+icon: ArrowLeftRight
+---
+
+Migrating an enterprise application from legacy component libraries—such as shadcn/ui (Radix Primitives) or Material UI (MUI)—to `@innostes/ui` improves accessibility compliance, simplifies form wiring, and removes heavy runtime CSS-in-JS engines. This guide provides direct mapping tables for component names, layout structures, and API props to accelerate refactoring.
+
+## Why migrate to `@innostes/ui`?
+
+1. **Zero runtime styling overhead**: Replaces Emotion/MUI CSS-in-JS style injection with zero-runtime Tailwind CSS utility tokens and CSS variables.
+2. **Unified accessible forms**: Replaces scattered label and error boilerplates with cohesive [`Field`](/ui/docs/components/forms/field) containers that automatically link IDs, descriptions, and ARIA error states.
+3. **Integrated enterprise data primitives**: Native support for [`DataTable`](/ui/docs/components/data-display/data-table), [`SplitPane`](/ui/docs/components/layout/split-pane), [`KanbanBoard`](/ui/docs/widgets/kanban-board), [`PermissionMatrix`](/ui/docs/widgets/permission-matrix), and BCP 47 locale selectors.
+4. **Multi-React version support**: First-class compatibility across React 17, React 18, and React 19 without peer dependency conflicts.
+
+## Mapping from shadcn/ui (Radix UI)
+
+shadcn/ui copies individual Radix wrapper components into your repository. `@innostes/ui` provides drop-in components built on Base UI with consistent styling and zero boilerplate.
+
+### Component mapping table
+
+| shadcn/ui Component | `@innostes/ui` Equivalent | Key API Differences |
+| :--- | :--- | :--- |
+| `Button` | [`Button`](/ui/docs/components/actions/button) | `variant="default"` maps to `variant="primary"`. Also supports `variant="secondary"`, `variant="outline"`, `variant="ghost"`, `variant="destructive"`. |
+| `Input` | [`Input`](/ui/docs/components/forms/input) | Drop-in compatible. Supports `size="sm" \| "md" \| "lg"`. |
+| `FormField` / `FormItem` | [`Field`](/ui/docs/components/forms/field) | Single wrapping component. Automatically generates accessible IDs and connects labels to inputs. |
+| `FormLabel` | [`FieldLabel`](/ui/docs/components/forms/field) | Renders semantic `<label>` linked via context. |
+| `FormDescription` | [`FieldDescription`](/ui/docs/components/forms/field) | Links automatically to input via `aria-describedby`. |
+| `FormMessage` | [`FieldError`](/ui/docs/components/forms/field) | Renders error text with `role="alert"` and automatically adds error rings to the field input. |
+| `Dialog` / `DialogContent` | [`Dialog`](/ui/docs/components/overlays/dialog) | Identical structure: `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`, `DialogClose`. |
+| `AlertDialog` | [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) | Identical structure with enforced alertdialog semantics. |
+| `Sheet` | [`Sheet`](/ui/docs/components/overlays/sheet) | Same `side="top" \| "right" \| "bottom" \| "left"` prop. Better focus trap and mobile drawer animations. |
+| `DropdownMenu` | [`DropdownMenu`](/ui/docs/components/overlays/dropdown-menu) | Uses `@base-ui/react` menu engine. `DropdownMenuItem` supports keyboard shortcuts. |
+| `Select` | [`Select`](/ui/docs/components/forms/select) | Offers both a convenient single-prop API (`options={items}`) and a full composable subcomponent API. |
+| `Tabs` | [`Tabs`](/ui/docs/components/navigation/tabs) | `TabsTrigger` is supported; also exports semantic `TabsTab` and `TabsPanel`. |
+| `Badge` | [`Badge`](/ui/docs/components/data-display/badge) | Similar variants (`primary`, `secondary`, `outline`, `destructive`). |
+| `Card` | [`Card`](/ui/docs/components/data-display/card) | Drop-in compatible structure (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`). |
+| `Table` | [`Table`](/ui/docs/components/data-display/table) | Drop-in compatible HTML table primitives. For server tables, consider [`DataTable`](/ui/docs/components/data-display/data-table). |
+| `Toaster` / `toast` | [`Toaster`](/ui/docs/components/feedback/toast) / `toast` | Direct functional API. Supports `title`, `description`, `action`, `variant`. |
+
+### Before & after: shadcn/ui Form migration
+
+```tsx
+// ─── Before: shadcn/ui ────────────────────────────────────────────────────────
+import { useForm } from 'react-hook-form';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+
+export function OldVendorForm() {
+  const form = useForm();
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(console.log)}>
+        <FormField
+          control={form.control}
+          name="vendorName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Vendor Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Acme Ltd" {...field} />
+              </FormControl>
+              <FormDescription>Official legal trade entity</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
+  );
+}
+
+// ─── After: @innostes/ui ──────────────────────────────────────────────────────
+import { useForm } from 'react-hook-form';
+import { Field, FieldLabel, FieldDescription, FieldError, Input, Button } from '@innostes/ui';
+
+export function NewVendorForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  return (
+    <form onSubmit={handleSubmit(console.log)} className="space-y-4">
+      <Field id="vendorName" error={errors.vendorName?.message as string}>
+        <FieldLabel>Vendor Name</FieldLabel>
+        <Input placeholder="Acme Ltd" {...register('vendorName', { required: 'Name is required' })} />
+        <FieldDescription>Official legal trade entity</FieldDescription>
+        <FieldError />
+      </Field>
+      <Button type="submit" variant="primary">Submit</Button>
+    </form>
+  );
+}
+```
+
+## Mapping from Material UI (MUI v5)
+
+Material UI relies on Emotion/styled-components for style generation. Migrating to `@innostes/ui` removes runtime styling overhead and provides Tailwind CSS agility.
+
+### Component mapping table
+
+| MUI Component | `@innostes/ui` Equivalent | Key API Differences |
+| :--- | :--- | :--- |
+| `Button` (`variant="contained"`) | [`Button`](/ui/docs/components/actions/button) `variant="primary"` | `variant="contained"` → `variant="primary"`; `variant="outlined"` → `variant="outline"`; `variant="text"` → `variant="ghost"`. |
+| `TextField` | [`Field`](/ui/docs/components/forms/field) + [`Input`](/ui/docs/components/forms/input) | MUI packages label, input, and helperText in one monolithic component. In `@innostes/ui`, compose [`FieldLabel`](/ui/docs/components/forms/field), [`Input`](/ui/docs/components/forms/input), and [`FieldError`](/ui/docs/components/forms/field). |
+| `Dialog` | [`Dialog`](/ui/docs/components/overlays/dialog) | MUI uses `onClose={() => setOpen(false)}`; `@innostes/ui` uses `onOpenChange={(open) => setOpen(open)}`. |
+| `Drawer` | [`Sheet`](/ui/docs/components/overlays/sheet) | `anchor="right"` becomes `side="right"`. |
+| `Menu` / `MenuItem` | [`DropdownMenu`](/ui/docs/components/overlays/dropdown-menu) | MUI requires passing an `anchorEl` DOM ref state. `@innostes/ui` uses a declarative trigger (`<DropdownMenuTrigger asChild>`). |
+| `Typography` | Semantic HTML + Tailwind | Replace `<Typography variant="h4">` with `<h2 className="text-xl font-bold">`. |
+| `Stack` | Tailwind Flexbox | Replace `<Stack direction="row" spacing={2}>` with `<div className="flex flex-row gap-2">`. |
+| `Grid` | Tailwind Grid | Replace `<Grid container spacing={3}>` with `<div className="grid grid-cols-12 gap-6">` or [`FormGrid`](/ui/docs/components/layout/form-layout). |
+| `CircularProgress` | [`Spinner`](/ui/docs/components/feedback/spinner) | Direct accessible SVG spinner. |
+| `LinearProgress` | [`Progress`](/ui/docs/components/feedback/progress) | Supports `value` (0–100) and `aria-label`. |
+| `Chip` | [`Badge`](/ui/docs/components/data-display/badge) | Compact status tag. |
+| `Snackbar` / `Alert` | [`toast`](/ui/docs/components/feedback/toast) / [`Alert`](/ui/docs/components/feedback/alert) | Transient alerts use `toast()`; persistent banners use `<Alert>`. |
+
+### Before & after: Material UI Modal migration
+
+```tsx
+// ─── Before: Material UI ──────────────────────────────────────────────────────
+import * as React from 'react';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
+export function OldMuiDialog() {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <>
+      <Button variant="contained" onClick={() => setOpen(true)}>Open Modal</Button>
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Confirm Disbursement</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you wish to release payment?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={() => setOpen(false)}>Confirm</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
+
+// ─── After: @innostes/ui ──────────────────────────────────────────────────────
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+  Button,
+} from '@innostes/ui';
+
+export function NewInnostesDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="primary">Open Modal</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirm Disbursement</DialogTitle>
+          <DialogDescription>Are you sure you wish to release payment?</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button variant="destructive">Confirm</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+```
+
+## Migration checklist
+
+1. **Install `@innostes/ui` and peer dependencies**:
+   ```bash
+   pnpm add @innostes/ui @base-ui/react clsx tailwind-merge class-variance-authority lucide-react
+   ```
+2. **Configure Tailwind CSS preset**: Import `@innostes/ui/tailwind.css` or the design token CSS variables in your global stylesheet (`globals.css`).
+3. **Migrate leaf primitives first**: Start refactoring buttons, badges, inputs, and cards before tackling high-level layout shells and data tables.
+4. **Replace complex form controls**: Transition forms to [`Field`](/ui/docs/components/forms/field) containers.
+5. **Run accessibility test suites**: Confirm all interactive components pass automated axe-core and Testing Library queries.
+
+## Related documentation
+
+- [API Conventions](/ui/docs/resources/conventions) — Architectural principles and state models.
+- [Forms and validation](/ui/docs/patterns/forms-and-validation) — Zod and React Hook Form recipes.
+- [Data tables backed by an API](/ui/docs/patterns/api-tables) — Server table composition.

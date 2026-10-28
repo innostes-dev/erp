@@ -1,0 +1,315 @@
+---
+title: Data tables backed by an API
+description: Server pagination, sorting, filtering, and bulk operations with URL synchronization.
+icon: Table
+---
+
+Enterprise ERP tables display tens of thousands of purchase orders, stock balance lines, and tax invoices. Rendering large datasets in the browser requires delegating pagination, sorting, and search querying to your backend API while synchronizing filter parameters with URL search params.
+
+## The problem
+
+Common failure modes in data table integrations include:
+1. **Unshareable view state**: Filtering for high-value orders in Bangalore does not update the browser URL, meaning operators cannot share or bookmark the exact filtered view.
+2. **Debounce thrashing**: Firing backend search queries on every key press, overwhelming the server and causing race conditions where out-of-order responses overwrite newer search inputs.
+3. **Ambiguous empty states**: Displaying the exact same message ("No orders found") when an organisation has zero orders versus when a specific query returned zero matches.
+
+## Recommended approach
+
+- **URL search params as source of truth**: Store `page`, `pageSize`, `sort`, `order`, and `search` in browser URL search parameters (`?page=2&sort=amount&order=desc&q=spices`).
+- **Manual mode in [`DataTable`](/ui/docs/components/data-display/data-table)**: Set `manualPagination={true}` and `manualSorting={true}` to prevent TanStack Table from re-filtering the server-paginated slice in the client.
+- **Debounced input**: Debounce keystroke events by 300ms before pushing search updates to URL state.
+- **Differentiated empty states**: Render distinct empty states for "Zero entity records exist" versus "No records match active search filters".
+- **Bulk action safety**: Confirm destructive batch operations (such as cancelling multiple purchase orders) with [`AlertDialog`](/ui/docs/components/overlays/alert-dialog).
+
+## Complete example: Server-driven purchase orders table
+
+```tsx
+'use client';
+
+import { useState, useEffect, useTransition } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import {
+  DataTable,
+  type ColumnDef,
+  type SortingState,
+  Input,
+  Button,
+  Badge,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogClose,
+  toast,
+} from '@innostes/ui';
+import { Search, MoreHorizontal, ArrowUpDown, Trash2 } from 'lucide-react';
+
+export interface PurchaseOrderRow {
+  id: string;
+  vendorName: string;
+  orderDate: string;
+  amount: number;
+  status: 'draft' | 'approved' | 'dispatched' | 'cancelled';
+}
+
+export function ApiBackedOrdersTable() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // 1. Read query parameters from URL
+  const page = Number(searchParams.get('page') ?? '1');
+  const pageSize = Number(searchParams.get('pageSize') ?? '10');
+  const sortParam = searchParams.get('sort') ?? 'orderDate';
+  const sortDir = (searchParams.get('order') ?? 'desc') as 'asc' | 'desc';
+  const queryParam = searchParams.get('q') ?? '';
+
+  // Local state for immediate typing responsiveness
+  const [searchInput, setSearchInput] = useState(queryParam);
+  const [data, setData] = useState<PurchaseOrderRow[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedRows, setSelectedRows] = useState<PurchaseOrderRow[]>([]);
+  const [bulkCancelOpen, setBulkCancelOpen] = useState(false);
+
+  // 2. Synchronise URL parameters helper
+  const updateParams = (updates: Record<string, string | number | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, val] of Object.entries(updates)) {
+      if (val === null || val === '') {
+        params.delete(key);
+      } else {
+        params.set(key, String(val));
+      }
+    }
+    startTransition(() => {
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  };
+
+  // 3. Debounce search input by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== queryParam) {
+        updateParams({ q: searchInput, page: 1 });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // 4. Fetch server records when URL parameters change
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+
+    fetch(`/api/purchases?page=${page}&pageSize=${pageSize}&sort=${sortParam}&order=${sortDir}&q=${encodeURIComponent(queryParam)}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (active) {
+          setData(json.items);
+          setTotalRecords(json.total);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setIsLoading(false);
+          toast.error('Failed to fetch purchase orders from API');
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [page, pageSize, sortParam, sortDir, queryParam]);
+
+  // 5. Define column structure
+  const columns: ColumnDef<PurchaseOrderRow>[] = [
+    {
+      accessorKey: 'id',
+      header: 'PO Number',
+      cell: ({ row }) => <span className="font-mono font-medium">{row.original.id}</span>,
+    },
+    {
+      accessorKey: 'vendorName',
+      header: 'Vendor name',
+    },
+    {
+      accessorKey: 'orderDate',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ms-2.5 h-8 data-[state=open]:bg-accent"
+          onClick={() => {
+            const isDesc = sortParam === 'orderDate' && sortDir === 'desc';
+            updateParams({ sort: 'orderDate', order: isDesc ? 'asc' : 'desc' });
+          }}
+        >
+          <span>Order date</span>
+          <ArrowUpDown className="ms-2 size-3.5" />
+        </Button>
+      ),
+    },
+    {
+      accessorKey: 'amount',
+      header: 'Amount (₹)',
+      cell: ({ row }) => (
+        <span className="font-medium">
+          ₹{row.original.amount.toLocaleString('en-IN')}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => {
+        const variants = {
+          approved: 'success',
+          draft: 'neutral',
+          dispatched: 'primary',
+          cancelled: 'destructive',
+        } as const;
+        return <Badge variant={variants[row.original.status]}>{row.original.status}</Badge>;
+      },
+    },
+    {
+      id: 'actions',
+      header: () => <span className="sr-only">Actions</span>,
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={<Button variant="ghost" size="sm" iconOnly aria-label={`Actions for ${row.original.id}`} />}
+          >
+            <MoreHorizontal className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => router.push(`/purchases/${row.original.id}`)}>
+              View order details
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => toast.info(`Initiated cancellation for ${row.original.id}`)}
+            >
+              Cancel PO
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Search and bulk actions bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="relative w-72">
+          <Search className="pointer-events-none absolute start-3 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search vendor or PO..."
+            className="ps-9"
+          />
+        </div>
+
+        {selectedRows.length > 0 && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">{selectedRows.length} selected</span>
+            <AlertDialog open={bulkCancelOpen} onOpenChange={setBulkCancelOpen}>
+              <AlertDialogTrigger
+                render={<Button variant="destructive" size="sm" startIcon={<Trash2 className="size-4" />} />}
+              >
+                Cancel selected
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel {selectedRows.length} purchase orders?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will invalidate the selected orders and emit cancellation notices to vendors. This action cannot be reversed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogClose render={<Button variant="outline" />}>Keep orders</AlertDialogClose>
+                  <AlertDialogClose
+                    render={<Button variant="destructive" />}
+                    onClick={() => {
+                      toast.success(`Cancelled ${selectedRows.length} orders`);
+                      setSelectedRows([]);
+                    }}
+                  >
+                    Confirm cancellation
+                  </AlertDialogClose>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
+      </div>
+
+      {/* Manual server-backed DataTable */}
+      <DataTable
+        columns={columns}
+        data={data}
+        loading={isLoading || isPending}
+        selectable
+        selectedRows={selectedRows}
+        onSelectionChange={setSelectedRows}
+        manualPagination
+        pageCount={Math.ceil(totalRecords / pageSize)}
+        pageIndex={page - 1}
+        pageSize={pageSize}
+        onPageChange={(nextPageIndex) => updateParams({ page: nextPageIndex + 1 })}
+        emptyState={
+          queryParam ? (
+            <div className="py-12 text-center">
+              <p className="text-sm font-medium text-foreground">No orders matching "{queryParam}"</p>
+              <p className="text-xs text-muted-foreground mt-1">Try searching by vendor name or clear active filters.</p>
+              <Button variant="outline" size="sm" className="mt-4" onClick={() => updateParams({ q: '' })}>
+                Clear search filter
+              </Button>
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <p className="text-sm font-medium text-foreground">No purchase orders recorded</p>
+              <p className="text-xs text-muted-foreground mt-1">Create your first purchase order to begin tracking procurement.</p>
+              <Button size="sm" className="mt-4" onClick={() => router.push('/purchases/new')}>
+                Create purchase order
+              </Button>
+            </div>
+          )
+        }
+      />
+    </div>
+  );
+}
+```
+
+## Accessibility notes
+
+- **Keyboard sorting**: Provide sort buttons in column headers with clear `aria-label` text describing the current and target sort order.
+- **Live region announcements**: Wrap table loading states in `aria-busy="true"` so screen readers inform operators when a server query is resolving.
+- **Row selection context**: Ensure table row selection checkboxes have accessible names identifying the specific row (e.g. `aria-label="Select order PO-2026-081"`).
+
+## Common mistakes
+
+| Anti-pattern | Recommended solution |
+| :--- | :--- |
+| Omitting `manualPagination` while passing sliced data. | Set `manualPagination={true}` and `pageCount={total}` so TanStack Table respects server pages. |
+| Firing search queries on raw `onChange` without debounce. | Debounce query state updates by 300ms using a timeout or custom hook. |
+| Storing page state exclusively in `useState`. | Synchronize query state with Next.js URL search params so views are shareable. |
+| Generic "No data" message when filters return 0 records. | Provide a "Clear search filter" button when active search queries return empty sets. |
+
+## Related components
+
+- [DataTable](/ui/docs/components/data-display/data-table) — Interactive table component supporting sorting and pagination.
+- [DropdownMenu](/ui/docs/components/overlays/dropdown-menu) — Trigger-anchored action list for row operations.
+- [AlertDialog](/ui/docs/components/overlays/alert-dialog) — Strict modal confirmation for bulk cancellations.

@@ -1,0 +1,241 @@
+---
+title: Testing your app
+description: Unit, integration, and end-to-end testing strategies with Testing Library, Vitest, jsdom polyfills, and Playwright.
+icon: FlaskConical
+---
+
+Resilient enterprise software requires multi-tiered test automation covering business logic, user interaction flows, and accessibility compliance. This guide outlines how to test applications built with `@innostes/ui` using Vitest and React Testing Library for unit/integration tests, configure required jsdom polyfills, and write deterministic Playwright end-to-end tests.
+
+## The problem
+
+Testing modern design systems in enterprise apps introduces recurring challenges:
+1. **Flaky DOM queries**: Relying on unstable CSS selectors or implementation details (`.btn-primary`, `div > span:nth-child(2)`) breaks tests during routine styling refactors.
+2. **Missing browser APIs in jsdom**: Node test runners like Vitest and Jest use `jsdom`, which lacks `ResizeObserver`, `window.matchMedia`, and Web Animations APIs, throwing crashes during test execution.
+3. **Portal detachment**: Overlays, dropdown menus, dialogs, and tooltips render into `document.body` through React portals. Calling `within(container).getByRole(...)` fails to find open modal content.
+4. **Flaky asynchronous timing in E2E tests**: Using hardcoded `sleep(1000)` timeouts in Playwright tests creates flakiness under CI load.
+
+## Recommended approach
+
+- **Query by accessible role and name**: Always use `screen.getByRole('button', { name: /save/i })`, `screen.getByRole('dialog')`, and `screen.getByLabelText(...)`. This guarantees that tests interact with components exactly as assistive technologies experience them.
+- **Configure standard jsdom polyfills**: Install polyfills for `ResizeObserver`, `matchMedia`, and `getAnimations` in your global test setup file.
+- **Inspect `screen` for portal overlays**: Because `@innostes/ui` dialogs, sheets, and popovers render into the document body root, query them using `screen.getByRole` rather than searching within a local component test `container`.
+- **User Event over FireEvent**: Use `@testing-library/user-event` to simulate realistic keystrokes, tab navigation, and focus transitions.
+
+## Vitest test environment setup
+
+Create a setup file (`vitest.setup.ts`) matching the test harness used internally by `@innostes/ui`:
+
+```ts
+import '@testing-library/jest-dom/vitest';
+import { cleanup } from '@testing-library/react';
+import { afterEach } from 'vitest';
+
+// Automatically clean up DOM nodes after each test
+afterEach(() => {
+  cleanup();
+});
+
+// 1. Polyfill window.matchMedia for responsive and dark mode hooks
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
+}
+
+// 2. Polyfill ResizeObserver for charts and split panes
+if (!('ResizeObserver' in window)) {
+  class ResizeObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  (window as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver =
+    ResizeObserverStub;
+}
+
+// 3. Polyfill Element.prototype.getAnimations for Base UI transitions
+if (!Element.prototype.getAnimations) {
+  Element.prototype.getAnimations = () => [];
+}
+```
+
+Reference this file in your `vitest.config.ts`:
+
+```ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+    globals: true,
+  },
+});
+```
+
+## Testing form workflows with Testing Library
+
+Below is a complete integration test verifying user interaction, validation errors, and submission in a Northwind purchase order dialog:
+
+```tsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi } from 'vitest';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Field,
+  FieldLabel,
+  Input,
+  Button,
+} from '@innostes/ui';
+import { useState } from 'react';
+
+function OrderModal({ onSubmit }: { onSubmit: (po: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [po, setPo] = useState('');
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="primary">Create PO</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>New Purchase Order</DialogTitle>
+        </DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit(po);
+            setOpen(false);
+          }}
+          className="space-y-4 pt-4"
+        >
+          <Field id="po-input">
+            <FieldLabel>PO Number</FieldLabel>
+            <Input value={po} onChange={(e) => setPo(e.target.value)} placeholder="PO-2026-XXXX" />
+          </Field>
+          <Button type="submit" variant="primary">
+            Confirm PO
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+describe('OrderModal Integration', () => {
+  it('opens dialogue, accepts input, and submits successfully', async () => {
+    const user = userEvent.setup();
+    const handleSubmit = vi.fn();
+
+    render(<OrderModal onSubmit={handleSubmit} />);
+
+    // 1. Verify trigger exists and dialogue is not yet open
+    const trigger = screen.getByRole('button', { name: /create po/i });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    // 2. Click trigger to mount dialogue portal
+    await user.click(trigger);
+
+    // 3. Dialogue is rendered in document.body via Portal
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /new purchase order/i })).toBeInTheDocument();
+
+    // 4. Enter PO number
+    const input = screen.getByRole('textbox', { name: /po number/i });
+    await user.type(input, 'PO-2026-0912');
+
+    // 5. Submit form
+    const submitBtn = screen.getByRole('button', { name: /confirm po/i });
+    await user.click(submitBtn);
+
+    // 6. Assert callback was fired with typed value
+    expect(handleSubmit).toHaveBeenCalledWith('PO-2026-0912');
+  });
+});
+```
+
+## Playwright end-to-end testing tips
+
+For browser-level regression testing, write Playwright specs that evaluate accessible locators and keyboard flows:
+
+```ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Vendor Directory E2E', () => {
+  test('supports complete keyboard navigation and search filtering', async ({ page }) => {
+    await page.goto('/vendors');
+
+    // 1. Search for a specific vendor
+    const searchInput = page.getByPlaceholder(/search vendors/i);
+    await searchInput.fill('Kirloskar');
+
+    // 2. Wait for debounced results to settle
+    const vendorRow = page.getByRole('row', { name: /kirloskar electric/i });
+    await expect(vendorRow).toBeVisible();
+
+    // 3. Open actions dropdown with keyboard
+    const actionBtn = vendorRow.getByRole('button', { name: /actions for kirloskar/i });
+    await actionBtn.focus();
+    await page.keyboard.press('Enter');
+
+    // 4. Navigate dropdown items
+    const archiveMenuItem = page.getByRole('menuitem', { name: /archive vendor/i });
+    await expect(archiveMenuItem).toBeVisible();
+    await archiveMenuItem.click();
+
+    // 5. Verify confirmation alertdialog appears
+    const alertDialog = page.getByRole('alertdialog');
+    await expect(alertDialog).toBeVisible();
+    await expect(alertDialog.getByText(/archive vendor account/i)).toBeVisible();
+
+    // 6. Dismiss with Escape key
+    await page.keyboard.press('Escape');
+    await expect(alertDialog).not.toBeVisible();
+  });
+
+  test('maintains accessible visual contrast in dark mode', async ({ page }) => {
+    // Emulate dark mode media feature
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/dashboard');
+
+    const kpiCard = page.getByText(/active purchase commitments/i);
+    await expect(kpiCard).toBeVisible();
+  });
+});
+```
+
+## Accessibility notes
+
+- **Avoid querying by test ID**: Using `data-testid` hides broken accessibility names from test suites. If a test cannot find a button by its role and accessible name, assistive software cannot find it either.
+- **Test focus traps**: When verifying modal dialogs, press <kbd>Tab</kbd> multiple times and confirm that focus remains trapped inside the active overlay.
+- **Verify polite announcements**: For alerts and toasts, assert that the wrapping container exposes `aria-live="polite"` or `role="alert"`.
+
+## Common mistakes
+
+- **Testing implementation details**: Asserting internal React state variables instead of rendered DOM text or input values couples tests to internal component refactoring.
+- **Forgetting `userEvent.setup()`**: Using `userEvent.click()` directly without initialising `const user = userEvent.setup()` can cause state synchronization issues in modern Testing Library versions.
+- **Querying closed portal elements**: Asserting that a modal or tooltip is hidden with `getByRole` throws an error. Always use `queryByRole` when asserting non-existence.
+
+## Related components
+
+- [`Dialog`](/ui/docs/components/overlays/dialog) — Modal dialog with portal rendering and focus management.
+- [`AlertDialog`](/ui/docs/components/overlays/alert-dialog) — High-consequence confirmation dialogue.
+- [`Field`](/ui/docs/components/forms/field) — Accessible form wrapper connecting label, input, and errors.
+- [`Input`](/ui/docs/components/forms/input) — Accessible text control.

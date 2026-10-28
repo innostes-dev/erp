@@ -1,0 +1,301 @@
+---
+title: Master-detail screens
+description: Responsive split-screen layouts with SplitPane on desktop, Sheet on mobile, and URL selection synchronisation.
+icon: Columns2
+---
+
+Master-detail screens allow operators to scan high-density record lists while inspecting or modifying full entity details without losing their browsing position. This guide explains how to construct responsive master-detail views combining [`SplitPane`](/ui/docs/components/layout/split-pane) for desktop viewports, [`Sheet`](/ui/docs/components/overlays/sheet) for mobile screens, URL search parameter synchronisation, and roving keyboard navigation.
+
+## The problem
+
+Enterprise master-detail layouts often suffer from three usability degradations:
+1. **Lost navigation context**: Clicking an item in a list navigates to a new page, forcing operators to click the browser back button repeatedly when inspecting dozens of line items.
+2. **Brittle mobile experiences**: Rigid side-by-side split panes collapse into unreadable narrow columns on smartphone or tablet viewports.
+3. **Unshareable state**: Selecting an item only mutates transient React memory, meaning bookmarking or refreshing the page resets the detail view to an empty state.
+4. **Broken keyboard navigation**: Moving between list items and detail controls requires tabbing through hundreds of unrelated DOM nodes.
+
+## Recommended approach
+
+- **Responsive presentation**: Render a resizable horizontal [`SplitPane`](/ui/docs/components/layout/split-pane) on viewports wider than 1024px (`lg:` breakpoint). On viewports below 1024px, render a full-width list and present the detail panel inside an overlay [`Sheet`](/ui/docs/components/overlays/sheet) side drawer.
+- **Deep-linkable URL parameters**: Store the selected record ID in query parameters (`?id=PO-2026-0811`). On initial page mount, hydrate the selected detail item directly from the URL.
+- **Roving keyboard focus**: Allow users to navigate the master list with <kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd> keys, press <kbd>Enter</kbd> to inspect details, and press <kbd>Escape</kbd> or <kbd>Tab</kbd> to shift focus into the detail pane.
+- **Persistent split pane dimensions**: Persist desktop pane size percentages in `localStorage` so user workspace preferences survive session restarts.
+
+## Complete example: Purchase requisition master-detail
+
+Below is a complete implementation of a purchase requisition review screen for Northwind Traders Pvt Ltd:
+
+```tsx
+'use client';
+
+import { useState, useEffect, useTransition } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import {
+  SplitPane,
+  SplitPanePanel,
+  SplitPaneResizer,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  Badge,
+  Button,
+  Card,
+  Input,
+  Skeleton,
+} from '@innostes/ui';
+import { Search, ChevronRight, FileText, CheckCircle2, Clock } from 'lucide-react';
+
+interface Requisition {
+  id: string;
+  department: string;
+  requester: string;
+  amount: number;
+  status: 'pending' | 'approved' | 'rejected';
+  date: string;
+  itemsCount: number;
+  description: string;
+}
+
+const REQUISITIONS: Requisition[] = [
+  {
+    id: 'PR-8901',
+    department: 'Bengaluru Logistics Hub',
+    requester: 'Aarav Sharma',
+    amount: 142500,
+    status: 'pending',
+    date: '28 Oct 2026',
+    itemsCount: 4,
+    description: 'Replacement hydraulic seal assemblies and conveyor belt rollers.',
+  },
+  {
+    id: 'PR-8902',
+    department: 'Quality Assurance Lab',
+    requester: 'Priya Patel',
+    amount: 88400,
+    status: 'approved',
+    date: '27 Oct 2026',
+    itemsCount: 2,
+    description: 'Precision digital calibration gauges and safety thermal probes.',
+  },
+  {
+    id: 'PR-8903',
+    department: 'Procurement & Stores',
+    requester: 'Rajesh Kumar',
+    amount: 320000,
+    status: 'pending',
+    date: '26 Oct 2026',
+    itemsCount: 12,
+    description: 'Industrial corrugated packaging cartons and tamper-evident seals.',
+  },
+];
+
+export function MasterDetailScreen() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // Read selected requisition from URL search params
+  const selectedId = searchParams.get('requisitionId') || REQUISITIONS[0].id;
+  const selectedItem = REQUISITIONS.find((r) => r.id === selectedId) || null;
+
+  // Track responsive screen width for mobile sheet presentation
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 1024px)');
+    setIsMobile(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  const handleSelectRequisition = (id: string) => {
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('requisitionId', id);
+      router.replace(`${pathname}?${params.toString()}`);
+    });
+
+    if (isMobile) {
+      setMobileSheetOpen(true);
+    }
+  };
+
+  // Reusable detail view component
+  const DetailContent = ({ item }: { item: Requisition | null }) => {
+    if (!item) {
+      return (
+        <div className="flex h-full items-center justify-center p-8 text-center text-muted-foreground">
+          Select a requisition from the list to inspect authorization line items.
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6 p-6">
+        <div className="flex items-start justify-between border-b pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold text-foreground">{item.id}</h2>
+              <Badge variant={item.status === 'approved' ? 'default' : 'secondary'}>
+                {item.status}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">{item.department}</p>
+          </div>
+          <div className="text-right">
+            <span className="text-xs text-muted-foreground block">Estimated Total</span>
+            <span className="text-2xl font-bold text-foreground">
+              ₹{item.amount.toLocaleString('en-IN')}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="text-muted-foreground block">Requested by</span>
+            <span className="font-medium text-foreground">{item.requester}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground block">Submission date</span>
+            <span className="font-medium text-foreground">{item.date}</span>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-2">Scope of purchase</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed bg-muted/30 p-4 rounded-md">
+            {item.description}
+          </p>
+        </div>
+
+        <div className="pt-4 flex gap-3">
+          <Button variant="primary">Approve requisition</Button>
+          <Button variant="outline">Request revision</Button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="h-[600px] border rounded-lg overflow-hidden bg-background">
+      {isMobile ? (
+        // Mobile layout: Full width list + Sheet detail drawer
+        <div className="p-4 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search requisitions..." className="pl-9" />
+          </div>
+          <div className="space-y-2">
+            {REQUISITIONS.map((req) => (
+              <Card
+                key={req.id}
+                tabIndex={0}
+                role="button"
+                onClick={() => handleSelectRequisition(req.id)}
+                className={`p-4 cursor-pointer transition-colors ${
+                  req.id === selectedId ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="font-semibold text-foreground">{req.id}</span>
+                    <p className="text-xs text-muted-foreground">{req.requester}</p>
+                  </div>
+                  <span className="text-sm font-medium">₹{req.amount.toLocaleString('en-IN')}</span>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
+            <SheetContent side="right" className="w-full sm:max-w-lg p-0">
+              <SheetHeader className="p-6 border-b">
+                <SheetTitle>Requisition details</SheetTitle>
+                <SheetDescription>Review specifications and fiscal approvals.</SheetDescription>
+              </SheetHeader>
+              <DetailContent item={selectedItem} />
+            </SheetContent>
+          </Sheet>
+        </div>
+      ) : (
+        // Desktop layout: SplitPane side-by-side with resizer
+        <SplitPane direction="horizontal" defaultSizes={[38, 62]}>
+          <SplitPanePanel minSize={280} defaultSize={380} className="border-r flex flex-col">
+            <div className="p-4 border-b">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Filter by ID or requester..." className="pl-9" />
+              </div>
+            </div>
+            <div className="overflow-y-auto flex-1 divide-y" role="listbox" aria-label="Purchase requisitions">
+              {REQUISITIONS.map((req) => (
+                <div
+                  key={req.id}
+                  role="option"
+                  aria-selected={req.id === selectedId}
+                  tabIndex={0}
+                  onClick={() => handleSelectRequisition(req.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelectRequisition(req.id);
+                    }
+                  }}
+                  className={`p-4 cursor-pointer transition-colors ${
+                    req.id === selectedId
+                      ? 'bg-accent/40 border-l-4 border-l-primary'
+                      : 'hover:bg-muted/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm text-foreground">{req.id}</span>
+                    <Badge variant="outline">{req.status}</Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1 flex justify-between">
+                    <span>{req.requester}</span>
+                    <span className="font-medium text-foreground">
+                      ₹{req.amount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </SplitPanePanel>
+
+          <SplitPaneResizer aria-label="Resize requisition panel" />
+
+          <SplitPanePanel minSize={400} className="overflow-y-auto bg-muted/5">
+            <DetailContent item={selectedItem} />
+          </SplitPanePanel>
+        </SplitPane>
+      )}
+    </div>
+  );
+}
+```
+
+## Accessibility notes
+
+- **Keyboard navigation semantics**: Master items rendered inside the navigation column should expose `role="option"` inside a container with `role="listbox"`. Set `aria-selected="true"` on the currently active item.
+- **Focus handoff**: When pressing <kbd>Enter</kbd> to inspect a record on desktop, allow keyboard users to advance focus directly to the detail action buttons using <kbd>Tab</kbd>.
+- **Accessible resizers**: The [`SplitPaneResizer`](/ui/docs/components/layout/split-pane) component renders `role="separator"` with appropriate `aria-valuenow`, `aria-valuemin`, and `aria-valuemax` attributes, supporting incrementation via <kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd>.
+- **Mobile sheet close focus**: When the mobile [`Sheet`](/ui/docs/components/overlays/sheet) dismisses, return keyboard focus cleanly to the trigger list card.
+
+## Common mistakes
+
+- **Hardcoding fixed pixel widths**: Hardcoding static pixel dimensions on master lists causes horizontal clipping on smaller desktop monitors. Always use fluid percentage splits with defined `minSize` safety boundaries.
+- **Neglecting URL state**: Failing to update the browser address bar with the selected identifier prevents users from emailing direct links to colleagues or opening items in background tabs.
+- **Duplicate scroll containers**: Avoid nesting independently scrolling viewports inside the master column without explicit height constraints; this causes scroll-wheel traps.
+
+## Related components
+
+- [`SplitPane`](/ui/docs/components/layout/split-pane) — Collapsible, resizable two-column and two-row layouts.
+- [`Sheet`](/ui/docs/components/overlays/sheet) — Slide-out modal drawer for mobile navigation and detailed inspectors.
+- [`Card`](/ui/docs/components/data-display/card) — Compact container for master listing items.
+- [`Badge`](/ui/docs/components/data-display/badge) — Status and category indicators.

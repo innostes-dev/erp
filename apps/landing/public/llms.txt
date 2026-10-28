@@ -15,10 +15,18 @@
 - [Vite React](https://innostes.com/ui/docs/frameworks/vite): Complete integration guide for Vite React projects with Tailwind CSS v4, TypeScript, and dark mode.
 - [Introduction](https://innostes.com/ui/docs): Enterprise UI component library for ERP and operations systems, built on Base UI and Tailwind CSS.
 - [Installation](https://innostes.com/ui/docs/installation): Install @innostes/ui, configure stylesheets, set up providers, and verify your build.
-- [Application shell](https://innostes.com/ui/docs/patterns/app-shell): Composable layout scaffolding for multi-tenant enterprise dashboards.
-- [Complex forms](https://innostes.com/ui/docs/patterns/complex-forms): Architecture for multi-section data entry, validation, and unsaved changes.
-- [Data management](https://innostes.com/ui/docs/patterns/data-management): Patterns for enterprise data tables, batch actions, and filtering.
-- [Patterns](https://innostes.com/ui/docs/patterns/index): Reusable composition recipes for enterprise application architectures.
+- [Data tables backed by an API](https://innostes.com/ui/docs/patterns/api-tables): Server pagination, sorting, filtering, and bulk operations with URL synchronization.
+- [Create, edit, and delete flows](https://innostes.com/ui/docs/patterns/crud-flows): Enterprise CRUD workflows with optimistic state mutations, destructive confirmations, and rollback toasts.
+- [Dashboards](https://innostes.com/ui/docs/patterns/dashboards): High-density executive and operational dashboard layouts with MetricCard, WidgetCard, charts, and date filtering.
+- [Forms and validation](https://innostes.com/ui/docs/patterns/forms-and-validation): Client and server form validation patterns with React Hook Form, Zod, and Next.js Server Actions.
+- [Patterns](https://innostes.com/ui/docs/patterns/index): Reusable composition recipes and architectural patterns for enterprise ERP screens.
+- [Internationalisation and right-to-left](https://innostes.com/ui/docs/patterns/internationalisation): Multi-locale formatting, Indian fiscal conventions, RTL layout configuration, and component labels overrides.
+- [Master-detail screens](https://innostes.com/ui/docs/patterns/master-detail): Responsive split-screen layouts with SplitPane on desktop, Sheet on mobile, and URL selection synchronisation.
+- [Migrating from another library](https://innostes.com/ui/docs/patterns/migration): Migration guide and component mapping tables from shadcn/ui and Material UI (MUI) to @innostes/ui.
+- [Theming for multiple tenants](https://innostes.com/ui/docs/patterns/multi-tenant-theming): Dynamic runtime brand token injection, multi-tenant CSS variables, WCAG AA contrast validation, and dark mode.
+- [Performance](https://innostes.com/ui/docs/patterns/performance): Optimising bundle size, tree-shaking, subpath entry points, virtualisation, and controlled state rendering.
+- [Permissions and roles](https://innostes.com/ui/docs/patterns/permissions-and-roles): Access control UI design with PermissionMatrix, policy evaluation, and accessible disabled action guidance.
+- [Testing your app](https://innostes.com/ui/docs/patterns/testing): Unit, integration, and end-to-end testing strategies with Testing Library, Vitest, jsdom polyfills, and Playwright.
 - [Theming & Design Tokens](https://innostes.com/ui/docs/theming): Semantic design token architecture, OKLCH colour system, theme overrides, multi-tenant scoping, and generated token reference.
 
 ## Components

@@ -431,4 +431,40 @@ drop, which doesn't work on touch screens.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 13 (Patterns and guides).
+- Non-blocking: none. Resolved in 13.
+
+
+## 13 – Patterns and guides – 2026-10-29
+
+**Summary**: Authored all 11 task-oriented enterprise pattern guides demonstrating production composition recipes using `@innostes/ui` primitives, Base UI foundations, and React ecosystem tools across the Northwind Traders Pvt Ltd domain. Replaced legacy stub pages with comprehensive guides covering client/server validation with Zod and Next.js Server Actions, server-paginated data tables with debounced URL filtering, CRUD workflows with optimistic UI and rollback toasts, master-detail split screens with desktop SplitPane and mobile Sheet drawers, high-density KPI dashboards with MetricCard and Cartesian/Donut charts, RBAC/ABAC access control using PermissionMatrix, internationalisation and RTL layout with Indian fiscal formatting (INR ₹, Lakhs, Crores), multi-tenant dynamic brand theming with WCAG AA contrast validation, testing recipes with React Testing Library, Vitest, jsdom polyfills, and Playwright E2E, bundle optimization and subpath tree-shaking, and detailed migration mapping tables for shadcn/ui and Material UI (MUI). Cross-linked all pattern guides from the Related sections of relevant component pages.
+
+**Changed**:
+- Created 11 pattern guide pages:
+  - `apps/landing/content/docs/patterns/forms-and-validation.mdx`: Zod, React Hook Form, Next.js Server Actions, Field linking, AlertDialog unsaved changes.
+  - `apps/landing/content/docs/patterns/api-tables.mdx`: server pagination, sorting, 300ms debounced search, URL sync, loading skeletons, bulk actions.
+  - `apps/landing/content/docs/patterns/crud-flows.mdx`: list → detail → edit, optimistic deletion with 5s undo window, AlertDialog confirmations.
+  - `apps/landing/content/docs/patterns/master-detail.mdx`: SplitPane desktop, Sheet mobile, URL search param selection, roving keyboard navigation.
+  - `apps/landing/content/docs/patterns/dashboards.mdx`: MetricCard KPI strip, WidgetCard async wrappers, Cartesian and Donut chart composition, auto-refresh.
+  - `apps/landing/content/docs/patterns/permissions-and-roles.mdx`: PermissionMatrix, hiding vs disabling with accessible tooltips, server enforcement.
+  - `apps/landing/content/docs/patterns/internationalisation.mdx`: BCP 47 locale propagation, label overrides list, INR formatting, RTL setup and testing.
+  - `apps/landing/content/docs/patterns/multi-tenant-theming.mdx`: runtime CSS token injection, relative luminance WCAG AA contrast validation, dark mode.
+  - `apps/landing/content/docs/patterns/testing.mdx`: Testing Library accessible role/name queries, portal handling, jsdom polyfills setup, Playwright E2E specs.
+  - `apps/landing/content/docs/patterns/performance.mdx`: ESM tree-shaking, subpath isolation (`/charts`, `/editor`), measured bundle sizes, virtualization.
+  - `apps/landing/content/docs/patterns/migration.mdx`: mapping tables from shadcn/ui and MUI with before-and-after refactoring examples.
+- Removed obsolete stubs:
+  - `apps/landing/content/docs/patterns/app-shell.mdx` (consolidated into `layout/index.mdx`)
+  - `apps/landing/content/docs/patterns/complex-forms.mdx` (replaced by `forms-and-validation.mdx`)
+  - `apps/landing/content/docs/patterns/data-management.mdx` (replaced by `api-tables.mdx`)
+- Updated navigation and cross-links:
+  - `apps/landing/content/docs/patterns/index.mdx`: card grid index of all 11 enterprise architectural patterns.
+  - `apps/landing/content/docs/patterns/meta.json`: ordered sidebar listing of all 11 guides.
+  - `apps/landing/public/llms.txt`: updated LLMs index with all 11 pattern links.
+  - Cross-linked related components: `field.mdx`, `data-table.mdx`, `split-pane.mdx`, `alert-dialog.mdx`, `metric-card.mdx`, `permission-matrix.mdx`.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (0.21s, all 9 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (static generation completed).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 14 (Full-screen realistic examples).

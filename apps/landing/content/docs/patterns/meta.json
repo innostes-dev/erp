@@ -2,8 +2,16 @@
   "title": "Patterns",
   "pages": [
     "index",
-    "complex-forms",
-    "data-management",
-    "app-shell"
+    "forms-and-validation",
+    "api-tables",
+    "crud-flows",
+    "master-detail",
+    "dashboards",
+    "permissions-and-roles",
+    "internationalisation",
+    "multi-tenant-theming",
+    "testing",
+    "performance",
+    "migration"
   ]
 }

@@ -1,14 +1,131 @@
 ---
 title: Patterns
-description: Reusable composition recipes for enterprise application architectures.
+description: Reusable composition recipes and architectural patterns for enterprise ERP screens.
 ---
 
-# Patterns
+Patterns document established combinations of `@innostes/ui` primitives and widgets that resolve recurrent challenges in enterprise software systems. Rather than prescribing rigid page layouts, patterns provide battle-tested, accessible blueprints for data flows, validation, multi-device layouts, and operational workflows modeled on Northwind Traders Pvt Ltd.
 
-Patterns document established combinations of primitives and widgets that resolve recurrent enterprise challenges at Northwind Traders Pvt Ltd. Rather than prescribing rigid page templates, patterns offer composable blueprints for forms, data tables, and application shells.
+## Architectural patterns
 
-## Core patterns
+<div className="grid gap-4 sm:grid-cols-2 mt-6">
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/forms-and-validation" className="hover:underline text-primary">
+        Forms and validation →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Client and server schema validation using React Hook Form, Zod, and Next.js Server Actions with accessible field linking.
+    </p>
+  </div>
 
-- **Complex forms**: Multi-section data entry, conditional validation with Zod, unsaved changes detection, and accessible error summaries.
-- **Data management**: High-density server tables, compound filtering drawers, batch selection workflows, and export pipelines.
-- **Application shell**: Responsive dual-tier navigation, persistent command bars, collapsible sidebars, and contextual breadcrumbs.
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/api-tables" className="hover:underline text-primary">
+        Data tables backed by an API →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Server pagination, multi-column sorting, debounced filtering synced with URL search params, and loading skeletons.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/crud-flows" className="hover:underline text-primary">
+        Create, edit, and delete flows →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Deterministic entity lifecycle flows with optimistic UI mutations, destructive confirmation dialogues, and undo toasts.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/master-detail" className="hover:underline text-primary">
+        Master-detail screens →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Responsive layouts combining desktop SplitPane and mobile Sheet drawers with deep-linked URL selection and roving focus.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/dashboards" className="hover:underline text-primary">
+        Dashboards →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      High-density executive and operational monitoring grids using MetricCard, WidgetCard, charts, and date filters.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/permissions-and-roles" className="hover:underline text-primary">
+        Permissions and roles →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Access control UI design with PermissionMatrix, policy evaluation rubrics, and accessible disabled action guidance.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/internationalisation" className="hover:underline text-primary">
+        Internationalisation and RTL →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      BCP 47 locales, Indian fiscal conventions (INR ₹, Lakhs, Crores), right-to-left layout configuration, and label overrides.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/multi-tenant-theming" className="hover:underline text-primary">
+        Theming for multiple tenants →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Dynamic runtime brand token injection, multi-tenant CSS variables, WCAG AA contrast validation, and dark mode.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/testing" className="hover:underline text-primary">
+        Testing your app →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Unit and integration testing with React Testing Library, Vitest, jsdom polyfills, and Playwright end-to-end specs.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/performance" className="hover:underline text-primary">
+        Performance →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Tree-shaking mechanics, isolated subpath entry points, measured bundle sizes, and large dataset virtualisation.
+    </p>
+  </div>
+
+  <div className="border rounded-lg p-5 bg-card text-card-foreground space-y-2 sm:col-span-2">
+    <h3 className="font-semibold text-base">
+      <a href="/ui/docs/patterns/migration" className="hover:underline text-primary">
+        Migrating from another library →
+      </a>
+    </h3>
+    <p className="text-sm text-muted-foreground">
+      Direct mapping tables, prop differences, and before-and-after refactoring recipes for shadcn/ui and Material UI.
+    </p>
+  </div>
+</div>

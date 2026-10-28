@@ -1,0 +1,149 @@
+---
+title: Internationalisation and right-to-left
+description: Multi-locale formatting, Indian fiscal conventions, RTL layout configuration, and component labels overrides.
+icon: Globe
+---
+
+Global enterprise applications serve distributed teams across linguistic borders and regulatory jurisdictions. `@innostes/ui` is built on top of standard web platform internationalisation APIs (`Intl.DateTimeFormat`, `Intl.NumberFormat`, `Intl.Collator`, `Intl.DisplayNames`) and CSS logical properties. This guide explains how to configure language locales, override built-in strings, apply Indian fiscal formatting conventions, and activate bidirectional Right-to-Left (RTL) rendering.
+
+## The problem
+
+Internationalised enterprise interfaces frequently encounter four fundamental issues:
+1. **Hardcoded Western number formatting**: Formatting currency with standard Western thousands grouping (`10,000,000`) instead of the Indian numbering system (`1,00,00,000` / 1 Crore) confuses local accounting and tax audit teams.
+2. **Untranslatable UI strings**: Hardcoding English text ("Previous", "Next", "Upload files", "Drop files here") inside compiled UI components prevents local language translation.
+3. **Broken bidirectional layout**: Using physical directional CSS properties (`left`, `right`, `margin-left`, `padding-right`) causes layouts to invert incorrectly when switching to RTL scripts such as Arabic, Urdu, or Hebrew.
+4. **Calendar start-of-week mismatches**: Forcing Sunday as the first day of the week disregards regional ISO-8601 business standards where Monday starts the work week.
+
+## Recommended approach
+
+- **BCP 47 Locale propagation**: Pass the active BCP 47 locale tag (e.g. `en-IN`, `hi-IN`, `ar-AE`, `en-GB`) to `@innostes/ui` date, number, and selection primitives.
+- **Component `labels` overrides**: Customise UI strings across components using their typed `labels` prop, or wire them to your app's i18n dictionary (e.g. `next-intl` or `react-i18next`).
+- **CSS logical properties**: Apply `start` and `end` logical dimensions (`ms-`, `me-`, `ps-`, `pe-`, `border-s-`, `border-e-`, `inset-inline-start`) instead of left/right physical styles.
+- **Top-level `dir` attribute**: Set `<html dir="rtl">` or `<div dir="rtl">` at the root document container. All `@innostes/ui` overlays, dialogs, sheets, and popovers inherit this directionality.
+
+## Components accepting `locale`
+
+The following primitives accept a `locale?: string` prop and use the browser's native `Intl` engine:
+
+| Component | Target `Intl` API | Formatting Behaviour |
+| :--- | :--- | :--- |
+| [`Calendar`](/ui/docs/components/forms/calendar) | `Intl.DateTimeFormat` | Localises month names, weekday abbreviations, and determines whether the week begins on Sunday or Monday. |
+| [`DatePicker`](/ui/docs/components/forms/date-picker) | `Intl.DateTimeFormat` | Formats selected dates in the trigger input matching regional date conventions (e.g. `DD/MM/YYYY` in `en-IN` vs `MM/DD/YYYY` in `en-US`). |
+| [`CountrySelect`](/ui/docs/components/forms/locale-select) | `Intl.DisplayNames`, `Intl.Collator` | Translates country names to the specified language and sorts options alphabetically in that language. |
+| [`LanguageSelect`](/ui/docs/components/forms/locale-select) | `Intl.DisplayNames` | Translates languages to target locale or displays native autonyms. |
+| [`CurrencySelect`](/ui/docs/components/forms/locale-select) | `Intl.DisplayNames`, `Intl.NumberFormat` | Resolves official currency names and ISO code symbols. |
+| [`MetricCard`](/ui/docs/widgets/metric-card) | `Intl.NumberFormat` | Formats metric delta values and percentages using local grouping separators. |
+| [`CartesianCharts`](/ui/docs/charts/cartesian) | `Intl.NumberFormat` | Formats numeric axis ticks and hover tooltip readout values. |
+| [`DonutChart`](/ui/docs/charts/donut) | `Intl.NumberFormat` | Formats slice values and accessible percentage summaries. |
+| [`ActivityFeed`](/ui/docs/widgets/activity-feed) | `Intl.RelativeTimeFormat` | Formats relative timestamps (e.g. "2 hours ago", "yesterday", "कल"). |
+| [`Notifications`](/ui/docs/widgets/notifications) | `Intl.RelativeTimeFormat` | Localises event timestamp indicators. |
+
+## Components accepting `labels` overrides
+
+When integrating with translation systems such as `next-intl` or `react-i18next`, override embedded component strings using the `labels` prop:
+
+| Component | Labels Interface | Customisable Keys |
+| :--- | :--- | :--- |
+| [`Pagination`](/ui/docs/components/navigation/pagination) | `PaginationLabels` | `previous`, `next`, `first`, `last`, `page`, `of` |
+| [`Stepper`](/ui/docs/components/navigation/stepper) | `StepperLabels` | `step`, `completed`, `optional` |
+| [`FileDropzone`](/ui/docs/components/forms/file-dropzone) | `FileDropzoneLabels` | `title`, `description`, `browse`, `rejectedFile`, `fileSizeExceeded` |
+| [`RichTextEditor`](/ui/docs/components/forms/rich-text-editor) | `RichTextEditorLabels` | `bold`, `italic`, `bulletList`, `orderedList`, `link`, `clear` |
+| [`KanbanBoard`](/ui/docs/widgets/kanban-board) | `KanbanLabels` | `columnEmpty`, `addCard`, `moveItem` |
+| [`ActivityFeed`](/ui/docs/widgets/activity-feed) | `ActivityFeedLabels` | `today`, `yesterday` |
+| [`PermissionMatrix`](/ui/docs/widgets/permission-matrix) | `PermissionMatrixLabels` | `subjectHeader`, `actionsHeader`, `allPermissions` |
+| [`Notifications`](/ui/docs/widgets/notifications) | `NotificationsLabels` | `trigger`, `markAllRead`, `viewAll` |
+
+## Indian fiscal conventions (`en-IN`)
+
+Northwind Traders Pvt Ltd operates under Indian statutory accounting standards requiring Lakh (`1,00,000`) and Crore (`1,00,00,000`) grouping and INR (`₹`) currency presentation.
+
+### Formatting utility
+
+Use this standard helper across financial summary screens:
+
+```tsx
+export function formatINR(amount: number, options: { compact?: boolean } = {}): string {
+  if (options.compact) {
+    if (Math.abs(amount) >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(2)} Cr`;
+    }
+    if (Math.abs(amount) >= 100000) {
+      return `₹${(amount / 100000).toFixed(2)} L`;
+    }
+  }
+
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+// Example outputs:
+// formatINR(1485200)                => "₹14,85,200.00"
+// formatINR(35000000, { compact: true }) => "₹3.50 Cr"
+```
+
+## Right-to-Left (RTL) configuration
+
+To configure RTL mode for Middle Eastern subsidiaries or Arabic/Urdu speaking users:
+
+```tsx
+// Root layout or tenant wrapper:
+export default function Layout({ children, locale }: { children: React.ReactNode; locale: string }) {
+  const isRtl = locale.startsWith('ar') || locale.startsWith('ur') || locale.startsWith('he');
+
+  return (
+    <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'}>
+      <body className="min-h-screen bg-background text-foreground">
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+### RTL CSS checklist
+
+When writing custom application CSS alongside `@innostes/ui`:
+- Use `ms-auto` (margin-inline-start) instead of `ml-auto`.
+- Use `me-2` (margin-inline-end) instead of `mr-2`.
+- Use `ps-4` (padding-inline-start) instead of `pl-4`.
+- Use `text-start` and `text-end` instead of `text-left` and `text-right`.
+- Use `border-s` and `border-e` instead of `border-l` and `border-r`.
+
+## Testing RTL layouts
+
+Verify RTL layouts in Vitest with Testing Library:
+
+```tsx
+import { render, screen } from '@testing-library/react';
+import { Pagination } from '@innostes/ui';
+
+describe('Pagination RTL', () => {
+  it('renders correctly within an RTL container', () => {
+    const { container } = render(
+      <div dir="rtl">
+        <Pagination currentPage={1} totalPages={10} onPageChange={() => {}} />
+      </div>
+    );
+
+    const prevButton = screen.getByRole('button', { name: /previous/i });
+    expect(prevButton).toBeInTheDocument();
+    expect(container.querySelector('[dir="rtl"]')).toBeInTheDocument();
+  });
+});
+```
+
+## Common mistakes
+
+- **Mixing physical and logical Tailwind classes**: Writing `pl-4 rtl:pr-4` creates redundant CSS. Always use standard Tailwind logical utilities like `ps-4` which automatically swap based on container direction.
+- **Client-only locale resolution**: Calling `navigator.language` directly in server components or during initial render causes hydration mismatch warnings. Pass the user's preferred locale from cookie or HTTP header state.
+- **Ignoring date order differences**: Assuming all dates are `YYYY-MM-DD` causes data entry errors. Always pair date inputs with localized helper placeholders.
+
+## Related components
+
+- [`Calendar`](/ui/docs/components/forms/calendar) — BCP 47 aware monthly date selector.
+- [`CountrySelect`](/ui/docs/components/forms/locale-select) — International country, language, currency, and timezone selectors.
+- [`Pagination`](/ui/docs/components/navigation/pagination) — Navigation control supporting full string localisation.
+- [`MetricCard`](/ui/docs/widgets/metric-card) — KPI metric with locale-formatted numeric deltas.

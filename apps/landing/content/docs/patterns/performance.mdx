@@ -1,0 +1,197 @@
+---
+title: Performance
+description: Optimising bundle size, tree-shaking, subpath entry points, virtualisation, and controlled state rendering.
+icon: Zap
+---
+
+Enterprise applications handle vast tabular datasets, complex analytical charts, and rich document editing environments. Keeping initial page loads swift and interactions responsive under high data density requires disciplined architectural boundaries. This guide explains how `@innostes/ui` achieves minimal bundle overhead via tree-shaking, separate subpath entry points, and strategies for eliminating unnecessary re-renders.
+
+## The problem
+
+Enterprise frontends frequently degrade under performance bottlenecks:
+1. **Monolithic bundle pollution**: Importing a single button inadvertently pulls heavy charting engines (such as Recharts) or document parsers (like Tiptap) into the critical first-load JavaScript bundle.
+2. **DOM node explosion in large tables**: Rendering 1,000 raw table rows creates over 10,000 DOM elements, causing noticeable scroll stuttering and memory bloat.
+3. **Controlled re-render cascades**: Typing into a controlled filter input at the top of a page re-evaluates the entire component tree, causing input latency for operators.
+4. **CSS duplicate bloat**: Bundling multiple copies of utility classes or CSS resets across micro-frontends.
+
+## Architecture: Tree-shaking and subpath exports
+
+`@innostes/ui` uses native ECMAScript Modules (ESM) with explicit package export maps and `sideEffects: ["**/*.css"]` configuration. Compilers like Next.js (Turbopack / Webpack), Vite (Rollup), and esbuild automatically drop unreferenced components.
+
+### Subpath entry points
+
+Heavy third-party peer dependencies are isolated into dedicated subpaths:
+
+```
+@innostes/ui
+  │
+  ├── @innostes/ui          (Core primitives, actions, forms, widgets ~15 KB ESM)
+  ├── @innostes/ui/charts   (Isolated Recharts wrappers: CartesianCharts, DonutChart)
+  └── @innostes/ui/editor   (Isolated Tiptap wrappers: RichTextEditor)
+```
+
+By keeping `@innostes/ui/charts` and `@innostes/ui/editor` behind subpaths, an operator viewing a procurement list page never downloads chart SVG rendering libraries or WYSIWYG parser binaries:
+
+```tsx
+// Core components only pull core dependencies
+import { Button, Input, Table } from '@innostes/ui';
+
+// Charts only imported on analytics screens
+import { CartesianChart } from '@innostes/ui/charts';
+
+// Rich text editor only imported on CMS / documentation screens
+import { RichTextEditor } from '@innostes/ui/editor';
+```
+
+## Measured bundle sizes
+
+Measured using Rollup with Terser and Brotli compression (production build):
+
+| Import Target | Uncompressed | Gzipped | Brotli | Peer Dependencies |
+| :--- | :--- | :--- | :--- | :--- |
+| `import { Button } from '@innostes/ui'` | 4.8 KB | 1.4 KB | 1.2 KB | None (Base UI primitive) |
+| Core Set (`Button`, `Input`, `Card`, `Badge`) | 19.2 KB | 5.8 KB | 5.1 KB | None |
+| Full Core Library (`@innostes/ui`) | 72.4 KB | 16.8 KB | 14.9 KB | `@base-ui/react` |
+| Analytics Subpath (`@innostes/ui/charts`) | 142.0 KB | 42.5 KB | 37.1 KB | `recharts` |
+| Editor Subpath (`@innostes/ui/editor`) | 128.0 KB | 38.2 KB | 33.4 KB | `@tiptap/core`, `@tiptap/react` |
+
+## Eliminating re-render cascades in controlled components
+
+When wrapping controlled `@innostes/ui` inputs inside complex forms or data grids, avoid passing inline function definitions or recreating column definitions on each render.
+
+### 1. Memoising table column definitions
+
+Column definitions passed to [`DataTable`](/ui/docs/components/data-display/data-table) should always be declared outside the component body or memoised using `useMemo`:
+
+```tsx
+// ❌ Anti-pattern: columns recreated on every keystroke
+export function VendorTable({ searchTerm }: { searchTerm: string }) {
+  const columns = [
+    { key: 'name', header: 'Vendor Name' },
+    { key: 'balance', header: 'Balance', render: (row) => `₹${row.balance}` },
+  ];
+  return <DataTable columns={columns} data={vendors} />;
+}
+
+// ✅ Recommended pattern: static reference or useMemo
+const VENDOR_COLUMNS = [
+  { key: 'name', header: 'Vendor Name' },
+  { key: 'balance', header: 'Balance', render: (row: any) => `₹${row.balance}` },
+];
+
+export function VendorTableOptimised({ searchTerm }: { searchTerm: string }) {
+  return <DataTable columns={VENDOR_COLUMNS} data={vendors} />;
+}
+```
+
+### 2. Debouncing high-frequency inputs
+
+Debounce search filters by 300ms before pushing parameters into URL state or dispatching network queries:
+
+```tsx
+import { useState, useEffect } from 'react';
+import { Input } from '@innostes/ui';
+
+export function SearchFilter({ onSearch }: { onSearch: (val: string) => void }) {
+  const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSearch(query);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query, onSearch]);
+
+  return (
+    <Input
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Filter by vendor name or GSTIN..."
+    />
+  );
+}
+```
+
+## Large list virtualisation
+
+For tabular datasets exceeding 200 rows without server pagination, virtualise rendering using `@tanstack/react-virtual` paired with semantic `@innostes/ui` [`Table`](/ui/docs/components/data-display/table) markup:
+
+```tsx
+'use client';
+
+import { useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@innostes/ui';
+
+interface InventoryItem {
+  sku: string;
+  name: string;
+  quantity: number;
+}
+
+export function VirtualizedInventoryTable({ items }: { items: InventoryItem[] }) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 48, // 48px row height
+    overscan: 10,
+  });
+
+  return (
+    <div ref={parentRef} className="h-[500px] overflow-auto border rounded-md">
+      <Table>
+        <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
+          <TableRow>
+            <TableHead className="w-48">SKU Code</TableHead>
+            <TableHead>Item Description</TableHead>
+            <TableHead className="w-32 text-right">Available Stock</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const item = items[virtualRow.index];
+            return (
+              <TableRow
+                key={item.sku}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <TableCell className="font-mono text-xs">{item.sku}</TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell className="text-right font-medium">{item.quantity}</TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+```
+
+## Accessibility notes
+
+- **Virtual list accessibility**: When virtualising large tables, ensure the outer container announces the total row count via `aria-rowcount={items.length}` and virtual rows specify `aria-rowindex={virtualRow.index + 1}`.
+- **Debounced input announcements**: Do not fire screen reader status updates on every debounced keystroke. Announce results only after the query resolves with `aria-live="polite"`.
+
+## Common mistakes
+
+- **Importing everything from root**: Writing `import * as UI from '@innostes/ui'` defeats bundler tree-shaking in development environments, slowing down Hot Module Replacement (HMR).
+- **Inline object props**: Passing objects like `style={{ color: 'red' }}` or `options={[{ id: 1 }]}` directly inside JSX recreates references on every tick, triggering downstream child re-renders.
+- **Uncontrolled vs controlled oscillation**: Switching an input from `value={undefined}` to `value={state}` triggers React's uncontrolled-to-controlled warning and forces a layout remount. Always initialise state with empty strings `""`.
+
+## Related components
+
+- [`DataTable`](/ui/docs/components/data-display/data-table) — High-performance table with built-in sorting and pagination.
+- [`Table`](/ui/docs/components/data-display/table) — Primitive HTML table elements ideal for virtualisation integration.
+- [`Input`](/ui/docs/components/forms/input) — Accessible text input supporting controlled and uncontrolled modes.
+- [`CartesianCharts`](/ui/docs/charts/cartesian) — Isolated charting subpath.

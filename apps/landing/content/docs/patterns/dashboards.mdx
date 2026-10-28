@@ -1,0 +1,212 @@
+---
+title: Dashboards
+description: High-density executive and operational dashboard layouts with MetricCard, WidgetCard, charts, and date filtering.
+icon: LayoutDashboard
+---
+
+Operational dashboards in enterprise ERP environments aggregate mission-critical KPIs, real-time inventory levels, and financial transaction telemetry. This guide shows how to compose modular dashboard screens using [`MetricCard`](/ui/docs/widgets/metric-card), [`WidgetCard`](/ui/docs/widgets/widget-card), [`CartesianChart`](/ui/docs/charts/cartesian), and [`DonutChart`](/ui/docs/charts/donut), handling per-widget loading and error states, auto-refresh polling, and global date range controls.
+
+## The problem
+
+Enterprise dashboards frequently present three key implementation problems:
+1. **Monolithic data fetching**: Fetching all dashboard data in a single massive API payload stalls the entire page if one peripheral widget query encounters database locks.
+2. **Layout instability**: Metrics and charts jump across viewports as asynchronous endpoints resolve at unpredictable intervals.
+3. **Inaccessible charts**: Screen readers and keyboard operators cannot inspect graphical data points, violating statutory accessibility mandates.
+4. **Stale operational data**: Warehouse dispatchers and procurement leads must manually refresh the browser to detect newly logged purchase orders.
+
+## Recommended approach
+
+- **Isolated widget queries**: Decouple metric and chart fetching. Each widget component loads independently, allowing instant rendering of cached metrics while complex financial aggregations compute in the background.
+- **Consistent widget wrapper**: Standardise all panels with [`WidgetCard`](/ui/docs/widgets/widget-card), leveraging its built-in loading skeletons, empty state announcements, and error retry triggers.
+- **Global filter synchronization**: Manage dashboard date ranges (`fiscalYear`, `quarter`, or `custom`) at the page container level, cascading updates downward via props or URL search params.
+- **Accessible tabular alternatives**: Pair every visualization with an accessible hidden data table (`sr-only` or toggleable) so assistive technology users can parse figures.
+
+## Layout composition blueprint
+
+A standard 12-column responsive grid ensures visual balance across executive KPI strips and operational charts:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ Global Header: Fiscal Date Range Selector | Warehouse Selector | Auto-Refresh │
+├────────────────────────────────────────────────────────────────────────┤
+│ [ MetricCard 1 ] │ [ MetricCard 2 ] │ [ MetricCard 3 ] │ [ MetricCard 4 ] │
+│ 3 cols (desktop) │ 3 cols (desktop) │ 3 cols (desktop) │ 3 cols (desktop) │
+├──────────────────────────────────────┬─────────────────────────────────┤
+│ [ WidgetCard: CartesianChart ]       │ [ WidgetCard: DonutChart ]      │
+│ 8 columns (Revenue vs Expenditure)   │ 4 columns (Category Breakdown)  │
+├──────────────────────────────────────┴─────────────────────────────────┤
+│ [ WidgetCard: High-Priority Action List / Recent Purchase Orders ]      │
+│ 12 columns                                                             │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+## Complete example: Northwind Operations Dashboard
+
+Below is a complete implementation of the daily procurement and inventory dashboard for Northwind Traders Pvt Ltd:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import {
+  MetricCard,
+  WidgetCard,
+  CartesianChart,
+  DonutChart,
+  Button,
+  Select,
+  Badge,
+} from '@innostes/ui';
+import { RefreshCw, TrendingUp, AlertTriangle, ArrowUpRight } from 'lucide-react';
+
+// Monthly procurement telemetry (en-IN currency formatting)
+const REVENUE_DATA = [
+  { month: 'Apr', budget: 4200000, actual: 3950000 },
+  { month: 'May', budget: 4500000, actual: 4620000 },
+  { month: 'Jun', budget: 4800000, actual: 4410000 },
+  { month: 'Jul', budget: 5100000, actual: 5280000 },
+  { month: 'Aug', budget: 5300000, actual: 5190000 },
+  { month: 'Sep', budget: 5600000, actual: 5780000 },
+];
+
+// Inventory allocation by regional warehouse
+const WAREHOUSE_DATA = [
+  { name: 'Bengaluru Central Hub', value: 14200000, color: 'hsl(var(--primary))' },
+  { name: 'Chennai Port Depot', value: 9800000, color: 'hsl(var(--chart-2))' },
+  { name: 'Hyderabad Distribution', value: 6400000, color: 'hsl(var(--chart-3))' },
+  { name: 'Kochi Terminal', value: 3100000, color: 'hsl(var(--chart-4))' },
+];
+
+export function OperationsDashboard() {
+  const [fiscalRange, setFiscalRange] = useState('FY26-Q2');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleManualRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => setIsRefreshing(false), 800);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* 1. Global Controls Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Procurement telemetry</h1>
+          <p className="text-sm text-muted-foreground">
+            Northwind Traders Pvt Ltd – Southern Distribution Zone
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Select
+            value={fiscalRange}
+            onValueChange={setFiscalRange}
+            options={[
+              { value: 'FY26-Q1', label: 'FY 2026-27 Q1 (Apr-Jun)' },
+              { value: 'FY26-Q2', label: 'FY 2026-27 Q2 (Jul-Sep)' },
+              { value: 'FY26-Q3', label: 'FY 2026-27 Q3 (Oct-Dec)' },
+            ]}
+            aria-label="Filter fiscal quarter"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+            aria-label="Refresh dashboard data"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* 2. Top-level KPI Strips */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="Active purchase commitments"
+          value="₹3,41,80,000"
+          change={{ value: '+14.2%', trend: 'up' }}
+          description="Compared to prior fiscal quarter"
+        />
+        <MetricCard
+          title="Consignment clearance rate"
+          value="96.4%"
+          change={{ value: '+2.1%', trend: 'up' }}
+          description="Customs Port & Logistics gate"
+        />
+        <MetricCard
+          title="Vendor payment turnaround"
+          value="18.2 days"
+          change={{ value: '-3.4 days', trend: 'down' }}
+          description="Avg settlement duration"
+        />
+        <MetricCard
+          title="Exceptions requiring audit"
+          value="7"
+          change={{ value: '+2', trend: 'neutral' }}
+          description="Three-way match discrepancies"
+        />
+      </div>
+
+      {/* 3. Deep Analytical Visualizations */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Main Spending Trajectory Chart */}
+        <div className="lg:col-span-8">
+          <WidgetCard
+            title="Procurement budget vs actual expenditure"
+            description="Monthly expenditure comparison against allocated zone capital (₹ Lakhs)"
+            loading={isRefreshing}
+          >
+            <div className="h-[320px] w-full pt-4">
+              <CartesianChart
+                data={REVENUE_DATA}
+                categories={['budget', 'actual']}
+                index="month"
+                valueFormatter={(val) => `₹${(val / 100000).toFixed(1)}L`}
+                colors={['hsl(var(--muted-foreground))', 'hsl(var(--primary))']}
+              />
+            </div>
+          </WidgetCard>
+        </div>
+
+        {/* Warehouse Inventory Breakdown */}
+        <div className="lg:col-span-4">
+          <WidgetCard
+            title="Inventory allocation"
+            description="Stock asset value by zonal distribution depot"
+            loading={isRefreshing}
+          >
+            <div className="h-[320px] w-full flex items-center justify-center">
+              <DonutChart
+                data={WAREHOUSE_DATA}
+                category="value"
+                index="name"
+                valueFormatter={(val) => `₹${(val / 10000000).toFixed(2)} Cr`}
+              />
+            </div>
+          </WidgetCard>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+## Accessibility notes
+
+- **High-contrast chart palettes**: Chart color assignments use CSS custom properties linked to design tokens (`hsl(var(--primary))`, `hsl(var(--chart-2))`). Ensure neighbouring segments maintain a 3:1 minimum contrast ratio.
+- **Screen reader data tables**: When rendering visual charts, include a hidden `table` element using CSS `.sr-only` detailing category keys and numeric quantities, or render an accessible summary paragraph.
+- **Keyboard focus within widgets**: Provide logical tab stops for widget action menus and maximize controls. Ensure widget cards do not trap focus inside chart SVG containers.
+
+## Common mistakes
+
+- **Unbound polling loops**: Running aggressive `setInterval` requests every 2 seconds without checking browser document visibility (`document.visibilityState === 'visible'`) wastes server bandwidth when operators leave tabs backgrounded.
+- **Full dashboard layout shifts**: Unmounting entire widget structures during background data re-fetching causes disruptive layout reflow. Always use inline skeletons or subtle loading overlays.
+- **Overcrowding single views**: Squeezing more than 6 primary charts onto a single dashboard degrades cognitive readability. Segment operational views with tabs or dedicated routing.
+
+## Related components
+
+- [`MetricCard`](/ui/docs/widgets/metric-card) — Formatted KPI metric display with percentage trend indicators.
+- [`WidgetCard`](/ui/docs/widgets/widget-card) — Standardized dashboard container with title, description, and state slots.
+- [`CartesianCharts`](/ui/docs/charts/cartesian) — High-performance SVG bar, line, and area charts.
+- [`DonutChart`](/ui/docs/charts/donut) — Radial proportional asset distributions.
