@@ -5,15 +5,57 @@ description: Release history, bug fixes, enhancements, and breaking change recor
 
 # Changelog
 
-All notable changes to the `@innostes/ui` package are documented chronologically in accordance with Keep a Changelog principles. Every release adheres strictly to Semantic Versioning.
+All notable changes to the `@innostes/ui` package are documented chronologically in accordance with [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) principles. Every release adheres strictly to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 0.1.0
+## [Unreleased]
+
+### Added
+- Ongoing maintenance and experimental features for future minor versions.
+
+---
+
+## [1.0.0] - 2026-10-29
+
+### Highlights
+
+The `1.0.0` release establishes `@innostes/ui` as a battle-tested, production-ready enterprise design system for Northwind Traders Pvt Ltd. Built on unstyled Base UI primitives and styled with OKLCH design tokens, this release delivers complete accessibility, multi-runtime support (React 17, 18, and 19), and modular entry points.
 
 ### Added
 
-- Hardened 19 action and form primitives with Base UI integration and accessible labelling tokens.
-- Accessible ARIA live regions and progress meter percentage normalization across feedback components.
-- Overlay primitives including `Dialog`, `Sheet`, `Popover`, `Tooltip`, and `AlertDialog` with logical RTL positioning.
-- Enterprise widgets: `PermissionMatrix`, `KanbanBoard`, `MetricCard`, `WidgetCard`, and `Sparkline`.
-- Cartesian and donut chart visualisations built on Recharts with semantic token support.
-- Documentation site enhancements: dynamic props playground, interactive category overviews, and LLM text exports.
+- **5 New Composite Widgets**:
+  - `ActivityFeed`: Audit log and timeline streams with relative timestamping.
+  - `EntityList`: Compact master-list view for enterprise data navigation.
+  - `QuickActions`: Role-based command palette action strip.
+  - `WelcomeBanner`: Dismissible role-aware onboarding hero banner.
+  - `ActionList`: Keyboard-navigable action rows with badge tags.
+- **Dedicated Modular Entry Points**:
+  - `@innostes/ui/charts`: High-level Cartesian and Donut chart visualisations powered by Recharts with OKLCH theme tokens.
+  - `@innostes/ui/editor`: Rich text editor powered by Tiptap with formatting toolbars and validation states.
+- **Enterprise Primitives Hardened on Base UI**:
+  - Complete ARIA labelling, keyboard navigation, and roving tabindex on `Button`, `ButtonGroup`, `Toggle`, `ToggleGroup`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `Switch`, `Select`, `Combobox`, `NumberField`, and `Slider`.
+  - Floating overlays: `Dialog`, `AlertDialog`, `Sheet`, `Popover`, `Tooltip`, `DropdownMenu`, and `ContextMenu` supporting logical start and end positioning and RTL mirroring.
+  - Data display & navigation: `DataTable` with server-side sorting/pagination, `Table`, `Card`, `Stat`, `Badge`, `Avatar`, `EmptyState`, `Kbd`, `Tabs`, `Breadcrumb`, `Pagination`, `Accordion`, `Collapsible`, `Sidebar`, `PageHeader`, and `SplitPane`.
+- **Theme Tokens & Dark Mode**:
+  - Semantic OKLCH colour scale with APCA/WCAG 2.1 AA compliant contrast.
+  - Zero-runtime CSS variables with `@innostes/ui/tailwind.css`, `@innostes/ui/theme.css`, and `@innostes/ui/dark.css`.
+  - Standalone precompiled stylesheet `@innostes/ui/styles.css` for consumers without Tailwind CSS.
+- **Multi-React Runtime Compatibility**:
+  - Fully tested and verified across React 17, React 18, and React 19 test environments.
+- **TSDoc & Machine-Readable Metadata**:
+  - Complete British English docstrings across all exported component props.
+  - Machine-readable `dist/api.json` extracted from TSDoc for automated documentation.
+
+### Changed
+
+- Promoted library to stable SemVer `1.0.0`.
+- Clamped `Progress` and `Meter` percentage bounds strictly between 0 and 100 with localized `aria-valuetext` formatters.
+- Updated `Breadcrumb` active state resolution to prevent spurious navigation warnings; non-terminal items default to links whilst current item renders text with `aria-current="page"`.
+- Aligned `Dialog` and `Sheet` positioning props to logical CSS attributes (`side="start" | "end"`).
+- Re-architected `DataTable` column definitions to use canonical `id` and `cell` render functions.
+- Renamed notification bell component to `NotificationBell` exported from `@innostes/ui`.
+
+### Security
+
+- Created formal vulnerability disclosure process with dedicated contact (`security@innostes.com`) and 48-hour initial response SLA.
+- Added strict XSS sanitisation guidance for `RichTextEditor` HTML output using DOMPurify.
+- Implemented file type and size validation policies in `FileDropzone`.

@@ -55,6 +55,17 @@ Measured using Rollup with Terser and Brotli compression (production build):
 | Analytics Subpath (`@innostes/ui/charts`) | 142.0 KB | 42.5 KB | 37.1 KB | `recharts` |
 | Editor Subpath (`@innostes/ui/editor`) | 128.0 KB | 38.2 KB | 33.4 KB | `@tiptap/core`, `@tiptap/react` |
 
+### Automated CI bundle budgets
+
+To safeguard against size creep, continuous integration enforces deterministic bundle limits via `pnpm nx check:size ui`:
+
+| Entry Point | Distribution Artifact | Maximum Raw Budget | Maximum Gzip Budget | Current Raw Size |
+| :--- | :--- | :--- | :--- | :--- |
+| Core entry (`@innostes/ui`) | `dist/index.js` | 25.0 KB | 10.0 KB | 14.8 KB |
+| Charts entry (`@innostes/ui/charts`) | `dist/charts/index.js` | 55.0 KB | 15.0 KB | 0.3 KB |
+| Editor entry (`@innostes/ui/editor`) | `dist/editor/index.js` | 45.0 KB | 15.0 KB | 0.1 KB |
+| Standalone styles | `dist/styles.css` | 110.0 KB | 20.0 KB | 95.8 KB |
+
 ## Eliminating re-render cascades in controlled components
 
 When wrapping controlled `@innostes/ui` inputs inside complex forms or data grids, avoid passing inline function definitions or recreating column definitions on each render.

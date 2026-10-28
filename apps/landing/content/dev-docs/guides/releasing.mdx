@@ -1,11 +1,11 @@
 ---
 title: Releasing
-description: Version and publish @innostes/ui to npm.
+description: Version and publish @innostes/ui to npm with multi-entry packaging and bundle verification.
 icon: Send
 install: pnpm nx release --dry-run
 ---
 
-Only `@innostes/ui` is published. Apps are never released to npm. This is set in `nx.json`:
+Only `@innostes/ui` is published to the npm registry. Applications (`landing`, `web-app`, `api-server`) are internal monorepo targets and are never published. Release configuration is defined in `nx.json`:
 
 ```json title="nx.json"
 {
@@ -16,18 +16,60 @@ Only `@innostes/ui` is published. Apps are never released to npm. This is set in
 }
 ```
 
-## Before the first release
+## Before releasing
 
-1. Create the `innostes` organization on [npmjs.com](https://www.npmjs.com) (the package is
-   published as `@innostes/ui`).
-2. Log in: `npm login`.
+1. **Organization and access**: Ensure you have publish credentials for the `@innostes` scope on [npmjs.com](https://www.npmjs.com) and are authenticated locally via `npm login`.
+2. **Quality gates**: Ensure all automated quality gates, multi-React test suites, and bundle size checks pass cleanly:
+   ```bash
+   pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache
+   pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache
+   pnpm nx check:size ui
+   pnpm nx run landing:docs-check
+   ```
 
-## Release
+## Multi-entry package architecture
+
+`@innostes/ui` publishes multiple subpaths and stylesheet assets in a single package:
+
+| Subpath | Output Artifact | Peer Dependency Guidance |
+| :--- | :--- | :--- |
+| `.` (`@innostes/ui`) | `dist/index.js`, `dist/index.d.ts` | Requires `react` and `react-dom` (`^17.0.0 \|\| ^18.0.0 \|\| ^19.0.0`). |
+| `./charts` (`@innostes/ui/charts`) | `dist/charts/index.js`, `dist/charts/index.d.ts` | Optional peer dependency `recharts` (`^2.15.0 \|\| ^3.0.0`). |
+| `./editor` (`@innostes/ui/editor`) | `dist/editor/index.js`, `dist/editor/index.d.ts` | Optional peer dependencies `@tiptap/*` (`^3.0.0`). |
+| `./styles.css` | `dist/styles.css` | Standalone precompiled stylesheet for apps without Tailwind CSS. |
+| `./tailwind.css` | `tailwind/tailwind.css` | Tailwind CSS v4 design tokens and source path directives. |
+| `./dark.css` | `tailwind/dark.css` | Dark mode CSS variable overrides. |
+| `./theme.css` | `tailwind/theme.css` | Theme tokens only. |
+| `./api.json` | `dist/api.json` | Generated machine-readable TSDoc property schemas. |
+
+Verify that all entry points and files are properly included by running a dry-run package packing:
+
+```bash
+cd packages/ui
+pnpm pack --dry-run
+```
+
+Ensure no stray test files, TypeScript build info caches (`*.tsbuildinfo`), or scratch scripts are included.
+
+## Release procedure
 
 <Steps>
 <Step>
 
-Preview what will happen:
+### 1. Update changelog
+
+Review changes since the previous release and populate the `[Unreleased]` section in:
+- `packages/ui/CHANGELOG.md`
+- `apps/landing/content/docs/resources/changelog.mdx`
+
+Convert the `[Unreleased]` header to the target version and release date (e.g. `[1.0.0] - 2026-10-29`).
+
+</Step>
+<Step>
+
+### 2. Preview release
+
+Simulate the release to review the generated version bump and git tags:
 
 ```bash
 pnpm nx release --dry-run
@@ -36,32 +78,48 @@ pnpm nx release --dry-run
 </Step>
 <Step>
 
-Release. Nx builds the package, sets the new version in `package.json`, writes the changelog,
-commits, tags, and then asks before publishing:
+### 3. Execute publish
+
+Trigger the automated build, version bump, commit, tag, and publish workflow:
 
 ```bash
-pnpm nx release patch      # or minor, major, or an exact version like 1.2.0
+# For a standard patch release:
+pnpm nx release patch
+
+# For a minor release (new components or non-breaking features):
+pnpm nx release minor
+
+# For a major release (breaking changes):
+pnpm nx release major
+
+# For an explicit version (e.g. 1.0.0):
+pnpm nx release 1.0.0
 ```
 
-For the very first release add `--first-release`, because there's no earlier git tag or npm version yet.
+Nx will build the package, update `packages/ui/package.json`, commit the changes, tag the release commit, and prompt for final confirmation before pushing to the npm registry.
 
 </Step>
 </Steps>
 
-## Test a release locally
+## Testing a release locally with Verdaccio
 
-The repo includes a local npm registry ([Verdaccio](https://verdaccio.org)) for trying a publish
-without touching npm:
+The repository includes a private local npm registry ([Verdaccio](https://verdaccio.org)) to test publication without affecting the public registry:
 
-```bash
-pnpm nx local-registry   # run from the repo root; starts http://localhost:4873
-```
+1. Start the local registry from the repository root:
+   ```bash
+   pnpm nx local-registry
+   ```
+   This will spin up an isolated registry at `http://localhost:4873`.
 
-Then, in another terminal, version without publishing, and publish to the local registry:
+2. In a separate terminal, version and publish to the local registry:
+   ```bash
+   pnpm nx release patch --skip-publish
+   pnpm nx release publish --registry=http://localhost:4873
+   ```
 
-```bash
-pnpm nx release patch --skip-publish
-pnpm nx release publish --registry=http://localhost:4873
-```
+3. Test consumption in an external scratch app:
+   ```bash
+   npm install @innostes/ui --registry=http://localhost:4873
+   ```
 
-Undo the version commit and tag afterwards if it was only a test.
+4. Reset any testing commits or tags before making the genuine release to npm.

@@ -2,7 +2,7 @@
 title: '@innostes/ui'
 description: The innostes design system package.
 icon: Layers
-status: Beta
+status: Stable
 summary: React components on Base UI, styled with Tailwind CSS tokens. Published to npm.
 install: pnpm nx build ui
 ---
@@ -20,6 +20,7 @@ This page covers **working on** the package. For **using** it, see the
 | `pnpm nx test ui --coverage` | Tests with a coverage report in `coverage/packages/ui` |
 | `pnpm nx typecheck ui` | Type-check the library and the tests |
 | `pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests` | The same tests and a type check on React 17 and 18 |
+| `pnpm nx check:size ui` | Evaluates bundle size budgets per entry point |
 | `pnpm nx release --dry-run` | Preview the next version and publish |
 
 ## Structure

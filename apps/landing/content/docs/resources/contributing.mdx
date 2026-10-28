@@ -5,15 +5,60 @@ description: Development guidelines, code standards, and PR submission workflows
 
 # Contributing
 
-Contributions to `@innostes/ui` are welcome from engineering teams across Northwind Traders Pvt Ltd. This guide outlines local environment setup, testing requirements, and quality checks required before submitting pull requests.
+We welcome contributions from engineering teams across Northwind Traders Pvt Ltd. This guide outlines the development workflow, coding conventions, and verification steps required before submitting pull requests to `@innostes/ui`.
 
-## Workflow
+For in-depth architectural rules and internal codebase conventions, refer to the internal [CONTRIBUTING.md in packages/ui](https://github.com/innostes/erp/blob/main/packages/ui/CONTRIBUTING.md).
 
-1. **Monorepo setup**: Clone the repository and install dependencies with `pnpm install`.
-2. **Component development**: Implement new primitives in `packages/ui/src/` adhering strictly to Base UI conventions and British English TSDoc.
-3. **Automated verification**: Run uncached quality gates before raising a pull request:
-   ```bash
-   pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache
-   pnpm nx run landing:docs-check
-   ```
-4. **Documentation**: Every new component requires complete documentation adhering to the component template.
+## Local development setup
+
+Clone the repository and install workspace dependencies:
+
+```bash
+git clone https://github.com/innostes/erp.git
+cd erp
+pnpm install
+```
+
+Start the interactive documentation development server:
+
+```bash
+pnpm nx dev landing
+```
+
+Visit `http://localhost:3000/ui/docs` to preview documentation changes live.
+
+---
+
+## Component submission checklist
+
+Every new or modified component must satisfy the following criteria:
+
+- [ ] **Base UI foundation**: Built on unstyled Base UI primitives wherever applicable, preserving keyboard focus loops and ARIA attributes.
+- [ ] **Logical styling**: Uses Tailwind CSS v4 design tokens and logical directional properties (`ps-`, `pe-`, `start-`, `end-`) rather than absolute left/right coordinates.
+- [ ] **Accessibility (a11y)**: Conforms to WCAG 2.1 AA standards, provides default ARIA roles, and supports full keyboard navigation (Enter, Space, Tab, and Arrow keys).
+- [ ] **Right-to-Left (RTL)**: Tested and verified under RTL layout direction (`dir="rtl"`).
+- [ ] **Complete TSDoc**: All exported components and prop interfaces feature full British English docstrings with default values and usage notes.
+- [ ] **Multi-runtime test coverage**: Accompanied by Vitest unit tests covering rendering, keyboard interaction, and accessibility attributes. Tests must pass across React 17, 18, and 19.
+- [ ] **Documentation & demo**: Accompanied by a 7-section documentation page under `apps/landing/content/docs/` and an interactive demo in `apps/landing/components/demos/`.
+
+---
+
+## Verification gates
+
+Before submitting a pull request, run the complete verification pipeline locally:
+
+```bash
+# 1. Typecheck and unit tests
+pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache
+
+# 2. Multi-React compatibility suites
+pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache
+
+# 3. Documentation quality gates
+pnpm nx run landing:docs-check
+
+# 4. Production build verification
+pnpm nx build landing --skip-nx-cache
+```
+
+All quality gates must exit with code 0 before code review.

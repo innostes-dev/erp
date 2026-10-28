@@ -14892,6 +14892,17 @@ Measured using Rollup with Terser and Brotli compression (production build):
 | Analytics Subpath (`@innostes/ui/charts`) | 142.0 KB | 42.5 KB | 37.1 KB | `recharts` |
 | Editor Subpath (`@innostes/ui/editor`) | 128.0 KB | 38.2 KB | 33.4 KB | `@tiptap/core`, `@tiptap/react` |
 
+### Automated CI bundle budgets
+
+To safeguard against size creep, continuous integration enforces deterministic bundle limits via `pnpm nx check:size ui`:
+
+| Entry Point | Distribution Artifact | Maximum Raw Budget | Maximum Gzip Budget | Current Raw Size |
+| :--- | :--- | :--- | :--- | :--- |
+| Core entry (`@innostes/ui`) | `dist/index.js` | 25.0 KB | 10.0 KB | 14.8 KB |
+| Charts entry (`@innostes/ui/charts`) | `dist/charts/index.js` | 55.0 KB | 15.0 KB | 0.3 KB |
+| Editor entry (`@innostes/ui/editor`) | `dist/editor/index.js` | 45.0 KB | 15.0 KB | 0.1 KB |
+| Standalone styles | `dist/styles.css` | 110.0 KB | 20.0 KB | 95.8 KB |
+
 ## Eliminating re-render cascades in controlled components
 
 When wrapping controlled `@innostes/ui` inputs inside complex forms or data grids, avoid passing inline function definitions or recreating column definitions on each render.
@@ -15460,18 +15471,60 @@ Release history, bug fixes, enhancements, and breaking change records for @innos
 
 # Changelog
 
-All notable changes to the `@innostes/ui` package are documented chronologically in accordance with Keep a Changelog principles. Every release adheres strictly to Semantic Versioning.
+All notable changes to the `@innostes/ui` package are documented chronologically in accordance with [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) principles. Every release adheres strictly to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 0.1.0
+## [Unreleased]
+
+### Added
+- Ongoing maintenance and experimental features for future minor versions.
+
+---
+
+## [1.0.0] - 2026-10-29
+
+### Highlights
+
+The `1.0.0` release establishes `@innostes/ui` as a battle-tested, production-ready enterprise design system for Northwind Traders Pvt Ltd. Built on unstyled Base UI primitives and styled with OKLCH design tokens, this release delivers complete accessibility, multi-runtime support (React 17, 18, and 19), and modular entry points.
 
 ### Added
 
-- Hardened 19 action and form primitives with Base UI integration and accessible labelling tokens.
-- Accessible ARIA live regions and progress meter percentage normalization across feedback components.
-- Overlay primitives including `Dialog`, `Sheet`, `Popover`, `Tooltip`, and `AlertDialog` with logical RTL positioning.
-- Enterprise widgets: `PermissionMatrix`, `KanbanBoard`, `MetricCard`, `WidgetCard`, and `Sparkline`.
-- Cartesian and donut chart visualisations built on Recharts with semantic token support.
-- Documentation site enhancements: dynamic props playground, interactive category overviews, and LLM text exports.
+- **5 New Composite Widgets**:
+  - `ActivityFeed`: Audit log and timeline streams with relative timestamping.
+  - `EntityList`: Compact master-list view for enterprise data navigation.
+  - `QuickActions`: Role-based command palette action strip.
+  - `WelcomeBanner`: Dismissible role-aware onboarding hero banner.
+  - `ActionList`: Keyboard-navigable action rows with badge tags.
+- **Dedicated Modular Entry Points**:
+  - `@innostes/ui/charts`: High-level Cartesian and Donut chart visualisations powered by Recharts with OKLCH theme tokens.
+  - `@innostes/ui/editor`: Rich text editor powered by Tiptap with formatting toolbars and validation states.
+- **Enterprise Primitives Hardened on Base UI**:
+  - Complete ARIA labelling, keyboard navigation, and roving tabindex on `Button`, `ButtonGroup`, `Toggle`, `ToggleGroup`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `Switch`, `Select`, `Combobox`, `NumberField`, and `Slider`.
+  - Floating overlays: `Dialog`, `AlertDialog`, `Sheet`, `Popover`, `Tooltip`, `DropdownMenu`, and `ContextMenu` supporting logical start and end positioning and RTL mirroring.
+  - Data display & navigation: `DataTable` with server-side sorting/pagination, `Table`, `Card`, `Stat`, `Badge`, `Avatar`, `EmptyState`, `Kbd`, `Tabs`, `Breadcrumb`, `Pagination`, `Accordion`, `Collapsible`, `Sidebar`, `PageHeader`, and `SplitPane`.
+- **Theme Tokens & Dark Mode**:
+  - Semantic OKLCH colour scale with APCA/WCAG 2.1 AA compliant contrast.
+  - Zero-runtime CSS variables with `@innostes/ui/tailwind.css`, `@innostes/ui/theme.css`, and `@innostes/ui/dark.css`.
+  - Standalone precompiled stylesheet `@innostes/ui/styles.css` for consumers without Tailwind CSS.
+- **Multi-React Runtime Compatibility**:
+  - Fully tested and verified across React 17, React 18, and React 19 test environments.
+- **TSDoc & Machine-Readable Metadata**:
+  - Complete British English docstrings across all exported component props.
+  - Machine-readable `dist/api.json` extracted from TSDoc for automated documentation.
+
+### Changed
+
+- Promoted library to stable SemVer `1.0.0`.
+- Clamped `Progress` and `Meter` percentage bounds strictly between 0 and 100 with localized `aria-valuetext` formatters.
+- Updated `Breadcrumb` active state resolution to prevent spurious navigation warnings; non-terminal items default to links whilst current item renders text with `aria-current="page"`.
+- Aligned `Dialog` and `Sheet` positioning props to logical CSS attributes (`side="start" | "end"`).
+- Re-architected `DataTable` column definitions to use canonical `id` and `cell` render functions.
+- Renamed notification bell component to `NotificationBell` exported from `@innostes/ui`.
+
+### Security
+
+- Created formal vulnerability disclosure process with dedicated contact (`security@innostes.com`) and 48-hour initial response SLA.
+- Added strict XSS sanitisation guidance for `RichTextEditor` HTML output using DOMPurify.
+- Implemented file type and size validation policies in `FileDropzone`.
 
 ---
 
@@ -15481,18 +15534,63 @@ Development guidelines, code standards, and PR submission workflows.
 
 # Contributing
 
-Contributions to `@innostes/ui` are welcome from engineering teams across Northwind Traders Pvt Ltd. This guide outlines local environment setup, testing requirements, and quality checks required before submitting pull requests.
+We welcome contributions from engineering teams across Northwind Traders Pvt Ltd. This guide outlines the development workflow, coding conventions, and verification steps required before submitting pull requests to `@innostes/ui`.
 
-## Workflow
+For in-depth architectural rules and internal codebase conventions, refer to the internal [CONTRIBUTING.md in packages/ui](https://github.com/innostes/erp/blob/main/packages/ui/CONTRIBUTING.md).
 
-1. **Monorepo setup**: Clone the repository and install dependencies with `pnpm install`.
-2. **Component development**: Implement new primitives in `packages/ui/src/` adhering strictly to Base UI conventions and British English TSDoc.
-3. **Automated verification**: Run uncached quality gates before raising a pull request:
-   ```bash
-   pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache
-   pnpm nx run landing:docs-check
-   ```
-4. **Documentation**: Every new component requires complete documentation adhering to the component template.
+## Local development setup
+
+Clone the repository and install workspace dependencies:
+
+```bash
+git clone https://github.com/innostes/erp.git
+cd erp
+pnpm install
+```
+
+Start the interactive documentation development server:
+
+```bash
+pnpm nx dev landing
+```
+
+Visit `http://localhost:3000/ui/docs` to preview documentation changes live.
+
+---
+
+## Component submission checklist
+
+Every new or modified component must satisfy the following criteria:
+
+- [ ] **Base UI foundation**: Built on unstyled Base UI primitives wherever applicable, preserving keyboard focus loops and ARIA attributes.
+- [ ] **Logical styling**: Uses Tailwind CSS v4 design tokens and logical directional properties (`ps-`, `pe-`, `start-`, `end-`) rather than absolute left/right coordinates.
+- [ ] **Accessibility (a11y)**: Conforms to WCAG 2.1 AA standards, provides default ARIA roles, and supports full keyboard navigation (Enter, Space, Tab, and Arrow keys).
+- [ ] **Right-to-Left (RTL)**: Tested and verified under RTL layout direction (`dir="rtl"`).
+- [ ] **Complete TSDoc**: All exported components and prop interfaces feature full British English docstrings with default values and usage notes.
+- [ ] **Multi-runtime test coverage**: Accompanied by Vitest unit tests covering rendering, keyboard interaction, and accessibility attributes. Tests must pass across React 17, 18, and 19.
+- [ ] **Documentation & demo**: Accompanied by a 7-section documentation page under `apps/landing/content/docs/` and an interactive demo in `apps/landing/components/demos/`.
+
+---
+
+## Verification gates
+
+Before submitting a pull request, run the complete verification pipeline locally:
+
+```bash
+# 1. Typecheck and unit tests
+pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache
+
+# 2. Multi-React compatibility suites
+pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache
+
+# 3. Documentation quality gates
+pnpm nx run landing:docs-check
+
+# 4. Production build verification
+pnpm nx build landing --skip-nx-cache
+```
+
+All quality gates must exit with code 0 before code review.
 
 ---
 
@@ -15670,21 +15768,82 @@ Frequently asked questions regarding @innostes/ui installation, theming, and usa
 
 # Frequently asked questions
 
-Common questions and answers regarding `@innostes/ui` integration and enterprise usage.
+Real-world questions, architecture comparisons, and troubleshooting advice for `@innostes/ui`.
 
-## General
+## Architecture & Comparisons
 
-### How does innostes UI differ from standard Tailwind component libraries?
+### How does innostes UI compare with shadcn/ui and Radix?
 
-`@innostes/ui` is built directly on Base UI unstyled primitives, ensuring full WAI-ARIA compliance, roving focus management, and keyboard accessibility by default. Tailwind CSS v4 provides token-based styling rather than arbitrary utility classes.
+`shadcn/ui` is a copy-paste distribution model using Radix UI primitives and Tailwind CSS. While excellent for greenfield applications, enterprise ERP deployments require centralised governance, automated regression testing, and predictable package upgrades.
 
-### Can I use innostes UI with React 17 or React 18?
+`@innostes/ui` provides:
+- **Centralised package distribution**: A single versioned package (`@innostes/ui`) maintained and upgraded via standard package managers.
+- **Base UI foundation**: Modern unstyled primitives developed by the Base UI team, delivering zero-runtime overhead, refined focus rings, and native accessibility.
+- **Enterprise-first primitives**: Built-in data tables, split panes, complex filter bars, audit logs, and permission matrices designed specifically for back-office and admin applications.
 
-Yes. The package is thoroughly tested and verified across React 17, React 18, and React 19 runtimes using dedicated test matrices in our CI pipeline.
+### How does innostes UI compare with Ant Design or MUI?
 
-### Does the library support dark mode?
+Ant Design and Material UI bundle substantial JavaScript runtimes and opinionated CSS-in-JS engines. `@innostes/ui` uses zero-runtime CSS custom properties and atomic Tailwind utility classes, achieving a root bundle footprint under 15 KB (raw) compared to hundreds of kilobytes in monolithic component frameworks.
 
-Yes. All components consume OKLCH semantic variables that dynamically adjust when toggling between `.light` and `.dark` class names or `data-theme` attributes on the root container.
+---
+
+## Installation & Setup
+
+### Do I need Tailwind CSS to use @innostes/ui?
+
+No. If your project does not use Tailwind CSS, you can import our precompiled stylesheet:
+
+```ts
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css'; // Optional dark mode
+```
+
+This single stylesheet delivers all utility rules and token variables necessary for proper component rendering without requiring a Tailwind build step.
+
+### Why do I get missing peer dependency warnings for recharts or tiptap?
+
+`@innostes/ui` isolates heavy dependencies into optional entry points (`@innostes/ui/charts` and `@innostes/ui/editor`). If your application does not require chart visualisations or rich text editing, you can safely ignore these peer dependency warnings. If you use those subpaths, install the corresponding peer dependencies:
+
+```bash
+pnpm add recharts@^3.0.0
+pnpm add @tiptap/core@^3.0.0 @tiptap/react@^3.0.0 @tiptap/starter-kit@^3.0.0
+```
+
+---
+
+## Theming & Styling
+
+### How do I customise brand colours?
+
+`@innostes/ui` uses OKLCH CSS custom properties. You can override individual tokens in your application's CSS without modifying component source files:
+
+```css
+:root {
+  --primary: oklch(0.55 0.22 260); /* Custom brand blue */
+  --primary-foreground: oklch(0.98 0 0);
+  --radius: 0.5rem;
+}
+```
+
+Every component consuming `--primary` will immediately reflect your updated brand palette.
+
+### How does dark mode toggling work?
+
+Components consume the CSS variables defined in `@innostes/ui/dark.css`. Dark mode is activated whenever a parent DOM node has the `.dark` class or the `[data-theme="dark"]` attribute:
+
+```html
+<html class="dark">
+  <!-- All nested @innostes/ui components render dark theme -->
+</html>
+```
+
+---
+
+## Next.js & Server Components
+
+### Are components compatible with the Next.js App Router?
+
+Yes. Interactive primitives (buttons, modals, dropdowns) include the `"use client"` directive, allowing them to be imported directly into Next.js App Router layouts and pages. Non-interactive helpers (`cn`, `buttonVariants`) remain server-safe.
 
 ---
 
@@ -15698,13 +15857,13 @@ Reference documentation, architectural conventions, contribution standards, and 
 
 ## Available resources
 
-- **Conventions**: Core design principles, component composition rules, event signatures, and styling models.
-- **Changelog**: Detailed release notes tracking new components, enhancements, bug fixes, and deprecations.
-- **Versioning and support**: Semantic versioning guarantees, browser compatibility matrix, and LTS support windows.
-- **Migration guides**: Step-by-step upgrade instructions for major library releases and breaking changes.
-- **Contributing**: Development workflow, local testing procedures, and submission standards.
-- **Security**: Vulnerability reporting protocols, dependency audit policies, and security advisories.
-- **FAQ**: Frequently asked questions regarding framework integration, bundle size, and styling overrides.
+- **[Conventions](/ui/docs/resources/conventions)**: Core design principles, component composition rules, event signatures, and styling models.
+- **[Changelog](/ui/docs/resources/changelog)**: Chronological release notes tracking new components, enhancements, bug fixes, and deprecations.
+- **[Versioning and support](/ui/docs/resources/versioning)**: Semantic versioning guarantees, browser compatibility matrix, and LTS support windows.
+- **[Migration guides](/ui/docs/resources/migration)**: Step-by-step upgrade instructions for major library releases and breaking changes.
+- **[Contributing](/ui/docs/resources/contributing)**: Development workflow, local testing procedures, and submission standards.
+- **[Security](/ui/docs/resources/security)**: Vulnerability reporting protocols, dependency audit policies, and security advisories.
+- **[FAQ](/ui/docs/resources/faq)**: Frequently asked questions regarding framework integration, bundle size, and styling overrides.
 
 ---
 
@@ -15714,16 +15873,133 @@ Upgrade instructions and breaking change migrations between major versions.
 
 # Migration guides
 
-Detailed upgrade procedures and codemod instructions for transitioning across major `@innostes/ui` releases.
+Detailed upgrade procedures, codified breaking changes, and migration steps for `@innostes/ui`.
 
-## Upgrading to 0.1.0
+## Migration template
 
-The initial enterprise overhaul release normalizes component properties and aligns layout behaviors with Base UI conventions:
+When planning a major version migration within your application codebase, follow this standard procedure:
 
-- **Breadcrumb**: Resolved false-positive active state warnings; root items now default to `href` links whilst terminal items omit anchors.
-- **Progress and Meter**: Value bounds are now strictly clamped between 0 and 100, accepting explicit `aria-valuetext` formatters.
-- **Dialog and Sheet**: Replaced directional string literals with logical `side="start" | "end"` positioning properties.
-- **RichTextEditor**: Added explicit `invalid` boolean prop for uniform validation integration inside `<Field>`.
+1. **Audit dependencies**: Ensure peer dependencies (`react`, `react-dom`, `recharts`, `@tiptap/*`) meet the minimum specified requirements for the new target version.
+2. **Review breaking changes**: Cross-reference the migration section below against your application imports.
+3. **Execute codemods or automated search**: Search for deprecated prop identifiers and update call sites.
+4. **Execute local test suites**: Run your TypeScript compiler (`tsc --noEmit`) and component test suites (`pnpm test`) to catch type-level or DOM assertion mismatches.
+5. **Verify visual regressions**: Confirm that critical enterprise layouts (e.g. data tables, navigation sidebars, and dialogue modals) render faithfully.
+
+---
+
+## Migrating from 0.0.1 to 1.0.0
+
+The `1.0.0` release introduces architectural hardening, full WAI-ARIA conformance via Base UI primitives, and logical layout properties. Follow the migration steps below to upgrade your application.
+
+### Step 1: Update package dependencies
+
+Update `@innostes/ui` in your project `package.json`:
+
+```bash
+pnpm update @innostes/ui@^1.0.0
+```
+
+If you utilise charts or rich text editing, install the corresponding optional peer dependencies:
+
+```bash
+# Optional: only if using charts
+pnpm add recharts@^3.0.0
+
+# Optional: only if using rich text editing
+pnpm add @tiptap/core@^3.0.0 @tiptap/react@^3.0.0 @tiptap/starter-kit@^3.0.0
+```
+
+---
+
+### Step 2: Address breaking component changes
+
+#### 1. Breadcrumb active state resolution
+
+In version 0.0.1, passing active state to `BreadcrumbItem` sometimes emitted nested anchor tag warnings. In 1.0.0, non-terminal items should render anchor links while the active page item renders plain text with `aria-current="page"`.
+
+```tsx
+// Before (0.0.1)
+<BreadcrumbItem active href="/orders">Orders</BreadcrumbItem>
+
+// After (1.0.0)
+<BreadcrumbItem isCurrent>Orders</BreadcrumbItem>
+```
+
+#### 2. Progress and Meter percentage bounds
+
+Values are now strictly clamped between 0 and 100. If your domain values operate on arbitrary scales (e.g. raw inventory count), normalize the value before passing it to `value`:
+
+```tsx
+// Before (0.0.1)
+<Progress value={250} max={500} />
+
+// After (1.0.0)
+// Normalize value to a 0–100 percentage:
+<Progress value={(250 / 500) * 100} aria-valuetext="250 of 500 units" />
+```
+
+#### 3. Dialog and Sheet logical positioning
+
+Directional literals (`"left"` and `"right"`) have been replaced with logical CSS properties (`"start"` and `"end"`) to provide automatic Right-to-Left (RTL) mirroring:
+
+```tsx
+// Before (0.0.1)
+<SheetContent side="right">
+
+// After (1.0.0)
+<SheetContent side="end">
+```
+
+#### 4. DataTable column definitions
+
+The `DataTable` column schema has been normalized to use canonical `id` and `cell` render properties, aligning with TanStack Table and modern headless conventions:
+
+```tsx
+// Before (0.0.1)
+const columns = [
+  { key: 'status', header: 'Status', render: (row) => <Badge>{row.status}</Badge> }
+];
+
+// After (1.0.0)
+const columns = [
+  { id: 'status', header: 'Status', cell: (row) => <Badge>{row.status}</Badge> }
+];
+```
+
+#### 5. RichTextEditor validation prop
+
+`RichTextEditor` now accepts an explicit `invalid?: boolean` prop for uniform integration with `<Field>` validation contexts:
+
+```tsx
+// Before (0.0.1)
+<RichTextEditor className={errors.body ? 'border-destructive' : ''} />
+
+// After (1.0.0)
+<RichTextEditor invalid={Boolean(errors.body)} />
+```
+
+#### 6. Notification bell component export
+
+The notification bell component has been normalized to the canonical export name `NotificationBell`:
+
+```tsx
+// Before (0.0.1)
+import { NotificationBellWidget } from '@innostes/ui';
+
+// After (1.0.0)
+import { NotificationBell } from '@innostes/ui';
+```
+
+---
+
+### Step 3: Run verification checks
+
+After making the above adjustments, run your project validation pipeline:
+
+```bash
+pnpm typecheck
+pnpm test
+```
 
 ---
 
@@ -15733,19 +16009,65 @@ Security practices, vulnerability reporting, and dependency auditing.
 
 # Security
 
-Security is foundational to the development lifecycle of `@innostes/ui`. Because the library runs in mission-critical ERP environments handling sensitive business and financial data, all components undergo continuous security review.
+Security is foundational to the development lifecycle of `@innostes/ui`. Because the library runs in mission-critical enterprise environments handling sensitive commercial and financial data for Northwind Traders Pvt Ltd, all primitives and entry points undergo rigorous security assessments.
 
-## Reporting vulnerabilities
+## Reporting a vulnerability
 
-If you discover a potential security vulnerability within `@innostes/ui` or associated tooling, please report it privately:
+If you discover a potential security vulnerability within `@innostes/ui` or its submodules, please report it privately:
 
-- Send vulnerability disclosures directly to `security@innostes.com`.
-- Avoid filing public issues on GitHub for undisclosed security vulnerabilities.
-- Provide reproduction steps, package version, and expected impact.
+- **Email**: Send vulnerability disclosures to `security@innostes.com`.
+- **Public channels**: Please do NOT create public GitHub issues or forum threads for undisclosed vulnerabilities.
+- **Payload details**: Please include step-by-step reproduction instructions, affected package versions, and a minimal reproducible example or proof-of-concept.
 
-## Dependency auditing
+### Response service level agreements (SLAs)
 
-Automated dependency audits execute on every CI run via `pnpm audit`. High or critical severity findings block release pipelines until patches or vendor updates are merged.
+| Stage | Target Timeline | Action |
+| :--- | :--- | :--- |
+| **Acknowledgement** | Within 24 hours | Initial intake confirmation and vulnerability ticket creation. |
+| **Triage & Impact Assessment** | Within 72 hours | Verification of affected versions and reproduction in an isolated environment. |
+| **Remediation & Patch** | Within 7 business days | Production of security hotfix, CI verification, and publication to npm registry. |
+| **Public Advisory** | Coordinated disclosure | Release notes and CVE publication following consumer patching window. |
+
+---
+
+## Component security considerations
+
+### 1. Rich text editor (`@innostes/ui/editor`)
+
+The `RichTextEditor` primitive is built upon Tiptap and emits formatted HTML strings. Unsanitised HTML rendering can expose web applications to Cross-Site Scripting (XSS) attacks.
+
+- **Client sanitisation**: Always sanitize raw HTML strings produced by the editor before rendering them with `dangerouslySetInnerHTML`. Use established sanitisation libraries such as [DOMPurify](https://github.com/cure53/DOMPurify):
+  ```tsx
+  import DOMPurify from 'dompurify';
+
+  export function SafeArticleContent({ html }: { html: string }) {
+    const cleanHtml = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'code', 'pre', 'blockquote'],
+      ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    });
+
+    return <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />;
+  }
+  ```
+- **Server sanitisation**: Apply identical sanitisation rules on your backend APIs before writing editor payloads to PostgreSQL or document databases.
+
+### 2. File dropzone (`@innostes/ui`)
+
+The `FileDropzone` component provides client-side file selection, file count limits, and MIME type filtering via the `accept` attribute.
+
+- **Do not trust client-side validation**: The `accept` prop provides user experience hints to operating system file selectors. Malicious actors can easily bypass client checks and upload arbitrary binary payloads.
+- **Server validation**: Server endpoints must inspect magic bytes and file headers to verify genuine MIME types, rather than relying solely on file extensions.
+- **Storage isolation**: Store uploaded assets in isolated Amazon S3 / Google Cloud Storage buckets using generated UUID filenames, ensuring non-executable permissions.
+
+---
+
+## Dependency policy and supply chain security
+
+To protect against software supply chain attacks:
+
+1. **Automated audits**: Every CI pipeline execution runs `pnpm audit --audit-level=high`. Pull requests introducing vulnerabilities are automatically blocked.
+2. **Pinned dependency trees**: Dependencies are strictly pinned using `pnpm-lock.yaml`.
+3. **Zero runtime bloat**: Core `@innostes/ui` primitives maintain only 4 production dependencies (`@base-ui/react`, `clsx`, `tailwind-merge`, and `class-variance-authority`). Heavy charting and rich text dependencies are strictly isolated to optional peer dependencies.
 
 ---
 
@@ -15755,22 +16077,88 @@ Semantic versioning policy, release lifecycle, and browser compatibility targets
 
 # Versioning and support
 
-The `@innostes/ui` package follows Semantic Versioning (SemVer 2.0.0). Version numbers adhere to the `MAJOR.MINOR.PATCH` structure, providing predictable upgrade paths for Northwind Traders Pvt Ltd's engineering teams.
+The `@innostes/ui` package follows [Semantic Versioning (SemVer 2.0.0)](https://semver.org/). Version numbers adhere to the `MAJOR.MINOR.PATCH` structure, providing predictable upgrade paths for Northwind Traders Pvt Ltd's engineering teams.
 
-## Release cadence
+## SemVer policy
 
-- **Patch releases** (`0.1.x`): Backwards-compatible bug fixes, security remediations, and performance improvements.
-- **Minor releases** (`0.x.0`): Backwards-compatible feature additions, new components, and deprecation notices.
-- **Major releases** (`x.0.0`): Breaking changes, major architectural migrations, or minimum React runtime requirement upgrades.
+We adhere strictly to semantic guarantees across our public API surface.
 
-## Supported environments
+| Release Type | Version Segment | Frequency | Backwards Compatibility | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Patch** | `x.x.PATCH` | Weekly / As needed | Fully compatible | Bug fixes, internal refactoring, accessibility refinements, and documentation updates. |
+| **Minor** | `x.MINOR.0` | Monthly | Fully compatible | New components, opt-in prop additions, non-breaking behavioural enhancements, and deprecation notices. |
+| **Major** | `MAJOR.0.0` | 6–12 months | Breaking changes | Breaking API changes, DOM restructuring, removal of deprecated features, or runtime minimum bumps. |
 
-The library supports modern evergreen desktop and mobile browsers:
+### What constitutes a breaking change?
 
-- Chromium (Chrome, Edge, Opera) latest 2 major versions.
-- Mozilla Firefox latest 2 major versions.
-- Apple Safari latest 2 major versions.
-- Node.js LTS versions (v20, v22) for SSR and build tooling.
+To maintain predictable enterprise stability, the following modifications are classified as **breaking** and will only occur in major releases:
+
+1. **TypeScript signatures**: Removing or renaming exported component props, changing required prop contracts, or narrowing callback argument types.
+2. **DOM hierarchy & `data-slot` names**: Removing, renaming, or changing the nesting order of elements marked with `data-slot="..."`, as consumers rely on these selectors for CSS overrides.
+3. **Component lifecycle & events**: Altering the signature or invocation sequence of event callbacks (e.g. `onValueChange`, `onOpenChange`).
+4. **Theme token variables**: Removing or renaming semantic CSS custom properties in `@innostes/ui/theme.css`.
+5. **Runtime peer dependencies**: Raising minimum supported versions of React, Next.js, or Node.js.
+
+### What does not constitute a breaking change?
+
+The following modifications are considered **non-breaking**:
+
+- Adding new optional props to existing components.
+- Adding new `data-slot` elements or auxiliary helper functions.
+- Internal CSS optimizations that preserve rendered visual geometry and WCAG contrast compliance.
+- Bug fixes that restore intended specification behaviour.
+
+## Deprecation policy
+
+When an existing API or component is superseded, we follow an orderly deprecation lifecycle before removal:
+
+1. **Deprecation announcement**: The feature is marked as deprecated in a minor release. TSDoc annotations (`@deprecated`) are added to trigger IDE strikethrough warnings.
+2. **Runtime warnings**: In development mode (`process.env.NODE_ENV !== 'production'`), invoking a deprecated prop logs a single formatted console warning with instructions on the replacement pattern. No warnings are emitted in production bundles.
+3. **Grace period**: Deprecated APIs remain supported for a minimum of **two minor versions** or **six months**, whichever is longer.
+4. **Removal**: Deprecated APIs are permanently removed only upon the subsequent major version release.
+
+## Support matrix
+
+`@innostes/ui` is engineered and tested for enterprise browsers, modern SSR environments, and multiple React runtime versions.
+
+### React runtime matrix
+
+All primitives undergo automated compatibility testing across our target React versions:
+
+| Package | Supported Version Range | Verification Suite |
+| :--- | :--- | :--- |
+| **React 19** | `^19.0.0` | Primary development target (`pnpm nx test ui`) |
+| **React 18** | `^18.0.0` | Isolated runner (`tests/ui-react18`) |
+| **React 17** | `^17.0.0` | Isolated runner (`tests/ui-react17`) |
+| **Next.js** | `>= 14.0.0` (App Router & Pages Router) | Smoke tested in `apps/landing` and `apps/web-app` |
+| **Vite** | `>= 5.0.0` | Verified with `@vitejs/plugin-react` |
+
+### Browser support
+
+We support modern evergreen desktop and mobile browsers. Our build configuration targets the following minimum baseline:
+
+| Browser | Minimum Version | Market Coverage |
+| :--- | :--- | :--- |
+| **Chromium** (Chrome, Edge, Brave, Opera) | 120+ | Full support (WAI-ARIA, OKLCH colours, CSS Container Queries) |
+| **Mozilla Firefox** | 120+ | Full support |
+| **Apple Safari** (macOS) | 17+ | Full support |
+| **Apple Safari** (iOS) | 17+ | Full support |
+
+> [!NOTE]
+> Internet Explorer and legacy Microsoft Edge (EdgeHTML) are strictly unsupported.
+
+### Server-side execution
+
+- **Node.js**: LTS `20.x` and `22.x` are supported for Next.js App Router Server Components, static site generation, and CLI build tooling.
+- **SSR Safety**: Interactive components ship with explicit `"use client"` directives. Pure utility functions (such as `cn` and `buttonVariants`) contain no browser APIs and remain safe for Server Component evaluation.
+
+## Security maintenance window
+
+Security vulnerability remediations are prioritized according to release status:
+
+- **Current major release** (v1.x): Receives immediate patch releases for all critical, high, and moderate security findings.
+- **Previous major release** (v0.x): Receives critical security patches for 12 months following supersession.
+- **End-of-Life (EOL)** releases: No security patches are guaranteed. Teams must upgrade to an actively supported version.
 
 ---
 

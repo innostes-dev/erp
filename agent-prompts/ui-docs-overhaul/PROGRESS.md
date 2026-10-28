@@ -504,4 +504,53 @@ drop, which doesn't work on touch screens.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 15 (Governance and release readiness).
+- Non-blocking: none. Resolved in 15.
+
+
+## 15 – Governance and release readiness – 2026-10-29
+
+**Summary**: Completed full release governance overhaul for `@innostes/ui`. Established version `1.0.0` release readiness with complete package metadata, licensing, security disclosure policies, Keep a Changelog documentation, automated CI bundle size limits, and synchronized developer release guides. Resolved `LIB-006`, `LIB-011`, `DOC-007`, and `DEV-003`.
+
+**Changed**:
+- Licensing and Security:
+  - `packages/ui/LICENSE`: Created formal MIT License file.
+  - `packages/ui/SECURITY.md` & `SECURITY.md`: Established formal vulnerability disclosure policy (`security@innostes.com`), 24/72h SLA targets, and XSS sanitization policies for rich text and file uploads.
+- Package Metadata and Manifest:
+  - `packages/ui/package.json`: Promoted version to `1.0.0`. Added `repository`, `homepage`, `bugs`, `author`, `funding`, accurate `keywords`, `engines` (`>=20.0.0`), explicit `files` array, and `check:size` script.
+  - `packages/ui/README.md`: Overhauled as public npm landing page featuring badges, quickstart, multi-entry exports, peer dependency requirements, and browser support matrix.
+- Changelog:
+  - `packages/ui/CHANGELOG.md`: Created Keep a Changelog formatted changelog detailing 1.0.0 additions, breaking change migrations, and security advisories.
+- Bundle Size Verification:
+  - `packages/ui/scripts/check-bundle-size.mjs`: Automated gate verifying root entry (<25KB), charts (<55KB), editor (<45KB), and stylesheet (<110KB) limits.
+  - `apps/landing/content/docs/patterns/performance.mdx`: Published automated CI bundle budgets and measured sizes.
+- Policy Documentation Pages:
+  - `apps/landing/content/docs/resources/index.mdx`: Resource index directory with links to all governance documents.
+  - `apps/landing/content/docs/resources/changelog.mdx`: Complete public changelog page matching `CHANGELOG.md`.
+  - `apps/landing/content/docs/resources/versioning.mdx`: Comprehensive SemVer rules (breaking vs non-breaking), deprecation lifecycle, and multi-runtime browser support matrix.
+  - `apps/landing/content/docs/resources/migration.mdx`: Structured migration guide for 0.0.1 to 1.0.0 covering Breadcrumb, Progress, Dialog/Sheet logical positioning, DataTable schema, and RichTextEditor validation.
+  - `apps/landing/content/docs/resources/security.mdx`: Vulnerability reporting SLAs, XSS prevention guidelines, and dependency auditing protocols.
+  - `apps/landing/content/docs/resources/contributing.mdx`: Public contribution workflow and component checklist.
+  - `apps/landing/content/docs/resources/faq.mdx`: Architecture comparisons (shadcn/ui, Radix, Ant Design, MUI) and setup troubleshooting.
+- Developer Documentation:
+  - `apps/landing/content/dev-docs/guides/releasing.mdx`: Multi-entry publishing instructions, peer dependency checks, and Verdaccio testing steps (DEV-003).
+  - `apps/landing/content/dev-docs/packages/ui.mdx`: Updated status to Stable and added bundle size gate.
+
+**Tarball Packaging Verification**:
+`pnpm pack --dry-run` produces `innostes-ui-1.0.0.tgz` containing exclusively:
+- `CHANGELOG.md`, `LICENSE`, `README.md`, `SECURITY.md`, `package.json`
+- `tailwind/dark.css`, `tailwind/tailwind.css`, `tailwind/theme.css`
+- `dist/index.js`, `dist/index.d.ts`, `dist/styles.css`, `dist/api.json`
+- `dist/charts/` (`cartesian-charts.js`, `donut-chart.js`, `chart-utils.js`, `index.js`, and `.d.ts` types)
+- `dist/editor/` (`rich-text-editor.js`, `editor-icons.js`, `index.js`, and `.d.ts` types)
+- `dist/components/`, `dist/widgets/`, `dist/lib/` (ESM modules and type definitions)
+- (All tests, mocks, test-setup files, and tsbuildinfo cache files correctly excluded).
+
+**Verification**:
+- `pnpm nx check:size ui`: PASS (all 4 entry points within budget).
+- `pnpm nx run landing:docs-check`: PASS (all 9 enforced quality gates green).
+- `pnpm nx build landing --skip-nx-cache`: PASS (156 static pages generated).
+- `packages/ui` `pnpm pack --dry-run`: PASS.
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 16 (Browser QA and visual verification).

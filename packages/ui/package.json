@@ -1,8 +1,22 @@
 {
   "name": "@innostes/ui",
-  "version": "0.0.1",
-  "description": "innostes UI: accessible React components for admin interfaces, built on Base UI and styled with Tailwind CSS design tokens.",
+  "version": "1.0.0",
+  "description": "Accessible, high-performance React component library for enterprise admin interfaces, built on Base UI and styled with Tailwind CSS design tokens.",
   "license": "MIT",
+  "author": "Northwind Traders Pvt Ltd <engineering@innostes.com>",
+  "homepage": "https://innostes.com/ui/docs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/innostes/erp.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/innostes/erp/issues"
+  },
+  "funding": {
+    "type": "corporate",
+    "url": "https://innostes.com"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -38,13 +52,20 @@
     "tailwind/tailwind.css",
     "tailwind/theme.css",
     "tailwind/dark.css",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "SECURITY.md",
     "!**/*.tsbuildinfo"
   ],
   "sideEffects": [
     "**/*.css"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "check:size": "node ./scripts/check-bundle-size.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -100,7 +121,8 @@
     "components",
     "accessible",
     "ui",
-    "rich-text"
+    "rich-text",
+    "charts"
   ],
   "nx": {
     "name": "ui"

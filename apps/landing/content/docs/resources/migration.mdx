@@ -5,13 +5,130 @@ description: Upgrade instructions and breaking change migrations between major v
 
 # Migration guides
 
-Detailed upgrade procedures and codemod instructions for transitioning across major `@innostes/ui` releases.
+Detailed upgrade procedures, codified breaking changes, and migration steps for `@innostes/ui`.
 
-## Upgrading to 0.1.0
+## Migration template
 
-The initial enterprise overhaul release normalizes component properties and aligns layout behaviors with Base UI conventions:
+When planning a major version migration within your application codebase, follow this standard procedure:
 
-- **Breadcrumb**: Resolved false-positive active state warnings; root items now default to `href` links whilst terminal items omit anchors.
-- **Progress and Meter**: Value bounds are now strictly clamped between 0 and 100, accepting explicit `aria-valuetext` formatters.
-- **Dialog and Sheet**: Replaced directional string literals with logical `side="start" | "end"` positioning properties.
-- **RichTextEditor**: Added explicit `invalid` boolean prop for uniform validation integration inside `<Field>`.
+1. **Audit dependencies**: Ensure peer dependencies (`react`, `react-dom`, `recharts`, `@tiptap/*`) meet the minimum specified requirements for the new target version.
+2. **Review breaking changes**: Cross-reference the migration section below against your application imports.
+3. **Execute codemods or automated search**: Search for deprecated prop identifiers and update call sites.
+4. **Execute local test suites**: Run your TypeScript compiler (`tsc --noEmit`) and component test suites (`pnpm test`) to catch type-level or DOM assertion mismatches.
+5. **Verify visual regressions**: Confirm that critical enterprise layouts (e.g. data tables, navigation sidebars, and dialogue modals) render faithfully.
+
+---
+
+## Migrating from 0.0.1 to 1.0.0
+
+The `1.0.0` release introduces architectural hardening, full WAI-ARIA conformance via Base UI primitives, and logical layout properties. Follow the migration steps below to upgrade your application.
+
+### Step 1: Update package dependencies
+
+Update `@innostes/ui` in your project `package.json`:
+
+```bash
+pnpm update @innostes/ui@^1.0.0
+```
+
+If you utilise charts or rich text editing, install the corresponding optional peer dependencies:
+
+```bash
+# Optional: only if using charts
+pnpm add recharts@^3.0.0
+
+# Optional: only if using rich text editing
+pnpm add @tiptap/core@^3.0.0 @tiptap/react@^3.0.0 @tiptap/starter-kit@^3.0.0
+```
+
+---
+
+### Step 2: Address breaking component changes
+
+#### 1. Breadcrumb active state resolution
+
+In version 0.0.1, passing active state to `BreadcrumbItem` sometimes emitted nested anchor tag warnings. In 1.0.0, non-terminal items should render anchor links while the active page item renders plain text with `aria-current="page"`.
+
+```tsx
+// Before (0.0.1)
+<BreadcrumbItem active href="/orders">Orders</BreadcrumbItem>
+
+// After (1.0.0)
+<BreadcrumbItem isCurrent>Orders</BreadcrumbItem>
+```
+
+#### 2. Progress and Meter percentage bounds
+
+Values are now strictly clamped between 0 and 100. If your domain values operate on arbitrary scales (e.g. raw inventory count), normalize the value before passing it to `value`:
+
+```tsx
+// Before (0.0.1)
+<Progress value={250} max={500} />
+
+// After (1.0.0)
+// Normalize value to a 0–100 percentage:
+<Progress value={(250 / 500) * 100} aria-valuetext="250 of 500 units" />
+```
+
+#### 3. Dialog and Sheet logical positioning
+
+Directional literals (`"left"` and `"right"`) have been replaced with logical CSS properties (`"start"` and `"end"`) to provide automatic Right-to-Left (RTL) mirroring:
+
+```tsx
+// Before (0.0.1)
+<SheetContent side="right">
+
+// After (1.0.0)
+<SheetContent side="end">
+```
+
+#### 4. DataTable column definitions
+
+The `DataTable` column schema has been normalized to use canonical `id` and `cell` render properties, aligning with TanStack Table and modern headless conventions:
+
+```tsx
+// Before (0.0.1)
+const columns = [
+  { key: 'status', header: 'Status', render: (row) => <Badge>{row.status}</Badge> }
+];
+
+// After (1.0.0)
+const columns = [
+  { id: 'status', header: 'Status', cell: (row) => <Badge>{row.status}</Badge> }
+];
+```
+
+#### 5. RichTextEditor validation prop
+
+`RichTextEditor` now accepts an explicit `invalid?: boolean` prop for uniform integration with `<Field>` validation contexts:
+
+```tsx
+// Before (0.0.1)
+<RichTextEditor className={errors.body ? 'border-destructive' : ''} />
+
+// After (1.0.0)
+<RichTextEditor invalid={Boolean(errors.body)} />
+```
+
+#### 6. Notification bell component export
+
+The notification bell component has been normalized to the canonical export name `NotificationBell`:
+
+```tsx
+// Before (0.0.1)
+import { NotificationBellWidget } from '@innostes/ui';
+
+// After (1.0.0)
+import { NotificationBell } from '@innostes/ui';
+```
+
+---
+
+### Step 3: Run verification checks
+
+After making the above adjustments, run your project validation pipeline:
+
+```bash
+pnpm typecheck
+pnpm test
+```

@@ -5,18 +5,79 @@ description: Frequently asked questions regarding @innostes/ui installation, the
 
 # Frequently asked questions
 
-Common questions and answers regarding `@innostes/ui` integration and enterprise usage.
+Real-world questions, architecture comparisons, and troubleshooting advice for `@innostes/ui`.
 
-## General
+## Architecture & Comparisons
 
-### How does innostes UI differ from standard Tailwind component libraries?
+### How does innostes UI compare with shadcn/ui and Radix?
 
-`@innostes/ui` is built directly on Base UI unstyled primitives, ensuring full WAI-ARIA compliance, roving focus management, and keyboard accessibility by default. Tailwind CSS v4 provides token-based styling rather than arbitrary utility classes.
+`shadcn/ui` is a copy-paste distribution model using Radix UI primitives and Tailwind CSS. While excellent for greenfield applications, enterprise ERP deployments require centralised governance, automated regression testing, and predictable package upgrades.
 
-### Can I use innostes UI with React 17 or React 18?
+`@innostes/ui` provides:
+- **Centralised package distribution**: A single versioned package (`@innostes/ui`) maintained and upgraded via standard package managers.
+- **Base UI foundation**: Modern unstyled primitives developed by the Base UI team, delivering zero-runtime overhead, refined focus rings, and native accessibility.
+- **Enterprise-first primitives**: Built-in data tables, split panes, complex filter bars, audit logs, and permission matrices designed specifically for back-office and admin applications.
 
-Yes. The package is thoroughly tested and verified across React 17, React 18, and React 19 runtimes using dedicated test matrices in our CI pipeline.
+### How does innostes UI compare with Ant Design or MUI?
 
-### Does the library support dark mode?
+Ant Design and Material UI bundle substantial JavaScript runtimes and opinionated CSS-in-JS engines. `@innostes/ui` uses zero-runtime CSS custom properties and atomic Tailwind utility classes, achieving a root bundle footprint under 15 KB (raw) compared to hundreds of kilobytes in monolithic component frameworks.
 
-Yes. All components consume OKLCH semantic variables that dynamically adjust when toggling between `.light` and `.dark` class names or `data-theme` attributes on the root container.
+---
+
+## Installation & Setup
+
+### Do I need Tailwind CSS to use @innostes/ui?
+
+No. If your project does not use Tailwind CSS, you can import our precompiled stylesheet:
+
+```ts
+import '@innostes/ui/styles.css';
+import '@innostes/ui/dark.css'; // Optional dark mode
+```
+
+This single stylesheet delivers all utility rules and token variables necessary for proper component rendering without requiring a Tailwind build step.
+
+### Why do I get missing peer dependency warnings for recharts or tiptap?
+
+`@innostes/ui` isolates heavy dependencies into optional entry points (`@innostes/ui/charts` and `@innostes/ui/editor`). If your application does not require chart visualisations or rich text editing, you can safely ignore these peer dependency warnings. If you use those subpaths, install the corresponding peer dependencies:
+
+```bash
+pnpm add recharts@^3.0.0
+pnpm add @tiptap/core@^3.0.0 @tiptap/react@^3.0.0 @tiptap/starter-kit@^3.0.0
+```
+
+---
+
+## Theming & Styling
+
+### How do I customise brand colours?
+
+`@innostes/ui` uses OKLCH CSS custom properties. You can override individual tokens in your application's CSS without modifying component source files:
+
+```css
+:root {
+  --primary: oklch(0.55 0.22 260); /* Custom brand blue */
+  --primary-foreground: oklch(0.98 0 0);
+  --radius: 0.5rem;
+}
+```
+
+Every component consuming `--primary` will immediately reflect your updated brand palette.
+
+### How does dark mode toggling work?
+
+Components consume the CSS variables defined in `@innostes/ui/dark.css`. Dark mode is activated whenever a parent DOM node has the `.dark` class or the `[data-theme="dark"]` attribute:
+
+```html
+<html class="dark">
+  <!-- All nested @innostes/ui components render dark theme -->
+</html>
+```
+
+---
+
+## Next.js & Server Components
+
+### Are components compatible with the Next.js App Router?
+
+Yes. Interactive primitives (buttons, modals, dropdowns) include the `"use client"` directive, allowing them to be imported directly into Next.js App Router layouts and pages. Non-interactive helpers (`cn`, `buttonVariants`) remain server-safe.

@@ -5,16 +5,62 @@ description: Security practices, vulnerability reporting, and dependency auditin
 
 # Security
 
-Security is foundational to the development lifecycle of `@innostes/ui`. Because the library runs in mission-critical ERP environments handling sensitive business and financial data, all components undergo continuous security review.
+Security is foundational to the development lifecycle of `@innostes/ui`. Because the library runs in mission-critical enterprise environments handling sensitive commercial and financial data for Northwind Traders Pvt Ltd, all primitives and entry points undergo rigorous security assessments.
 
-## Reporting vulnerabilities
+## Reporting a vulnerability
 
-If you discover a potential security vulnerability within `@innostes/ui` or associated tooling, please report it privately:
+If you discover a potential security vulnerability within `@innostes/ui` or its submodules, please report it privately:
 
-- Send vulnerability disclosures directly to `security@innostes.com`.
-- Avoid filing public issues on GitHub for undisclosed security vulnerabilities.
-- Provide reproduction steps, package version, and expected impact.
+- **Email**: Send vulnerability disclosures to `security@innostes.com`.
+- **Public channels**: Please do NOT create public GitHub issues or forum threads for undisclosed vulnerabilities.
+- **Payload details**: Please include step-by-step reproduction instructions, affected package versions, and a minimal reproducible example or proof-of-concept.
 
-## Dependency auditing
+### Response service level agreements (SLAs)
 
-Automated dependency audits execute on every CI run via `pnpm audit`. High or critical severity findings block release pipelines until patches or vendor updates are merged.
+| Stage | Target Timeline | Action |
+| :--- | :--- | :--- |
+| **Acknowledgement** | Within 24 hours | Initial intake confirmation and vulnerability ticket creation. |
+| **Triage & Impact Assessment** | Within 72 hours | Verification of affected versions and reproduction in an isolated environment. |
+| **Remediation & Patch** | Within 7 business days | Production of security hotfix, CI verification, and publication to npm registry. |
+| **Public Advisory** | Coordinated disclosure | Release notes and CVE publication following consumer patching window. |
+
+---
+
+## Component security considerations
+
+### 1. Rich text editor (`@innostes/ui/editor`)
+
+The `RichTextEditor` primitive is built upon Tiptap and emits formatted HTML strings. Unsanitised HTML rendering can expose web applications to Cross-Site Scripting (XSS) attacks.
+
+- **Client sanitisation**: Always sanitize raw HTML strings produced by the editor before rendering them with `dangerouslySetInnerHTML`. Use established sanitisation libraries such as [DOMPurify](https://github.com/cure53/DOMPurify):
+  ```tsx
+  import DOMPurify from 'dompurify';
+
+  export function SafeArticleContent({ html }: { html: string }) {
+    const cleanHtml = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'code', 'pre', 'blockquote'],
+      ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    });
+
+    return <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />;
+  }
+  ```
+- **Server sanitisation**: Apply identical sanitisation rules on your backend APIs before writing editor payloads to PostgreSQL or document databases.
+
+### 2. File dropzone (`@innostes/ui`)
+
+The `FileDropzone` component provides client-side file selection, file count limits, and MIME type filtering via the `accept` attribute.
+
+- **Do not trust client-side validation**: The `accept` prop provides user experience hints to operating system file selectors. Malicious actors can easily bypass client checks and upload arbitrary binary payloads.
+- **Server validation**: Server endpoints must inspect magic bytes and file headers to verify genuine MIME types, rather than relying solely on file extensions.
+- **Storage isolation**: Store uploaded assets in isolated Amazon S3 / Google Cloud Storage buckets using generated UUID filenames, ensuring non-executable permissions.
+
+---
+
+## Dependency policy and supply chain security
+
+To protect against software supply chain attacks:
+
+1. **Automated audits**: Every CI pipeline execution runs `pnpm audit --audit-level=high`. Pull requests introducing vulnerabilities are automatically blocked.
+2. **Pinned dependency trees**: Dependencies are strictly pinned using `pnpm-lock.yaml`.
+3. **Zero runtime bloat**: Core `@innostes/ui` primitives maintain only 4 production dependencies (`@base-ui/react`, `clsx`, `tailwind-merge`, and `class-variance-authority`). Heavy charting and rich text dependencies are strictly isolated to optional peer dependencies.

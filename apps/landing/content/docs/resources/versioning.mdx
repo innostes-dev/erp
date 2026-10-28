@@ -5,19 +5,85 @@ description: Semantic versioning policy, release lifecycle, and browser compatib
 
 # Versioning and support
 
-The `@innostes/ui` package follows Semantic Versioning (SemVer 2.0.0). Version numbers adhere to the `MAJOR.MINOR.PATCH` structure, providing predictable upgrade paths for Northwind Traders Pvt Ltd's engineering teams.
+The `@innostes/ui` package follows [Semantic Versioning (SemVer 2.0.0)](https://semver.org/). Version numbers adhere to the `MAJOR.MINOR.PATCH` structure, providing predictable upgrade paths for Northwind Traders Pvt Ltd's engineering teams.
 
-## Release cadence
+## SemVer policy
 
-- **Patch releases** (`0.1.x`): Backwards-compatible bug fixes, security remediations, and performance improvements.
-- **Minor releases** (`0.x.0`): Backwards-compatible feature additions, new components, and deprecation notices.
-- **Major releases** (`x.0.0`): Breaking changes, major architectural migrations, or minimum React runtime requirement upgrades.
+We adhere strictly to semantic guarantees across our public API surface.
 
-## Supported environments
+| Release Type | Version Segment | Frequency | Backwards Compatibility | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Patch** | `x.x.PATCH` | Weekly / As needed | Fully compatible | Bug fixes, internal refactoring, accessibility refinements, and documentation updates. |
+| **Minor** | `x.MINOR.0` | Monthly | Fully compatible | New components, opt-in prop additions, non-breaking behavioural enhancements, and deprecation notices. |
+| **Major** | `MAJOR.0.0` | 6–12 months | Breaking changes | Breaking API changes, DOM restructuring, removal of deprecated features, or runtime minimum bumps. |
 
-The library supports modern evergreen desktop and mobile browsers:
+### What constitutes a breaking change?
 
-- Chromium (Chrome, Edge, Opera) latest 2 major versions.
-- Mozilla Firefox latest 2 major versions.
-- Apple Safari latest 2 major versions.
-- Node.js LTS versions (v20, v22) for SSR and build tooling.
+To maintain predictable enterprise stability, the following modifications are classified as **breaking** and will only occur in major releases:
+
+1. **TypeScript signatures**: Removing or renaming exported component props, changing required prop contracts, or narrowing callback argument types.
+2. **DOM hierarchy & `data-slot` names**: Removing, renaming, or changing the nesting order of elements marked with `data-slot="..."`, as consumers rely on these selectors for CSS overrides.
+3. **Component lifecycle & events**: Altering the signature or invocation sequence of event callbacks (e.g. `onValueChange`, `onOpenChange`).
+4. **Theme token variables**: Removing or renaming semantic CSS custom properties in `@innostes/ui/theme.css`.
+5. **Runtime peer dependencies**: Raising minimum supported versions of React, Next.js, or Node.js.
+
+### What does not constitute a breaking change?
+
+The following modifications are considered **non-breaking**:
+
+- Adding new optional props to existing components.
+- Adding new `data-slot` elements or auxiliary helper functions.
+- Internal CSS optimizations that preserve rendered visual geometry and WCAG contrast compliance.
+- Bug fixes that restore intended specification behaviour.
+
+## Deprecation policy
+
+When an existing API or component is superseded, we follow an orderly deprecation lifecycle before removal:
+
+1. **Deprecation announcement**: The feature is marked as deprecated in a minor release. TSDoc annotations (`@deprecated`) are added to trigger IDE strikethrough warnings.
+2. **Runtime warnings**: In development mode (`process.env.NODE_ENV !== 'production'`), invoking a deprecated prop logs a single formatted console warning with instructions on the replacement pattern. No warnings are emitted in production bundles.
+3. **Grace period**: Deprecated APIs remain supported for a minimum of **two minor versions** or **six months**, whichever is longer.
+4. **Removal**: Deprecated APIs are permanently removed only upon the subsequent major version release.
+
+## Support matrix
+
+`@innostes/ui` is engineered and tested for enterprise browsers, modern SSR environments, and multiple React runtime versions.
+
+### React runtime matrix
+
+All primitives undergo automated compatibility testing across our target React versions:
+
+| Package | Supported Version Range | Verification Suite |
+| :--- | :--- | :--- |
+| **React 19** | `^19.0.0` | Primary development target (`pnpm nx test ui`) |
+| **React 18** | `^18.0.0` | Isolated runner (`tests/ui-react18`) |
+| **React 17** | `^17.0.0` | Isolated runner (`tests/ui-react17`) |
+| **Next.js** | `>= 14.0.0` (App Router & Pages Router) | Smoke tested in `apps/landing` and `apps/web-app` |
+| **Vite** | `>= 5.0.0` | Verified with `@vitejs/plugin-react` |
+
+### Browser support
+
+We support modern evergreen desktop and mobile browsers. Our build configuration targets the following minimum baseline:
+
+| Browser | Minimum Version | Market Coverage |
+| :--- | :--- | :--- |
+| **Chromium** (Chrome, Edge, Brave, Opera) | 120+ | Full support (WAI-ARIA, OKLCH colours, CSS Container Queries) |
+| **Mozilla Firefox** | 120+ | Full support |
+| **Apple Safari** (macOS) | 17+ | Full support |
+| **Apple Safari** (iOS) | 17+ | Full support |
+
+> [!NOTE]
+> Internet Explorer and legacy Microsoft Edge (EdgeHTML) are strictly unsupported.
+
+### Server-side execution
+
+- **Node.js**: LTS `20.x` and `22.x` are supported for Next.js App Router Server Components, static site generation, and CLI build tooling.
+- **SSR Safety**: Interactive components ship with explicit `"use client"` directives. Pure utility functions (such as `cn` and `buttonVariants`) contain no browser APIs and remain safe for Server Component evaluation.
+
+## Security maintenance window
+
+Security vulnerability remediations are prioritized according to release status:
+
+- **Current major release** (v1.x): Receives immediate patch releases for all critical, high, and moderate security findings.
+- **Previous major release** (v0.x): Receives critical security patches for 12 months following supersession.
+- **End-of-Life (EOL)** releases: No security patches are guaranteed. Teams must upgrade to an actively supported version.
