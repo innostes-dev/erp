@@ -30,6 +30,12 @@ export interface SplitPaneProps extends Omit<ComponentProps<'div'>, 'defaultValu
   maxSize?: number;
   /** Percent moved per arrow key press. Shift moves 4× as far. @default 2 */
   step?: number;
+  /** Whether the start pane is collapsed (controlled). @default false */
+  collapsed?: boolean;
+  /** Whether the start pane is initially collapsed (uncontrolled). @default false */
+  defaultCollapsed?: boolean;
+  /** Called when the collapsed state changes. */
+  onCollapsedChange?: (collapsed: boolean) => void;
   /** Accessible name of the resize handle. @default 'Resize panes' */
   handleLabel?: string;
   /** Classes for inner parts. */
@@ -59,6 +65,9 @@ export const SplitPane = forwardRef<HTMLDivElement, SplitPaneProps>(function Spl
     minSize = 15,
     maxSize = 85,
     step = 2,
+    collapsed,
+    defaultCollapsed = false,
+    onCollapsedChange,
     handleLabel = 'Resize panes',
     className,
     classNames,
@@ -72,6 +81,11 @@ export const SplitPane = forwardRef<HTMLDivElement, SplitPaneProps>(function Spl
     defaultValue: defaultSize,
     onChange: onSizeChange,
   });
+  const [isCollapsed, setIsCollapsed] = useControllableState({
+    value: collapsed,
+    defaultValue: defaultCollapsed,
+    onChange: onCollapsedChange,
+  });
   const rootRef = useRef<HTMLDivElement | null>(null);
   const startId = useId();
   const horizontal = orientation === 'horizontal';
@@ -79,6 +93,7 @@ export const SplitPane = forwardRef<HTMLDivElement, SplitPaneProps>(function Spl
   const value = clamp(current, minSize, maxSize);
 
   const set = (next: number) => {
+    if (isCollapsed) setIsCollapsed(false);
     const clamped = Math.round(clamp(next, minSize, maxSize) * 100) / 100;
     if (clamped !== value) setCurrent(clamped);
   };
@@ -129,8 +144,12 @@ export const SplitPane = forwardRef<HTMLDivElement, SplitPaneProps>(function Spl
       <div
         id={startId}
         data-slot="split-pane-start"
+        data-collapsed={isCollapsed ? '' : undefined}
         className={cn('min-h-0 min-w-0 shrink-0 overflow-auto', classNames?.start)}
-        style={{ flexBasis: `${value}%` }}
+        style={{
+          flexBasis: isCollapsed ? '0%' : `${value}%`,
+          display: isCollapsed ? 'none' : undefined,
+        }}
       >
         {start}
       </div>
@@ -140,12 +159,16 @@ export const SplitPane = forwardRef<HTMLDivElement, SplitPaneProps>(function Spl
         aria-label={handleLabel}
         aria-controls={startId}
         aria-orientation={horizontal ? 'vertical' : 'horizontal'}
-        aria-valuenow={value}
+        aria-valuenow={isCollapsed ? 0 : value}
         aria-valuemin={minSize}
         aria-valuemax={maxSize}
         data-slot="split-pane-handle"
+        data-collapsed={isCollapsed ? '' : undefined}
         onKeyDown={onKeyDown}
-        onDoubleClick={() => set(defaultSize)}
+        onDoubleClick={() => {
+          if (isCollapsed) setIsCollapsed(false);
+          else set(defaultSize);
+        }}
         onPointerDown={(e) => {
           if (e.button !== 0) return;
           e.preventDefault();

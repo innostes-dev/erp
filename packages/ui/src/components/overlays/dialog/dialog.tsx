@@ -68,12 +68,24 @@ export interface DialogContentProps extends BaseDialog.Popup.Props {
    * @default true
    */
   showCloseButton?: boolean;
+  /**
+   * Accessible label for the close button.
+   * @default 'Close'
+   */
+  closeLabel?: string;
 }
 
 /** The dialog panel. Rendered in a portal over a dimmed backdrop. */
 export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
   function DialogContent(
-    { className, size = 'md', showCloseButton = true, children, ...props },
+    {
+      className,
+      size = 'md',
+      showCloseButton = true,
+      closeLabel = 'Close',
+      children,
+      ...props
+    },
     ref,
   ) {
     return (
@@ -98,7 +110,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
           {children}
           {showCloseButton && (
             <BaseDialog.Close
-              aria-label="Close"
+              aria-label={closeLabel}
               className="absolute end-4 top-4 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring"
             >
               <XIcon className="size-4" />

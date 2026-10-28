@@ -13,7 +13,7 @@ import { ChevronRightIcon, MoreHorizontalIcon } from '../../../lib/icons';
  *     <BreadcrumbSeparator />
  *     <BreadcrumbItem><BreadcrumbLink href="/orders">Orders</BreadcrumbLink></BreadcrumbItem>
  *     <BreadcrumbSeparator />
- *     <BreadcrumbItem><BreadcrumbPage>#1024</BreadcrumbPage></BreadcrumbItem>
+ *     <BreadcrumbItem><BreadcrumbPage>ORD-1024</BreadcrumbPage></BreadcrumbItem>
  *   </BreadcrumbList>
  * </Breadcrumb>
  */

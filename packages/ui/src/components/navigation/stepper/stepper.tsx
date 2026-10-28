@@ -44,6 +44,15 @@ export interface StepperProps extends Omit<ComponentProps<'nav'>, 'onChange'> {
   size?: 'sm' | 'md';
   /** Classes for inner parts. */
   classNames?: SlotClassNames<StepperSlot>;
+  /**
+   * Accessible status labels for assistive technology.
+   * @default { completedGoBack: '(completed, go back to this step)', completed: '(completed)', hasErrors: '(has errors)' }
+   */
+  labels?: {
+    completedGoBack?: string;
+    completed?: string;
+    hasErrors?: string;
+  };
   /** Accessible name. @default 'Progress' */
   'aria-label'?: string;
 }
@@ -72,6 +81,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
     orientation = 'horizontal',
     labelPlacement = 'bottom',
     size = 'md',
+    labels,
     className,
     classNames,
     'aria-label': ariaLabel = 'Progress',
@@ -81,6 +91,10 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
 ) {
   const vertical = orientation === 'vertical';
   const stacked = !vertical && labelPlacement === 'bottom';
+  const completedGoBack =
+    labels?.completedGoBack ?? '(completed, go back to this step)';
+  const completedLabel = labels?.completed ?? '(completed)';
+  const hasErrorsLabel = labels?.hasErrors ?? '(has errors)';
 
   return (
     <nav
@@ -214,9 +228,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
                   )}
                 >
                   {content}
-                  <span className="sr-only">
-                    (completed, go back to this step)
-                  </span>
+                  <span className="sr-only">{completedGoBack}</span>
                 </button>
               ) : (
                 <div
@@ -229,10 +241,10 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
                 >
                   {content}
                   {status === 'complete' && (
-                    <span className="sr-only">(completed)</span>
+                    <span className="sr-only">{completedLabel}</span>
                   )}
                   {status === 'error' && (
-                    <span className="sr-only">(has errors)</span>
+                    <span className="sr-only">{hasErrorsLabel}</span>
                   )}
                 </div>
               )}

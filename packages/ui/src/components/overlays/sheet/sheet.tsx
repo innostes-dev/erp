@@ -43,7 +43,10 @@ export const SheetClose = forwardRef<HTMLButtonElement, BaseDialog.Close.Props>(
 const sideClass = {
   right:
     'inset-y-0 end-0 h-full w-[min(28rem,100vw)] border-s data-starting-style:translate-x-full data-ending-style:translate-x-full rtl:data-starting-style:-translate-x-full rtl:data-ending-style:-translate-x-full',
+  end:
+    'inset-y-0 end-0 h-full w-[min(28rem,100vw)] border-s data-starting-style:translate-x-full data-ending-style:translate-x-full rtl:data-starting-style:-translate-x-full rtl:data-ending-style:-translate-x-full',
   left: 'inset-y-0 start-0 h-full w-[min(28rem,100vw)] border-e data-starting-style:-translate-x-full data-ending-style:-translate-x-full rtl:data-starting-style:translate-x-full rtl:data-ending-style:translate-x-full',
+  start: 'inset-y-0 start-0 h-full w-[min(28rem,100vw)] border-e data-starting-style:-translate-x-full data-ending-style:-translate-x-full rtl:data-starting-style:translate-x-full rtl:data-ending-style:translate-x-full',
   top: 'inset-x-0 top-0 max-h-[85dvh] border-b data-starting-style:-translate-y-full data-ending-style:-translate-y-full',
   bottom:
     'inset-x-0 bottom-0 max-h-[85dvh] border-t data-starting-style:translate-y-full data-ending-style:translate-y-full',
@@ -51,7 +54,7 @@ const sideClass = {
 
 export interface SheetContentProps extends BaseDialog.Popup.Props {
   /**
-   * Edge the panel slides in from. `right`/`left` follow the text direction in RTL.
+   * Edge the panel slides in from. `right`/`left` or logical `start`/`end` follow the text direction in RTL.
    * @default 'right'
    */
   side?: keyof typeof sideClass;
@@ -60,12 +63,24 @@ export interface SheetContentProps extends BaseDialog.Popup.Props {
    * @default true
    */
   showCloseButton?: boolean;
+  /**
+   * Accessible label for the close button.
+   * @default 'Close'
+   */
+  closeLabel?: string;
 }
 
 /** The sliding panel. Rendered in a portal over a dimmed backdrop. */
 export const SheetContent = forwardRef<HTMLDivElement, SheetContentProps>(
   function SheetContent(
-    { className, side = 'right', showCloseButton = true, children, ...props },
+    {
+      className,
+      side = 'right',
+      showCloseButton = true,
+      closeLabel = 'Close',
+      children,
+      ...props
+    },
     ref,
   ) {
     return (
@@ -88,7 +103,7 @@ export const SheetContent = forwardRef<HTMLDivElement, SheetContentProps>(
           {children}
           {showCloseButton && (
             <BaseDialog.Close
-              aria-label="Close"
+              aria-label={closeLabel}
               className="absolute end-4 top-4 flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-ring"
             >
               <XIcon className="size-4" />

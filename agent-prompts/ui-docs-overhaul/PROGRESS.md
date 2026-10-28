@@ -148,3 +148,35 @@ drop, which doesn't work on touch screens.
 **Open issues**:
 - Blocking: none.
 - Non-blocking: remaining items in `AUDIT.md` for prompts 05–19.
+
+
+## 05 – Library: overlays, navigation and layout – 2026-10-29
+
+**Summary**: Hardened all 22 components across `src/components/overlays`, `src/components/navigation`, and `src/components/layout`. Resolved false positive `#1024` raw color audit note in Breadcrumb (LIB-010). Fixed logical RTL positioning and customizable `closeLabel` in Dialog and Sheet. Enhanced Stepper with configurable screen-reader status strings (`labels`). Implemented collapsible state (`collapsed`, `defaultCollapsed`, `onCollapsedChange`) in SplitPane for master-detail views. Added new accessible `SkipLink` component for keyboard navigation skip-to-content support.
+**Changed**:
+- `packages/ui/src/components/navigation/breadcrumb/breadcrumb.tsx`: resolved order example token `#1024` -> `ORD-1024` (LIB-010).
+- `packages/ui/src/components/overlays/dialog/dialog.tsx`: added customizable `closeLabel` to `DialogContentProps`.
+- `packages/ui/src/components/overlays/sheet/sheet.tsx`: added customizable `closeLabel` and logical `side="start" | "end"`.
+- `packages/ui/src/components/navigation/stepper/stepper.tsx`: added customizable `labels` for assistive technology status text.
+- `packages/ui/src/components/layout/split-pane/split-pane.tsx`: added `collapsed`, `defaultCollapsed`, `onCollapsedChange` props and accessibility handling.
+- `packages/ui/src/components/layout/skip-link/skip-link.tsx`: created `SkipLink` accessible jump component.
+- `packages/ui/src/components/layout/index.ts`: exported `SkipLink`.
+- Created `packages/ui/src/components/overlays/overlays-coverage.test.tsx` (CommandPalette filtering/hotkeys, Dialog/Sheet/AlertDialog anatomy).
+- Created `packages/ui/src/components/layout/layout-coverage.test.tsx` (SkipLink, PageHeader, TopBar, FormGrid/FormSection, ScrollArea, Stepper labels).
+- Normalized CRLF line endings to LF across `packages/ui/src`.
+**API changes**:
+- Added `SkipLink` and `SkipLinkProps` to `@innostes/ui`.
+- `DialogContentProps` & `SheetContentProps`: added `closeLabel?: string`.
+- `SheetContentProps['side']`: added `'start' | 'end'`.
+- `StepperProps`: added `labels?: { completedGoBack?: string; completed?: string; hasErrors?: string }`.
+- `SplitPaneProps`: added `collapsed?: boolean`, `defaultCollapsed?: boolean`, `onCollapsedChange?: (collapsed: boolean) => void`.
+**Decisions**:
+- Added `SkipLink` targeting `#main-content` by default with accessible fixed focus styling.
+- `SplitPane` supports collapsing to 0% with `data-collapsed` attributes and uncollapses upon double-click.
+**Verification**:
+- `pnpm nx test ui`: PASS (29 test files, 224 tests)
+- `pnpm nx build ui`: PASS (238 components compiled cleanly)
+- `pnpm nx run landing:docs-check`: PASS (0.09s)
+**Open issues**:
+- Blocking: none.
+- Non-blocking: remaining items in `AUDIT.md` for prompts 06–19.

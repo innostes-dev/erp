@@ -63,4 +63,30 @@ describe('SplitPane', () => {
     await user.dblClick(handle);
     expect(handle).toHaveAttribute('aria-valuenow', '40');
   });
+
+  it('supports collapsed state and uncollapsing on double-click', async () => {
+    const user = userEvent.setup();
+    const onCollapsedChange = vi.fn();
+    const { rerender } = render(
+      <SplitPane defaultCollapsed onCollapsedChange={onCollapsedChange}>
+        <div>Start Pane</div>
+        <div>End Pane</div>
+      </SplitPane>,
+    );
+    const handle = screen.getByRole('separator');
+    expect(handle).toHaveAttribute('aria-valuenow', '0');
+    expect(handle).toHaveAttribute('data-collapsed', '');
+
+    await user.dblClick(handle);
+    expect(handle).toHaveAttribute('aria-valuenow', '50');
+    expect(onCollapsedChange).toHaveBeenCalledWith(false);
+
+    rerender(
+      <SplitPane collapsed={true}>
+        <div>Start Pane</div>
+        <div>End Pane</div>
+      </SplitPane>,
+    );
+    expect(handle).toHaveAttribute('aria-valuenow', '0');
+  });
 });
