@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   AppSwitcher,
   Breadcrumb,
@@ -26,8 +25,6 @@ import {
   Building2,
   Users,
   LayoutGrid,
-  Moon,
-  Sun,
   Power,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';

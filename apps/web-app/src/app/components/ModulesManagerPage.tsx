@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,11 +18,9 @@ import {
   LayoutGrid,
   Users,
   Building2,
-  CheckCircle2,
   ArrowRight,
   Power,
   PowerOff,
-  Filter,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';

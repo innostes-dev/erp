@@ -13,9 +13,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -41,8 +38,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   Terminal,
-  Calendar,
-  Lock,
 } from 'lucide-react';
 import {
   createApiKey,

@@ -17,7 +17,7 @@ import {
   Sparkles,
   Target,
 } from 'lucide-react';
-import { crmManifest } from './manifest';
+import { crmManifest, type SubFeature } from './manifest';
 
 export function CrmPage() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -46,7 +46,7 @@ export function CrmPage() {
       {/* Sub-feature Tabs */}
       <Tabs value={activeTab} onValueChange={(val) => setActiveTab(String(val))}>
         <TabsList>
-          {crmManifest.subFeatures.map((sub) => (
+          {crmManifest.subFeatures.map((sub: SubFeature) => (
             <TabsTab key={sub.id} value={sub.id}>
               {sub.label}
             </TabsTab>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { SidebarProvider, SidebarInset } from '@innostes/ui';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { ModulesProvider } from './context/ModulesContext';

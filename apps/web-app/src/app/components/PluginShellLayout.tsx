@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   AppSwitcher,
   Breadcrumb,
@@ -24,7 +23,6 @@ import {
   ArrowLeft,
   Puzzle,
   Activity,
-  Terminal,
   Power,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';

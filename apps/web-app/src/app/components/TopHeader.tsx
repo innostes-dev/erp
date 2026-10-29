@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TopBar,
   TopBarStart,
@@ -6,7 +6,6 @@ import {
   TopBarEnd,
   SidebarTrigger,
   SearchInput,
-  Kbd,
   NotificationBell,
   UserMenu,
   DropdownMenuItem,
@@ -73,7 +72,7 @@ export function TopHeader() {
             onValueChange={setSearchQuery}
             placeholder="Search modules, tools, people, documents..."
             className="w-full"
-            addonEnd={<Kbd size="sm">⌘ K</Kbd>}
+            shortcut="⌘ K"
           />
         </div>
       </TopBarCenter>
@@ -88,7 +87,8 @@ export function TopHeader() {
         {/* Help button */}
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
+          iconOnly
           aria-label="Documentation & Help"
           onClick={() => window.open('http://localhost:3000/docs', '_blank')}
         >
@@ -98,7 +98,8 @@ export function TopHeader() {
         {/* Theme Toggle */}
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
+          iconOnly
           aria-label="Toggle Theme"
           onClick={toggleTheme}
         >

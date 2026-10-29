@@ -53,7 +53,7 @@ export function PluginsProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await apiRequest<{ tenant_id: string; items: Array<{ id: string; is_active: boolean }> }>(
         '/tenants/current/plugins',
         { headers }
@@ -82,7 +82,7 @@ export function PluginsProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       await apiRequest(`/tenants/current/plugins/${id}/activate`, {
         method: 'POST',
         headers,
@@ -99,7 +99,7 @@ export function PluginsProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       await apiRequest(`/tenants/current/plugins/${id}/deactivate`, {
         method: 'POST',
         headers,

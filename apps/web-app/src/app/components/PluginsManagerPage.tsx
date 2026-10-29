@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,7 +20,6 @@ import {
   ArrowRight,
   Power,
   PowerOff,
-  Terminal,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { usePlugins } from '../context/PluginsContext';

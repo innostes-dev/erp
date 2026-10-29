@@ -1,4 +1,20 @@
-import type { ModuleManifest } from '@innostes/hrms';
+export interface SubFeature {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export interface ModuleManifest {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  type: 'module';
+  tags: string[];
+  tone: 'chart-1' | 'chart-2' | 'chart-3' | 'chart-4' | 'chart-5';
+  href: string;
+  subFeatures: SubFeature[];
+}
 
 export const crmManifest: ModuleManifest = {
   id: 'crm',
