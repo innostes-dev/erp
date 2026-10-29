@@ -28,3 +28,29 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 - There's no URL versioning (`/v1`), no deprecation policy and no API changelog.
 - The `user` module has models for roles and permissions (RBAC), devices and profiles. Check which
   have endpoints. Document only what's exposed.
+
+
+## 01 – Audit – 2026-10-29
+
+**Summary**: Completed exhaustive audit of the FastAPI HTTP API across all 33 endpoints, 38 schemas, and 9 tags. Scored all operations against E1–E17, schemas against S1–S8, and tags against T1–T3. Catalogued 17 discrete findings (API-001 through API-017) mapped to owner prompts 02–07 in `AUDIT.md`.
+
+**Changed**:
+- Created `agent-prompts/api-docs/AUDIT.md` (baseline metrics, checklist adherence summary, full operation matrix, schema matrix, tag matrix, verified runtime behaviour notes, and findings table).
+
+**API changes**: none.
+
+**Decisions**:
+- Stay on `main` branch per continuous integration workflow.
+- All auto-generated FastAPI `operation_id` values will be standardised to `<feature>_<action>` (e.g. `auth_login`, `users_create`).
+- Unify bearer authentication under a single consistent `BearerAuth` scheme across all modules.
+- Ensure all authenticated endpoints explicitly declare `401 Unauthorized` and `403 Forbidden` error responses.
+
+**Verification**:
+- `pnpm nx test api-server`: PASS (6 tests in 1.40s).
+- `pnpm nx test kernel-backend`: PASS (100 tests in 5.83s).
+- `pnpm nx run api-server:openapi`: PASS (0 diff against committed spec).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 02 (Quality gates).
+
