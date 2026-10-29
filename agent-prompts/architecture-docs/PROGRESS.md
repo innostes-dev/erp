@@ -112,3 +112,27 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - `pnpm nx build landing`: PASSED (262 pages statically generated).
 **Open issues**:
 - Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
+
+## 05 – Runtime view of key scenarios – 2026-10-29
+**Summary**: Authored arc42 section 6 (Runtime View) in `apps/landing/content/dev-docs/architecture/runtime-view.mdx`:
+1. Traced and documented all 7 key runtime scenarios with Mermaid sequence diagrams, numbered execution steps, exact file references, and `alt`/`opt` exception paths:
+   - Scenario 1: API server start-up sequence (`ServerEngine`, `ModuleLoader.discover()`, `auto_migrate()` with PostgreSQL advisory lock `42`, module lifecycle hooks).
+   - Scenario 2: Request lifecycle and multi-tenant isolation (`CORSMiddleware`, `SetupRequiredMiddleware`, `ApiLoggerMiddleware`, `Depends(get_current_user)`, `Depends(get_current_tenant_id)`, `BaseService` transaction boundaries, and `register_error_handlers`).
+   - Scenario 3: First-run setup flow (`GET /setup/status`, `X-Setup-Token` rate-limited validation, atomic organization provisioning transaction, cache invalidation, and CLI installer `python -m kernel.setup --from-env`).
+   - Scenario 4: Authentication, rotating refresh token family issuance, and logout (`POST /auth/login`, bcrypt password verification, 30m JWT access token, 7d rotating refresh token, automated token replay/theft detection and session termination, `POST /auth/logout`).
+   - Scenario 5: Password reset workflow (`POST /auth/reset-password/request`, 64-char crypto token with 15m expiration, SMTP notification, `password_histories` check preventing reuse of last 5 passwords, universal session revocation).
+   - Scenario 6: UI engine boot and module mounting (`apps/web-app/src/main.tsx`, `configureApi()`, `<SetupGate>`, `<AuthGate>`, `AppRouter`, dynamic `<ModuleShellLayout>`, and transparent token refresh retry via `apiRequest()`).
+   - Scenario 7: Entity lifecycle (`BaseService.create`, `update`, `soft_delete`, default query filtering `WHERE deleted_at IS NULL`, audit trail attributes `created_by`/`updated_by`/`deleted_by`, and compliance restoration via `POST /tenants/{id}/restore`).
+2. Updated `apps/landing/content/dev-docs/architecture/meta.json` with `runtime-view`.
+3. Verified all 7 sequence diagrams pass headless AST parsing with `mermaid.core.mjs`.
+**Changed**: `apps/landing/content/dev-docs/architecture/runtime-view.mdx`, `meta.json`, `PROGRESS.md`, `05-runtime-view.md` deleted.
+**Code changes**: none (documentation only).
+**Decisions**:
+- Standardised sequence diagrams on plain text message formats to avoid delimiter conflicts with Mermaid statement separators.
+**Verification**:
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED.
+- `pnpm nx run landing:docs-check`: PASSED (all 16 gates passed, 17 Mermaid diagrams validated).
+- Python test suite: 107 backend unit tests PASSED in 5.9s.
+**Open issues**:
+- Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).

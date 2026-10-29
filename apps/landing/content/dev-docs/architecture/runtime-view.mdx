@@ -1,0 +1,474 @@
+---
+title: Runtime View
+description: Detailed execution flows, sequence diagrams, and transaction boundaries across critical platform scenarios.
+icon: Activity
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 6
+---
+
+import { Diagram } from '@/components/docs/diagram';
+
+The **Runtime View** (arc42 §6) explains how the platform's building blocks collaborate at runtime during critical lifecycle events. Each scenario is traced through the real implementation, detailing participants, request boundaries, error paths, and transaction semantics.
+
+---
+
+## 1. API Server Start-up Sequence
+
+When Uvicorn boots the ASGI application, the engine coordinates configuration loading, database connection pooling, database migrations, and module initialisation:
+
+<Diagram caption="Sequence Diagram: apps/api-server boot sequence, migration runner, and module discovery.">
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Uvicorn as Uvicorn (ASGI Host)
+  participant Main as apps/api-server/app/main.py
+  participant Engine as ServerEngine (app/engine/server.py)
+  participant Loader as ModuleLoader (app/engine/loader.py)
+  participant Registry as ModuleRegistry (kernel.core.module)
+  participant Lifespan as Engine Lifespan (_lifespan)
+  participant Migrator as auto_migrate (kernel.core.database)
+  participant Postgres as PostgreSQL 16
+  participant Modules as Registered BaseModules
+
+  Uvicorn ->> Main: Start process
+  Main ->> Engine: Instantiate ServerEngine(settings)
+  Main ->> Loader: Instantiate ModuleLoader(registry)
+  Main ->> Loader: discover("innostes.modules")
+  
+  loop For each installed package entry point
+    Loader ->> Registry: register(module_instance)
+    opt Module import error
+      Loader -->> Loader: Log error & skip broken plug-in
+    end
+  end
+
+  Main ->> Engine: create_app()
+  Engine ->> Modules: module.configure(app)
+  Engine -->> Engine: Add CORSMiddleware & error handlers
+  Engine ->> Modules: Mount module.router
+  
+  Uvicorn ->> Lifespan: Enter lifespan context
+  
+  alt AUTO_MIGRATE=true
+    Lifespan ->> Migrator: auto_migrate()
+    Migrator ->> Postgres: Acquire pg_advisory_lock(42)
+    Migrator ->> Postgres: Run pending Alembic revisions
+    Migrator ->> Postgres: Release pg_advisory_lock(42)
+  end
+
+  loop For each registered module
+    Lifespan ->> Modules: await module.on_startup(app)
+  end
+
+  Lifespan -->> Uvicorn: Application ready (listening on :8001)
+
+  opt Shutdown Signal (SIGTERM / SIGINT)
+    Uvicorn ->> Lifespan: Exit lifespan context
+    loop For each registered module
+      Lifespan ->> Modules: await module.on_shutdown(app)
+    end
+    Lifespan ->> Postgres: close_db() (dispose connection pool)
+    Lifespan -->> Uvicorn: Process exited cleanly
+  end
+```
+</Diagram>
+
+### Step-by-Step Execution
+
+1. **Configuration Resolution**: [`kernel/backend/kernel/core/config/settings.py`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/config/settings.py) loads environment variables and `.env` files via Pydantic Settings.
+2. **Module Discovery**: [`ModuleLoader.discover()`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/api-server/app/engine/loader.py) inspects the `innostes.modules` entry-point group. If a module fails to import, the engine logs an error and skips it, preventing a single faulty plug-in from taking down the API server.
+3. **Application Assembly**: [`ServerEngine.create_app()`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/api-server/app/engine/server.py) executes `module.configure(app)` for each module (allowing middleware registration), attaches outermost `CORSMiddleware`, registers RFC 7807 error handlers, and includes module routers.
+4. **Lifespan Startup**:
+   - If `AUTO_MIGRATE=true`, executes [`auto_migrate()`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/database/migrations.py). Acquires PostgreSQL advisory lock `42` to prevent migration races across replicas.
+   - Calls `await module.on_startup(app)` across all modules.
+5. **Lifespan Shutdown**: On SIGTERM, executes `await module.on_shutdown(app)` and calls `close_db()` to drain the async connection pool.
+
+---
+
+## 2. Inbound Request Lifecycle & Tenant Isolation
+
+Every HTTP request traverses the ordered middleware stack, security dependencies, and domain service boundaries:
+
+<Diagram caption="Sequence Diagram: Authenticated multi-tenant request lifecycle and transaction boundary.">
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Client as HTTP Client (Browser / API Key)
+  participant CORS as CORSMiddleware
+  participant SetupMid as SetupRequiredMiddleware
+  participant LoggerMid as ApiLoggerMiddleware
+  participant Router as Module APIRouter
+  participant Security as Security Dependencies
+  participant Service as BaseService / Feature Service
+  participant DB as AsyncSession (PostgreSQL 16)
+  participant ErrorHandler as register_error_handlers
+
+  Client ->> CORS: HTTP GET /crm/leads (Headers: Bearer JWT, X-Tenant-ID)
+  CORS ->> SetupMid: Pass through CORS checks
+  
+  alt Platform uninitialised (is_installed == false)
+    SetupMid -->> Client: HTTP 503 Service Unavailable ("setup_required")
+  end
+  
+  SetupMid ->> LoggerMid: Request permitted
+  LoggerMid ->> Router: Start latency timer
+  
+  Router ->> Security: Resolve Depends(get_current_user)
+  Security -->> Router: Authenticated User (actor_id, roles)
+  
+  Router ->> Security: Resolve Depends(get_current_tenant_id)
+  Security ->> DB: Verify tenant membership & module activation
+  Security -->> Router: Tenant context validated (tenant_id)
+  
+  Router ->> Service: service.list_leads(tenant_id, offset=0, limit=20)
+  Service ->> DB: SELECT * FROM crm_leads WHERE tenant_id = :t AND deleted_at IS NULL
+  DB -->> Service: Result rows
+  Service -->> Router: Page[LeadRead] (items, total, offset, limit)
+  
+  Router -->> LoggerMid: HTTP 200 OK Response
+  LoggerMid -->> CORS: Record duration & status
+  CORS -->> Client: JSON Payload + CORS Headers
+
+  alt Domain Error (e.g. NotFoundError or PermissionDenied)
+    Service -->> ErrorHandler: raise NotFoundError("Lead not found")
+    ErrorHandler -->> CORS: HTTP 404 Problem JSON {"detail": "Lead not found", "code": "NOT_FOUND"}
+    CORS -->> Client: HTTP 404 with CORS Headers
+  end
+```
+</Diagram>
+
+### Step-by-Step Execution
+
+1. **CORS Evaluation**: [`CORSMiddleware`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/api-server/app/engine/server.py) verifies origin against `CORS_ORIGINS`.
+2. **Setup Mode Gate**: [`SetupRequiredMiddleware`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/setup/middleware.py) checks cached install state. If uninstalled, all routes outside `/setup/*`, `/`, `/config`, `/health`, and `/docs` receive HTTP 503.
+3. **Telemetry Capture**: [`ApiLoggerMiddleware`](file:///home/sai/Documents/GitHub/innostes_projects/erp/plugins/api-logger/backend/api_logger/middleware.py) captures start time, method, and URI path.
+4. **Authentication Resolution**: Dependency `get_current_user` extracts and validates the Bearer JWT or Personal API Key (`inno_live_...`).
+5. **Tenant Scoping**: Dependency `get_current_tenant_id` extracts `X-Tenant-ID`, queries `tenant_members` to verify the user belongs to the organization, and confirms that the requested module is enabled in `tenant_modules`.
+6. **Service Execution & Transaction**: [`BaseService`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/services/base.py) executes queries strictly scoped by `tenant_id` and filters out soft-deleted records (`deleted_at IS NULL`).
+7. **Error Normalisation**: If an exception occurs, [`register_error_handlers`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/http.py) maps domain errors to standard RFC 7807 responses.
+
+---
+
+## 3. First-run Setup Flow
+
+Before initial installation, the platform operates in setup mode. The initial administrator provisions the organization through the web wizard or CLI:
+
+<Diagram caption="Sequence Diagram: First-run setup token validation and organization provisioning.">
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Admin as Enterprise Administrator
+  participant UI as SetupWizard (web-app)
+  participant Router as SetupRouter (kernel.setup.router)
+  participant TokenSvc as TokenService (kernel.setup.services)
+  participant SetupSvc as SetupService (kernel.setup.services)
+  participant DB as PostgreSQL 16 (Base.metadata)
+  participant Cache as StateCache (is_installed_cached)
+
+  Admin ->> UI: Open web-app (GET /)
+  UI ->> Router: GET /setup/status
+  Router ->> DB: SELECT COUNT(*) FROM installation
+  DB -->> Router: count = 0
+  Router -->> UI: {"installed": false}
+  
+  Admin ->> UI: Enter Setup Token & Organization details
+  UI ->> Router: POST /setup (Headers: X-Setup-Token, Body: org_name, slug, admin_email, admin_password)
+  
+  Router ->> TokenSvc: validate_token(token_header)
+  alt Token Invalid or Rate Limited (>10 attempts / 15m)
+    TokenSvc -->> Router: InvalidTokenError / RateLimitError
+    Router -->> UI: HTTP 429 Too Many Requests or HTTP 403 Forbidden
+  end
+  
+  TokenSvc -->> Router: Token validated
+  Router ->> SetupSvc: execute_setup(request)
+  
+  critical Atomic Installation Transaction
+    SetupSvc ->> DB: INSERT INTO tenants (name, slug)
+    SetupSvc ->> DB: INSERT INTO users (email, password_hash, role='admin')
+    SetupSvc ->> DB: INSERT INTO tenant_members (tenant_id, user_id, role='owner')
+    SetupSvc ->> DB: INSERT INTO tenant_modules (tenant_id, module='crm', is_active=true)
+    SetupSvc ->> DB: INSERT INTO tenant_modules (tenant_id, module='hrms', is_active=true)
+    SetupSvc ->> DB: INSERT INTO installation (installed_at, version)
+  end
+
+  SetupSvc ->> Cache: invalidate_install_cache()
+  SetupSvc -->> Router: Installation summary
+  Router -->> UI: HTTP 201 Created {"status": "installed", "tenant_id": "..."}
+  
+  Note over Router,UI: Subsequent calls to /setup receive HTTP 404 Not Found
+  UI ->> Admin: Redirect to /auth/login
+```
+</Diagram>
+
+### Step-by-Step Execution
+
+1. **Status Check**: `GET /setup/status` evaluates the single-row `installation` table.
+2. **Security Token Verification**: [`TokenService`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/setup/services/token.py) validates the 256-bit token generated on first boot in `var/setup-token` or configured via `SETUP_TOKEN`. Enforces a strict rate limiter (maximum 10 failed attempts per 15 minutes).
+3. **Atomic Setup Transaction**: [`SetupService`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/setup/services/setup_service.py) provisions the primary tenant, the root administrator account, default memberships, and inserts the `installation` sentinel row.
+4. **Cache Invalidation**: Clears the in-process setup cache. The `SetupRequiredMiddleware` immediately unblocks standard application routes. All subsequent `/setup` requests return HTTP 404.
+5. **CLI Alternative**: Running `python -m kernel.setup install --from-env` executes identical provisioning steps directly without HTTP overhead.
+
+---
+
+## 4. Authentication, Token Rotation & Logout
+
+Authentication employs 30-minute JWT access tokens coupled with 7-day single-use rotating refresh token families:
+
+<Diagram caption="Sequence Diagram: Login, rotating refresh token family issuance, and logout.">
+```mermaid
+sequenceDiagram
+  autonumber
+  participant User as Enterprise User
+  participant Router as AuthRouter (kernel.auth.router)
+  participant AuthSvc as AuthService (kernel.auth.services)
+  participant DB as PostgreSQL 16
+  participant ClientStorage as Browser Secure Storage
+
+  User ->> Router: POST /auth/login
+  Router ->> AuthSvc: authenticate_user(email, password)
+  AuthSvc ->> DB: SELECT FROM users WHERE email
+  DB -->> AuthSvc: user row with password_hash
+  AuthSvc ->> AuthSvc: verify_password
+  
+  alt Credentials Invalid
+    AuthSvc -->> Router: AuthenticationError
+    Router -->> User: HTTP 401 Unauthorized - Invalid credentials
+  end
+
+  AuthSvc ->> DB: Register user_devices and create user_sessions
+  AuthSvc ->> AuthSvc: Issue Access Token and Refresh Token
+  AuthSvc -->> Router: AuthTokens payload
+  Router -->> ClientStorage: HTTP 200 with tokens
+
+  Note over User,ClientStorage: 30 minutes elapse - Access Token expires
+
+  User ->> Router: POST /auth/refresh
+  Router ->> AuthSvc: rotate_refresh_token
+  
+  alt Token Reuse Detected
+    AuthSvc ->> DB: Invalidate entire token family and revoke sessions
+    AuthSvc -->> Router: SecurityAlert - Token reuse detected
+    Router -->> User: HTTP 401 Unauthorized - Session revoked
+  else Token Valid
+    AuthSvc ->> DB: Mark current refresh token as revoked
+    AuthSvc ->> DB: Issue new refresh token in same family
+    AuthSvc ->> AuthSvc: Issue fresh 30m Access Token
+    AuthSvc -->> Router: New AuthTokens
+    Router -->> ClientStorage: HTTP 200 with new tokens
+  end
+
+  opt Logout Flow
+    User ->> Router: POST /auth/logout
+    Router ->> AuthSvc: revoke_session(session_id)
+    AuthSvc ->> DB: UPDATE user_sessions SET is_active = false
+    Router -->> User: HTTP 200 OK - Logged out
+  end
+```
+</Diagram>
+
+### Step-by-Step Execution
+
+1. **Authentication**: `POST /auth/login` verifies credentials with `bcrypt.checkpw()`.
+2. **Session & Device Audit**: Creates entries in `user_devices` and `user_sessions`, capturing IP address and user-agent.
+3. **Token Issuance**: Generates a 30-minute JWT containing user ID, tenant ID, and session ID, alongside a 7-day cryptographically random refresh token assigned to a token family UUID.
+4. **Token Rotation & Replay Protection**: `POST /auth/refresh` validates the refresh token:
+   - **Normal Rotation**: Revokes the supplied refresh token and issues a child refresh token in the same family.
+   - **Reuse Detection**: If a previously revoked refresh token is presented, the system treats it as token theft. It immediately revokes the entire token family and terminates all active sessions for that device.
+5. **Logout**: `POST /auth/logout` revokes the session and marks the active refresh token family as spent.
+
+---
+
+## 5. Password Reset Workflow
+
+Password resets ensure secure self-service recovery while maintaining password history hygiene:
+
+<Diagram caption="Sequence Diagram: Password reset request, token verification, and history checks.">
+```mermaid
+sequenceDiagram
+  autonumber
+  participant User as Enterprise User
+  participant Router as AuthRouter (POST /auth/reset-password/*)
+  participant AuthSvc as AuthService
+  participant Smtp as External SMTP Relay
+  participant DB as PostgreSQL 16
+
+  User ->> Router: POST /auth/reset-password/request {email}
+  Router ->> AuthSvc: request_password_reset(email)
+  AuthSvc ->> DB: SELECT id FROM users WHERE email = :e
+  
+  opt User exists
+    AuthSvc ->> AuthSvc: Generate 64-char crypto token & hash
+    AuthSvc ->> DB: UPDATE user_security SET reset_token_hash = :h, reset_token_expires_at = now() + 15m
+    AuthSvc ->> Smtp: Send reset link with plaintext token
+  end
+  
+  AuthSvc -->> Router: Generic success
+  Router -->> User: HTTP 200 OK {"message": "If the account exists, a reset link was sent."}
+
+  User ->> Router: POST /auth/reset-password/confirm {token, new_password}
+  Router ->> AuthSvc: confirm_password_reset(token, new_password)
+  AuthSvc ->> DB: SELECT user_id FROM user_security WHERE reset_token_hash = :h AND expires_at > now()
+  
+  AuthSvc ->> DB: SELECT password_hash FROM password_histories WHERE user_id = :u ORDER BY created_at DESC LIMIT 5
+  DB -->> AuthSvc: Previous 5 password hashes
+  
+  loop Check password history
+    alt New password matches any of previous 5
+      AuthSvc -->> Router: ConflictError("Cannot reuse recent password")
+      Router -->> User: HTTP 400 Bad Request ("PASSWORD_RECENTLY_USED")
+    end
+  end
+
+  critical Atomic Password Update
+    AuthSvc ->> DB: INSERT INTO password_histories (user_id, password_hash) VALUES (:u, current_hash)
+    AuthSvc ->> DB: UPDATE users SET password_hash = :new_hash WHERE id = :u
+    AuthSvc ->> DB: UPDATE user_security SET reset_token_hash = NULL, reset_token_expires_at = NULL
+    AuthSvc ->> DB: UPDATE user_sessions SET is_active = false WHERE user_id = :u
+  end
+
+  Router -->> User: HTTP 200 OK {"message": "Password updated successfully"}
+```
+</Diagram>
+
+### Step-by-Step Execution
+
+1. **Reset Request**: `POST /auth/reset-password/request` generates a 64-character random token, stores its hash with a 15-minute expiration, and dispatches an email via SMTP. It returns a generic HTTP 200 message to prevent user enumeration.
+2. **Token & History Verification**: `POST /auth/reset-password/confirm` validates the token hash and compares the new password against the last 5 entries in `password_histories`.
+3. **Session Invalidation**: Commits the new hash, archives the old hash in `password_histories`, and revokes all active sessions for the user across all devices.
+
+---
+
+## 6. UI Engine Boot & Module Mounting
+
+The browser Single Page Application (`apps/web-app`) coordinates bootstrapping, setup detection, authentication gating, and dynamic shell rendering:
+
+<Diagram caption="Sequence Diagram: apps/web-app client boot sequence, gates, and dynamic module rendering.">
+```mermaid
+sequenceDiagram
+  autonumber
+  participant Browser as Browser Window
+  participant Main as src/main.tsx
+  participant SetupGate as @innostes/kernel: SetupGate
+  participant AuthGate as @innostes/kernel: AuthGate
+  participant ApiClient as @innostes/kernel: apiRequest
+  participant ApiServer as apps/api-server
+  participant AppRouter as src/app/app.tsx: AppRouter
+  participant ModuleShell as ModuleShellLayout (CRM / HRMS)
+
+  Browser ->> Main: Load React bundle
+  Main ->> ApiClient: configureApi({ baseUrl: VITE_API_URL })
+  Main ->> SetupGate: Render <SetupGate>
+  
+  SetupGate ->> ApiClient: GET /setup/status
+  ApiClient ->> ApiServer: HTTP GET /setup/status
+  ApiServer -->> ApiClient: {"installed": true}
+  ApiClient -->> SetupGate: installed = true
+  
+  SetupGate ->> AuthGate: Render <AuthGate>
+  AuthGate ->> ApiClient: GET /auth/sessions/current
+  
+  alt Unauthenticated / Expired Session
+    ApiClient -->> AuthGate: HTTP 401 Unauthorized
+    AuthGate -->> Browser: Render <AuthPage /> (Login form)
+  else Valid Session
+    ApiClient -->> AuthGate: HTTP 200 {user, tenant}
+    AuthGate ->> AppRouter: Render <AppRouter>
+    
+    alt URL path: /
+      AppRouter -->> Browser: Render <EcosystemHome /> in Standard Shell
+    else URL path: /modules/crm
+      AppRouter ->> ModuleShell: Mount <ModuleShellLayout moduleId="crm">
+      ModuleShell ->> ApiClient: GET /crm/leads (with automatic token injection)
+      ApiClient ->> ApiServer: GET /crm/leads
+      ApiServer -->> ApiClient: HTTP 200 {items: [...]}
+      ApiClient -->> ModuleShell: Lead data
+      ModuleShell -->> Browser: Render CRM Workspace UI
+    end
+  end
+```
+</Diagram>
+
+### Step-by-Step Execution
+
+1. **Client Boot**: [`apps/web-app/src/main.tsx`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/web-app/src/main.tsx) initialises the API client.
+2. **Setup Check**: `<SetupGate>` queries `GET /setup/status`. If uninstalled, `<SetupWizard>` mounts immediately.
+3. **Authentication Check**: `<AuthGate>` evaluates current session cookies or local storage. If unauthenticated, `<AuthPage>` renders.
+4. **Workspace Routing**: `<AppRouter>` evaluates the URL:
+   - Root `/`: Renders standard shell with navigation and tenant overview.
+   - Module path `/modules/crm`: Loads the `@innostes/crm` manifest and renders `<ModuleShellLayout />`.
+5. **Transparent Refresh**: If any background API call returns HTTP 401, `apiRequest()` intercepts the failure, requests a new access token via `POST /auth/refresh`, and replays the original request without user interruption.
+
+---
+
+## 7. Entity Lifecycle: Create, Update, Soft-delete & Restore
+
+All domain records (e.g. tenants, users, leads) follow uniform lifecycle and audit trail patterns:
+
+<Diagram caption="Sequence Diagram: Universal entity audit trail, soft-delete, and restoration cycle.">
+```mermaid
+sequenceDiagram
+  autonumber
+  participant User as Admin User
+  participant Router as TenantsRouter
+  participant Service as TenantService
+  participant DB as PostgreSQL 16
+
+  Note over User,DB: 1. Record Creation
+  User ->> Router: POST /tenants with name and slug
+  Router ->> Service: service.create(tenant_data, actor_id)
+  Service ->> DB: INSERT INTO tenants with audit columns
+  DB -->> Service: Row created
+  Service -->> Router: TenantRead model
+  Router -->> User: HTTP 201 Created
+
+  Note over User,DB: 2. Record Mutation
+  User ->> Router: PATCH /tenants/id with updated name
+  Router ->> Service: service.update(id, update_data, actor_id)
+  Service ->> DB: UPDATE tenants SET name, updated_by WHERE id AND deleted_at IS NULL
+  DB -->> Service: Row updated
+  Service -->> Router: TenantRead model
+  Router -->> User: HTTP 200 OK
+
+  Note over User,DB: 3. Soft-delete
+  User ->> Router: DELETE /tenants/id
+  Router ->> Service: service.soft_delete(id, actor_id)
+  Service ->> DB: UPDATE tenants SET deleted_at=now, deleted_by=actor_id WHERE id AND deleted_at IS NULL
+  DB -->> Service: 1 row affected
+  Service -->> Router: Success
+  Router -->> User: HTTP 204 No Content
+
+  Note over User,DB: 4. Standard queries filter deleted records
+  User ->> Router: GET /tenants/id
+  Router ->> Service: service.get(id)
+  Service ->> DB: SELECT FROM tenants WHERE id AND deleted_at IS NULL
+  DB -->> Service: 0 rows found
+  Service -->> Router: raise NotFoundError
+  Router -->> User: HTTP 404 Not Found
+
+  Note over User,DB: 5. Restoration
+  User ->> Router: POST /tenants/id/restore
+  Router ->> Service: service.restore(id, actor_id)
+  Service ->> DB: UPDATE tenants SET deleted_at=NULL, deleted_by=NULL WHERE id
+  DB -->> Service: 1 row affected
+  Service -->> Router: TenantRead model
+  Router -->> User: HTTP 200 OK - Record restored
+```
+</Diagram>
+
+### Step-by-Step Execution
+
+1. **Creation**: [`BaseService.create()`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/services/base.py) sets primary keys (`UUID v4`), `created_at = UTC now`, and `created_by = actor_id`.
+2. **Update**: [`BaseService.update()`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/services/base.py) mutates fields and updates `updated_at = UTC now`, `updated_by = actor_id`.
+3. **Soft-deletion**: [`BaseService.soft_delete()`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/services/base.py) sets `deleted_at = UTC now` and `deleted_by = actor_id`. The record remains physically intact in PostgreSQL.
+4. **Default Query Filtering**: Queries executed through `BaseService` automatically append `WHERE deleted_at IS NULL`. Soft-deleted entities return HTTP 404 to standard users.
+5. **Audit / Restoration**: Compliance administrators can view soft-deleted records using `include_deleted=true` and execute `POST /tenants/{id}/restore` to un-delete records by setting `deleted_at = NULL`.
+
+---
+
+## Related Documentation
+
+- [Building Block View](/docs/architecture/building-blocks) — Static container and component decompositions.
+- [Data Architecture](/docs/architecture/data-architecture) — Entity relationships, column mixins, and migration patterns.
+- [REST API Reference](/api-reference) — Complete parameter specifications and operation payloads.
