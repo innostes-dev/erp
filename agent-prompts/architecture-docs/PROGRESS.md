@@ -159,3 +159,27 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - `pnpm nx run landing:docs-check`: PASSED.
 **Open issues**:
 - Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
+
+## 07 – Deployment view, configuration reference and runbooks – 2026-10-29
+**Summary**: Authored arc42 section 7 (Deployment View) and operational runbooks:
+1. Created `apps/landing/content/dev-docs/architecture/deployment.mdx` covering C4 Level 2 local developer workstation topology (`pnpm nx dev`), Docker Compose container boundaries (`postgres` and `api-server` with healthchecks and persistent named volume), and the recommended production topology (TLS termination reverse proxy, horizontally scaled stateless ASGI replicas, managed PostgreSQL 16 cluster, CDN edge hosting for static `web-app`, corporate SMTP relay).
+2. Documented configuration reference covering all 42 environment variables from `kernel.core.config.Settings` and `PostgresSettings` (types, defaults, secret flags, and security warnings for insecure development defaults).
+3. Documented observability standards (`GET /health` database ping and per-module health probes, structured JSON telemetry via `api_logger`).
+4. Created operations runbooks in `apps/landing/content/dev-docs/operations/`:
+   - `deployment.mdx`: Production deployment procedure, prerequisites, and migration execution.
+   - `backup-restore.mdx`: PostgreSQL logical backups (`pg_dump -F c`), transactional restoration (`pg_restore -1`), and Point-in-Time Recovery (PITR) strategy.
+   - `key-rotation.mdx`: Procedures for rotating `JWT_SECRET_KEY`, database credentials, and versioned encryption keys.
+5. Implemented automated configuration reference check script (`apps/landing/scripts/generate-config-reference.py --check`) verifying 42 settings in Settings and PostgresSettings.
+6. Registered `operations` section in `apps/landing/content/dev-docs/meta.json`.
+**Changed**: `apps/landing/content/dev-docs/architecture/deployment.mdx`, `apps/landing/content/dev-docs/operations/*`, `apps/landing/scripts/generate-config-reference.py`, `PROGRESS.md`, `07-deployment-operations.md` deleted.
+**Code changes**: Added `generate-config-reference.py`.
+**Decisions**:
+- Standardised deployment diagrams on `<Diagram>` with Mermaid flowcharts.
+- Positioned `operations` runbooks as how-to documentation in `content/dev-docs/operations/`.
+**Verification**:
+- `apps/api-server/.venv/bin/python apps/landing/scripts/generate-config-reference.py --check`: PASSED (42 settings verified).
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed, 18 Mermaid diagrams verified).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
+**Open issues**:
+- Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).

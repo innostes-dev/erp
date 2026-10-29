@@ -1,0 +1,50 @@
+---
+title: Key Rotation
+description: JWT_SECRET_KEY, encryption keyring version rotation, and SMTP credentials runbook.
+icon: Key
+owner: Platform Operations Team
+lastReviewed: 2026-10-29
+arc42: 7
+---
+
+# Key Rotation Runbook
+
+Security best practices require periodic rotation of cryptographic keys and credentials. This runbook details the procedures for rotating critical secrets in Innostes ERP.
+
+## 1. JWT Secret Key Rotation
+
+Rotating the `JWT_SECRET_KEY` will invalidate all currently active user sessions.
+
+### Procedure
+
+1. **Generate New Key:** Create a new, strong random string (e.g., using `openssl rand -hex 32`).
+2. **Update Configuration:** Update the `JWT_SECRET_KEY` environment variable in your production configuration management system (e.g., AWS Secrets Manager, Vault, or `.env` file).
+3. **Restart API Server:** Restart all ASGI workers to load the new key.
+   ```bash
+   sudo systemctl restart api-server
+   ```
+4. **Communicate:** Users will need to log in again. Ensure this is communicated if performed during business hours.
+
+## 2. Encryption Keyring Rotation
+
+Innostes ERP uses a versioned keyring for data encryption, allowing for zero-downtime rotation.
+
+### Procedure
+
+1. **Generate New Key Version:** Generate a new encryption key.
+2. **Update Keyring Config:** Add the new key to the `ENCRYPTION_KEYRING` configuration variable, making sure to increment the version number. Ensure it is set as the active/primary key for _new_ encryption operations.
+   - Example format: `v1=oldkey,v2=newkey;active=v2`
+3. **Deploy Configuration:** Deploy the updated configuration to the API servers.
+4. **Restart API Server:** Restart the ASGI workers.
+5. **Data Re-encryption (Optional but Recommended):** Run a background job or script to iterate through existing encrypted data and re-encrypt it using the new active key. Once all data is migrated, the old key can eventually be removed from the keyring.
+
+## 3. SMTP Credentials Rotation
+
+Rotating SMTP credentials ensures email delivery remains secure.
+
+### Procedure
+
+1. **Generate New Credentials:** Request or generate a new `SMTP_USER` and `SMTP_PASS` from your email service provider.
+2. **Update Configuration:** Update these variables in your production configuration.
+3. **Restart API Server:** Restart the ASGI workers to apply the new credentials.
+4. **Test Delivery:** Trigger an action in the application that sends an email (e.g., a password reset request) to verify the new credentials are working correctly.

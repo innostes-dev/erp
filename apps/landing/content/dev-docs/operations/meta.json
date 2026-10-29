@@ -1,0 +1,4 @@
+{
+  "title": "Operations",
+  "pages": ["deployment", "backup-restore", "key-rotation"]
+}

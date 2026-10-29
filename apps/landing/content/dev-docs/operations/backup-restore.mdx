@@ -1,0 +1,67 @@
+---
+title: Backup & Restore
+description: PostgreSQL pg_dump/pg_restore and point-in-time recovery runbook.
+icon: DatabaseBackup
+owner: Platform Operations Team
+lastReviewed: 2026-10-29
+arc42: 7
+---
+
+# Backup and Restore Runbook
+
+This runbook outlines the procedures for backing up and restoring the PostgreSQL database used by Innostes ERP.
+
+## Regular Backups (`pg_dump`)
+
+Logical backups are performed regularly using `pg_dump`.
+
+### Creating a Backup
+
+To create a backup, run the following command, replacing the variables with your actual connection details:
+
+```bash
+pg_dump -U <username> -h <host> -p 5432 -d <database_name> -F c -f /path/to/backup/innostes_erp_$(date +%Y%m%d%H%M%S).dump
+```
+
+- `-F c`: Specifies the custom archive format suitable for `pg_restore`.
+
+### Restoring from a Backup (`pg_restore`)
+
+To restore a database from a custom format dump:
+
+```bash
+pg_restore -U <username> -h <host> -p 5432 -d <database_name> -1 /path/to/backup/innostes_erp_YYYYMMDDHHMMSS.dump
+```
+
+- `-1`: Executes the restore as a single transaction, ensuring that either all changes are applied or none are if an error occurs.
+
+## Point-in-Time Recovery (PITR)
+
+For disaster recovery scenarios requiring restoration to a specific moment in time, we rely on Write-Ahead Logging (WAL) archiving and base backups.
+
+### Prerequisites
+
+- Continuous WAL archiving must be configured in `postgresql.conf` (e.g., `archive_mode = on`, `archive_command`).
+- A valid base backup must be available.
+
+### Recovery Procedure
+
+1. **Stop PostgreSQL:** Ensure the database service is stopped.
+   ```bash
+   sudo systemctl stop postgresql
+   ```
+2. **Restore Base Backup:** Replace the current data directory with the base backup.
+3. **Configure Recovery:** Create a `recovery.signal` file in the data directory.
+   ```bash
+   touch /var/lib/postgresql/data/recovery.signal
+   ```
+4. **Set Recovery Target:** Edit `postgresql.conf` to specify the recovery target time.
+   ```ini
+   recovery_target_time = '2026-10-29 14:00:00 UTC'
+   restore_command = 'cp /mnt/wal_archive/%f %p' # Example command to fetch WAL files
+   ```
+5. **Start PostgreSQL:** Start the service. It will process the WAL files up to the target time.
+   ```bash
+   sudo systemctl start postgresql
+   ```
+6. **Verify:** Check the logs to ensure recovery was successful. The database will automatically exit recovery mode and rename `recovery.signal`.

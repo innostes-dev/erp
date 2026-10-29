@@ -1,0 +1,68 @@
+---
+title: Deployment Runbook
+description: Step-by-step production deployment runbook with environment configuration.
+icon: Play
+owner: Platform Operations Team
+lastReviewed: 2026-10-29
+arc42: 7
+---
+
+# Production Deployment Runbook
+
+This runbook outlines the step-by-step procedure for deploying Innostes ERP to a production environment.
+
+## Prerequisites
+
+- Production environment access (Reverse Proxy, ASGI Workers, PostgreSQL).
+- Access to the CDN platform for the frontend web application.
+- Environment variables configured (see Configuration section).
+- Latest release tags for both frontend and backend.
+
+## 1. Environment Configuration
+
+Ensure the following environment variables are set on the backend servers:
+
+- `DATABASE_URL`: Connection string to the production PostgreSQL database.
+- `JWT_SECRET_KEY`: Secret key for signing JSON Web Tokens.
+- `ENCRYPTION_KEYRING`: Versioned keyring for data encryption.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`: Credentials for sending emails.
+- `CORS_ORIGINS`: Allowed origins (should include the production CDN URL).
+
+## 2. Database Migration
+
+Before deploying new code, apply any pending database migrations. This should be done on a single management node or via a dedicated CI/CD pipeline job.
+
+```bash
+# Example command using the backend engine's migration tool
+alembic upgrade head
+```
+
+## 3. Backend Deployment (api-server)
+
+Deploy the new backend code to the ASGI workers.
+
+1. **Pull Latest Code:** Fetch the release branch or tag.
+2. **Install Dependencies:** Ensure all Python dependencies are installed using `pip` or `poetry`.
+3. **Restart Workers:** Gracefully restart the ASGI workers to pick up the new code.
+   - Example using `systemctl` (if managed by systemd): `sudo systemctl restart api-server`
+   - Example using a process manager like Supervisor or PM2.
+
+## 4. Frontend Deployment (web-app)
+
+Deploy the updated UI to the CDN.
+
+1. **Build Static Assets:** Run the build process for the React application.
+   ```bash
+   pnpm --filter web-app build
+   ```
+2. **Upload to CDN:** Upload the contents of the `dist/` or `build/` directory to your CDN provider (e.g., AWS S3 + CloudFront, Cloudflare Pages, Vercel).
+3. **Invalidate Cache:** If necessary, invalidate the CDN cache to ensure users receive the latest version of the application.
+
+## 5. Verification
+
+After deployment, perform sanity checks:
+
+- Verify the frontend loads correctly.
+- Test login functionality.
+- Ensure API endpoints are responding correctly via the reverse proxy.
+- Check backend logs for any immediate errors or warnings.
