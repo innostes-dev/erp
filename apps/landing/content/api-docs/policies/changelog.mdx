@@ -1,0 +1,24 @@
+---
+title: "API Changelog"
+description: "Release history, endpoint revisions, additions, and deprecation timeline for the innostes ERP API."
+---
+
+This changelog records all notable changes, additions, enhancements, and deprecations across releases of the innostes ERP REST API. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] - 2026-10-29
+
+### Added
+- **OpenAPI 3.1 Specification**: Formally published machine-readable schema available at [/api-reference/openapi.json](/api-reference/openapi.json).
+- **Interactive Documentation**: Top-tier reference documentation at `/api-reference` with semantic method badges and integrated client-side request console.
+- **Developer Guides**: Comprehensive guides for Quickstart, Authentication lifecycle, Multi-tenancy headers, Setup, Errors, Pagination, Soft deletion, and Client generation.
+- **Contract Verification Suite**: Automated JSON Schema draft 2020-12 contract tests asserting status-code conformance across all 33 endpoints.
+- **Machine Error Codes**: Centralised `ErrorCode` constants returned in RFC 7807 problem details across all core services.
+- **Quality Gates**: Spec freshness validator (`openapi-check`), Spectral OAS linter (`openapi-lint`), and docs staleness check wired into CI.
+
+### Changed
+- **Standardised Operation IDs**: Canonical `<feature>_<action>` naming format applied across all FastAPI endpoint routers.
+- **Security Requirement Unification**: All protected endpoints declare `BearerAuth` or `SetupToken` schemes in OpenAPI components.
+- **Explicit Response Declarations**: Explicit `401 Unauthorized`, `403 Forbidden`, and `422 Unprocessable Content` response schemas declared across all routes.
+
+### Removed
+- **Undocumented Parameters**: Removed internal `timeout` query parameter from `GET /setup/status`.

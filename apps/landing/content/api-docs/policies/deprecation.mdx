@@ -1,0 +1,48 @@
+---
+title: "Deprecation Policy"
+description: "Guidelines for announcing, phasing out, and retiring deprecated endpoints and fields."
+---
+
+When superior workflows or architectural revisions necessitate replacing an existing API feature, the innostes engineering team follows a disciplined deprecation process designed to give enterprise consumers adequate transition time.
+
+## Deprecation lifecycle
+
+```
+[Active] ──> [Deprecated: 12-month notice] ──> [Sunset Window] ──> [Retired: 410 Gone]
+```
+
+1. **Announcement**: The endpoint is marked with `deprecated: true` in `openapi.json`, documented in the [API Changelog](/api-reference/policies/changelog), and an alternative endpoint is specified.
+2. **Transition Window**: The deprecated endpoint remains fully functional, tested by automated CI suites, and monitored for a minimum notice period of **12 months**.
+3. **HTTP Warning Headers**: Deprecated endpoints return RFC 8594 standard headers:
+   - `Deprecation: @<timestamp>` indicating the date of deprecation.
+   - `Sunset: <date>` indicating the anticipated retirement deadline.
+   - `Link: <url>; rel="successor-version"` providing a direct link to the replacement endpoint documentation.
+4. **Retirement**: Once the sunset date is reached, the endpoint responds with `410 Gone` before permanent route removal.
+
+---
+
+## Identification in OpenAPI and Documentation
+
+In the OpenAPI specification, deprecated endpoints declare:
+
+```json
+{
+  "deprecated": true,
+  "description": "DEPRECATED: Use POST /v2/tenants instead. Scheduled for removal on 2027-10-31."
+}
+```
+
+In the documentation site, deprecated operations display a visible amber warning banner detailing:
+- The effective date of deprecation.
+- The scheduled removal date.
+- The recommended successor endpoint and migration guide.
+
+---
+
+## Consumer checklist for deprecations
+
+When an endpoint you consume is marked as deprecated:
+
+1. **Review Changelog**: Inspect the [API Changelog](/api-reference/policies/changelog) for architectural motivation and upgrade guides.
+2. **Update Type Definitions**: Regenerate TypeScript or Python client models using `node scripts/generate-api-docs.mjs` or `openapi-typescript` to see compile-time `@deprecated` JSDoc annotations.
+3. **Switch to Successor Endpoint**: Verify contract tests against the successor route before migrating production traffic.

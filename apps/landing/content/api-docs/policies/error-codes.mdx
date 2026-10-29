@@ -1,0 +1,53 @@
+---
+title: "Error-Code Catalogue"
+description: "Comprehensive catalogue of machine error codes, HTTP statuses, and recovery actions."
+---
+
+This reference catalogues every machine-readable `code` returned in the `ErrorResponse` payload by the innostes ERP API, alongside the HTTP status codes used across all subsystems.
+
+## Machine error codes
+
+When an error condition is handled, the API returns a structured JSON payload containing a `code` field. Automated callers can switch on this token without parsing human-readable error messages:
+
+| Error Code | HTTP Status | Meaning | Typical Endpoints | Caller Action |
+| --- | --- | --- | --- | --- |
+| `invalid_credentials` | `401 Unauthorized` | Email or password verification failed. | `POST /auth/login` | Prompt user to check credentials and re-enter password. |
+| `account_locked` | `401 Unauthorized` | Account locked due to excessive failed login attempts. | `POST /auth/login` | Inspect `Retry-After` header and wait before retrying. |
+| `account_suspended` | `403 Forbidden` | Account has been administratively deactivated. | `POST /auth/login` | Contact tenant administrator or system support. |
+| `temporary_password_expired` | `401 Unauthorized` | Temporary reset password exceeded validity window. | `POST /auth/login` | Request a new password reset via `POST /auth/forgot-password`. |
+| `device_wiped` | `403 Forbidden` | Mobile or workstation device has been remotely wiped. | All authenticated endpoints | Re-enrol device through administrator MDM console. |
+| `invalid_token` | `401 Unauthorized` | JWT access token or refresh token is expired or malformed. | All authenticated endpoints | Exchange refresh token via `POST /auth/refresh` or re-login. |
+| `password_recently_used` | `409 Conflict` | New password violates password history policy (SOC 2). | `POST /auth/change-password`, `POST /auth/reset-password` | Choose a password that has not been used recently. |
+| `already_installed` | `409 Conflict` | System setup was previously executed and is locked. | `POST /setup/install` | Setup is completed; proceed directly to `POST /auth/login`. |
+| `database_unavailable` | `503 Service Unavailable` | Target database connection pool is unreachable. | `GET /setup/status`, `GET /setup/checks`, `POST /setup/install` | Check database cluster health and network connectivity; retry after backoff. |
+| `setup_not_available` | `404 Not Found` | Setup endpoint disabled because installation is complete. | `POST /setup/install` | Route is sealed; invoke regular domain endpoints. |
+| `invalid_setup_token` | `401 Unauthorized` | `X-Setup-Token` header is missing, wrong, or rate-limited. | `POST /setup/install` | Retrieve fresh setup token from server boot logs or inspect attempt limit. |
+| `setup_required` | `503 Service Unavailable` | System requires first-run setup before servicing requests. | All domain routes | Direct operator to `http://localhost:8001/setup/status` to bootstrap. |
+| `tenant_not_found` | `404 Not Found` | Organization specified by ID does not exist or was deleted. | `GET /tenants/{id}`, `PUT /tenants/{id}`, `DELETE /tenants/{id}` | Verify tenant identifier or query `GET /tenants` with `include_deleted=true`. |
+| `slug_taken` | `409 Conflict` | Desired organization slug is already in use by an active or soft-deleted tenant. | `POST /tenants`, `PUT /tenants/{id}` | Select an alternative slug or restore/hard-delete the colliding tenant. |
+| `permission_denied` | `403 Forbidden` | Authenticated user lacks necessary RBAC permission or tenant membership. | All tenant operations | Request required role permissions from tenant administrator. |
+| `email_already_exists` | `409 Conflict` | An account already exists with the provided email address. | `POST /users` | Use a different email or initiate password recovery. |
+| `user_not_found` | `404 Not Found` | User entity with the specified identifier does not exist. | `GET /users/{id}` | Verify user ID or list users to inspect current accounts. |
+| `device_not_found` | `404 Not Found` | Hardware device registration not found. | Device management endpoints | Re-register the client device. |
+| `validation_error` | `422 Unprocessable Content` | Request payload, path argument, or query parameter failed Pydantic schema validation. | All endpoints accepting inputs | Inspect the `detail` array for field-specific error locations and constraints. |
+
+---
+
+## HTTP status codes reference
+
+The API restricts status codes to a predictable subset of standard HTTP response statuses:
+
+| Status Code | Official Phrase | Usage in innostes ERP API |
+| --- | --- | --- |
+| `200 OK` | Standard success | Successful `GET` queries, updates, and authenticated profile retrieval. |
+| `201 Created` | Created | Successful entity creation (`POST /tenants`, `POST /users`, `POST /setup/install`). |
+| `204 No Content` | No content | Successful operations with empty body (`DELETE /tenants/{id}`, `POST /auth/logout`). |
+| `400 Bad Request` | Client error | Malformed JSON syntax or unrecognized payload encoding. |
+| `401 Unauthorized` | Not authenticated | Missing or invalid bearer token or setup token. |
+| `403 Forbidden` | Forbidden | Authenticated caller does not have permission for the requested tenant or action. |
+| `404 Not Found` | Not found | Requested resource identifier or entity does not exist. |
+| `409 Conflict` | Conflict | Business logic violation, slug uniqueness collision, or duplicate state transition. |
+| `422 Unprocessable Content` | Schema validation error | Syntactically valid request breaking data constraints (types, min length, regex). |
+| `429 Too Many Requests` | Rate limit exceeded | Setup attempt brute-force limit reached (max 5 guesses). |
+| `500 Internal Server Error` | Server error | Unexpected runtime fault; error is logged to telemetry with trace ID. |
+| `503 Service Unavailable` | Service unavailable | Database connectivity probe failed, or setup is required. |

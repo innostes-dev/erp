@@ -1,0 +1,50 @@
+---
+title: "Versioning and Compatibility Policy"
+description: "Rules governing breaking versus non-breaking changes, release versioning, and caller stability."
+---
+
+The innostes ERP API prioritises stability and predictable evolution for enterprise integrations. This document outlines what constitutes breaking and non-breaking changes, how versions are communicated, and support guarantees.
+
+## Versioning strategy
+
+The innostes platform follows **Semantic Versioning (SemVer 2.0.0)** applied to the OpenAPI specification (`info.version` in `openapi.json`):
+
+- **Major (`X.y.z`)**: Reserved for incompatible API changes that require caller code modifications.
+- **Minor (`x.Y.z`)**: Backwards-compatible functionality, new endpoints, and optional fields.
+- **Patch (`x.y.Z`)**: Backwards-compatible bug fixes, performance improvements, and documentation updates.
+
+### Clean URLs without unnecessary prefixes
+
+Endpoint URLs remain clean and resource-oriented (e.g. `/auth/login`, `/tenants`). Breaking changes are avoided by adding new optional parameters or introducing parallel versioned routes rather than forcing universal URL prefix increments across unaffected endpoints.
+
+---
+
+## Breaking versus non-breaking changes
+
+To maintain integration compatibility, changes are strictly classified:
+
+### Non-breaking changes (Permitted in Minor/Patch releases)
+
+- Adding new API endpoints or HTTP methods to existing resources.
+- Adding new optional request query parameters or optional request body fields (with safe defaults).
+- Adding new properties to response JSON envelopes (callers must ignore unrecognised fields).
+- Adding new enum values to response payloads (unless explicitly restricted by contract).
+- Adding new machine-readable error codes to the `ErrorCode` catalogue.
+- Modifying internal server performance, caching, or logging implementations.
+
+### Breaking changes (Require Major version bump & notice)
+
+- Removing or renaming existing endpoints, paths, HTTP methods, or `operation_id` values.
+- Removing or renaming fields in request or response JSON envelopes.
+- Changing field types (e.g. converting a string ID to an integer, or vice versa).
+- Tightening request validation (e.g. making an optional field required, or reducing max string length).
+- Changing HTTP response status codes for existing scenarios.
+- Changing authentication mechanisms or required credential header schemes.
+
+---
+
+## Support and maintenance guarantees
+
+1. **Deprecation Notice**: Any endpoint scheduled for removal will be marked as `deprecated: true` in the OpenAPI specification at least **12 months** prior to decommissioning.
+2. **Backward Compatibility**: Client applications built against a given minor version (e.g. `0.1.0`) will continue functioning without breaking against subsequent minor releases (`0.2.0`, `0.3.0`).
+3. **Changelog**: All changes are recorded with full rationale in the [API Changelog](/api-reference/policies/changelog).

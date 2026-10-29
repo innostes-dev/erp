@@ -6,12 +6,14 @@ import uuid
 from pydantic import BaseModel as PydanticModel
 from sqlalchemy import select
 
-from kernel.core.services import BaseService, ConflictError, NotFoundError
+from kernel.core.services import BaseService, ConflictError, ErrorCode, NotFoundError
 from kernel.tenancy.models import Tenant
 
 
 class TenantNotFoundError(NotFoundError):
     """No active tenant has the requested id."""
+
+    code = ErrorCode.TENANT_NOT_FOUND
 
     def __init__(self) -> None:
         """Create the error with a fixed, client-safe message."""
@@ -20,6 +22,8 @@ class TenantNotFoundError(NotFoundError):
 
 class SlugTakenError(ConflictError):
     """Another tenant (active or deleted) already uses this slug."""
+
+    code = ErrorCode.SLUG_TAKEN
 
     def __init__(self, slug: str) -> None:
         """Create the error.

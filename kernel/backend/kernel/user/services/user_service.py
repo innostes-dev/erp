@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from kernel.core.crypto import BlindIndex, FieldCipher
-from kernel.core.services import ConflictError, NotFoundError
+from kernel.core.services import ConflictError, ErrorCode, NotFoundError
 from kernel.user.models.password_history import PasswordHistory
 from kernel.user.models.profile import UserProfile
 from kernel.user.models.security import UserSecurity
@@ -19,12 +19,16 @@ from kernel.user.services.password import hash_password
 class EmailAlreadyExistsError(ConflictError):
     """Raised when an account already exists with the provided email."""
 
+    code = ErrorCode.EMAIL_ALREADY_EXISTS
+
     def __init__(self, email: str) -> None:
         super().__init__(f"User with email '{email}' already exists.")
 
 
 class UserNotFoundError(NotFoundError):
     """Raised when a requested user identity is not found."""
+
+    code = ErrorCode.USER_NOT_FOUND
 
     def __init__(self, identifier: str | uuid.UUID) -> None:
         super().__init__(f"User '{identifier}' not found.")

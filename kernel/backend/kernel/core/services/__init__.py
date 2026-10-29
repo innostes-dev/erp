@@ -47,10 +47,12 @@ from kernel.core.services.errors import (
     UriTooLongError,
     VariantAlsoNegotiatesError,
     error_for_status,
+    ErrorCode,
 )
 
 __all__ = [
     "BaseService",
+    "ErrorCode",
     "ServiceError",
     "ClientError",
     "ServerError",

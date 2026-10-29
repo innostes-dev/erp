@@ -1,0 +1,47 @@
+---
+title: "Security and Compliance"
+description: "Vulnerability reporting, token handling standards, data retention, and audit trails."
+---
+
+Security is fundamental to the architecture of the innostes ERP API platform. This page details vulnerability reporting policies, authentication token safeguards, data retention standards, and audit trails.
+
+## Reporting security vulnerabilities
+
+If you discover a security vulnerability in the innostes ERP platform, please disclose it responsibly:
+
+- **Email**: `security@innostes.com` (encrypted via our published PGP key where appropriate).
+- **GitHub**: Use GitHub Private Vulnerability Reporting via the repository's Security tab.
+- **Response SLA**: The security team acknowledges all reports within **24 hours** and provides weekly remediation status updates until resolution.
+- **Responsible Disclosure**: Please allow our engineering team at least 30 days to remediate reported vulnerabilities before public disclosure.
+
+---
+
+## Token storage and handling guidelines
+
+To prevent token leakage and cross-site scripting (XSS) compromise:
+
+1. **HttpOnly Cookies**: For browser-based applications, store refresh tokens in `HttpOnly`, `Secure`, `SameSite=Strict` cookies.
+2. **In-Memory Access Tokens**: Keep short-lived JWT access tokens in memory (e.g. JavaScript runtime variables) rather than persistent web storage.
+3. **Avoid LocalStorage**: Never store authentication credentials or refresh tokens in browser `localStorage` or `sessionStorage` where they are exposed to client-side scripts.
+4. **Header Scheme**: Always transmit access tokens via the standard `Authorization: Bearer <token>` header over TLS 1.3 encrypted connections.
+
+---
+
+## Data retention and soft delete policies
+
+- **Soft Deletion**: Records deleted via standard `DELETE` endpoints have their `deleted_at` timestamp set, but remain preserved in encrypted database storage to maintain auditable referential integrity.
+- **Retention Period**: Soft-deleted entities are retained indefinitely for compliance and audit recovery unless an administrator explicitly calls `DELETE /tenants/{id}/hard`.
+- **Permanent Purging**: Hard-deletion irrevocably purges the target database row and triggers cascading removal across all tenant partition tables.
+
+---
+
+## System audit trails
+
+Every mutable entity in the innostes ERP platform records audit metadata:
+
+- `created_at`: The exact UTC timestamp of record creation.
+- `created_by`: The unique integer ID of the user who initiated the creation.
+- `updated_at`: The UTC timestamp of the most recent update.
+- `updated_by`: The unique integer ID of the user who committed the modification.
+
+These fields are populated automatically by server-side interceptors and cannot be spoofed or overridden by client request payloads.

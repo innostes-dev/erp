@@ -1,0 +1,53 @@
+---
+title: "Limits and Quotas"
+description: "Platform resource limits, pagination ceilings, password policies, and token lifetimes."
+---
+
+To ensure system resilience, high availability, and protection against denial-of-service vectors, the innostes ERP API enforces predictable resource limits and quotas.
+
+## Request and payload limits
+
+| Resource Constraint | Default Limit | Enforcing Layer | Controlling Setting |
+| --- | --- | --- | --- |
+| **Request Body Size** | `10 MB` | Reverse Proxy / ASGI | `MAX_CONTENT_LENGTH` |
+| **Max Pagination Limit** | `200 items` | FastAPI / Pydantic | `MAX_PAGE_SIZE` |
+| **URI Length** | `2,048 bytes` | HTTP Server (Uvicorn) | `--limit-concurrency` / Web Ingress |
+| **Request Timeout** | `30 seconds` | ASGI Middleware | `HTTP_TIMEOUT_SECONDS` |
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_pagination_bounds__rejects_limit_exceeding_200`.
+
+---
+
+## Rate limits and attempt caps
+
+| Operation | Attempt Ceiling | Action Upon Exceeding | Reset Period |
+| --- | --- | --- | --- |
+| **First-Run Setup Token** | `5 failed attempts` | Token permanently invalidated; returns `429 Too Many Requests`. | Server restart required. |
+| **User Login Attempts** | `5 consecutive failures` | Account locked; returns `401 Unauthorized` with `Retry-After: 900`. | 15 minutes (900 seconds). |
+| **Password Reset Requests** | `3 requests per hour` | Subsequent requests throttled to protect email infrastructure. | 1 hour. |
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_setup_token_attempt_limit__locks_out_after_max_guesses`.
+
+---
+
+## Token lifetimes
+
+All token lifetimes are governed by environment configuration settings:
+
+| Token Type | Default Expiry | Config Setting | Description |
+| --- | --- | --- | --- |
+| **JWT Access Token** | `30 minutes` | `ACCESS_TOKEN_EXPIRE_MINUTES` | Stateless authorization token sent in bearer headers. |
+| **JWT Refresh Token** | `7 days` | `REFRESH_TOKEN_EXPIRE_DAYS` | Database-backed rotation token used to obtain new access tokens. |
+| **Password Reset Token** | `60 minutes` | `PASSWORD_RESET_TOKEN_EXPIRE_MINUTES` | Single-use email token for initiating account password reset. |
+| **Temporary Initial Password** | `24 hours` | `TEMP_PASSWORD_EXPIRE_HOURS` | Administrative temporary password issued during onboarding. |
+
+---
+
+## Password strength rules
+
+When setting or resetting user passwords (`POST /auth/change-password`, `POST /auth/reset-password`), passwords must satisfy the following constraints:
+
+- **Minimum Length**: 8 characters (configured via `PASSWORD_MIN_LENGTH=8`).
+- **Complexity**: Must contain at least one uppercase letter, one lowercase letter, one digit, and one special character (`!@#$%^&*()_+-=[]{}|;:,.<>?`).
+- **History Enforcement**: Users cannot reuse any of their last 4 previously used passwords (SOC 2 requirement).
+- **Prohibited Passwords**: Common dictionary words, sequences (`12345678`), and user email substrings are rejected.

@@ -36,6 +36,39 @@ from collections.abc import Mapping
 from fastapi import status
 
 
+class ErrorCode:
+    """Centralised machine-readable error codes returned in ErrorResponse.code."""
+
+    # Authentication & Accounts
+    INVALID_CREDENTIALS = "invalid_credentials"
+    ACCOUNT_LOCKED = "account_locked"
+    ACCOUNT_SUSPENDED = "account_suspended"
+    TEMPORARY_PASSWORD_EXPIRED = "temporary_password_expired"
+    DEVICE_WIPED = "device_wiped"
+    INVALID_TOKEN = "invalid_token"
+    PASSWORD_RECENTLY_USED = "password_recently_used"
+
+    # Setup & System Lifecycle
+    ALREADY_INSTALLED = "already_installed"
+    DATABASE_UNAVAILABLE = "database_unavailable"
+    SETUP_NOT_AVAILABLE = "setup_not_available"
+    INVALID_SETUP_TOKEN = "invalid_setup_token"
+    SETUP_REQUIRED = "setup_required"
+
+    # Tenancy & Permissions
+    TENANT_NOT_FOUND = "tenant_not_found"
+    SLUG_TAKEN = "slug_taken"
+    PERMISSION_DENIED = "permission_denied"
+
+    # User Management
+    EMAIL_ALREADY_EXISTS = "email_already_exists"
+    USER_NOT_FOUND = "user_not_found"
+    DEVICE_NOT_FOUND = "device_not_found"
+
+    # Validation & General
+    VALIDATION_ERROR = "validation_error"
+
+
 class ServiceError(Exception):
     """Base class for every error that maps to an HTTP error response.
 

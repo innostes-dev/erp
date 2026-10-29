@@ -29,6 +29,7 @@ from kernel.core.crypto import BlindIndex, FieldCipher
 from kernel.core.security.jwt import create_access_token, decode_token
 from kernel.core.services import (
     ConflictError,
+    ErrorCode,
     ForbiddenError,
     UnauthorizedError,
 )
@@ -52,12 +53,16 @@ DUMMY_BCRYPT_HASH = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lew.6K2f2D3z8S6m
 class InvalidCredentialsError(UnauthorizedError):
     """Raised when email or password verification fails."""
 
+    code = ErrorCode.INVALID_CREDENTIALS
+
     def __init__(self, message: str = "Invalid email or password") -> None:
         super().__init__(message)
 
 
 class AccountLockedError(UnauthorizedError):
     """Raised when an account is temporarily locked due to too many failed attempts."""
+
+    code = ErrorCode.ACCOUNT_LOCKED
 
     def __init__(self, retry_after: int = 900) -> None:
         super().__init__(
@@ -69,12 +74,16 @@ class AccountLockedError(UnauthorizedError):
 class AccountSuspendedError(ForbiddenError):
     """Raised when account is inactive or administratively suspended."""
 
+    code = ErrorCode.ACCOUNT_SUSPENDED
+
     def __init__(self) -> None:
         super().__init__("Account has been suspended or deactivated. Contact your administrator.")
 
 
 class TemporaryPasswordExpiredError(UnauthorizedError):
     """Raised when temporary password has passed its validity window."""
+
+    code = ErrorCode.TEMPORARY_PASSWORD_EXPIRED
 
     def __init__(self) -> None:
         super().__init__("Temporary password has expired. Please request a new password reset.")
@@ -83,6 +92,8 @@ class TemporaryPasswordExpiredError(UnauthorizedError):
 class DeviceWipedError(ForbiddenError):
     """Raised when a hardware device has been remotely wiped."""
 
+    code = ErrorCode.DEVICE_WIPED
+
     def __init__(self) -> None:
         super().__init__("This device has been remotely wiped. Access is blocked.")
 
@@ -90,12 +101,16 @@ class DeviceWipedError(ForbiddenError):
 class InvalidTokenError(UnauthorizedError):
     """Raised when JWT or refresh token validation fails."""
 
+    code = ErrorCode.INVALID_TOKEN
+
     def __init__(self, message: str = "Invalid or expired token") -> None:
         super().__init__(message)
 
 
 class PasswordRecentlyUsedError(ConflictError):
     """Raised when new password matches recently used passwords (SOC 2)."""
+
+    code = ErrorCode.PASSWORD_RECENTLY_USED
 
     def __init__(self) -> None:
         super().__init__("Cannot reuse a recently used password. Please choose a different password.")

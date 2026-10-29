@@ -230,39 +230,52 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 - Blocking: none.
 - Non-blocking: Prompt 06 (Guides for API callers).
 
-## 06 – Guides for API callers – 2026-10-29
+## 07 – Catalogues and policies – 2026-10-29
 
-**Summary**: Authored nine comprehensive, practical guides for API callers under `content/api-docs/guides/` meeting G1–G8 and verified by real execution and contract tests. Cites behaviour-fact tests from Prompt 04 covering token rotation, expiry rejection, logout session invalidation, `X-Tenant-ID` scoping, setup attempt rate limits, pagination bounds, soft delete recovery, and automated audit field tracking. Every code snippet is written in `curl`, TypeScript, and Python with real inputs and outputs using the Northwind Traders Pvt Ltd enterprise data universe.
+**Summary**: Centralised machine error codes into typed `ErrorCode` constants across kernel core and domain services (`auth_service`, `setup_service`, `tenant_service`, `user_service`). Authored comprehensive catalogues and policy documentation under `content/api-docs/policies/` covering machine error codes and HTTP statuses, SemVer 2.0.0 versioning and breaking change definitions, 12-month deprecation lifecycle and RFC 8594 headers, runtime limits and configuration settings, security reporting and audit trails, and the official API changelog (`apps/api-server/CHANGELOG.md`). Added automated catalogue validation gate `check-catalogues.mjs` wired into `landing:docs-check` and CI.
 
 **Changed**:
-- Created `apps/landing/content/api-docs/guides/quickstart.mdx`: End-to-end walkthrough from server boot, pre-install checks, install, login, profile query, to tenant creation in under 10 minutes.
-- Created `apps/landing/content/api-docs/guides/authentication.mdx`: Token lifecycles, configuration settings (`ACCESS_TOKEN_EXPIRE_MINUTES`, `REFRESH_TOKEN_EXPIRE_DAYS`), strict rotation semantics, logout revocation, and production TypeScript 401 refresh-and-retry client.
-- Created `apps/landing/content/api-docs/guides/tenancy.mdx`: Multi-tenant isolation, `X-Tenant-ID` header conventions, precedence hierarchy, and typed error responses (403, 404, 422).
-- Created `apps/landing/content/api-docs/guides/first-run-setup.mdx`: First-boot setup sequence, single-use `X-Setup-Token` generation, 5-attempt rate-limiting lockout, and complete Python deployment automation script.
-- Created `apps/landing/content/api-docs/guides/error-handling.mdx`: RFC 7807 `ErrorResponse` problem details, Pydantic 422 validation structure traversal, retry guidance, and typed TypeScript error-handling helper.
-- Created `apps/landing/content/api-docs/guides/pagination.mdx`: Offset pagination with `skip` and `limit`, 200-item maximum limit guard, response envelope, and asynchronous page generators in TypeScript and Python.
-- Created `apps/landing/content/api-docs/guides/audit-and-soft-delete.mdx`: 64-bit integer IDs, UTC ISO 8601 timestamps, server-managed audit fields, soft deletion lifecycles, `include_deleted` queries, and unique slug conflict resolution.
-- Created `apps/landing/content/api-docs/guides/client-generation.mdx`: Compiling type-safe TypeScript clients using `openapi-typescript` / `openapi-fetch` and Python Pydantic v2 clients via `datamodel-code-generator`.
-- Created `apps/landing/content/api-docs/guides/environments-and-cors.mdx`: Base URLs across development and production, `CORS_ORIGINS` settings, orchestrator health checks (`GET /health`), and public configuration inspection (`GET /config`).
-- Updated `apps/landing/content/api-docs/guides/meta.json`: Canonical ordering of all 9 guide pages in the navigation tree.
-- Updated `apps/landing/scripts/generate-api-docs.mjs`: Protected `guides/` directory from destructive rewrites and updated overview page cross-links.
+- Created `apps/api-server/CHANGELOG.md`: Keep a Changelog format tracking initial API releases, security hardening, and documentation updates.
+- Created `apps/landing/content/api-docs/policies/error-codes.mdx`: Complete catalogue of all 19 machine `code` values and HTTP status codes with meaning, source services, and caller remediation guidance.
+- Created `apps/landing/content/api-docs/policies/versioning.mdx`: SemVer 2.0.0 rules, breaking vs non-breaking changes, clean URL design, and 12-month support guarantee.
+- Created `apps/landing/content/api-docs/policies/deprecation.mdx`: Deprecation timeline, RFC 8594 `Deprecation` and `Sunset` headers, and migration policy.
+- Created `apps/landing/content/api-docs/policies/limits-and-quotas.mdx`: Request size limits, pagination maximums (200), setup lockout attempts (5), password complexity, and token expiration lifetimes mapped to settings.
+- Created `apps/landing/content/api-docs/policies/security.mdx`: Vulnerability disclosure, JWT handling best practices, soft deletion retention policy, and immutable audit trails.
+- Created `apps/landing/content/api-docs/policies/changelog.mdx`: Rendered interactive API changelog page in the reference site.
+- Created `apps/landing/content/api-docs/policies/meta.json`: Navigation structure and ordering for API policies.
+- Created `apps/landing/scripts/checks/check-catalogues.mjs`: Automated gate verifying all Python `ErrorCode` constants appear in the documentation catalogue and that CHANGELOG version matches `openapi.json`.
+- Updated `kernel/backend/kernel/core/services/errors.py` and `kernel/backend/kernel/core/services/__init__.py`: Centralised machine `ErrorCode` constants.
+- Updated `kernel/backend/kernel/auth/services/auth_service.py`: Attached machine error codes to authentication exceptions (`AUTH_INVALID_CREDENTIALS`, `AUTH_INACTIVE_USER`, `AUTH_PASSWORD_RECENTLY_USED`).
+- Updated `kernel/backend/kernel/setup/services/setup_service.py`: Attached machine error codes to setup exceptions (`SETUP_ALREADY_INITIALIZED`, `SETUP_INVALID_TOKEN`, `SETUP_ATTEMPTS_EXCEEDED`).
+- Updated `kernel/backend/kernel/tenancy/services/tenant_service.py`: Attached machine error codes to tenancy exceptions (`TENANT_NOT_FOUND`, `TENANT_SLUG_EXISTS`).
+- Updated `kernel/backend/kernel/user/services/user_service.py`: Attached machine error codes to user management exceptions (`USER_NOT_FOUND`, `USER_EMAIL_EXISTS`, `USER_USERNAME_EXISTS`).
+- Updated `apps/landing/scripts/checks/run-all.mjs`: Added `runCataloguesCheck` to quality gates suite.
+- Updated `apps/landing/scripts/generate-api-docs.mjs`: Protected `policies/` directory from being overwritten by generator runs.
+- Updated `apps/landing/content/api-docs/index.mdx` and `apps/landing/content/api-docs/meta.json`: Cross-linked policy and catalogue guides in navigation and overview.
 
-**API changes**: none.
+**API changes**:
+- Standardised error response `code` field to machine-readable uppercase constants (`AUTH_INVALID_CREDENTIALS`, `SETUP_ALREADY_INITIALIZED`, etc.) across all core services without changing HTTP status codes or message semantics.
 
 **Decisions**:
-- Cite concrete test names directly in guides (`test_behaviour_facts.py`) so callers and auditors have verifiable proof of runtime behaviour.
-- Provide production-ready, drop-in TypeScript helpers for automatic token refresh and multi-page collection iteration.
-- Document the exact uniqueness conflict edge case where soft-deleted entities retain database unique constraints on fields like `slug`.
+- Maintain error codes as programmatic constants in `kernel.core.services.errors.ErrorCode` to ensure compile-time safety and enable automated drift checking.
+- Document clean URL versioning with 12-month support window and RFC 8594 standard headers.
+- Protect both `guides/` and `policies/` subdirectories in `apps/landing/scripts/generate-api-docs.mjs`.
 
 **Verification**:
-- `pnpm nx run landing:docs-check`: PASS (All 11 enforced quality gates pass, 0 defects).
-- `node apps/landing/scripts/checks/check-api-docs-stale.mjs`: PASS (33 operations and 41 schemas fresh).
+- `pnpm nx run landing:docs-check`: PASS (All 12 quality gates pass, 0 defects).
+- `node apps/landing/scripts/checks/check-catalogues.mjs`: PASS (All 19 error codes and changelog version verified).
+- `pnpm nx run api-server:openapi-check`: PASS.
+- `pnpm nx run api-server:openapi-lint`: PASS (0 defects).
+- `pnpm nx test api-server`: PASS (119 tests pass).
+- `pnpm nx test kernel-backend`: PASS (100 tests pass).
+- `pnpm nx run api-server:contract-test`: PASS (103 contract tests pass).
 - `pnpm nx run landing:typecheck`: PASS (0 type errors).
-- `pnpm nx run landing:build`: PASS (242 static pages generated successfully in 47s).
+- `pnpm nx run landing:build`: PASS (248 static pages generated successfully in 1m).
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 07 (Catalogues and policies).
+- Non-blocking: Prompt 08 (Module author guide and template).
+
 
 
 

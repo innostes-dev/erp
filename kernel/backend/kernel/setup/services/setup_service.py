@@ -12,6 +12,7 @@ from kernel.core.database.connection import get_engine, ping_db
 from kernel.core.database.migrations import pending_migrations, run_migrations
 from kernel.core.services import (
     ConflictError,
+    ErrorCode,
     NotFoundError,
     ServiceUnavailableError,
     UnauthorizedError,
@@ -34,6 +35,8 @@ logger = logging.getLogger("kernel.setup")
 class AlreadyInstalledError(ConflictError):
     """Setup was already completed; it can only run once."""
 
+    code = ErrorCode.ALREADY_INSTALLED
+
     def __init__(self) -> None:
         """Create the error with a fixed, client-safe message."""
         super().__init__("Setup has already been completed")
@@ -42,7 +45,7 @@ class AlreadyInstalledError(ConflictError):
 class DatabaseUnavailableError(ServiceUnavailableError):
     """The database can't be reached, so the setup state is unknown."""
 
-    code = "database_unavailable"
+    code = ErrorCode.DATABASE_UNAVAILABLE
 
     def __init__(self) -> None:
         """Create the error with a fixed, client-safe message."""
@@ -52,6 +55,8 @@ class DatabaseUnavailableError(ServiceUnavailableError):
 class SetupNotAvailableError(NotFoundError):
     """Setup is finished or web setup is disabled: the route behaves as if it didn't exist."""
 
+    code = ErrorCode.SETUP_NOT_AVAILABLE
+
     def __init__(self) -> None:
         """Create the error with the same message as any unknown route."""
         super().__init__("Not Found")
@@ -60,7 +65,7 @@ class SetupNotAvailableError(NotFoundError):
 class InvalidSetupTokenError(UnauthorizedError):
     """The `X-Setup-Token` header is missing or wrong."""
 
-    code = "invalid_setup_token"
+    code = ErrorCode.INVALID_SETUP_TOKEN
 
     def __init__(self) -> None:
         """Create the error; tells clients which header to send."""
@@ -73,7 +78,7 @@ class InvalidSetupTokenError(UnauthorizedError):
 class SetupRequiredError(ServiceUnavailableError):
     """The system is not installed yet, so normal API routes are unavailable."""
 
-    code = "setup_required"
+    code = ErrorCode.SETUP_REQUIRED
 
     def __init__(self) -> None:
         """Create the error with a fixed, client-safe message."""

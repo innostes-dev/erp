@@ -9,6 +9,7 @@ import { runCoverageCheck } from './check-coverage.mjs';
 import { runApiTablesCheck } from './check-api-tables.mjs';
 import { runTemplateCheck } from './check-template.mjs';
 import { runApiDocsStaleCheck } from './check-api-docs-stale.mjs';
+import { runCatalogueCheck } from './check-catalogues.mjs';
 
 console.log('Running documentation quality gates...\n');
 const startTime = Date.now();
@@ -103,6 +104,14 @@ if (apiDocsStaleErrors.length > 0) {
   console.log('✓ [API FRESHNESS] All 33 API operations and 41 schemas are fresh against openapi.json.');
 }
 
+const catalogueErrors = runCatalogueCheck();
+if (catalogueErrors.length > 0) {
+  console.error(`❌ [CATALOGUES] ${catalogueErrors.length} catalogue or changelog issues:`);
+  for (const e of catalogueErrors) console.error(`   ${e.file} - ${e.message}`);
+} else {
+  console.log('✓ [CATALOGUES] All ErrorCode constants and API changelog versions are in sync.');
+}
+
 // 2. Report-mode checks
 console.log('\n--- REPORT-MODE GATES ---');
 
@@ -123,7 +132,8 @@ const totalEnforcedFailures =
   frontmatterErrors.length +
   coverageErrors.length +
   templateErrors.length +
-  apiDocsStaleErrors.length;
+  apiDocsStaleErrors.length +
+  catalogueErrors.length;
 
 if (totalEnforcedFailures > 0) {
   console.error(`\n❌ Quality gates failed with ${totalEnforcedFailures} enforced defect(s).`);

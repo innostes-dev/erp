@@ -615,6 +615,8 @@ Explore endpoints organized by functional subsystem:
 | [HRMS](/api-reference/hrms/hrms-info) | Human Resource Management System employee and organizational directory. | 1 endpoint |
 | [API Logger](/api-reference/api-logger/api-logger-info) | HTTP request audit logging and inspection service metadata. | 1 endpoint |
 | [Data Models](/api-reference/schemas) | Complete catalogue of all 41 request and response schemas. | 41 schemas |
+| [Error Codes](/api-reference/policies/error-codes) | Complete catalogue of machine-readable error codes and HTTP statuses. | Reference |
+| [Policies](/api-reference/policies/versioning) | Versioning, deprecation, limits, security, and changelog policies. | Policies |
 `;
 
 writeFileSync(join(targetDocsDir, 'index.mdx'), overviewMdx.trim() + '\n');
@@ -630,6 +632,8 @@ const rootMeta = {
     ...tagMetaList,
     '---Data Models---',
     '...schemas',
+    '---Policies & Reference---',
+    '...policies',
   ],
 };
 
