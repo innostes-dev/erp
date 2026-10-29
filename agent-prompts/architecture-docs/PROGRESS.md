@@ -313,3 +313,24 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - `pnpm nx build landing`: PASSED (288/288 static pages compiled with 0 errors).
 **Open issues**:
 - None.
+
+
+## 13 – Checklist verification – 2026-10-29
+**Summary**: Executed complete, independent architecture compliance verification across the entire monorepo and produced the comprehensive verification report `CHECKLIST-REPORT.md`:
+1. Audited all 42 architecture, operations, and decision pages against checklist requirements A1–A10 with concrete code citations for every factual statement.
+2. Verified all 20 Mermaid diagrams against D1–D7 (C4 standards, code-verified element naming, descriptive text alternatives in captions, responsive layout in `<Diagram>`).
+3. Verified all 18 MADR architectural decision records against R1–R9.
+4. Verified all 8 architecture fitness functions (5 Python `import-linter` contracts, 1 TypeScript boundaries gate, 2 Python architectural unit tests) against F1–F4.
+5. Re-reviewed the single justified exception (`EXC-001` / `DEBT-001` / `ARC-002`) allowlisted in `.importlinter` and catalogued in `risks-and-technical-debt.mdx`.
+6. Generated `agent-prompts/architecture-docs/CHECKLIST-REPORT.md` documenting 100% compliance across all 12 arc42 sections with 0 failing checks.
+**Changed**: `agent-prompts/architecture-docs/CHECKLIST-REPORT.md`, `PROGRESS.md`, `13-checklist-verification.md` deleted.
+**Code changes**: none.
+**Decisions**:
+- Certified 100% arc42 completeness and standards compliance across the Innostes ERP architecture documentation suite.
+**Verification**:
+- `pnpm run arch-check`: PASSED (all 5 import-linter contracts kept, 167 TS files checked, 2 unit tests passed).
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed, 12/12 arc42 sections covered, 42 files verified).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
+- `pnpm nx build landing --skip-nx-cache`: PASSED (288/288 static SSG routes compiled without errors).
+**Open issues**:
+- None.
