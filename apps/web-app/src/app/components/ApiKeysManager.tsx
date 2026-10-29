@@ -13,9 +13,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -41,8 +38,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   Terminal,
-  Calendar,
-  Lock,
 } from 'lucide-react';
 import {
   createApiKey,
@@ -67,7 +62,8 @@ export function ApiKeysManager() {
   const [scope, setScope] = useState<string>('*');
 
   // Created Key Success State
-  const [createdKeyData, setCreatedKeyData] = useState<ApiKeyCreatedResponse | null>(null);
+  const [createdKeyData, setCreatedKeyData] =
+    useState<ApiKeyCreatedResponse | null>(null);
   const [hasCopied, setHasCopied] = useState(false);
 
   const loadKeys = useCallback(async () => {
@@ -92,7 +88,8 @@ export function ApiKeysManager() {
 
     setIsCreating(true);
     try {
-      const expiresInDays = expiration === 'never' ? null : parseInt(expiration, 10);
+      const expiresInDays =
+        expiration === 'never' ? null : parseInt(expiration, 10);
       const scopes = scope === '*' ? ['*'] : [scope];
 
       const res = await createApiKey({
@@ -115,7 +112,11 @@ export function ApiKeysManager() {
   }
 
   async function handleRevoke(keyId: string) {
-    if (!confirm('Are you sure you want to revoke this API key? Any applications or integrations using it will immediately lose access.')) {
+    if (
+      !confirm(
+        'Are you sure you want to revoke this API key? Any applications or integrations using it will immediately lose access.',
+      )
+    ) {
       return;
     }
 
@@ -152,13 +153,19 @@ export function ApiKeysManager() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
+            <BreadcrumbLink
+              onClick={() => navigate('/')}
+              className="cursor-pointer"
+            >
               Home
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
+            <BreadcrumbLink
+              onClick={() => navigate('/')}
+              className="cursor-pointer"
+            >
               Administration
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -177,7 +184,8 @@ export function ApiKeysManager() {
             Personal Access Tokens & API Keys
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Generate and manage high-entropy keys for programmatic API access, automated scripts, and third-party integrations.
+            Generate and manage high-entropy keys for programmatic API access,
+            automated scripts, and third-party integrations.
           </p>
         </div>
 
@@ -199,9 +207,20 @@ export function ApiKeysManager() {
           <ShieldCheck className="size-5" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-foreground">Zero-Trust Cryptographic Token Architecture</h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            Zero-Trust Cryptographic Token Architecture
+          </h3>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            API keys use 256-bit entropy (<code className="font-mono text-primary font-bold">inno_live_...</code>). Plaintext keys are never stored in the database; only SHA-256 hashes are persisted. Pass them in the <code className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">Authorization: Bearer &lt;token&gt;</code> header.
+            API keys use 256-bit entropy (
+            <code className="font-mono text-primary font-bold">
+              inno_live_...
+            </code>
+            ). Plaintext keys are never stored in the database; only SHA-256
+            hashes are persisted. Pass them in the{' '}
+            <code className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">
+              Authorization: Bearer &lt;token&gt;
+            </code>{' '}
+            header.
           </p>
         </div>
       </div>
@@ -233,7 +252,9 @@ export function ApiKeysManager() {
               <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-3">
-                    <span className="font-bold text-base text-foreground">{k.name}</span>
+                    <span className="font-bold text-base text-foreground">
+                      {k.name}
+                    </span>
                     <Badge
                       variant={k.is_revoked ? 'destructive' : 'success'}
                       dot={!k.is_revoked}
@@ -246,21 +267,34 @@ export function ApiKeysManager() {
                     <span className="font-mono bg-muted px-2 py-0.5 rounded text-foreground font-semibold">
                       {k.key_prefix}
                     </span>
-                    <span>Created: {new Date(k.created_at).toLocaleDateString()}</span>
+                    <span>
+                      Created: {new Date(k.created_at).toLocaleDateString()}
+                    </span>
                     {k.expires_at ? (
-                      <span>Expires: {new Date(k.expires_at).toLocaleDateString()}</span>
+                      <span>
+                        Expires: {new Date(k.expires_at).toLocaleDateString()}
+                      </span>
                     ) : (
                       <span>Never expires</span>
                     )}
                     {k.last_used_at && (
-                      <span>Last used: {new Date(k.last_used_at).toLocaleDateString()}</span>
+                      <span>
+                        Last used:{' '}
+                        {new Date(k.last_used_at).toLocaleDateString()}
+                      </span>
                     )}
                   </div>
 
                   <div className="flex items-center gap-1.5 pt-1">
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Scopes:</span>
+                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">
+                      Scopes:
+                    </span>
                     {k.scopes.map((s) => (
-                      <Badge key={s} variant="outline" className="text-[10px] py-0 px-1.5 font-mono">
+                      <Badge
+                        key={s}
+                        variant="outline"
+                        className="text-[10px] py-0 px-1.5 font-mono"
+                      >
                         {s}
                       </Badge>
                     ))}
@@ -273,7 +307,9 @@ export function ApiKeysManager() {
                       variant="outline"
                       size="sm"
                       loading={revokingId === k.id}
-                      startIcon={<Trash2 className="size-3.5 text-destructive" />}
+                      startIcon={
+                        <Trash2 className="size-3.5 text-destructive" />
+                      }
                       onClick={() => void handleRevoke(k.id)}
                     >
                       Revoke Key
@@ -295,13 +331,16 @@ export function ApiKeysManager() {
               <DialogHeader>
                 <DialogTitle>Generate Personal API Key</DialogTitle>
                 <DialogDescription>
-                  Create an authentication key for machine-to-machine integrations or developer automation.
+                  Create an authentication key for machine-to-machine
+                  integrations or developer automation.
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Key Name / Description</label>
+                  <label className="text-xs font-semibold text-foreground">
+                    Key Name / Description
+                  </label>
                   <Input
                     placeholder="e.g. Zapier CRM Sync, CI/CD Pipeline"
                     value={name}
@@ -310,13 +349,19 @@ export function ApiKeysManager() {
                     autoFocus
                   />
                   <p className="text-[11px] text-muted-foreground">
-                    What is this key for? A recognizable name helps you identify it later.
+                    What is this key for? A recognizable name helps you identify
+                    it later.
                   </p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Expiration</label>
-                  <Select value={expiration} onValueChange={(val) => setExpiration(val || '30')}>
+                  <label className="text-xs font-semibold text-foreground">
+                    Expiration
+                  </label>
+                  <Select
+                    value={expiration}
+                    onValueChange={(val) => setExpiration(val || '30')}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select lifespan" />
                     </SelectTrigger>
@@ -325,29 +370,46 @@ export function ApiKeysManager() {
                       <SelectItem value="60">60 days</SelectItem>
                       <SelectItem value="90">90 days</SelectItem>
                       <SelectItem value="365">1 year</SelectItem>
-                      <SelectItem value="never">No expiration (Perpetual)</SelectItem>
+                      <SelectItem value="never">
+                        No expiration (Perpetual)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Scopes / Access Level</label>
-                  <Select value={scope} onValueChange={(val) => setScope(val || '*')}>
+                  <label className="text-xs font-semibold text-foreground">
+                    Scopes / Access Level
+                  </label>
+                  <Select
+                    value={scope}
+                    onValueChange={(val) => setScope(val || '*')}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select scopes" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="*">Full Platform Access (*)</SelectItem>
-                      <SelectItem value="*:read">Read-Only Access (*:read)</SelectItem>
+                      <SelectItem value="*">
+                        Full Platform Access (*)
+                      </SelectItem>
+                      <SelectItem value="*:read">
+                        Read-Only Access (*:read)
+                      </SelectItem>
                       <SelectItem value="hrms:read">HRMS Read Only</SelectItem>
-                      <SelectItem value="crm:write">CRM Read & Write</SelectItem>
+                      <SelectItem value="crm:write">
+                        CRM Read & Write
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <DialogFooter>
-                <Button variant="outline" type="button" onClick={handleCloseDialog}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={handleCloseDialog}
+                >
                   Cancel
                 </Button>
                 <Button variant="primary" type="submit" loading={isCreating}>
@@ -373,12 +435,16 @@ export function ApiKeysManager() {
                   <AlertTriangle className="size-4" />
                   <AlertTitle>Copy your secret API key now!</AlertTitle>
                   <AlertDescription>
-                    For your security, this raw key will <strong>never be shown again</strong>. If you lose it, you will need to revoke it and generate a new one.
+                    For your security, this raw key will{' '}
+                    <strong>never be shown again</strong>. If you lose it, you
+                    will need to revoke it and generate a new one.
                   </AlertDescription>
                 </Alert>
 
                 <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-foreground">Your Secret API Key</span>
+                  <span className="text-xs font-semibold text-foreground">
+                    Your Secret API Key
+                  </span>
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/60 p-2 font-mono text-xs">
                     <span className="flex-1 break-all text-primary font-bold select-all">
                       {createdKeyData.raw_key}
@@ -386,7 +452,13 @@ export function ApiKeysManager() {
                     <Button
                       variant="secondary"
                       size="sm"
-                      startIcon={hasCopied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
+                      startIcon={
+                        hasCopied ? (
+                          <Check className="size-3.5 text-success" />
+                        ) : (
+                          <Copy className="size-3.5" />
+                        )
+                      }
                       onClick={() => copyToClipboard(createdKeyData.raw_key)}
                     >
                       {hasCopied ? 'Copied' : 'Copy'}
@@ -400,7 +472,7 @@ export function ApiKeysManager() {
                     cURL Usage Example
                   </span>
                   <pre className="rounded-lg bg-zinc-950 p-3 text-[11px] text-zinc-100 overflow-x-auto font-mono">
-{`curl -H "Authorization: Bearer ${createdKeyData.raw_key}" \\
+                    {`curl -H "Authorization: Bearer ${createdKeyData.raw_key}" \\
      http://localhost:8001/api/v1/hrms/info`}
                   </pre>
                 </div>

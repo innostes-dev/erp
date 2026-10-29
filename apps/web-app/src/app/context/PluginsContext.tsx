@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import { apiRequest } from '@innostes/kernel';
 import { getStoredAccessToken } from '../../../../../kernel/frontend/src/auth/api';
 import { PLUGINS_CATALOG, type CatalogItem } from '../catalog';
@@ -53,14 +59,16 @@ export function PluginsProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await apiRequest<{ tenant_id: string; items: Array<{ id: string; is_active: boolean }> }>(
-        '/tenants/current/plugins',
-        { headers }
-      );
+      const headers: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
+      const res = await apiRequest<{
+        tenant_id: string;
+        items: Array<{ id: string; is_active: boolean }>;
+      }>('/tenants/current/plugins', { headers });
       if (res && Array.isArray(res.items)) {
         const activeIds = new Set<string>(
-          res.items.filter((item) => item.is_active).map((item) => item.id)
+          res.items.filter((item) => item.is_active).map((item) => item.id),
         );
         syncActivePlugins(activeIds);
       }
@@ -82,7 +90,9 @@ export function PluginsProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
       await apiRequest(`/tenants/current/plugins/${id}/activate`, {
         method: 'POST',
         headers,
@@ -99,7 +109,9 @@ export function PluginsProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
       await apiRequest(`/tenants/current/plugins/${id}/deactivate`, {
         method: 'POST',
         headers,
@@ -111,7 +123,9 @@ export function PluginsProvider({ children }: { children: React.ReactNode }) {
 
   const isPluginActive = (id: string) => activePluginIds.has(id);
 
-  const activePlugins = PLUGINS_CATALOG.filter((p) => activePluginIds.has(p.id));
+  const activePlugins = PLUGINS_CATALOG.filter((p) =>
+    activePluginIds.has(p.id),
+  );
 
   return (
     <PluginsContext.Provider

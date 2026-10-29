@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TopBar,
   TopBarStart,
@@ -6,7 +6,6 @@ import {
   TopBarEnd,
   SidebarTrigger,
   SearchInput,
-  Kbd,
   NotificationBell,
   UserMenu,
   DropdownMenuItem,
@@ -23,8 +22,10 @@ export function TopHeader() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return document.documentElement.classList.contains('dark') ||
-        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return (
+        document.documentElement.classList.contains('dark') ||
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+      );
     }
     return false;
   });
@@ -45,20 +46,23 @@ export function TopHeader() {
     {
       id: '1',
       title: 'Platform update v1.2.0 ready',
-      description: 'System-wide modular architecture upgrade with plugin support.',
+      description:
+        'System-wide modular architecture upgrade with plugin support.',
       time: '10m ago',
       read: false,
     },
     {
       id: '2',
       title: 'Security check passed',
-      description: 'Multi-tenant isolation and anti-enumeration defenses verified.',
+      description:
+        'Multi-tenant isolation and anti-enumeration defenses verified.',
       time: '1h ago',
       read: true,
     },
   ];
 
-  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Arun';
+  const fullName =
+    [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Arun';
 
   return (
     <TopBar className="border-b border-border bg-background/95 backdrop-blur">
@@ -73,7 +77,7 @@ export function TopHeader() {
             onValueChange={setSearchQuery}
             placeholder="Search modules, tools, people, documents..."
             className="w-full"
-            addonEnd={<Kbd size="sm">⌘ K</Kbd>}
+            shortcut="⌘ K"
           />
         </div>
       </TopBarCenter>
@@ -88,7 +92,8 @@ export function TopHeader() {
         {/* Help button */}
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
+          iconOnly
           aria-label="Documentation & Help"
           onClick={() => window.open('http://localhost:3000/docs', '_blank')}
         >
@@ -98,7 +103,8 @@ export function TopHeader() {
         {/* Theme Toggle */}
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="sm"
+          iconOnly
           aria-label="Toggle Theme"
           onClick={toggleTheme}
         >
@@ -129,7 +135,10 @@ export function TopHeader() {
           <DropdownMenuItem onClick={() => void logout(false)}>
             Sign out
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => void logout(true)} className="text-destructive">
+          <DropdownMenuItem
+            onClick={() => void logout(true)}
+            className="text-destructive"
+          >
             Sign out all devices
           </DropdownMenuItem>
         </UserMenu>

@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -58,8 +57,12 @@ export function SidebarNav() {
             </svg>
           </div>
           <div>
-            <h1 className="text-base font-extrabold tracking-wider text-foreground">ECOSYSTEM</h1>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Platform</p>
+            <h1 className="text-base font-extrabold tracking-wider text-foreground">
+              ECOSYSTEM
+            </h1>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+              Platform
+            </p>
           </div>
         </button>
       </SidebarHeader>
@@ -82,9 +85,11 @@ export function SidebarNav() {
               isActive={isModules}
               icon={<LayoutGrid className="size-4" />}
               onClick={() => navigate('/modules')}
-              badge={activeModuleIds.size > 0 ? (
-                <SidebarMenuBadge>{activeModuleIds.size}</SidebarMenuBadge>
-              ) : undefined}
+              badge={
+                activeModuleIds.size > 0 ? (
+                  <SidebarMenuBadge>{activeModuleIds.size}</SidebarMenuBadge>
+                ) : undefined
+              }
             >
               Modules
             </SidebarMenuButton>
@@ -95,9 +100,11 @@ export function SidebarNav() {
               isActive={isPlugins}
               icon={<Puzzle className="size-4" />}
               onClick={() => navigate('/plugins')}
-              badge={activePluginIds.size > 0 ? (
-                <SidebarMenuBadge>{activePluginIds.size}</SidebarMenuBadge>
-              ) : undefined}
+              badge={
+                activePluginIds.size > 0 ? (
+                  <SidebarMenuBadge>{activePluginIds.size}</SidebarMenuBadge>
+                ) : undefined
+              }
             >
               Plugins
             </SidebarMenuButton>
@@ -141,8 +148,12 @@ export function SidebarNav() {
               A
             </div>
             <div className="truncate">
-              <p className="text-sm font-semibold text-foreground truncate">Acme Corporation</p>
-              <p className="text-xs text-muted-foreground truncate">Enterprise Plan</p>
+              <p className="text-sm font-semibold text-foreground truncate">
+                Acme Corporation
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                Enterprise Plan
+              </p>
             </div>
           </div>
           <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
