@@ -1,0 +1,59 @@
+---
+title: Solution Strategy
+description: Fundamental architectural choices, engine-plugin inversion, and quality attribute alignment (arc42 §4).
+icon: Compass
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 4
+---
+
+The Innostes ERP platform balances two competing forces: **rapid delivery of domain business features** and **rigorous platform-wide consistency, security, and multi-tenant isolation**. The solution strategy outlines the core decisions that resolve these forces.
+
+---
+
+## 1. Fundamental Architectural Decisions
+
+The architecture follows eight foundational decisions:
+
+1. **Two-Engine Execution Architecture**: The platform avoids monolithic coupling by establishing two dedicated, plumbing-only execution engines:
+   - `apps/api-server`: Backend ASGI runtime (FastAPI) responsible for lifespans, CORS, database connection pool lifecycle, and error handling.
+   - `apps/web-app`: Frontend single-page app (React 19 + Vite) responsible for the root navigation shell, authentication gating, and layout.
+   - *Rationale*: Engines contain 0 business tables, 0 domain routes, and 0 commercial screens.
+2. **Plug-in Inversion via Entry Points**: Features register their modules through standard Python `innostes.modules` entry points. The backend engine automatically discovers and mounts registered modules without requiring code changes in `app/`.
+3. **The Kernel as the First Plug-in**: The foundational package (`kernel/backend` and `kernel/frontend`) is structured exactly like any commercial module. It provides shared infrastructure (`core`), security, and platform tables (`setup`, `tenancy`, `user`, `auth`).
+4. **Shared Database with Horizontal Tenant Scoping**: Single PostgreSQL 16 database instance for ACID transactional consistency across modules. Tenant isolation is enforced horizontally via the `X-Tenant-ID` HTTP header, verified against `tenant_members` table on every request.
+5. **Universal BaseModel Standard**: Every database entity inherits `BaseModel`, automatically gaining UUIDv4 primary keys, insert/update timestamps, audit actor tracking (`created_by`, `updated_by`), and non-destructive soft deletion (`deleted_at`, `deleted_by`).
+6. **Ephemeral First-Run Setup Token**: Fresh databases are locked against unauthenticated exploitation. Until setup completes, all operational routes answer `503 Service Unavailable`. First-run provisioning requires a one-time 256-bit token printed in the server log.
+7. **Stateless JWT with Token Family Rotation**: Short-lived access tokens (30m) paired with single-use rotating refresh tokens (7d). Any attempt to replay an old refresh token instantly invalidates the entire token family.
+8. **Documentation as Code with Automated Fitness Functions**: Architecture documentation and OpenAPI specs are generated from code contracts. Automated checks in CI prevent architectural erosion and import violations.
+
+---
+
+## 2. Architecture Decisions Alignment
+
+Each fundamental decision is catalogued as an Architecture Decision Record (ADR) under `docs/architecture/decisions/` (formalised in Prompt 09):
+
+| Decision Summary | Record Identifier & Core Reference |
+|:---|:---|
+| Plug-in Architecture via Python Entry Points | `ADR-0001` (see [Plug-ins Guide](/docs/architecture/plugins)) |
+| FastAPI Backend ASGI Engine | `ADR-0002` (see [api-server Overview](/docs/apps/api-server)) |
+| React 19 & Vite UI Engine | `ADR-0003` (see [web-app Overview](/docs/apps/web-app)) |
+| PostgreSQL 16 Relational Database | `ADR-0004` (see [Constraints](/docs/architecture/constraints)) |
+| UUIDv4 Primary Keys on Every Entity | `ADR-0007` (see [Common Columns](/docs/architecture/kernel#common-columns)) |
+| Universal Soft Delete Pattern | `ADR-0008` (see [Soft Delete Architecture](/docs/architecture/kernel#soft-delete)) |
+| JWT Tokens with Token Family Rotation | `ADR-0010` (see [Actor Authentication](/docs/architecture/kernel#who-made-the-change)) |
+| Multi-Tenancy Scoping via `X-Tenant-ID` | `ADR-0011` (see [Overview Request Flow](/docs/architecture/overview#how-a-request-flows)) |
+| First-Run Setup Security Token | `ADR-0012` (see [First-run Setup](/docs/architecture/setup)) |
+
+---
+
+## 3. Goals to Approach Mapping
+
+The table below demonstrates how the chosen strategy directly satisfies the [Quality Goals](/docs/architecture/goals#2-quality-goals-isoiec-25010):
+
+| Quality Goal | Strategic Approach & Architectural Mechanism | Verification Metric |
+|:---|:---|:---|
+| **Modifiability** | Plug-in architecture using `BaseModule` contracts, entry point discovery, and TypeScript workspace packages. Modules develop independently under `modules/*`. | `pnpm run arch-check` verifies that engines do not import modules by name (Rule 1). |
+| **Security** | Zero-trust token rotation, `SetupRequiredMiddleware` pre-installation lock, constant-time token comparison, and AES-GCM-256 envelope encryption for sensitive fields. | Unit and contract test suites verify 401, 403, and 503 HTTP responses on unauthenticated calls. |
+| **Maintainability** | Generic `BaseService[T]` implementation handling CRUD, automatic audit attribution from `get_actor_id`, and global exception mapping to standard JSON error envelopes. | 100% of API endpoints adhere to standard error envelopes (`ErrorResponse`). |
+| **Operability** | Postgres advisory locking (`pg_try_advisory_lock(724819)`) guarantees safe concurrent startup across multiple worker replicas. Automated health checks (`/health`) probe connection pools. | Zero database schema corruption during parallel container starts. |

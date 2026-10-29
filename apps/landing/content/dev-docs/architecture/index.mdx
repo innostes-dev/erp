@@ -1,0 +1,68 @@
+---
+title: Architecture Overview
+description: Structural architecture, technical constraints, quality attributes, and decision records for the Innostes ERP platform.
+icon: Workflow
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: [1, 2, 3, 4]
+---
+
+Innostes ERP is a modular enterprise resource planning platform engineered around **two lightweight execution engines** (`apps/web-app` for the user interface and `apps/api-server` for the backend ASGI runtime) and a decoupled **plug-in ecosystem**.
+
+All domain capabilities—from multi-tenant identity and access management to commercial business applications (such as HRMS and CRM)—are authored as independent plug-ins. The engines contain no business logic of their own.
+
+---
+
+## 1. Documentation Map (arc42 v8)
+
+This architecture documentation is organised according to the internationally recognised **arc42 framework (template v8)** across twelve sections:
+
+| arc42 Section | Page | Description |
+|:---|:---|:---|
+| **§1. Introduction and Goals** | [Goals](/docs/architecture/goals) | Business requirements, enterprise stakeholders, and top ISO/IEC 25010 quality goals. |
+| **§2. Architecture Constraints** | [Constraints](/docs/architecture/constraints) | Technical boundaries, runtime requirements, language versions, and conventions. |
+| **§3. Context and Scope** | [Context & Scope](/docs/architecture/context-and-scope) | C4 Level 1 system context diagram, actor interactions, and communication channels. |
+| **§4. Solution Strategy** | [Solution Strategy](/docs/architecture/solution-strategy) | Fundamental architectural choices, engine-plugin inversion, and quality alignment. |
+| **§5. Building Block View** | [Plug-ins](/docs/architecture/plugins) & [Kernel](/docs/architecture/kernel) | Container and component breakdown, BaseModule contracts, and common columns. |
+| **§6. Runtime View** | [Overview Request Flow](/docs/architecture/overview#how-a-request-flows) | Execution flows for setup gating, token rotation, tenant resolution, and transactions. |
+| **§7. Deployment View** | [First-run Setup](/docs/architecture/setup) | Local container topologies, production ingress, worker scaling, and runbooks. |
+| **§8. Cross-cutting Concepts** | [Kernel Columns](/docs/architecture/kernel#common-columns) | Common database columns, universal soft delete, and actor attribution. |
+| **§9. Architecture Decisions** | [Solution Strategy Decisions](/docs/architecture/solution-strategy#2-architecture-decisions-alignment) | Formal ADR log recorded in Markdown Architectural Decision Records (MADR 4.x). |
+| **§10–12. Quality, Risks, Glossary** | [Quality Goals](/docs/architecture/goals#2-quality-goals-isoiec-25010) | ISO/IEC 25010 quality attributes, risk register, and canonical terminology. |
+
+---
+
+## 2. Visual Modelling (C4 Model)
+
+Diagrams across this documentation follow the **C4 model for software architecture**, rendered as diffable, version-controlled Mermaid code using the `<Diagram>` component:
+
+- **Level 1 (System Context)**: Shows how Innostes ERP sits in its enterprise environment, detailing interactions with human users (Admins, Staff, Auditors) and external systems (SMTP, Identity providers). Located in [Context and Scope](/docs/architecture/context-and-scope).
+- **Level 2 (Containers)**: Highlights deployable execution units: the React 19 single-page application (`web-app`), the FastAPI backend service (`api-server`), and the PostgreSQL 16 database. Located in [Overview](/docs/architecture/overview).
+- **Level 3 (Components)**: Breaks down the internal structure of `api-server` and `web-app`, detailing the module loader, session dependencies, routers, service layer, and ORM models. Located in [Kernel](/docs/architecture/kernel) and [Plug-ins](/docs/architecture/plugins).
+- **Runtime Views**: Traces critical lifecycle workflows (token rotation, first-run setup, multi-tenant queries). Located in [First-run Setup](/docs/architecture/setup).
+
+---
+
+## 3. Related Documentation
+
+Architecture documentation works in harmony with the adjacent specialised runbooks:
+
+- **[REST API Reference](/api-reference)**: Machine-verified HTTP operation specifications generated directly from FastAPI's OpenAPI 3.1 contract.
+- **[innostes UI Design System](/ui/docs)**: Accessible React component library documentation with live interactive playgrounds and token references.
+- **[Developer Guides](/docs/guides/building-a-feature)**: Practical walkthroughs for scaffolding fresh business modules and registering extensible plugins.
+
+---
+
+## 4. Docs as Code & Quality Enforcement
+
+Documentation changes must be proposed alongside code changes in the same pull request. Automated fitness functions enforce all architectural rules in CI:
+
+```bash
+# Verify Python import-linter contracts and TypeScript module boundaries
+pnpm run arch-check
+
+# Run diagram syntax checks, frontmatter validation, and ADR compliance gates
+pnpm nx run landing:arch-docs-check
+```
+
+See the [Architecture Documentation Guide](/docs/guides/architecture-docs) for authoring standards and checklist criteria.

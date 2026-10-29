@@ -1,0 +1,72 @@
+---
+title: Introduction and Goals
+description: Requirements overview, ISO/IEC 25010 quality goals, and stakeholder concerns for Innostes ERP (arc42 §1).
+icon: Target
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 1
+---
+
+Innostes ERP is an extensible, multi-tenant enterprise resource planning platform designed for distribution, trading, and logistics enterprises. The system provides core platform foundations—tenant management, identity and access control, security policies, and first-run installation—while serving business functions through decoupled plug-ins.
+
+---
+
+## 1. Requirements Overview
+
+The functional scope is divided between currently implemented capabilities and planned extensions.
+
+### What is Built Today
+
+The following capabilities are fully implemented in code, covered by automated test suites, and running in production builds:
+
+- **First-run Setup**: Ephemeral token-protected installation wizard and command-line installer. Locks down non-setup HTTP traffic until the primary organisation and Super Admin are provisioned.
+- **Multi-Tenancy**: Shared database multi-tenancy with horizontal isolation. Organisations are scoped via the `X-Tenant-ID` header and verified against `tenant_members` membership tables.
+- **Identity & Access Management (IAM)**:
+  - User accounts, profile data, password history (preventing reuse of recent passwords), and failed attempt lockouts (5 failed attempts trigger a 15-minute lockout).
+  - Role-Based Access Control (RBAC): dynamic roles (`roles`), fine-grained permissions (`permissions`), and user role assignments (`user_roles`).
+  - Personal access tokens and programmatic API keys (`api_keys`) with SHA-256 hash validation and prefix matching.
+- **Authentication & Session Lifecycle**:
+  - JWT authentication using short-lived access tokens (30 minutes) and rotating single-use refresh tokens (7 days) with token family reuse detection.
+  - Active session tracking (`user_sessions`) and device fingerprinting (`user_devices`).
+- **Commercial Modules & Plug-ins**:
+  - **HRMS (`modules/hrms`)**: Employee directory, department structures, and leave management.
+  - **CRM (`modules/crm`)**: Lead tracking, customer contacts, sales pipelines, and visual Kanban stages.
+  - **API Logger (`plugins/api-logger`)**: Extensible HTTP telemetry and request/response audit logging.
+- **Common Entity Standard**: Universal UUIDv4 primary keys, automatic audit columns (`created_by`, `updated_by`), and non-destructive soft delete (`deleted_at`, `deleted_by`) on all tables.
+
+### Planned Capabilities
+
+<Callout type="info" title="Status: Planned Roadmap">
+The following business modules are planned for future delivery and do not yet exist in code:
+- **Finance & Invoicing**: General ledger, accounts payable, accounts receivable, and automated GST/tax filing.
+- **Inventory & Warehouse Management**: Stock batch tracking, warehouse bin transfers, serialised inventory, and stock valuations.
+- **Procurement**: Purchase requisitions, purchase orders, vendor evaluation, and goods receipt notes.
+</Callout>
+
+---
+
+## 2. Quality Goals (ISO/IEC 25010)
+
+The architecture is driven by four primary quality goals prioritised according to enterprise operational needs:
+
+| Priority | Quality Attribute | Rationale for Innostes ERP |
+|:---|:---|:---|
+| **1** | **Modifiability** (ISO 25010 §4.2.7) | ERP systems evolve continuously. Teams must be able to author, deploy, and activate fresh business modules (`modules/*`) or developer plugins (`plugins/*`) without editing, recompiling, or restarting the core engines (`apps/api-server`, `apps/web-app`). |
+| **2** | **Security & Multi-tenant Isolation** (ISO 25010 §4.2.6) | The platform hosts sensitive corporate financial, employee, and customer records across independent commercial entities (e.g. Northwind Traders Pvt Ltd). Cross-tenant data leakage is catastrophic. Cryptographic security, token rotation, and envelope encryption must be non-negotiable. |
+| **3** | **Maintainability & Testability** (ISO 25010 §4.2.8) | Clear horizontal boundaries and uniform abstractions (e.g. `BaseService[T]`, standard HTTP error codes, and strict import rules) enable automated test coverage (unit, contract, and e2e) and minimise long-term technical debt. |
+| **4** | **Operability & Fault Tolerance** (ISO 25010 §4.2.5) | Enterprise operations require smooth deployments, zero-downtime database migrations with Postgres advisory locking, health probe readiness (`/health`), and ephemeral token-protected setup modes that eliminate unauthenticated hijacking risks. |
+
+---
+
+## 3. Stakeholders and Concerns (ISO/IEC/IEEE 42010)
+
+Different engineering and operational personas interact with the architecture documentation. The table below maps stakeholder roles to their primary concerns and the architectural views that address them:
+
+| Stakeholder Role | Primary Concern | Addressing Architectural Views |
+|:---|:---|:---|
+| **Module Author** | How do I package a new business feature? What contracts must my module implement? How do I query data safely? | [Plug-ins](/docs/architecture/plugins), [Kernel](/docs/architecture/kernel), [Creating a Module Guide](/docs/guides/creating-a-module) |
+| **Platform Engineer** | How are the execution engines wired? How do entry-point discovery and dependency rules work? | [Solution Strategy](/docs/architecture/solution-strategy), [Overview](/docs/architecture/overview), [Fitness Functions](/docs/guides/architecture-docs#5-automated-fitness-functions-and-quality-gates-f1f4) |
+| **System Operator** | How do I deploy the application? How do I handle backups, migrations, and key rotation? | [First-run Setup](/docs/architecture/setup), [api-server Guide](/docs/apps/api-server), [Constraints](/docs/architecture/constraints) |
+| **Security Reviewer** | Where are the trust boundaries? What cryptographic keys are used? How is authorization enforced? | [First-run Setup Security](/docs/architecture/setup#security-layers), [Solution Strategy](/docs/architecture/solution-strategy) |
+| **Frontend Developer** | How does `web-app` consume `@innostes/ui` and `@innostes/kernel`? How do module shells route? | [Plug-ins](/docs/architecture/plugins#frontend-plug-ins), [UI Design System](/ui/docs) |
+| **Third-Party Integrator** | How do external systems authenticate via API keys? What are the rate limits and error formats? | [Context and Scope](/docs/architecture/context-and-scope), [REST API Reference](/api-reference) |

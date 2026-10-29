@@ -1,4 +1,14 @@
 {
   "title": "Architecture",
-  "pages": ["overview", "plugins", "kernel", "setup"]
+  "pages": [
+    "index",
+    "overview",
+    "goals",
+    "constraints",
+    "context-and-scope",
+    "solution-strategy",
+    "plugins",
+    "kernel",
+    "setup"
+  ]
 }

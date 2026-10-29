@@ -69,4 +69,28 @@ Observed before the runbook started. Prompt 01 must verify every one.
 **Open issues**:
 - Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
 
+## 03 – Context, goals, constraints and solution strategy – 2026-10-29
+**Summary**: Authored arc42 sections 1–4 establishing the architectural foundation of Innostes ERP:
+1. Created `apps/landing/content/dev-docs/architecture/index.mdx` (Architecture overview, complete arc42 section mapping, C4 model hierarchy, and docs-as-code quality gate summary).
+2. Created `apps/landing/content/dev-docs/architecture/goals.mdx` (arc42 §1: requirements overview, ISO/IEC 25010 quality goals [modifiability, security, maintainability, operability], and ISO 42010 stakeholder concern matrix).
+3. Created `apps/landing/content/dev-docs/architecture/constraints.mdx` (arc42 §2: technical constraints [Python 3.10+, FastAPI, PostgreSQL 16, React 19, Nx, Tailwind v4], organisational constraints, and conventions).
+4. Created `apps/landing/content/dev-docs/architecture/context-and-scope.mdx` (arc42 §3: C4 Level 1 System Context diagram using `<Diagram>` with Mermaid flowchart, business context table, and technical context protocols table).
+5. Created `apps/landing/content/dev-docs/architecture/solution-strategy.mdx` (arc42 §4: fundamental architectural decisions, ADR mappings, and goals-to-approach matrix).
+6. Updated `apps/landing/content/dev-docs/architecture/meta.json` with new pages.
+**Changed**: `content/dev-docs/architecture/index.mdx`, `goals.mdx`, `constraints.mdx`, `context-and-scope.mdx`, `solution-strategy.mdx`, `meta.json`, `PROGRESS.md`, `03-context-goals-strategy.md` deleted.
+**Code changes**: none (documentation only).
+**Decisions**:
+- Registered arc42 §1-4 pages in `meta.json` and validated all internal links across dev-docs.
+**Verification**:
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED.
+- `pnpm nx run landing:docs-check`: PASSED (16 quality gates, 0 broken links).
+- `pnpm nx build landing`: PASSED (255 pages statically generated).
+**Open issues**:
+- Open questions for product owner:
+  1. Regulatory data retention requirements for financial and audit history under Indian statutory laws.
+  2. Multi-region database replication / read-replica requirements for distributed warehouse locations.
+  3. Priority of enterprise SAML 2.0 / OIDC corporate single sign-on (SSO) integration.
+
+
 

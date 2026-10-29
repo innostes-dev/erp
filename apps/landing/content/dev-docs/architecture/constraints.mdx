@@ -1,0 +1,64 @@
+---
+title: Architecture Constraints
+description: Technical, organisational, and convention constraints governing the Innostes ERP platform (arc42 §2).
+icon: ShieldAlert
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 2
+---
+
+Architectural choices are bounded by hard technical realities, tooling commitments, and organisational standards. Every constraint listed below is strictly evidenced by configuration files, build scripts, or codebase dependencies.
+
+---
+
+## 1. Technical Constraints
+
+| Category | Constraint | Evidence in Codebase |
+|:---|:---|:---|
+| **Python Runtime** | Python `>= 3.10` is strictly required. Async ASGI execution with `uvicorn` and `asyncpg`. | `kernel/backend/pyproject.toml:9`, `apps/api-server/Dockerfile:1` |
+| **Backend Framework** | FastAPI `>= 0.158` with Pydantic `>= 2.7.0` for request validation and OpenAPI 3.1 generation. | `apps/api-server/requirements.txt:5` |
+| **Database Engine** | PostgreSQL 16 is the sole supported relational database. Relies on native UUID, JSONB, and advisory locking primitives. | `docker-compose.yml:3`, `kernel/core/database/db_settings.py:10` |
+| **Database Access** | SQLAlchemy 2.0 async engine (`asyncpg` driver). Synchronous ORM calls are forbidden. | `kernel/core/database/engine.py:15`, `pyproject.toml:15` |
+| **Migration Tooling** | Alembic `>= 1.13.0` using PostgreSQL advisory lock (`pg_try_advisory_lock(724819)`). | `kernel/backend/alembic.ini`, `kernel/core/database/migrations.py:24` |
+| **UI Framework** | React 19 (`^19.3.0`) with Vite as the bundler. Uses `@innostes/source` export conditions for instant source HMR. | `apps/web-app/package.json:16`, `apps/web-app/vite.config.mts:24` |
+| **Design System** | Tailwind CSS v4 paired with unstyled accessible primitives from Base UI (`@base-ui-components/react`). | `packages/ui/package.json:30`, `packages/ui/src/` |
+| **Docs Engine** | Next.js 16.4.2 (Turbopack) and Fumadocs 16.17 for static site generation (SSG). | `apps/landing/package.json:54-57` |
+| **Monorepo Manager** | Nx 23.2.0 with pnpm 9.x workspace resolution. | `nx.json`, `pnpm-workspace.yaml` |
+| **Virtual Environments** | Separate Python virtual environment per application (`apps/api-server/.venv`). | `apps/api-server/project.json:12`, `apps/api-server/scripts/venv-python.js` |
+| **Cryptography** | Envelope encryption with AES-GCM-256 via `cryptography` package; password hashing via `bcrypt` (work factor 12). | `kernel/backend/pyproject.toml:19-20`, `kernel/core/config/settings.py:70` |
+
+---
+
+## 2. Organisational & Process Constraints
+
+- **Repository Layout**: Monorepo hosting all code, applications, design system packages, documentation, and infrastructure definitions (`apps/`, `kernel/`, `modules/`, `plugins/`, `packages/`).
+- **Trunk-Based Development**: Commits merge directly into the `main` branch. Long-lived feature branches are avoided.
+- **Automated CI Quality Gates**: All code submissions must pass the complete CI matrix (`.github/workflows/ci.yml`):
+  - Linting (`pnpm nx run-many -t lint`)
+  - Unit and contract tests (`pnpm nx run-many -t test contract-test`)
+  - TypeScript type checking (`pnpm nx run-many -t typecheck`)
+  - Architecture fitness functions (`pnpm run arch-check`)
+  - Documentation quality gates (`pnpm nx run landing:arch-docs-check`)
+- **Documentation Proximity**: Documentation lives next to the code in `apps/landing/content/`. Documentation changes must be submitted in the same pull request as the implementation.
+
+---
+
+## 3. Conventions & Standards
+
+- **Prose & Spelling**: British English spelling is enforced across all documentation, guides, and source docstrings (`colour`, `behaviour`, `customise`, `centre`, `organisation`, `licence`).
+- **Heading Casing**: Strict sentence case for all headings, labels, and table headers ("Architecture constraints", never "Architecture Constraints").
+- **Tone & Voice**: Authoritative enterprise reference manual style. Marketing buzzwords ("seamless", "robust", "powerful", "leverage") and conversational cliches are banned.
+- **Enterprise Reference Universe**: All examples, mock fixtures, and seed data must use the canonical corporate entity:
+  - **Company**: Northwind Traders Pvt Ltd (distributor based in Bengaluru, Karnataka, India).
+  - **Personnel**: Real Indian enterprise identities (`priya.shah@northwind.example`, `arjun.mehta@northwind.example`).
+  - **Currency**: Indian Rupees (`INR` / `₹`).
+
+---
+
+## 4. Open Questions for the Product Owner
+
+The following items are technical considerations that lack formal product owner sign-off:
+
+1. **Regulatory Data Retention**: Are there mandatory Indian statutory audit retention windows (e.g. 7 years under Companies Act) for soft-deleted transactions and audit logs?
+2. **Cross-Region Replication**: Will multi-region database failover or read-replica routing be required for multi-state enterprise deployments?
+3. **Third-Party Identity Providers**: Should SAML 2.0 / OpenID Connect (OIDC) integration be prioritized to support corporate single sign-on (SSO)?

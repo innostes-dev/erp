@@ -1,0 +1,85 @@
+---
+title: System Context and Scope
+description: High-level boundary of the Innostes ERP platform, actors, and communication protocols (arc42 §3).
+icon: Network
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 3
+---
+
+The system context establishes the external boundaries of the Innostes ERP platform. It identifies the human personas who interact with the system, the external technical services it integrates with, and the communication protocols that link them.
+
+---
+
+## 1. C4 Level 1: System Context Diagram
+
+The diagram below illustrates the Innostes ERP platform in its operational environment:
+
+<Diagram caption="Figure 1: C4 Level 1 System Context Diagram. Depicts human actors and external service integrations surrounding Innostes ERP.">
+{`
+flowchart TD
+    subgraph Users["Enterprise Personas"]
+        Admin["Tenant Administrator<br/>(Priya Shah)"]
+        User["Business Staff / Employee<br/>(Arjun Mehta)"]
+        Operator["Platform Operator<br/>(DevOps / SRE)"]
+        Integrator["External Integrator<br/>(API Consumer)"]
+    end
+
+    subgraph ERP["Innostes ERP Platform Boundary"]
+        System["Innostes ERP Platform<br/>[Two-Engine Modular Monolith]<br/>Executes business logic, IAM, and module APIs"]
+    end
+
+    subgraph External["External Supporting Systems"]
+        DB[("PostgreSQL 16 Database<br/>[Primary Relational Store]<br/>Houses tenant data, auth records, and audit tables")]
+        SMTP["SMTP Mail Server<br/>[Email Relay]<br/>Dispatches invitation and password reset links"]
+        Browser["Modern Web Browser<br/>[Client Runtime]<br/>Renders React SPA and Base UI components"]
+    end
+
+    Admin -->|Configures tenants, IAM, modules via HTTPS/JSON| System
+    User -->|Accesses HRMS, CRM, and daily tasks via HTTPS/JSON| System
+    Operator -->|Runs migrations, CLI setup, and monitoring| System
+    Integrator -->|Invokes M2M REST APIs with API keys| System
+
+    System -->|Queries and persists entities via asyncpg SQL| DB
+    System -->|Sends notification emails over SMTP/STARTTLS| SMTP
+    Browser -->|Downloads static JS/CSS bundles and renders UI| System
+
+    classDef user fill:#e1f5fe,stroke:#0288d1,stroke-width:1.5px,color:#01579b;
+    classDef system fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#1b5e20;
+    classDef ext fill:#fff3e0,stroke:#f57c00,stroke-width:1.5px,color:#e65100;
+
+    class Admin,User,Operator,Integrator user;
+    class System system;
+    class DB,SMTP,Browser ext;
+`}
+</Diagram>
+
+---
+
+## 2. Business Context Table
+
+The table below describes the business responsibilities, inputs, and outputs for every persona and system boundary:
+
+| Persona / System | Role & Responsibility | Business Inputs | Business Outputs |
+|:---|:---|:---|:---|
+| **Tenant Administrator** | Manages organisation settings, invites staff, assigns roles, and activates modules. | Tenant configuration, user invitations, role definitions, module activation flags. | Active organization workspace, RBAC assignments, audit records. |
+| **Business Staff** | Executes day-to-day business operations in commercial modules (HRMS, CRM). | Leave requests, attendance entries, customer leads, sales opportunities. | Updated sales pipelines, approved leave records, customer correspondence. |
+| **Platform Operator** | Deploys containers, monitors health probes, and manages database migrations. | Environment variables, release bundles, migration commands, backup schedules. | Operational service uptime, migrated schema revisions, health telemetry. |
+| **External Integrator** | Connects third-party software (logistics, e-commerce, banking) via REST APIs. | HTTP REST requests with Bearer tokens or `X-API-Key` headers. | JSON data payloads, webhooks, paginated resource records. |
+| **PostgreSQL Database** | Guarantees durable relational data persistence and transaction atomicity. | SQL DML/DDL queries, advisory lock acquire/release statements. | ACID query results, relational constraints, foreign key enforcement. |
+| **SMTP Mail Server** | Delivers transactional emails to enterprise personnel. | RFC 5322 MIME messages, recipient email addresses, reset tokens. | Delivery receipts, bounce notifications. |
+
+---
+
+## 3. Technical Context & Protocols
+
+Every interface crossing the platform boundary uses standardized, secure transport protocols:
+
+| Interface | Protocol | Port | Authentication & Security | Payload Format |
+|:---|:---|:---|:---|:---|
+| **Browser Client → Web App** | HTTPS / HTTP/2 | `4200` (dev) / `443` (prod) | TLS 1.3, Content Security Policy | Static HTML, CSS, JavaScript chunks |
+| **Web App → API Server** | HTTPS / REST | `8001` (dev) / `443` (prod) | Bearer JWT (`Authorization`), `X-Tenant-ID`, CORS origins whitelist | JSON (`application/json`) |
+| **Integrator → API Server** | HTTPS / REST | `8001` (dev) / `443` (prod) | `X-API-Key` header with SHA-256 hash lookup | JSON (`application/json`) |
+| **API Server → PostgreSQL** | TCP / PostgreSQL Wire Protocol | `5432` | Username, password (`SecretStr`), optional SSL/TLS (`prefer`/`require`) | Binary asyncpg SQL frames |
+| **API Server → SMTP Server** | SMTP / TCP | `587` (STARTTLS) / `465` (SSL) | SMTP AUTH (Username / Password) | Plain text and HTML MIME messages |
+| **CLI Tools → API Server** | Direct Execution / Local socket | N/A | Local operating system shell permissions, `.env` file credentials | Command arguments, stdout, exit codes |
