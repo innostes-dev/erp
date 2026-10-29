@@ -3,16 +3,124 @@ title: "Tenancy and Headers"
 description: "Multi-tenant scoping, organisation boundaries, and the X-Tenant-ID header convention."
 ---
 
-Multi-tenant scoping, organisation boundaries, and the X-Tenant-ID header convention.
+The innostes ERP API is architected around strict multi-tenant isolation. All domain records, module installations, and plugin configurations belong to a tenant organization.
 
-## Overview
+## The `X-Tenant-ID` header
 
-This guide covers operational conventions and best practices for interacting with the innostes ERP API platform.
+When an authenticated user belongs to multiple organizations, or an administrative caller performs tenant-scoped operations, the request specifies the active tenant using the `X-Tenant-ID` HTTP header:
 
-### Conventions summary
+```http
+X-Tenant-ID: 1
+```
 
-- **Environment base URL**: `http://localhost:8001` for local development; `https://api.innostes.com` for production environments.
-- **Payload format**: Standard JSON (`application/json`) with UTF-8 encoding across all endpoints.
-- **Example universe**: Northwind Traders Pvt Ltd (`priya.shah@northwind.example`, Bengaluru distributor, INR currency).
+### When the header is required
 
-Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
+| Endpoint Category | `X-Tenant-ID` Required? | Resolution Behaviour |
+| --- | --- | --- |
+| **Global Operations** (e.g. `GET /tenants`, `POST /tenants`, `GET /auth/me`) | **Optional** | Operates at the platform administration tier. |
+| **Tenant Operations** (e.g. `GET /tenants/1/modules`, `POST /tenants/1/plugins/configure`) | **Path Scoped** | The path parameter `{tenant_id}` sets the explicit tenant context. |
+| **Domain Operations** (e.g. CRM contacts, HRMS employee rosters) | **Required** | Scopes all database queries to the given tenant ID. |
+
+---
+
+## Scoping resolution logic
+
+The server evaluates tenant context using the following precedence:
+
+1. **Explicit path parameter**: If the endpoint URL contains `{tenant_id}`, the path argument overrides all headers.
+2. **Explicit `X-Tenant-ID` header**: The integer value in the `X-Tenant-ID` header is parsed and validated against the caller's authorized tenant memberships.
+3. **Primary user tenant**: If no header is provided and the caller is not an administrator, the user's default registered tenant is selected.
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_x_tenant_id__scopes_request_to_explicit_tenant`.
+
+---
+
+## Error handling for tenancy
+
+When tenant scoping checks fail, the API returns structured error responses:
+
+### 1. Invalid tenant format (`422 Unprocessable Content`)
+The header value must be an unsigned 64-bit integer. Passing non-numeric characters returns:
+
+```json
+{
+  "detail": [
+    {
+      "loc": ["header", "x-tenant-id"],
+      "msg": "Input should be a valid integer, unable to parse string as an integer",
+      "type": "int_parsing"
+    }
+  ]
+}
+```
+
+### 2. Tenant not found (`404 Not Found`)
+If the requested tenant does not exist or has been hard-deleted:
+
+```json
+{
+  "code": "TENANT_NOT_FOUND",
+  "detail": "Tenant with id 99999 was not found",
+  "status": 404
+}
+```
+
+### 3. Non-member tenant access (`403 Forbidden`)
+If a caller attempts to pass an `X-Tenant-ID` for an organization they are not a member of, access is denied:
+
+```json
+{
+  "code": "PERMISSION_DENIED",
+  "detail": "You do not have access to tenant 42",
+  "status": 403
+}
+```
+
+---
+
+## Tenant lifecycle operations
+
+Organizations can be managed through the [Tenancy endpoints](/api-reference/tenancy/list-tenants):
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+# Query modules active for Northwind Traders (Tenant ID 1)
+curl -X GET "http://localhost:8001/tenants/1/modules" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "X-Tenant-ID: 1"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const res = await fetch('http://localhost:8001/tenants/1/modules', {
+  headers: {
+    Authorization: `Bearer ${token}`,
+    'X-Tenant-ID': '1',
+  },
+});
+const modules = await res.json();
+console.log(modules);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+res = httpx.get(
+    "http://localhost:8001/tenants/1/modules",
+    headers={
+        "Authorization": f"Bearer {token}",
+        "X-Tenant-ID": "1",
+    },
+)
+print(res.json())
+```
+
+  </Tab>
+</Tabs>

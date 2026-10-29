@@ -3,16 +3,142 @@ title: "Pagination and Filtering"
 description: "Traversing record collections with skip, limit, and total count metadata."
 ---
 
-Traversing record collections with skip, limit, and total count metadata.
+Collection endpoints in the innostes ERP API use offset-based pagination to return manageable batches of records.
 
-## Overview
+## Query parameters and constraints
 
-This guide covers operational conventions and best practices for interacting with the innostes ERP API platform.
+All paginated endpoints accept two standard query parameters:
 
-### Conventions summary
+| Parameter | Type | Default | Minimum | Maximum | Description |
+| --- | --- | --- | --- | --- | --- |
+| `skip` | `integer` | `0` | `0` | None | Number of records to skip before collecting results. |
+| `limit` | `integer` | `20` | `1` | `200` | Maximum number of records to return in a single page. |
 
-- **Environment base URL**: `http://localhost:8001` for local development; `https://api.innostes.com` for production environments.
-- **Payload format**: Standard JSON (`application/json`) with UTF-8 encoding across all endpoints.
-- **Example universe**: Northwind Traders Pvt Ltd (`priya.shah@northwind.example`, Bengaluru distributor, INR currency).
+If `limit` exceeds `200`, the API rejects the request with HTTP `422 Unprocessable Content`:
 
-Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
+```json
+{
+  "detail": [
+    {
+      "loc": ["query", "limit"],
+      "msg": "Input should be less than or equal to 200",
+      "type": "less_than_equal"
+    }
+  ]
+}
+```
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_pagination_bounds__rejects_limit_exceeding_200`.
+
+---
+
+## Response envelope
+
+Paginated endpoints wrap items in a standard envelope:
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "name": "Northwind Traders Pvt Ltd",
+      "slug": "northwind",
+      "is_active": true
+    }
+  ],
+  "total": 142,
+  "page": 1,
+  "size": 20,
+  "pages": 8
+}
+```
+
+---
+
+## Sort order guarantees
+
+Unless explicitly stated otherwise:
+- Primary entities (e.g. tenants, users) are ordered deterministically by `id ASC` to prevent duplicate or skipped items across consecutive page fetches.
+- Audit feeds and system logs are ordered by `created_at DESC`.
+
+---
+
+## Client iteration helpers
+
+### TypeScript page iterator
+
+```ts
+interface Page<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export async function* fetchAllPages<T>(
+  baseUrl: string,
+  path: string,
+  token: string,
+  pageSize: number = 50
+): AsyncGenerator<T> {
+  let skip = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const url = new URL(path, baseUrl);
+    url.searchParams.set('skip', skip.toString());
+    url.searchParams.set('limit', pageSize.toString());
+
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch page: ${res.status}`);
+    }
+
+    const data: Page<T> = await res.json();
+    for (const item of data.items) {
+      yield item;
+    }
+
+    skip += data.items.length;
+    hasMore = skip < data.total && data.items.length > 0;
+  }
+}
+```
+
+### Python page iterator
+
+```python
+import httpx
+from typing import Iterator, Dict, Any
+
+def fetch_all_items(
+    base_url: str,
+    path: str,
+    token: str,
+    page_size: int = 50,
+) -> Iterator[Dict[str, Any]]:
+    client = httpx.Client(base_url=base_url)
+    headers = {"Authorization": f"Bearer {token}"}
+    skip = 0
+    has_more = True
+
+    while has_more:
+        response = client.get(
+            path,
+            params={"skip": skip, "limit": page_size},
+            headers=headers,
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        items = data.get("items", [])
+        for item in items:
+            yield item
+
+        skip += len(items)
+        total = data.get("total", 0)
+        has_more = skip < total and len(items) > 0
+```

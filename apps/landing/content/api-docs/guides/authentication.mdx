@@ -3,16 +3,208 @@ title: "Authentication"
 description: "JWT token issuance, rotation, revocation, and password recovery lifecycle."
 ---
 
-JWT token issuance, rotation, revocation, and password recovery lifecycle.
+The innostes ERP API uses JSON Web Tokens (JWT) for stateless authentication. Callers obtain tokens via username/password login, pass access tokens in the `Authorization` header, and exchange refresh tokens before access expires.
 
-## Overview
+## Token lifecycles and configuration
 
-This guide covers operational conventions and best practices for interacting with the innostes ERP API platform.
+When a user logs in via [Login](/api-reference/authentication/auth-login), two tokens are issued:
 
-### Conventions summary
+| Token Type | Purpose | Default Lifetime | Configuration Setting |
+| --- | --- | --- | --- |
+| **Access Token** | Authorises HTTP requests to protected endpoints. | 30 minutes | `ACCESS_TOKEN_EXPIRE_MINUTES` |
+| **Refresh Token** | Obtains a new access/refresh token pair. | 7 days | `REFRESH_TOKEN_EXPIRE_DAYS` |
+| **Password Reset Token** | One-time link sent via email for password recovery. | 60 minutes | `PASSWORD_RESET_TOKEN_EXPIRE_MINUTES` |
 
-- **Environment base URL**: `http://localhost:8001` for local development; `https://api.innostes.com` for production environments.
-- **Payload format**: Standard JSON (`application/json`) with UTF-8 encoding across all endpoints.
-- **Example universe**: Northwind Traders Pvt Ltd (`priya.shah@northwind.example`, Bengaluru distributor, INR currency).
+---
 
-Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
+## Token refresh rotation
+
+To prevent token theft and replay attacks, the API enforces **strict refresh-token rotation**. When [Refresh Token](/api-reference/authentication/auth-refresh) is called:
+
+1. The supplied refresh token is validated against active database sessions.
+2. A new access token AND a new refresh token are generated and returned.
+3. **The previous refresh token is immediately invalidated and cannot be reused.**
+4. If an already-rotated or revoked refresh token is presented, the API responds with `401 Unauthorized` and terminates the compromised session family.
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_token_rotation__rejects_old_refresh_token`.
+
+### Refreshing tokens
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/auth/refresh" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const res = await fetch('http://localhost:8001/auth/refresh', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ refresh_token: currentRefreshToken }),
+});
+
+if (res.ok) {
+  const data = await res.json();
+  const newAccessToken = data.access_token;
+  const newRefreshToken = data.refresh_token;
+}
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+res = httpx.post(
+    "http://localhost:8001/auth/refresh",
+    headers={"Content-Type": "application/json"},
+    json={"refresh_token": current_refresh_token},
+)
+if res.status_code == 200:
+    data = res.json()
+    new_access_token = data["access_token"]
+    new_refresh_token = data["refresh_token"]
+```
+
+  </Tab>
+</Tabs>
+
+---
+
+## Logout and session revocation
+
+Calling [Logout](/api-reference/authentication/auth-logout) with the current refresh token permanently revokes the server session. Subsequent requests using the associated tokens will fail with `401 Unauthorized`:
+
+```bash
+curl -X POST "http://localhost:8001/auth/logout" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "<refresh-token-to-revoke>"
+  }'
+```
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_logout_revocation__invalidates_subsequent_token_calls`.
+
+---
+
+## Protected endpoints summary
+
+The following endpoints require valid credentials:
+
+| Subsystem | Endpoints Requiring Bearer Auth | Public Endpoints |
+| --- | --- | --- |
+| **Authentication** | `GET /auth/me`, `POST /auth/change-password`, `POST /auth/logout`, `POST /auth/api-keys`, `GET /auth/api-keys` | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/forgot-password`, `POST /auth/reset-password` |
+| **General** | None (public system info) | `GET /`, `GET /config`, `GET /health` |
+| **Setup** | `POST /setup/install` requires `X-Setup-Token` | `GET /setup/status`, `GET /setup/checks` |
+| **Tenancy** | All `POST`, `PUT`, `DELETE`, `GET` operations | None |
+| **User Management**| `POST /users`, `GET /users/me` | None |
+
+---
+
+## Complete TypeScript refresh-and-retry client
+
+This production helper transparently intercepts `401` responses, invokes the refresh endpoint, and retries the original request:
+
+```ts
+interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+class InnostesApiClient {
+  private tokens: AuthTokens | null = null;
+  private isRefreshing = false;
+  private refreshSubscribers: ((token: string) => void)[] = [];
+
+  constructor(private baseUrl: string = 'http://localhost:8001') {}
+
+  setTokens(tokens: AuthTokens) {
+    this.tokens = tokens;
+  }
+
+  async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const url = `${this.baseUrl}${path}`;
+    const headers = new Headers(options.headers || {});
+
+    if (this.tokens?.accessToken) {
+      headers.set('Authorization', `Bearer ${this.tokens.accessToken}`);
+    }
+
+    let response = await fetch(url, { ...options, headers });
+
+    // Handle token expiry with retry
+    if (response.status === 401 && this.tokens?.refreshToken) {
+      const refreshedToken = await this.refreshToken();
+      if (refreshedToken) {
+        headers.set('Authorization', `Bearer ${refreshedToken}`);
+        response = await fetch(url, { ...options, headers });
+      }
+    }
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(`API Error ${response.status}: ${JSON.stringify(errorBody)}`);
+    }
+
+    return response.json();
+  }
+
+  private async refreshToken(): Promise<string | null> {
+    if (!this.tokens?.refreshToken) return null;
+
+    if (this.isRefreshing) {
+      return new Promise((resolve) => {
+        this.refreshSubscribers.push(resolve);
+      });
+    }
+
+    this.isRefreshing = true;
+    try {
+      const res = await fetch(`${this.baseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: this.tokens.refreshToken }),
+      });
+
+      if (!res.ok) {
+        this.tokens = null;
+        return null;
+      }
+
+      const data = await res.json();
+      this.tokens = {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+      };
+
+      this.refreshSubscribers.forEach((callback) => callback(data.access_token));
+      this.refreshSubscribers = [];
+      return data.access_token;
+    } finally {
+      this.isRefreshing = false;
+    }
+  }
+}
+```
+
+---
+
+## Secure token storage recommendations
+
+When integrating browser applications with the innostes API:
+
+| Storage Strategy | Security Trade-off | Recommendation |
+| --- | --- | --- |
+| **HttpOnly, Secure Cookies** | Impermeable to Cross-Site Scripting (XSS); requires configuring `CORS_ORIGINS` and CSRF protection. | **Recommended for browser-facing web apps.** |
+| **In-Memory JavaScript State** | Highly secure against persistent storage tampering; access tokens lost upon browser reload (refresh via silent session cookie). | **Recommended for Single Page Applications (SPAs).** |
+| **`localStorage` / `sessionStorage`** | Vulnerable to malicious browser extensions or XSS injection reading tokens directly. | **Not recommended for production enterprise environments.** |

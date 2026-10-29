@@ -3,16 +3,128 @@ title: "Generating Typed Clients"
 description: "Generating type-safe TypeScript and Python API clients from the published OpenAPI schema."
 ---
 
-Generating type-safe TypeScript and Python API clients from the published OpenAPI schema.
+Generating API clients directly from the published OpenAPI schema ensures complete compile-time type safety and guarantees that frontend code remains synchronised with the backend specification.
 
-## Overview
+## Fetching the OpenAPI specification
 
-This guide covers operational conventions and best practices for interacting with the innostes ERP API platform.
+The API server serves the current OpenAPI 3.1 contract from:
+- Production/Docs: `https://api.innostes.com/api-reference/openapi.json`
+- Local Development: `http://localhost:8001/openapi.json`
 
-### Conventions summary
+Download the specification locally:
 
-- **Environment base URL**: `http://localhost:8001` for local development; `https://api.innostes.com` for production environments.
-- **Payload format**: Standard JSON (`application/json`) with UTF-8 encoding across all endpoints.
-- **Example universe**: Northwind Traders Pvt Ltd (`priya.shah@northwind.example`, Bengaluru distributor, INR currency).
+```bash
+curl -o openapi.json http://localhost:8001/openapi.json
+```
 
-Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
+---
+
+## TypeScript client generation with `openapi-fetch`
+
+The recommended approach for TypeScript applications is `openapi-typescript` combined with `openapi-fetch`.
+
+### 1. Install dependencies
+
+```bash
+pnpm add openapi-fetch
+pnpm add -D openapi-typescript
+```
+
+### 2. Generate TypeScript types
+
+```bash
+npx openapi-typescript openapi.json -o src/lib/api-types.ts
+```
+
+### 3. Create a type-safe client
+
+```ts
+import createClient from 'openapi-fetch';
+import type { paths } from './api-types';
+
+export const api = createClient<paths>({
+  baseUrl: 'http://localhost:8001',
+});
+
+// Configure bearer authentication middleware
+export function setAuthToken(token: string) {
+  api.use({
+    onRequest({ request }) {
+      request.headers.set('Authorization', `Bearer ${token}`);
+      return request;
+    },
+  });
+}
+```
+
+### 4. Execute typed calls
+
+All paths, query parameters, request bodies, and response types are fully typed:
+
+```ts
+// 1. Typed login request
+const { data: auth, error: authError } = await api.POST('/auth/login', {
+  body: {
+    username: 'priya.shah@northwind.example',
+    password: 'Password123!',
+  },
+});
+
+if (authError) {
+  console.error('Login failed:', authError);
+} else {
+  console.log('Access token:', auth.access_token);
+}
+
+// 2. Typed tenant query with full autocompletion
+const { data: tenants, error: tenantsError } = await api.GET('/tenants', {
+  params: {
+    query: {
+      skip: 0,
+      limit: 10,
+    },
+  },
+});
+
+if (!tenantsError) {
+  tenants.items.forEach((tenant) => {
+    console.log(`Tenant ${tenant.id}: ${tenant.name}`);
+  });
+}
+```
+
+---
+
+## Python client generation with `datamodel-code-generator`
+
+For Python services and data pipelines, generate Pydantic v2 data models:
+
+```bash
+pip install datamodel-code-generator httpx
+datamodel-codegen --input openapi.json --output models.py --output-model-type pydantic_v2.BaseModel
+```
+
+### Usage with `httpx`
+
+```python
+import httpx
+from models import LoginRequest, TokenResponse, PageTenantRead_
+
+client = httpx.Client(base_url="http://localhost:8001")
+
+# Typed login
+payload = LoginRequest(
+    username="priya.shah@northwind.example",
+    password="Password123!",
+)
+res = client.post("/auth/login", json=payload.model_dump())
+tokens = TokenResponse.model_validate(res.json())
+
+# Typed tenant listing
+headers = {"Authorization": f"Bearer {tokens.access_token}"}
+res = client.get("/tenants", params={"skip": 0, "limit": 10}, headers=headers)
+page = PageTenantRead_.model_validate(res.json())
+
+for tenant in page.items:
+    print(f"Tenant {tenant.id}: {tenant.name} ({tenant.slug})")
+```

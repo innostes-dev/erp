@@ -8,6 +8,7 @@
     "error-handling",
     "pagination",
     "audit-and-soft-delete",
-    "client-generation"
+    "client-generation",
+    "environments-and-cors"
   ]
 }

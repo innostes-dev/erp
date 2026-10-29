@@ -63,10 +63,7 @@ const tagDescriptions = {
   'API logger': 'Request audit logging and inspection module.',
 };
 
-// Clean and recreate content/api-docs/
-if (existsSync(targetDocsDir)) {
-  rmSync(targetDocsDir, { recursive: true, force: true });
-}
+// Ensure content/api-docs/ exists; do not delete guides folder
 mkdirSync(targetDocsDir, { recursive: true });
 
 // Helper to resolve $ref
@@ -515,10 +512,17 @@ const guides = [
     title: 'Generating Typed Clients',
     description: 'Generating type-safe TypeScript and Python API clients from the published OpenAPI schema.',
   },
+  {
+    slug: 'environments-and-cors',
+    title: 'Environments and CORS',
+    description: 'Base URLs, CORS_ORIGINS settings, load balancer health checks, and runtime configuration.',
+  },
 ];
 
 for (const g of guides) {
-  const guideMdx = `---
+  const guideFilePath = join(guidesDir, `${g.slug}.mdx`);
+  if (!existsSync(guideFilePath)) {
+    const guideMdx = `---
 title: ${JSON.stringify(g.title)}
 description: ${JSON.stringify(g.description)}
 ---
@@ -537,7 +541,8 @@ This guide covers operational conventions and best practices for interacting wit
 
 Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
 `;
-  writeFileSync(join(guidesDir, `${g.slug}.mdx`), guideMdx.trim() + '\n');
+    writeFileSync(guideFilePath, guideMdx.trim() + '\n');
+  }
 }
 
 writeFileSync(
@@ -577,11 +582,16 @@ The API uses stateless JSON Web Tokens (JWT) passed in the standard \`Authorizat
 
 All endpoints adhere to predictable enterprise REST conventions:
 
-- **Identities**: 64-bit integer IDs (\`BigInt\`), returned as numeric values in JSON payloads. See [Multi-Tenancy Guide](/api-reference/guides/tenancy).
-- **Timestamps**: UTC ISO 8601 formatted timestamps (e.g. \`2026-10-29T10:00:00Z\`). See [Audit and Soft Delete Guide](/api-reference/guides/audit-and-soft-delete).
+- **Quickstart**: Bootstrapping, authentication and first API calls in under 10 minutes. See [Quickstart Guide](/api-reference/guides/quickstart).
+- **Authentication**: JWT token issuance, refresh rotation, and session logout. See [Authentication Guide](/api-reference/guides/authentication).
+- **Identities**: 64-bit integer IDs (\`BigInt\`), returned as numeric values in JSON payloads. See [Tenancy Guide](/api-reference/guides/tenancy).
+- **First-run setup**: Bootstrap tokens, pre-flight environment checks, and initialisation. See [First-Run Setup Guide](/api-reference/guides/first-run-setup).
+- **Timestamps**: UTC ISO 8601 formatted timestamps (e.g. \`2026-10-29T10:00:00Z\`). See [Records and Audit Guide](/api-reference/guides/audit-and-soft-delete).
 - **Pagination**: Offset-based pagination with \`skip\` and \`limit\` query parameters, returning a standardized pagination envelope. See [Pagination Guide](/api-reference/guides/pagination).
-- **Soft delete**: Audit records remain recoverable; deleted entries are omitted by default unless \`include_deleted=true\` is requested. See [Audit and Soft Delete Guide](/api-reference/guides/audit-and-soft-delete).
+- **Soft delete**: Audit records remain recoverable; deleted entries are omitted by default unless \`include_deleted=true\` is requested. See [Records and Audit Guide](/api-reference/guides/audit-and-soft-delete).
 - **Error handling**: Machine-readable RFC 7807 problem details with typed \`code\` identifiers and contextual parameter metadata. See [Error Handling Guide](/api-reference/guides/error-handling).
+- **Client generation**: Generating typed TypeScript and Python clients from the OpenAPI spec. See [Client Generation Guide](/api-reference/guides/client-generation).
+- **Environments and CORS**: Cross-origin settings, load balancer health probes, and runtime configuration. See [Environments and CORS Guide](/api-reference/guides/environments-and-cors).
 
 ## OpenAPI specification
 

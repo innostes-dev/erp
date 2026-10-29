@@ -3,16 +3,106 @@ title: "First-Run Setup"
 description: "Initialising new deployments, bootstrap tokens, and pre-flight environment checks."
 ---
 
-Initialising new deployments, bootstrap tokens, and pre-flight environment checks.
+When deploying innostes ERP for the first time, operators must execute the bootstrap sequence before regular tenant operations can begin. This process sets up the database schema, seeds the root administrative user, and locks the installation endpoint.
 
-## Overview
+## The setup sequence
 
-This guide covers operational conventions and best practices for interacting with the innostes ERP API platform.
+```
+[Server Boot] ──> [GET /setup/status] ──> [GET /setup/checks] ──> [POST /setup/install] ──> [Locked]
+```
 
-### Conventions summary
+1. **Server Boot**: The API server starts and determines whether any tenant records exist in the database.
+2. **Setup Status Query**: The installer UI or orchestration script polls `GET /setup/status` to determine whether configuration is pending.
+3. **Pre-flight Checks**: The operator calls `GET /setup/checks` to verify database connectivity and pending migrations.
+4. **Execution**: The operator submits `POST /setup/install` with the administrative credentials and the one-time `X-Setup-Token`.
+5. **Lockout**: Once initialised, `POST /setup/install` permanently returns `409 Conflict` to prevent re-installation.
 
-- **Environment base URL**: `http://localhost:8001` for local development; `https://api.innostes.com` for production environments.
-- **Payload format**: Standard JSON (`application/json`) with UTF-8 encoding across all endpoints.
-- **Example universe**: Northwind Traders Pvt Ltd (`priya.shah@northwind.example`, Bengaluru distributor, INR currency).
+---
 
-Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
+## Where the setup token comes from
+
+During boot on an uninitialised database, the server generates a high-entropy cryptographically random setup token and writes it directly to `stdout`:
+
+```
+======================================================================
+innostes ERP First-Run Setup Token:
+  X-Setup-Token: 9f8a3c1e2b4d5e6f7a8b9c0d1e2f3a4b
+This token expires after first use or 5 failed validation attempts.
+======================================================================
+```
+
+Alternatively, operators in automated GitOps or Docker deployments can provide a predefined token using the environment variable:
+
+```bash
+export SETUP_TOKEN="your-secure-bootstrap-token"
+```
+
+---
+
+## Rate limiting and attempt limits
+
+To guard against brute-force attacks against the bootstrap token:
+- The setup token allows a maximum of **5 failed validation attempts**.
+- Upon the 5th failed attempt, the server invalidates the token, emits an audit alert, and responds with `429 Too Many Requests`.
+- Once locked, an operator must restart the server process to generate a new setup token.
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_setup_token_attempt_limit__locks_out_after_max_guesses`.
+
+---
+
+## What setup provisions
+
+A successful call to [Execute Installation](/api-reference/setup/setup-execute-install) creates:
+
+1. **System Tenant**: The initial enterprise organisation (e.g. Northwind Traders Pvt Ltd) configured with default business settings and INR (₹) base currency.
+2. **Superuser Account**: The root administrative user (`priya.shah@northwind.example`) with full administrative privileges.
+3. **Core Modules**: Automatic activation of baseline tenancy, observability, and audit modules.
+4. **Installation Marker**: An indelible database record marking `installed=true`, disarming the setup token permanently.
+
+---
+
+## Automation sample
+
+Automate cluster deployment with this Python script:
+
+```python
+import os
+import sys
+import httpx
+
+API_BASE = os.getenv("API_BASE_URL", "http://localhost:8001")
+SETUP_TOKEN = os.getenv("SETUP_TOKEN", "test-setup-token-42")
+
+client = httpx.Client(base_url=API_BASE, timeout=10.0)
+
+# 1. Check status
+status = client.get("/setup/status").json()
+if status.get("installed"):
+    print("Deployment already installed. Exiting.")
+    sys.exit(0)
+
+# 2. Run pre-install checks
+checks = client.get("/setup/checks").json()
+if not checks.get("ready"):
+    print(f"Pre-flight checks failed: {checks}")
+    sys.exit(1)
+
+# 3. Submit install
+response = client.post(
+    "/setup/install",
+    headers={"X-Setup-Token": SETUP_TOKEN},
+    json={
+        "app_name": "Northwind Enterprise ERP",
+        "admin_email": "priya.shah@northwind.example",
+        "admin_password": "Password123!",
+        "admin_first_name": "Priya",
+        "admin_last_name": "Shah",
+    },
+)
+
+if response.status_code == 201:
+    print("Setup completed successfully.")
+else:
+    print(f"Setup failed ({response.status_code}): {response.text}")
+    sys.exit(1)
+```

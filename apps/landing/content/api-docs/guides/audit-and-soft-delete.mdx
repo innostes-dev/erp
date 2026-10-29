@@ -3,16 +3,63 @@ title: "Records, Audit, and Soft Delete"
 description: "Deterministic identifiers, UTC ISO 8601 timestamps, and soft deletion recovery."
 ---
 
-Deterministic identifiers, UTC ISO 8601 timestamps, and soft deletion recovery.
+All records across the innostes ERP database follow strict conventions for data integrity, auditable history, and non-destructive deletion.
 
-## Overview
+## Identifiers and timestamps
 
-This guide covers operational conventions and best practices for interacting with the innostes ERP API platform.
+- **Identifiers (`id`)**: 64-bit unsigned integers (`BigInt`), generated deterministically by database sequence generators. Handled as numeric values in JSON payloads.
+- **Timestamps (`*_at`)**: Formatted in UTC conforming to the ISO 8601 standard (`YYYY-MM-DDTHH:MM:SSZ`). Callers should parse them into UTC datetime instances.
 
-### Conventions summary
+---
 
-- **Environment base URL**: `http://localhost:8001` for local development; `https://api.innostes.com` for production environments.
-- **Payload format**: Standard JSON (`application/json`) with UTF-8 encoding across all endpoints.
-- **Example universe**: Northwind Traders Pvt Ltd (`priya.shah@northwind.example`, Bengaluru distributor, INR currency).
+## Audit trail fields
 
-Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
+Entity records automatically maintain four system audit fields:
+
+| Field | Type | Populated By | Description |
+| --- | --- | --- | --- |
+| `created_at` | `string (date-time)` | Server | Exact UTC timestamp of initial record insertion. |
+| `created_by` | `integer` (nullable) | Server | User `id` extracted from the bearer token upon creation. |
+| `updated_at` | `string (date-time)` | Server | Exact UTC timestamp of the most recent modification. |
+| `updated_by` | `integer` (nullable) | Server | User `id` of the actor performing the modification. |
+
+*Verified by contract test*: `apps/api-server/tests/test_behaviour_facts.py::test_audit_fields__populated_on_create_and_update`.
+
+---
+
+## Soft deletion lifecycle
+
+To protect against accidental data loss, standard delete endpoints perform a **soft delete** rather than a destructive SQL `DELETE`:
+
+```
+[Active Record] ──(DELETE /tenants/1)──> [Soft Deleted: deleted_at set]
+       │                                            │
+       │                               (POST /tenants/1/restore)
+       │                                            │
+       └────────────────────────────────────────────┘
+```
+
+1. **Deletion**: Calling `DELETE /tenants/{id}` updates `deleted_at` to the current UTC timestamp and sets `is_active = false`.
+2. **Default Filtering**: By default, `GET /tenants` excludes soft-deleted records.
+3. **Auditing**: Administrative callers can audit deleted entries by passing the query parameter `include_deleted=true`.
+4. **Restoration**: Calling `POST /tenants/{id}/restore` clears `deleted_at` and restores active status.
+5. **Hard Deletion**: Permanent purging requires invoking `DELETE /tenants/{id}/hard`, which permanently removes the row and cascades to dependent resources.
+
+*Verified by contract tests*:
+- `test_soft_delete__hides_record_by_default`
+- `test_soft_delete__include_deleted_shows_records`
+- `test_soft_delete__restore_makes_record_active`
+
+---
+
+## Uniqueness collisions with soft-deleted entities
+
+A critical edge case involves unique fields such as organisation `slug`:
+
+> [!IMPORTANT]
+> Unique constraints on fields like `slug` apply across the entire table. If a tenant with slug `northwind` is soft-deleted, creating a new tenant with slug `northwind` returns `409 Conflict`.
+> 
+> To reuse the slug, administrators must either:
+> 1. Restore the original tenant: `POST /tenants/{id}/restore`
+> 2. Hard-delete the original tenant: `DELETE /tenants/{id}/hard`
+> 3. Update the original tenant's slug prior to deletion.

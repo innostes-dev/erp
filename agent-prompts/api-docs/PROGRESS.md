@@ -230,6 +230,41 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 - Blocking: none.
 - Non-blocking: Prompt 06 (Guides for API callers).
 
+## 06 – Guides for API callers – 2026-10-29
+
+**Summary**: Authored nine comprehensive, practical guides for API callers under `content/api-docs/guides/` meeting G1–G8 and verified by real execution and contract tests. Cites behaviour-fact tests from Prompt 04 covering token rotation, expiry rejection, logout session invalidation, `X-Tenant-ID` scoping, setup attempt rate limits, pagination bounds, soft delete recovery, and automated audit field tracking. Every code snippet is written in `curl`, TypeScript, and Python with real inputs and outputs using the Northwind Traders Pvt Ltd enterprise data universe.
+
+**Changed**:
+- Created `apps/landing/content/api-docs/guides/quickstart.mdx`: End-to-end walkthrough from server boot, pre-install checks, install, login, profile query, to tenant creation in under 10 minutes.
+- Created `apps/landing/content/api-docs/guides/authentication.mdx`: Token lifecycles, configuration settings (`ACCESS_TOKEN_EXPIRE_MINUTES`, `REFRESH_TOKEN_EXPIRE_DAYS`), strict rotation semantics, logout revocation, and production TypeScript 401 refresh-and-retry client.
+- Created `apps/landing/content/api-docs/guides/tenancy.mdx`: Multi-tenant isolation, `X-Tenant-ID` header conventions, precedence hierarchy, and typed error responses (403, 404, 422).
+- Created `apps/landing/content/api-docs/guides/first-run-setup.mdx`: First-boot setup sequence, single-use `X-Setup-Token` generation, 5-attempt rate-limiting lockout, and complete Python deployment automation script.
+- Created `apps/landing/content/api-docs/guides/error-handling.mdx`: RFC 7807 `ErrorResponse` problem details, Pydantic 422 validation structure traversal, retry guidance, and typed TypeScript error-handling helper.
+- Created `apps/landing/content/api-docs/guides/pagination.mdx`: Offset pagination with `skip` and `limit`, 200-item maximum limit guard, response envelope, and asynchronous page generators in TypeScript and Python.
+- Created `apps/landing/content/api-docs/guides/audit-and-soft-delete.mdx`: 64-bit integer IDs, UTC ISO 8601 timestamps, server-managed audit fields, soft deletion lifecycles, `include_deleted` queries, and unique slug conflict resolution.
+- Created `apps/landing/content/api-docs/guides/client-generation.mdx`: Compiling type-safe TypeScript clients using `openapi-typescript` / `openapi-fetch` and Python Pydantic v2 clients via `datamodel-code-generator`.
+- Created `apps/landing/content/api-docs/guides/environments-and-cors.mdx`: Base URLs across development and production, `CORS_ORIGINS` settings, orchestrator health checks (`GET /health`), and public configuration inspection (`GET /config`).
+- Updated `apps/landing/content/api-docs/guides/meta.json`: Canonical ordering of all 9 guide pages in the navigation tree.
+- Updated `apps/landing/scripts/generate-api-docs.mjs`: Protected `guides/` directory from destructive rewrites and updated overview page cross-links.
+
+**API changes**: none.
+
+**Decisions**:
+- Cite concrete test names directly in guides (`test_behaviour_facts.py`) so callers and auditors have verifiable proof of runtime behaviour.
+- Provide production-ready, drop-in TypeScript helpers for automatic token refresh and multi-page collection iteration.
+- Document the exact uniqueness conflict edge case where soft-deleted entities retain database unique constraints on fields like `slug`.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (All 11 enforced quality gates pass, 0 defects).
+- `node apps/landing/scripts/checks/check-api-docs-stale.mjs`: PASS (33 operations and 41 schemas fresh).
+- `pnpm nx run landing:typecheck`: PASS (0 type errors).
+- `pnpm nx run landing:build`: PASS (242 static pages generated successfully in 47s).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 07 (Catalogues and policies).
+
+
 
 
 

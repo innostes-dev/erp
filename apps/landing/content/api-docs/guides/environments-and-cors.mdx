@@ -1,0 +1,88 @@
+---
+title: "Environments and CORS"
+description: "Base URLs, CORS_ORIGINS settings, load balancer health checks, and runtime configuration."
+---
+
+This guide outlines deployment environments, network security boundaries, cross-origin resource sharing (CORS), and infrastructure observability probes.
+
+## Environments and base URLs
+
+The API runs across standard enterprise environments:
+
+| Environment | Base URL | Description |
+| --- | --- | --- |
+| **Local Development** | `http://localhost:8001` | Local development server started via `pnpm nx serve api-server`. |
+| **Staging** | `https://staging-api.innostes.com` | Automated CI/CD integration and contract verification tier. |
+| **Production** | `https://api.innostes.com` | Multi-tenant cloud production deployment behind TLS terminating ingress. |
+
+---
+
+## Configuring CORS for browser apps
+
+Browser applications hosted on different origins (e.g. Next.js on `http://localhost:3000` calling API on `http://localhost:8001`) require Cross-Origin Resource Sharing (CORS) authorization.
+
+### The `CORS_ORIGINS` configuration
+
+The API server reads allowed origins from the `CORS_ORIGINS` environment variable (comma-separated or JSON list):
+
+```bash
+# In your .env or environment configuration
+CORS_ORIGINS="http://localhost:3000,https://app.innostes.com"
+```
+
+When a browser initiates an HTTP request with an `Origin` header matching one of the configured patterns:
+- The server responds with `Access-Control-Allow-Origin: <origin>` and `Access-Control-Allow-Credentials: true`.
+- Allowed methods: `GET, POST, PUT, PATCH, DELETE, OPTIONS`.
+- Allowed headers: `Authorization, Content-Type, X-Tenant-ID, X-Setup-Token`.
+
+If CORS fails, browsers block responses with a `Cross-Origin Request Blocked` error.
+
+---
+
+## Observability and load balancer health checks
+
+Cloud orchestrators (Kubernetes, AWS ALB, GCP Cloud Run) poll the [Health Check](/api-reference/observability/system-health) endpoint:
+
+```bash
+curl -i http://localhost:8001/health
+```
+
+### Readiness probe response (`200 OK`)
+
+```json
+{
+  "status": "ok",
+  "database": "connected",
+  "version": "0.1.0"
+}
+```
+
+If database connectivity is lost, the endpoint responds with `503 Service Unavailable`, prompting load balancers to route traffic away from the degraded instance.
+
+---
+
+## Public runtime configuration (`GET /config`)
+
+The [System Config](/api-reference/general/system-config) endpoint exposes public, non-sensitive feature flags and environment identifiers to frontend applications:
+
+```bash
+curl -X GET "http://localhost:8001/config"
+```
+
+**Response (`200 OK`)**:
+
+```json
+{
+  "app_name": "innostes ERP",
+  "environment": "development",
+  "version": "0.1.0",
+  "features": {
+    "registration_enabled": true,
+    "audit_logging": true,
+    "plugins_enabled": true
+  }
+}
+```
+
+> [!NOTE]
+> Database connection strings, JWT signing keys, and internal service credentials are never exposed via `/config`.

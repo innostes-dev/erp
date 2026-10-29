@@ -3,16 +3,130 @@ title: "Error Handling"
 description: "Standard problem detail envelopes, error codes, and robust caller retry strategies."
 ---
 
-Standard problem detail envelopes, error codes, and robust caller retry strategies.
+The innostes ERP API returns predictable, machine-readable error responses adhering to the RFC 7807 problem details specification.
 
-## Overview
+## The `ErrorResponse` shape
 
-This guide covers operational conventions and best practices for interacting with the innostes ERP API platform.
+All handled business and operational errors return the following standard JSON envelope:
 
-### Conventions summary
+```json
+{
+  "code": "TENANT_NOT_FOUND",
+  "detail": "Tenant with id 42 was not found",
+  "status": 404,
+  "params": {
+    "tenant_id": 42
+  }
+}
+```
 
-- **Environment base URL**: `http://localhost:8001` for local development; `https://api.innostes.com` for production environments.
-- **Payload format**: Standard JSON (`application/json`) with UTF-8 encoding across all endpoints.
-- **Example universe**: Northwind Traders Pvt Ltd (`priya.shah@northwind.example`, Bengaluru distributor, INR currency).
+### Envelope fields
 
-Refer to the [API Overview](/api-reference) for the complete endpoint catalogue.
+| Field | Type | Description |
+| --- | --- | --- |
+| `code` | `string` | Machine-readable, uppercase error token (e.g. `AUTHENTICATION_FAILED`, `PERMISSION_DENIED`). |
+| `detail` | `string` | Human-readable explanation written in British English for debugging. |
+| `status` | `integer` | HTTP status code matching the response header. |
+| `params` | `object` | Optional dictionary containing context variables (IDs, field names, limits) that caused the error. |
+
+---
+
+## Validation errors (`422 Unprocessable Content`)
+
+When incoming request bodies, query arguments, or headers fail Pydantic schema validation, the API returns HTTP 422 with a structured field path list:
+
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "slug"],
+      "msg": "String should match pattern '^[a-z0-9-]+$'",
+      "type": "string_pattern_mismatch"
+    },
+    {
+      "loc": ["body", "name"],
+      "msg": "Field required",
+      "type": "missing"
+    }
+  ]
+}
+```
+
+In your application code, traverse `loc` to display validation errors next to the appropriate input field in user interfaces:
+- `loc[0]` indicates the location: `body`, `query`, `path`, or `header`.
+- `loc[1..n]` provides the nested property name.
+
+---
+
+## HTTP status codes summary
+
+| Status Code | Description | Caller Action |
+| --- | --- | --- |
+| `400 Bad Request` | Malformed request syntax or unparseable payload. | Correct payload structure before retrying. |
+| `401 Unauthorized` | Missing, expired, or invalid JWT access token. | Refresh credentials via `/auth/refresh` or re-authenticate. |
+| `403 Forbidden` | Authenticated caller lacks permissions for the target organization or resource. | Check user role assignments or request organization membership. |
+| `404 Not Found` | The specified entity or route does not exist. | Verify resource identifiers before calling. |
+| `409 Conflict` | Uniqueness collision (e.g. slug already taken) or illegal state transition. | Change unique values or verify entity lifecycle state. |
+| `422 Unprocessable Content` | Schema or field constraint violation. | Fix field formats and re-submit. |
+| `429 Too Many Requests` | Setup attempt limit or rate limit exceeded. | Back off and inspect the `Retry-After` header. |
+| `500 Internal Server Error` | Unhandled server error. | Retry with exponential backoff; notify administrator if persistent. |
+| `503 Service Unavailable` | Database or dependency readiness probe failed. | Safe to retry after backoff. |
+
+---
+
+## Retry guidance and backoff
+
+Safe retries depend on HTTP method idempotency and status code:
+
+1. **Idempotent methods (`GET`, `PUT`, `DELETE`)**: Safe to retry on `503 Service Unavailable` and network disconnects.
+2. **Non-idempotent methods (`POST`, `PATCH`)**: Only retry if confirmed that the server did not receive the initial request.
+3. **`Retry-After` Header**: When a `429 Too Many Requests` or `503 Service Unavailable` response includes a `Retry-After: <seconds>` header, clients must respect the suggested duration.
+
+---
+
+## TypeScript error handling helper
+
+```ts
+export class InnostesApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly code: string,
+    public readonly detail: string,
+    public readonly params?: Record<string, unknown>,
+    public readonly validationErrors?: Array<{ loc: (string | number)[]; msg: string; type: string }>
+  ) {
+    super(`[${code || status}] ${detail}`);
+    this.name = 'InnostesApiError';
+  }
+}
+
+export async function handleApiResponse<T>(response: Response): Promise<T> {
+  if (response.ok) {
+    return response.json();
+  }
+
+  let errorBody: any;
+  try {
+    errorBody = await response.json();
+  } catch {
+    errorBody = { detail: response.statusText };
+  }
+
+  if (response.status === 422 && Array.isArray(errorBody.detail)) {
+    throw new InnostesApiError(
+      422,
+      'VALIDATION_ERROR',
+      'One or more fields failed schema validation',
+      undefined,
+      errorBody.detail
+    );
+  }
+
+  throw new InnostesApiError(
+    response.status,
+    errorBody.code || 'UNKNOWN_ERROR',
+    errorBody.detail || 'An unexpected error occurred',
+    errorBody.params
+  );
+}
+```
