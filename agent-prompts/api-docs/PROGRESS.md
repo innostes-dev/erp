@@ -54,3 +54,43 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 - Blocking: none.
 - Non-blocking: Prompt 02 (Quality gates).
 
+## 02 – Quality gates for the API spec – 2026-10-29
+
+**Summary**: Implemented automated spec freshness and spec linting quality gates. Wired `api-server:openapi-check` and `api-server:openapi-lint` into Nx and GitHub Actions CI. Spectral OAS ruleset and custom Python checklist validator cover E1–E17, S1–S8, and T1–T3. Report-mode rules configured to track violations without breaking builds; all enforced rules pass.
+
+**Changed**:
+- Created `apps/api-server/scripts/check_openapi.py` & `apps/api-server/scripts/check-openapi.js` (freshness check with diff output).
+- Created `apps/api-server/scripts/lint_openapi.py` & `apps/api-server/scripts/lint-openapi.js` (checklist validation and Spectral OAS execution).
+- Created `apps/api-server/.spectral.yaml` (Spectral OAS rule configuration).
+- Created `apps/api-server/openapi-lint-exceptions.yaml` (report-mode rule configuration and exceptions).
+- Updated `apps/api-server/project.json` (added `openapi-check` and `openapi-lint` targets).
+- Updated `.github/workflows/ci.yml` (added Python 3.11 setup, `api-server:install`, and quality gate targets).
+- Updated `kernel/backend/README.md` (documented quality gate commands, modes, and exception process).
+
+**Report-mode metrics (296 observations tracking toward prompt 10)**:
+- `E1` (operation_id snake_case / uniqueness): 12 occurrences
+- `E5` (explicit security declaration): 21 occurrences
+- `E6` (parameter descriptions / UUID format): 10 occurrences
+- `E9` (declared 401/422 responses): 15 occurrences
+- `E11` (custom header declarations): 8 occurrences
+- `S1` (schema docstrings): 3 occurrences
+- `S2` (field descriptions and examples): 209 occurrences
+- `S6` (read-schema json_schema_extra example): 15 occurrences
+- `S7` (consistent schema naming): 1 occurrence
+- `T3` (sentence case tag names): 2 occurrences
+
+**Decisions**:
+- Enforce strict rules (E4, E8, E14, E17, S4, S8, T1) immediately, failing if invalid tags, missing 2xx schemas, deprecated routes without replacement, or unsafe emails are introduced.
+- Run remaining rules in report mode via `openapi-lint-exceptions.yaml`; prompt 03 will address these in code.
+
+**Verification**:
+- `pnpm nx run api-server:openapi-check`: PASS (spec is in sync with code).
+- `pnpm nx run api-server:openapi-lint`: PASS (Spectral clean, 0 enforced defects, 296 report-mode observations).
+- `pnpm nx test api-server`: PASS (6 tests in 1.35s).
+- `pnpm nx test kernel-backend`: PASS (100 tests in 5.80s).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 03 (Endpoint docs in code).
+
+

@@ -34,6 +34,20 @@
         "cwd": "apps/api-server",
         "command": "node scripts/export-openapi.js"
       }
+    },
+    "openapi-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api-server",
+        "command": "node scripts/check-openapi.js"
+      }
+    },
+    "openapi-lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api-server",
+        "command": "node scripts/lint-openapi.js"
+      }
     }
   }
 }

@@ -1,0 +1,25 @@
+# Quality gate configuration for apps/api-server openapi-lint
+# Rules listed under report_mode_rules emit warnings and metrics in report mode without failing CI.
+# As prompt 03 fixes each area, the rule is removed from this list until it is empty.
+
+report_mode_rules:
+  - E1   # Stable snake_case <feature>_<action> operation_id
+  - E2   # Imperative sentence-case summary <=60 chars without trailing period
+  - E3   # Non-empty public description before \f without internal Args/Returns
+  - E5   # Explicit security matching real dependencies
+  - E6   # Parameter descriptions, formats, and examples
+  - E9   # Declared 401/403/422 responses matching route security & parameters
+  - E11  # Explicit declaration of custom headers (X-Tenant-ID, X-Setup-Token)
+  - E12  # Pagination parameter bounds on list endpoints
+  - S1   # Schema class docstring descriptions
+  - S2   # Field descriptions and examples on schemas
+  - S6   # Realistic read-schema example in json_schema_extra
+  - S7   # Consistent schema naming (Create/Update suffix instead of Input)
+  - T2   # Logical tag order
+  - T3   # Sentence case tag names
+
+exceptions:
+  # Justified exceptions with reasons:
+  - rule: E14
+    target: "all"
+    reason: "No deprecated endpoints exist in the current API version."

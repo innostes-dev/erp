@@ -93,6 +93,29 @@ def get(self, id: uuid.UUID, include_deleted: bool = False) -> ModelT | None:
 - Schemas: `Field(description=..., examples=[...])` on every field, plus a full example in `model_config["json_schema_extra"]` for read schemas.
 - Module: describe each router tag in `openapi_tags` on the module class.
 
+### Automated API quality gates
+
+All endpoints and schemas are validated by automated quality gates in CI:
+
+- **Spec freshness**: `pnpm nx run api-server:openapi-check` regenerates the specification to a temporary buffer and asserts zero difference against the committed `apps/api-server/openapi.json`.
+- **Spec linting**: `pnpm nx run api-server:openapi-lint` executes Spectral OAS rules and the Python checklist runner (`scripts/lint_openapi.py`) covering rules E1–E17, S1–S8, and T1–T3.
+
+#### Report vs enforce modes
+
+- **Enforced rules** (e.g. unique tags, success response schemas, deprecated operation guidance, email domains in `.example`) immediately fail the build on any violation.
+- **Report-mode rules** track ongoing improvements across the codebase without breaking builds. These are configured in `apps/api-server/openapi-lint-exceptions.yaml` under `report_mode_rules:`. As issues are addressed, rule IDs are removed from `report_mode_rules`.
+
+#### Justified exceptions
+
+If an endpoint or schema has an architectural rationale for deviating from a rule, document the exception under `exceptions:` in `apps/api-server/openapi-lint-exceptions.yaml` with the rule ID, target, and a clear reason:
+
+```yaml
+exceptions:
+  - rule: E14
+    target: "all"
+    reason: "No deprecated endpoints exist in the current API version."
+```
+
 ## Usage
 
 ```python

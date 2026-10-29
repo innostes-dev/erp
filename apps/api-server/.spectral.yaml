@@ -1,0 +1,31 @@
+extends: [[spectral:oas, off]]
+
+rules:
+  operation-tags:
+    description: Operation must have tags
+    message: "{{error}}"
+    severity: error
+    given: $.paths.*[?( @property !== 'parameters' )]
+    then:
+      field: tags
+      function: defined
+
+  operation-tag-defined:
+    description: Tag must be defined in "tags" list
+    severity: error
+    given: $.paths.*[?( @property !== 'parameters' )].tags.*
+    then:
+      function: defined
+
+  operation-success-response:
+    description: Operation must have a 2xx or 3xx response
+    severity: error
+    given: $.paths.*[?( @property !== 'parameters' )].responses
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          patternProperties:
+            "^(2|3)":
+              type: object
