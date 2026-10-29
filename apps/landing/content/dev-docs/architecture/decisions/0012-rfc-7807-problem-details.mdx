@@ -1,0 +1,50 @@
+---
+title: "ADR-0012: RFC 7807 Problem Details for HTTP Error Responses"
+description: "Standardising machine-readable error responses across all API endpoints."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0012: RFC 7807 Problem Details for HTTP Error Responses
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Inconsistent error payloads (some strings, some dicts, some HTML) cause client-side parsing failures and degrade developer experience.
+
+## Decision Drivers
+
+- Predictable, uniform error payloads across all modules.
+- Machine-readable error codes for programmatic client handling.
+- Sanitisation of internal stack traces and database credentials.
+
+## Considered Options
+
+- Ad-hoc dictionary payloads `{'error': '...'}`.
+- GraphQL-style error lists.
+- RFC 7807 Problem Details (`ErrorResponse`).
+
+## Decision Outcome
+
+Chosen option: "RFC 7807 Problem Details (`ErrorResponse`).", because RFC 7807 compliant `ErrorResponse` containing `detail` and optional machine `code`.
+
+### Consequences
+
+- Good, because Client libraries can reliably parse `detail` and switch on `code`.
+- Good, because Enforced centrally via `register_error_handlers` in `kernel.core.http`.
+- Good, because Verified by the API documentation freshness and sample gates.
+- Bad, because All custom exceptions must be registered in the error handler mapper.
+
+## Confirmation
+
+Enforced by `check-catalogues.mjs` verifying all `ErrorCode` constants match documentation.

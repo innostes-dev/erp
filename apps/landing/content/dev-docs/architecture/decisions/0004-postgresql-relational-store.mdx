@@ -1,0 +1,50 @@
+---
+title: "ADR-0004: PostgreSQL 16 as Canonical Relational Store"
+description: "Standardising on PostgreSQL for transactional ACID consistency and JSONB flexibility."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0004: PostgreSQL 16 as Canonical Relational Store
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Enterprise ERP platforms manage financial, organisational, and audit data requiring strict ACID transactional guarantees, relational foreign keys, and performant semi-structured attributes.
+
+## Decision Drivers
+
+- Strong ACID compliance and relational integrity.
+- Robust JSONB indexing for extensible configuration documents.
+- Transactional advisory locks for concurrent migration safety.
+
+## Considered Options
+
+- MySQL / MariaDB.
+- MongoDB / NoSQL document store.
+- PostgreSQL 16.
+
+## Decision Outcome
+
+Chosen option: "PostgreSQL 16.", because PostgreSQL 16. Serves as the single source of truth for all 18 core tables and plug-in domain entities.
+
+### Consequences
+
+- Good, because Advanced relational features: partial indexes, advisory locks, and JSONB operators.
+- Good, because Universal cloud support (AWS RDS, GCP Cloud SQL, Azure Database).
+- Good, because Future-proof path for PostgreSQL Row-Level Security (RLS).
+- Bad, because Horizontal scaling requires read replicas or partitioned multi-database sharding.
+
+## Confirmation
+
+Enforced in `docker-compose.yml` and `kernel/core/database/db_settings.py`.

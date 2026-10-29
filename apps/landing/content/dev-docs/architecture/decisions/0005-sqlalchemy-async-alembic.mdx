@@ -1,0 +1,50 @@
+---
+title: "ADR-0005: SQLAlchemy 2.0 Async Engine and Alembic Migrations"
+description: "Adopting SQLAlchemy 2.0 declarative models and Alembic migration tracking."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0005: SQLAlchemy 2.0 Async Engine and Alembic Migrations
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Python backend services need a strongly-typed Object Relational Mapper (ORM) that integrates natively with asyncpg and provides repeatable, versioned schema migrations.
+
+## Decision Drivers
+
+- Type-safe Python 3.10+ model definitions (`Mapped[T]`, `mapped_column`).
+- Non-blocking async query execution via `asyncpg`.
+- Automated schema diffing and migration tracking.
+
+## Considered Options
+
+- Tortoise ORM or Peewee.
+- Raw SQL with asyncpg.
+- SQLAlchemy 2.0 with Alembic.
+
+## Decision Outcome
+
+Chosen option: "SQLAlchemy 2.0 with Alembic.", because SQLAlchemy 2.0 with Alembic. Models inherit from a shared declarative `Base` in `kernel.core.database`.
+
+### Consequences
+
+- Good, because Mature, enterprise-proven ORM with complete SQL dialect coverage.
+- Good, because Alembic auto-generates schema diffs based on model class changes.
+- Good, because Managed `AsyncSession` scoping in FastAPI dependencies.
+- Bad, because Strict separation between async queries and synchronous attributes requires `lazy='selectin'` or explicit joins.
+
+## Confirmation
+
+Enforced by `kernel/backend/tests/test_architecture_fitness.py`.

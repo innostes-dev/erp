@@ -1,0 +1,51 @@
+---
+title: "ADR-0008: Universal Soft Delete via deleted_at and deleted_by"
+description: "Prohibiting physical deletions in favour of audit-tracked soft deletion."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0008: Universal Soft Delete via deleted_at and deleted_by
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Accidental deletion of enterprise data causes catastrophic operational impact. Regulatory frameworks (such as Indian corporate law and GDPR) require data retention and audit traceability.
+
+## Decision Drivers
+
+- Prevent catastrophic data loss from accidental user deletion.
+- Retain historical audit records for regulatory compliance.
+- Enable single-click restoration of erroneously deleted entities.
+
+## Considered Options
+
+- Hard physical SQL DELETE statements.
+- Archiving deleted records into separate history tables.
+- In-place soft deletion via `deleted_at` and `deleted_by` columns.
+
+## Decision Outcome
+
+Chosen option: "In-place soft deletion via `deleted_at` and `deleted_by` columns.", because In-place soft deletion via `SoftDeleteMixin`. Physical `DELETE` statements are prohibited in application code.
+
+### Consequences
+
+- Good, because Seamless query filtering: `BaseService` automatically appends `WHERE deleted_at IS NULL`.
+- Good, because Full attribution: `deleted_by` identifies who initiated the removal.
+- Good, because Instant recovery via `service.restore(id)`.
+- Bad, because Unique constraints on fields like `slug` require partial indexes (`WHERE deleted_at IS NULL`).
+- Bad, because Table storage grows over time requiring periodic purging policies.
+
+## Confirmation
+
+Enforced by `SoftDeleteMixin` and `BaseService.soft_delete`.

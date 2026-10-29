@@ -214,3 +214,40 @@ Observed before the runbook started. Prompt 01 must verify every one.
 **Open issues**:
 - Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
 - Handed to Prompt 10: `ARC-014` (IP-based rate limiting at ingress) and `ARC-015` (PostgreSQL RLS).
+
+## 09 – Architecture decision records – 2026-10-29
+**Summary**: Authored arc42 section 9 (Architecture Decisions) in `apps/landing/content/dev-docs/architecture/decisions/`:
+1. Established the MADR 4.x decision template in `decisions/0000-template.mdx`.
+2. Authored the complete Architecture Decision Log index in `decisions/index.mdx` with tabular status tracking.
+3. Authored all 16 retroactive Architecture Decision Records (ADRs) covering foundational platform choices:
+   - `0001-engine-plugin-inversion`: Modular monolith with engine-plugin inversion.
+   - `0002-fastapi-backend-engine`: FastAPI and Uvicorn for asynchronous execution and OpenAPI contracts.
+   - `0003-react-vite-ui-engine`: React 19 and Vite with `@innostes/source` export conditions for instant HMR.
+   - `0004-postgresql-relational-store`: PostgreSQL 16 as canonical ACID store.
+   - `0005-sqlalchemy-async-alembic`: SQLAlchemy 2.0 async ORM and Alembic schema diffing.
+   - `0006-shared-database-per-module-migrations`: Single database connection pool with per-module table ownership.
+   - `0007-uuidv4-primary-keys`: Client-side key generation and enumeration prevention via UUIDv4.
+   - `0008-universal-soft-delete`: Universal soft-delete semantics (`deleted_at`/`deleted_by`).
+   - `0009-standardised-audit-columns`: Universal audit trail (`created_by`/`updated_by`).
+   - `0010-jwt-access-rotating-refresh-tokens`: 30m JWT access tokens with 7d refresh token family rotation.
+   - `0011-multi-tenancy-header-membership`: `X-Tenant-ID` scoping and membership verification.
+   - `0012-rfc-7807-problem-details`: Machine-readable `ErrorResponse` problem payloads.
+   - `0013-headless-tailwind-ui-package`: 238 accessible enterprise UI components in `@innostes/ui`.
+   - `0014-first-run-setup-gate`: Ephemeral setup token and setup required middleware gating.
+   - `0015-single-use-rotating-refresh-family`: Automatic token replay/theft detection and session termination.
+   - `0016-nextjs-fumadocs-docs-site`: Static site generation for documentation portal.
+4. Authored 2 proposed ADRs for pending architecture decisions:
+   - `0017-database-row-level-security`: PostgreSQL Row-Level Security for defense-in-depth multi-tenancy.
+   - `0018-dynamic-frontend-module-manifests`: Dynamic runtime frontend manifest loading.
+5. Registered `decisions/meta.json` and linked in `architecture/meta.json`.
+**Changed**: `apps/landing/content/dev-docs/architecture/decisions/*`, `architecture/meta.json`, `apps/landing/scripts/generate-adrs.py`, `PROGRESS.md`, `09-adrs.md` deleted.
+**Code changes**: Added `generate-adrs.py`.
+**Decisions**:
+- Registered all 18 ADRs in `decisions/meta.json` and validated MADR 4.x compliance via `check-adrs.mjs`.
+**Verification**:
+- `node apps/landing/scripts/checks/check-adrs.mjs`: PASSED (19 ADR files verified).
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed, 39 architecture pages verified).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
+**Open issues**:
+- Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).

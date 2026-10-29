@@ -1,0 +1,50 @@
+---
+title: "ADR-0013: Headless UI Components with Tailwind CSS in @innostes/ui"
+description: "Building a centralised design system package using Tailwind v4 and accessible primitives."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0013: Headless UI Components with Tailwind CSS in @innostes/ui
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+UI inconsistency across business modules leads to poor user experience. We need a shared design system that enforces accessible enterprise components.
+
+## Decision Drivers
+
+- Accessible, responsive enterprise UI components (WAI-ARIA).
+- Unified design tokens (colours, spacing, typography, contrast).
+- Zero runtime styling overhead via Tailwind CSS.
+
+## Considered Options
+
+- Heavy monolithic UI framework (MUI or Ant Design).
+- Raw unstyled HTML with module-specific stylesheets.
+- Custom headless primitives styled with Tailwind CSS in `@innostes/ui`.
+
+## Decision Outcome
+
+Chosen option: "Custom headless primitives styled with Tailwind CSS in `@innostes/ui`.", because Custom component library in `packages/ui` (`@innostes/ui`) styled with Tailwind CSS and CSS design tokens.
+
+### Consequences
+
+- Good, because 238 accessible components, widgets, and charts shared across all apps.
+- Good, because Light and dark theme support with automated contrast ratio verification.
+- Good, because Strict isolation: modules never reinvent form controls, tables, or modals.
+- Bad, because Component updates require maintaining backward compatibility for existing consumers.
+
+## Confirmation
+
+Verified by `landing:docs-check` and UI React 17/18 compatibility test suites.

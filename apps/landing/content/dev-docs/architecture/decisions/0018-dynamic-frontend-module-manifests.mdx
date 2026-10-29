@@ -1,0 +1,49 @@
+---
+title: "ADR-0018: Dynamic Runtime Frontend Module Manifest Discovery"
+description: "Transitioning from compile-time module imports to dynamic runtime manifest loading."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: proposed
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0018: Dynamic Runtime Frontend Module Manifest Discovery
+
+- **Status**: proposed
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Currently, `apps/web-app` imports business module manifests statically from `@innostes/crm` and `@innostes/hrms` in `apps/web-app/src/app/catalog.ts`. While fast, this couples the UI engine package to specific modules at build time.
+
+## Decision Drivers
+
+- Decouple `apps/web-app` from compile-time dependencies on optional business modules.
+- Match the backend engine's dynamic `ModuleLoader.discover()` pattern.
+- Enable runtime module loading and tenant-specific bundle downloads.
+
+## Considered Options
+
+- Retain static compile-time catalog imports in `apps/web-app`.
+- Microfrontends via Module Federation.
+- Dynamic runtime manifest discovery and lazy-loaded module chunks.
+
+## Decision Outcome
+
+Chosen option: "Dynamic runtime manifest discovery and lazy-loaded module chunks.", because Proposed: Implement a runtime module manifest loader where `apps/web-app` fetches active tenant modules from `GET /tenants/current/modules` and dynamically imports component chunks.
+
+### Consequences
+
+- Good, because `apps/web-app` contains zero hardcoded references to business modules.
+- Good, because Reduces initial bundle size for tenants that only use a subset of modules.
+- Bad, because Increases client-side dynamic loading complexity and error boundary requirements.
+
+## Confirmation
+
+Will be confirmed via bundle analysis and dynamic loading test suites.

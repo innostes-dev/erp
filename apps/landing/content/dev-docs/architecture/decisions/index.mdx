@@ -1,0 +1,46 @@
+---
+title: Architecture Decision Log
+description: Complete index of all formal Markdown Architectural Decision Records (MADR 4.x) for Innostes ERP.
+icon: BookOpen
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+---
+
+The **Architecture Decision Log** (arc42 §9) records all significant architectural choices made across the Innostes ERP platform using the **MADR 4.x template**.
+
+Decisions are immutable once accepted. Any change to an accepted decision requires proposing a new ADR that explicitly supersedes the prior record.
+
+---
+
+## Decision Log Index
+
+| Number | Identifier | Decision Title | Status | Date |
+|:---:|:---|:---|:---:|:---:|
+| 0001 | [ADR-0001](/docs/architecture/decisions/0001-engine-plugin-inversion) | Engine-Plugin Inversion Architecture | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0002 | [ADR-0002](/docs/architecture/decisions/0002-fastapi-backend-engine) | FastAPI for the Backend ASGI Engine | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0003 | [ADR-0003](/docs/architecture/decisions/0003-react-vite-ui-engine) | React 19 and Vite for UI Engine | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0004 | [ADR-0004](/docs/architecture/decisions/0004-postgresql-relational-store) | PostgreSQL 16 as Canonical Relational Store | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0005 | [ADR-0005](/docs/architecture/decisions/0005-sqlalchemy-async-alembic) | SQLAlchemy 2.0 Async Engine and Alembic Migrations | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0006 | [ADR-0006](/docs/architecture/decisions/0006-shared-database-per-module-migrations) | Monolithic Shared Database with Per-Module Migration Isolation | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0007 | [ADR-0007](/docs/architecture/decisions/0007-uuidv4-primary-keys) | Universally Unique Identifiers (UUIDv4) for Primary Keys | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0008 | [ADR-0008](/docs/architecture/decisions/0008-universal-soft-delete) | Universal Soft Delete via deleted_at and deleted_by | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0009 | [ADR-0009](/docs/architecture/decisions/0009-standardised-audit-columns) | Standardised Audit Columns on Every Entity | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0010 | [ADR-0010](/docs/architecture/decisions/0010-jwt-access-rotating-refresh-tokens) | JWT Access and Refresh Tokens with Token Family Rotation | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0011 | [ADR-0011](/docs/architecture/decisions/0011-multi-tenancy-header-membership) | Multi-Tenancy Scoping via X-Tenant-ID and Membership Verification | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0012 | [ADR-0012](/docs/architecture/decisions/0012-rfc-7807-problem-details) | RFC 7807 Problem Details for HTTP Error Responses | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0013 | [ADR-0013](/docs/architecture/decisions/0013-headless-tailwind-ui-package) | Headless UI Components with Tailwind CSS in @innostes/ui | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0014 | [ADR-0014](/docs/architecture/decisions/0014-first-run-setup-gate) | First-Run Setup Gate with Ephemeral Setup Token | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0015 | [ADR-0015](/docs/architecture/decisions/0015-single-use-rotating-refresh-family) | Single-Use Rotating Refresh Token Families for Replay Detection | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0016 | [ADR-0016](/docs/architecture/decisions/0016-nextjs-fumadocs-docs-site) | Next.js and Fumadocs for Documentation Site | `accepted (recorded retroactively on 2026-10-29)` | 2026-10-29 |
+| 0017 | [ADR-0017](/docs/architecture/decisions/0017-database-row-level-security) | PostgreSQL Row-Level Security for Multi-Tenancy | `proposed` | 2026-10-29 |
+| 0018 | [ADR-0018](/docs/architecture/decisions/0018-dynamic-frontend-module-manifests) | Dynamic Runtime Frontend Module Manifest Discovery | `proposed` | 2026-10-29 |
+
+---
+
+## Decision Lifecycle & Governance
+
+1. **Proposed**: An architecture question or design change is drafted using the [ADR Template](/docs/architecture/decisions/0000-template).
+2. **Review**: The Platform Architecture Review Board evaluates the proposal during weekly architecture reviews.
+3. **Accepted**: The decision is committed and linked to automated fitness functions verifying its invariants in CI.
+4. **Superseded**: If technical requirements change, a new ADR is authored that references the old ADR via `supersedes: NNNN`.

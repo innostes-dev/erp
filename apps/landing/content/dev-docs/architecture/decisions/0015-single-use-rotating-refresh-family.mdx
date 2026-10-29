@@ -1,0 +1,50 @@
+---
+title: "ADR-0015: Single-Use Rotating Refresh Token Families for Replay Detection"
+description: "Mitigating refresh token theft via cryptographic token family rotation."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0015: Single-Use Rotating Refresh Token Families for Replay Detection
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+If an attacker steals a long-lived refresh token, they can maintain persistent unauthorized access indefinitely unless the system detects replay attacks.
+
+## Decision Drivers
+
+- Detect token theft automatically without manual user reports.
+- Instantly invalidate compromised session hierarchies.
+- Maintain smooth session continuity for legitimate users.
+
+## Considered Options
+
+- Static non-rotating refresh tokens.
+- Server-side token revocation list with short expirations.
+- Token Family Rotation with immediate reuse invalidation.
+
+## Decision Outcome
+
+Chosen option: "Token Family Rotation with immediate reuse invalidation.", because Every refresh request rotates the token. If an already-revoked token is presented, the system treats it as token theft and revokes the entire token family.
+
+### Consequences
+
+- Good, because Automated security containment: compromised sessions are terminated instantly.
+- Good, because Limits attacker window to single use.
+- Good, because Full traceability in `user_sessions` and security audit logs.
+- Bad, because Legitimate concurrent requests from multiple browser tabs can trigger false-positive revocations if not debounced.
+
+## Confirmation
+
+Enforced by `AuthService.rotate_refresh_token` in `kernel.auth.services`.

@@ -1,0 +1,50 @@
+---
+title: "ADR-0016: Next.js and Fumadocs for Documentation Site"
+description: "Static site generation with MDX and Fumadocs for the developer documentation portal."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0016: Next.js and Fumadocs for Documentation Site
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+The documentation portal (`apps/landing`) requires fast full-text search, interactive API reference exploration, embedded React component playgrounds, and arc42 compliance.
+
+## Decision Drivers
+
+- High performance Static Site Generation (SSG) with zero runtime database dependencies.
+- Rich MDX authoring with custom React components (`<Diagram>`, `<ApiTable>`).
+- Automated docs-as-code quality gates in CI.
+
+## Considered Options
+
+- Docusaurus.
+- MkDocs with Material theme.
+- Next.js 15 with Fumadocs.
+
+## Decision Outcome
+
+Chosen option: "Next.js 15 with Fumadocs.", because Next.js with Fumadocs. Powers `/docs`, `/api-reference`, and `/ui/docs`.
+
+### Consequences
+
+- Good, because Direct integration with monorepo packages (`@innostes/ui`).
+- Good, because Interactive OpenAPI explorer generated directly from FastAPI's schema.
+- Good, because Sub-second client-side page transitions and built-in full-text search.
+- Bad, because Requires Node.js runtime and Next.js build pipeline.
+
+## Confirmation
+
+Enforced by `landing:docs-check` and `landing:build` static generation.

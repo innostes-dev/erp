@@ -1,0 +1,25 @@
+{
+  "title": "Decisions",
+  "pages": [
+    "index",
+    "0000-template",
+    "0001-engine-plugin-inversion",
+    "0002-fastapi-backend-engine",
+    "0003-react-vite-ui-engine",
+    "0004-postgresql-relational-store",
+    "0005-sqlalchemy-async-alembic",
+    "0006-shared-database-per-module-migrations",
+    "0007-uuidv4-primary-keys",
+    "0008-universal-soft-delete",
+    "0009-standardised-audit-columns",
+    "0010-jwt-access-rotating-refresh-tokens",
+    "0011-multi-tenancy-header-membership",
+    "0012-rfc-7807-problem-details",
+    "0013-headless-tailwind-ui-package",
+    "0014-first-run-setup-gate",
+    "0015-single-use-rotating-refresh-family",
+    "0016-nextjs-fumadocs-docs-site",
+    "0017-database-row-level-security",
+    "0018-dynamic-frontend-module-manifests"
+  ]
+}

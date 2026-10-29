@@ -14,6 +14,8 @@
     "deployment",
     "cross-cutting",
     "threat-model",
+    "---Decisions---",
+    "...decisions",
     "plugins",
     "kernel",
     "setup"

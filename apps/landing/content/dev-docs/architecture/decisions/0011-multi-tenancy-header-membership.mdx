@@ -1,0 +1,50 @@
+---
+title: "ADR-0011: Multi-Tenancy Scoping via X-Tenant-ID and Membership Verification"
+description: "Resolving active organisation context via request headers and membership verification."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0011: Multi-Tenancy Scoping via X-Tenant-ID and Membership Verification
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Enterprise users often belong to multiple organisations (e.g. parent company and regional distribution subsidiaries). The platform must securely scope requests to the active tenant.
+
+## Decision Drivers
+
+- Allow users to switch between organisations without re-authenticating.
+- Prevent cross-tenant data leakage.
+- Enforce tenant module activation checks.
+
+## Considered Options
+
+- Subdomain-based multi-tenancy (`tenant.innostes.example`).
+- Path-based multi-tenancy (`/tenants/:id/crm/leads`).
+- Header-based multi-tenancy (`X-Tenant-ID`) with dependency verification.
+
+## Decision Outcome
+
+Chosen option: "Header-based multi-tenancy (`X-Tenant-ID`) with dependency verification.", because Header-based multi-tenancy via `X-Tenant-ID`. Dependencies verify user membership in `tenant_members` and module enablement in `tenant_modules`.
+
+### Consequences
+
+- Good, because Clean REST URI structures without repetitive tenant path prefixes.
+- Good, because Single frontend client can switch organisations seamlessly via state context.
+- Good, because Enforced at the dependency injection layer before route handlers execute.
+- Bad, because API consumers must remember to include the `X-Tenant-ID` header on tenant-scoped routes.
+
+## Confirmation
+
+Enforced by `get_current_tenant_id` dependency in `kernel.tenancy.dependencies`.

@@ -1,0 +1,50 @@
+---
+title: "ADR-0010: JWT Access and Refresh Tokens with Token Family Rotation"
+description: "Stateless 30-minute access tokens paired with rotating 7-day refresh tokens."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0010: JWT Access and Refresh Tokens with Token Family Rotation
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+High-scale enterprise APIs need stateless authentication to allow horizontal scaling while retaining the ability to revoke compromised sessions immediately.
+
+## Decision Drivers
+
+- Stateless token validation for API performance.
+- Immediate session revocation capability.
+- Protection against refresh token replay and theft.
+
+## Considered Options
+
+- Server-side stateful session cookies with Redis.
+- Long-lived static API tokens.
+- Short-lived JWT access tokens with rotating single-use refresh tokens.
+
+## Decision Outcome
+
+Chosen option: "Short-lived JWT access tokens with rotating single-use refresh tokens.", because Short-lived JWT access tokens (30 minutes) paired with single-use rotating refresh tokens (7 days).
+
+### Consequences
+
+- Good, because Stateless signature verification eliminates database queries on fast-path API requests.
+- Good, because Token reuse detection invalidates the entire token family if a stolen token is replayed.
+- Good, because Granular device and session tracking via `user_devices` and `user_sessions`.
+- Bad, because Access tokens cannot be revoked until their 30-minute expiration without a token blocklist.
+
+## Confirmation
+
+Verified by `kernel.auth.services.auth_service` test suite in `kernel/backend/tests/`.

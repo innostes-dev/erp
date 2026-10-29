@@ -1,0 +1,50 @@
+---
+title: "ADR-0007: Universally Unique Identifiers (UUIDv4) for Primary Keys"
+description: "Adopting RFC 4122 UUID v4 strings across all relational tables."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0007: Universally Unique Identifiers (UUIDv4) for Primary Keys
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Auto-incrementing integer IDs leak business metrics (e.g. number of orders or customers), are vulnerable to enumeration attacks, and prevent client-side key generation.
+
+## Decision Drivers
+
+- Prevent identifier enumeration and business metric leakage.
+- Enable client-side key generation before persistence.
+- Seamless multi-tenant data merging and replication.
+
+## Considered Options
+
+- Sequential auto-incrementing integers (BIGSERIAL).
+- ULID / UUIDv7 (time-ordered).
+- UUIDv4 via `uuid.uuid4()`.
+
+## Decision Outcome
+
+Chosen option: "UUIDv4 via `uuid.uuid4()`.", because UUIDv4 primary keys via `UUIDPrimaryKeyMixin` on `BaseModel`.
+
+### Consequences
+
+- Good, because Globally unique across all distributed nodes and client sessions.
+- Good, because Zero enumeration vulnerability across public REST endpoints.
+- Good, because Clients and sub-services can generate IDs prior to database commits.
+- Bad, because 16-byte storage overhead and B-tree page fragmentation compared to sequential integers.
+
+## Confirmation
+
+Enforced by `kernel/backend/tests/test_architecture_fitness.py` verifying all tables have UUID primary keys.

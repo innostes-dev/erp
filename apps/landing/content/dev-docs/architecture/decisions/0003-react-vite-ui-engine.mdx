@@ -1,0 +1,51 @@
+---
+title: "ADR-0003: React 19 and Vite for UI Engine"
+description: "Modern React Single Page Application runtime powered by Vite and Tailwind CSS."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0003: React 19 and Vite for UI Engine
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+The frontend application (`apps/web-app`) requires fast local development compilation, support for modern React component primitives, and the ability to consume workspace modules directly.
+
+## Decision Drivers
+
+- Instant Hot Module Replacement (HMR) without multi-minute pre-bundling.
+- Direct consumption of `@innostes/kernel` and business module components.
+- Future-proof component architecture compatible with React 19.
+
+## Considered Options
+
+- Next.js client-side SPA mode.
+- Webpack / Create React App.
+- Vite 6 with React 19 and `@innostes/source` export conditions.
+
+## Decision Outcome
+
+Chosen option: "Vite 6 with React 19 and `@innostes/source` export conditions.", because Vite with React 19. Vite compiles workspace TypeScript packages on the fly using `@innostes/source` export conditions.
+
+### Consequences
+
+- Good, because Sub-second local startup times and instant HMR.
+- Good, because Zero pre-build step required when editing packages or modules.
+- Good, because Clean decoupling between static SPA and backend ASGI API.
+- Bad, because Client-side routing requires proper fallback configuration on reverse proxies.
+- Bad, because React 19 compatibility across third-party libraries requires automated verification.
+
+## Confirmation
+
+Verified by `apps/web-app/src/main.tsx` and React 17/18 compatibility test suites.

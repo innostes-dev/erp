@@ -1,0 +1,50 @@
+---
+title: "ADR-0014: First-Run Setup Gate with Ephemeral Setup Token"
+description: "Locking platform endpoints until initial organization and administrator provisioning."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0014: First-Run Setup Gate with Ephemeral Setup Token
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+An unprovisioned ERP instance deployed to a public server must not expose operational endpoints or allow unauthorized users to register as the root administrator.
+
+## Decision Drivers
+
+- Prevent hostile takeover of fresh installations.
+- Guide initial operators through zero-config onboarding.
+- Provide both Web wizard and automated CLI provisioning paths.
+
+## Considered Options
+
+- Open registration for the first user.
+- Static default admin credentials (`admin/admin`).
+- SetupRequiredMiddleware gating with 256-bit token authorization.
+
+## Decision Outcome
+
+Chosen option: "SetupRequiredMiddleware gating with 256-bit token authorization.", because SetupRequiredMiddleware intercepts all traffic until the `installation` table is populated. Access to `/setup` routes requires an ephemeral 256-bit token.
+
+### Consequences
+
+- Good, because Default admin credentials eliminated entirely.
+- Good, because Uninitialised instances return 503 `setup_required` on all normal routes.
+- Good, because Token is rate-limited (10 attempts / 15 mins) and disabled post-installation.
+- Bad, because Operators must retrieve the setup token from server logs or environment variables.
+
+## Confirmation
+
+Verified by `kernel/backend/tests/` setup test cases.

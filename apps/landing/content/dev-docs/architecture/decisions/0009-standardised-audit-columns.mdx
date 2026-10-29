@@ -1,0 +1,50 @@
+---
+title: "ADR-0009: Standardised Audit Columns on Every Entity"
+description: "Universal tracking of timestamps and actor attribution across all records."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0009: Standardised Audit Columns on Every Entity
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Auditors and enterprise compliance teams require complete non-repudiation: who created every record, when, and who performed the last update.
+
+## Decision Drivers
+
+- Complete non-repudiation across all business entities.
+- Uniform attribute names across all tables to simplify reporting.
+- Automated attribution without manual developer plumbing.
+
+## Considered Options
+
+- Ad-hoc timestamp columns added manually per table.
+- Database triggers recording mutations in an external log table.
+- Universal `AuditMixin` and `TimestampMixin` inherited by `BaseModel`.
+
+## Decision Outcome
+
+Chosen option: "Universal `AuditMixin` and `TimestampMixin` inherited by `BaseModel`.", because Universal `AuditMixin` providing `created_at`, `created_by`, `updated_at`, `updated_by` on every entity.
+
+### Consequences
+
+- Good, because Consistency: every entity exhibits identical audit properties.
+- Good, because `BaseService` automatically binds the active `actor_id` during CRUD operations.
+- Good, because UTC timestamps ensure timezone ambiguity is eliminated.
+- Bad, because Audit columns add 32 bytes of metadata per row.
+
+## Confirmation
+
+Checked by `test_architecture_fitness.py` asserting audit columns on all registered models.

@@ -1,0 +1,51 @@
+---
+title: "ADR-0002: FastAPI for the Backend ASGI Engine"
+description: "Choice of FastAPI and Uvicorn for high-throughput asynchronous execution."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0002: FastAPI for the Backend ASGI Engine
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+The backend engine requires an asynchronous Python runtime capable of handling high-concurrency enterprise workloads, automated OpenAPI contract generation, and native type validation.
+
+## Decision Drivers
+
+- High async I/O throughput for PostgreSQL queries via asyncpg.
+- Native generation of OpenAPI 3.1 specifications directly from code.
+- Declarative request validation and serialisation with Pydantic.
+
+## Considered Options
+
+- Django with Django REST Framework (DRF).
+- Flask with Marshmallow.
+- FastAPI with Uvicorn and Pydantic.
+
+## Decision Outcome
+
+Chosen option: "FastAPI with Uvicorn and Pydantic.", because FastAPI with Uvicorn. The backend engine (`apps/api-server`) mounts modular APIRouters from discovered BaseModule plug-ins.
+
+### Consequences
+
+- Good, because Automatic interactive documentation served at `/docs` and `/redoc`.
+- Good, because Native async/await request pipeline with high concurrency performance.
+- Good, because FastAPI dependency injection (`Depends`) simplifies database sessions and authentication scoping.
+- Bad, because Asynchronous SQLAlchemy requires careful session lifecycle management.
+- Bad, because Python async ecosystem requires strict avoidance of blocking CPU operations.
+
+## Confirmation
+
+Verified via `apps/api-server/app/engine/server.py` and automated OpenAPI generation checks in CI.

@@ -1,0 +1,50 @@
+---
+title: "ADR-0017: PostgreSQL Row-Level Security for Multi-Tenancy"
+description: "Evaluating PostgreSQL Row-Level Security (RLS) for defense-in-depth tenant isolation."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: proposed
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0017: PostgreSQL Row-Level Security for Multi-Tenancy
+
+- **Status**: proposed
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Currently, multi-tenant data isolation is enforced at the application service layer via `BaseService` filtering (`WHERE tenant_id = :t`). If an engineer writes a custom raw SQL query that omits this clause, cross-tenant data leakage could occur.
+
+## Decision Drivers
+
+- Defense-in-depth: database-level guarantee that cross-tenant queries cannot execute.
+- Protection against developer error in custom SQL queries.
+- Minimal performance overhead on PostgreSQL connection pooling.
+
+## Considered Options
+
+- Maintain application-layer filtering exclusively.
+- Adopt database-per-tenant sharding.
+- Implement PostgreSQL Row-Level Security (RLS) with session-local variables (`SET LOCAL app.current_tenant_id`).
+
+## Decision Outcome
+
+Chosen option: "Implement PostgreSQL Row-Level Security (RLS) with session-local variables (`SET LOCAL app.current_tenant_id`).", because Proposed: Implement PostgreSQL RLS policies on all tenant-scoped tables as a secondary defense layer while keeping application-layer filtering in `BaseService`.
+
+### Consequences
+
+- Good, because Guarantees that even raw SQL queries or faulty service methods cannot access other tenants' data.
+- Good, because Auditable directly inside PostgreSQL schema definitions.
+- Bad, because Requires setting session-local variables on every checked-out connection in the pool.
+- Bad, because Bypassed by superusers unless explicitly configured with `FORCE ROW LEVEL SECURITY`.
+
+## Confirmation
+
+Will be confirmed via database penetration tests and latency benchmarks.

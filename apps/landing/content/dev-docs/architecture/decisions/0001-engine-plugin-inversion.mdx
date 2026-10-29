@@ -1,0 +1,51 @@
+---
+title: "ADR-0001: Engine-Plugin Inversion Architecture"
+description: "Separation of plumbing engines from business feature modules."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0001: Engine-Plugin Inversion Architecture
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Enterprise ERP platforms typically degrade into monolithic tangles where core framework code intermingles with business domain logic (e.g. sales, CRM, HRMS). We need an architectural separation that allows independent development of features without bloating the core runtime.
+
+## Decision Drivers
+
+- Enable independent authoring of business features without modifying engine source code.
+- Guarantee that the kernel and engines provide zero business logic of their own.
+- Enforce strict modular boundaries using automated linting.
+
+## Considered Options
+
+- Traditional layered monolith with shared models and routers.
+- Microservices architecture with separate services per domain.
+- Modular monolith with engine-plugin inversion (BaseModule contract and entry points).
+
+## Decision Outcome
+
+Chosen option: "Modular monolith with engine-plugin inversion (BaseModule contract and entry points).", because Modular monolith with engine-plugin inversion. The platform provides two lightweight engines (apps/api-server and apps/web-app) that host independent plug-in modules discovered via Python package entry points and workspace exports.
+
+### Consequences
+
+- Good, because Business modules can be scaffolded, installed, or removed without modifying engine code.
+- Good, because Zero network latency or distributed transaction complexities compared to microservices.
+- Good, because Enforced by automated import-linter contracts in CI (Rule 1, Rule 2, Rule 3).
+- Bad, because Modules must adhere strictly to the BaseModule interface and package structure.
+- Bad, because Requires robust monorepo tooling (Nx and pnpm) to manage workspace dependencies.
+
+## Confirmation
+
+Enforced by `.importlinter` contracts verifying that engines never import specific plug-ins and plug-ins never import engines.

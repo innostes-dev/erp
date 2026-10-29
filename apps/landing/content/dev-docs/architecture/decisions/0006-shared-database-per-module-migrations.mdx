@@ -1,0 +1,50 @@
+---
+title: "ADR-0006: Monolithic Shared Database with Per-Module Migration Isolation"
+description: "Single database connection pool with module-owned tables and isolated migrations."
+icon: GitCommit
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 9
+status: accepted
+date: 2026-10-29
+deciders: ["Platform Architecture Team", "Platform Engineering"]
+---
+
+# ADR-0006: Monolithic Shared Database with Per-Module Migration Isolation
+
+- **Status**: accepted (recorded retroactively on 2026-10-29)
+- **Date**: 2026-10-29
+- **Deciders**: Platform Architecture Team, Platform Engineering
+- **Consulted**: Security Architecture, Core Platform Team
+- **Informed**: Developer Community
+
+## Context and Problem Statement
+
+Balancing operational simplicity against modularity: running separate databases per ERP module creates operational overhead and distributed transaction issues.
+
+## Decision Drivers
+
+- Operational simplicity: a single database cluster to back up, monitor, and scale.
+- Transactional integrity: atomic commits across tenant and user provisioning.
+- Modular ownership: plug-ins own distinct table namespaces.
+
+## Considered Options
+
+- Database-per-module (microservices database pattern).
+- Shared database with shared global migrations.
+- Shared database with per-module table namespaces and migration paths.
+
+## Decision Outcome
+
+Chosen option: "Shared database with per-module table namespaces and migration paths.", because Shared database with per-module table ownership. Modules define their own models and migrations path while sharing the SQLAlchemy metadata engine.
+
+### Consequences
+
+- Good, because Single connection pool managed by `api-server` via `kernel.core.database`.
+- Good, because Seamless atomic transactions during cross-cutting setup and tenant onboarding.
+- Good, because No distributed two-phase commit overhead.
+- Bad, because Requires discipline: modules must never alter or foreign-key directly to other modules' private tables.
+
+## Confirmation
+
+Enforced by `.importlinter` Rule 4 and `check-ts-boundaries.mjs`.
