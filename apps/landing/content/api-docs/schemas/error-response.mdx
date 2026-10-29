@@ -1,0 +1,22 @@
+---
+title: "ErrorResponse"
+description: "Body returned for handled errors, e.g. a not-found or conflict error. Attributes:     detail: Human-readable error message.     code: Machine-readable error id, only for some errors (e.g. \"setup_required\")."
+---
+
+Body returned for handled errors, e.g. a not-found or conflict error. Attributes:     detail: Human-readable error message.     code: Machine-readable error id, only for some errors (e.g. "setup_required").
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `detail` | string | Yes | — | Human-readable explanation of the error condition. |
+| `code` | string \| null | No | — | Machine-readable error identifier for programmatic client branching. |
+
+## Example payload
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```

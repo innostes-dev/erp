@@ -1,0 +1,27 @@
+---
+title: "TenantUpdate"
+description: "Body for updating a tenant organisation. Send only the fields you wish to modify."
+---
+
+Body for updating a tenant organisation. Send only the fields you wish to modify.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string \| null | No | — | Display name of the organisation. |
+| `slug` | string \| null | No | — | Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`). |
+| `country` | string \| null | No | — | ISO 3166-1 alpha-2 country code. |
+| `timezone` | string \| null | No | — | IANA time zone name. |
+| `language` | string \| null | No | — | BCP 47 language tag for default language. |
+| `date_format` | string \| null | No | — | Preferred date display format. |
+
+## Example payload
+
+```json
+{
+  "country": "IN",
+  "name": "Northwind Traders India Pvt Ltd",
+  "timezone": "Asia/Kolkata"
+}
+```

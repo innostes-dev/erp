@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,6 +7,7 @@ const landingRoot = join(__dirname, '..', '..');
 const contentRoot = join(landingRoot, 'content');
 const docsRoot = join(contentRoot, 'docs');
 const devDocsRoot = join(contentRoot, 'dev-docs');
+const apiDocsRoot = join(contentRoot, 'api-docs');
 
 function getMdxFiles(dir) {
   let results = [];
@@ -22,7 +23,11 @@ function getMdxFiles(dir) {
 }
 
 export function runLinkCheck() {
-  const mdxFiles = [...getMdxFiles(docsRoot), ...getMdxFiles(devDocsRoot)];
+  const mdxFiles = [
+    ...getMdxFiles(docsRoot),
+    ...getMdxFiles(devDocsRoot),
+    ...(existsSync(apiDocsRoot) ? getMdxFiles(apiDocsRoot) : []),
+  ];
   const pages = new Map();
 
   for (const file of mdxFiles) {
@@ -46,6 +51,15 @@ export function runLinkCheck() {
         url = '/docs/' + sub.slice(0, -1).join('/');
       } else {
         url = '/docs/' + sub.join('/');
+      }
+    } else if (parts[0] === 'api-docs') {
+      const sub = parts.slice(1);
+      if (sub.length === 1 && sub[0] === 'index') {
+        url = '/api-reference';
+      } else if (sub[sub.length - 1] === 'index') {
+        url = '/api-reference/' + sub.slice(0, -1).join('/');
+      } else {
+        url = '/api-reference/' + sub.join('/');
       }
     }
 

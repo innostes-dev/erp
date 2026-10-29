@@ -1,0 +1,27 @@
+---
+title: "CreateApiKeyRequest"
+description: "Payload to generate a new API key."
+---
+
+Payload to generate a new API key.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string | Yes | — | Descriptive identifier for the API key. |
+| `expires_in_days` | integer \| null | No | — | Lifespan in days. Null for perpetual key. |
+| `scopes` | string[] | No | `["*"]` | Authorized permission scopes, e.g. ['hrms:read', 'crm:write'] or ['*']. |
+
+## Example payload
+
+```json
+{
+  "name": "Zapier CRM Sync",
+  "expires_in_days": 30,
+  "scopes": [
+    "crm:read",
+    "hrms:read"
+  ]
+}
+```

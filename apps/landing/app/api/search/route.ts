@@ -4,7 +4,7 @@ import {
   createSearchAPI,
   type AdvancedIndex,
 } from 'fumadocs-core/search/server';
-import { devSource, source } from '@/lib/source';
+import { apiSource, devSource, source } from '@/lib/source';
 
 // Load api.json for component prop and symbol search
 let apiComponents: Record<string, { description?: string; props: Record<string, { type?: string; description?: string }> }> = {};
@@ -18,18 +18,28 @@ try {
   // Gracefully fallback if api.json is not yet generated
 }
 
-/** One search index for both the developer docs and the UI docs, enriched with component props. */
+/** One search index for the developer docs, UI docs, and API reference, enriched with component props and operation IDs. */
 export const { GET } = createSearchAPI('advanced', {
   indexes: async () => {
     const sections = [
       { loader: devSource, label: 'Developer Docs' },
       { loader: source, label: 'innostes UI' },
+      { loader: apiSource, label: 'API Reference' },
     ] as const;
 
     return sections.flatMap(({ loader, label }) =>
       loader.getPages().map((page): AdvancedIndex => {
         const structured = page.data.structuredData;
         const pageBasename = page.url.split('/').pop() || '';
+
+        // For API Reference pages, enrich index with path and operation info
+        if (label === 'API Reference' && structured?.contents) {
+          const rawSlug = page.url.replace('/api-reference/', '');
+          structured.contents.push({
+            heading: 'Operation Details',
+            content: `Operation: ${pageBasename} Path: ${rawSlug} Title: ${page.data.title}`,
+          });
+        }
 
         // Find relevant components for this page
         const relevant = Object.entries(apiComponents).filter(([name, comp]) => {

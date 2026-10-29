@@ -1,0 +1,36 @@
+---
+title: "HealthCheckRead"
+description: "System health check and diagnostic status."
+---
+
+System health check and diagnostic status.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `status` | string | Yes | — | Aggregated platform health status: pass or fail. |
+| `environment` | string | Yes | — | Runtime deployment environment. |
+| `database` | object | Yes | — | Database connectivity diagnostic report. |
+| `modules` | object | Yes | — | Diagnostic health reports for each registered module. |
+
+## Example payload
+
+```json
+{
+  "database": {
+    "latency_ms": 1.25,
+    "status": "HEALTHY"
+  },
+  "environment": "development",
+  "modules": {
+    "auth": {
+      "status": "HEALTHY"
+    },
+    "tenancy": {
+      "status": "HEALTHY"
+    }
+  },
+  "status": "pass"
+}
+```

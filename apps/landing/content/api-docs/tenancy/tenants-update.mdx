@@ -1,0 +1,196 @@
+---
+title: "Update a tenant"
+description: "Change tenant organisation fields."
+---
+
+<ApiEndpoint method="PATCH" path="/tenants/{tenant_id}" auth="BearerAuth" />
+
+Change tenant organisation fields. Only sent fields are modified.
+
+Requires Bearer authentication. The calling user is recorded in `updated_by`.
+Soft-deleted tenants return 404; restore them first.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Path parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `tenant_id` | string | Yes | Unique identifier of the tenant organisation. |
+
+## Request body
+
+Payload model: [TenantUpdate](/api-reference/schemas/tenant-update)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string \| null | No | Display name of the organisation. |
+| `slug` | string \| null | No | Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`). |
+| `country` | string \| null | No | ISO 3166-1 alpha-2 country code. |
+| `timezone` | string \| null | No | IANA time zone name. |
+| `language` | string \| null | No | BCP 47 language tag for default language. |
+| `date_format` | string \| null | No | Preferred date display format. |
+
+### Request example
+
+```json
+{
+  "country": "IN",
+  "name": "Northwind Traders India Pvt Ltd",
+  "timezone": "Asia/Kolkata"
+}
+```
+
+## Responses
+
+### HTTP 200
+
+The updated tenant organisation.
+
+Response model: [TenantRead](/api-reference/schemas/tenant-read)
+
+```json
+{
+  "country": "IN",
+  "created_at": "2026-10-26T10:15:00Z",
+  "created_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c",
+  "date_format": "DD/MM/YYYY",
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "language": "en-IN",
+  "name": "Northwind Traders Pvt Ltd",
+  "slug": "northwind-traders",
+  "timezone": "Asia/Kolkata",
+  "updated_at": "2026-10-26T10:15:00Z",
+  "updated_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c"
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 404
+
+Resource not found
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 409
+
+Conflict with existing data
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X PATCH "http://localhost:8001/tenants/{tenant_id}" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "country": "IN",
+    "name": "Northwind Traders India Pvt Ltd",
+    "timezone": "Asia/Kolkata"
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/tenants/{tenant_id}', {
+  method: 'PATCH',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "country": "IN",
+    "name": "Northwind Traders India Pvt Ltd",
+    "timezone": "Asia/Kolkata"
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+    "Content-Type": "application/json",
+}
+
+response = httpx.patch(
+    "http://localhost:8001/tenants/{tenant_id}",
+    headers=headers,
+    json={
+      "country": "IN",
+      "name": "Northwind Traders India Pvt Ltd",
+      "timezone": "Asia/Kolkata"
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="PATCH" path="/tenants/{tenant_id}" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"country\": \"IN\",\n  \"name\": \"Northwind Traders India Pvt Ltd\",\n  \"timezone\": \"Asia/Kolkata\"\n}"} />

@@ -1,0 +1,142 @@
+---
+title: "Revoke API key"
+description: "Permanently revokes an API key."
+---
+
+<ApiEndpoint method="DELETE" path="/auth/api-keys/{key_id}" auth="BearerAuth" />
+
+Permanently revokes an API key.
+
+Requires Bearer authentication. Revocation takes effect immediately, blocking
+all subsequent calls made with this key.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Path parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `key_id` | string | Yes | Unique identifier of the API key to revoke. |
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [ApiKeyRead](/api-reference/schemas/api-key-read)
+
+```json
+{
+  "created_at": "2026-10-29T09:00:00Z",
+  "expires_at": "2026-11-28T10:00:00Z",
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "is_revoked": false,
+  "key_prefix": "inno_live_xK9p",
+  "last_used_at": "2026-10-29T10:15:00Z",
+  "name": "Zapier CRM Sync",
+  "scopes": [
+    "crm:read",
+    "hrms:read"
+  ]
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 404
+
+Resource not found
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X DELETE "http://localhost:8001/auth/api-keys/{key_id}" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/auth/api-keys/{key_id}', {
+  method: 'DELETE',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.delete(
+    "http://localhost:8001/auth/api-keys/{key_id}",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="DELETE" path="/auth/api-keys/{key_id}" authType="BearerAuth" hasBody={false} initialBody={""} />

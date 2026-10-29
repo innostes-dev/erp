@@ -28,7 +28,7 @@ export function renderDocsPage(
         owner: 'innostes',
         repo: 'erp',
         sha: 'main',
-        path: `apps/landing/content/${rootUrl === '/docs' ? 'dev-docs' : 'docs'}/${page.path}`,
+        path: `apps/landing/content/${rootUrl === '/docs' ? 'dev-docs' : rootUrl === '/api-reference' ? 'api-docs' : 'docs'}/${page.path}`,
       }}
       lastUpdate={new Date()}
     >

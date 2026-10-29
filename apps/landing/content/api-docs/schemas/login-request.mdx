@@ -1,0 +1,28 @@
+---
+title: "LoginRequest"
+description: "User login credentials and client hardware context."
+---
+
+User login credentials and client hardware context.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `email` | string | Yes | — | Registered user account email address. |
+| `password` | string | Yes | — | Account authentication password. |
+| `device_fingerprint` | string | No | `"browser-client-default"` | Unique hardware or browser fingerprint for Zero-Trust verification. |
+| `device_name` | string \| null | No | — | Optional human-readable client device label. |
+| `device_type` | [DeviceType](/api-reference/schemas/device-type) | No | `"desktop"` | Form-factor classification of client hardware. |
+
+## Example payload
+
+```json
+{
+  "email": "priya.shah@northwind.example",
+  "password": "NorthwindPass2026!",
+  "device_fingerprint": "fp_7a9f1c3e8b2d4a6e",
+  "device_name": "Bengaluru Office MacBook Pro",
+  "device_type": "desktop"
+}
+```

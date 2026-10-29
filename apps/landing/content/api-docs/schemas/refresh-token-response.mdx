@@ -1,0 +1,26 @@
+---
+title: "RefreshTokenResponse"
+description: "New token pair issued following successful refresh token rotation."
+---
+
+New token pair issued following successful refresh token rotation.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `access_token` | string | Yes | — | Newly minted short-lived JWT bearer access token. |
+| `refresh_token` | string | Yes | — | Freshly rotated single-use refresh token. |
+| `token_type` | string | No | `"bearer"` | HTTP authorization scheme type. |
+| `expires_in` | integer | Yes | — | Access token lifespan in seconds (1800 seconds). |
+
+## Example payload
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJleHAiOjE3NjE3NDAwMDB9.new_sample_signature",
+  "expires_in": 1800,
+  "refresh_token": "rt_9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d",
+  "token_type": "bearer"
+}
+```

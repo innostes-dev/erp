@@ -10,3 +10,5 @@ export const repoUrl = 'https://github.com/innostes/erp';
 export const docsRoute = '/ui/docs';
 /** innostes developer docs. */
 export const devDocsRoute = '/docs';
+/** innostes API reference docs. */
+export const apiDocsRoute = '/api-reference';

@@ -1,0 +1,26 @@
+---
+title: "Page_TenantRead_"
+description: "Data schema model."
+---
+
+Data schema model.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `items` | [TenantRead](/api-reference/schemas/tenant-read)[] | Yes | — | Records on this page. |
+| `total` | integer | Yes | — | Number of matching records across all pages. |
+| `offset` | integer | Yes | — | How many records were skipped. |
+| `limit` | integer | Yes | — | Maximum records per page. |
+
+## Example payload
+
+```json
+{
+  "items": [],
+  "total": 42,
+  "offset": 0,
+  "limit": 20
+}
+```

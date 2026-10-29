@@ -3,7 +3,7 @@ import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { z } from 'zod';
-import { devDocsRoute, docsRoute } from './shared';
+import { devDocsRoute, docsRoute, apiDocsRoute } from './shared';
 
 const docsPageSchema = pageSchema.extend({
   /** Badge shown next to the title, e.g. "Stable" or "Beta". */
@@ -28,6 +28,13 @@ const devDocs = defineDocs({
   meta: { schema: metaSchema },
 });
 
+/** innostes API reference docs: content/api-docs → /api-reference */
+const apiDocs = defineDocs({
+  dir: 'content/api-docs',
+  docs: { schema: docsPageSchema },
+  meta: { schema: metaSchema },
+});
+
 export const source = loader({
   baseUrl: docsRoute,
   source: uiDocs.toFumadocsSource(),
@@ -40,4 +47,10 @@ export const devSource = loader({
   plugins: [lucideIconsPlugin()],
 });
 
-export type DocsSource = typeof source | typeof devSource;
+export const apiSource = loader({
+  baseUrl: apiDocsRoute,
+  source: apiDocs.toFumadocsSource(),
+  plugins: [lucideIconsPlugin()],
+});
+
+export type DocsSource = typeof source | typeof devSource | typeof apiSource;

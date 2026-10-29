@@ -41,6 +41,8 @@ import { TokenReference } from './docs/token-reference';
 import { ContrastTable } from './docs/contrast-table';
 import { ComponentIndex } from './docs/component-index';
 import { HeroDemo } from './docs/hero-demo';
+import { ApiEndpoint } from './docs/api-endpoint';
+import { ApiPlayground } from './docs/api-playground';
 import {
   AsLinkDemo,
   ButtonShowcase,
@@ -65,6 +67,8 @@ export function getMDXComponents(components?: MDXComponents) {
     Folder,
     File,
     Button,
+    ApiEndpoint,
+    ApiPlayground,
     ComponentPreview,
     ApiTable,
     Preview,

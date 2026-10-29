@@ -1,0 +1,296 @@
+---
+title: "Run first-run setup"
+description: "Install the system: create the database tables and the first organisation."
+---
+
+<ApiEndpoint method="POST" path="/setup" auth="BearerAuth" />
+
+Install the system: create the database tables and the first organisation.
+
+Requires the `X-Setup-Token` header. Works **only once**: afterwards this
+route returns **404**, as if it never existed.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Setup-Token` | string \| null | No | One-time system installation token printed in server log or set via SETUP_TOKEN. |
+
+## Request body
+
+Payload model: [SetupRequest](/api-reference/schemas/setup-request)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `organization` | [TenantCreate](/api-reference/schemas/tenant-create) | Yes | The primary root customer organisation (tenant) to provision. |
+| `admin` | [AdminUserCreate](/api-reference/schemas/admin-user-create) | No | The root super administrator credentials. |
+| `branding` | [SetupBrandingCreate](/api-reference/schemas/setup-branding-create) \| null | No | Optional branding customization. Set to null if skipped. |
+
+### Request example
+
+```json
+{
+  "admin": {
+    "email": "priya.shah@northwind.example",
+    "first_name": "Priya",
+    "last_name": "Shah",
+    "mobile": "+919876543210",
+    "password": "AdminSecurePassword2026!"
+  },
+  "branding": {
+    "primary_color": "#2563EB",
+    "theme": "system"
+  },
+  "organization": {
+    "country": "IN",
+    "date_format": "DD/MM/YYYY",
+    "language": "en-IN",
+    "name": "Northwind Traders Pvt Ltd",
+    "slug": "northwind-traders",
+    "timezone": "Asia/Kolkata"
+  }
+}
+```
+
+## Responses
+
+### HTTP 201
+
+What setup created.
+
+Response model: [SetupResult](/api-reference/schemas/setup-result)
+
+```json
+{
+  "admin": {
+    "created_at": "2026-10-29T10:00:00Z",
+    "email": "priya.shah@northwind.example",
+    "first_name": "Priya",
+    "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "is_super_admin": true,
+    "last_name": "Shah",
+    "mobile": "+919876543210",
+    "status": "active",
+    "token_version": 1,
+    "updated_at": "2026-10-29T10:00:00Z"
+  },
+  "installed_at": "2026-10-29T10:00:00Z",
+  "tenant": {
+    "country": "IN",
+    "created_at": "2026-10-29T10:00:00Z",
+    "date_format": "DD/MM/YYYY",
+    "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+    "language": "en-IN",
+    "name": "Northwind Traders Pvt Ltd",
+    "slug": "northwind-traders",
+    "timezone": "Asia/Kolkata",
+    "updated_at": "2026-10-29T10:00:00Z"
+  }
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 404
+
+Resource not found
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 409
+
+Conflict with existing data
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+### HTTP 429
+
+Too many requests
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 503
+
+A required service (e.g. the database) is unavailable
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/setup" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "admin": {
+      "email": "priya.shah@northwind.example",
+      "first_name": "Priya",
+      "last_name": "Shah",
+      "mobile": "+919876543210",
+      "password": "AdminSecurePassword2026!"
+    },
+    "branding": {
+      "primary_color": "#2563EB",
+      "theme": "system"
+    },
+    "organization": {
+      "country": "IN",
+      "date_format": "DD/MM/YYYY",
+      "language": "en-IN",
+      "name": "Northwind Traders Pvt Ltd",
+      "slug": "northwind-traders",
+      "timezone": "Asia/Kolkata"
+    }
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/setup', {
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "admin": {
+      "email": "priya.shah@northwind.example",
+      "first_name": "Priya",
+      "last_name": "Shah",
+      "mobile": "+919876543210",
+      "password": "AdminSecurePassword2026!"
+    },
+    "branding": {
+      "primary_color": "#2563EB",
+      "theme": "system"
+    },
+    "organization": {
+      "country": "IN",
+      "date_format": "DD/MM/YYYY",
+      "language": "en-IN",
+      "name": "Northwind Traders Pvt Ltd",
+      "slug": "northwind-traders",
+      "timezone": "Asia/Kolkata"
+    }
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+    "Content-Type": "application/json",
+}
+
+response = httpx.post(
+    "http://localhost:8001/setup",
+    headers=headers,
+    json={
+      "admin": {
+        "email": "priya.shah@northwind.example",
+        "first_name": "Priya",
+        "last_name": "Shah",
+        "mobile": "+919876543210",
+        "password": "AdminSecurePassword2026!"
+      },
+      "branding": {
+        "primary_color": "#2563EB",
+        "theme": "system"
+      },
+      "organization": {
+        "country": "IN",
+        "date_format": "DD/MM/YYYY",
+        "language": "en-IN",
+        "name": "Northwind Traders Pvt Ltd",
+        "slug": "northwind-traders",
+        "timezone": "Asia/Kolkata"
+      }
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="POST" path="/setup" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"admin\": {\n    \"email\": \"priya.shah@northwind.example\",\n    \"first_name\": \"Priya\",\n    \"last_name\": \"Shah\",\n    \"mobile\": \"+919876543210\",\n    \"password\": \"AdminSecurePassword2026!\"\n  },\n  \"branding\": {\n    \"primary_color\": \"#2563EB\",\n    \"theme\": \"system\"\n  },\n  \"organization\": {\n    \"country\": \"IN\",\n    \"date_format\": \"DD/MM/YYYY\",\n    \"language\": \"en-IN\",\n    \"name\": \"Northwind Traders Pvt Ltd\",\n    \"slug\": \"northwind-traders\",\n    \"timezone\": \"Asia/Kolkata\"\n  }\n}"} />

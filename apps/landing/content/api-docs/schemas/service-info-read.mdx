@@ -1,0 +1,34 @@
+---
+title: "ServiceInfoRead"
+description: "Core service identification and runtime module metadata."
+---
+
+Core service identification and runtime module metadata.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `service` | string | Yes | — | Name of the backend service application. |
+| `environment` | string | Yes | — | Runtime deployment environment. |
+| `status` | string | Yes | — | High-level operational status of the service. |
+| `modules` | string[] | Yes | — | List of discovered and registered ERP plug-in modules. |
+
+## Example payload
+
+```json
+{
+  "environment": "development",
+  "modules": [
+    "auth",
+    "setup",
+    "tenancy",
+    "user",
+    "crm",
+    "hrms",
+    "api-logger"
+  ],
+  "service": "Innostes ERP API Server",
+  "status": "online"
+}
+```

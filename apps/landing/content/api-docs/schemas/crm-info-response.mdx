@@ -1,0 +1,35 @@
+---
+title: "CrmInfoResponse"
+description: "Information schema for CRM scaffold module."
+---
+
+Information schema for CRM scaffold module.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | No | `"crm"` | Unique package identifier string. |
+| `name` | string | No | `"CRM"` | Human-readable module title. |
+| `version` | string | No | `"0.1.0"` | Semver version string. |
+| `status` | string | No | `"scaffold_ready"` | Operational readiness status of module. |
+| `sub_features` | string[] | No | `["leads","deals","pipeline","contacts"]` | List of functional sub-features supported by module. |
+| `description` | string | No | `"Customer relationship management and sales pipeline"` | Module functional overview. |
+
+## Example payload
+
+```json
+{
+  "description": "Customer relationship management and sales pipeline",
+  "id": "crm",
+  "name": "CRM",
+  "status": "scaffold_ready",
+  "sub_features": [
+    "leads",
+    "deals",
+    "pipeline",
+    "contacts"
+  ],
+  "version": "0.1.0"
+}
+```

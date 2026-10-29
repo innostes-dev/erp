@@ -1,0 +1,171 @@
+---
+title: "Generate API key"
+description: "Generates a high-entropy programmatic API key."
+---
+
+<ApiEndpoint method="POST" path="/auth/api-keys" auth="BearerAuth" />
+
+Generates a high-entropy programmatic API key.
+
+Requires Bearer authentication. Returns the plaintext secret key exactly once;
+it cannot be retrieved or reconstructed later.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Request body
+
+Payload model: [CreateApiKeyRequest](/api-reference/schemas/create-api-key-request)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | Yes | Descriptive identifier for the API key. |
+| `expires_in_days` | integer \| null | No | Lifespan in days. Null for perpetual key. |
+| `scopes` | string[] | No | Authorized permission scopes, e.g. ['hrms:read', 'crm:write'] or ['*']. |
+
+### Request example
+
+```json
+{
+  "name": "Zapier CRM Sync",
+  "expires_in_days": 30,
+  "scopes": [
+    "crm:read",
+    "hrms:read"
+  ]
+}
+```
+
+## Responses
+
+### HTTP 201
+
+Successful Response
+
+Response model: [ApiKeyCreatedResponse](/api-reference/schemas/api-key-created-response)
+
+```json
+{
+  "created_at": "2026-10-29T09:00:00Z",
+  "expires_at": "2026-11-28T10:00:00Z",
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "is_revoked": false,
+  "key_prefix": "inno_live_xK9p",
+  "name": "Zapier CRM Sync",
+  "raw_key": "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH",
+  "scopes": [
+    "crm:read",
+    "hrms:read"
+  ]
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/auth/api-keys" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Zapier CRM Sync",
+    "expires_in_days": 30,
+    "scopes": [
+      "crm:read",
+      "hrms:read"
+    ]
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/auth/api-keys', {
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "name": "Zapier CRM Sync",
+    "expires_in_days": 30,
+    "scopes": [
+      "crm:read",
+      "hrms:read"
+    ]
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+    "Content-Type": "application/json",
+}
+
+response = httpx.post(
+    "http://localhost:8001/auth/api-keys",
+    headers=headers,
+    json={
+      "name": "Zapier CRM Sync",
+      "expires_in_days": 30,
+      "scopes": [
+        "crm:read",
+        "hrms:read"
+      ]
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="POST" path="/auth/api-keys" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"name\": \"Zapier CRM Sync\",\n  \"expires_in_days\": 30,\n  \"scopes\": [\n    \"crm:read\",\n    \"hrms:read\"\n  ]\n}"} />

@@ -1,0 +1,40 @@
+---
+title: "PluginListResponse"
+description: "Catalog of extensible plugins with current tenant activation status."
+---
+
+Catalog of extensible plugins with current tenant activation status.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `installed` | [ItemCatalogRead](/api-reference/schemas/item-catalog-read)[] | Yes | — | List of all installed and discoverable extensible plugins. |
+| `active_ids` | string[] | Yes | — | List of plugin IDs currently enabled for the tenant. |
+
+## Example payload
+
+```json
+{
+  "active_ids": [
+    "api-logger"
+  ],
+  "installed": [
+    {
+      "activated_at": "2026-10-29T10:00:00Z",
+      "description": "API request logging, webhook inspection, and debugging",
+      "id": "api-logger",
+      "is_active": true,
+      "name": "API Logger",
+      "tags": [
+        "Logs",
+        "Webhooks",
+        "Analytics"
+      ],
+      "tone": "chart-5",
+      "type": "plugin",
+      "version": "0.1.0"
+    }
+  ]
+}
+```

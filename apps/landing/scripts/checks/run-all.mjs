@@ -8,6 +8,7 @@ import { runFrontmatterCheck } from './check-frontmatter.mjs';
 import { runCoverageCheck } from './check-coverage.mjs';
 import { runApiTablesCheck } from './check-api-tables.mjs';
 import { runTemplateCheck } from './check-template.mjs';
+import { runApiDocsStaleCheck } from './check-api-docs-stale.mjs';
 
 console.log('Running documentation quality gates...\n');
 const startTime = Date.now();
@@ -94,6 +95,14 @@ if (templateErrors.length > 0) {
   console.log('✓ [TEMPLATE] All component pages follow the 7-section template strictly.');
 }
 
+const apiDocsStaleErrors = runApiDocsStaleCheck();
+if (apiDocsStaleErrors.length > 0) {
+  console.error(`❌ [API FRESHNESS] ${apiDocsStaleErrors.length} API docs freshness issues:`);
+  for (const e of apiDocsStaleErrors) console.error(`   ${e.file} - ${e.message}`);
+} else {
+  console.log('✓ [API FRESHNESS] All 33 API operations and 41 schemas are fresh against openapi.json.');
+}
+
 // 2. Report-mode checks
 console.log('\n--- REPORT-MODE GATES ---');
 
@@ -113,7 +122,8 @@ const totalEnforcedFailures =
   spellingErrors.length +
   frontmatterErrors.length +
   coverageErrors.length +
-  templateErrors.length;
+  templateErrors.length +
+  apiDocsStaleErrors.length;
 
 if (totalEnforcedFailures > 0) {
   console.error(`\n❌ Quality gates failed with ${totalEnforcedFailures} enforced defect(s).`);

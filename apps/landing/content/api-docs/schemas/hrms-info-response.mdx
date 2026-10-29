@@ -1,0 +1,35 @@
+---
+title: "HrmsInfoResponse"
+description: "Information schema for HRMS scaffold module."
+---
+
+Information schema for HRMS scaffold module.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | No | `"hrms"` | Unique package identifier string. |
+| `name` | string | No | `"HRMS"` | Human-readable module title. |
+| `version` | string | No | `"0.1.0"` | Semver version string. |
+| `status` | string | No | `"scaffold_ready"` | Operational readiness status of module. |
+| `sub_features` | string[] | No | `["employees","leave","payroll","attendance"]` | List of functional sub-features supported by module. |
+| `description` | string | No | `"People and human resources management"` | Module functional overview. |
+
+## Example payload
+
+```json
+{
+  "description": "People and human resources management",
+  "id": "hrms",
+  "name": "HRMS",
+  "status": "scaffold_ready",
+  "sub_features": [
+    "employees",
+    "leave",
+    "payroll",
+    "attendance"
+  ],
+  "version": "0.1.0"
+}
+```

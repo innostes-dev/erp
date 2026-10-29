@@ -1,0 +1,148 @@
+---
+title: "Rotate refresh token"
+description: "Rotates a single-use refresh token and issues fresh access credentials."
+---
+
+<ApiEndpoint method="POST" path="/auth/refresh" auth="None" />
+
+Rotates a single-use refresh token and issues fresh access credentials.
+
+Public endpoint. Detects reuse attempts, invalidating compromised session
+families if reuse occurs.
+
+## Authentication
+
+This endpoint is public and does not require an authentication header.
+
+## Request body
+
+Payload model: [RefreshTokenRequest](/api-reference/schemas/refresh-token-request)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `refresh_token` | string | Yes | Active single-use rotating refresh token. |
+
+### Request example
+
+```json
+{
+  "refresh_token": "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+}
+```
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [RefreshTokenResponse](/api-reference/schemas/refresh-token-response)
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJleHAiOjE3NjE3NDAwMDB9.new_sample_signature",
+  "expires_in": 1800,
+  "refresh_token": "rt_9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d",
+  "token_type": "bearer"
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 403
+
+Not allowed
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/auth/refresh" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/auth/refresh', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "refresh_token": "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Content-Type": "application/json",
+}
+
+response = httpx.post(
+    "http://localhost:8001/auth/refresh",
+    headers=headers,
+    json={
+      "refresh_token": "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="POST" path="/auth/refresh" authType="None" hasBody={true} initialBody={"{\n  \"refresh_token\": \"rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d\"\n}"} />

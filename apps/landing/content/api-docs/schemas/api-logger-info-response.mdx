@@ -1,0 +1,37 @@
+---
+title: "ApiLoggerInfoResponse"
+description: "Information schema for API Logger plugin."
+---
+
+Information schema for API Logger plugin.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | No | `"api-logger"` | Unique plugin identifier string. |
+| `name` | string | No | `"API Logger"` | Human-readable plugin title. |
+| `version` | string | No | `"0.1.0"` | Semver version string. |
+| `status` | string | No | `"scaffold_ready"` | Operational readiness status of plugin. |
+| `type` | string | No | `"plugin"` | Package type classification. |
+| `features` | string[] | No | `["requests","webhooks","analytics","filters"]` | List of telemetry features provided by plugin. |
+| `description` | string | No | `"API request logging, webhook inspection, and debugging"` | Plugin functional overview. |
+
+## Example payload
+
+```json
+{
+  "description": "API request logging, webhook inspection, and debugging",
+  "features": [
+    "requests",
+    "webhooks",
+    "analytics",
+    "filters"
+  ],
+  "id": "api-logger",
+  "name": "API Logger",
+  "status": "scaffold_ready",
+  "type": "plugin",
+  "version": "0.1.0"
+}
+```

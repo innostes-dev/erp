@@ -1,0 +1,153 @@
+---
+title: "Activate an extensible plugin for tenant"
+description: "Activate an extensible plugin for the current tenant."
+---
+
+<ApiEndpoint method="POST" path="/tenants/current/plugins/{plugin_id}/activate" auth="BearerAuth" />
+
+Activate an extensible plugin for the current tenant.
+
+Requires Super Administrator privilege. Enables third-party extensions
+and hook listeners for the organization.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Path parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `plugin_id` | string | Yes | Package identifier of extensible plugin to activate. |
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant UUID context. |
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [ActivationResponse](/api-reference/schemas/activation-response)
+
+```json
+{
+  "is_active": true,
+  "item_id": "hrms",
+  "message": "Module 'hrms' activated successfully."
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 403
+
+Not allowed
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 404
+
+Resource not found
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/tenants/current/plugins/{plugin_id}/activate" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/tenants/current/plugins/{plugin_id}/activate', {
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.post(
+    "http://localhost:8001/tenants/current/plugins/{plugin_id}/activate",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="POST" path="/tenants/current/plugins/{plugin_id}/activate" authType="BearerAuth" hasBody={false} initialBody={""} />

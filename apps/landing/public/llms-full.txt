@@ -265,7 +265,7 @@ Chart colours are mapped directly from semantic design tokens (`--color-chart-1`
 
 ## Donut Chart (https://innostes.com/ui/docs/charts/donut)
 
-Donut chart for visualizing proportions and percentage shares with prominent center metrics, en-IN formatting, and accessible hidden tables.
+Donut chart for visualising proportions and percentage shares with prominent centre metrics, en-IN formatting, and accessible hidden tables.
 
 <ComponentPreview name="charts/donut/basic" />
 
@@ -292,9 +292,9 @@ Use `DonutChart` when visualizing the proportional breakdown of a finite total a
 
 ## Examples
 
-### Category distribution with center metric
+### Category distribution with centre metric
 
-Displaying total annual expenditure with prominent center KPI callouts:
+Displaying total annual expenditure with prominent centre KPI callouts:
 
 ```tsx
 const spendDistribution = [
@@ -345,13 +345,13 @@ const auditBreakdown = [
 
 ### Colour contrast
 
-Slices consume token-based colors (`chart-1` through `chart-8` or semantic tones) designed to maintain distinct contrast boundaries in both light and dark modes.
+Slices consume token-based colours (`chart-1` through `chart-8` or semantic tones) designed to maintain distinct contrast boundaries in both light and dark modes.
 
 ## Guidelines
 
 <DoDont
   do={{
-    description: 'Use the center metric (centerValue and centerLabel) to emphasize the primary takeaway of the chart.',
+    description: 'Use the centre metric (centerValue and centerLabel) to emphasize the primary takeaway of the chart.',
     code: `<DonutChart centerLabel="Total budget" centerValue="₹50L" />`,
   }}
   dont={{
@@ -1193,10 +1193,10 @@ export function OrderStatusCell({ status }: { status: OrderStatus }) {
 
 `Badge` complies with WCAG 2.2 AA contrast standards across all semantic variants.
 
-### Contrast and color independence
+### Contrast and colour independence
 
-- Never rely exclusively on background color to communicate status. Always provide unambiguous text labels (e.g. "Overdue" rather than just a red dot or empty square).
-- Every variant pairs text color and background tint with an inset ring token to guarantee 4.5:1 text-to-background contrast in both light and dark display modes.
+- Never rely exclusively on background colour to communicate status. Always provide unambiguous text labels (e.g. "Overdue" rather than just a red dot or empty square).
+- Every variant pairs text colour and background tint with an inset ring token to guarantee 4.5:1 text-to-background contrast in both light and dark display modes.
 - The indicator dot includes `aria-hidden="true"`, ensuring screen readers announce the semantic text directly without reading spurious bullet symbols.
 
 ### Screen readers
@@ -1909,7 +1909,7 @@ Pass `EmptyState` directly to `DataTable` via its `emptyState` prop:
 ### Heading hierarchy
 
 - `title` renders inside an `<h3>` heading element by default.
-- When placed within a top-level page landmark that lacks intermediate headings, you can customize the title element using `classNames.title` or nest an appropriate heading level (`<h2>`) within `title`.
+- When placed within a top-level page landmark that lacks intermediate headings, you can customise the title element using `classNames.title` or nest an appropriate heading level (`<h2>`) within `title`.
 
 ### Focus management and action clarity
 
@@ -1969,7 +1969,7 @@ import { IconTile, type IconTileProps, type IconTileTone } from '@innostes/ui';
 
 Use `IconTile` to highlight an icon with a tinted or solid background container in dashboard summaries, module navigation lists, or feature cards:
 
-- Categorizing ERP modules (Procurement, Inventory, Ledgers, Logistics) with dedicated palette colors.
+- Categorising ERP modules (Procurement, Inventory, Ledgers, Logistics) with dedicated palette colours.
 - Visually anchoring metric tiles ([MetricCard](/ui/docs/widgets/metric-card) and [Stat](/ui/docs/components/data-display/stat)).
 - Reinforcing empty state or workflow step headers with prominent iconography.
 
@@ -1982,7 +1982,7 @@ When choosing icon components:
 
 ### Semantic and categorical tones
 
-`IconTile` provides both semantic roles (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) and eight categorical chart tones (`chart-1` through `chart-8`). Categorical tones match design system charts, allowing dashboards to share uniform color coding across charts and tiles.
+`IconTile` provides both semantic roles (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) and eight categorical chart tones (`chart-1` through `chart-8`). Categorical tones match design system charts, allowing dashboards to share uniform colour coding across charts and tiles.
 
 ```tsx
 import { IconTile } from '@innostes/ui';
@@ -2067,7 +2067,7 @@ export function BorderedTile() {
 - Embedded icons render with `aria-hidden="true"` by default.
 - `IconTile` itself is decorative. Never use an isolated `IconTile` without adjacent descriptive text (such as a card title or list label) or an explicit `aria-label` when wrapped inside an interactive container.
 
-### Color contrast
+### Colour contrast
 
 All `soft` and `solid` variants meet WCAG 2.2 AA non-text contrast requirements (> 3:1 for graphical objects and boundaries) across light and dark display modes.
 
@@ -2406,8 +2406,8 @@ export function OperationsOverview() {
 ### Screen readers and trend indicators
 
 - Trend arrows (`ArrowUpIcon`, `ArrowDownIcon`) are rendered with `aria-hidden="true"`.
-- When delta text includes a leading `+` or `-` symbol, screen readers announce the numeric polarity cleanly without relying exclusively on color.
-- Avoid using color alone to communicate whether a trend is favorable or unfavorable; ensure the helper text or label provides adequate context.
+- When delta text includes a leading `+` or `-` symbol, screen readers announce the numeric polarity cleanly without relying exclusively on colour.
+- Avoid using colour alone to communicate whether a trend is favourable or unfavourable; ensure the helper text or label provides adequate context.
 
 ### Numerical tabular formatting
 
@@ -3136,9 +3136,9 @@ export function DispatchGauge() {
 }
 ```
 
-### Dynamic threshold coloring
+### Dynamic threshold colouring
 
-Pass a function to `tone` to change the arc color dynamically as the measured metric enters warning or critical bands:
+Pass a function to `tone` to change the arc colour dynamically as the measured metric enters warning or critical bands:
 
 ```tsx
 import { Gauge } from '@innostes/ui';
@@ -3314,7 +3314,7 @@ import { Meter, type MeterProps } from '@innostes/ui';
 Use `Meter` to communicate an existing scalar measurement or capacity against known numerical bounds:
 
 - Displaying storage consumption, memory usage, or compute quotas.
-- Tracking organization seat license utilization (e.g. 8 of 10 operator licenses used).
+- Tracking organisation seat licence utilisation (e.g. 8 of 10 operator licences used).
 - Monitoring warehouse bin volume or tank fuel levels.
 
 When choosing scalar components:
@@ -3400,9 +3400,9 @@ export function NormalizedQuotaMeter() {
 - Screen readers announce the current reading in relation to the upper and lower boundaries (e.g., "Cloud document storage, 64 gigabytes, 64%").
 - When `format={{ style: 'percent' }}` is used, `aria-valuetext` announces the correct computed percentage string.
 
-### Color independence
+### Colour independence
 
-Avoid relying strictly on the bar color to communicate limit risks. Always provide clear numerical text or helper copy indicating proximity to the maximum capacity.
+Avoid relying strictly on the bar colour to communicate limit risks. Always provide clear numerical text or helper copy indicating proximity to the maximum capacity.
 
 ## Guidelines
 
@@ -3765,9 +3765,9 @@ export function DefaultSpinner() {
 }
 ```
 
-### Sizing and color inheritance
+### Sizing and colour inheritance
 
-`Spinner` uses `stroke="currentColor"` so it automatically matches the text color of its parent container. Adjust its dimensions using standard Tailwind `size-*` utilities:
+`Spinner` uses `stroke="currentColor"` so it automatically matches the text colour of its parent container. Adjust its dimensions using standard Tailwind `size-*` utilities:
 
 ```tsx
 import { Spinner } from '@innostes/ui';
@@ -5358,7 +5358,7 @@ import { Input, SearchInput, PasswordInput, inputVariants } from '@innostes/ui';
 
 ### Interactive playground
 
-Customize sizes, HTML types, and validation states in real time:
+Customise sizes, HTML types, and validation states in real time:
 
 <InputPlayground />
 
@@ -5744,7 +5744,7 @@ When formatting percentages, supply a decimal fraction (e.g. `0.18` for 18%):
 </Field>
 ```
 
-### Bounds and step behavior
+### Bounds and step behaviour
 
 Enforce minimum, maximum, and step increments:
 
@@ -7877,7 +7877,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 }
 ```
 
-### Collapsible behavior and keyboard shortcuts
+### Collapsible behaviour and keyboard shortcuts
 
 - **Desktop state**: Expands to standard width (default `256px`) or collapses into an icon rail (default `56px`). In icon mode, hovering or focusing any menu item displays its title via an accessible tooltip.
 - **Mobile drawer**: Below `768px` (customisable via `mobileQuery`), the sidebar automatically switches to a slide-in modal drawer. Selecting any item automatically closes the drawer.
@@ -8215,7 +8215,7 @@ import {
 
 Use `TopBar` as the persistent header across administrative and enterprise applications:
 
-- **Application header**: Housing the organization logo, workspace switcher, and mobile sidebar trigger.
+- **Application header**: Housing the organisation logo, workspace switcher, and mobile sidebar trigger.
 - **Global search integration**: Providing a prominent trigger for [CommandPalette](/ui/docs/components/overlays/command-palette).
 - **Tenant and user profile tools**: Housing branch switchers (e.g. Bengaluru vs Mumbai), alert notifications, and user avatars.
 
@@ -8281,7 +8281,7 @@ Using `TopBarStart`, `TopBarCenter`, and `TopBarEnd`:
 
 <KeyboardTable
   entries={[
-    { key: 'Tab', action: 'Moves focus sequentially across interactive controls inside Start, Center, and End slots.' },
+    { key: 'Tab', action: 'Moves focus sequentially across interactive controls inside Start, Centre, and End slots.' },
   ]}
 />
 
@@ -10388,12 +10388,12 @@ Overlays present supplementary workflows, context-sensitive details, and decisio
 
 Use this decision matrix to select the appropriate overlay component:
 
-| Component | Modality | Focus behavior | Mobile behavior | Ideal scenario |
+| Component | Modality | Focus behaviour | Mobile behaviour | Ideal scenario |
 | --- | --- | --- | --- | --- |
-| **[Dialog](/ui/docs/components/overlays/dialog)** | Modal (backdrop) | Trapped; restored to trigger on close | Centered modal (or bottom sheet) | Multi-field creation forms, detailed entity edits, complex configuration. |
-| **[AlertDialog](/ui/docs/components/overlays/alert-dialog)** | Strict modal (no backdrop click) | Trapped; focuses cancel button | Centered alert dialog | Irreversible destructive actions (voiding invoices, deleting vendors). |
+| **[Dialog](/ui/docs/components/overlays/dialog)** | Modal (backdrop) | Trapped; restored to trigger on close | Centred modal (or bottom sheet) | Multi-field creation forms, detailed entity edits, complex configuration. |
+| **[AlertDialog](/ui/docs/components/overlays/alert-dialog)** | Strict modal (no backdrop click) | Trapped; focuses cancel button | Centred alert dialog | Irreversible destructive actions (voiding invoices, deleting vendors). |
 | **[Sheet](/ui/docs/components/overlays/sheet)** | Modal or non-modal | Trapped if modal; side drawer | Full-width slide-over drawer | Audit inspection trails, record side-panels, mobile filter drawers. |
-| **[Popover](/ui/docs/components/overlays/popover)** | Non-modal (or light dismiss) | Tab navigation inside popup | Repositioned within viewport bounds | Rich interactive controls (date pickers, filter builders, color swatches). |
+| **[Popover](/ui/docs/components/overlays/popover)** | Non-modal (or light dismiss) | Tab navigation inside popup | Repositioned within viewport bounds | Rich interactive controls (date pickers, filter builders, colour swatches). |
 | **[DropdownMenu](/ui/docs/components/overlays/dropdown-menu)** | Non-modal menu | Arrow key navigation; roving focus | Touch-friendly menu items | Action lists, table row action menus ("View", "Download", "Refund"). |
 | **[ContextMenu](/ui/docs/components/overlays/context-menu)** | Non-modal context menu | Arrow key navigation; roving focus | Replaced by row action button | Right-click shortcuts on table rows or desktop canvas nodes. |
 | **[Tooltip](/ui/docs/components/overlays/tooltip)** | Non-modal informational | Never traps focus; hover / focus only | Hidden on touch (use long-press or tap) | Explanations for icon-only buttons, keyboard hotkey reminders. |
@@ -11037,7 +11037,7 @@ This reference screen demonstrates talent recruitment and candidate workflow tra
 | **Pipeline Scaffolding** | [`KanbanBoard`](/ui/docs/widgets/kanban-board) with 5 recruitment stages (Applied, Screening, Technical, Offer, Hired) |
 | **Candidate Cards** | Custom card layout with candidate name, role, expected CTC in INR Lakhs, rating stars, and avatar |
 | **Candidate Identity** | [`Avatar`](/ui/docs/components/data-display/avatar), [`AvatarFallback`](/ui/docs/components/data-display/avatar) |
-| **Stage Badges & Dots** | Color-coded status dots (`tone`) identifying stage urgency and progression |
+| **Stage Badges & Dots** | Colour-coded status dots (`tone`) identifying stage urgency and progression |
 | **Candidate Inspector** | [`Sheet`](/ui/docs/components/overlays/sheet) slide-out drawer displaying candidate experience, notice periods, and interviewer notes |
 | **Action Triggers** | [`Button`](/ui/docs/components/actions/button) to advance candidates to the subsequent pipeline stage |
 | **Move Notifications** | [`toast`](/ui/docs/components/feedback/toast) announcing stage transitions upon card drop |
@@ -11277,7 +11277,7 @@ This reference screen demonstrates high-density operational data management for 
 | **Filtering Toolbar** | [`Input`](/ui/docs/components/forms/input) with search icon prefix, [`Select`](/ui/docs/components/forms/select) for status segmentation |
 | **Batch Action Bar** | Contextual banner rendered conditionally when rows are selected, with bulk reminder and export triggers |
 | **Data Grid** | [`DataTable`](/ui/docs/components/data-display/data-table) with row selection checkboxes, customer details, and INR formatting |
-| **Status Indicators** | [`Badge`](/ui/docs/components/data-display/badge) with semantic color variants (`default`, `secondary`, `destructive`, `outline`) |
+| **Status Indicators** | [`Badge`](/ui/docs/components/data-display/badge) with semantic colour variants (`default`, `secondary`, `destructive`, `outline`) |
 | **Row Actions** | [`DropdownMenu`](/ui/docs/components/overlays/dropdown-menu) with item actions (View details, Download PDF, Send reminder) |
 | **Notifications** | [`toast`](/ui/docs/components/feedback/toast) confirming batch operations and export generation |
 
@@ -11510,7 +11510,7 @@ A common issue in server-rendered applications is Flash of Unstyled Theme (FOUT)
 To prevent FOUT:
 
 1. **Add `suppressHydrationWarning`**: Always add this prop to the `<html>` tag in your root layout. This tells React to ignore differences between the server-rendered HTML and client-injected theme classes.
-2. **Use `disableTransitionOnChange`**: When switching themes, temporarily disable CSS transitions to prevent color property interpolation flickers across buttons and borders.
+2. **Use `disableTransitionOnChange`**: When switching themes, temporarily disable CSS transitions to prevent colour property interpolation flickers across buttons and borders.
 3. **Vanilla / Vite blocking script**: For client-side Single Page Applications without `next-themes`, place a tiny synchronous script inside the `<head>` tag of `index.html`:
 
 ```html title="index.html"
@@ -11558,7 +11558,7 @@ describe('Dark mode rendering', () => {
 
 ### End-to-end testing with Playwright
 
-Test dark theme visual rendering and token contrast using Playwright's color scheme emulation:
+Test dark theme visual rendering and token contrast using Playwright's colour scheme emulation:
 
 ```ts title="tests/theme.spec.ts"
 import { test, expect } from '@playwright/test';
@@ -13515,7 +13515,7 @@ export function OperationsDashboard() {
 
 ## Accessibility notes
 
-- **High-contrast chart palettes**: Chart color assignments use CSS custom properties linked to design tokens (`hsl(var(--primary))`, `hsl(var(--chart-2))`). Ensure neighbouring segments maintain a 3:1 minimum contrast ratio.
+- **High-contrast chart palettes**: Chart colour assignments use CSS custom properties linked to design tokens (`hsl(var(--primary))`, `hsl(var(--chart-2))`). Ensure neighbouring segments maintain a 3:1 minimum contrast ratio.
 - **Screen reader data tables**: When rendering visual charts, include a hidden `table` element using CSS `.sr-only` detailing category keys and numeric quantities, or render an accessible summary paragraph.
 - **Keyboard focus within widgets**: Provide logical tab stops for widget action menus and maximize controls. Ensure widget cards do not trap focus inside chart SVG containers.
 
@@ -14740,7 +14740,7 @@ export function TenantProvider({
 
 ## Administrative brand preview and safety audit
 
-In the tenant settings panel, provide real-time contrast auditing to prevent administrators from saving non-compliant color schemes:
+In the tenant settings panel, provide real-time contrast auditing to prevent administrators from saving non-compliant colour schemes:
 
 ```tsx
 'use client';
@@ -14819,12 +14819,12 @@ export function TenantThemeEditor() {
 ## Accessibility notes
 
 - **Strict WCAG 2.1 compliance**: Enterprise business software requires a minimum 4.5:1 contrast ratio for regular body text and buttons, and 3:1 for large typography and essential user interface boundaries.
-- **Automated fallback enforcement**: If a tenant saves an invalid color below 4.5:1, adjust the lightness channel automatically in your theme parser to guarantee baseline compliance.
+- **Automated fallback enforcement**: If a tenant saves an invalid colour below 4.5:1, adjust the lightness channel automatically in your theme parser to guarantee baseline compliance.
 - **Focus ring visibility**: Ensure `--ring` custom properties maintain a 3:1 contrast ratio against the page background so keyboard focus indicators remain distinct.
 
 ## Common mistakes
 
-- **Saving unverified hex colors**: Allowing tenant admins to type arbitrary hex codes without validation leads to broken buttons with invisible text.
+- **Saving unverified hex colours**: Allowing tenant admins to type arbitrary hex codes without validation leads to broken buttons with invisible text.
 - **Global `body` style overrides**: Injecting tenant styles onto the top-level `document.body` breaks multi-tenant tab switching or unified super-admin consoles where multiple tenants are inspected simultaneously.
 - **Ignoring dark mode inversion**: A dark navy blue works well as primary on white backgrounds, but becomes virtually invisible when rendered against a `#09090b` dark mode background. Always supply a distinct dark mode value.
 
@@ -17425,7 +17425,7 @@ import {
 Use `NotificationBell` and `NotificationList` to keep operators informed of high-priority system events without disrupting their active workflow:
 
 - **Top navigation bar alerts**: Persistent notification badge with dropdown menu in [TopBar](/ui/docs/components/layout/top-bar).
-- **Dedicated notifications center**: Full-page notifications feed using `NotificationList`.
+- **Dedicated notifications centre**: Full-page notifications feed using `NotificationList`.
 - **Dashboard alert widgets**: Embedding `NotificationList` inside [WidgetCard](/ui/docs/widgets/widget-card).
 
 **Do not use NotificationBell for:**

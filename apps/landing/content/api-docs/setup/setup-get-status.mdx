@@ -1,0 +1,90 @@
+---
+title: "Get setup status"
+description: "Tell the UI whether to show the setup wizard."
+---
+
+<ApiEndpoint method="GET" path="/setup/status" auth="None" />
+
+Tell the UI whether to show the setup wizard. Reveals nothing else.
+
+Returns **503** if the database can't be reached: the setup state is
+unknown then, so the UI must not show the wizard.
+
+## Authentication
+
+This endpoint is public and does not require an authentication header.
+
+## Responses
+
+### HTTP 200
+
+Whether the system is installed.
+
+Response model: [SetupStatus](/api-reference/schemas/setup-status)
+
+```json
+{
+  "installed": false
+}
+```
+
+### HTTP 503
+
+A required service (e.g. the database) is unavailable
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/setup/status"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/setup/status', {
+  method: 'GET',
+  headers: {
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+}
+
+response = httpx.get(
+    "http://localhost:8001/setup/status",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/setup/status" authType="None" hasBody={false} initialBody={""} />

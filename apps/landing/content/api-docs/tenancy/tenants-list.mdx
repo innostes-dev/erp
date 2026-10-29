@@ -1,0 +1,124 @@
+---
+title: "List tenants"
+description: "List tenants with pagination, newest first."
+---
+
+<ApiEndpoint method="GET" path="/tenants" auth="BearerAuth" />
+
+List tenants with pagination, newest first.
+
+Requires Bearer authentication. Soft-deleted tenants are hidden unless
+`include_deleted=true` is requested.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Query parameters
+
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `offset` | integer | No | `0` | Number of tenants to skip. |
+| `limit` | integer | No | `50` | Maximum tenants to return (1-200). |
+| `include_deleted` | boolean | No | `false` | Also return soft-deleted tenants. |
+
+## Responses
+
+### HTTP 200
+
+One page of tenants, newest first.
+
+Response model: [Page_TenantRead_](/api-reference/schemas/page-tenant-read-)
+
+```json
+{
+  "items": [],
+  "total": 42,
+  "offset": 0,
+  "limit": 20
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/tenants" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/tenants', {
+  method: 'GET',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/tenants",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/tenants" authType="BearerAuth" hasBody={false} initialBody={""} />

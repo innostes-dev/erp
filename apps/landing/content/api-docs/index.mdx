@@ -1,0 +1,52 @@
+---
+title: "API Reference Overview"
+description: "REST API reference, OpenAPI specifications, and integration guides for the innostes ERP platform."
+---
+
+Welcome to the innostes ERP REST API documentation. The API provides a modern, high-performance interface for multi-tenant enterprise resource planning, identity and access management, and modular ERP extensions.
+
+## Base URLs
+
+The API server listens on the following environments:
+
+| Environment | Base URL | Usage |
+| --- | --- | --- |
+| Local Development | `http://localhost:8001` | Local Docker and Python virtual environments |
+| Production | `https://api.innostes.com` | Cloud staging and multi-tenant production clusters |
+
+## Authentication
+
+The API uses stateless JSON Web Tokens (JWT) passed in the standard `Authorization: Bearer <token>` header for all protected operations. During initial system bootstrap, single-use `X-Setup-Token` headers authenticate administrative installation before tenant administrators are provisioned.
+
+## API Conventions
+
+All endpoints adhere to predictable enterprise REST conventions:
+
+- **Identities**: 64-bit integer IDs (`BigInt`), returned as numeric values in JSON payloads. See [Multi-Tenancy Guide](/api-reference/guides/tenancy).
+- **Timestamps**: UTC ISO 8601 formatted timestamps (e.g. `2026-10-29T10:00:00Z`). See [Audit and Soft Delete Guide](/api-reference/guides/audit-and-soft-delete).
+- **Pagination**: Offset-based pagination with `skip` and `limit` query parameters, returning a standardized pagination envelope. See [Pagination Guide](/api-reference/guides/pagination).
+- **Soft delete**: Audit records remain recoverable; deleted entries are omitted by default unless `include_deleted=true` is requested. See [Audit and Soft Delete Guide](/api-reference/guides/audit-and-soft-delete).
+- **Error handling**: Machine-readable RFC 7807 problem details with typed `code` identifiers and contextual parameter metadata. See [Error Handling Guide](/api-reference/guides/error-handling).
+
+## OpenAPI specification
+
+The machine-readable OpenAPI 3.1 specification is available for automated code generation, linting, and SDK compilation:
+
+- [Download openapi.json](/api-reference/openapi.json)
+
+## Operation catalogue
+
+Explore endpoints organized by functional subsystem:
+
+| Subsystem | Description | Operations |
+| --- | --- | --- |
+| [General](/api-reference/general/root) | Core service status and active runtime configuration. | 2 endpoints |
+| [Observability](/api-reference/observability/health-check) | Health check and readiness probes for orchestration and monitoring. | 1 endpoint |
+| [Authentication](/api-reference/authentication/login) | Identity issuance, session refresh, token revocation, and password recovery. | 10 endpoints |
+| [Setup](/api-reference/setup/setup-status) | First-boot deployment initialisation and pre-installation diagnostic checks. | 3 endpoints |
+| [Tenancy](/api-reference/tenancy/list-tenants) | Multi-tenant organisation boundaries, module lifecycles, and plugin management. | 12 endpoints |
+| [User Management](/api-reference/user-management/create-user) | Account provisioning, role assignments, and authenticated caller profile. | 2 endpoints |
+| [CRM](/api-reference/crm/crm-info) | Customer Relationship Management subsystem info and records. | 1 endpoint |
+| [HRMS](/api-reference/hrms/hrms-info) | Human Resource Management System employee and organizational directory. | 1 endpoint |
+| [API Logger](/api-reference/api-logger/api-logger-info) | HTTP request audit logging and inspection service metadata. | 1 endpoint |
+| [Data Models](/api-reference/schemas) | Complete catalogue of all 41 request and response schemas. | 41 schemas |

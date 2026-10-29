@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { devSource, source } from '@/lib/source';
+import { apiSource, devSource, source } from '@/lib/source';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://innostes.com';
@@ -18,6 +18,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  const apiPages = apiSource.getPages().map((page) => ({
+    url: `${baseUrl}${page.url}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: page.url === '/api-reference' ? 1.0 : 0.8,
+  }));
+
   return [
     {
       url: `${baseUrl}/`,
@@ -33,5 +40,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...uiPages,
     ...devPages,
+    ...apiPages,
   ];
 }

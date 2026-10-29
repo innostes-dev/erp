@@ -1,0 +1,28 @@
+---
+title: "AdminUserCreate"
+description: "Administrator credentials and profile collected during first-run setup."
+---
+
+Administrator credentials and profile collected during first-run setup.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `first_name` | string | Yes | — | Administrator given name. |
+| `last_name` | string \| null | No | — | Administrator family name. |
+| `email` | string | Yes | — | Primary administrative email address used for root login. |
+| `password` | string | Yes | — | Strong administrative root password. |
+| `mobile` | string \| null | No | — | Administrative mobile telephone number. |
+
+## Example payload
+
+```json
+{
+  "first_name": "Priya",
+  "last_name": "Shah",
+  "email": "priya.shah@northwind.example",
+  "password": "AdminSecurePassword2026!",
+  "mobile": "+919876543210"
+}
+```

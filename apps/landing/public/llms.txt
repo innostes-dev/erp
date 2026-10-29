@@ -118,7 +118,7 @@
 
 ## Charts
 - [Cartesian Charts](https://innostes.com/ui/docs/charts/cartesian) [Stable]: Bar, Line, and Area charts for categorical business analytics with accessible hidden tables, en-IN formatting, and Recharts integration.
-- [Donut Chart](https://innostes.com/ui/docs/charts/donut) [Stable]: Donut chart for visualizing proportions and percentage shares with prominent center metrics, en-IN formatting, and accessible hidden tables.
+- [Donut Chart](https://innostes.com/ui/docs/charts/donut) [Stable]: Donut chart for visualising proportions and percentage shares with prominent centre metrics, en-IN formatting, and accessible hidden tables.
 - [Charts](https://innostes.com/ui/docs/charts/index) [Stable]: Accessible, theme-aware charting primitives for financial summaries and inventory analytics.
 
 ## Patterns and Examples

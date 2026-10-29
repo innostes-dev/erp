@@ -1,0 +1,22 @@
+---
+title: "SetupChecks"
+description: "Pre-install diagnostics for holders of the one-time setup token."
+---
+
+Pre-install diagnostics for holders of the one-time setup token.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `database_connected` | boolean | Yes | — | True when the database connection pool is healthy and reachable. |
+| `migrations_pending` | integer | Yes | — | Number of database schema migrations that setup will apply. |
+
+## Example payload
+
+```json
+{
+  "database_connected": true,
+  "migrations_pending": 0
+}
+```

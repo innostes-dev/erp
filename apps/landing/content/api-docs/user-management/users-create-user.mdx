@@ -1,0 +1,186 @@
+---
+title: "Create a user"
+description: "Registers a new user identity with envelope-encrypted PII."
+---
+
+<ApiEndpoint method="POST" path="/users" auth="BearerAuth" />
+
+Registers a new user identity with envelope-encrypted PII.
+
+Requires Bearer authentication. Encrypts sensitive fields (email, mobile)
+and generates blind search indexes.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Request body
+
+Payload model: [UserCreate](/api-reference/schemas/user-create)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `first_name` | string | Yes | User given name. |
+| `last_name` | string \| null | No | User family name. |
+| `email` | string | Yes | Primary user account email address. |
+| `password` | string | Yes | Initial account password. |
+| `mobile` | string \| null | No | User mobile telephone number. |
+| `is_super_admin` | boolean | No | Flag granting platform-wide super administrator privileges. |
+
+### Request example
+
+```json
+{
+  "first_name": "Arjun",
+  "last_name": "Mehta",
+  "email": "arjun.mehta@northwind.example",
+  "password": "UserSecurePassword2026!",
+  "mobile": "+919876543211",
+  "is_super_admin": false
+}
+```
+
+## Responses
+
+### HTTP 201
+
+Successful Response
+
+Response model: [UserRead](/api-reference/schemas/user-read)
+
+```json
+{
+  "created_at": "2026-10-29T10:00:00Z",
+  "email": "priya.shah@northwind.example",
+  "first_name": "Priya",
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "is_super_admin": true,
+  "last_name": "Shah",
+  "mobile": "+919876543210",
+  "status": "active",
+  "token_version": 1,
+  "updated_at": "2026-10-29T10:00:00Z"
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 409
+
+Conflict with existing data
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/users" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "Arjun",
+    "last_name": "Mehta",
+    "email": "arjun.mehta@northwind.example",
+    "password": "UserSecurePassword2026!",
+    "mobile": "+919876543211",
+    "is_super_admin": false
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/users', {
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "first_name": "Arjun",
+    "last_name": "Mehta",
+    "email": "arjun.mehta@northwind.example",
+    "password": "UserSecurePassword2026!",
+    "mobile": "+919876543211",
+    "is_super_admin": false
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+    "Content-Type": "application/json",
+}
+
+response = httpx.post(
+    "http://localhost:8001/users",
+    headers=headers,
+    json={
+      "first_name": "Arjun",
+      "last_name": "Mehta",
+      "email": "arjun.mehta@northwind.example",
+      "password": "UserSecurePassword2026!",
+      "mobile": "+919876543211",
+      "is_super_admin": false
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="POST" path="/users" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"first_name\": \"Arjun\",\n  \"last_name\": \"Mehta\",\n  \"email\": \"arjun.mehta@northwind.example\",\n  \"password\": \"UserSecurePassword2026!\",\n  \"mobile\": \"+919876543211\",\n  \"is_super_admin\": false\n}"} />

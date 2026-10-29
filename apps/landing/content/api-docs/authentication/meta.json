@@ -1,0 +1,15 @@
+{
+  "title": "Authentication",
+  "pages": [
+    "auth-login",
+    "auth-refresh",
+    "auth-forgot-password",
+    "auth-reset-password",
+    "auth-change-password",
+    "auth-logout",
+    "auth-get-me",
+    "auth-list-api-keys",
+    "auth-create-api-key",
+    "auth-revoke-api-key"
+  ]
+}

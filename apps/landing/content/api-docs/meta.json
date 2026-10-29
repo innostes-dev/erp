@@ -1,0 +1,20 @@
+{
+  "title": "API Reference",
+  "pages": [
+    "index",
+    "---Guides---",
+    "...guides",
+    "---Operations---",
+    "...general",
+    "...observability",
+    "...authentication",
+    "...setup",
+    "...tenancy",
+    "...user-management",
+    "...crm",
+    "...hrms",
+    "...api-logger",
+    "---Data Models---",
+    "...schemas"
+  ]
+}

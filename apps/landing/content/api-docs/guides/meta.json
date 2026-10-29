@@ -1,0 +1,13 @@
+{
+  "title": "Guides",
+  "pages": [
+    "quickstart",
+    "authentication",
+    "tenancy",
+    "first-run-setup",
+    "error-handling",
+    "pagination",
+    "audit-and-soft-delete",
+    "client-generation"
+  ]
+}

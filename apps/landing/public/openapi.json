@@ -1,0 +1,4986 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Innostes ERP API",
+    "description": "Backend REST API for **Innostes ERP**, an enterprise resource planning platform.\n\n### Conventions\n* **Identifiers**: All resource identifiers are RFC 4122 UUID v4 strings.\n* **Timestamps**: All date-time fields follow ISO 8601 representation in UTC (`YYYY-MM-DDTHH:MM:SSZ`).\n* **Audit Trail**: Every domain entity contains `id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, and `deleted_by`.\n* **Soft Deletes**: Deletion operations perform soft-deletion. Soft-deleted records are excluded from default queries and list views unless `include_deleted=true` is supplied.\n* **Pagination**: Collection list operations use zero-based `offset` and positive `limit` query parameters, returning a standardized `Page` object `{items, total, offset, limit}`.\n* **Errors**: Standard RFC 7807-compliant responses with `{detail, code?}` payloads. Input validation failures emit standard HTTP 422 Unprocessable Entity payloads.\n\n### Security & Authentication\n* **Bearer Tokens**: Authenticated requests must present `Authorization: Bearer <token>` carrying either a 30-minute JWT access token issued by `/auth/login` or a permanent Personal API Key (`inno_live_...`).\n* **Refresh Tokens**: 7-day single-use rotating refresh tokens are managed via HttpOnly secure cookies or `/auth/refresh`.\n* **Multi-Tenancy**: Tenant-scoped operations accept the `X-Tenant-ID` header.",
+    "contact": {
+      "name": "Innostes Platform Engineering",
+      "url": "https://innostes.example/",
+      "email": "platform@innostes.example"
+    },
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    },
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8001",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://api.innostes.example",
+      "description": "Production API gateway (placeholder)"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "Service information",
+        "description": "Service name, environment, status, and the list of loaded modules.\n\nPublic endpoint. Returns service identification and loaded feature module metadata.",
+        "operationId": "system_root",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceInfoRead"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/config": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "Application configuration",
+        "description": "Public configuration and app metadata for frontend bootstrapping.\n\nPublic endpoint. Supplies non-sensitive deployment information to client applications.",
+        "operationId": "system_config",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppConfigRead"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Observability"
+        ],
+        "summary": "System health check",
+        "description": "Report API, database, and per-module health.\n\nPublic endpoint. Returns **200** with `status: pass` when the database responds,\notherwise **503** with `status: fail`.",
+        "operationId": "system_health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckRead"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Database is unreachable"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Authenticate with email and password",
+        "description": "Authenticates credentials and issues short-lived JWT and refresh tokens.\n\nPublic endpoint. Sets secure HttpOnly cookies for web browsers and returns\nbearer credentials for programmatic API callers.",
+        "operationId": "auth_login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Rotate refresh token",
+        "description": "Rotates a single-use refresh token and issues fresh access credentials.\n\nPublic endpoint. Detects reuse attempts, invalidating compromised session\nfamilies if reuse occurs.",
+        "operationId": "auth_refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Request password reset",
+        "description": "Dispatches password reset instructions with anti-enumeration protection.\n\nPublic endpoint. Always returns a 200 confirmation notice regardless of\nwhether the email is registered in the system.",
+        "operationId": "auth_forgot_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotPasswordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Reset password with token",
+        "description": "Resets account credentials using a single-use signed reset token.\n\nPublic endpoint. Enforces SOC 2 historical password reuse prevention and\nrevokes all active sessions upon successful reset.",
+        "operationId": "auth_reset_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/change-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Change user password",
+        "description": "Updates password for the currently authenticated user.\n\nRequires Bearer authentication. Verifies existing credentials before\napplying the update and rotating active sessions.",
+        "operationId": "auth_change_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Revoke session tokens",
+        "description": "Revokes active refresh tokens and clears authentication cookies.\n\nRequires Bearer authentication. Optionally revokes all active sessions\nacross all client devices when logout_all is true.",
+        "operationId": "auth_logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get current user profile",
+        "description": "Retrieves profile and identity details of the authenticated actor.\n\nRequires Bearer authentication. Decrypts PII fields (email, mobile) for\nthe authorized user.",
+        "operationId": "auth_get_me",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRead"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/api-keys": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "List tenant API keys",
+        "description": "Lists programmatic API keys registered for the current organisation.\n\nRequires Bearer authentication. Omits secret hashes and reveals key\nmetadata and permission scopes.",
+        "operationId": "auth_list_api_keys",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Generate API key",
+        "description": "Generates a high-entropy programmatic API key.\n\nRequires Bearer authentication. Returns the plaintext secret key exactly once;\nit cannot be retrieved or reconstructed later.",
+        "operationId": "auth_create_api_key",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiKeyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyCreatedResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/api-keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Revoke API key",
+        "description": "Permanently revokes an API key.\n\nRequires Bearer authentication. Revocation takes effect immediately, blocking\nall subsequent calls made with this key.",
+        "operationId": "auth_revoke_api_key",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier of the API key to revoke.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "Key Id"
+            },
+            "description": "Unique identifier of the API key to revoke."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyRead"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/crm/info": {
+      "get": {
+        "tags": [
+          "CRM"
+        ],
+        "summary": "Get CRM module metadata and scaffold status",
+        "description": "Return CRM module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
+        "operationId": "crm_get_info",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmInfoResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/hrms/info": {
+      "get": {
+        "tags": [
+          "HRMS"
+        ],
+        "summary": "Get HRMS module metadata and scaffold status",
+        "description": "Return HRMS module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
+        "operationId": "hrms_get_info",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HrmsInfoResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/setup/status": {
+      "get": {
+        "tags": [
+          "Setup"
+        ],
+        "summary": "Get setup status",
+        "description": "Tell the UI whether to show the setup wizard. Reveals nothing else.\n\nReturns **503** if the database can't be reached: the setup state is\nunknown then, so the UI must not show the wizard.",
+        "operationId": "setup_get_status",
+        "responses": {
+          "200": {
+            "description": "Whether the system is installed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupStatus"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required service (e.g. the database) is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/setup/checks": {
+      "get": {
+        "tags": [
+          "Setup"
+        ],
+        "summary": "Run pre-install checks",
+        "description": "Check the database before installing. Requires the `X-Setup-Token` header.\n\nThe wizard also uses it to verify the token. Returns **404** once setup is\ncomplete or when web setup is disabled.",
+        "operationId": "setup_run_checks",
+        "security": [
+          {
+            "SetupToken": []
+          },
+          {
+            "SetupToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Setup-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "One-time system installation token printed in server log or set via SETUP_TOKEN.",
+              "examples": [
+                "inno_setup_secret_token_123"
+              ],
+              "title": "X-Setup-Token"
+            },
+            "description": "One-time system installation token printed in server log or set via SETUP_TOKEN."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Database connectivity and pending migrations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupChecks"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required service (e.g. the database) is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/setup": {
+      "post": {
+        "tags": [
+          "Setup"
+        ],
+        "summary": "Run first-run setup",
+        "description": "Install the system: create the database tables and the first organisation.\n\nRequires the `X-Setup-Token` header. Works **only once**: afterwards this\nroute returns **404**, as if it never existed.",
+        "operationId": "setup_execute_install",
+        "security": [
+          {
+            "SetupToken": []
+          },
+          {
+            "BearerAuth": []
+          },
+          {
+            "SetupToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Setup-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "One-time system installation token printed in server log or set via SETUP_TOKEN.",
+              "examples": [
+                "inno_setup_secret_token_123"
+              ],
+              "title": "X-Setup-Token"
+            },
+            "description": "One-time system installation token printed in server log or set via SETUP_TOKEN."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "What setup created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A required service (e.g. the database) is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Create a tenant",
+        "description": "Create a new tenant (customer organisation).\n\nRequires Bearer authentication. If a valid bearer token is sent, its user is\nrecorded in `created_by` and `updated_by`. Returns **409** if the slug is already taken.",
+        "operationId": "tenants_create",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created tenant organisation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "List tenants",
+        "description": "List tenants with pagination, newest first.\n\nRequires Bearer authentication. Soft-deleted tenants are hidden unless\n`include_deleted=true` is requested.",
+        "operationId": "tenants_list",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of tenants to skip.",
+              "examples": [
+                0
+              ],
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of tenants to skip."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Maximum tenants to return (1-200).",
+              "examples": [
+                50
+              ],
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum tenants to return (1-200)."
+          },
+          {
+            "name": "include_deleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Also return soft-deleted tenants.",
+              "examples": [
+                false
+              ],
+              "default": false,
+              "title": "Include Deleted"
+            },
+            "description": "Also return soft-deleted tenants."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of tenants, newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_TenantRead_"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/{tenant_id}": {
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Get a tenant",
+        "description": "Get one tenant organisation by unique id.\n\nRequires Bearer authentication. Soft-deleted tenants return 404.",
+        "operationId": "tenants_get",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier of the tenant organisation.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "Tenant Id"
+            },
+            "description": "Unique identifier of the tenant organisation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tenant organisation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Update a tenant",
+        "description": "Change tenant organisation fields. Only sent fields are modified.\n\nRequires Bearer authentication. The calling user is recorded in `updated_by`.\nSoft-deleted tenants return 404; restore them first.",
+        "operationId": "tenants_update",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier of the tenant organisation.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "Tenant Id"
+            },
+            "description": "Unique identifier of the tenant organisation."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated tenant organisation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Delete a tenant",
+        "description": "Soft-delete a tenant organisation.\n\nRequires Bearer authentication. The tenant is hidden from standard lists\nbut retained in the database. Sets `deleted_at` and `deleted_by`. Undo with\n`POST /tenants/{tenant_id}/restore`.",
+        "operationId": "tenants_delete",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier of the tenant organisation.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "Tenant Id"
+            },
+            "description": "Unique identifier of the tenant organisation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tenant organisation, now marked as deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/{tenant_id}/restore": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Restore a deleted tenant",
+        "description": "Bring back a soft-deleted tenant organisation.\n\nRequires Bearer authentication. Clears `deleted_at` and `deleted_by`.\nCalling on an active tenant is harmless and idempotent.",
+        "operationId": "tenants_restore",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier of the tenant organisation.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "Tenant Id"
+            },
+            "description": "Unique identifier of the tenant organisation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tenant organisation, active again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/modules": {
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "List business modules for current tenant",
+        "description": "Return catalog of business modules and their activation status.\n\nRequires Bearer authentication. Returns which packages are enabled for the\ncurrent tenant organization context.",
+        "operationId": "tenants_list_modules",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant UUID context.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant UUID context."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuleListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/modules/{module_id}/activate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Activate a business module for tenant",
+        "description": "Activate a business module for the current tenant.\n\nRequires Super Administrator privilege. Enables the module's feature set\nand navigation for the organization.",
+        "operationId": "tenants_activate_module",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Package identifier of business module to activate.",
+              "examples": [
+                "hrms"
+              ],
+              "title": "Module Id"
+            },
+            "description": "Package identifier of business module to activate."
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant UUID context.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant UUID context."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/modules/{module_id}/deactivate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Deactivate a business module for tenant",
+        "description": "Deactivate a business module for the current tenant.\n\nRequires Super Administrator privilege. Disables access to module routes\nand navigation.",
+        "operationId": "tenants_deactivate_module",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "module_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Package identifier of business module to deactivate.",
+              "examples": [
+                "hrms"
+              ],
+              "title": "Module Id"
+            },
+            "description": "Package identifier of business module to deactivate."
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant UUID context.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant UUID context."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/plugins": {
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "List extensible plugins for current tenant",
+        "description": "Return catalog of extensible plugins and their activation status.\n\nRequires Bearer authentication. Returns which plugins are enabled for the\ncurrent tenant organisation context.",
+        "operationId": "tenants_list_plugins",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant UUID context.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant UUID context."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/plugins/{plugin_id}/activate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Activate an extensible plugin for tenant",
+        "description": "Activate an extensible plugin for the current tenant.\n\nRequires Super Administrator privilege. Enables third-party extensions\nand hook listeners for the organization.",
+        "operationId": "tenants_activate_plugin",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plugin_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Package identifier of extensible plugin to activate.",
+              "examples": [
+                "api-logger"
+              ],
+              "title": "Plugin Id"
+            },
+            "description": "Package identifier of extensible plugin to activate."
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant UUID context.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant UUID context."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current/plugins/{plugin_id}/deactivate": {
+      "post": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Deactivate an extensible plugin for tenant",
+        "description": "Deactivate an extensible plugin for the current tenant.\n\nRequires Super Administrator privilege. Disables third-party extensions\nand hook listeners.",
+        "operationId": "tenants_deactivate_plugin",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "plugin_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Package identifier of extensible plugin to deactivate.",
+              "examples": [
+                "api-logger"
+              ],
+              "title": "Plugin Id"
+            },
+            "description": "Package identifier of extensible plugin to deactivate."
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant UUID context.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant UUID context."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": [
+          "User management"
+        ],
+        "summary": "Create a user",
+        "description": "Registers a new user identity with envelope-encrypted PII.\n\nRequires Bearer authentication. Encrypts sensitive fields (email, mobile)\nand generates blind search indexes.",
+        "operationId": "users_create_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRead"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with existing data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "tags": [
+          "User management"
+        ],
+        "summary": "Get user by ID",
+        "description": "Retrieves a user account and decrypts their PII.\n\nRequires Bearer authentication. Returns the user's decrypted email and\nmobile number for authorized callers.",
+        "operationId": "users_get_user",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique identifier of the user.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "User Id"
+            },
+            "description": "Unique identifier of the user."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/api-logger/info": {
+      "get": {
+        "tags": [
+          "API logger"
+        ],
+        "summary": "Get API logger plugin metadata and status",
+        "description": "Return API Logger plugin metadata and status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
+        "operationId": "api_logger_get_info",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiLoggerInfoResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivationResponse": {
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id",
+            "description": "Identifier of the module or plugin whose status changed.",
+            "examples": [
+              "hrms"
+            ]
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "New activation state of the package.",
+            "examples": [
+              true
+            ]
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable operational status message.",
+            "examples": [
+              "Module 'hrms' activated successfully."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "is_active",
+          "message"
+        ],
+        "title": "ActivationResponse",
+        "description": "Response returned upon activation or deactivation.",
+        "examples": [
+          {
+            "is_active": true,
+            "item_id": "hrms",
+            "message": "Module 'hrms' activated successfully."
+          }
+        ]
+      },
+      "AdminUserCreate": {
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "First Name",
+            "description": "Administrator given name.",
+            "examples": [
+              "Priya"
+            ]
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name",
+            "description": "Administrator family name.",
+            "examples": [
+              "Shah"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Primary administrative email address used for root login.",
+            "examples": [
+              "priya.shah@northwind.example"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "Strong administrative root password.",
+            "examples": [
+              "AdminSecurePassword2026!"
+            ]
+          },
+          "mobile": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile",
+            "description": "Administrative mobile telephone number.",
+            "examples": [
+              "+919876543210"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "first_name",
+          "email",
+          "password"
+        ],
+        "title": "AdminUserCreate",
+        "description": "Administrator credentials and profile collected during first-run setup."
+      },
+      "ApiKeyCreatedResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the API key.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable label for the API key.",
+            "examples": [
+              "Zapier CRM Sync"
+            ]
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix",
+            "description": "Public prefix used to identify the token key (e.g. inno_live_...).",
+            "examples": [
+              "inno_live_xK9p"
+            ]
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "Authorized permission scopes granted to this key.",
+            "examples": [
+              [
+                "crm:read",
+                "hrms:read"
+              ]
+            ]
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "Expiration timestamp in ISO 8601 UTC format. Null for perpetual keys.",
+            "examples": [
+              "2026-11-28T10:00:00Z"
+            ]
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At",
+            "description": "Timestamp when key was last presented in an authenticated request.",
+            "examples": [
+              "2026-10-29T10:15:00Z"
+            ]
+          },
+          "is_revoked": {
+            "type": "boolean",
+            "title": "Is Revoked",
+            "description": "Flag indicating whether this API key has been revoked.",
+            "examples": [
+              false
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when key was created.",
+            "examples": [
+              "2026-10-29T09:00:00Z"
+            ]
+          },
+          "raw_key": {
+            "type": "string",
+            "title": "Raw Key",
+            "description": "The plaintext secret API token (e.g. inno_live_...). Copy this immediately as it cannot be recovered.",
+            "examples": [
+              "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "scopes",
+          "is_revoked",
+          "created_at",
+          "raw_key"
+        ],
+        "title": "ApiKeyCreatedResponse",
+        "description": "Returned exclusively on key creation. The raw_key will never be shown again.",
+        "examples": [
+          {
+            "created_at": "2026-10-29T09:00:00Z",
+            "expires_at": "2026-11-28T10:00:00Z",
+            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+            "is_revoked": false,
+            "key_prefix": "inno_live_xK9p",
+            "name": "Zapier CRM Sync",
+            "raw_key": "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH",
+            "scopes": [
+              "crm:read",
+              "hrms:read"
+            ]
+          }
+        ]
+      },
+      "ApiKeyListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyRead"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of all personal access tokens and programmatic API keys for the current organization.",
+            "examples": [
+              [
+                {
+                  "created_at": "2026-10-29T09:00:00Z",
+                  "expires_at": "2026-11-28T10:00:00Z",
+                  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+                  "is_revoked": false,
+                  "key_prefix": "inno_live_xK9p",
+                  "last_used_at": "2026-10-29T10:15:00Z",
+                  "name": "Zapier CRM Sync",
+                  "scopes": [
+                    "crm:read",
+                    "hrms:read"
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ApiKeyListResponse",
+        "description": "List of all API keys for tenant.",
+        "examples": [
+          {
+            "items": [
+              {
+                "created_at": "2026-10-29T09:00:00Z",
+                "expires_at": "2026-11-28T10:00:00Z",
+                "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+                "is_revoked": false,
+                "key_prefix": "inno_live_xK9p",
+                "last_used_at": "2026-10-29T10:15:00Z",
+                "name": "Zapier CRM Sync",
+                "scopes": [
+                  "crm:read",
+                  "hrms:read"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "ApiKeyRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the API key.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable label for the API key.",
+            "examples": [
+              "Zapier CRM Sync"
+            ]
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix",
+            "description": "Public prefix used to identify the token key (e.g. inno_live_...).",
+            "examples": [
+              "inno_live_xK9p"
+            ]
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "Authorized permission scopes granted to this key.",
+            "examples": [
+              [
+                "crm:read",
+                "hrms:read"
+              ]
+            ]
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "Expiration timestamp in ISO 8601 UTC format. Null for perpetual keys.",
+            "examples": [
+              "2026-11-28T10:00:00Z"
+            ]
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At",
+            "description": "Timestamp when key was last presented in an authenticated request.",
+            "examples": [
+              "2026-10-29T10:15:00Z"
+            ]
+          },
+          "is_revoked": {
+            "type": "boolean",
+            "title": "Is Revoked",
+            "description": "Flag indicating whether this API key has been revoked.",
+            "examples": [
+              false
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when key was created.",
+            "examples": [
+              "2026-10-29T09:00:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "scopes",
+          "is_revoked",
+          "created_at"
+        ],
+        "title": "ApiKeyRead",
+        "description": "Safe public representation of an API key without secret hash.",
+        "examples": [
+          {
+            "created_at": "2026-10-29T09:00:00Z",
+            "expires_at": "2026-11-28T10:00:00Z",
+            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+            "is_revoked": false,
+            "key_prefix": "inno_live_xK9p",
+            "last_used_at": "2026-10-29T10:15:00Z",
+            "name": "Zapier CRM Sync",
+            "scopes": [
+              "crm:read",
+              "hrms:read"
+            ]
+          }
+        ]
+      },
+      "ApiLoggerInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique plugin identifier string.",
+            "default": "api-logger",
+            "examples": [
+              "api-logger"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable plugin title.",
+            "default": "API Logger",
+            "examples": [
+              "API Logger"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string.",
+            "default": "0.1.0",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Operational readiness status of plugin.",
+            "default": "scaffold_ready",
+            "examples": [
+              "scaffold_ready"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Package type classification.",
+            "default": "plugin",
+            "examples": [
+              "plugin"
+            ]
+          },
+          "features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Features",
+            "description": "List of telemetry features provided by plugin.",
+            "default": [
+              "requests",
+              "webhooks",
+              "analytics",
+              "filters"
+            ],
+            "examples": [
+              [
+                "requests",
+                "webhooks",
+                "analytics",
+                "filters"
+              ]
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Plugin functional overview.",
+            "default": "API request logging, webhook inspection, and debugging",
+            "examples": [
+              "API request logging, webhook inspection, and debugging"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ApiLoggerInfoResponse",
+        "description": "Information schema for API Logger plugin.",
+        "examples": [
+          {
+            "description": "API request logging, webhook inspection, and debugging",
+            "features": [
+              "requests",
+              "webhooks",
+              "analytics",
+              "filters"
+            ],
+            "id": "api-logger",
+            "name": "API Logger",
+            "status": "scaffold_ready",
+            "type": "plugin",
+            "version": "0.1.0"
+          }
+        ]
+      },
+      "AppConfigRead": {
+        "properties": {
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "description": "Name of the backend service application.",
+            "examples": [
+              "Innostes ERP API Server"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string of the API server.",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment",
+            "description": "Runtime deployment environment.",
+            "examples": [
+              "development"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "service",
+          "version",
+          "environment"
+        ],
+        "title": "AppConfigRead",
+        "description": "Public application metadata and frontend bootstrapping configuration.",
+        "examples": [
+          {
+            "environment": "development",
+            "service": "Innostes ERP API Server",
+            "version": "0.1.0"
+          }
+        ]
+      },
+      "ChangePasswordRequest": {
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "title": "Current Password",
+            "description": "Current active password or temporary one-time password.",
+            "examples": [
+              "NorthwindPass2026!"
+            ]
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "New Password",
+            "description": "New strong account password complying with complexity rules.",
+            "examples": [
+              "NewPermanentPassword2026!"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "title": "ChangePasswordRequest",
+        "description": "Authenticated request to update credentials (or complete first-login reset)."
+      },
+      "CreateApiKeyRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Descriptive identifier for the API key.",
+            "examples": [
+              "Zapier CRM Sync"
+            ]
+          },
+          "expires_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Days",
+            "description": "Lifespan in days. Null for perpetual key.",
+            "examples": [
+              30
+            ]
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "Authorized permission scopes, e.g. ['hrms:read', 'crm:write'] or ['*'].",
+            "default": [
+              "*"
+            ],
+            "examples": [
+              [
+                "crm:read",
+                "hrms:read"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateApiKeyRequest",
+        "description": "Payload to generate a new API key."
+      },
+      "CrmInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique package identifier string.",
+            "default": "crm",
+            "examples": [
+              "crm"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable module title.",
+            "default": "CRM",
+            "examples": [
+              "CRM"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string.",
+            "default": "0.1.0",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Operational readiness status of module.",
+            "default": "scaffold_ready",
+            "examples": [
+              "scaffold_ready"
+            ]
+          },
+          "sub_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sub Features",
+            "description": "List of functional sub-features supported by module.",
+            "default": [
+              "leads",
+              "deals",
+              "pipeline",
+              "contacts"
+            ],
+            "examples": [
+              [
+                "leads",
+                "deals",
+                "pipeline",
+                "contacts"
+              ]
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Module functional overview.",
+            "default": "Customer relationship management and sales pipeline",
+            "examples": [
+              "Customer relationship management and sales pipeline"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "CrmInfoResponse",
+        "description": "Information schema for CRM scaffold module.",
+        "examples": [
+          {
+            "description": "Customer relationship management and sales pipeline",
+            "id": "crm",
+            "name": "CRM",
+            "status": "scaffold_ready",
+            "sub_features": [
+              "leads",
+              "deals",
+              "pipeline",
+              "contacts"
+            ],
+            "version": "0.1.0"
+          }
+        ]
+      },
+      "DeviceType": {
+        "type": "string",
+        "enum": [
+          "desktop",
+          "mobile",
+          "tablet",
+          "scanner",
+          "kiosk"
+        ],
+        "title": "DeviceType",
+        "description": "Classification of client devices."
+      },
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "Human-readable explanation of the error condition.",
+            "examples": [
+              "Tenant not found."
+            ]
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code",
+            "description": "Machine-readable error identifier for programmatic client branching.",
+            "examples": [
+              "tenant_not_found"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse",
+        "description": "Body returned for handled errors, e.g. a not-found or conflict error.\n\nAttributes:\n    detail: Human-readable error message.\n    code: Machine-readable error id, only for some errors (e.g. \"setup_required\").",
+        "examples": [
+          {
+            "code": "tenant_not_found",
+            "detail": "Tenant not found."
+          }
+        ]
+      },
+      "ForgotPasswordRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Registered user account email address.",
+            "examples": [
+              "priya.shah@northwind.example"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "ForgotPasswordRequest",
+        "description": "Initiates an anti-enumeration password reset and temporary password dispatch."
+      },
+      "ForgotPasswordResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Anti-enumeration confirmation notice.",
+            "default": "If an account exists with that email address, a password reset link and temporary password have been sent.",
+            "examples": [
+              "If an account exists with that email address, a password reset link and temporary password have been sent."
+            ]
+          }
+        },
+        "type": "object",
+        "title": "ForgotPasswordResponse",
+        "description": "Generic status response guaranteeing timing and anti-enumeration defense.",
+        "examples": [
+          {
+            "message": "If an account exists with that email address, a password reset link and temporary password have been sent."
+          }
+        ]
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthCheckRead": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Aggregated platform health status: pass or fail.",
+            "examples": [
+              "pass"
+            ]
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment",
+            "description": "Runtime deployment environment.",
+            "examples": [
+              "development"
+            ]
+          },
+          "database": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Database",
+            "description": "Database connectivity diagnostic report.",
+            "examples": [
+              {
+                "latency_ms": 1.25,
+                "status": "HEALTHY"
+              }
+            ]
+          },
+          "modules": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Modules",
+            "description": "Diagnostic health reports for each registered module.",
+            "examples": [
+              {
+                "auth": {
+                  "status": "HEALTHY"
+                },
+                "tenancy": {
+                  "status": "HEALTHY"
+                }
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "environment",
+          "database",
+          "modules"
+        ],
+        "title": "HealthCheckRead",
+        "description": "System health check and diagnostic status.",
+        "examples": [
+          {
+            "database": {
+              "latency_ms": 1.25,
+              "status": "HEALTHY"
+            },
+            "environment": "development",
+            "modules": {
+              "auth": {
+                "status": "HEALTHY"
+              },
+              "tenancy": {
+                "status": "HEALTHY"
+              }
+            },
+            "status": "pass"
+          }
+        ]
+      },
+      "HrmsInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique package identifier string.",
+            "default": "hrms",
+            "examples": [
+              "hrms"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable module title.",
+            "default": "HRMS",
+            "examples": [
+              "HRMS"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string.",
+            "default": "0.1.0",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Operational readiness status of module.",
+            "default": "scaffold_ready",
+            "examples": [
+              "scaffold_ready"
+            ]
+          },
+          "sub_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sub Features",
+            "description": "List of functional sub-features supported by module.",
+            "default": [
+              "employees",
+              "leave",
+              "payroll",
+              "attendance"
+            ],
+            "examples": [
+              [
+                "employees",
+                "leave",
+                "payroll",
+                "attendance"
+              ]
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Module functional overview.",
+            "default": "People and human resources management",
+            "examples": [
+              "People and human resources management"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "HrmsInfoResponse",
+        "description": "Information schema for HRMS scaffold module.",
+        "examples": [
+          {
+            "description": "People and human resources management",
+            "id": "hrms",
+            "name": "HRMS",
+            "status": "scaffold_ready",
+            "sub_features": [
+              "employees",
+              "leave",
+              "payroll",
+              "attendance"
+            ],
+            "version": "0.1.0"
+          }
+        ]
+      },
+      "ItemCatalogRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique package identifier string (e.g. 'hrms', 'crm', 'api-logger').",
+            "examples": [
+              "hrms"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable title of the module or plugin.",
+            "examples": [
+              "HRMS"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string of the package.",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Package classification: 'module' for business modules or 'plugin' for extensible plugins.",
+            "examples": [
+              "module"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Brief functional overview of package capabilities.",
+            "examples": [
+              "People and human resources management"
+            ]
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "Categorical feature tags for filtering in the catalog.",
+            "examples": [
+              [
+                "Employees",
+                "Leave",
+                "Payroll"
+              ]
+            ]
+          },
+          "tone": {
+            "type": "string",
+            "title": "Tone",
+            "description": "Design system accent color tone for badge presentation.",
+            "default": "primary",
+            "examples": [
+              "chart-3"
+            ]
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Whether this package is currently activated for the tenant organisation.",
+            "default": false,
+            "examples": [
+              true
+            ]
+          },
+          "activated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activated At",
+            "description": "Timestamp in ISO 8601 UTC when the package was activated. Null if inactive.",
+            "examples": [
+              "2026-10-29T10:00:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "version",
+          "type",
+          "description"
+        ],
+        "title": "ItemCatalogRead",
+        "description": "Metadata describing an installed module or plugin package in the catalog.",
+        "examples": [
+          {
+            "activated_at": "2026-10-29T10:00:00Z",
+            "description": "People and human resources management",
+            "id": "hrms",
+            "is_active": true,
+            "name": "HRMS",
+            "tags": [
+              "Employees",
+              "Leave",
+              "Payroll"
+            ],
+            "tone": "chart-3",
+            "type": "module",
+            "version": "0.1.0"
+          }
+        ]
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Registered user account email address.",
+            "examples": [
+              "priya.shah@northwind.example"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password",
+            "description": "Account authentication password.",
+            "examples": [
+              "NorthwindPass2026!"
+            ]
+          },
+          "device_fingerprint": {
+            "type": "string",
+            "title": "Device Fingerprint",
+            "description": "Unique hardware or browser fingerprint for Zero-Trust verification.",
+            "default": "browser-client-default",
+            "examples": [
+              "fp_7a9f1c3e8b2d4a6e"
+            ]
+          },
+          "device_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Name",
+            "description": "Optional human-readable client device label.",
+            "examples": [
+              "Bengaluru Office MacBook Pro"
+            ]
+          },
+          "device_type": {
+            "$ref": "#/components/schemas/DeviceType",
+            "description": "Form-factor classification of client hardware.",
+            "default": "desktop",
+            "examples": [
+              "desktop"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "User login credentials and client hardware context."
+      },
+      "LogoutRequest": {
+        "properties": {
+          "refresh_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Token",
+            "description": "Specific session refresh token to revoke. When omitted, active cookie is revoked.",
+            "examples": [
+              "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+            ]
+          },
+          "logout_all": {
+            "type": "boolean",
+            "title": "Logout All",
+            "description": "Whether to revoke all active sessions across all client devices.",
+            "default": false,
+            "examples": [
+              false
+            ]
+          }
+        },
+        "type": "object",
+        "title": "LogoutRequest",
+        "description": "Request to revoke session refresh tokens."
+      },
+      "MessageResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable operational status message.",
+            "examples": [
+              "Operation completed successfully."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "MessageResponse",
+        "description": "Standard operation message response.",
+        "examples": [
+          {
+            "message": "Operation completed successfully."
+          }
+        ]
+      },
+      "ModuleListResponse": {
+        "properties": {
+          "installed": {
+            "items": {
+              "$ref": "#/components/schemas/ItemCatalogRead"
+            },
+            "type": "array",
+            "title": "Installed",
+            "description": "List of all installed and discoverable business modules.",
+            "examples": [
+              [
+                {
+                  "activated_at": "2026-10-29T10:00:00Z",
+                  "description": "People and human resources management",
+                  "id": "hrms",
+                  "is_active": true,
+                  "name": "HRMS",
+                  "tags": [
+                    "Employees",
+                    "Leave",
+                    "Payroll"
+                  ],
+                  "tone": "chart-3",
+                  "type": "module",
+                  "version": "0.1.0"
+                }
+              ]
+            ]
+          },
+          "active_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Active Ids",
+            "description": "List of module IDs currently enabled for the tenant.",
+            "examples": [
+              [
+                "hrms",
+                "crm"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "installed",
+          "active_ids"
+        ],
+        "title": "ModuleListResponse",
+        "description": "Catalog of business modules with current tenant activation status.",
+        "examples": [
+          {
+            "active_ids": [
+              "hrms"
+            ],
+            "installed": [
+              {
+                "activated_at": "2026-10-29T10:00:00Z",
+                "description": "People and human resources management",
+                "id": "hrms",
+                "is_active": true,
+                "name": "HRMS",
+                "tags": [
+                  "Employees",
+                  "Leave",
+                  "Payroll"
+                ],
+                "tone": "chart-3",
+                "type": "module",
+                "version": "0.1.0"
+              }
+            ]
+          }
+        ]
+      },
+      "Page_TenantRead_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TenantRead"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Records on this page.",
+            "examples": [
+              []
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Number of matching records across all pages.",
+            "examples": [
+              42
+            ]
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset",
+            "description": "How many records were skipped.",
+            "examples": [
+              0
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "description": "Maximum records per page.",
+            "examples": [
+              20
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "title": "Page[TenantRead]"
+      },
+      "PluginListResponse": {
+        "properties": {
+          "installed": {
+            "items": {
+              "$ref": "#/components/schemas/ItemCatalogRead"
+            },
+            "type": "array",
+            "title": "Installed",
+            "description": "List of all installed and discoverable extensible plugins.",
+            "examples": [
+              [
+                {
+                  "activated_at": "2026-10-29T10:00:00Z",
+                  "description": "API request logging, webhook inspection, and debugging",
+                  "id": "api-logger",
+                  "is_active": true,
+                  "name": "API Logger",
+                  "tags": [
+                    "Logs",
+                    "Webhooks",
+                    "Analytics"
+                  ],
+                  "tone": "chart-5",
+                  "type": "plugin",
+                  "version": "0.1.0"
+                }
+              ]
+            ]
+          },
+          "active_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Active Ids",
+            "description": "List of plugin IDs currently enabled for the tenant.",
+            "examples": [
+              [
+                "api-logger"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "installed",
+          "active_ids"
+        ],
+        "title": "PluginListResponse",
+        "description": "Catalog of extensible plugins with current tenant activation status.",
+        "examples": [
+          {
+            "active_ids": [
+              "api-logger"
+            ],
+            "installed": [
+              {
+                "activated_at": "2026-10-29T10:00:00Z",
+                "description": "API request logging, webhook inspection, and debugging",
+                "id": "api-logger",
+                "is_active": true,
+                "name": "API Logger",
+                "tags": [
+                  "Logs",
+                  "Webhooks",
+                  "Analytics"
+                ],
+                "tone": "chart-5",
+                "type": "plugin",
+                "version": "0.1.0"
+              }
+            ]
+          }
+        ]
+      },
+      "RefreshTokenRequest": {
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token",
+            "description": "Active single-use rotating refresh token.",
+            "examples": [
+              "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshTokenRequest",
+        "description": "Payload to rotate a refresh token and obtain a new access token."
+      },
+      "RefreshTokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "Newly minted short-lived JWT bearer access token.",
+            "examples": [
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJleHAiOjE3NjE3NDAwMDB9.new_sample_signature"
+            ]
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token",
+            "description": "Freshly rotated single-use refresh token.",
+            "examples": [
+              "rt_9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d"
+            ]
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "description": "HTTP authorization scheme type.",
+            "default": "bearer",
+            "examples": [
+              "bearer"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "description": "Access token lifespan in seconds (1800 seconds).",
+            "examples": [
+              1800
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "expires_in"
+        ],
+        "title": "RefreshTokenResponse",
+        "description": "New token pair issued following successful refresh token rotation.",
+        "examples": [
+          {
+            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJleHAiOjE3NjE3NDAwMDB9.new_sample_signature",
+            "expires_in": 1800,
+            "refresh_token": "rt_9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d",
+            "token_type": "bearer"
+          }
+        ]
+      },
+      "ResetPasswordRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "Cryptographically signed single-use reset token delivered via email.",
+            "examples": [
+              "rst_4f8e2a1b9c3d7e5f6a0b8c2d4e6f1a3b"
+            ]
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "New Password",
+            "description": "New strong account password complying with complexity rules.",
+            "examples": [
+              "NewPermanentPassword2026!"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "token",
+          "new_password"
+        ],
+        "title": "ResetPasswordRequest",
+        "description": "Payload to reset account password using single-use signed reset token."
+      },
+      "ServiceInfoRead": {
+        "properties": {
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "description": "Name of the backend service application.",
+            "examples": [
+              "Innostes ERP API Server"
+            ]
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment",
+            "description": "Runtime deployment environment.",
+            "examples": [
+              "development"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "High-level operational status of the service.",
+            "examples": [
+              "online"
+            ]
+          },
+          "modules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Modules",
+            "description": "List of discovered and registered ERP plug-in modules.",
+            "examples": [
+              [
+                "auth",
+                "setup",
+                "tenancy",
+                "user",
+                "crm",
+                "hrms",
+                "api-logger"
+              ]
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "service",
+          "environment",
+          "status",
+          "modules"
+        ],
+        "title": "ServiceInfoRead",
+        "description": "Core service identification and runtime module metadata.",
+        "examples": [
+          {
+            "environment": "development",
+            "modules": [
+              "auth",
+              "setup",
+              "tenancy",
+              "user",
+              "crm",
+              "hrms",
+              "api-logger"
+            ],
+            "service": "Innostes ERP API Server",
+            "status": "online"
+          }
+        ]
+      },
+      "SetupBrandingCreate": {
+        "properties": {
+          "theme": {
+            "type": "string",
+            "title": "Theme",
+            "description": "Default interface theme mode: light, dark, or system.",
+            "default": "system",
+            "examples": [
+              "system"
+            ]
+          },
+          "primary_color": {
+            "type": "string",
+            "title": "Primary Color",
+            "description": "Hexadecimal brand primary accent color code.",
+            "default": "#2563EB",
+            "examples": [
+              "#2563EB"
+            ]
+          },
+          "logo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logo Url",
+            "description": "Public URL pointing to corporate logo asset.",
+            "examples": [
+              "https://cdn.northwind.example/logo.svg"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "SetupBrandingCreate",
+        "description": "Optional branding preferences collected during first-run setup."
+      },
+      "SetupChecks": {
+        "properties": {
+          "database_connected": {
+            "type": "boolean",
+            "title": "Database Connected",
+            "description": "True when the database connection pool is healthy and reachable.",
+            "examples": [
+              true
+            ]
+          },
+          "migrations_pending": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Migrations Pending",
+            "description": "Number of database schema migrations that setup will apply.",
+            "examples": [
+              0
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "database_connected",
+          "migrations_pending"
+        ],
+        "title": "SetupChecks",
+        "description": "Pre-install diagnostics for holders of the one-time setup token.",
+        "examples": [
+          {
+            "database_connected": true,
+            "migrations_pending": 0
+          }
+        ]
+      },
+      "SetupRequest": {
+        "properties": {
+          "organization": {
+            "$ref": "#/components/schemas/TenantCreate",
+            "description": "The primary root customer organisation (tenant) to provision.",
+            "examples": [
+              {
+                "country": "IN",
+                "name": "Northwind Traders Pvt Ltd",
+                "slug": "northwind-traders"
+              }
+            ]
+          },
+          "admin": {
+            "$ref": "#/components/schemas/AdminUserCreate",
+            "description": "The root super administrator credentials.",
+            "examples": [
+              {
+                "email": "priya.shah@northwind.example",
+                "first_name": "Priya",
+                "last_name": "Shah"
+              }
+            ]
+          },
+          "branding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SetupBrandingCreate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional branding customization. Set to null if skipped.",
+            "examples": [
+              {
+                "primary_color": "#2563EB",
+                "theme": "system"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "organization"
+        ],
+        "title": "SetupRequest",
+        "description": "System configuration parameters collected by the setup wizard.",
+        "examples": [
+          {
+            "admin": {
+              "email": "priya.shah@northwind.example",
+              "first_name": "Priya",
+              "last_name": "Shah",
+              "mobile": "+919876543210",
+              "password": "AdminSecurePassword2026!"
+            },
+            "branding": {
+              "primary_color": "#2563EB",
+              "theme": "system"
+            },
+            "organization": {
+              "country": "IN",
+              "date_format": "DD/MM/YYYY",
+              "language": "en-IN",
+              "name": "Northwind Traders Pvt Ltd",
+              "slug": "northwind-traders",
+              "timezone": "Asia/Kolkata"
+            }
+          }
+        ]
+      },
+      "SetupResult": {
+        "properties": {
+          "tenant": {
+            "$ref": "#/components/schemas/TenantRead",
+            "description": "The primary organisation created during setup.",
+            "examples": [
+              {
+                "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+                "name": "Northwind Traders Pvt Ltd",
+                "slug": "northwind-traders"
+              }
+            ]
+          },
+          "admin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserRead"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The root super administrator created during setup.",
+            "examples": [
+              {
+                "email": "priya.shah@northwind.example",
+                "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+              }
+            ]
+          },
+          "installed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Installed At",
+            "description": "Timestamp in ISO 8601 UTC when setup was completed.",
+            "examples": [
+              "2026-10-29T10:00:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "tenant",
+          "installed_at"
+        ],
+        "title": "SetupResult",
+        "description": "Resources created during successful first-run installation.",
+        "examples": [
+          {
+            "admin": {
+              "created_at": "2026-10-29T10:00:00Z",
+              "email": "priya.shah@northwind.example",
+              "first_name": "Priya",
+              "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+              "is_super_admin": true,
+              "last_name": "Shah",
+              "mobile": "+919876543210",
+              "status": "active",
+              "token_version": 1,
+              "updated_at": "2026-10-29T10:00:00Z"
+            },
+            "installed_at": "2026-10-29T10:00:00Z",
+            "tenant": {
+              "country": "IN",
+              "created_at": "2026-10-29T10:00:00Z",
+              "date_format": "DD/MM/YYYY",
+              "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+              "language": "en-IN",
+              "name": "Northwind Traders Pvt Ltd",
+              "slug": "northwind-traders",
+              "timezone": "Asia/Kolkata",
+              "updated_at": "2026-10-29T10:00:00Z"
+            }
+          }
+        ]
+      },
+      "SetupStatus": {
+        "properties": {
+          "installed": {
+            "type": "boolean",
+            "title": "Installed",
+            "description": "True once first-run setup has been completed.",
+            "examples": [
+              false
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "installed"
+        ],
+        "title": "SetupStatus",
+        "description": "Public answer to whether the UI needs to display the first-run setup wizard.",
+        "examples": [
+          {
+            "installed": false
+          },
+          {
+            "installed": true
+          }
+        ]
+      },
+      "TenantCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Display name of the organisation.",
+            "examples": [
+              "Northwind Traders Pvt Ltd"
+            ]
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 63,
+            "minLength": 1,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "title": "Slug",
+            "description": "Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`).",
+            "examples": [
+              "northwind-traders"
+            ]
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "examples": [
+              "IN"
+            ]
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA time zone name.",
+            "examples": [
+              "Asia/Kolkata"
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "BCP 47 language tag for default language.",
+            "examples": [
+              "en-IN"
+            ]
+          },
+          "date_format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Format",
+            "description": "Preferred date display format.",
+            "examples": [
+              "DD/MM/YYYY"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "TenantCreate",
+        "description": "Body for creating a customer organisation (tenant).",
+        "examples": [
+          {
+            "country": "IN",
+            "date_format": "DD/MM/YYYY",
+            "language": "en-IN",
+            "name": "Northwind Traders Pvt Ltd",
+            "slug": "northwind-traders",
+            "timezone": "Asia/Kolkata"
+          }
+        ]
+      },
+      "TenantRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the record in UUID v4 format.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when the record was created in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:00:00Z"
+            ]
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By",
+            "description": "Unique identifier of the user who created the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At",
+            "description": "Timestamp when the record was last modified in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:30:00Z"
+            ]
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By",
+            "description": "Unique identifier of the user who last modified the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At",
+            "description": "Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "deleted_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted By",
+            "description": "Unique identifier of the user who soft-deleted the record. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Display name of the organisation.",
+            "examples": [
+              "Northwind Traders Pvt Ltd"
+            ]
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`).",
+            "examples": [
+              "northwind-traders"
+            ]
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "examples": [
+              "IN"
+            ]
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA time zone name.",
+            "examples": [
+              "Asia/Kolkata"
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "BCP 47 language tag for default language.",
+            "examples": [
+              "en-IN"
+            ]
+          },
+          "date_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Format",
+            "description": "Preferred date display format.",
+            "examples": [
+              "DD/MM/YYYY"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "name",
+          "slug"
+        ],
+        "title": "TenantRead",
+        "description": "A tenant organisation as returned by the API (includes common audit trail fields).",
+        "examples": [
+          {
+            "country": "IN",
+            "created_at": "2026-10-26T10:15:00Z",
+            "created_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c",
+            "date_format": "DD/MM/YYYY",
+            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+            "language": "en-IN",
+            "name": "Northwind Traders Pvt Ltd",
+            "slug": "northwind-traders",
+            "timezone": "Asia/Kolkata",
+            "updated_at": "2026-10-26T10:15:00Z",
+            "updated_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c"
+          }
+        ]
+      },
+      "TenantUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Display name of the organisation.",
+            "examples": [
+              "Northwind Traders India Pvt Ltd"
+            ]
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63,
+                "minLength": 1,
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug",
+            "description": "Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`).",
+            "examples": [
+              "northwind-traders-india"
+            ]
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2,
+                "minLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "examples": [
+              "IN"
+            ]
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA time zone name.",
+            "examples": [
+              "Asia/Kolkata"
+            ]
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language",
+            "description": "BCP 47 language tag for default language.",
+            "examples": [
+              "en-IN"
+            ]
+          },
+          "date_format": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Format",
+            "description": "Preferred date display format.",
+            "examples": [
+              "DD/MM/YYYY"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "TenantUpdate",
+        "description": "Body for updating a tenant organisation. Send only the fields you wish to modify.",
+        "examples": [
+          {
+            "country": "IN",
+            "name": "Northwind Traders India Pvt Ltd",
+            "timezone": "Asia/Kolkata"
+          }
+        ]
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "Short-lived JWT bearer access token valid for 30 minutes.",
+            "examples": [
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJleHAiOjE3NjE3NDAwMDB9.sample_signature"
+            ]
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token",
+            "description": "Long-lived single-use rotating refresh token valid for 7 days.",
+            "examples": [
+              "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d"
+            ]
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "description": "HTTP authorization scheme type.",
+            "default": "bearer",
+            "examples": [
+              "bearer"
+            ]
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In",
+            "description": "Access token lifespan in seconds (1800 seconds).",
+            "examples": [
+              1800
+            ]
+          },
+          "must_change_password": {
+            "type": "boolean",
+            "title": "Must Change Password",
+            "description": "Flag indicating whether user must change temporary credentials before continuing.",
+            "examples": [
+              false
+            ]
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserRead",
+            "description": "Authenticated user identity and profile summary.",
+            "examples": [
+              {
+                "email": "priya.shah@northwind.example",
+                "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "expires_in",
+          "must_change_password",
+          "user"
+        ],
+        "title": "TokenResponse",
+        "description": "Successful authentication response containing JWT credentials and user identity.",
+        "examples": [
+          {
+            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJleHAiOjE3NjE3NDAwMDB9.sample_signature",
+            "expires_in": 1800,
+            "must_change_password": false,
+            "refresh_token": "rt_8f1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d",
+            "token_type": "bearer",
+            "user": {
+              "created_at": "2026-10-29T10:00:00Z",
+              "email": "priya.shah@northwind.example",
+              "first_name": "Priya",
+              "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+              "is_super_admin": true,
+              "last_name": "Shah",
+              "mobile": "+919876543210",
+              "status": "active",
+              "token_version": 1,
+              "updated_at": "2026-10-29T10:00:00Z"
+            }
+          }
+        ]
+      },
+      "UserCreate": {
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "First Name",
+            "description": "User given name.",
+            "examples": [
+              "Arjun"
+            ]
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name",
+            "description": "User family name.",
+            "examples": [
+              "Mehta"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Primary user account email address.",
+            "examples": [
+              "arjun.mehta@northwind.example"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "Initial account password.",
+            "examples": [
+              "UserSecurePassword2026!"
+            ]
+          },
+          "mobile": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile",
+            "description": "User mobile telephone number.",
+            "examples": [
+              "+919876543211"
+            ]
+          },
+          "is_super_admin": {
+            "type": "boolean",
+            "title": "Is Super Admin",
+            "description": "Flag granting platform-wide super administrator privileges.",
+            "default": false,
+            "examples": [
+              false
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "first_name",
+          "email",
+          "password"
+        ],
+        "title": "UserCreate",
+        "description": "Payload to create a new user account."
+      },
+      "UserRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the record in UUID v4 format.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when the record was created in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:00:00Z"
+            ]
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By",
+            "description": "Unique identifier of the user who created the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At",
+            "description": "Timestamp when the record was last modified in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:30:00Z"
+            ]
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By",
+            "description": "Unique identifier of the user who last modified the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At",
+            "description": "Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "deleted_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted By",
+            "description": "Unique identifier of the user who soft-deleted the record. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "description": "User given name.",
+            "examples": [
+              "Priya"
+            ]
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name",
+            "description": "User family name.",
+            "examples": [
+              "Shah"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "Decrypted primary user email address.",
+            "examples": [
+              "priya.shah@northwind.example"
+            ]
+          },
+          "mobile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile",
+            "description": "Decrypted mobile telephone number.",
+            "examples": [
+              "+919876543210"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatus",
+            "description": "Account lifecycle status.",
+            "examples": [
+              "active"
+            ]
+          },
+          "is_super_admin": {
+            "type": "boolean",
+            "title": "Is Super Admin",
+            "description": "Whether the user holds platform-wide super administrator privileges.",
+            "examples": [
+              true
+            ]
+          },
+          "token_version": {
+            "type": "integer",
+            "title": "Token Version",
+            "description": "Monotonically increasing token generation counter used for instant session invalidation.",
+            "examples": [
+              1
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "first_name",
+          "email",
+          "status",
+          "is_super_admin",
+          "token_version"
+        ],
+        "title": "UserRead",
+        "description": "User identity record as returned by the API (with decrypted email and mobile).",
+        "examples": [
+          {
+            "created_at": "2026-10-29T10:00:00Z",
+            "email": "priya.shah@northwind.example",
+            "first_name": "Priya",
+            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+            "is_super_admin": true,
+            "last_name": "Shah",
+            "mobile": "+919876543210",
+            "status": "active",
+            "token_version": 1,
+            "updated_at": "2026-10-29T10:00:00Z"
+          }
+        ]
+      },
+      "UserStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "inactive",
+          "suspended",
+          "pending_verification"
+        ],
+        "title": "UserStatus",
+        "description": "Lifecycle status for user accounts."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer access token or personal access token (inno_live_...). Obtain an access token via POST /auth/login (30-minute lifespan, refreshed via POST /auth/refresh). Send in the HTTP Authorization header as 'Bearer <token>'."
+      },
+      "SetupToken": {
+        "type": "apiKey",
+        "name": "X-Setup-Token",
+        "in": "header",
+        "description": "One-time system installation token printed in the server log on first start or configured via SETUP_TOKEN in .env."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "General",
+      "description": "Service identity, runtime metadata, and public configuration."
+    },
+    {
+      "name": "Observability",
+      "description": "Health probes, diagnostic telemetry, and readiness checks."
+    },
+    {
+      "name": "Authentication",
+      "description": "User authentication, JWT token lifecycle, session revocation, and API key management."
+    },
+    {
+      "name": "Setup",
+      "description": "First-run installation. `GET /setup/status` tells the UI whether to show the setup wizard. `GET /setup/checks` and `POST /setup` require the `X-Setup-Token` header (printed in the server log on first start) and return 404 once setup is complete. Until then, other routes return 503 with `code: setup_required`."
+    },
+    {
+      "name": "Tenancy",
+      "description": "Tenants are the customer organisations using the ERP. Every business record belongs to a tenant. Deleting a tenant is a soft delete and can be undone with *restore*."
+    },
+    {
+      "name": "User management",
+      "description": "Enterprise identity management, staff credentials, RBAC roles, and permission assignments."
+    },
+    {
+      "name": "CRM",
+      "description": "Customer Relationship Management endpoints."
+    },
+    {
+      "name": "HRMS",
+      "description": "Human Resource Management System endpoints."
+    },
+    {
+      "name": "API logger",
+      "description": "API logger request inspection and webhook telemetry plugin."
+    }
+  ]
+}

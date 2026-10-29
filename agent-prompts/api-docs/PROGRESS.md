@@ -186,6 +186,51 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 - Blocking: none.
 - Non-blocking: Prompt 05 (Reference site).
 
+## 05 – API reference in the docs site – 2026-10-29
+
+**Summary**: Published complete, drift-free API reference documentation on the Next.js/Fumadocs site (`apps/landing`) at `/api-reference`. Generated 33 operation pages grouped by canonical OpenAPI tags, 41 browsable schema pages with field constraints and enums, and 8 guide stubs. Implemented interactive `<ApiPlayground>` request console and `<ApiEndpoint>` semantic badges. Provided stable OpenAPI specification download at `/api-reference/openapi.json`. Built automated generation into `dev`, `build`, and `typecheck` pipelines, and wired freshness validation gate `check-api-docs-stale.mjs` into `landing:docs-check` and CI.
+
+**Changed**:
+- Created `apps/landing/scripts/generate-api-docs.mjs`: Automated reference and schema page generator reading `apps/api-server/openapi.json`.
+- Created `apps/landing/scripts/checks/check-api-docs-stale.mjs`: Freshness quality gate verifying all 33 operations, 41 schemas, and public spec downloads are in sync.
+- Created `apps/landing/components/docs/api-endpoint.tsx`: Semantic HTTP method badge (blue GET, emerald POST, amber PATCH, rose DELETE), endpoint path, and authentication requirement badge.
+- Created `apps/landing/components/docs/api-playground.tsx`: Interactive client-side request playground with configurable base URL (default `http://localhost:8001`), authentication token headers, request body editor, latency timer, and formatted response viewer.
+- Created `apps/landing/app/(docs)/api-reference/layout.tsx`: Layout shell with top navigation bar, sidebar navigation tree, and cross-links to developer and UI docs.
+- Created `apps/landing/app/(docs)/api-reference/[[...slug]]/page.tsx`: Dynamic page renderer supporting static generation and SEO metadata matching `<Summary> – innostes ERP API`.
+- Created `apps/landing/app/api-reference/openapi.json/route.ts`: Static JSON route serving OpenAPI 3.1 specification.
+- Updated `apps/landing/lib/shared.ts`: Added `apiDocsRoute = '/api-reference'`.
+- Updated `apps/landing/lib/source.ts`: Configured `apiDocs` collection with `defineDocs` and exported `apiSource` loader.
+- Updated `apps/landing/components/docs/docs-page.tsx`: Extended GitHub edit links to support `api-docs`.
+- Updated `apps/landing/components/mdx.tsx`: Registered `ApiEndpoint` and `ApiPlayground` globally in MDX components.
+- Updated `apps/landing/app/(home)/layout.tsx`: Added `API Reference` link with Server icon to main navigation menu.
+- Updated `apps/landing/app/(docs)/docs/layout.tsx`: Added `API` navigation item.
+- Updated `apps/landing/app/(docs)/ui/docs/layout.tsx`: Added `API` navigation item.
+- Updated `apps/landing/app/sitemap.ts`: Included all `/api-reference/**` pages in XML sitemap generation.
+- Updated `apps/landing/app/api/search/route.ts`: Enriched advanced search index with API reference operations, paths, summaries, and schemas.
+- Updated `apps/landing/scripts/checks/check-links.mjs`: Added `api-docs` link resolution and verification.
+- Updated `apps/landing/scripts/checks/run-all.mjs`: Enforced `runApiDocsStaleCheck` in quality gates.
+- Updated `apps/landing/package.json`: Wired `generate-api-docs.mjs` into `dev`, `build`, `typecheck`, and added `api-docs` target.
+- Updated `apps/landing/content/dev-docs/guides/writing-docs.mdx` and `apps/landing/content/dev-docs/apps/landing.mdx`: Documented API collection, generation script, and freshness check.
+
+**API changes**: none.
+
+**Decisions**:
+- Generated MDX operation and schema pages directly from `openapi.json` using custom AST generator to guarantee 100% theme consistency with `@innostes/ui` and avoid dependency conflicts with React 19 / Base UI.
+- Use semantic token styling for HTTP method badges (`bg-emerald-500/10 text-emerald-600` for POST, etc.).
+- Pre-populate all operation samples in `curl`, TypeScript (`fetch`), and Python (`httpx`) using the Northwind Traders Pvt Ltd enterprise data universe.
+- Serve `/api-reference/openapi.json` via Next.js route handler and static public asset.
+
+**Verification**:
+- `pnpm nx run landing:docs-check`: PASS (All 11 enforced quality gates pass, 0 defects).
+- `node apps/landing/scripts/checks/check-api-docs-stale.mjs`: PASS (All 33 operations and 41 schemas fresh against spec).
+- `pnpm nx run landing:typecheck`: PASS (0 type errors).
+- `pnpm nx run landing:build`: PASS (241 static pages generated successfully in 45s).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 06 (Guides for API callers).
+
+
 
 
 

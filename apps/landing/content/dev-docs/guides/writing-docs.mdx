@@ -10,8 +10,17 @@ All documentation across the repository lives in `apps/landing` and is written i
 | --- | --- | --- |
 | Developer docs | `content/dev-docs/` | `/docs` |
 | innostes UI design system | `content/docs/` | `/ui/docs` |
+| REST API Reference | `content/api-docs/` | `/api-reference` |
 
 Run `pnpm nx dev landing` to start the local documentation server with instant hot-reloading.
+
+## API reference generation
+
+The REST API reference is generated automatically from `apps/api-server/openapi.json` using `node scripts/generate-api-docs.mjs`.
+
+- **Automatic generation**: Runs before every `dev`, `build`, and `typecheck` task.
+- **Freshness gate**: `node scripts/checks/check-api-docs-stale.mjs` verifies that every OpenAPI operation, schema, and `meta.json` file is in sync with the backend contract. It is enforced in `pnpm nx run landing:docs-check` and CI.
+- **Downloadable spec**: Served from the stable URL `/api-reference/openapi.json`.
 
 ## Component page template
 

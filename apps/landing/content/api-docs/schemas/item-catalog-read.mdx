@@ -1,0 +1,40 @@
+---
+title: "ItemCatalogRead"
+description: "Metadata describing an installed module or plugin package in the catalog."
+---
+
+Metadata describing an installed module or plugin package in the catalog.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | Yes | — | Unique package identifier string (e.g. 'hrms', 'crm', 'api-logger'). |
+| `name` | string | Yes | — | Human-readable title of the module or plugin. |
+| `version` | string | Yes | — | Semver version string of the package. |
+| `type` | string | Yes | — | Package classification: 'module' for business modules or 'plugin' for extensible plugins. |
+| `description` | string | Yes | — | Brief functional overview of package capabilities. |
+| `tags` | string[] | No | — | Categorical feature tags for filtering in the catalog. |
+| `tone` | string | No | `"primary"` | Design system accent color tone for badge presentation. |
+| `is_active` | boolean | No | `false` | Whether this package is currently activated for the tenant organisation. |
+| `activated_at` | string \| null | No | — | Timestamp in ISO 8601 UTC when the package was activated. Null if inactive. |
+
+## Example payload
+
+```json
+{
+  "activated_at": "2026-10-29T10:00:00Z",
+  "description": "People and human resources management",
+  "id": "hrms",
+  "is_active": true,
+  "name": "HRMS",
+  "tags": [
+    "Employees",
+    "Leave",
+    "Payroll"
+  ],
+  "tone": "chart-3",
+  "type": "module",
+  "version": "0.1.0"
+}
+```

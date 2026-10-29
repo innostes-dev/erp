@@ -1,0 +1,30 @@
+---
+title: "TenantCreate"
+description: "Body for creating a customer organisation (tenant)."
+---
+
+Body for creating a customer organisation (tenant).
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string | Yes | — | Display name of the organisation. |
+| `slug` | string | Yes | — | Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`). |
+| `country` | string \| null | No | — | ISO 3166-1 alpha-2 country code. |
+| `timezone` | string \| null | No | — | IANA time zone name. |
+| `language` | string \| null | No | — | BCP 47 language tag for default language. |
+| `date_format` | string \| null | No | — | Preferred date display format. |
+
+## Example payload
+
+```json
+{
+  "country": "IN",
+  "date_format": "DD/MM/YYYY",
+  "language": "en-IN",
+  "name": "Northwind Traders Pvt Ltd",
+  "slug": "northwind-traders",
+  "timezone": "Asia/Kolkata"
+}
+```

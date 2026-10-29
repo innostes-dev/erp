@@ -1,0 +1,86 @@
+---
+title: "Get CRM module metadata and scaffold status"
+description: "Return CRM module metadata and scaffold status."
+---
+
+<ApiEndpoint method="GET" path="/crm/info" auth="None" />
+
+Return CRM module metadata and scaffold status.
+
+Public endpoint. Returns scaffold readiness status and available features.
+
+## Authentication
+
+This endpoint is public and does not require an authentication header.
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [CrmInfoResponse](/api-reference/schemas/crm-info-response)
+
+```json
+{
+  "description": "Customer relationship management and sales pipeline",
+  "id": "crm",
+  "name": "CRM",
+  "status": "scaffold_ready",
+  "sub_features": [
+    "leads",
+    "deals",
+    "pipeline",
+    "contacts"
+  ],
+  "version": "0.1.0"
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/crm/info"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/crm/info', {
+  method: 'GET',
+  headers: {
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+}
+
+response = httpx.get(
+    "http://localhost:8001/crm/info",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/crm/info" authType="None" hasBody={false} initialBody={""} />

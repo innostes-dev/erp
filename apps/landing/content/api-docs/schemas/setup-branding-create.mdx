@@ -1,0 +1,24 @@
+---
+title: "SetupBrandingCreate"
+description: "Optional branding preferences collected during first-run setup."
+---
+
+Optional branding preferences collected during first-run setup.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `theme` | string | No | `"system"` | Default interface theme mode: light, dark, or system. |
+| `primary_color` | string | No | `"#2563EB"` | Hexadecimal brand primary accent color code. |
+| `logo_url` | string \| null | No | — | Public URL pointing to corporate logo asset. |
+
+## Example payload
+
+```json
+{
+  "theme": "system",
+  "primary_color": "#2563EB",
+  "logo_url": "https://cdn.northwind.example/logo.svg"
+}
+```

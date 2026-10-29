@@ -1,0 +1,8 @@
+{
+  "title": "Setup",
+  "pages": [
+    "setup-get-status",
+    "setup-run-checks",
+    "setup-execute-install"
+  ]
+}

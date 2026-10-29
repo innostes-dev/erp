@@ -1,0 +1,40 @@
+---
+title: "ModuleListResponse"
+description: "Catalog of business modules with current tenant activation status."
+---
+
+Catalog of business modules with current tenant activation status.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `installed` | [ItemCatalogRead](/api-reference/schemas/item-catalog-read)[] | Yes | — | List of all installed and discoverable business modules. |
+| `active_ids` | string[] | Yes | — | List of module IDs currently enabled for the tenant. |
+
+## Example payload
+
+```json
+{
+  "active_ids": [
+    "hrms"
+  ],
+  "installed": [
+    {
+      "activated_at": "2026-10-29T10:00:00Z",
+      "description": "People and human resources management",
+      "id": "hrms",
+      "is_active": true,
+      "name": "HRMS",
+      "tags": [
+        "Employees",
+        "Leave",
+        "Payroll"
+      ],
+      "tone": "chart-3",
+      "type": "module",
+      "version": "0.1.0"
+    }
+  ]
+}
+```

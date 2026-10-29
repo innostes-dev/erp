@@ -1,0 +1,159 @@
+---
+title: "Run pre-install checks"
+description: "Check the database before installing."
+---
+
+<ApiEndpoint method="GET" path="/setup/checks" auth="SetupToken" />
+
+Check the database before installing. Requires the `X-Setup-Token` header.
+
+The wizard also uses it to verify the token. Returns **404** once setup is
+complete or when web setup is disabled.
+
+## Authentication
+
+Requires a privileged first-run setup token displayed in the server console upon boot. Pass the token in the `X-Setup-Token` HTTP header:
+
+```http
+X-Setup-Token: <setup-token>
+```
+
+## Parameters
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Setup-Token` | string \| null | No | One-time system installation token printed in server log or set via SETUP_TOKEN. |
+
+## Responses
+
+### HTTP 200
+
+Database connectivity and pending migrations.
+
+Response model: [SetupChecks](/api-reference/schemas/setup-checks)
+
+```json
+{
+  "database_connected": true,
+  "migrations_pending": 0
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 404
+
+Resource not found
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+### HTTP 429
+
+Too many requests
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 503
+
+A required service (e.g. the database) is unavailable
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/setup/checks" \
+  -H "X-Setup-Token: <setup-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/setup/checks', {
+  method: 'GET',
+  headers: {
+    'X-Setup-Token': '<setup-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "X-Setup-Token": "<setup-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/setup/checks",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/setup/checks" authType="SetupToken" hasBody={false} initialBody={""} />

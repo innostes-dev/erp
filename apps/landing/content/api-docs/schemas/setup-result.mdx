@@ -1,0 +1,45 @@
+---
+title: "SetupResult"
+description: "Resources created during successful first-run installation."
+---
+
+Resources created during successful first-run installation.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `tenant` | [TenantRead](/api-reference/schemas/tenant-read) | Yes | — | The primary organisation created during setup. |
+| `admin` | [UserRead](/api-reference/schemas/user-read) \| null | No | — | The root super administrator created during setup. |
+| `installed_at` | string | Yes | — | Timestamp in ISO 8601 UTC when setup was completed. |
+
+## Example payload
+
+```json
+{
+  "admin": {
+    "created_at": "2026-10-29T10:00:00Z",
+    "email": "priya.shah@northwind.example",
+    "first_name": "Priya",
+    "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+    "is_super_admin": true,
+    "last_name": "Shah",
+    "mobile": "+919876543210",
+    "status": "active",
+    "token_version": 1,
+    "updated_at": "2026-10-29T10:00:00Z"
+  },
+  "installed_at": "2026-10-29T10:00:00Z",
+  "tenant": {
+    "country": "IN",
+    "created_at": "2026-10-29T10:00:00Z",
+    "date_format": "DD/MM/YYYY",
+    "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+    "language": "en-IN",
+    "name": "Northwind Traders Pvt Ltd",
+    "slug": "northwind-traders",
+    "timezone": "Asia/Kolkata",
+    "updated_at": "2026-10-29T10:00:00Z"
+  }
+}
+```

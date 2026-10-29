@@ -1,0 +1,28 @@
+---
+title: "HTTPValidationError"
+description: "Data schema model."
+---
+
+Data schema model.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `detail` | [ValidationError](/api-reference/schemas/validation-error)[] | No | — | — |
+
+## Example payload
+
+```json
+{
+  "detail": [
+    {
+      "loc": null,
+      "msg": null,
+      "type": null,
+      "input": null,
+      "ctx": null
+    }
+  ]
+}
+```

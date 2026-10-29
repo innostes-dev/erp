@@ -1,0 +1,24 @@
+---
+title: "ActivationResponse"
+description: "Response returned upon activation or deactivation."
+---
+
+Response returned upon activation or deactivation.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `item_id` | string | Yes | — | Identifier of the module or plugin whose status changed. |
+| `is_active` | boolean | Yes | — | New activation state of the package. |
+| `message` | string | Yes | — | Human-readable operational status message. |
+
+## Example payload
+
+```json
+{
+  "is_active": true,
+  "item_id": "hrms",
+  "message": "Module 'hrms' activated successfully."
+}
+```

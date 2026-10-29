@@ -1,0 +1,42 @@
+---
+title: "TenantRead"
+description: "A tenant organisation as returned by the API (includes common audit trail fields)."
+---
+
+A tenant organisation as returned by the API (includes common audit trail fields).
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | Yes | — | Unique identifier of the record in UUID v4 format. |
+| `created_at` | string | Yes | — | Timestamp when the record was created in ISO 8601 UTC format. |
+| `created_by` | string \| null | No | — | Unique identifier of the user who created the record. Null for automated system actions. |
+| `updated_at` | string | Yes | — | Timestamp when the record was last modified in ISO 8601 UTC format. |
+| `updated_by` | string \| null | No | — | Unique identifier of the user who last modified the record. Null for automated system actions. |
+| `deleted_at` | string \| null | No | — | Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active. |
+| `deleted_by` | string \| null | No | — | Unique identifier of the user who soft-deleted the record. Null while active. |
+| `name` | string | Yes | — | Display name of the organisation. |
+| `slug` | string | Yes | — | Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`). |
+| `country` | string \| null | No | — | ISO 3166-1 alpha-2 country code. |
+| `timezone` | string \| null | No | — | IANA time zone name. |
+| `language` | string \| null | No | — | BCP 47 language tag for default language. |
+| `date_format` | string \| null | No | — | Preferred date display format. |
+
+## Example payload
+
+```json
+{
+  "country": "IN",
+  "created_at": "2026-10-26T10:15:00Z",
+  "created_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c",
+  "date_format": "DD/MM/YYYY",
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "language": "en-IN",
+  "name": "Northwind Traders Pvt Ltd",
+  "slug": "northwind-traders",
+  "timezone": "Asia/Kolkata",
+  "updated_at": "2026-10-26T10:15:00Z",
+  "updated_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c"
+}
+```

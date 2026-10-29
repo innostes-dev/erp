@@ -1,0 +1,94 @@
+---
+title: "System health check"
+description: "Report API, database, and per-module health."
+---
+
+<ApiEndpoint method="GET" path="/health" auth="None" />
+
+Report API, database, and per-module health.
+
+Public endpoint. Returns **200** with `status: pass` when the database responds,
+otherwise **503** with `status: fail`.
+
+## Authentication
+
+This endpoint is public and does not require an authentication header.
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [HealthCheckRead](/api-reference/schemas/health-check-read)
+
+```json
+{
+  "database": {
+    "latency_ms": 1.25,
+    "status": "HEALTHY"
+  },
+  "environment": "development",
+  "modules": {
+    "auth": {
+      "status": "HEALTHY"
+    },
+    "tenancy": {
+      "status": "HEALTHY"
+    }
+  },
+  "status": "pass"
+}
+```
+
+### HTTP 503
+
+Database is unreachable
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/health"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/health', {
+  method: 'GET',
+  headers: {
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+}
+
+response = httpx.get(
+    "http://localhost:8001/health",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/health" authType="None" hasBody={false} initialBody={""} />

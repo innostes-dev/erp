@@ -1,0 +1,106 @@
+---
+title: "Get current user profile"
+description: "Retrieves profile and identity details of the authenticated actor."
+---
+
+<ApiEndpoint method="GET" path="/auth/me" auth="BearerAuth" />
+
+Retrieves profile and identity details of the authenticated actor.
+
+Requires Bearer authentication. Decrypts PII fields (email, mobile) for
+the authorized user.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [UserRead](/api-reference/schemas/user-read)
+
+```json
+{
+  "created_at": "2026-10-29T10:00:00Z",
+  "email": "priya.shah@northwind.example",
+  "first_name": "Priya",
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "is_super_admin": true,
+  "last_name": "Shah",
+  "mobile": "+919876543210",
+  "status": "active",
+  "token_version": 1,
+  "updated_at": "2026-10-29T10:00:00Z"
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/auth/me" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/auth/me', {
+  method: 'GET',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/auth/me",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/auth/me" authType="BearerAuth" hasBody={false} initialBody={""} />

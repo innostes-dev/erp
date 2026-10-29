@@ -1,0 +1,30 @@
+---
+title: "UserCreate"
+description: "Payload to create a new user account."
+---
+
+Payload to create a new user account.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `first_name` | string | Yes | — | User given name. |
+| `last_name` | string \| null | No | — | User family name. |
+| `email` | string | Yes | — | Primary user account email address. |
+| `password` | string | Yes | — | Initial account password. |
+| `mobile` | string \| null | No | — | User mobile telephone number. |
+| `is_super_admin` | boolean | No | `false` | Flag granting platform-wide super administrator privileges. |
+
+## Example payload
+
+```json
+{
+  "first_name": "Arjun",
+  "last_name": "Mehta",
+  "email": "arjun.mehta@northwind.example",
+  "password": "UserSecurePassword2026!",
+  "mobile": "+919876543211",
+  "is_super_admin": false
+}
+```

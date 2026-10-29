@@ -1,6 +1,6 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { Button } from '@innostes/ui';
-import { BookOpen, Layers } from 'lucide-react';
+import { BookOpen, Layers, Server } from 'lucide-react';
 import { baseOptions } from '@/lib/layout.shared';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
@@ -25,6 +25,13 @@ export default function Layout({ children }: LayoutProps<'/'>) {
                 'Components, theming and usage of the design system.',
               url: '/ui/docs',
               icon: <Layers />,
+            },
+            {
+              text: 'API Reference',
+              description:
+                'REST API endpoints, OpenAPI schemas and authentication.',
+              url: '/api-reference',
+              icon: <Server />,
             },
           ],
         },

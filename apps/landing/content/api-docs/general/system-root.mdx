@@ -1,0 +1,87 @@
+---
+title: "Service information"
+description: "Service name, environment, status, and the list of loaded modules."
+---
+
+<ApiEndpoint method="GET" path="/" auth="None" />
+
+Service name, environment, status, and the list of loaded modules.
+
+Public endpoint. Returns service identification and loaded feature module metadata.
+
+## Authentication
+
+This endpoint is public and does not require an authentication header.
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [ServiceInfoRead](/api-reference/schemas/service-info-read)
+
+```json
+{
+  "environment": "development",
+  "modules": [
+    "auth",
+    "setup",
+    "tenancy",
+    "user",
+    "crm",
+    "hrms",
+    "api-logger"
+  ],
+  "service": "Innostes ERP API Server",
+  "status": "online"
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/', {
+  method: 'GET',
+  headers: {
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+}
+
+response = httpx.get(
+    "http://localhost:8001/",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/" authType="None" hasBody={false} initialBody={""} />

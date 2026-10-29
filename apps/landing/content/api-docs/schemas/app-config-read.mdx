@@ -1,0 +1,24 @@
+---
+title: "AppConfigRead"
+description: "Public application metadata and frontend bootstrapping configuration."
+---
+
+Public application metadata and frontend bootstrapping configuration.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `service` | string | Yes | — | Name of the backend service application. |
+| `version` | string | Yes | — | Semver version string of the API server. |
+| `environment` | string | Yes | — | Runtime deployment environment. |
+
+## Example payload
+
+```json
+{
+  "environment": "development",
+  "service": "Innostes ERP API Server",
+  "version": "0.1.0"
+}
+```

@@ -19,6 +19,7 @@ export default function Layout({ children }: LayoutProps<'/ui/docs'>) {
         { text: 'Patterns', url: '/ui/docs/patterns' },
         { text: 'Foundations', url: '/ui/docs/foundations/status-legend' },
         { text: 'Resources', url: '/ui/docs/resources' },
+        { text: 'API', url: '/api-reference' },
         { text: 'Developers', url: '/docs' },
       ]}
       cta={{ text: 'Get Started', url: '/ui/docs/installation' }}

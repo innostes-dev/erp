@@ -1,0 +1,17 @@
+{
+  "title": "Tenancy",
+  "pages": [
+    "tenants-create",
+    "tenants-list",
+    "tenants-get",
+    "tenants-update",
+    "tenants-delete",
+    "tenants-restore",
+    "tenants-list-modules",
+    "tenants-activate-module",
+    "tenants-deactivate-module",
+    "tenants-list-plugins",
+    "tenants-activate-plugin",
+    "tenants-deactivate-plugin"
+  ]
+}

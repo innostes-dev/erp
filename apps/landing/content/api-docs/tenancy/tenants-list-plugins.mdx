@@ -1,0 +1,151 @@
+---
+title: "List extensible plugins for current tenant"
+description: "Return catalog of extensible plugins and their activation status."
+---
+
+<ApiEndpoint method="GET" path="/tenants/current/plugins" auth="BearerAuth" />
+
+Return catalog of extensible plugins and their activation status.
+
+Requires Bearer authentication. Returns which plugins are enabled for the
+current tenant organisation context.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant UUID context. |
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [PluginListResponse](/api-reference/schemas/plugin-list-response)
+
+```json
+{
+  "active_ids": [
+    "api-logger"
+  ],
+  "installed": [
+    {
+      "activated_at": "2026-10-29T10:00:00Z",
+      "description": "API request logging, webhook inspection, and debugging",
+      "id": "api-logger",
+      "is_active": true,
+      "name": "API Logger",
+      "tags": [
+        "Logs",
+        "Webhooks",
+        "Analytics"
+      ],
+      "tone": "chart-5",
+      "type": "plugin",
+      "version": "0.1.0"
+    }
+  ]
+}
+```
+
+### HTTP 401
+
+Not authenticated
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 404
+
+Resource not found
+
+Response model: [ErrorResponse](/api-reference/schemas/error-response)
+
+```json
+{
+  "code": "tenant_not_found",
+  "detail": "Tenant not found."
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/tenants/current/plugins" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/tenants/current/plugins', {
+  method: 'GET',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/tenants/current/plugins",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/tenants/current/plugins" authType="BearerAuth" hasBody={false} initialBody={""} />

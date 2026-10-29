@@ -1,0 +1,40 @@
+---
+title: "SetupRequest"
+description: "System configuration parameters collected by the setup wizard."
+---
+
+System configuration parameters collected by the setup wizard.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `organization` | [TenantCreate](/api-reference/schemas/tenant-create) | Yes | — | The primary root customer organisation (tenant) to provision. |
+| `admin` | [AdminUserCreate](/api-reference/schemas/admin-user-create) | No | — | The root super administrator credentials. |
+| `branding` | [SetupBrandingCreate](/api-reference/schemas/setup-branding-create) \| null | No | — | Optional branding customization. Set to null if skipped. |
+
+## Example payload
+
+```json
+{
+  "admin": {
+    "email": "priya.shah@northwind.example",
+    "first_name": "Priya",
+    "last_name": "Shah",
+    "mobile": "+919876543210",
+    "password": "AdminSecurePassword2026!"
+  },
+  "branding": {
+    "primary_color": "#2563EB",
+    "theme": "system"
+  },
+  "organization": {
+    "country": "IN",
+    "date_format": "DD/MM/YYYY",
+    "language": "en-IN",
+    "name": "Northwind Traders Pvt Ltd",
+    "slug": "northwind-traders",
+    "timezone": "Asia/Kolkata"
+  }
+}
+```

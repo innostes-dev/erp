@@ -1,0 +1,42 @@
+---
+title: "UserRead"
+description: "User identity record as returned by the API (with decrypted email and mobile)."
+---
+
+User identity record as returned by the API (with decrypted email and mobile).
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | Yes | — | Unique identifier of the record in UUID v4 format. |
+| `created_at` | string | Yes | — | Timestamp when the record was created in ISO 8601 UTC format. |
+| `created_by` | string \| null | No | — | Unique identifier of the user who created the record. Null for automated system actions. |
+| `updated_at` | string | Yes | — | Timestamp when the record was last modified in ISO 8601 UTC format. |
+| `updated_by` | string \| null | No | — | Unique identifier of the user who last modified the record. Null for automated system actions. |
+| `deleted_at` | string \| null | No | — | Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active. |
+| `deleted_by` | string \| null | No | — | Unique identifier of the user who soft-deleted the record. Null while active. |
+| `first_name` | string | Yes | — | User given name. |
+| `last_name` | string \| null | No | — | User family name. |
+| `email` | string | Yes | — | Decrypted primary user email address. |
+| `mobile` | string \| null | No | — | Decrypted mobile telephone number. |
+| `status` | [UserStatus](/api-reference/schemas/user-status) | Yes | — | Account lifecycle status. |
+| `is_super_admin` | boolean | Yes | — | Whether the user holds platform-wide super administrator privileges. |
+| `token_version` | integer | Yes | — | Monotonically increasing token generation counter used for instant session invalidation. |
+
+## Example payload
+
+```json
+{
+  "created_at": "2026-10-29T10:00:00Z",
+  "email": "priya.shah@northwind.example",
+  "first_name": "Priya",
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "is_super_admin": true,
+  "last_name": "Shah",
+  "mobile": "+919876543210",
+  "status": "active",
+  "token_version": 1,
+  "updated_at": "2026-10-29T10:00:00Z"
+}
+```
