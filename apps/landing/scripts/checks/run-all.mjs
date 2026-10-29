@@ -10,6 +10,7 @@ import { runApiTablesCheck } from './check-api-tables.mjs';
 import { runTemplateCheck } from './check-template.mjs';
 import { runApiDocsStaleCheck } from './check-api-docs-stale.mjs';
 import { runCatalogueCheck } from './check-catalogues.mjs';
+import { checkApiSamples } from './check-api-samples.mjs';
 
 console.log('Running documentation quality gates...\n');
 const startTime = Date.now();
@@ -112,6 +113,15 @@ if (catalogueErrors.length > 0) {
   console.log('✓ [CATALOGUES] All ErrorCode constants and API changelog versions are in sync.');
 }
 
+const sampleCheckResult = await checkApiSamples();
+const sampleErrors = sampleCheckResult.issues || [];
+if (sampleErrors.length > 0) {
+  console.error(`❌ [API SAMPLES] ${sampleErrors.length} sample contract issues:`);
+  for (const e of sampleErrors) console.error(`   ${e}`);
+} else {
+  console.log('✓ [API SAMPLES] All code samples valid against openapi.json and standards.');
+}
+
 // 2. Report-mode checks
 console.log('\n--- REPORT-MODE GATES ---');
 
@@ -133,7 +143,8 @@ const totalEnforcedFailures =
   coverageErrors.length +
   templateErrors.length +
   apiDocsStaleErrors.length +
-  catalogueErrors.length;
+  catalogueErrors.length +
+  sampleErrors.length;
 
 if (totalEnforcedFailures > 0) {
   console.error(`\n❌ Quality gates failed with ${totalEnforcedFailures} enforced defect(s).`);

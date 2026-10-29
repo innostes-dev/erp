@@ -13,6 +13,7 @@
     "llms": "node scripts/generate-llms.mjs",
     "demos": "node scripts/generate-demo-registry.mjs",
     "tokens": "node scripts/generate-tokens-data.mjs",
+    "api-docs-samples": "node scripts/checks/check-api-samples.mjs",
     "test:e2e": "playwright test"
   },
   "nx": {

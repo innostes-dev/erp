@@ -9,7 +9,7 @@ function getSitemapPaths(): string[] {
   if (existsSync(sitemapPath)) {
     const xml = readFileSync(sitemapPath, 'utf8');
     const matches = Array.from(xml.matchAll(/<loc>https?:\/\/[^/]+(\/[^<]*)<\/loc>/g));
-    const paths = matches.map((m) => m[1] || '/').filter((p) => p.startsWith('/ui') || p === '/');
+    const paths = matches.map((m) => m[1] || '/').filter((p) => p.startsWith('/ui') || p.startsWith('/api-reference') || p === '/');
     return Array.from(new Set(paths));
   }
   // Fallback list of key sections if sitemap file is not present
@@ -30,6 +30,15 @@ function getSitemapPaths(): string[] {
     '/ui/docs/examples',
     '/ui/docs/resources/changelog',
     '/ui/docs/resources/versioning',
+    '/api-reference',
+    '/api-reference/guides/quickstart',
+    '/api-reference/guides/authentication',
+    '/api-reference/policies/error-codes',
+    '/api-reference/policies/versioning',
+    '/api-reference/policies/deprecation',
+    '/api-reference/policies/limits-and-quotas',
+    '/api-reference/policies/security',
+    '/api-reference/policies/changelog',
   ];
 }
 

@@ -18,7 +18,7 @@ X-Tenant-ID: 1
 | Endpoint Category | `X-Tenant-ID` Required? | Resolution Behaviour |
 | --- | --- | --- |
 | **Global Operations** (e.g. `GET /tenants`, `POST /tenants`, `GET /auth/me`) | **Optional** | Operates at the platform administration tier. |
-| **Tenant Operations** (e.g. `GET /tenants/1/modules`, `POST /tenants/1/plugins/configure`) | **Path Scoped** | The path parameter `{tenant_id}` sets the explicit tenant context. |
+| **Tenant Operations** (e.g. `GET /tenants/current/modules`) | **Context Header** | The `X-Tenant-ID` header scopes module and plugin queries to the active tenant. |
 | **Domain Operations** (e.g. CRM contacts, HRMS employee rosters) | **Required** | Scopes all database queries to the given tenant ID. |
 
 ---
@@ -86,20 +86,20 @@ Organizations can be managed through the [Tenancy endpoints](/api-reference/tena
   <Tab value="cURL">
 
 ```bash
-# Query modules active for Northwind Traders (Tenant ID 1)
-curl -X GET "http://localhost:8001/tenants/1/modules" \
+# Query modules active for Northwind Traders
+curl -X GET "http://localhost:8001/tenants/current/modules" \
   -H "Authorization: Bearer <your-access-token>" \
-  -H "X-Tenant-ID: 1"
+  -H "X-Tenant-ID: 3f2b1c9e-4d5a-6b7c-8e9f-0a1b2c3d4e5f"
 ```
 
   </Tab>
   <Tab value="TypeScript (fetch)">
 
 ```ts
-const res = await fetch('http://localhost:8001/tenants/1/modules', {
+const res = await fetch('http://localhost:8001/tenants/current/modules', {
   headers: {
     Authorization: `Bearer ${token}`,
-    'X-Tenant-ID': '1',
+    'X-Tenant-ID': '3f2b1c9e-4d5a-6b7c-8e9f-0a1b2c3d4e5f',
   },
 });
 const modules = await res.json();
@@ -113,10 +113,10 @@ console.log(modules);
 import httpx
 
 res = httpx.get(
-    "http://localhost:8001/tenants/1/modules",
+    "http://localhost:8001/tenants/current/modules",
     headers={
         "Authorization": f"Bearer {token}",
-        "X-Tenant-ID": "1",
+        "X-Tenant-ID": "3f2b1c9e-4d5a-6b7c-8e9f-0a1b2c3d4e5f",
     },
 )
 print(res.json())

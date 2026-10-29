@@ -120,15 +120,20 @@ Retrieve the single-use setup token printed in the server boot terminal, then su
   <Tab value="cURL">
 
 ```bash
-curl -X POST "http://localhost:8001/setup/install" \
+curl -X POST "http://localhost:8001/setup" \
   -H "Content-Type: application/json" \
   -H "X-Setup-Token: test-setup-token-42" \
   -d '{
-    "app_name": "Northwind Enterprise ERP",
-    "admin_email": "priya.shah@northwind.example",
-    "admin_password": "Password123!",
-    "admin_first_name": "Priya",
-    "admin_last_name": "Shah"
+    "organization": {
+      "name": "Northwind Traders Pvt Ltd",
+      "slug": "northwind-traders"
+    },
+    "admin": {
+      "email": "priya.shah@northwind.example",
+      "password": "Password123!",
+      "first_name": "Priya",
+      "last_name": "Shah"
+    }
   }'
 ```
 
@@ -136,18 +141,23 @@ curl -X POST "http://localhost:8001/setup/install" \
   <Tab value="TypeScript (fetch)">
 
 ```ts
-const res = await fetch('http://localhost:8001/setup/install', {
+const res = await fetch('http://localhost:8001/setup', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
     'X-Setup-Token': 'test-setup-token-42',
   },
   body: JSON.stringify({
-    app_name: 'Northwind Enterprise ERP',
-    admin_email: 'priya.shah@northwind.example',
-    admin_password: 'Password123!',
-    admin_first_name: 'Priya',
-    admin_last_name: 'Shah',
+    organization: {
+      name: 'Northwind Traders Pvt Ltd',
+      slug: 'northwind-traders',
+    },
+    admin: {
+      email: 'priya.shah@northwind.example',
+      password: 'Password123!',
+      first_name: 'Priya',
+      last_name: 'Shah',
+    },
   }),
 });
 const result = await res.json();
@@ -161,17 +171,22 @@ console.log(result);
 import httpx
 
 res = httpx.post(
-    "http://localhost:8001/setup/install",
+    "http://localhost:8001/setup",
     headers={
         "Content-Type": "application/json",
         "X-Setup-Token": "test-setup-token-42",
     },
     json={
-        "app_name": "Northwind Enterprise ERP",
-        "admin_email": "priya.shah@northwind.example",
-        "admin_password": "Password123!",
-        "admin_first_name": "Priya",
-        "admin_last_name": "Shah",
+        "organization": {
+            "name": "Northwind Traders Pvt Ltd",
+            "slug": "northwind-traders",
+        },
+        "admin": {
+            "email": "priya.shah@northwind.example",
+            "password": "Password123!",
+            "first_name": "Priya",
+            "last_name": "Shah",
+        },
     },
 )
 print(res.json())

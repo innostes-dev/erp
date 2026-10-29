@@ -310,7 +310,41 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 09 (Editorial pass and verified code samples).
+- Non-blocking: none.
+
+## 09 – QA and editorial pass – 2026-10-29
+
+**Summary**: Conducted comprehensive QA and editorial pass over the entire API reference and caller guides. Created canonical domain terminology reference `TERMINOLOGY.md` establishing standardized vocabulary (access token vs refresh token, tenant vs organisation, record vs resource, error code vs status code) and British English rules. Built automated sample validation quality gate `check-api-samples.mjs` wired into `landing:docs-check` and `apps/landing/package.json` (`api-docs-samples`). Built end-to-end guide sample runner `test_api_samples.py` in `apps/api-server/tests/` executing the complete quickstart sequence. Corrected sample endpoints (`POST /setup` and `GET /tenants/current/modules`). Extended Playwright crawl audit `crawl.spec.ts` to crawl all `/api-reference` routes across themes and viewports.
+
+**Changed**:
+- Created `agent-prompts/api-docs/TERMINOLOGY.md`: Authoritative vocabulary guidelines, British English spelling rules, and code sample conventions across languages.
+- Created `apps/api-server/tests/test_api_samples.py`: Integration test suite running all guide samples sequentially against a fresh server environment.
+- Created `apps/landing/scripts/checks/check-api-samples.mjs`: Automated gate verifying code snippets against `openapi.json` paths and Northwind enterprise standards.
+- Updated `apps/landing/scripts/checks/run-all.mjs`: Integrated `checkApiSamples` as the 13th enforced quality gate.
+- Updated `apps/landing/package.json`: Added `api-docs-samples` script target.
+- Updated `apps/landing/content/api-docs/guides/quickstart.mdx`: Fixed install endpoint route from `/setup/install` to `/setup` with canonical payload schema.
+- Updated `apps/landing/content/api-docs/guides/tenancy.mdx`: Fixed tenant module query route from `/tenants/1/modules` to `/tenants/current/modules` with header scoping.
+- Updated `apps/landing/e2e/crawl.spec.ts`: Expanded crawl scope to cover `/api-reference` pages.
+
+**API changes**: none.
+
+**Decisions**:
+- Enforce both static sample schema validation (`check-api-samples.mjs`) in documentation checks and dynamic runtime execution (`test_api_samples.py`) in backend test suites.
+- Align all guide endpoints to canonical OpenAPI 3.1 routes.
+
+**Verification**:
+- `pnpm nx test api-server`: PASS (120 tests pass in 3.27s).
+- `pnpm nx run api-server:contract-test`: PASS (103 contract tests pass in 3.12s).
+- `pnpm nx test kernel-backend`: PASS (105 tests pass in 5.95s).
+- `pnpm nx run api-server:openapi-check`: PASS.
+- `pnpm nx run api-server:openapi-lint`: PASS (0 defects).
+- `node apps/landing/scripts/checks/check-api-samples.mjs`: PASS (0 defects).
+- `pnpm nx run landing:docs-check`: PASS (All 13 enforced quality gates pass, 0 defects).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 10 (Checklist verification).
+
 
 
 
