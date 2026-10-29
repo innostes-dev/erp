@@ -11,6 +11,10 @@ import { runTemplateCheck } from './check-template.mjs';
 import { runApiDocsStaleCheck } from './check-api-docs-stale.mjs';
 import { runCatalogueCheck } from './check-catalogues.mjs';
 import { checkApiSamples } from './check-api-samples.mjs';
+import { runDiagramCheck } from './check-diagrams.mjs';
+import { runArchFrontmatterCheck } from './check-arch-frontmatter.mjs';
+import { runAdrCheck } from './check-adrs.mjs';
+import { runArc42CoverageCheck } from './check-arc42-coverage.mjs';
 
 console.log('Running documentation quality gates...\n');
 const startTime = Date.now();
@@ -122,8 +126,41 @@ if (sampleErrors.length > 0) {
   console.log('✓ [API SAMPLES] All code samples valid against openapi.json and standards.');
 }
 
+const diagramCheckResult = await runDiagramCheck();
+const diagramErrors = diagramCheckResult.errors || [];
+if (diagramErrors.length > 0) {
+  console.error(`❌ [DIAGRAMS] ${diagramErrors.length} diagram syntax issues:`);
+  for (const e of diagramErrors) console.error(`   ${e.file}:${e.line} - ${e.message}`);
+} else {
+  console.log(`✓ [DIAGRAMS] All ${diagramCheckResult.diagramCount} Mermaid diagrams parsed successfully.`);
+}
+
+const archFmResult = runArchFrontmatterCheck({ enforce: true });
+const archFmErrors = archFmResult.errors || [];
+if (archFmErrors.length > 0) {
+  console.error(`❌ [ARCH FRONTMATTER] ${archFmErrors.length} frontmatter issues:`);
+  for (const e of archFmErrors) console.error(`   ${e.file}:${e.line} - ${e.message}`);
+} else {
+  console.log(`✓ [ARCH FRONTMATTER] All ${archFmResult.checkedFiles} architecture pages have owner and lastReviewed.`);
+}
+
+const adrCheckResult = runAdrCheck();
+const adrErrors = adrCheckResult.errors || [];
+if (adrErrors.length > 0) {
+  console.error(`❌ [ADRS] ${adrErrors.length} ADR gate issues:`);
+  for (const e of adrErrors) console.error(`   ${e.file}:${e.line} - ${e.message}`);
+} else {
+  console.log(`✓ [ADRS] All ADRs conform to MADR 4.x structure and allowed statuses.`);
+}
+
 // 2. Report-mode checks
 console.log('\n--- REPORT-MODE GATES ---');
+
+const arc42Result = runArc42CoverageCheck({ enforceAll: false });
+console.log(`ℹ️ [ARC42 COVERAGE] ${arc42Result.coveredCount}/12 arc42 sections covered.`);
+for (const w of arc42Result.warnings) {
+  console.log(`   ${w.message}`);
+}
 
 const apiTableErrors = runApiTablesCheck({ enforce: false });
 console.log(`ℹ️ [API TABLES] ${apiTableErrors.length} <ApiTable> entries with 0 props or missing (tracked)`);
@@ -144,7 +181,10 @@ const totalEnforcedFailures =
   templateErrors.length +
   apiDocsStaleErrors.length +
   catalogueErrors.length +
-  sampleErrors.length;
+  sampleErrors.length +
+  diagramErrors.length +
+  archFmErrors.length +
+  adrErrors.length;
 
 if (totalEnforcedFailures > 0) {
   console.error(`\n❌ Quality gates failed with ${totalEnforcedFailures} enforced defect(s).`);

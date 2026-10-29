@@ -7,14 +7,18 @@ export function PageHeader({
   status,
   summary,
   install,
+  owner,
+  lastReviewed,
 }: {
   title: string;
   description?: string;
   status?: Status;
   summary?: string;
   install?: string;
+  owner?: string;
+  lastReviewed?: string;
 }) {
-  const hasAside = status || summary || install;
+  const hasAside = status || summary || install || owner || lastReviewed;
   return (
     <header className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
@@ -23,6 +27,21 @@ export function PageHeader({
         </h1>
         {description && (
           <p className="mt-3 text-lg text-fd-muted-foreground">{description}</p>
+        )}
+        {(owner || lastReviewed) && (
+          <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-fd-muted-foreground">
+            {owner && (
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border/60 bg-fd-muted/30 px-2 py-0.5">
+                <span className="font-semibold text-fd-foreground">Owner:</span> {owner}
+              </span>
+            )}
+            {lastReviewed && (
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-fd-border/60 bg-fd-muted/30 px-2 py-0.5">
+                <span className="font-semibold text-fd-foreground">Last reviewed:</span>{' '}
+                <time dateTime={lastReviewed}>{lastReviewed}</time>
+              </span>
+            )}
+          </div>
         )}
       </div>
       {hasAside && (

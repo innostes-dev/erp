@@ -1,0 +1,79 @@
+[importlinter]
+root_packages =
+    app
+    kernel
+    hrms
+    crm
+    api_logger
+
+[importlinter:contract:rule-1-engine-does-not-import-plugins]
+name = RULE-1: Engine does not import specific plugins (docs/architecture/overview#dependency-rules)
+type = forbidden
+source_modules =
+    app
+forbidden_modules =
+    kernel.tenancy
+    kernel.setup
+    kernel.user
+    kernel.auth
+    hrms
+    crm
+    api_logger
+
+[importlinter:contract:rule-2-plugins-never-import-engine]
+name = RULE-2: Plugins never import engine (docs/architecture/overview#dependency-rules)
+type = forbidden
+source_modules =
+    kernel
+    hrms
+    crm
+    api_logger
+forbidden_modules =
+    app
+
+[importlinter:contract:rule-3-kernel-imports-no-plugin]
+name = RULE-3: Kernel imports no external plugins (docs/architecture/overview#dependency-rules)
+type = forbidden
+source_modules =
+    kernel
+forbidden_modules =
+    hrms
+    crm
+    api_logger
+
+[importlinter:contract:rule-4-kernel-core-isolation]
+name = RULE-4: Kernel core imports no feature modules (docs/architecture/kernel#backend-layout)
+type = forbidden
+source_modules =
+    kernel.core
+forbidden_modules =
+    kernel.setup
+    kernel.tenancy
+    kernel.user
+    kernel.auth
+    hrms
+    crm
+    api_logger
+
+[importlinter:contract:rule-5-kernel-layering]
+name = RULE-5: Kernel features follow layered order core <- setup <- tenancy <- user <- auth (docs/architecture/overview#dependency-rules)
+type = layers
+layers =
+    kernel.auth
+    kernel.user
+    kernel.tenancy
+    kernel.setup
+    kernel.core
+ignore_imports =
+    # Debt ARC-002: Kernel feature circular and forward dependencies to be refactored in Prompt 10
+    kernel.tenancy.router -> kernel.auth.dependencies
+    kernel.tenancy.router -> kernel.user.models.user
+    kernel.user.router -> kernel.auth.dependencies
+    kernel.user.services.seeding -> kernel.tenancy.models.settings
+    kernel.setup.services.setup_service -> kernel.tenancy
+    kernel.setup.services.setup_service -> kernel.tenancy.models.tenant_member
+    kernel.setup.services.setup_service -> kernel.user.schemas
+    kernel.setup.services.setup_service -> kernel.user.services
+    kernel.setup.schemas.setup -> kernel.tenancy.schemas
+    kernel.setup.schemas.setup -> kernel.user.schemas
+    kernel.setup.__main__ -> kernel.tenancy

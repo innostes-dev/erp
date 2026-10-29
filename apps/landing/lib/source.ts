@@ -12,6 +12,12 @@ const docsPageSchema = pageSchema.extend({
   summary: z.string().optional(),
   /** Command shown (with a copy button) in the page header. */
   install: z.string().optional(),
+  /** Team or role owning this document (e.g. "Platform Architecture Team"). */
+  owner: z.string().optional(),
+  /** ISO date when this document was last reviewed (YYYY-MM-DD). */
+  lastReviewed: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be an ISO date (YYYY-MM-DD)').optional(),
+  /** arc42 section mapping (1-12 or array of section numbers). */
+  arc42: z.union([z.number(), z.string(), z.array(z.union([z.number(), z.string()]))]).optional(),
 });
 
 /** innostes UI design system docs: content/docs → /ui/docs */

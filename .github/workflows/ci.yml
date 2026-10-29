@@ -43,7 +43,8 @@ jobs:
 
       # Prepend any command with "nx record --" to record its logs to Nx Cloud
       - run: pnpm nx record -- pnpm nx format:check --base="remotes/origin/main"
-      - run: pnpm nx run-many -t lint test contract-test build typecheck e2e docs-check docs-e2e verify-checklist openapi-check openapi-lint
+      - run: pnpm nx run-many -t lint test contract-test build typecheck e2e docs-check docs-e2e verify-checklist openapi-check openapi-lint arch-docs-check
+      - run: pnpm run arch-check
       # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/docs/features/ci-features/self-healing-ci
       - run: pnpm nx fix-ci
         if: always()

@@ -4,3 +4,4 @@
 -e ../../plugins/api-logger/backend
 fastapi[standard]>=0.158
 jsonschema>=4.20.0
+import-linter>=2.15

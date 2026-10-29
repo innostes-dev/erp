@@ -41,3 +41,32 @@ Observed before the runbook started. Prompt 01 must verify every one.
 **Open issues**:
 - Non-blocking: `ARC-001` through `ARC-013` (tracked in `AUDIT.md` with assigned owner prompts).
 
+## 02 – Tooling, doc gates and fitness functions – 2026-10-29
+**Summary**: Established the complete architecture documentation tooling and fitness function infrastructure:
+1. Implemented `<Diagram>` MDX component in `apps/landing` using `mermaid` with automatic light/dark theming and 360px responsive horizontal scrolling.
+2. Built automated diagram syntax validation gate (`check-diagrams.mjs`) using JSDOM and `mermaid.core` parser.
+3. Extended Fumadocs dev-docs schema with `owner`, `lastReviewed` (ISO date), and `arc42` section metadata; built frontmatter enforcement gate (`check-arch-frontmatter.mjs`) and displayed owner/lastReviewed badges in `PageHeader`.
+4. Created MADR 4.x validation gate (`check-adrs.mjs`) checking NNNN numbering, allowed statuses, sections, and superseded reference integrity.
+5. Created arc42 coverage gate (`check-arc42-coverage.mjs`) mapping architecture pages to all 12 arc42 sections.
+6. Implemented Python `import-linter` contracts (`.importlinter`) enforcing Rule 1 (engine doesn't import plugins), Rule 2 (plugins never import engine), Rule 3 (kernel imports no external plugins), Rule 4 (core imports no feature modules), and Rule 5 (kernel layering with narrow exceptions for `ARC-002`).
+7. Implemented TypeScript module boundary checker (`scripts/checks/check-ts-boundaries.mjs`) enforcing isolation of `@innostes/ui` and `@innostes/kernel`. Fixed cross-module boundary violation in `modules/crm/frontend/src/manifest.ts`.
+8. Implemented database model uniformity fitness function (`kernel/backend/tests/test_architecture_fitness.py`) and fixed omitted `kernel.auth.models` import in `kernel/backend/kernel/models.py` (`ARC-005`).
+9. Added `landing:arch-docs-check` and `arch-check` targets to Nx, package.json, and CI workflow (`.github/workflows/ci.yml`).
+10. Authored comprehensive architectural authoring guide `content/dev-docs/guides/architecture-docs.mdx` and updated `writing-docs.mdx`.
+**Changed**: `.importlinter`, `apps/landing/components/docs/diagram.tsx`, `apps/landing/components/mdx.tsx`, `apps/landing/components/docs/page-header.tsx`, `apps/landing/components/docs/docs-page.tsx`, `apps/landing/lib/source.ts`, `apps/landing/scripts/checks/*`, `scripts/checks/check-ts-boundaries.mjs`, `kernel/backend/tests/test_architecture_fitness.py`, `kernel/backend/kernel/models.py`, `modules/crm/frontend/src/manifest.ts`, `.github/workflows/ci.yml`, `writing-docs.mdx`, `architecture-docs.mdx`, `02-tooling-fitness-functions.md` deleted.
+**Code changes**:
+- `apps/landing/package.json`: added `mermaid` dependency, added `arch-docs-check` script and nx target.
+- `apps/api-server/requirements.txt`: added `import-linter>=2.15`.
+- `kernel/backend/kernel/models.py`: imported `kernel.auth.models` so all 18 tables are registered in `Base.metadata`.
+- `modules/crm/frontend/src/manifest.ts`: decoupled CRM from HRMS manifest type.
+**Decisions**:
+- Standardised Mermaid diagrams on `flowchart` with C4 notation conventions (legend per D4) because experimental Mermaid `C4Context` requires DOMPurify browser hooks that fail during server/node build parsing.
+**Verification**:
+- `pnpm run arch-check`: PASSED (167 TS files, 5 import-linter contracts kept, 2 model fitness tests passed).
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 5 gates passed).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 enforced quality gates passed).
+- `pnpm nx build landing`: PASSED (250 pages statically generated).
+**Open issues**:
+- Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
+
+

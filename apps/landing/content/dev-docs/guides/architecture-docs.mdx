@@ -1,0 +1,112 @@
+---
+title: Writing Architecture Documentation
+description: Standards, checklists, and automated fitness functions for arc42 architecture pages, C4 diagrams, and MADR decision records.
+icon: Layers
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+---
+
+Architecture documentation at Innostes ERP is maintained as code alongside the implementation ("docs-as-code"). Every architectural claim must be factual, every stated constraint enforced by automated checks, and every significant structural decision captured in an Architecture Decision Record (ADR).
+
+---
+
+## 1. Documentation Structure (arc42 v8)
+
+All architecture documentation lives in `apps/landing/content/dev-docs/architecture/` and maps to the **arc42 framework (template v8)** across 12 distinct sections:
+
+| Section | Topic | Primary Concern |
+|:---|:---|:---|
+| **§1** | Introduction and Goals | Business context, stakeholders, and top quality goals (ISO/IEC 25010). |
+| **§2** | Architecture Constraints | Technical, organizational, and regulatory constraints. |
+| **§3** | Context and Scope | System context (C4 Level 1) and external business/technical interfaces. |
+| **§4** | Solution Strategy | Fundamental decisions, engine/plugin design, and modularisation strategy. |
+| **§5** | Building Block View | Container (C4 Level 2) and Component (C4 Level 3) views; module contracts. |
+| **§6** | Runtime View | Sequence diagrams for authentication, setup, multi-tenancy, and operations. |
+| **§7** | Deployment View | Infrastructure topology, container deployment, and operational runbooks. |
+| **§8** | Cross-cutting Concepts | Domain models, universal soft delete, audit columns, envelope encryption, and STRIDE threat models. |
+| **§9** | Architecture Decisions | MADR 4.x decision records in `architecture/decisions/`. |
+| **§10** | Quality Requirements | Quality tree and evaluation scenarios mapped to ISO/IEC 25010 attributes. |
+| **§11** | Risks and Technical Debt | Prioritised risk register and technical debt backlog. |
+| **§12** | Glossary | Canonical domain vocabulary and technical terminology. |
+
+---
+
+## 2. Page Frontmatter Standard (Checklist A1)
+
+Every architecture page and operational runbook must declare its metadata in frontmatter:
+
+```yaml
+---
+title: System Context and Scope
+description: High-level boundary of the Innostes ERP platform and external systems.
+icon: Network
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 3
+---
+```
+
+- **`owner`**: The engineering team or role accountable for the technical truth of the page.
+- **`lastReviewed`**: ISO date (`YYYY-MM-DD`). Automated gates warn if the document has not been reviewed within 180 days.
+- **`arc42`**: Section number (1–12) or array of sections covered.
+
+---
+
+## 3. Diagram Conventions (Checklists D1–D7)
+
+All architectural diagrams must be written in Mermaid code within MDX pages:
+
+- **Component Wrapper**: Always enclose diagrams in the `<Diagram>` component:
+  ```mdx
+  <Diagram caption="Figure 1: Container diagram showing web-app, api-server, and PostgreSQL.">
+  {`
+  flowchart TD
+      UI[apps/web-app] -->|HTTPS / JSON| API[apps/api-server]
+      API -->|SQL / asyncpg| DB[(PostgreSQL 16)]
+  `}
+  </Diagram>
+  ```
+- **C4 Standardisation**: Because experimental Mermaid C4 diagrams require browser DOM hooks that break in static node compilation, standardise on `flowchart` with C4 notation conventions (containers, protocols, and clear legends per D4).
+- **Responsive Overflow**: Diagrams must scroll horizontally on viewports down to 360px without breaking parent layout boundaries.
+
+---
+
+## 4. Architecture Decision Records (MADR 4.x, Checklist R1–R9)
+
+ADRs capture structural, foundational decisions and live in `content/dev-docs/architecture/decisions/NNNN-kebab-title.mdx`.
+
+### Required Sections (MADR Template)
+1. **Title**: `# NNNN. <Title stating the decision>`
+2. **Status**: `proposed`, `accepted`, `deprecated`, or `superseded by NNNN`.
+3. **Date**: ISO date of the decision (`YYYY-MM-DD`).
+4. **Deciders**: List of architects and engineering leads involved.
+5. **Context and Problem Statement**: Factual background.
+6. **Decision Drivers**: Forces, requirements, and constraints influencing the choice.
+7. **Considered Options**: Alternative approaches evaluated.
+8. **Decision Outcome**: Chosen option and detailed rationale.
+9. **Consequences**: Positive and negative trade-offs.
+10. **Confirmation**: How adherence is verified (automated fitness function, CI gate, or review).
+11. **More Information**: Relevant links, standards, or issue trackers.
+
+---
+
+## 5. Automated Fitness Functions and Quality Gates (F1–F4)
+
+Automated architectural fitness functions enforce architectural rules on every pull request and local build:
+
+### Running Architecture Checks
+```bash
+# 1. Run Python and TypeScript architectural fitness functions
+pnpm run arch-check
+
+# 2. Run documentation quality gates (diagram parser, frontmatter schema, ADR validator, arc42 coverage)
+pnpm nx run landing:arch-docs-check
+```
+
+### Enforced Rules
+- **Rule 1 (Engine Isolation)**: `apps/api-server` imports only `kernel.core` and never imports specific feature modules or plugins by name. Enforced by `import-linter` contract `rule-1-engine-does-not-import-plugins`.
+- **Rule 2 (Plugin Inversion)**: Plugins and kernel modules never import the engine. Enforced by `rule-2-plugins-never-import-engine`.
+- **Rule 3 (Kernel Independence)**: `kernel` imports no external business module or plugin. Enforced by `rule-3-kernel-imports-no-plugin`.
+- **Rule 4 (Kernel Core Purity)**: `kernel.core` contains infrastructure only and imports no feature tables. Enforced by `rule-4-kernel-core-isolation`.
+- **Rule 5 (Frontend Package Isolation)**: `@innostes/ui` and `@innostes/kernel` never depend on higher-level apps or modules. Enforced by `check-ts-boundaries.mjs`.
+- **Rule 6 (Database Model Uniformity)**: Every relational table inherits `BaseModel` with UUID primary key, audit columns, and soft delete mixins. Enforced by `test_architecture_fitness.py`.

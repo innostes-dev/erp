@@ -60,6 +60,35 @@ Visual side-by-side design recommendations with accessible status icons:
 
 ```mdx
 <DoDont>
+  <Do title="Use descriptive action verbs">
+    Label buttons with the action they perform, e.g. "Create invoice".
+  </Do>
+  <Dont title="Avoid vague labels">
+    Do not use generic labels such as "Submit" or "Click here".
+  </Dont>
+</DoDont>
+```
+
+### Architectural diagrams
+
+Render version-controlled Mermaid diagrams themed automatically for light and dark display modes:
+
+```mdx
+<Diagram caption="Figure 1: Request flow between the UI engine and backend engine.">
+{`
+flowchart LR
+    UI[apps/web-app] -->|HTTP / JSON| API[apps/api-server]
+    API -->|SQL / asyncpg| DB[(PostgreSQL 16)]
+`}
+</Diagram>
+```
+
+- **Responsiveness**: `<Diagram>` ensures diagrams scroll horizontally inside a styled viewport border without breaking layout on mobile viewports down to 360px.
+- **Accessibility**: Always supply a concise descriptive `caption` providing context and textual alternative (D6).
+- **Notation conventions**: Standardise on `flowchart` with C4 notation conventions (containers, protocols, data flows, and legends per D4).
+
+```mdx
+<DoDont>
   <Do caption="Use primary buttons for the single primary operation on a view.">
     <Button variant="primary">Submit</Button>
   </Do>
@@ -174,6 +203,8 @@ Before submitting any documentation changes, run the automated quality gate test
 
 ```bash
 pnpm nx run landing:docs-check
+pnpm nx run landing:arch-docs-check
+pnpm run arch-check
 ```
 
 The gate scripts (`apps/landing/scripts/checks/`) enforce:
@@ -184,3 +215,7 @@ The gate scripts (`apps/landing/scripts/checks/`) enforce:
 4. **MDX safety**: checks for unescaped prose braces that could trigger MDX parser errors.
 5. **Consistency**: synchronises package versions between `packages/ui` and documentation headers.
 6. **Prose rules**: verifies British English, blocks banned buzzwords, and forbids placeholder data.
+7. **Diagrams**: compiles all Mermaid diagrams in dev-docs using `@mermaid-js` parser in JSDOM.
+8. **Architecture frontmatter**: verifies `owner`, `lastReviewed` (ISO date), and `arc42` tags on all architecture and operations pages.
+9. **ADR verification**: enforces MADR 4.x structure, sequential numbering (`NNNN-title.mdx`), allowed statuses, and superseded reference integrity.
+10. **Fitness functions**: runs Python `import-linter` contracts for backend dependency rules and TypeScript boundary enforcement across packages.

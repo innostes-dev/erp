@@ -38,6 +38,8 @@ export function renderDocsPage(
         status={page.data.status}
         summary={page.data.summary}
         install={page.data.install ?? options.defaultInstall}
+        owner={(page.data as any).owner}
+        lastReviewed={(page.data as any).lastReviewed}
       />
       <DocsBody>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
