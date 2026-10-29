@@ -19,12 +19,7 @@ import {
 } from '@innostes/ui';
 import { useAuth } from '@innostes/kernel';
 import { ApiLoggerPage } from '@innostes/api-logger';
-import {
-  ArrowLeft,
-  Puzzle,
-  Activity,
-  Power,
-} from 'lucide-react';
+import { ArrowLeft, Puzzle, Activity, Power } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { usePlugins } from '../context/PluginsContext';
 import { PLUGINS_CATALOG } from '../catalog';
@@ -69,7 +64,8 @@ export function PluginShellLayout({ pluginId }: PluginShellLayoutProps) {
     },
   ];
 
-  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Arun';
+  const fullName =
+    [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Arun';
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -100,19 +96,27 @@ export function PluginShellLayout({ pluginId }: PluginShellLayoutProps) {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
+                <BreadcrumbLink
+                  onClick={() => navigate('/')}
+                  className="cursor-pointer"
+                >
                   Ecosystem
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink onClick={() => navigate('/plugins')} className="cursor-pointer">
+                <BreadcrumbLink
+                  onClick={() => navigate('/plugins')}
+                  className="cursor-pointer"
+                >
                   Plugins
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{currentPlugin?.name ?? pluginId.toUpperCase()}</BreadcrumbPage>
+                <BreadcrumbPage>
+                  {currentPlugin?.name ?? pluginId.toUpperCase()}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

@@ -20,13 +20,7 @@ import {
 import { useAuth } from '@innostes/kernel';
 import { HrmsPage } from '@innostes/hrms';
 import { CrmPage } from '@innostes/crm';
-import {
-  ArrowLeft,
-  Building2,
-  Users,
-  LayoutGrid,
-  Power,
-} from 'lucide-react';
+import { ArrowLeft, Building2, Users, LayoutGrid, Power } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';
 import { BUSINESS_MODULES_CATALOG } from '../catalog';
@@ -73,7 +67,8 @@ export function ModuleShellLayout({ moduleId }: ModuleShellLayoutProps) {
     },
   ];
 
-  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Arun';
+  const fullName =
+    [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Arun';
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -104,19 +99,27 @@ export function ModuleShellLayout({ moduleId }: ModuleShellLayoutProps) {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
+                <BreadcrumbLink
+                  onClick={() => navigate('/')}
+                  className="cursor-pointer"
+                >
                   Ecosystem
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink onClick={() => navigate('/modules')} className="cursor-pointer">
+                <BreadcrumbLink
+                  onClick={() => navigate('/modules')}
+                  className="cursor-pointer"
+                >
                   Modules
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{currentModule?.name ?? moduleId.toUpperCase()}</BreadcrumbPage>
+                <BreadcrumbPage>
+                  {currentModule?.name ?? moduleId.toUpperCase()}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

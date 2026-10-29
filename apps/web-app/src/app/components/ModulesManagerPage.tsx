@@ -39,9 +39,12 @@ function getModuleIcon(id: string) {
 
 export function ModulesManagerPage() {
   const { navigate } = useNavigation();
-  const { allModules, isModuleActive, activateModule, deactivateModule } = useModules();
+  const { allModules, isModuleActive, activateModule, deactivateModule } =
+    useModules();
   const [query, setQuery] = useState('');
-  const [filterTab, setFilterTab] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filterTab, setFilterTab] = useState<'all' | 'active' | 'inactive'>(
+    'all',
+  );
   const [mutatingId, setMutatingId] = useState<string | null>(null);
 
   const filteredModules = useMemo(() => {
@@ -54,7 +57,9 @@ export function ModulesManagerPage() {
       const q = query.toLowerCase();
       const inName = mod.name.toLowerCase().includes(q);
       const inDesc = mod.description.toLowerCase().includes(q);
-      const inTags = mod.subFeatures.some((f) => f.label.toLowerCase().includes(q));
+      const inTags = mod.subFeatures.some((f) =>
+        f.label.toLowerCase().includes(q),
+      );
       return inName || inDesc || inTags;
     });
   }, [allModules, isModuleActive, filterTab, query]);
@@ -79,7 +84,10 @@ export function ModulesManagerPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
+            <BreadcrumbLink
+              onClick={() => navigate('/')}
+              className="cursor-pointer"
+            >
               Home
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -98,7 +106,8 @@ export function ModulesManagerPage() {
             Business Modules
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Browse, activate, and manage modular business applications for your organization.
+            Browse, activate, and manage modular business applications for your
+            organization.
           </p>
         </div>
       </div>
@@ -113,7 +122,12 @@ export function ModulesManagerPage() {
           />
         </div>
 
-        <Tabs value={filterTab} onValueChange={(val) => setFilterTab(val as 'all' | 'active' | 'inactive')}>
+        <Tabs
+          value={filterTab}
+          onValueChange={(val) =>
+            setFilterTab(val as 'all' | 'active' | 'inactive')
+          }
+        >
           <TabsList>
             <TabsTab value="all">All Modules</TabsTab>
             <TabsTab value="active">Active</TabsTab>
@@ -141,8 +155,13 @@ export function ModulesManagerPage() {
                     </IconTile>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-base font-bold text-foreground">{mod.name}</h2>
-                        <Badge variant="outline" className="text-[10px] font-mono">
+                        <h2 className="text-base font-bold text-foreground">
+                          {mod.name}
+                        </h2>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] font-mono"
+                        >
                           v{mod.version}
                         </Badge>
                       </div>
@@ -152,7 +171,10 @@ export function ModulesManagerPage() {
                     </div>
                   </div>
 
-                  <Badge variant={active ? 'success' : 'secondary'} dot={active}>
+                  <Badge
+                    variant={active ? 'success' : 'secondary'}
+                    dot={active}
+                  >
                     {active ? 'ACTIVE' : 'INACTIVE'}
                   </Badge>
                 </div>
@@ -180,7 +202,13 @@ export function ModulesManagerPage() {
                   variant={active ? 'outline' : 'primary'}
                   size="sm"
                   loading={isPending}
-                  startIcon={active ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
+                  startIcon={
+                    active ? (
+                      <PowerOff className="size-3.5" />
+                    ) : (
+                      <Power className="size-3.5" />
+                    )
+                  }
                   onClick={() => void handleToggle(mod)}
                 >
                   {active ? 'Deactivate' : 'Activate Module'}

@@ -34,7 +34,13 @@ const MountainIllustration = (
     xmlns="http://www.w3.org/2000/svg"
     className="h-36 w-auto opacity-90 select-none pointer-events-none"
   >
-    <circle cx="260" cy="50" r="28" fill="currentColor" className="text-primary/10" />
+    <circle
+      cx="260"
+      cy="50"
+      r="28"
+      fill="currentColor"
+      className="text-primary/10"
+    />
     <path
       d="M50 180 L140 100 L210 145 L300 70 L390 150 L450 110 L450 180 Z"
       fill="currentColor"
@@ -164,8 +170,12 @@ export function EcosystemHome() {
               <LayoutGrid className="size-4.5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold tracking-tight text-foreground">Modules</h2>
-              <p className="text-xs text-muted-foreground">Core business applications to run your organization.</p>
+              <h2 className="text-lg font-bold tracking-tight text-foreground">
+                Modules
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Core business applications to run your organization.
+              </p>
             </div>
           </div>
           <Button
@@ -244,8 +254,12 @@ export function EcosystemHome() {
               <Puzzle className="size-4.5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold tracking-tight text-foreground">Plugins</h2>
-              <p className="text-xs text-muted-foreground">Productivity, integrations, and extensible tools.</p>
+              <h2 className="text-lg font-bold tracking-tight text-foreground">
+                Plugins
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Productivity, integrations, and extensible tools.
+              </p>
             </div>
           </div>
           <Button
@@ -306,7 +320,8 @@ export function EcosystemHome() {
                   {plugin.subFeatures.slice(0, 3).map((sub, idx) => (
                     <span key={sub.id} className="truncate">
                       {sub.label}
-                      {idx < Math.min(plugin.subFeatures.length, 3) - 1 && ' • '}
+                      {idx < Math.min(plugin.subFeatures.length, 3) - 1 &&
+                        ' • '}
                     </span>
                   ))}
                 </div>
@@ -349,11 +364,16 @@ export function EcosystemHome() {
               </div>
               <div className="space-y-0.5 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-foreground">System Update</span>
-                  <Badge variant="default" className="text-[10px] py-0 px-1.5">NEW</Badge>
+                  <span className="text-xs font-semibold text-foreground">
+                    System Update
+                  </span>
+                  <Badge variant="default" className="text-[10px] py-0 px-1.5">
+                    NEW
+                  </Badge>
                 </div>
                 <p className="text-[11px] text-muted-foreground line-clamp-2">
-                  Platform v1.2.0 is now live with separated business modules and extensible plugins.
+                  Platform v1.2.0 is now live with separated business modules
+                  and extensible plugins.
                 </p>
               </div>
             </div>
@@ -363,9 +383,12 @@ export function EcosystemHome() {
                 <AlertTriangle className="size-4" />
               </div>
               <div className="space-y-0.5 min-w-0">
-                <span className="text-xs font-semibold text-foreground">Maintenance Window</span>
+                <span className="text-xs font-semibold text-foreground">
+                  Maintenance Window
+                </span>
                 <p className="text-[11px] text-muted-foreground line-clamp-2">
-                  Scheduled database maintenance on Sunday 02:00 UTC. Zero downtime expected.
+                  Scheduled database maintenance on Sunday 02:00 UTC. Zero
+                  downtime expected.
                 </p>
               </div>
             </div>

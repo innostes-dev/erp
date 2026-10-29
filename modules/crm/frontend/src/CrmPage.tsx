@@ -30,7 +30,9 @@ export function CrmPage() {
           <div className="flex items-center gap-3">
             <span>{crmManifest.name}</span>
             <Badge variant="outline">Module Scaffold</Badge>
-            <Badge variant="success" dot>Active</Badge>
+            <Badge variant="success" dot>
+              Active
+            </Badge>
           </div>
         }
         description={crmManifest.description}
@@ -44,7 +46,10 @@ export function CrmPage() {
       />
 
       {/* Sub-feature Tabs */}
-      <Tabs value={activeTab} onValueChange={(val) => setActiveTab(String(val))}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => setActiveTab(String(val))}
+      >
         <TabsList>
           {crmManifest.subFeatures.map((sub: SubFeature) => (
             <TabsTab key={sub.id} value={sub.id}>
@@ -64,7 +69,11 @@ export function CrmPage() {
                 <Button size="sm" onClick={() => setActiveTab('leads')}>
                   View Leads
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setActiveTab('pipeline')}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setActiveTab('pipeline')}
+                >
                   Kanban Pipeline
                 </Button>
               </div>

@@ -14,13 +14,7 @@ import {
   TabsList,
   TabsTab,
 } from '@innostes/ui';
-import {
-  Puzzle,
-  Activity,
-  ArrowRight,
-  Power,
-  PowerOff,
-} from 'lucide-react';
+import { Puzzle, Activity, ArrowRight, Power, PowerOff } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { usePlugins } from '../context/PluginsContext';
 import type { CatalogItem } from '../catalog';
@@ -36,9 +30,12 @@ function getPluginIcon(id: string) {
 
 export function PluginsManagerPage() {
   const { navigate } = useNavigation();
-  const { allPlugins, isPluginActive, activatePlugin, deactivatePlugin } = usePlugins();
+  const { allPlugins, isPluginActive, activatePlugin, deactivatePlugin } =
+    usePlugins();
   const [query, setQuery] = useState('');
-  const [filterTab, setFilterTab] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filterTab, setFilterTab] = useState<'all' | 'active' | 'inactive'>(
+    'all',
+  );
   const [mutatingId, setMutatingId] = useState<string | null>(null);
 
   const filteredPlugins = useMemo(() => {
@@ -51,7 +48,9 @@ export function PluginsManagerPage() {
       const q = query.toLowerCase();
       const inName = plugin.name.toLowerCase().includes(q);
       const inDesc = plugin.description.toLowerCase().includes(q);
-      const inTags = plugin.subFeatures.some((f) => f.label.toLowerCase().includes(q));
+      const inTags = plugin.subFeatures.some((f) =>
+        f.label.toLowerCase().includes(q),
+      );
       return inName || inDesc || inTags;
     });
   }, [allPlugins, isPluginActive, filterTab, query]);
@@ -76,7 +75,10 @@ export function PluginsManagerPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
+            <BreadcrumbLink
+              onClick={() => navigate('/')}
+              className="cursor-pointer"
+            >
               Home
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -95,7 +97,8 @@ export function PluginsManagerPage() {
             Plugins & Tools
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Discover, activate, and configure extensible developer, productivity, and system plugins.
+            Discover, activate, and configure extensible developer,
+            productivity, and system plugins.
           </p>
         </div>
       </div>
@@ -110,7 +113,12 @@ export function PluginsManagerPage() {
           />
         </div>
 
-        <Tabs value={filterTab} onValueChange={(val) => setFilterTab(val as 'all' | 'active' | 'inactive')}>
+        <Tabs
+          value={filterTab}
+          onValueChange={(val) =>
+            setFilterTab(val as 'all' | 'active' | 'inactive')
+          }
+        >
           <TabsList>
             <TabsTab value="all">All Plugins</TabsTab>
             <TabsTab value="active">Active</TabsTab>
@@ -138,8 +146,13 @@ export function PluginsManagerPage() {
                     </IconTile>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 className="text-base font-bold text-foreground">{plugin.name}</h2>
-                        <Badge variant="outline" className="text-[10px] font-mono">
+                        <h2 className="text-base font-bold text-foreground">
+                          {plugin.name}
+                        </h2>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] font-mono"
+                        >
                           v{plugin.version}
                         </Badge>
                       </div>
@@ -149,7 +162,10 @@ export function PluginsManagerPage() {
                     </div>
                   </div>
 
-                  <Badge variant={active ? 'success' : 'secondary'} dot={active}>
+                  <Badge
+                    variant={active ? 'success' : 'secondary'}
+                    dot={active}
+                  >
                     {active ? 'ACTIVE' : 'INACTIVE'}
                   </Badge>
                 </div>
@@ -177,7 +193,13 @@ export function PluginsManagerPage() {
                   variant={active ? 'outline' : 'primary'}
                   size="sm"
                   loading={isPending}
-                  startIcon={active ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
+                  startIcon={
+                    active ? (
+                      <PowerOff className="size-3.5" />
+                    ) : (
+                      <Power className="size-3.5" />
+                    )
+                  }
                   onClick={() => void handleToggle(plugin)}
                 >
                   {active ? 'Deactivate' : 'Activate Plugin'}
