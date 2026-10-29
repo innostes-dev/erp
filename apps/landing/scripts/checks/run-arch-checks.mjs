@@ -58,9 +58,9 @@ async function main() {
     console.log('   ✓ ADR checks passed.');
   }
 
-  // Gate 4: arc42 Coverage Map (Report mode)
-  console.log('\n4. Checking arc42 12-section coverage...');
-  const arc42Result = runArc42CoverageCheck({ enforceAll: false });
+  // Gate 4: arc42 Coverage Map (Enforce mode)
+  console.log('\n4. Checking arc42 12-section coverage (enforce mode)...');
+  const arc42Result = runArc42CoverageCheck({ enforceAll: true });
   console.log(`   Covered ${arc42Result.coveredCount}/12 arc42 sections.`);
   for (const w of arc42Result.warnings) {
     console.log(`   ℹ ${w.message}`);

@@ -1,0 +1,48 @@
+---
+title: Risks and Technical Debt
+description: Architectural risk register, technical debt backlog, impact scoring, and remediation roadmaps.
+icon: AlertTriangle
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 11
+---
+
+The **Risks and Technical Debt** log (arc42 §11) records known architectural trade-offs, security exposures, and structural debt items across Innostes ERP. Each entry is assigned an owner, an impact rating, and a clear remediation strategy.
+
+---
+
+## 1. Risk Assessment Methodology
+
+Risks are assessed using a standard qualitative matrix:
+- **Likelihood**: Low (unlikely to occur), Medium (possible in normal operations), High (frequent or trivial to exploit).
+- **Impact**: Low (minor inconvenience), Medium (degraded service or technical debt), High (data breach, platform downtime, or compliance violation).
+
+---
+
+## 2. Architectural Risk Register
+
+| ID | Title & Description | Category | Likelihood | Impact | Consequences | Mitigation / Remediation Plan | Owner | Status | Related Artifacts |
+|:---|:---|:---:|:---:|:---:|:---|:---|:---:|:---:|:---|
+| **RISK-001** | **Application-Layer Multi-Tenancy Reliance**<br/>Tenant isolation is enforced strictly at the Python service layer via `BaseService` filtering (`WHERE tenant_id = :t`). | Security | Low | **High** | A developer writing a custom raw SQL query that omits tenant scoping could accidentally expose cross-tenant data. | Implement PostgreSQL Row-Level Security (RLS) policies as defense-in-depth (`ADR-0017`). | Security Architecture Lead | Accepted (Planned) | `ARC-015`, `TM-002`, [ADR-0017](/docs/architecture/decisions/0017-database-row-level-security) |
+| **RISK-002** | **Absence of IP-based Edge Rate Limiting**<br/>Public authentication endpoints (`/auth/login`, `/auth/reset-password/request`) lack global IP-based rate limiting in local application code. | Security | Medium | Medium | Adversaries could launch distributed credential stuffing attacks, consuming server CPU through repeated bcrypt evaluations. | Enforce rate limiting at the reverse proxy or WAF tier (e.g. Nginx `limit_req` or Cloudflare WAF). | Site Reliability Engineer | Open | `ARC-014`, `TM-005` |
+| **RISK-003** | **Compile-Time UI Module Coupling**<br/>`apps/web-app` imports business module manifests statically from `@innostes/crm` and `@innostes/hrms` in `catalog.ts`. | Architecture | High | Low | UI engine cannot be deployed completely independently of business modules; increases initial bundle size. | Transition to dynamic runtime manifest loading via `GET /tenants/current/modules` (`ADR-0018`). | Frontend Lead | Accepted (Planned) | `ARC-004`, [ADR-0018](/docs/architecture/decisions/0018-dynamic-frontend-module-manifests) |
+| **RISK-004** | **Unbuilt Regulatory Data Retention Purging**<br/>The platform retains all soft-deleted records indefinitely without automated statutory data purging routines. | Compliance | Low | Medium | Storage volume grows unbounded over time; potential conflict with "right to be forgotten" under GDPR/DPDP. | Establish an automated lifecycle background worker that purges records older than statutory limits (e.g. 7 years). | Compliance Officer | Open | `AUDIT.md:290` |
+| **RISK-005** | **Multi-Region Cross-Branch Latency**<br/>Single-region PostgreSQL cluster deployed in Bengaluru may incur high network latency for international distribution branches. | Scalability | Medium | Medium | Remote branch offices may experience degraded UI responsiveness during heavy ERP transactional entry. | Implement read replicas in regional clouds and optimize payload sizes with HTTP/2 and caching. | Infrastructure Lead | Open | [Goals §3](/docs/architecture/goals) |
+
+---
+
+## 3. Technical Debt Backlog
+
+| ID | Title & Description | Category | Impact | Remediation Strategy | Owner | Status | Related Artifacts |
+|:---|:---|:---:|:---:|:---|:---:|:---:|:---|
+| **DEBT-001** | **Kernel Feature Circular Dependencies**<br/>Bidirectional imports between `tenancy`, `user`, `auth`, and `setup` in `kernel/backend/`. | Maintainability | Medium | Refactor shared abstractions (such as user credential lookups during setup) into `kernel.core` interfaces. Narrow exceptions documented in `.importlinter`. | Core Backend Lead | Recorded (Exceptions Granted) | `ARC-002`, [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter) (`contracts.5`) |
+| **DEBT-002** | **Granular Endpoint Permission Gating**<br/>Certain module endpoints rely solely on tenant membership verification rather than granular permission codes (e.g. `crm:leads:delete`). | Security | Low | Introduce `@require_permission(...)` decorator dependencies across all domain module routes. | Platform Security Lead | Open | `ARC-003`, [Cross-cutting §2](/docs/architecture/cross-cutting#2-authorisation-role-based-access-control-rbac) |
+| **DEBT-003** | **Setup Gating Token Cache Synchronization**<br/>`is_installed_cached()` uses an in-memory boolean flag. On multi-instance deployments, setup completion requires cache invalidation across all replicas. | Operability | Low | Use Redis Pub/Sub or short TTL database polling (e.g. 5 seconds) to propagate installation completion across horizontally scaled pods. | Site Reliability Engineer | Open | [ADR-0014](/docs/architecture/decisions/0014-first-run-setup-gate) |
+
+---
+
+## Related Documentation
+
+- [Quality Requirements](/docs/architecture/quality-requirements) — Measurable ISO/IEC 25010 scenarios.
+- [STRIDE Threat Model](/docs/architecture/threat-model) — Threat analysis and code mitigations.
+- [Architecture Decision Log](/docs/architecture/decisions) — Formal MADR 4.x decision records.

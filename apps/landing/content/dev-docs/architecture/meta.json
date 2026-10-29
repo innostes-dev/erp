@@ -16,6 +16,10 @@
     "threat-model",
     "---Decisions---",
     "...decisions",
+    "---Governance & Quality---",
+    "quality-requirements",
+    "risks-and-technical-debt",
+    "glossary",
     "plugins",
     "kernel",
     "setup"

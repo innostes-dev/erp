@@ -251,3 +251,27 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
 **Open issues**:
 - Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
+
+## 10 – Quality scenarios, risk register and glossary – 2026-10-29
+**Summary**: Authored arc42 sections 10–12 completing full arc42 framework coverage:
+1. Created `apps/landing/content/dev-docs/architecture/quality-requirements.mdx` (arc42 §10):
+   - Rendered ISO/IEC 25010 Quality Tree using Mermaid flowchart diagram across Modifiability, Security, Maintainability, and Operability.
+   - Authored 8 concrete six-part quality scenarios (source, stimulus, artefact, environment, response, response measure) with automated verification mechanisms.
+2. Created `apps/landing/content/dev-docs/architecture/risks-and-technical-debt.mdx` (arc42 §11):
+   - Authored formal Architectural Risk Register with 5 scored items (`RISK-001` through `RISK-005`) covering application-layer tenancy, edge rate limiting, UI coupling, and statutory data retention.
+   - Authored Technical Debt Backlog with 3 tracked items (`DEBT-001` through `DEBT-003`) including the feature circular dependency exceptions in `.importlinter` (`ARC-002`).
+3. Created `apps/landing/content/dev-docs/architecture/glossary.mdx` (arc42 §12):
+   - Defined 18 canonical platform terms with precise codebase mappings and British English spellings.
+4. Switched arc42 coverage gate to **enforce mode** in `apps/landing/scripts/checks/run-arch-checks.mjs`:
+   - Verified 100% coverage (12/12 arc42 sections covered).
+5. Updated `apps/landing/content/dev-docs/architecture/meta.json` with the new pages.
+**Changed**: `apps/landing/content/dev-docs/architecture/quality-requirements.mdx`, `risks-and-technical-debt.mdx`, `glossary.mdx`, `meta.json`, `run-arch-checks.mjs`, `PROGRESS.md`, `10-quality-risks-glossary.md` deleted.
+**Code changes**: Switched `runArc42CoverageCheck` to `{ enforceAll: true }`.
+**Decisions**:
+- Enforced 12/12 arc42 section completeness across the documentation suite.
+**Verification**:
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed, 12/12 arc42 sections enforced, 42 architecture pages verified).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
+**Open issues**:
+- None blocking. All risks and debt items are catalogued with designated owners in `risks-and-technical-debt.mdx`.

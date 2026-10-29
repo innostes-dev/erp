@@ -1,0 +1,102 @@
+---
+title: Architecture Glossary
+description: Canonical definitions, terminology standards, and codebase mappings for Innostes ERP.
+icon: BookMarked
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 12
+---
+
+The **Architecture Glossary** (arc42 §12) standardises canonical terminology and domain definitions across the Innostes ERP platform. All technical documentation, code comments, and architecture decision records adhere strictly to the definitions below.
+
+---
+
+## Canonical Terms & Codebase Mappings
+
+### Access Token
+A short-lived, cryptographically signed JSON Web Token (JWT) issued to an authenticated user or client. In Innostes ERP, access tokens expire in 30 minutes and contain claims identifying the user UUID (`sub`), active tenant UUID (`tenant_id`), session UUID (`session_id`), and assigned role names (`roles`).  
+*Code Reference*: [`kernel.core.security.jwt`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/security/jwt.py)  
+*Related ADR*: [ADR-0010](/docs/architecture/decisions/0010-jwt-access-rotating-refresh-tokens)
+
+### API Server
+The backend execution engine implemented in FastAPI and Uvicorn. The API server contains no business domain logic of its own; it manages application lifecycles, database connection pools, middleware pipelines, and hosts discovered plug-in modules.  
+*Code Reference*: [`apps/api-server`](/docs/apps/api-server)  
+*Related ADR*: [ADR-0002](/docs/architecture/decisions/0002-fastapi-backend-engine)
+
+### Audit Columns
+Standardised metadata columns present on every persistent entity, recording the exact creation and mutation history: `created_at` (UTC), `created_by` (Actor UUID), `updated_at` (UTC), and `updated_by` (Actor UUID).  
+*Code Reference*: [`kernel.core.database.mixins.AuditMixin`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/database/mixins.py)  
+*Related ADR*: [ADR-0009](/docs/architecture/decisions/0009-standardised-audit-columns)
+
+### BaseModule
+The abstract Python contract that every backend plug-in must subclass. A `BaseModule` defines the module's unique name, semantic version, router endpoints, OpenAPI documentation tags, startup/shutdown lifecycle hooks, and health check diagnostics.  
+*Code Reference*: [`kernel.core.module.BaseModule`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/module/base.py)  
+*Related ADR*: [ADR-0001](/docs/architecture/decisions/0001-engine-plugin-inversion)
+
+### Business Module
+A domain-specific feature package providing commercial enterprise capabilities (such as HRMS or CRM). Business modules are authored as independent Python packages in `modules/<name>/backend` and pnpm workspace packages in `modules/<name>/frontend`.  
+*Code Reference*: `modules/hrms`, `modules/crm`
+
+### Engine
+A plumbing runtime application (`apps/api-server` or `apps/web-app`) responsible purely for infrastructure, hosting, routing, and lifecycle orchestration. Engines contain zero business capabilities.
+
+### Kernel
+The foundational plug-in ("the first plug-in") providing core platform infrastructure, authentication, database connection engines, user identity management, multi-tenancy, and first-run setup.  
+*Code Reference*: `kernel/backend`, `kernel/frontend` (`@innostes/kernel`)
+
+### Personal API Key
+A high-entropy, permanent programmatic credential (prefixed with `inno_live_...`) issued to developers or external systems for machine-to-machine authentication. Keys are stored as salted SHA-256 hashes in `api_keys`.  
+*Code Reference*: [`kernel.auth.models.ApiKey`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/auth/models.py)
+
+### Plug-in (or Plugin)
+An extensible software package that registers with the platform without modifying engine source code. Can refer to core features (`kernel.*`), business modules (`modules/*`), or extensible developer plugins (`plugins/*` such as `api-logger`).  
+*Code Reference*: [The Plug-in Contract](/docs/architecture/plugin-contract)
+
+### Refresh Token
+A cryptographically secure, 64-character single-use credential with a 7-day lifespan. Used to obtain fresh access tokens without requiring the user to re-enter their credentials.  
+*Code Reference*: [`kernel.auth.services.AuthService`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/auth/services/auth_service.py)  
+*Related ADR*: [ADR-0015](/docs/architecture/decisions/0015-single-use-rotating-refresh-family)
+
+### Role-Based Access Control (RBAC)
+An authorization mechanism where individual system permissions are bundled into roles, and roles are assigned to users within the context of a specific tenant.  
+*Code Reference*: [`kernel.user.models`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/user/models/)
+
+### Setup Gate
+The architectural barrier implemented by `SetupRequiredMiddleware` on the backend and `<SetupGate>` on the frontend. Halts normal platform operation and displays the installation wizard until initial organisation setup is completed.  
+*Code Reference*: [`kernel.setup.middleware.SetupRequiredMiddleware`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/setup/middleware.py)  
+*Related ADR*: [ADR-0014](/docs/architecture/decisions/0014-first-run-setup-gate)
+
+### Setup Token
+A 256-bit cryptographically generated one-time secret stored in `var/setup-token` or configured via `SETUP_TOKEN`. Required in the `X-Setup-Token` header to authorise initial platform installation.  
+*Code Reference*: [`kernel.setup.services.token.TokenService`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/setup/services/token.py)
+
+### Soft Delete
+A data management strategy where deletion operations set `deleted_at` (UTC timestamp) and `deleted_by` (Actor UUID) rather than executing physical SQL `DELETE` queries. Soft-deleted records are automatically excluded from default queries.  
+*Code Reference*: [`kernel.core.database.mixins.SoftDeleteMixin`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/database/mixins.py)  
+*Related ADR*: [ADR-0008](/docs/architecture/decisions/0008-universal-soft-delete)
+
+### Tenant
+An isolated customer organisation or corporate legal entity within the Innostes ERP platform. All transactional and business data is strictly partitioned by `tenant_id`.  
+*Code Reference*: [`kernel.tenancy.models.Tenant`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/tenancy/models.py)
+
+### Tenant Member
+A record binding an individual enterprise user to a tenant organization, specifying their status (`ACTIVE`, `SUSPENDED`) and membership role.  
+*Code Reference*: [`kernel.tenancy.models.TenantMember`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/tenancy/models.py)
+
+### Token Family Rotation
+A security pattern where each refresh token belongs to a parent token family UUID. When a refresh token is used, a new child token is issued. If a previously-revoked refresh token is presented, the system detects a token replay attack and revokes the entire family.  
+*Code Reference*: [`kernel.auth.services.AuthService.rotate_refresh_token`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/auth/services/auth_service.py)  
+*Related ADR*: [ADR-0015](/docs/architecture/decisions/0015-single-use-rotating-refresh-family)
+
+### Web App
+The client-side UI Single Page Application built on React 19, Vite, and Tailwind CSS. Mounts the platform shell, provides client-side routing, and hosts frontend plug-in manifests.  
+*Code Reference*: [`apps/web-app`](/docs/apps/web-app)  
+*Related ADR*: [ADR-0003](/docs/architecture/decisions/0003-react-vite-ui-engine)
+
+---
+
+## Related Documentation
+
+- [Introduction & Goals](/docs/architecture/goals) — Business requirements and quality goals.
+- [Building Block View](/docs/architecture/building-blocks) — System decompositions and module contracts.
+- [Cross-cutting Concepts](/docs/architecture/cross-cutting) — Universal standards and architectural mechanisms.
