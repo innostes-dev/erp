@@ -11072,7 +11072,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Executive Dashboard →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">Layout & Viz</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">Layout & Viz</span>
       </div>
       <p className="text-sm text-muted-foreground">
         Dual-tier AppRail and Sidebar navigation, TopBar, MetricCards with Indian numbering, and Cartesian charts.
@@ -11092,7 +11092,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Setup Wizard →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-chart-1/10 text-chart-1 font-medium">Onboarding</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">Onboarding</span>
       </div>
       <p className="text-sm text-muted-foreground">
         Multi-step tenant configuration flow with brand features panel, Stepper, locale selects, and error validation.
@@ -11112,7 +11112,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Invoice Registry →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">DataTable</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">DataTable</span>
       </div>
       <p className="text-sm text-muted-foreground">
         High-density tax invoice table with debounced search, status segmentation, row selection, and batch actions.
@@ -11132,7 +11132,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Invoice Detail & Settlement →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning font-medium">Audit & Review</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">Audit & Review</span>
       </div>
       <p className="text-sm text-muted-foreground">
         Transactional invoice review with PageHeader breadcrumbs, fiscal metrics, itemised table, ChangeLog, and AlertDialog.
@@ -11152,7 +11152,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Employee Directory →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-chart-2/10 text-chart-2 font-medium">Master-Detail</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">Master-Detail</span>
       </div>
       <p className="text-sm text-muted-foreground">
         Master-detail screen with desktop SplitPane resizer, mobile Sheet drawer, departmental TreeView, and profile cards.
@@ -11172,7 +11172,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Tenant Preferences →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">Form Layout</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">Form Layout</span>
       </div>
       <p className="text-sm text-muted-foreground">
         Multi-section administration console with FormSection, FormGrid, Switches, Selects, and sticky unsaved-changes bar.
@@ -11192,7 +11192,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Roles & Permissions →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">Access Control</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">Access Control</span>
       </div>
       <p className="text-sm text-muted-foreground">
         RBAC security policy management with role listings, member headcounts, and PermissionMatrix with bulk toggles.
@@ -11212,7 +11212,7 @@ Explore full-screen enterprise reference screens built with `@innostes/ui`. Each
             Hiring Pipeline →
           </a>
         </h3>
-        <span className="text-xs px-2 py-0.5 rounded-full bg-chart-4/10 text-chart-4 font-medium">Kanban</span>
+        <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted font-medium text-foreground">Kanban</span>
       </div>
       <p className="text-sm text-muted-foreground">
         Multi-stage talent recruitment pipeline with KanbanBoard, drag-and-drop moves, CTC tags, and candidate Sheet drawer.
@@ -15562,13 +15562,13 @@ Visit `http://localhost:3000/ui/docs` to preview documentation changes live.
 
 Every new or modified component must satisfy the following criteria:
 
-- [ ] **Base UI foundation**: Built on unstyled Base UI primitives wherever applicable, preserving keyboard focus loops and ARIA attributes.
-- [ ] **Logical styling**: Uses Tailwind CSS v4 design tokens and logical directional properties (`ps-`, `pe-`, `start-`, `end-`) rather than absolute left/right coordinates.
-- [ ] **Accessibility (a11y)**: Conforms to WCAG 2.1 AA standards, provides default ARIA roles, and supports full keyboard navigation (Enter, Space, Tab, and Arrow keys).
-- [ ] **Right-to-Left (RTL)**: Tested and verified under RTL layout direction (`dir="rtl"`).
-- [ ] **Complete TSDoc**: All exported components and prop interfaces feature full British English docstrings with default values and usage notes.
-- [ ] **Multi-runtime test coverage**: Accompanied by Vitest unit tests covering rendering, keyboard interaction, and accessibility attributes. Tests must pass across React 17, 18, and 19.
-- [ ] **Documentation & demo**: Accompanied by a 7-section documentation page under `apps/landing/content/docs/` and an interactive demo in `apps/landing/components/demos/`.
+- **Base UI foundation**: Built on unstyled Base UI primitives wherever applicable, preserving keyboard focus loops and ARIA attributes.
+- **Logical styling**: Uses Tailwind CSS v4 design tokens and logical directional properties (`ps-`, `pe-`, `start-`, `end-`) rather than absolute left/right coordinates.
+- **Accessibility (a11y)**: Conforms to WCAG 2.1 AA standards, provides default ARIA roles, and supports full keyboard navigation (Enter, Space, Tab, and Arrow keys).
+- **Right-to-Left (RTL)**: Tested and verified under RTL layout direction (`dir="rtl"`).
+- **Complete TSDoc**: All exported components and prop interfaces feature full British English docstrings with default values and usage notes.
+- **Multi-runtime test coverage**: Accompanied by Vitest unit tests covering rendering, keyboard interaction, and accessibility attributes. Tests must pass across React 17, 18, and 19.
+- **Documentation & demo**: Accompanied by a 7-section documentation page under `apps/landing/content/docs/` and an interactive demo in `apps/landing/components/demos/`.
 
 ---
 

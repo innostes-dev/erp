@@ -168,7 +168,7 @@ export default function InvoiceListExample() {
               }
             }}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full" aria-label="Filter by invoice status">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>

@@ -73,7 +73,7 @@ export default function FormLayoutDemo() {
                 13:00 instead of 1:00 PM
               </span>
             </span>
-            <Switch defaultChecked />
+            <Switch defaultChecked aria-label="Use 24-hour time" />
           </label>
         </FormGrid>
       </FormSection>

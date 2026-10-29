@@ -155,7 +155,7 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
                   'text-sm font-medium',
                   status === 'current' && 'text-primary',
                   status === 'upcoming' && 'text-foreground/80',
-                  status === 'error' && 'text-destructive',
+                  status === 'error' && 'text-red-600 dark:text-red-400',
                   // On narrow containers only the current step's title stays visible.
                   !vertical && status !== 'current' && '@max-xl:sr-only',
                   classNames?.title,

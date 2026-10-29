@@ -11,11 +11,23 @@
     "docs-check": "node scripts/checks/run-all.mjs",
     "llms": "node scripts/generate-llms.mjs",
     "demos": "node scripts/generate-demo-registry.mjs",
-    "tokens": "node scripts/generate-tokens-data.mjs"
+    "tokens": "node scripts/generate-tokens-data.mjs",
+    "test:e2e": "playwright test"
   },
   "nx": {
     "name": "landing",
     "targets": {
+      "docs-e2e": {
+        "dependsOn": [
+          "^build",
+          "build"
+        ],
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "playwright test",
+          "cwd": "apps/landing"
+        }
+      },
       "docs-check": {
         "dependsOn": [
           "^build"

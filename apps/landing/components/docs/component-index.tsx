@@ -69,7 +69,7 @@ export function ComponentIndex() {
     });
 
   return (
-    <div data-slot="component-index" className="not-prose my-8 overflow-x-auto rounded-lg border border-border bg-card">
+    <div tabIndex={0} role="region" aria-label="Component index catalog" data-slot="component-index" className="not-prose my-8 overflow-x-auto rounded-lg border border-border bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
       <table className="w-full text-left text-xs">
         <thead>
           <tr className="border-b border-border bg-muted/40 text-muted-foreground">

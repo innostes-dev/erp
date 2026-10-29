@@ -60,7 +60,7 @@ export const UserMenu = forwardRef<HTMLButtonElement, UserMenuProps>(function Us
   ref,
 ) {
   const avatar = (
-    <Avatar size="sm" className={classNames?.avatar}>
+    <Avatar size="sm" aria-hidden="true" className={classNames?.avatar}>
       {avatarSrc && <AvatarImage src={avatarSrc} alt="" />}
       <AvatarFallback>{initials ?? initialsOf(name)}</AvatarFallback>
     </Avatar>
@@ -71,7 +71,6 @@ export const UserMenu = forwardRef<HTMLButtonElement, UserMenuProps>(function Us
       <BaseMenu.Trigger
         ref={ref}
         data-slot="user-menu-trigger"
-        aria-label={`Account menu for ${name}`}
         className={cn(
           'inline-flex max-w-full shrink-0 cursor-pointer items-center gap-2.5 rounded-lg p-1 text-start transition-colors outline-none',
           'hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring data-popup-open:bg-accent',
@@ -80,17 +79,19 @@ export const UserMenu = forwardRef<HTMLButtonElement, UserMenuProps>(function Us
         )}
       >
         {avatar}
-        {showDetails && (
-          <span className="flex min-w-0 flex-col max-sm:hidden">
+        {showDetails ? (
+          <span className="flex min-w-0 flex-col max-sm:sr-only">
             <span data-slot="user-menu-name" className={cn('truncate text-sm leading-tight font-semibold', classNames?.name)}>
               {name}
             </span>
             {subtitle && (
-              <span data-slot="user-menu-subtitle" className={cn('truncate text-xs leading-tight text-muted-foreground', classNames?.subtitle)}>
+              <span aria-hidden="true" data-slot="user-menu-subtitle" className={cn('truncate text-xs leading-tight text-muted-foreground', classNames?.subtitle)}>
                 {subtitle}
               </span>
             )}
           </span>
+        ) : (
+          <span className="sr-only">{name ?? 'Account menu'}</span>
         )}
         {showDetails && <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground max-sm:hidden" />}
       </BaseMenu.Trigger>

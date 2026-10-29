@@ -83,7 +83,7 @@ export default function HiringPipelineExample() {
       </div>
 
       {/* Kanban Board */}
-      <div className="overflow-x-auto pb-4">
+      <div tabIndex={0} role="region" aria-label="Kanban board horizontal scroll" className="overflow-x-auto pb-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
         <KanbanBoard
           aria-label="Recruitment candidate pipeline"
           value={columns}

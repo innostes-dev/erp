@@ -64,6 +64,10 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>(
       <BaseProgress.Root
         ref={ref}
         data-slot="progress"
+        aria-label={
+          props['aria-label'] ??
+          (typeof label === 'string' ? label : 'Progress')
+        }
         value={value}
         min={min}
         max={max}

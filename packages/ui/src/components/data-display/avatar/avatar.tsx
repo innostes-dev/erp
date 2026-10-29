@@ -73,6 +73,7 @@ export const AvatarFallback = forwardRef<
     <BaseAvatar.Fallback
       ref={ref}
       data-slot="avatar-fallback"
+      aria-hidden="true"
       className={mergeClassName(
         'flex size-full items-center justify-center uppercase',
         className,

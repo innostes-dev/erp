@@ -24,7 +24,7 @@ export function ContrastTable() {
   const pairs = tokensData.contrastPairs as ContrastPair[];
 
   return (
-    <div className="not-prose my-8 overflow-x-auto rounded-lg border border-border bg-card">
+    <div tabIndex={0} role="region" aria-label="Design token contrast ratios" className="not-prose my-8 overflow-x-auto rounded-lg border border-border bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
       <table className="w-full text-left text-xs">
         <thead>
           <tr className="border-b border-border bg-muted/40 text-muted-foreground">
@@ -43,7 +43,7 @@ export function ContrastTable() {
               </td>
               <td className="py-2.5 px-3 font-mono text-[11px] text-muted-foreground whitespace-nowrap">
                 <span>{pair.textToken.replace('--color-', '')}</span>
-                <span className="mx-1 text-muted-foreground/60">on</span>
+                <span className="mx-1 text-muted-foreground font-sans">on</span>
                 <span>{pair.bgToken.replace('--color-', '')}</span>
               </td>
               <td className="py-2.5 px-3 whitespace-nowrap">

@@ -5,6 +5,7 @@ import { Skeleton } from '@innostes/ui';
 export default function SkeletonDemo() {
   return (
     <div
+      role="region"
       aria-busy="true"
       aria-label="Loading profile"
       className="flex w-full max-w-sm flex-col gap-4"

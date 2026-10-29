@@ -87,6 +87,7 @@ export const Gauge = forwardRef<HTMLDivElement, GaugeProps>(function Gauge(
   return (
     <BaseMeter.Root
       ref={ref}
+      aria-label={props['aria-label'] ?? (typeof label === 'string' ? label : 'Gauge meter')}
       data-slot="gauge"
       data-tone={resolvedTone}
       value={value}

@@ -103,17 +103,23 @@ export const AppRailItem = forwardRef<HTMLElement, AppRailItemProps>(function Ap
           isActive && 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground',
           className,
         ),
-        'aria-label': showLabel ? undefined : label,
+        'aria-label': showLabel
+          ? undefined
+          : badge !== undefined && badge > 0
+            ? `${badge > 99 ? '99+' : badge} ${label}`
+            : label,
         'aria-current': isActive ? 'page' : undefined,
         'data-active': isActive ? '' : undefined,
         'data-slot': 'app-rail-item',
         children: (
           <>
-            {icon}
+            <span aria-hidden="true" className="contents">
+              {icon}
+            </span>
             {showLabel && <span className="max-w-full truncate px-1 text-[0.6875rem] leading-tight font-medium">{label}</span>}
             {badge !== undefined && badge > 0 && (
               <span
-                aria-label={`${badge} new`}
+                aria-hidden="true"
                 className="absolute end-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[0.625rem] font-semibold text-destructive-foreground tabular-nums ring-2 ring-sidebar"
               >
                 {badge > 99 ? '99+' : badge}

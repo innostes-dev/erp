@@ -218,7 +218,7 @@ export const ChartFrame = forwardRef<HTMLElement, ChartFrameProps>(function Char
 ) {
   return (
     <figure ref={ref} data-slot="chart" aria-label={label} className={cn('m-0 flex w-full min-w-0 flex-col gap-3', className)} style={style}>
-      <div aria-hidden="true" className="w-full min-w-0" style={{ height }}>
+      <div className="w-full min-w-0" style={{ height }}>
         {children}
       </div>
       {legend}

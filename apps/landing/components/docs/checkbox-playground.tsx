@@ -35,6 +35,7 @@ export function CheckboxPlayground() {
             defaultChecked={values.defaultChecked}
             indeterminate={values.indeterminate}
             disabled={values.disabled}
+            aria-label="Include shipping tax in calculation"
           />
           <span>Include shipping tax in calculation</span>
         </label>

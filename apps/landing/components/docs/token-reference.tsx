@@ -35,7 +35,7 @@ export function TokenReference() {
               <p className="text-xs text-muted-foreground">{category.description}</p>
             </div>
 
-            <div className="overflow-x-auto rounded-lg border border-border bg-card">
+            <div tabIndex={0} role="region" aria-label={`${category.role} tokens`} className="overflow-x-auto rounded-lg border border-border bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 text-muted-foreground">

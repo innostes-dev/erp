@@ -68,9 +68,9 @@ export default function UiPage() {
   return (
     <main className="flex flex-1 flex-col">
       {/* Hero */}
-      <section className="border-b border-fd-border">
+      <section className="border-b border-fd-border overflow-hidden">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 md:py-28 lg:grid-cols-2">
-          <div>
+          <div className="min-w-0">
             <span className="inline-flex items-center gap-2 rounded-full border border-fd-border px-3 py-1 text-xs font-medium text-fd-muted-foreground">
               <Layers className="size-3.5" /> {uiName} · v{uiVersion}
             </span>
@@ -106,7 +106,7 @@ export default function UiPage() {
           </div>
 
           {/* Live sample */}
-          <div className="rounded-2xl border border-fd-border bg-fd-card p-6 shadow-sm">
+          <div className="min-w-0 rounded-2xl border border-fd-border bg-fd-card p-6 shadow-sm">
             <div className="mb-4 text-xs font-medium tracking-wide text-fd-muted-foreground uppercase">
               Live components
             </div>
@@ -167,9 +167,9 @@ export default function UiPage() {
       </section>
 
       {/* Tokens */}
-      <section className="border-y border-fd-border bg-fd-muted/50">
+      <section className="border-y border-fd-border bg-fd-muted/50 overflow-hidden">
         <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 lg:grid-cols-2">
-          <div>
+          <div className="min-w-0">
             <h2 className="text-3xl font-bold tracking-tight text-fd-foreground">
               Design tokens
             </h2>
@@ -177,7 +177,7 @@ export default function UiPage() {
               Components never use raw colours. They use semantic tokens with
               defaults from Tailwind's palette, so your theme always wins.
             </p>
-            <div className="mt-8 grid grid-cols-3 gap-3">
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {swatches.map((s) => (
                 <div
                   key={s.name}
@@ -191,7 +191,7 @@ export default function UiPage() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col gap-4">
+          <div className="flex min-w-0 flex-col gap-4">
             <SetupCard
               title="With Tailwind CSS"
               text="Components share your theme. Override any token."
@@ -255,7 +255,11 @@ function SetupCard({
     <div className="rounded-xl border border-fd-border bg-fd-card p-5">
       <h3 className="font-semibold text-fd-foreground">{title}</h3>
       <p className="mt-1 text-sm text-fd-muted-foreground">{text}</p>
-      <pre className="mt-4 overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100">
+      <pre
+        tabIndex={0}
+        aria-label={`${title} configuration snippet`}
+        className="mt-4 overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100 focus:outline-none focus:ring-1 focus:ring-fd-ring"
+      >
         {code}
       </pre>
     </div>

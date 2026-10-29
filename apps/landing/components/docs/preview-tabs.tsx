@@ -25,13 +25,9 @@ export function PreviewTabs({
     );
 
   return (
-    <div className="not-prose my-6 overflow-hidden rounded-xl border border-fd-border bg-fd-card">
-      <div
-        role="tablist"
-        aria-label="Example"
-        className="flex items-center justify-between border-b border-fd-border px-2"
-      >
-        <div className="flex">
+    <div data-slot="component-preview" className="not-prose my-6 overflow-hidden rounded-xl border border-fd-border bg-fd-card">
+      <div className="flex items-center justify-between border-b border-fd-border px-2">
+        <div role="tablist" aria-label="Example" className="flex">
           <button
             type="button"
             role="tab"
@@ -89,7 +85,7 @@ export function PreviewTabs({
           tab !== 'preview' && 'hidden',
         )}
       >
-        <div className={cn(isMobile ? 'mx-auto max-w-[360px] border-x border-dashed border-fd-border' : 'w-full')}>
+        <div className={cn('min-w-0 max-w-full overflow-hidden', isMobile ? 'mx-auto max-w-[360px] border-x border-dashed border-fd-border' : 'w-full')}>
           {preview}
         </div>
       </div>

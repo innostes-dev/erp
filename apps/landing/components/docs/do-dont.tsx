@@ -32,7 +32,7 @@ export function Do({ caption, children, className }: GuidelineProps) {
         className,
       )}
     >
-      <div className="flex items-center gap-2 border-b border-success/20 bg-success/10 px-4 py-2.5 text-xs font-semibold tracking-wider text-success uppercase">
+      <div className="flex items-center gap-2 border-b border-success/20 bg-success/10 px-4 py-2.5 text-xs font-semibold tracking-wider text-emerald-700 dark:text-emerald-400 uppercase">
         <Check className="size-4 shrink-0 stroke-[2.5]" aria-hidden="true" />
         <span>Do</span>
       </div>
@@ -57,7 +57,7 @@ export function Dont({ caption, children, className }: GuidelineProps) {
         className,
       )}
     >
-      <div className="flex items-center gap-2 border-b border-destructive/20 bg-destructive/10 px-4 py-2.5 text-xs font-semibold tracking-wider text-destructive uppercase">
+      <div className="flex items-center gap-2 border-b border-destructive/20 bg-destructive/10 px-4 py-2.5 text-xs font-semibold tracking-wider text-red-700 dark:text-red-400 uppercase">
         <X className="size-4 shrink-0 stroke-[2.5]" aria-hidden="true" />
         <span>Don't</span>
       </div>

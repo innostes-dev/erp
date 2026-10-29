@@ -23,12 +23,12 @@ export default function CheckboxGroupDemo() {
         id="permissions-label"
         className="flex items-center gap-2 text-sm font-medium"
       >
-        <Checkbox parent /> All permissions
+        <Checkbox parent aria-label="All permissions" /> All permissions
       </label>
       <div className="flex flex-col gap-3 ps-6">
         {permissions.map((p) => (
           <label key={p.value} className="flex items-center gap-2 text-sm">
-            <Checkbox value={p.value} /> {p.label}
+            <Checkbox value={p.value} aria-label={p.label} /> {p.label}
           </label>
         ))}
       </div>

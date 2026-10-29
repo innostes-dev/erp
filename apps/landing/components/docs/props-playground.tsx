@@ -220,7 +220,7 @@ export function PropsPlayground({
             )}
           </button>
         </div>
-        <pre className="mt-2 overflow-x-auto whitespace-pre font-mono text-xs text-fd-foreground">
+        <pre tabIndex={0} aria-label="Generated component code" className="mt-2 overflow-x-auto whitespace-pre font-mono text-xs text-fd-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
           <code>{code}</code>
         </pre>
       </div>

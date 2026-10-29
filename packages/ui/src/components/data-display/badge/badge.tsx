@@ -15,12 +15,14 @@ export const badgeVariants = cva(
         default: 'bg-primary text-primary-foreground',
         secondary: 'bg-secondary text-secondary-foreground',
         outline: 'border-border text-foreground',
-        success: 'bg-success/12 text-success ring-1 ring-success/25 ring-inset',
+        success:
+          'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 ring-1 ring-emerald-600/20 ring-inset',
         warning:
-          'bg-warning/15 text-warning-foreground ring-1 ring-warning/40 ring-inset',
+          'bg-amber-500/10 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 ring-1 ring-amber-600/20 ring-inset',
         destructive:
-          'bg-destructive/10 text-destructive ring-1 ring-destructive/25 ring-inset',
-        info: 'bg-info/10 text-info ring-1 ring-info/25 ring-inset',
+          'bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400 ring-1 ring-red-600/20 ring-inset',
+        info:
+          'bg-sky-500/10 text-sky-700 dark:bg-sky-500/15 dark:text-sky-400 ring-1 ring-sky-600/20 ring-inset',
       },
       size: {
         sm: 'h-5 px-1.5 text-[11px]',

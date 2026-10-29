@@ -155,15 +155,23 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
   return (
     <div
       ref={ref}
+      role="region"
+      aria-label={ariaLabel}
+      tabIndex={0}
       data-slot="permission-matrix"
-      className={cn('w-full overflow-x-auto rounded-lg border border-border', classNames?.root, className)}
+      className={cn(
+        'relative w-full max-w-full min-w-0 overflow-hidden rounded-lg border border-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+        classNames?.root,
+        className,
+      )}
       {...props}
     >
-      <table
-        aria-label={ariaLabel}
-        data-slot="permission-matrix-table"
-        className={cn('w-full border-collapse text-sm', classNames?.table)}
-      >
+      <div className="w-full max-w-full overflow-x-auto">
+        <table
+          aria-label={ariaLabel}
+          data-slot="permission-matrix-table"
+          className={cn('w-full border-collapse text-sm', classNames?.table)}
+        >
         <thead className={cn('bg-muted/50', stickyHeader && 'sticky top-0 z-20 bg-muted')}>
           <tr>
             <th
@@ -264,6 +272,7 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 });

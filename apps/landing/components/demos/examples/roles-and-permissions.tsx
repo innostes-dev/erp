@@ -217,7 +217,7 @@ export default function RolesAndPermissionsExample() {
             <p className="text-xs text-muted-foreground">{activeRole.description}</p>
           </div>
 
-          <div className="border rounded-lg overflow-x-auto bg-card">
+          <div tabIndex={0} role="region" aria-label="Role permissions table" className="border rounded-lg overflow-x-auto bg-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
             <PermissionMatrix
               aria-label={`Permissions for ${activeRole.name}`}
               resources={SYSTEM_RESOURCES}

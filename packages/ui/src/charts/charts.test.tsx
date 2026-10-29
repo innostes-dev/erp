@@ -47,6 +47,14 @@ describe('cartesian charts', () => {
     render(<LineChart aria-label="Revenue" data={data} categoryKey="month" series={[series[0]!]} />);
     expect(screen.queryByRole('button', { name: 'Total' })).toBeNull();
   });
+
+  it('does not mark the chart plot container aria-hidden to permit focusable accessibility layers', () => {
+    const { container } = render(
+      <BarChart aria-label="Headcount" data={data} categoryKey="month" series={series} />
+    );
+    const figure = container.querySelector('figure[data-slot="chart"]');
+    expect(figure?.querySelector('[aria-hidden="true"]')).toBeNull();
+  });
 });
 
 describe('DonutChart', () => {
@@ -67,5 +75,18 @@ describe('DonutChart', () => {
     const table = screen.getByRole('table', { name: 'Attendance today' });
     expect(within(table).getByRole('cell', { name: '91.9%' })).toBeInTheDocument();
     expect(screen.getAllByText('228').length).toBeGreaterThan(0);
+  });
+
+  it('does not mark the donut plot container aria-hidden to permit accessible layers', () => {
+    const { container } = render(
+      <DonutChart
+        aria-label="Attendance today"
+        data={[
+          { key: 'present', label: 'Present', value: 10 },
+        ]}
+      />,
+    );
+    const figure = container.querySelector('figure[data-slot="donut-chart"]');
+    expect(figure?.querySelector('[aria-hidden="true"]')).toBeNull();
   });
 });

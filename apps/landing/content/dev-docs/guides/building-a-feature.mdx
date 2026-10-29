@@ -290,13 +290,13 @@ pnpm nx typecheck kernel-frontend web-app
 
 A feature is ready for review when:
 
-- [ ] It follows the standard layout: `models/`, `schemas/`, `services/`, `router.py` and `__init__.py`.
-- [ ] The model only declares its own columns and is imported in `models.py`.
-- [ ] A migration exists, has been read, and runs on a clean database.
-- [ ] Every module, class and public function has a docstring.
-- [ ] Every endpoint has `summary`, `response_description`, `operation_id` and `error_responses(<error classes>)`.
-- [ ] No status code is written as a number. Use service error classes and `fastapi.status` constants.
-- [ ] Every schema field has a `description`.
-- [ ] The module is registered under `innostes.modules` and shows up in `GET /`.
-- [ ] Tests pass for `kernel-backend` and `api-server`.
-- [ ] The feature has a README, and the developer docs are updated if anything structural changed.
+- It follows the standard layout: `models/`, `schemas/`, `services/`, `router.py` and `__init__.py`.
+- The model only declares its own columns and is imported in `models.py`.
+- A migration exists, has been read, and runs on a clean database.
+- Every module, class and public function has a docstring.
+- Every endpoint has `summary`, `response_description`, `operation_id` and `error_responses(<error classes>)`.
+- No status code is written as a number. Use service error classes and `fastapi.status` constants.
+- Every schema field has a `description`.
+- The module is registered under `innostes.modules` and shows up in `GET /`.
+- Tests pass for `kernel-backend` and `api-server`.
+- The feature has a README, and the developer docs are updated if anything structural changed.

@@ -107,11 +107,11 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="mx-auto w-full max-w-5xl px-4 pb-24">
-        <div className="flex flex-col items-center gap-6 rounded-2xl bg-blue-600 px-6 py-14 text-center text-white">
+        <div className="flex flex-col items-center gap-6 rounded-2xl bg-blue-700 px-6 py-14 text-center text-white">
           <h2 className="text-3xl font-bold tracking-tight">
             Ready to get started?
           </h2>
-          <p className="max-w-lg text-blue-100">
+          <p className="max-w-lg text-white">
             Talk to us and see innostes in action.
           </p>
           <Button

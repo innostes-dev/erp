@@ -98,5 +98,11 @@ __pycache__/
 !.env.example
 
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
 # Runtime files of the kernel backend (e.g. the generated first-run setup token)
 kernel/backend/var/

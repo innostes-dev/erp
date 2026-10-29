@@ -31,7 +31,6 @@ export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(
         ref={ref}
         data-slot="button-group"
         data-orientation={orientation}
-        aria-orientation={orientation}
         className={cn(
           'inline-flex isolate',
           '[&>*]:focus-visible:z-10',

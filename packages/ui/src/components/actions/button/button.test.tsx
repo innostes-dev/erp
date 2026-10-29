@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button } from '@innostes/ui';
-import { buttonVariants } from '@innostes/ui';
+import { Button, ButtonGroup, buttonVariants } from '@innostes/ui';
 
 describe('Button', () => {
   it('renders a button that does not submit forms by default', () => {
@@ -84,5 +83,19 @@ describe('Button', () => {
 describe('buttonVariants', () => {
   it('produces classes for links styled as buttons', () => {
     expect(buttonVariants({ variant: 'outline', size: 'sm' })).toContain('h-8');
+  });
+});
+
+describe('ButtonGroup', () => {
+  it('renders role="group" without invalid aria-orientation attribute', () => {
+    render(
+      <ButtonGroup aria-label="Alignment">
+        <Button>Left</Button>
+        <Button>Right</Button>
+      </ButtonGroup>,
+    );
+    const group = screen.getByRole('group', { name: 'Alignment' });
+    expect(group).not.toHaveAttribute('aria-orientation');
+    expect(group).toHaveAttribute('data-orientation', 'horizontal');
   });
 });

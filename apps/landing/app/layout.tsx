@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex min-h-screen flex-col bg-fd-background text-fd-foreground">
         <RootProvider theme={{ defaultTheme: 'light' }}>
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster />

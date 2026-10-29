@@ -35,13 +35,15 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           on: 'nav',
           secondary: true,
           children: (
-            <Button
-              size="sm"
-              render={<a href="/docs/getting-started" />}
-              nativeButton={false}
-            >
-              Get Started
-            </Button>
+            <li>
+              <Button
+                size="sm"
+                render={<a href="/docs/getting-started" />}
+                nativeButton={false}
+              >
+                Get Started
+              </Button>
+            </li>
           ),
         },
       ]}

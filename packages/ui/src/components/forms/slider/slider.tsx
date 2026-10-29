@@ -31,6 +31,7 @@ export const Slider = forwardRef<HTMLDivElement, SliderProps>(function Slider(
     <BaseSlider.Root
       ref={ref}
       data-slot="slider"
+      aria-label={props['aria-label'] ?? 'Slider'}
       defaultValue={defaultValue}
       value={value}
       className={mergeClassName(
@@ -46,7 +47,7 @@ export const Slider = forwardRef<HTMLDivElement, SliderProps>(function Slider(
             <BaseSlider.Thumb
               key={i}
               index={i}
-              aria-label={thumbLabels?.[i]}
+              aria-label={thumbLabels?.[i] ?? (props['aria-label'] as string) ?? 'Slider value'}
               className="size-4 rounded-full border-2 border-primary bg-background shadow-sm transition-shadow outline-none focus-visible:ring-4 focus-visible:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30"
             />
           ))}

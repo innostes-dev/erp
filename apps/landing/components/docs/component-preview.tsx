@@ -39,7 +39,7 @@ export function ComponentPreview({
       preview={
         <div
           className={cn(
-            'flex min-h-48 w-full flex-wrap gap-4 p-6 sm:p-10',
+            'flex min-h-48 w-full min-w-0 max-w-full overflow-hidden flex-wrap gap-4 p-4 sm:p-10',
             align === 'center'
               ? 'items-center justify-center'
               : 'items-start justify-start',

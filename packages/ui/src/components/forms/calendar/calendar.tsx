@@ -513,7 +513,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(
                                   'inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-sm tabular-nums transition-colors outline-none pointer-coarse:size-10',
                                   'hover:bg-accent hover:text-accent-foreground',
                                   'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring',
-                                  outside && 'text-muted-foreground/60',
+                                  outside && 'text-muted-foreground',
                                   isToday &&
                                     !selected &&
                                     'font-semibold text-primary',

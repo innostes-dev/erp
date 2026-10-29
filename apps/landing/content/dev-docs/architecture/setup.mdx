@@ -86,12 +86,12 @@ docker compose run --rm \n  -e SETUP_ORG_NAME="Acme Corporation" -e SETUP_ORG_SL
 
 ## Production checklist
 
-- [ ] Install with the command line (or set `SETUP_TOKEN` and finish the wizard right after deploying).
-- [ ] Set `SETUP_ENABLED=false` after installing.
-- [ ] Don't share or commit the token. `kernel/backend/var/` is gitignored and excluded from Docker images (`.dockerignore`).
-- [ ] Running **more than one API replica**? Each one generates its own token, so set `SETUP_TOKEN`
+- Install with the command line (or set `SETUP_TOKEN` and finish the wizard right after deploying).
+- Set `SETUP_ENABLED=false` after installing.
+- Don't share or commit the token. `kernel/backend/var/` is gitignored and excluded from Docker images (`.dockerignore`).
+- Running **more than one API replica**? Each one generates its own token, so set `SETUP_TOKEN`
       (the same value everywhere) or use the command line.
-- [ ] Behind a reverse proxy, the attempt limiter sees the proxy's address. Run the API with
+- Behind a reverse proxy, the attempt limiter sees the proxy's address. Run the API with
       `--proxy-headers` (uvicorn) so it sees real client addresses.
 
 ## Code

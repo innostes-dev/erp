@@ -553,4 +553,43 @@ drop, which doesn't work on touch screens.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 16 (Browser QA and visual verification).
+- Non-blocking: none. Resolved in 16.
+
+
+## 16 – Browser QA: automated crawl and fixes – 2026-10-29
+
+**Summary**: Implemented comprehensive Playwright browser crawl test suite (`apps/landing/e2e/crawl.spec.ts`), keyboard interaction suite (`apps/landing/e2e/keyboard.spec.ts`), and visual regression baseline suite (`apps/landing/e2e/visual.spec.ts`). Validated all 130 documentation site routes across light and dark themes at desktop (1280×800) and mobile (360×740) viewports (520 total runs) with 0 failures. Integrated `docs-e2e` into Nx targets and CI workflow.
+
+**Changed**:
+- Test Suites:
+  - `apps/landing/e2e/crawl.spec.ts`: Automated discovery and crawl of 130 sitemap routes verifying 0 console errors, 0 failed requests, 0 broken images, 0 empty `ComponentPreview` elements, valid in-page anchor targets, zero horizontal page overflow, and zero Axe WCAG 2.2 AA violations.
+  - `apps/landing/e2e/keyboard.spec.ts`: Smoke tests for keyboard interaction patterns (Tabs arrow navigation, DropdownMenu arrow navigation and Escape dismissal, Select Space open and Enter select, Button/Action keyboard triggers, AlertDialog focus trap and Cancel, Dialog overlay trap and Escape return focus).
+  - `apps/landing/e2e/visual.spec.ts`: Visual regression baselines capturing lead demos in light and dark mode for Button, Dialog, DataTable, Cartesian Charts, PermissionMatrix, and KanbanBoard.
+  - `apps/landing/playwright.config.ts`: Configured automated webServer startup, desktop and mobile viewport configurations, and trace settings.
+  - `.github/workflows/ci.yml`: Integrated `docs-e2e` Playwright test execution and browser installation into CI.
+- Fixes Applied:
+  - `packages/ui/src/widgets/user-menu/user-menu.tsx`: Resolved WCAG 2.5.3 label-in-name mismatch by wrapping subtitle in `aria-hidden` and deriving accessible name strictly from user name.
+  - `packages/ui/src/components/layout/app-rail/app-rail.tsx`: Resolved label-in-name mismatch on badge items.
+  - `packages/ui/src/components/data-display/stat/stat.tsx` & `packages/ui/src/widgets/metric-card/metric-card.tsx`: Updated trend text colors to `text-emerald-700 dark:text-emerald-400` and `text-red-700 dark:text-red-400` to exceed 4.5:1 WCAG AA contrast ratio.
+  - `packages/ui/src/widgets/entity-list/entity-list.tsx`: Elevated avatar tones to high-contrast AA compliant values.
+  - `packages/ui/src/widgets/permission-matrix/permission-matrix.tsx`: Added nested overflow-x wrapper preventing 360px viewport overflow.
+  - `apps/landing/components/demos/forms/checkbox/basic.tsx`, `group.tsx`, & `checkbox-playground.tsx`: Added explicit `aria-label` attributes to ensure instantaneous accessible name recognition.
+  - `apps/landing/components/demos/layout/form-layout/basic.tsx`: Added missing `aria-label` to Switch demo.
+  - `apps/landing/app/global.css`: Added `max-width: 100vw; overflow-x: clip;` preventing unintentional body viewport spillover.
+
+**Manual QA Observations**:
+- **Keyboard Walk-through**: Installation, DataTable (row navigation, checkbox selection), Dialog (focus trap, Escape dismissal), Select (Space to open, arrow down, Enter to select), DatePicker (grid arrow navigation), KanbanBoard (keyboard column reordering / card focus), RichTextEditor (toolbar buttons accessible via Tab and Enter/Space), and Examples (Invoice List, Hiring Pipeline) fully navigable using keyboard alone with active visible focus rings.
+- **Screen Reader Spot Checks**: Evaluated accessibility tree attributes and accessible names via Axe Core engine (WCAG 2.5.3 Label in Name, WCAG 4.1.2 Name/Role/Value). Full screen reader (NVDA/JAWS) is not present in headless Linux host; DOM accessibility properties conform strictly to ARIA 1.2 authoring patterns.
+- **Prefers-reduced-motion**: Verified `motion-reduce:transition-none` and `motion-reduce:animate-none` applied to animations and transitions.
+- **Zoom & Reflow**: 200% zoom (WCAG 1.4.4) validated with no overlapping or clipped text; 320 CSS px reflow (WCAG 1.4.10) verified with zero horizontal document scroll.
+
+**Verification**:
+- `pnpm --filter @innostes/landing exec playwright test e2e/crawl.spec.ts --workers 8`: PASS (520/520 passed, 3.7m)
+- `pnpm --filter @innostes/landing exec playwright test e2e/keyboard.spec.ts e2e/visual.spec.ts`: PASS (18/18 passed, 6.5s)
+- `pnpm nx run landing:docs-check`: PASS
+- `pnpm nx run-many -t build -p ui landing --skip-nx-cache`: PASS
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 17 (Editorial pass and British English audit).
+

@@ -92,8 +92,8 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
                 good === null
                   ? 'text-muted-foreground'
                   : good
-                    ? 'text-success'
-                    : 'text-destructive',
+                    ? 'text-emerald-700 dark:text-emerald-400'
+                    : 'text-red-700 dark:text-red-400',
               )}
             >
               {inferred === 'up' && <ArrowUpIcon className="size-3" />}

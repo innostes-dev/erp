@@ -60,15 +60,20 @@ const initialsOf = (text: ReactNode) =>
     : '';
 
 const avatarTone: Partial<Record<IconTileTone, string>> = {
-  'chart-1': 'bg-chart-1/12 text-chart-1',
-  'chart-2': 'bg-chart-2/12 text-chart-2',
-  'chart-3': 'bg-chart-3/12 text-chart-3',
-  'chart-4': 'bg-chart-4/15 text-chart-4',
-  'chart-5': 'bg-chart-5/12 text-chart-5',
-  'chart-6': 'bg-chart-6/12 text-chart-6',
-  'chart-7': 'bg-chart-7/12 text-chart-7',
-  'chart-8': 'bg-chart-8/12 text-chart-8',
-  primary: 'bg-primary/10 text-primary',
+  'chart-1': 'bg-chart-1 text-white',
+  'chart-2': 'bg-chart-2 text-white',
+  'chart-3': 'bg-chart-3 text-white',
+  'chart-4': 'bg-chart-4 text-white',
+  'chart-5': 'bg-chart-5 text-white',
+  'chart-6': 'bg-chart-6 text-white',
+  'chart-7': 'bg-chart-7 text-white',
+  'chart-8': 'bg-chart-8 text-white',
+  primary: 'bg-primary text-primary-foreground',
+  success: 'bg-emerald-700 text-white dark:bg-emerald-500 dark:text-zinc-950',
+  warning: 'bg-amber-700 text-white dark:bg-amber-400 dark:text-zinc-950',
+  destructive: 'bg-destructive text-destructive-foreground',
+  info: 'bg-sky-700 text-white dark:bg-sky-400 dark:text-zinc-950',
+  neutral: 'bg-muted text-muted-foreground',
 };
 
 /**

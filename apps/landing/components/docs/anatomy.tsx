@@ -31,7 +31,7 @@ export function Anatomy({ slots, children, className }: AnatomyProps) {
           {children}
         </div>
       )}
-      <div className="w-full overflow-x-auto rounded-lg border border-fd-border">
+      <div tabIndex={0} role="region" aria-label="Component anatomy slots" className="w-full overflow-x-auto rounded-lg border border-fd-border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
         <table className="w-full border-collapse text-sm">
           <thead className="bg-fd-muted/50 text-start font-medium text-fd-muted-foreground">
             <tr className="border-b border-fd-border">

@@ -30,7 +30,12 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
   return (
     <div
       data-slot="table-container"
-      className={cn('relative w-full overflow-x-auto', containerClassName)}
+      tabIndex={0}
+      aria-label="Scrollable table container"
+      className={cn(
+        'relative w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+        containerClassName,
+      )}
     >
       <table
         ref={ref}

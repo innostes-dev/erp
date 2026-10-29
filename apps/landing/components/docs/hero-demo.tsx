@@ -69,7 +69,7 @@ export function HeroDemo() {
         <div className="rounded-lg border border-border bg-muted/20 p-3">
           <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Total Value</span>
           <div className="mt-1 text-lg font-semibold text-foreground">₹1,45,280.00</div>
-          <div className="mt-0.5 flex items-center text-[11px] text-emerald-600 dark:text-emerald-400">
+          <div className="mt-0.5 flex items-center text-[11px] text-emerald-700 dark:text-emerald-400">
             <ArrowUpRight className="size-3 me-0.5" />
             +8.4% vs last procurement run
           </div>

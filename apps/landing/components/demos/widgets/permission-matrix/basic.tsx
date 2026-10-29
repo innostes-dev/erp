@@ -29,7 +29,7 @@ export default function PermissionMatrixDemo() {
     'ledger:view',
   ]);
   return (
-    <div className="flex w-full flex-col gap-3">
+    <div className="flex w-full min-w-0 max-w-full flex-col gap-3">
       <PermissionMatrix
         aria-label="Permissions for Accountant"
         actions={actions}

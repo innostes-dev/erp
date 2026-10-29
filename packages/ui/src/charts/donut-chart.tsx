@@ -114,7 +114,6 @@ export const DonutChart = forwardRef<HTMLElement, DonutChartProps>(function Donu
         )}
       >
         <div
-          aria-hidden="true"
           data-slot="donut-chart-plot"
           className={cn('relative aspect-square shrink-0', classNames?.plot)}
           style={{ width: size }}

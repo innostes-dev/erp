@@ -168,8 +168,8 @@ export function MetricDelta({
       data-sentiment={sentiment}
       className={cn(
         'inline-flex items-center gap-0.5 text-xs font-medium tabular-nums',
-        sentiment === 'positive' && 'text-success',
-        sentiment === 'negative' && 'text-destructive',
+        sentiment === 'positive' && 'text-emerald-700 dark:text-emerald-400',
+        sentiment === 'negative' && 'text-red-700 dark:text-red-400',
         sentiment === 'neutral' && 'text-muted-foreground',
         className,
       )}

@@ -243,8 +243,9 @@ export function ThemingDemo() {
           className="flex flex-col items-start gap-2"
           style={
             {
-              '--color-primary': 'var(--color-emerald-600)',
-              '--color-primary-hover': 'var(--color-emerald-700)',
+              '--color-primary': 'var(--color-emerald-700)',
+              '--color-primary-hover': 'var(--color-emerald-800)',
+              '--color-primary-foreground': '#ffffff',
             } as CSSProperties
           }
         >
@@ -259,6 +260,7 @@ export function ThemingDemo() {
             {
               '--color-primary': 'var(--color-violet-600)',
               '--color-primary-hover': 'var(--color-violet-700)',
+              '--color-primary-foreground': '#ffffff',
             } as CSSProperties
           }
         >
