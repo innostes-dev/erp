@@ -12,6 +12,8 @@
     "runtime-view",
     "data-architecture",
     "deployment",
+    "cross-cutting",
+    "threat-model",
     "plugins",
     "kernel",
     "setup"

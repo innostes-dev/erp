@@ -183,3 +183,34 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
 **Open issues**:
 - Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
+
+## 08 – Cross-cutting concepts and STRIDE threat model – 2026-10-29
+**Summary**: Authored arc42 section 8 (Cross-cutting Concepts) and the formal STRIDE Security Threat Model:
+1. Created `apps/landing/content/dev-docs/architecture/cross-cutting.mdx` covering 10 universal platform concepts:
+   - Authentication (bcrypt cost 12, 30m JWT access tokens, 7d rotating refresh token families, token replay theft detection, password history preventing reuse of last 5 passwords, 5-attempt brute-force lockouts).
+   - Authorisation (RBAC hierarchy: permissions, roles, tenant-scoped user_roles, system roles, and current membership checkpoints).
+   - Multi-tenancy runtime scoping (`X-Tenant-ID` header validation, `BaseService` query scoping).
+   - RFC 7807 problem details and exception mapping (`register_error_handlers`).
+   - Three-tier validation (Pydantic edge DTOs, service invariants, database constraints).
+   - Asynchronous transactions and PostgreSQL advisory locking.
+   - Configuration layering and SecretStr masking.
+   - Separation of technical telemetry and compliance audit trails (`AuditMixin`, `SoftDeleteMixin`).
+   - Internationalisation, UTC time storage, and Indian enterprise defaults (INR [₹]).
+   - Layered test suites (107 Python unit tests, fitness functions, docs gates, multi-React compatibility).
+2. Created `apps/landing/content/dev-docs/architecture/threat-model.mdx`:
+   - Data Flow Diagram (DFD) modelling 5 primary trust boundaries.
+   - Asset classification inventory (secrets, keys, credentials, PII, setup tokens).
+   - Complete STRIDE Threat Analysis Matrix with 8 formal threats (`TM-001` through `TM-008`), exact code mitigation citations, residual risk scoring, and recommended hardening actions.
+   - Handed over top architectural risks to the Risk Register (`ARC-014` IP rate limiting, `ARC-015` database Row-Level Security).
+3. Updated `apps/landing/content/dev-docs/architecture/meta.json` with `cross-cutting` and `threat-model`.
+**Changed**: `apps/landing/content/dev-docs/architecture/cross-cutting.mdx`, `threat-model.mdx`, `meta.json`, `PROGRESS.md`, `08-crosscutting-security.md` deleted.
+**Code changes**: none (documentation only).
+**Decisions**:
+- Authored STRIDE threat model as code with diffable Mermaid DFD diagrams and explicit code-level mitigation links.
+**Verification**:
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed, 19 Mermaid diagrams verified).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
+**Open issues**:
+- Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
+- Handed to Prompt 10: `ARC-014` (IP-based rate limiting at ingress) and `ARC-015` (PostgreSQL RLS).

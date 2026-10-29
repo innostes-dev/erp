@@ -1,0 +1,174 @@
+---
+title: Cross-cutting Concepts
+description: Architectural standards and universal mechanisms governing authentication, authorization, multi-tenancy, errors, and data consistency.
+icon: Layers
+owner: Platform Architecture Team
+lastReviewed: 2026-10-29
+arc42: 8
+---
+
+The **Cross-cutting Concepts** (arc42 §8) define architectural invariants, security mechanisms, and design conventions that apply uniformly across every module and engine in Innostes ERP.
+
+---
+
+## 1. Authentication Architecture
+
+Authentication is managed centrally by [`kernel.auth`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/auth/) and [`kernel.core.security`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/security/):
+
+### Credential Storage & Password Hashing
+- **Algorithm**: Salted bcrypt (`bcrypt.hashpw`).
+- **Cost Factor**: Work factor `12` (`bcrypt.gensalt(rounds=12)`).
+- **Protection**: Plaintext passwords are never logged, serialised, or persisted. Authentication compares hashes using `bcrypt.checkpw()`.
+
+### Token Lifecycle & Family Rotation
+- **Access Tokens (JWT)**:
+  - Format: RFC 7519 JSON Web Token, signed with HMAC-SHA256 (`jwt_secret_key`).
+  - Lifespan: Short-lived (30 minutes).
+  - Claims: `sub` (User UUID), `tenant_id` (Tenant UUID), `session_id` (Session UUID), `roles` (list of assigned role names), `exp` (UTC expiration timestamp).
+- **Refresh Tokens**:
+  - Format: Cryptographically secure 64-character random string.
+  - Lifespan: 7 days.
+  - Token Family Rotation: Every refresh request (`POST /auth/refresh`) revokes the supplied token and issues a new child token linked to the family UUID.
+  - Token Replay Detection: If a previously revoked refresh token is presented, the system treats it as token theft, immediately revoking the entire token family and terminating all active sessions for that device.
+
+### Password History & Lockout Policies
+- **Password History**: [`password_histories`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/auth/models.py) retains the user's prior 5 password hashes. Attempting to set a password matching any of the previous 5 hashes returns HTTP 400 (`PASSWORD_RECENTLY_USED`).
+- **Brute-Force Lockout**: After 5 consecutive failed login attempts (`max_failed_login_attempts`), the account is locked for 15 minutes (`account_lockout_minutes`) by updating `user_security.blocked_until`.
+
+---
+
+## 2. Authorisation & Role-Based Access Control (RBAC)
+
+Authorisation follows a tenant-scoped Role-Based Access Control model:
+
+```text
+User ────(UserRole)────► Role ────(RolePermission)────► Permission
+   │                       ▲
+   └──────── Tenant ───────┘
+```
+
+### Relational Hierarchy
+1. **Permissions (`permissions`)**: Atomic system privileges identified by dot/colon codes (e.g. `crm:leads:create`, `crm:leads:read`, `hrms:leaves:approve`).
+2. **Roles (`roles`)**: Named bundles of permissions. Scoped to a specific tenant via `tenant_id`, or marked global via `is_system=true`. Built-in system roles include `Owner`, `Administrator`, `Member`, and `Auditor`.
+3. **Role Assignments (`user_roles`)**: Maps users to roles within the boundary of a specific tenant (`tenant_id`). A user may hold the `Owner` role in Tenant A while holding only `Member` in Tenant B.
+
+### Checkpoints & Enforcement Points
+- **Identity Extraction**: [`get_current_user`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/security/dependencies.py) decodes the Bearer JWT and queries `users` to verify the account is active.
+- **Tenant Context**: [`get_current_tenant_id`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/tenancy/dependencies.py) reads `X-Tenant-ID` and verifies active membership in `tenant_members`.
+- **Administrative Guard**: [`require_super_admin`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/security/dependencies.py) verifies `users.is_super_admin == true` for cross-tenant operations.
+
+<Callout type="info" title="Status: Granular Permission Gating">
+  **Current Implementation**: Administrative endpoints enforce super-admin status, and domain routes verify tenant membership and module enablement.
+  **Planned Evolution**: Granular per-route permission dependencies (e.g. `Depends(require_permission("crm:leads:delete"))`) are implemented in IAM services and will be rolled out across all business module routes in an upcoming release.
+</Callout>
+
+---
+
+## 3. Multi-Tenancy Scoping
+
+Innostes ERP implements single-database pooled multi-tenancy (see [Data Architecture](/docs/architecture/data-architecture)):
+
+- **Header Scoping**: Multi-tenant endpoints require the `X-Tenant-ID` header.
+- **Service Layer Isolation**: Domain services subclass [`kernel.core.services.BaseService`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/services/base.py), which automatically binds `tenant_id` to all queries, mutations, and soft-deletes.
+- **Module Activation Verification**: Before executing a domain request, the platform queries `tenant_modules` to ensure the organisation has activated the requested module.
+
+---
+
+## 4. Uniform Error Handling & Problem Details
+
+Error handling adheres to **RFC 7807 (Problem Details for HTTP APIs)**:
+
+### Domain Exception Hierarchy
+Feature services never emit raw HTTP exceptions directly. They raise domain exceptions subclassing `BaseServiceError`:
+
+```text
+BaseServiceError
+├── NotFoundError            -> HTTP 404 Not Found
+├── ConflictError            -> HTTP 409 Conflict
+├── ForbiddenError           -> HTTP 403 Forbidden
+├── UnauthorizedError        -> HTTP 401 Unauthorized
+├── ValidationError          -> HTTP 422 Unprocessable Entity
+└── ServiceUnavailableError  -> HTTP 503 Service Unavailable
+```
+
+### Response Normalisation
+[`kernel.core.http.register_error_handlers`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/http.py) translates domain exceptions into standard payloads:
+
+```json
+{
+  "detail": "Organisation with slug 'northwind-traders' already exists.",
+  "code": "SLUG_ALREADY_EXISTS"
+}
+```
+
+Internal database connection strings, credentials, and raw SQL exceptions are caught at the root handler and emitted as generic HTTP 500 errors to prevent information disclosure.
+
+---
+
+## 5. Three-tier Validation Strategy
+
+1. **Edge Validation (FastAPI & Pydantic v2)**: Inbound request bodies and query parameters are validated against strongly-typed Pydantic DTOs (`BaseSchema`). Malformed JSON or invalid types are rejected immediately with HTTP 422.
+2. **Domain Validation (Services)**: Business invariants (e.g. checking credit limits, verifying duplicate email addresses, validating date ranges) execute within `services/*`.
+3. **Database Constraints (PostgreSQL 16)**: Final integrity checks are enforced by relational schema constraints: `NOT NULL`, `UNIQUE` indexes, foreign keys (`ON DELETE RESTRICT`), and check constraints.
+
+---
+
+## 6. Transactions & Concurrency
+
+- **Session Lifecycle**: Database sessions are managed asynchronously via [`get_db`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/database/session.py). Each request receives an isolated `AsyncSession`.
+- **Commit Boundaries**: Transactions commit automatically upon successful router completion. Any unhandled exception triggers an immediate `session.rollback()`.
+- **Concurrency Protection**: Startup database migrations use PostgreSQL transaction-level advisory locks (`SELECT pg_advisory_xact_lock(727001)`), preventing parallel replica races.
+
+---
+
+## 7. Configuration & Secret Management
+
+Configuration resolution follows strict precedence:
+1. **Host Environment Variables** (highest priority).
+2. **Local Environment Files** (`.env`).
+3. **Pydantic Settings Defaults** in [`kernel/core/config/settings.py`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/config/settings.py).
+
+Secrets (such as `JWT_SECRET_KEY`, `DB_PASSWORD`, and `BLIND_INDEX_PEPPER`) use `pydantic.types.SecretStr`, ensuring that `.model_dump()` and logger formatters mask the values as `**********`.
+
+---
+
+## 8. Logging & Audit Trails
+
+The platform maintains a strict separation between technical telemetry and business audit logs:
+
+| Dimension | Technical Telemetry | Business Audit Trail |
+|:---|:---|:---|
+| **Purpose** | Diagnostic debugging, performance profiling, and operational health. | Regulatory compliance, non-repudiation, and historical accountability. |
+| **Mechanism** | Structured JSON logs emitted to stdout via `api_logger` plug-in. | Universal database columns on every table (`AuditMixin`, `SoftDeleteMixin`). |
+| **Data Captured** | HTTP method, URI, status code, latency, and client IP. | `id`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`. |
+| **Retention** | Short-term (7 to 30 days in log aggregation systems). | Indefinite retention in PostgreSQL database. |
+
+---
+
+## 9. Internationalisation & Time Conventions
+
+- **Timestamps**: Stored strictly in UTC (`DateTime(timezone=True)`). Emitted as ISO 8601 strings (`2026-10-29T17:00:00Z`).
+- **Locale & Currency**: Tenant settings configure corporate timezone, date format, and currency defaults.
+- **Reference Enterprise**: Northwind Traders Pvt Ltd (Bengaluru, Karnataka, India), operating with Indian Rupee (INR [₹]) formatting.
+
+---
+
+## 10. Testing & Quality Verification
+
+Quality is maintained through layered automated testing suites executed on every Pull Request:
+
+1. **Backend Test Suite**: 107 test cases executed via Python `unittest` (`kernel/backend/tests/`).
+2. **Architecture Fitness Functions**:
+   - Python import rules verified via [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter).
+   - TypeScript boundary separation verified via [`scripts/checks/check-ts-boundaries.mjs`](file:///home/sai/Documents/GitHub/innostes_projects/erp/scripts/checks/check-ts-boundaries.mjs).
+   - Database model registration verified via `test_architecture_fitness.py`.
+3. **Documentation Quality Gates**: 16 automated checks in [`apps/landing/scripts/checks/run-all.mjs`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/landing/scripts/checks/run-all.mjs).
+4. **UI Compatibility Suites**: Multi-version React testing in `tests/ui-react17` and `tests/ui-react18`.
+
+---
+
+## Related Documentation
+
+- [STRIDE Threat Model](/docs/architecture/threat-model) — Detailed security analysis and risk mitigations.
+- [Data Architecture](/docs/architecture/data-architecture) — Entity-relationship diagrams and column mixins.
+- [REST API Reference](/api-reference) — Complete error codes and payload schemas.
