@@ -94,3 +94,21 @@ Observed before the runbook started. Prompt 01 must verify every one.
 
 
 
+
+## 04 – Building block view and plug-in contract – 2026-10-29
+**Summary**: Authored arc42 section 5 (Building Block View) and the formal Plug-in Contract reference:
+1. Created `apps/landing/content/dev-docs/architecture/building-blocks.mdx` covering C4 Level 2 Container decomposition (`web-app`, `api-server`, `postgres`, `docsSite`, `smtpServer`), C4 Level 3 Backend Engine execution pipeline (`ServerEngine`, `ModuleLoader`, `ModuleRegistry`, ordered middleware stack, system routes), C4 Level 3 UI Engine bootstrap and routing (`SetupGate`, `AuthGate`, `NavigationContext`, `AppRouter`, shell layouts), and Level 3 Kernel subpackage architecture and three-tier feature layering.
+2. Created `apps/landing/content/dev-docs/architecture/plugin-contract.mdx` detailing the formal `BaseModule` backend contract, frontend package export conditions and `ModuleManifest`, package directory layout, engine guarantees, the 5 architectural invariant rules (linked to `.importlinter` and `check-ts-boundaries.mjs`), and the embedded 7-module catalogue table.
+3. Implemented automated module catalogue generator and staleness gate (`apps/landing/scripts/generate-module-catalog.mjs`, `apps/landing/lib/module-catalog.json`, and Gate 6 in `run-arch-checks.mjs`).
+4. Updated `apps/landing/content/dev-docs/architecture/meta.json` with `building-blocks` and `plugin-contract`.
+**Changed**: `apps/landing/content/dev-docs/architecture/building-blocks.mdx`, `plugin-contract.mdx`, `meta.json`, `apps/landing/scripts/generate-module-catalog.mjs`, `apps/landing/lib/module-catalog.json`, `apps/landing/scripts/checks/run-arch-checks.mjs`, `PROGRESS.md`, `04-building-blocks.md` deleted.
+**Code changes**: Added Gate 6 (module catalogue staleness verification) in `run-arch-checks.mjs`.
+**Decisions**:
+- Authored static module catalogue generator with programmatic freshness verification gate in CI.
+- Marked dynamic frontend module manifest discovery as planned with `<Callout type="info" title="Status">`.
+**Verification**:
+- `pnpm run arch-check`: PASSED (167 TS files, 5 import-linter contracts kept, 2 model fitness tests passed).
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed).
+- `pnpm nx build landing`: PASSED (262 pages statically generated).
+**Open issues**:
+- Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).

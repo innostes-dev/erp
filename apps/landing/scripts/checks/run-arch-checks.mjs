@@ -4,6 +4,7 @@ import { runArchFrontmatterCheck } from './check-arch-frontmatter.mjs';
 import { runAdrCheck } from './check-adrs.mjs';
 import { runArc42CoverageCheck } from './check-arc42-coverage.mjs';
 import { runLinkCheck } from './check-links.mjs';
+import { checkModuleCatalogStaleness } from '../generate-module-catalog.mjs';
 
 async function main() {
   console.log('====================================================');
@@ -75,6 +76,16 @@ async function main() {
     }
   } else {
     console.log('   ✓ Documentation internal links resolve.');
+  }
+
+  // Gate 6: Module Catalogue Staleness Check
+  console.log('\n6. Checking module catalogue data freshness...');
+  const catalogResult = checkModuleCatalogStaleness();
+  if (!catalogResult.passed) {
+    failed = true;
+    console.error(`   ✗ [CATALOG] ${catalogResult.error}`);
+  } else {
+    console.log(`   ✓ Module catalogue is fresh (${catalogResult.count} modules verified).`);
   }
 
   console.log('\n====================================================');

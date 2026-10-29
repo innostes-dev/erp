@@ -1,0 +1,161 @@
+[
+  {
+    "name": "kernel.setup",
+    "type": "kernel",
+    "package": "kernel",
+    "frontendPackage": "@innostes/kernel",
+    "entryPoint": "kernel.setup:module",
+    "description": "First-run platform installation, setup token verification, and health gating",
+    "routes": [
+      "/setup/status",
+      "/setup/checks",
+      "/setup"
+    ],
+    "tables": [
+      "installation"
+    ],
+    "migrationsPath": "kernel/backend/migrations",
+    "tags": [
+      "Setup"
+    ]
+  },
+  {
+    "name": "kernel.tenancy",
+    "type": "kernel",
+    "package": "kernel",
+    "frontendPackage": "@innostes/kernel",
+    "entryPoint": "kernel.tenancy:module",
+    "description": "Multi-tenant organization provisioning, tenant settings, and module activations",
+    "routes": [
+      "/tenants",
+      "/tenants/{id}",
+      "/tenants/current/modules",
+      "/tenants/current/plugins"
+    ],
+    "tables": [
+      "tenants",
+      "tenant_settings",
+      "tenant_members",
+      "tenant_modules",
+      "tenant_plugins"
+    ],
+    "migrationsPath": "kernel/backend/migrations",
+    "tags": [
+      "Tenancy"
+    ]
+  },
+  {
+    "name": "kernel.user",
+    "type": "kernel",
+    "package": "kernel",
+    "frontendPackage": "@innostes/kernel",
+    "entryPoint": "kernel.user:module",
+    "description": "User accounts, profile management, and Role-Based Access Control (RBAC)",
+    "routes": [
+      "/users",
+      "/users/{id}",
+      "/roles",
+      "/permissions"
+    ],
+    "tables": [
+      "users",
+      "user_profiles",
+      "user_identities",
+      "roles",
+      "permissions",
+      "role_permissions",
+      "user_roles"
+    ],
+    "migrationsPath": "kernel/backend/migrations",
+    "tags": [
+      "Users",
+      "IAM"
+    ]
+  },
+  {
+    "name": "kernel.auth",
+    "type": "kernel",
+    "package": "kernel",
+    "frontendPackage": "@innostes/kernel",
+    "entryPoint": "kernel.auth:module",
+    "description": "JWT authentication, refresh token family rotation, sessions, devices, and API keys",
+    "routes": [
+      "/auth/login",
+      "/auth/refresh",
+      "/auth/logout",
+      "/auth/change-password",
+      "/auth/reset-password/request",
+      "/auth/reset-password/confirm",
+      "/auth/api-keys",
+      "/auth/sessions"
+    ],
+    "tables": [
+      "user_devices",
+      "user_sessions",
+      "user_security",
+      "password_histories",
+      "api_keys"
+    ],
+    "migrationsPath": "kernel/backend/migrations",
+    "tags": [
+      "Authentication",
+      "API Keys"
+    ]
+  },
+  {
+    "name": "hrms",
+    "type": "business-module",
+    "package": "innostes-hrms",
+    "frontendPackage": "@innostes/hrms",
+    "entryPoint": "hrms:module",
+    "description": "Human Resource Management: employee directory, department hierarchy, and leave requests",
+    "routes": [
+      "/hrms/employees",
+      "/hrms/departments",
+      "/hrms/leaves"
+    ],
+    "tables": [],
+    "migrationsPath": "modules/hrms/backend/migrations",
+    "tags": [
+      "HRMS",
+      "Employees"
+    ]
+  },
+  {
+    "name": "crm",
+    "type": "business-module",
+    "package": "innostes-crm",
+    "frontendPackage": "@innostes/crm",
+    "entryPoint": "crm:module",
+    "description": "Customer Relationship Management: lead pipelines, opportunities, and contact directory",
+    "routes": [
+      "/crm/leads",
+      "/crm/deals",
+      "/crm/contacts"
+    ],
+    "tables": [],
+    "migrationsPath": "modules/crm/backend/migrations",
+    "tags": [
+      "CRM",
+      "Pipeline"
+    ]
+  },
+  {
+    "name": "api_logger",
+    "type": "plugin",
+    "package": "innostes-api-logger",
+    "frontendPackage": "@innostes/api-logger",
+    "entryPoint": "api_logger:module",
+    "description": "Extensible HTTP request/response observability, telemetry, and audit middleware",
+    "routes": [
+      "/api-logger/logs",
+      "/api-logger/stats"
+    ],
+    "tables": [],
+    "migrationsPath": "plugins/api-logger/backend/migrations",
+    "tags": [
+      "Telemetry",
+      "Audit"
+    ]
+  }
+]
