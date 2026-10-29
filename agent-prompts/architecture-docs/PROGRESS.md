@@ -31,3 +31,13 @@ Observed before the runbook started. Prompt 01 must verify every one.
   - the setup token with attempt limiting (`kernel/setup`)
   - the user models for roles and permissions (RBAC), sessions, devices and password history
   - tenant membership and the `X-Tenant-ID` header
+
+## 01 – Audit – 2026-10-29
+**Summary**: Completed comprehensive architectural audit. Verified every claim across dev-docs against code, audited dependency rule enforcement, recovered architectural facts across engines, kernel, modules, and plugins, analyzed arc42 gaps for all 12 sections, catalogued 16 candidate ADRs, and inventoried the threat surface for STRIDE threat modelling. Generated `agent-prompts/architecture-docs/AUDIT.md` containing 13 formal findings (`ARC-001` through `ARC-013`).
+**Changed**: Created `agent-prompts/architecture-docs/AUDIT.md`, updated `PROGRESS.md`, deleted `01-audit.md`.
+**Code changes**: none (pure audit phase).
+**Decisions**: Recorded 16 candidate ADRs in AUDIT.md to be authored in Prompt 09.
+**Verification**: Verified baseline with `pnpm nx build landing` (passed cleanly, 249 pages), `pnpm nx run-many -t test` (passed cleanly, 6 projects, 120 Python tests), and inspection of all 18 SQLAlchemy models.
+**Open issues**:
+- Non-blocking: `ARC-001` through `ARC-013` (tracked in `AUDIT.md` with assigned owner prompts).
+
