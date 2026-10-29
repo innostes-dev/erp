@@ -65,7 +65,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "check:size": "node ./scripts/check-bundle-size.mjs"
+    "check:size": "node ./scripts/check-bundle-size.mjs",
+    "verify-checklist": "node ./scripts/verify-checklist.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -125,7 +126,19 @@
     "charts"
   ],
   "nx": {
-    "name": "ui"
+    "name": "ui",
+    "targets": {
+      "verify-checklist": {
+        "dependsOn": [
+          "build"
+        ],
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "node ./scripts/verify-checklist.mjs",
+          "cwd": "packages/ui"
+        }
+      }
+    }
   },
   "devDependencies": {
     "@tiptap/core": "^3.32.0",

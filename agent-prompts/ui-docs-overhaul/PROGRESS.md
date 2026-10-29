@@ -668,7 +668,34 @@ drop, which doesn't work on touch screens.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 19 (Checklist verification and completion of UI Docs track).
+- Non-blocking: none. Resolved in 19.
+
+
+## 19 – Checklist verification – 2026-10-29
+
+**Summary**: Completed final compliance review across all 238 exported components and parts (94 component families) spanning `@innostes/ui`, `@innostes/ui/charts`, and `@innostes/ui/editor`. Implemented automated AST-level verification script `packages/ui/scripts/verify-checklist.mjs` checking C1–C13 mechanically and wired it into Nx targets and CI. Documented evidence across M1–M14 in `CHECKLIST-REPORT.md`.
+
+**Changed**:
+- Verification Script & Target:
+  - `packages/ui/scripts/verify-checklist.mjs`: Automated check for forwardRef, data-slot, 'use client', design tokens, className merging, rest prop spreading, React 17 compatibility, icon imports, TSDoc, naming conventions, and RTL safety.
+  - `packages/ui/package.json`: Added `verify-checklist` script and Nx target.
+  - `.github/workflows/ci.yml`: Added `verify-checklist` to the CI workflow pipeline.
+- Audit & Verification Artefacts:
+  - `agent-prompts/ui-docs-overhaul/CHECKLIST-REPORT.md`: Comprehensive compliance matrix across all 94 component families with evidence citations, accepted exceptions justification, and final summary statement.
+
+**Verification**:
+- `pnpm nx run ui:verify-checklist`: PASS (3,094 checks evaluated across 238 components with 0 failures).
+- `pnpm nx run landing:docs-check`: PASS (all 10 enforced quality gates green).
+- `pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache`: PASS.
+- `pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache`: PASS.
+
+**Conclusion**:
+All 94 component families (238 exported components and parts) verified against C1–C13 and M1–M14: 91 fully compliant, 3 with justified exceptions, 0 failing.
+
+---
+### TRACK 1 (UI DOCS OVERHAUL) IS 100% COMPLETE.
+---
+
 
 
 
