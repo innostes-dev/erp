@@ -17,7 +17,7 @@ from kernel.user.services import RBACService, UserService
 _bearer_scheme = HTTPBearer(
     auto_error=False,
     scheme_name="BearerAuth",
-    description="JWT Bearer access token or Personal API Key (inno_live_...) issued by POST /auth/login or /auth/api-keys.",
+    description="JWT Bearer access token or personal access token (inno_live_...). Obtain an access token via POST /auth/login (30-minute lifespan, refreshed via POST /auth/refresh). Send in the HTTP Authorization header as 'Bearer <token>'.",
 )
 
 

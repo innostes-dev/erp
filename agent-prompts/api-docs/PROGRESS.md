@@ -91,6 +91,49 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 03 (Endpoint docs in code).
+- Non-blocking: none.
+
+## 03 – Endpoint documentation in code – 2026-10-29
+
+**Summary**: Completely overhauled in-code endpoint and schema documentation across all 33 operations and 38 schemas. Standardised operation IDs to `<feature>_<action>`, separated public callers from internal developer notes via `\f`, unified authentication under `BearerAuth`, documented header parameters (`X-Tenant-ID`, `X-Setup-Token`), updated tag names to sentence case, added field descriptions and Northwind universe examples to all schemas, and reduced report-mode lint observations from 296 to 0.
+
+**Changed**:
+- `apps/api-server/app/engine/server.py`: Standardised app metadata (title, version, description, contact, license, servers), defined schemas (`ServiceInfoRead`, `AppConfigRead`, `HealthCheckRead`), enforced canonical tag ordering, and registered custom OpenAPI generator.
+- `kernel/backend/kernel/auth/router.py`: Assigned operation IDs (`auth_*`), formatted summaries, added `\f` split, configured explicit security, added 401/422 error responses.
+- `kernel/backend/kernel/auth/schemas/`: Added field descriptions, examples, and `model_config["json_schema_extra"]` on all models (`LoginRequest`, `TokenResponse`, `RefreshTokenRequest`, `RefreshTokenResponse`, `ForgotPasswordRequest`, `ForgotPasswordResponse`, `ResetPasswordRequest`, `ChangePasswordRequest`, `LogoutRequest`, `MessageResponse`, `ApiKeyRead`, `ApiKeyCreatedResponse`, `ApiKeyListResponse`).
+- `kernel/backend/kernel/setup/router.py`: Assigned operation IDs (`setup_get_status`, `setup_run_checks`, `setup_execute_install`), declared `X-Setup-Token` header parameters, documented 422 error responses.
+- `kernel/backend/kernel/setup/schemas/setup.py`: Aliased `SetupBrandingInput` to `SetupBrandingCreate`, switched admin model to `AdminUserCreate`, populated Northwind Traders Pvt Ltd example data.
+- `kernel/backend/kernel/tenancy/router.py`: Assigned operation IDs (`tenants_*`), unified bearer scheme to `BearerAuth`, added `X-Tenant-ID` header parameters, documented 401/403/422 responses.
+- `kernel/backend/kernel/tenancy/schemas/`: Added field examples on `TenantCreate`, `TenantUpdate`, and `TenantRead`; added descriptions and examples on `ItemCatalogRead`, `ModuleListResponse`, `PluginListResponse`, `ActivationResponse`.
+- `kernel/backend/kernel/user/router.py`: Renamed tag to `User management`, assigned operation IDs (`users_create_user`, `users_get_user`), resolved circular import via lazy dependency loader, added explicit security and error responses.
+- `kernel/backend/kernel/user/schemas/`: Aliased `AdminUserInput` to `AdminUserCreate`, added field descriptions and examples on `UserCreate`, `UserUpdate`, and `UserRead`.
+- `modules/crm/backend/crm/router.py` & `modules/hrms/backend/hrms/router.py`: Added field descriptions and examples to info responses.
+- `plugins/api-logger/backend/api_logger/router.py` & `__init__.py`: Renamed tag to `API logger` (sentence case), added field descriptions and examples.
+- `apps/api-server/scripts/lint_openapi.py`: Refined UUID check for non-package parameters, excluded internal FastAPI error models.
+- `apps/api-server/openapi-lint-exceptions.yaml`: Cleared `report_mode_rules` list to `[]` (all rules now fully enforced).
+- `apps/api-server/openapi.json`: Regenerated specification in full synchronization with code.
+- `kernel/backend/README.md`: Updated documentation standards to match STANDARDS.md §5 and recorded the S7 naming convention.
+
+**API changes**:
+- Operation IDs standardised to snake_case `<feature>_<action>` (e.g. `auth_login`, `tenants_create`, `users_create_user`).
+- Unification of all bearer security under `BearerAuth`; elimination of duplicate `HTTPBearer`.
+- Renamed tags to sentence case: `User Management` -> `User management`, `API Logger` -> `API logger`.
+- Documented `X-Tenant-ID` header on `/tenants/current/*` endpoints and `X-Setup-Token` on `/setup/checks` and `POST /setup`.
+- Declared explicit 401 Unauthorized and 422 Unprocessable Content error responses across secured and parameterized operations.
+
+**Decisions**:
+- Adopt `<Entity>Create`, `<Entity>Update`, and `<Entity>Read` naming convention (S7), aliasing legacy `Input` models for backwards compatibility.
+- Empty the quality gate report-mode list immediately in Prompt 03, making all checklists strictly enforced for future commits.
+
+**Verification**:
+- `pnpm nx run api-server:openapi-check`: PASS (0 diff against code).
+- `pnpm nx run api-server:openapi-lint`: PASS (Spectral clean, 0 enforced defects, 0 report-mode observations).
+- `pnpm nx test api-server`: PASS (6 tests in 1.47s).
+- `pnpm nx test kernel-backend`: PASS (100 tests in 5.90s).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 04 (Contract tests).
+
 
 

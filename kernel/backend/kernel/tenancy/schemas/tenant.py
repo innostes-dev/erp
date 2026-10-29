@@ -11,40 +11,62 @@ SLUG_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
 
 _DESCRIPTIONS = {
     "name": "Display name of the organisation.",
-    "slug": "Short unique id used in URLs: lowercase letters, digits and dashes (e.g. `acme`).",
+    "slug": "Short unique identifier used in URLs: lowercase letters, digits, and hyphens (e.g. `northwind-traders`).",
     "country": "ISO 3166-1 alpha-2 country code.",
     "timezone": "IANA time zone name.",
-    "language": "BCP 47 language tag for the default language.",
-    "date_format": "Preferred date format.",
+    "language": "BCP 47 language tag for default language.",
+    "date_format": "Preferred date display format.",
 }
 
 
 class TenantCreate(BaseSchema):
-    """Body for creating a tenant."""
+    """Body for creating a customer organisation (tenant)."""
 
-    name: str = Field(min_length=1, max_length=255, description=_DESCRIPTIONS["name"], examples=["Acme Corporation"])
+    name: str = Field(
+        min_length=1,
+        max_length=255,
+        description=_DESCRIPTIONS["name"],
+        examples=["Northwind Traders Pvt Ltd"],
+    )
     slug: str = Field(
-        min_length=1, max_length=63, pattern=SLUG_PATTERN, description=_DESCRIPTIONS["slug"], examples=["acme"]
+        min_length=1,
+        max_length=63,
+        pattern=SLUG_PATTERN,
+        description=_DESCRIPTIONS["slug"],
+        examples=["northwind-traders"],
     )
     country: str | None = Field(
-        default=None, min_length=2, max_length=2, description=_DESCRIPTIONS["country"], examples=["IN"]
+        default=None,
+        min_length=2,
+        max_length=2,
+        description=_DESCRIPTIONS["country"],
+        examples=["IN"],
     )
     timezone: str | None = Field(
-        default=None, max_length=64, description=_DESCRIPTIONS["timezone"], examples=["Asia/Kolkata"]
+        default=None,
+        max_length=64,
+        description=_DESCRIPTIONS["timezone"],
+        examples=["Asia/Kolkata"],
     )
     language: str | None = Field(
-        default=None, max_length=16, description=_DESCRIPTIONS["language"], examples=["en-IN"]
+        default=None,
+        max_length=16,
+        description=_DESCRIPTIONS["language"],
+        examples=["en-IN"],
     )
     date_format: str | None = Field(
-        default=None, max_length=20, description=_DESCRIPTIONS["date_format"], examples=["DD/MM/YYYY"]
+        default=None,
+        max_length=20,
+        description=_DESCRIPTIONS["date_format"],
+        examples=["DD/MM/YYYY"],
     )
 
     model_config = ConfigDict(
         json_schema_extra={
             "examples": [
                 {
-                    "name": "Acme Corporation",
-                    "slug": "acme",
+                    "name": "Northwind Traders Pvt Ltd",
+                    "slug": "northwind-traders",
                     "country": "IN",
                     "timezone": "Asia/Kolkata",
                     "language": "en-IN",
@@ -56,37 +78,101 @@ class TenantCreate(BaseSchema):
 
 
 class TenantUpdate(BaseSchema):
-    """Body for updating a tenant. Send only the fields you want to change."""
+    """Body for updating a tenant organisation. Send only the fields you wish to modify."""
 
-    name: str | None = Field(default=None, min_length=1, max_length=255, description=_DESCRIPTIONS["name"])
-    slug: str | None = Field(
-        default=None, min_length=1, max_length=63, pattern=SLUG_PATTERN, description=_DESCRIPTIONS["slug"]
+    name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+        description=_DESCRIPTIONS["name"],
+        examples=["Northwind Traders India Pvt Ltd"],
     )
-    country: str | None = Field(default=None, min_length=2, max_length=2, description=_DESCRIPTIONS["country"])
-    timezone: str | None = Field(default=None, max_length=64, description=_DESCRIPTIONS["timezone"])
-    language: str | None = Field(default=None, max_length=16, description=_DESCRIPTIONS["language"])
-    date_format: str | None = Field(default=None, max_length=20, description=_DESCRIPTIONS["date_format"])
-
-    model_config = ConfigDict(json_schema_extra={"examples": [{"name": "Acme Corp Ltd"}]})
-
-
-class TenantRead(AuditReadSchema):
-    """A tenant as returned by the API (includes the common record fields)."""
-
-    name: str = Field(description=_DESCRIPTIONS["name"])
-    slug: str = Field(description=_DESCRIPTIONS["slug"])
-    country: str | None = Field(default=None, description=_DESCRIPTIONS["country"])
-    timezone: str | None = Field(default=None, description=_DESCRIPTIONS["timezone"])
-    language: str | None = Field(default=None, description=_DESCRIPTIONS["language"])
-    date_format: str | None = Field(default=None, description=_DESCRIPTIONS["date_format"])
+    slug: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=63,
+        pattern=SLUG_PATTERN,
+        description=_DESCRIPTIONS["slug"],
+        examples=["northwind-traders-india"],
+    )
+    country: str | None = Field(
+        default=None,
+        min_length=2,
+        max_length=2,
+        description=_DESCRIPTIONS["country"],
+        examples=["IN"],
+    )
+    timezone: str | None = Field(
+        default=None,
+        max_length=64,
+        description=_DESCRIPTIONS["timezone"],
+        examples=["Asia/Kolkata"],
+    )
+    language: str | None = Field(
+        default=None,
+        max_length=16,
+        description=_DESCRIPTIONS["language"],
+        examples=["en-IN"],
+    )
+    date_format: str | None = Field(
+        default=None,
+        max_length=20,
+        description=_DESCRIPTIONS["date_format"],
+        examples=["DD/MM/YYYY"],
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
             "examples": [
                 {
-                    "id": "3f6c1a52-8d5e-4b8e-9c1a-2f6d3e7b9a10",
-                    "name": "Acme Corporation",
-                    "slug": "acme",
+                    "name": "Northwind Traders India Pvt Ltd",
+                    "country": "IN",
+                    "timezone": "Asia/Kolkata",
+                }
+            ]
+        }
+    )
+
+
+class TenantRead(AuditReadSchema):
+    """A tenant organisation as returned by the API (includes common audit trail fields)."""
+
+    name: str = Field(
+        description=_DESCRIPTIONS["name"],
+        examples=["Northwind Traders Pvt Ltd"],
+    )
+    slug: str = Field(
+        description=_DESCRIPTIONS["slug"],
+        examples=["northwind-traders"],
+    )
+    country: str | None = Field(
+        default=None,
+        description=_DESCRIPTIONS["country"],
+        examples=["IN"],
+    )
+    timezone: str | None = Field(
+        default=None,
+        description=_DESCRIPTIONS["timezone"],
+        examples=["Asia/Kolkata"],
+    )
+    language: str | None = Field(
+        default=None,
+        description=_DESCRIPTIONS["language"],
+        examples=["en-IN"],
+    )
+    date_format: str | None = Field(
+        default=None,
+        description=_DESCRIPTIONS["date_format"],
+        examples=["DD/MM/YYYY"],
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+                    "name": "Northwind Traders Pvt Ltd",
+                    "slug": "northwind-traders",
                     "country": "IN",
                     "timezone": "Asia/Kolkata",
                     "language": "en-IN",

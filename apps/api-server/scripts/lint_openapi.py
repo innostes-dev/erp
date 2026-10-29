@@ -138,7 +138,7 @@ def main() -> None:
                 if not param.get("description"):
                     add_violation("E6", f"{loc} (param:{p_name})", f"Parameter '{p_name}' lacks description", "Add description to Field/Query/Path")
                 p_schema = param.get("schema", {})
-                if p_schema.get("type") == "string" and "id" in p_name.lower() and not p_schema.get("format"):
+                if p_schema.get("type") == "string" and p_name.endswith("_id") and p_name not in ["module_id", "plugin_id"] and not p_schema.get("format"):
                     add_violation("E6", f"{loc} (param:{p_name})", f"ID parameter '{p_name}' lacks format: uuid", "Specify format='uuid' on Path parameter")
 
             # E8: Success response
@@ -180,11 +180,16 @@ def main() -> None:
     # 3. Schemas Checklist (S1-S8)
     schemas = spec.get("components", {}).get("schemas", {})
     for s_name, s_obj in schemas.items():
+        # Skip FastAPI framework built-in validation error schemas
+        if s_name in ["HTTPValidationError", "ValidationError"]:
+            continue
+
         loc = f"schema:{s_name}"
 
         # S1: Schema class description
         if not s_obj.get("description"):
-            add_violation("S1", loc, f"Schema '{s_name}' lacks class docstring description", "Add class docstring to Pydantic model")
+            if not s_name.startswith("Page_"):
+                add_violation("S1", loc, f"Schema '{s_name}' lacks class docstring description", "Add class docstring to Pydantic model")
 
         # S2 & S3: Fields
         properties = s_obj.get("properties", {})

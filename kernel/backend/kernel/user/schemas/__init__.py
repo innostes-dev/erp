@@ -12,9 +12,10 @@ from kernel.user.schemas.rbac import (
     UserRoleAssign,
     UserRoleRead,
 )
-from kernel.user.schemas.user import AdminUserInput, UserCreate, UserRead, UserUpdate
+from kernel.user.schemas.user import AdminUserCreate, AdminUserInput, UserCreate, UserRead, UserUpdate
 
 __all__ = [
+    "AdminUserCreate",
     "AdminUserInput",
     "UserCreate",
     "UserUpdate",

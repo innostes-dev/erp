@@ -60,8 +60,8 @@ class UserModule(BaseModule):
     router = router
     openapi_tags = [
         {
-            "name": TAG,
-            "description": "User identity management, authentication credentials, and device controls.",
+            "name": "User management",
+            "description": "Enterprise identity management, staff credentials, RBAC roles, and permission assignments.",
         }
     ]
 

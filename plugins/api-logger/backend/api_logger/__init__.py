@@ -13,7 +13,7 @@ class ApiLoggerPlugin(BaseModule):
     description: str = "API request logging, webhook inspection, and debugging"
     router = router
     openapi_tags: list[dict[str, Any]] = [
-        {"name": "API Logger", "description": "API Logger extensible plugin endpoints."}
+        {"name": "API logger", "description": "API logger request inspection and webhook telemetry plugin."}
     ]
 
     async def health_check(self) -> dict[str, Any]:

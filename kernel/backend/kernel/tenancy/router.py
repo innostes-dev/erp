@@ -8,14 +8,33 @@ from datetime import datetime, timezone
 from importlib.metadata import entry_points
 import uuid
 
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Header, Path, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from kernel.core.database import get_db
+from kernel.core.schemas import Page, error_responses
+from kernel.core.security import get_actor_id
+from kernel.core.services.errors import ForbiddenError, UnauthorizedError, UnprocessableContentError
+from kernel.tenancy.models import Tenant, TenantMember, TenantMemberStatus, TenantModule, TenantPlugin
+from kernel.tenancy.schemas import (
+    ActivationResponse,
+    ItemCatalogRead,
+    ModuleListResponse,
+    PluginListResponse,
+    TenantCreate,
+    TenantRead,
+    TenantUpdate,
+)
+from kernel.tenancy.services import SlugTakenError, TenantNotFoundError, TenantService
+from kernel.user.models.user import User
 
-_bearer_scheme = HTTPBearer(auto_error=True)
+_bearer_scheme = HTTPBearer(
+    auto_error=True,
+    scheme_name="BearerAuth",
+    description="JWT Bearer access token or personal access token.",
+)
 
 
 async def get_current_user_dep(
@@ -31,26 +50,15 @@ async def require_super_admin_dep(
 ) -> "User":
     from kernel.auth.dependencies import require_super_admin
     return await require_super_admin(current_user=user)
-from kernel.core.schemas import Page, error_responses
-from kernel.core.security import get_actor_id
-from kernel.tenancy.models import Tenant, TenantMember, TenantMemberStatus, TenantModule, TenantPlugin
-from kernel.tenancy.schemas import (
-    ActivationResponse,
-    ItemCatalogRead,
-    ModuleListResponse,
-    PluginListResponse,
-    TenantCreate,
-    TenantRead,
-    TenantUpdate,
-)
-from kernel.tenancy.services import SlugTakenError, TenantNotFoundError, TenantService
-from kernel.user.models.user import User
 
 TAG = "Tenancy"
 
 router = APIRouter(prefix="/tenants", tags=[TAG])
 
-TenantId = Path(description="Id of the tenant.")
+TenantId = Path(
+    description="Unique identifier of the tenant organisation.",
+    examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+)
 
 
 def get_service(session: AsyncSession = Depends(get_db)) -> TenantService:
@@ -94,9 +102,14 @@ async def _get_or_404(
     response_model=TenantRead,
     status_code=status.HTTP_201_CREATED,
     summary="Create a tenant",
-    response_description="The created tenant.",
-    responses=error_responses(SlugTakenError),
+    response_description="The created tenant organisation.",
     operation_id="tenants_create",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        SlugTakenError,
+        UnauthorizedError,
+        UnprocessableContentError,
+    ),
 )
 async def create_tenant(
     body: TenantCreate,
@@ -105,8 +118,8 @@ async def create_tenant(
 ) -> Tenant:
     """Create a new tenant (customer organisation).
 
-    If a valid bearer token is sent, its user is recorded in `created_by`
-    and `updated_by`. Returns **409** if the slug is already used.
+    Requires Bearer authentication. If a valid bearer token is sent, its user is
+    recorded in `created_by` and `updated_by`. Returns **409** if the slug is already taken.
     \f
     Args:
         body: Tenant fields.
@@ -128,16 +141,19 @@ async def create_tenant(
     summary="List tenants",
     response_description="One page of tenants, newest first.",
     operation_id="tenants_list",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, UnprocessableContentError),
 )
 async def list_tenants(
-    offset: int = Query(0, ge=0, description="Number of tenants to skip."),
-    limit: int = Query(50, ge=1, le=200, description="Maximum tenants to return (1-200)."),
-    include_deleted: bool = Query(False, description="Also return soft-deleted tenants."),
+    offset: int = Query(0, ge=0, description="Number of tenants to skip.", examples=[0]),
+    limit: int = Query(50, ge=1, le=200, description="Maximum tenants to return (1-200).", examples=[50]),
+    include_deleted: bool = Query(False, description="Also return soft-deleted tenants.", examples=[False]),
     service: TenantService = Depends(get_service),
 ) -> Page[TenantRead]:
     """List tenants with pagination, newest first.
 
-    Soft-deleted tenants are hidden unless `include_deleted=true`.
+    Requires Bearer authentication. Soft-deleted tenants are hidden unless
+    `include_deleted=true` is requested.
     \f
     Args:
         offset: Number of tenants to skip.
@@ -161,15 +177,22 @@ async def list_tenants(
     "/{tenant_id}",
     response_model=TenantRead,
     summary="Get a tenant",
-    response_description="The tenant.",
-    responses=error_responses(TenantNotFoundError),
+    response_description="The tenant organisation.",
     operation_id="tenants_get",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        TenantNotFoundError,
+        UnauthorizedError,
+        UnprocessableContentError,
+    ),
 )
 async def get_tenant(
     tenant_id: uuid.UUID = TenantId,
     service: TenantService = Depends(get_service),
 ) -> Tenant:
-    """Get one tenant by id. Soft-deleted tenants return 404.
+    """Get one tenant organisation by unique id.
+
+    Requires Bearer authentication. Soft-deleted tenants return 404.
     \f
     Args:
         tenant_id: Tenant id from the URL.
@@ -188,9 +211,15 @@ async def get_tenant(
     "/{tenant_id}",
     response_model=TenantRead,
     summary="Update a tenant",
-    response_description="The updated tenant.",
-    responses=error_responses(TenantNotFoundError, SlugTakenError),
+    response_description="The updated tenant organisation.",
     operation_id="tenants_update",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        TenantNotFoundError,
+        SlugTakenError,
+        UnauthorizedError,
+        UnprocessableContentError,
+    ),
 )
 async def update_tenant(
     body: TenantUpdate,
@@ -198,9 +227,9 @@ async def update_tenant(
     service: TenantService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
 ) -> Tenant:
-    """Change a tenant. Only the fields you send are updated.
+    """Change tenant organisation fields. Only sent fields are modified.
 
-    The calling user (from the bearer token) is recorded in `updated_by`.
+    Requires Bearer authentication. The calling user is recorded in `updated_by`.
     Soft-deleted tenants return 404; restore them first.
     \f
     Args:
@@ -223,19 +252,25 @@ async def update_tenant(
 @router.delete(
     "/{tenant_id}",
     response_model=TenantRead,
-    summary="Delete a tenant (soft delete)",
-    response_description="The tenant, now marked as deleted.",
-    responses=error_responses(TenantNotFoundError),
+    summary="Delete a tenant",
+    response_description="The tenant organisation, now marked as deleted.",
     operation_id="tenants_delete",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        TenantNotFoundError,
+        UnauthorizedError,
+        UnprocessableContentError,
+    ),
 )
 async def delete_tenant(
     tenant_id: uuid.UUID = TenantId,
     service: TenantService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
 ) -> Tenant:
-    """Soft-delete a tenant: it is hidden from lists but kept in the database.
+    """Soft-delete a tenant organisation.
 
-    Sets `deleted_at` and `deleted_by`. Undo with
+    Requires Bearer authentication. The tenant is hidden from standard lists
+    but retained in the database. Sets `deleted_at` and `deleted_by`. Undo with
     `POST /tenants/{tenant_id}/restore`.
     \f
     Args:
@@ -257,19 +292,24 @@ async def delete_tenant(
     "/{tenant_id}/restore",
     response_model=TenantRead,
     summary="Restore a deleted tenant",
-    response_description="The tenant, active again.",
-    responses=error_responses(TenantNotFoundError),
+    response_description="The tenant organisation, active again.",
     operation_id="tenants_restore",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        TenantNotFoundError,
+        UnauthorizedError,
+        UnprocessableContentError,
+    ),
 )
 async def restore_tenant(
     tenant_id: uuid.UUID = TenantId,
     service: TenantService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
 ) -> Tenant:
-    """Bring back a soft-deleted tenant.
+    """Bring back a soft-deleted tenant organisation.
 
-    Clears `deleted_at` and `deleted_by`. Calling it on an active tenant
-    is harmless.
+    Requires Bearer authentication. Clears `deleted_at` and `deleted_by`.
+    Calling on an active tenant is harmless and idempotent.
     \f
     Args:
         tenant_id: Tenant id from the URL.
@@ -291,8 +331,13 @@ async def restore_tenant(
 # ---------------------------------------------------------------------------
 
 
-async def _get_current_tenant_id(session: AsyncSession, user: User) -> uuid.UUID:
-    """Resolve active tenant ID for calling user, falling back to first active tenant."""
+async def _get_current_tenant_id(
+    session: AsyncSession, user: User, explicit_tenant_id: uuid.UUID | None = None
+) -> uuid.UUID:
+    """Resolve active tenant ID for calling user, respecting explicit header or membership."""
+    if explicit_tenant_id:
+        return explicit_tenant_id
+
     res = await session.execute(
         select(TenantMember.tenant_id)
         .where(TenantMember.user_id == user.id, TenantMember.status == TenantMemberStatus.ACTIVE)
@@ -314,15 +359,35 @@ async def _get_current_tenant_id(session: AsyncSession, user: User) -> uuid.UUID
 @router.get(
     "/current/modules",
     response_model=ModuleListResponse,
-    summary="List business modules with tenant activation status",
+    summary="List business modules for current tenant",
     operation_id="tenants_list_modules",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, TenantNotFoundError),
 )
 async def list_current_modules(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
 ) -> ModuleListResponse:
-    """Return catalog of business modules and which ones are activated for the current tenant."""
-    tenant_id = await _get_current_tenant_id(session, current_user)
+    """Return catalog of business modules and their activation status.
+
+    Requires Bearer authentication. Returns which packages are enabled for the
+    current tenant organization context.
+    \f
+    Args:
+        session: Active async database session.
+        current_user: Authenticated actor.
+        x_tenant_id: Optional explicit tenant context header.
+
+    Returns:
+        ModuleListResponse containing all discoverable modules and active IDs.
+    """
+    tenant_id = await _get_current_tenant_id(session, current_user, x_tenant_id)
 
     res = await session.execute(
         select(TenantModule).where(TenantModule.tenant_id == tenant_id, TenantModule.is_active.is_(True))
@@ -387,14 +452,40 @@ async def list_current_modules(
     response_model=ActivationResponse,
     summary="Activate a business module for tenant",
     operation_id="tenants_activate_module",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        UnauthorizedError,
+        ForbiddenError,
+        TenantNotFoundError,
+        UnprocessableContentError,
+    ),
 )
 async def activate_module(
-    module_id: str,
+    module_id: str = Path(description="Package identifier of business module to activate.", examples=["hrms"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
 ) -> ActivationResponse:
-    """Activate a business module for the current tenant (Super Admin only)."""
-    tenant_id = await _get_current_tenant_id(session, admin_user)
+    """Activate a business module for the current tenant.
+
+    Requires Super Administrator privilege. Enables the module's feature set
+    and navigation for the organization.
+    \f
+    Args:
+        module_id: Identifier of target module.
+        session: Active async database session.
+        admin_user: Authenticated administrator.
+        x_tenant_id: Optional explicit tenant context header.
+
+    Returns:
+        ActivationResponse confirming enabled state.
+    """
+    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
 
     res = await session.execute(
         select(TenantModule).where(TenantModule.tenant_id == tenant_id, TenantModule.module_id == module_id)
@@ -427,14 +518,40 @@ async def activate_module(
     response_model=ActivationResponse,
     summary="Deactivate a business module for tenant",
     operation_id="tenants_deactivate_module",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        UnauthorizedError,
+        ForbiddenError,
+        TenantNotFoundError,
+        UnprocessableContentError,
+    ),
 )
 async def deactivate_module(
-    module_id: str,
+    module_id: str = Path(description="Package identifier of business module to deactivate.", examples=["hrms"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
 ) -> ActivationResponse:
-    """Deactivate a business module for the current tenant (Super Admin only)."""
-    tenant_id = await _get_current_tenant_id(session, admin_user)
+    """Deactivate a business module for the current tenant.
+
+    Requires Super Administrator privilege. Disables access to module routes
+    and navigation.
+    \f
+    Args:
+        module_id: Identifier of target module.
+        session: Active async database session.
+        admin_user: Authenticated administrator.
+        x_tenant_id: Optional explicit tenant context header.
+
+    Returns:
+        ActivationResponse confirming deactivated state.
+    """
+    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
     res = await session.execute(
         select(TenantModule).where(TenantModule.tenant_id == tenant_id, TenantModule.module_id == module_id)
     )
@@ -454,15 +571,35 @@ async def deactivate_module(
 @router.get(
     "/current/plugins",
     response_model=PluginListResponse,
-    summary="List extensible plugins with tenant activation status",
+    summary="List extensible plugins for current tenant",
     operation_id="tenants_list_plugins",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, TenantNotFoundError),
 )
 async def list_current_plugins(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
 ) -> PluginListResponse:
-    """Return catalog of extensible plugins and which ones are activated for the current tenant."""
-    tenant_id = await _get_current_tenant_id(session, current_user)
+    """Return catalog of extensible plugins and their activation status.
+
+    Requires Bearer authentication. Returns which plugins are enabled for the
+    current tenant organisation context.
+    \f
+    Args:
+        session: Active async database session.
+        current_user: Authenticated actor.
+        x_tenant_id: Optional explicit tenant context header.
+
+    Returns:
+        PluginListResponse with all discoverable plugins and active IDs.
+    """
+    tenant_id = await _get_current_tenant_id(session, current_user, x_tenant_id)
 
     res = await session.execute(
         select(TenantPlugin).where(TenantPlugin.tenant_id == tenant_id, TenantPlugin.is_active.is_(True))
@@ -519,14 +656,40 @@ async def list_current_plugins(
     response_model=ActivationResponse,
     summary="Activate an extensible plugin for tenant",
     operation_id="tenants_activate_plugin",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        UnauthorizedError,
+        ForbiddenError,
+        TenantNotFoundError,
+        UnprocessableContentError,
+    ),
 )
 async def activate_plugin(
-    plugin_id: str,
+    plugin_id: str = Path(description="Package identifier of extensible plugin to activate.", examples=["api-logger"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
 ) -> ActivationResponse:
-    """Activate an extensible plugin for the current tenant (Super Admin only)."""
-    tenant_id = await _get_current_tenant_id(session, admin_user)
+    """Activate an extensible plugin for the current tenant.
+
+    Requires Super Administrator privilege. Enables third-party extensions
+    and hook listeners for the organization.
+    \f
+    Args:
+        plugin_id: Identifier of target plugin.
+        session: Active async database session.
+        admin_user: Authenticated administrator.
+        x_tenant_id: Optional explicit tenant context header.
+
+    Returns:
+        ActivationResponse confirming enabled state.
+    """
+    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
 
     res = await session.execute(
         select(TenantPlugin).where(TenantPlugin.tenant_id == tenant_id, TenantPlugin.plugin_id == plugin_id)
@@ -559,14 +722,40 @@ async def activate_plugin(
     response_model=ActivationResponse,
     summary="Deactivate an extensible plugin for tenant",
     operation_id="tenants_deactivate_plugin",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(
+        UnauthorizedError,
+        ForbiddenError,
+        TenantNotFoundError,
+        UnprocessableContentError,
+    ),
 )
 async def deactivate_plugin(
-    plugin_id: str,
+    plugin_id: str = Path(description="Package identifier of extensible plugin to deactivate.", examples=["api-logger"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
 ) -> ActivationResponse:
-    """Deactivate an extensible plugin for the current tenant (Super Admin only)."""
-    tenant_id = await _get_current_tenant_id(session, admin_user)
+    """Deactivate an extensible plugin for the current tenant.
+
+    Requires Super Administrator privilege. Disables third-party extensions
+    and hook listeners.
+    \f
+    Args:
+        plugin_id: Identifier of target plugin.
+        session: Active async database session.
+        admin_user: Authenticated administrator.
+        x_tenant_id: Optional explicit tenant context header.
+
+    Returns:
+        ActivationResponse confirming deactivated state.
+    """
+    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
     res = await session.execute(
         select(TenantPlugin).where(TenantPlugin.tenant_id == tenant_id, TenantPlugin.plugin_id == plugin_id)
     )
@@ -581,4 +770,3 @@ async def deactivate_plugin(
         is_active=False,
         message=f"Plugin '{plugin_id}' deactivated.",
     )
-

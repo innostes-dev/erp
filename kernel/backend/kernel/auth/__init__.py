@@ -47,7 +47,7 @@ class AuthModule(BaseModule):
     openapi_tags = [
         {
             "name": TAG,
-            "description": "User login, refresh token rotation, anti-enumeration forgot-password, and credential updates.",
+            "description": "User authentication, JWT token lifecycle, session revocation, and API key management.",
         }
     ]
 

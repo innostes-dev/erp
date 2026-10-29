@@ -29,20 +29,37 @@ class AuditReadSchema(BaseSchema):
     Read schemas inherit this and only add their own fields.
     """
 
-    id: uuid.UUID = Field(description="Unique id of the record.")
-    created_at: datetime = Field(description="When the record was created (UTC).")
-    created_by: uuid.UUID | None = Field(
-        default=None, description="User who created the record. Null for system actions."
+    id: uuid.UUID = Field(
+        description="Unique identifier of the record in UUID v4 format.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
     )
-    updated_at: datetime = Field(description="When the record was last changed (UTC).")
+    created_at: datetime = Field(
+        description="Timestamp when the record was created in ISO 8601 UTC format.",
+        examples=["2026-10-29T10:00:00Z"],
+    )
+    created_by: uuid.UUID | None = Field(
+        default=None,
+        description="Unique identifier of the user who created the record. Null for automated system actions.",
+        examples=["a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"],
+    )
+    updated_at: datetime = Field(
+        description="Timestamp when the record was last modified in ISO 8601 UTC format.",
+        examples=["2026-10-29T10:30:00Z"],
+    )
     updated_by: uuid.UUID | None = Field(
-        default=None, description="User who last changed the record. Null for system actions."
+        default=None,
+        description="Unique identifier of the user who last modified the record. Null for automated system actions.",
+        examples=["a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"],
     )
     deleted_at: datetime | None = Field(
-        default=None, description="When the record was soft-deleted. Null if active."
+        default=None,
+        description="Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active.",
+        examples=[None],
     )
     deleted_by: uuid.UUID | None = Field(
-        default=None, description="User who soft-deleted the record. Null if active."
+        default=None,
+        description="Unique identifier of the user who soft-deleted the record. Null while active.",
+        examples=[None],
     )
 
 
@@ -59,7 +76,7 @@ class Page(BaseSchema, Generic[ItemT]):
         limit: Maximum records per page.
     """
 
-    items: list[ItemT] = Field(description="Records on this page.")
-    total: int = Field(description="Number of matching records across all pages.", ge=0)
-    offset: int = Field(description="How many records were skipped.", ge=0)
-    limit: int = Field(description="Maximum records per page.", ge=1)
+    items: list[ItemT] = Field(description="Records on this page.", examples=[[]])
+    total: int = Field(description="Number of matching records across all pages.", ge=0, examples=[42])
+    offset: int = Field(description="How many records were skipped.", ge=0, examples=[0])
+    limit: int = Field(description="Maximum records per page.", ge=1, le=200, examples=[20])

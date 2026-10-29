@@ -88,10 +88,21 @@ def get(self, id: uuid.UUID, include_deleted: bool = False) -> ModelT | None:
 
 **API**: the docs at `/docs` are generated from the code, so document endpoints where they are defined:
 
-- Route decorator: `summary=`, `response_description=`, `operation_id="<feature>_<action>"`, and `responses=error_responses(<error classes>)` listing the service errors the endpoint can raise. Never write status codes as numbers: each error class (one per HTTP 4xx/5xx status, e.g. `NotFoundError`, `ConflictError`, `ServiceUnavailableError` in `core/services/errors.py`) declares its `fastapi.status` constant, and `core/http.py` maps raised errors to responses.
-- Endpoint docstring: text **before `\f`** is the public API description. Text **after `\f`** (Args/Returns/Raises) is for developers and is hidden from the API docs.
-- Schemas: `Field(description=..., examples=[...])` on every field, plus a full example in `model_config["json_schema_extra"]` for read schemas.
-- Module: describe each router tag in `openapi_tags` on the module class.
+- **Route decorator**:
+  - `summary=`: Imperative sentence case, 60 characters or fewer, with no trailing full stop (e.g. `"Create a tenant"`).
+  - `operation_id="<feature>_<action>"`: Stable snake_case identifier (e.g. `"tenants_create"`, `"auth_login"`).
+  - `response_description=`: Explicit description of what is returned on success.
+  - `openapi_extra={"security": [...]}`: Explicit declaration matching real dependencies (`[{"BearerAuth": []}]` for secured, `[]` for public).
+  - `responses=error_responses(<error classes>)`: Exactly lists the errors the endpoint can return, including `UnauthorizedError` (401), `ForbiddenError` (403), `NotFoundError` (404), `ConflictError` (409), and `UnprocessableContentError` (422). Never write status codes as raw numbers.
+- **Endpoint docstrings**: Text **before `\f`** is the public API description (what the endpoint does, authorized roles, side effects, and idempotency). Text **after `\f`** (Args/Returns/Raises) is for developers and is hidden from API clients.
+- **Parameters**: Every path, query, and header parameter must declare a `description=` and `examples=[...]`. UUID parameters must be typed as `uuid.UUID` or declare `format="uuid"`.
+- **Schemas**:
+  - S1: The class docstring defines the schema description.
+  - S2: Every field must have `description=` and `examples=[...]`.
+  - S3: Constraints (`min_length`, `max_length`, `ge`, `le`, `pattern`) must be declared directly on `Field(...)`.
+  - S6: Read schemas must declare a complete, realistic example in `model_config = {"json_schema_extra": {"examples": [...]}}` using the Northwind universe (`priya.shah@northwind.example`, `Northwind Traders Pvt Ltd`).
+  - S7: Schema naming convention is `<Entity>Create` for creation inputs, `<Entity>Update` for modification inputs, and `<Entity>Read` for response models. Never use the legacy `Input` suffix.
+- **Module tags**: Register tags in `openapi_tags` using sentence case (e.g. `"User management"`, `"API logger"`), providing a comprehensive functional overview.
 
 ### Automated API quality gates
 

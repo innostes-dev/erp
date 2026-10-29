@@ -3,6 +3,8 @@
 from http import HTTPStatus
 from typing import Any
 
+from pydantic import Field
+
 from kernel.core.schemas.base import BaseSchema
 from kernel.core.services.errors import ServiceError
 
@@ -15,10 +17,26 @@ class ErrorResponse(BaseSchema):
         code: Machine-readable error id, only for some errors (e.g. "setup_required").
     """
 
-    detail: str
-    code: str | None = None
+    detail: str = Field(
+        description="Human-readable explanation of the error condition.",
+        examples=["Tenant not found."],
+    )
+    code: str | None = Field(
+        default=None,
+        description="Machine-readable error identifier for programmatic client branching.",
+        examples=["tenant_not_found"],
+    )
 
-    model_config = {"json_schema_extra": {"examples": [{"detail": "Tenant not found"}]}}
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "detail": "Tenant not found.",
+                    "code": "tenant_not_found",
+                }
+            ]
+        }
+    }
 
 
 def error_responses(*errors: type[ServiceError] | int) -> dict[int | str, dict[str, Any]]:

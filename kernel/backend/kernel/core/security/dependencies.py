@@ -11,7 +11,7 @@ from kernel.core.security.jwt import decode_token
 _bearer = HTTPBearer(
     auto_error=False,
     scheme_name="BearerAuth",
-    description="JWT access token. Optional for now; used to record who made a change.",
+    description="JWT Bearer access token or personal access token (inno_live_...). Obtain an access token via POST /auth/login (30-minute lifespan, refreshed via POST /auth/refresh). Send in the HTTP Authorization header as 'Bearer <token>'.",
 )
 
 

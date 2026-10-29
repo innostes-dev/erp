@@ -15,7 +15,7 @@ part after `\\f` is for developers only.
 
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from kernel.core.config import get_settings
@@ -23,6 +23,7 @@ from kernel.core.database import get_db
 from kernel.core.schemas import error_responses
 from kernel.core.security import get_actor_id
 from kernel.core.services import TooManyRequestsError
+from kernel.core.services.errors import UnprocessableContentError
 from kernel.setup.dependencies import is_installed_cached, require_setup_available, require_setup_token
 from kernel.setup.schemas import SetupChecks, SetupRequest, SetupResult, SetupStatus
 from kernel.setup.services import (
@@ -62,8 +63,9 @@ def get_service(session: AsyncSession = Depends(get_db)) -> SetupService:
     response_model=SetupStatus,
     summary="Get setup status",
     response_description="Whether the system is installed.",
+    operation_id="setup_get_status",
+    openapi_extra={"security": []},
     responses=error_responses(DatabaseUnavailableError),
-    operation_id="setup_status",
 )
 async def get_setup_status() -> SetupStatus:
     """Tell the UI whether to show the setup wizard. Reveals nothing else.
@@ -85,13 +87,22 @@ async def get_setup_status() -> SetupStatus:
     response_model=SetupChecks,
     summary="Run pre-install checks",
     response_description="Database connectivity and pending migrations.",
+    operation_id="setup_run_checks",
+    openapi_extra={"security": [{"SetupToken": []}]},
     dependencies=_GUARDED,
     responses=error_responses(
         SetupNotAvailableError, InvalidSetupTokenError, TooManyRequestsError, DatabaseUnavailableError
     ),
-    operation_id="setup_checks",
 )
-async def get_setup_checks(service: SetupService = Depends(get_service)) -> SetupChecks:
+async def get_setup_checks(
+    service: SetupService = Depends(get_service),
+    x_setup_token: str | None = Header(
+        default=None,
+        alias="X-Setup-Token",
+        description="One-time system installation token printed in server log or set via SETUP_TOKEN.",
+        examples=["inno_setup_secret_token_123"],
+    ),
+) -> SetupChecks:
     """Check the database before installing. Requires the `X-Setup-Token` header.
 
     The wizard also uses it to verify the token. Returns **404** once setup is
@@ -99,6 +110,7 @@ async def get_setup_checks(service: SetupService = Depends(get_service)) -> Setu
     \f
     Args:
         service: Injected setup service.
+        x_setup_token: Setup token header parameter.
 
     Returns:
         Database connectivity and the number of pending migrations.
@@ -118,6 +130,8 @@ async def get_setup_checks(service: SetupService = Depends(get_service)) -> Setu
     status_code=status.HTTP_201_CREATED,
     summary="Run first-run setup",
     response_description="What setup created.",
+    operation_id="setup_execute_install",
+    openapi_extra={"security": [{"SetupToken": []}]},
     dependencies=_GUARDED,
     responses=error_responses(
         SetupNotAvailableError,
@@ -125,13 +139,19 @@ async def get_setup_checks(service: SetupService = Depends(get_service)) -> Setu
         AlreadyInstalledError,
         TooManyRequestsError,
         DatabaseUnavailableError,
+        UnprocessableContentError,
     ),
-    operation_id="setup_run",
 )
 async def run_setup(
     body: SetupRequest,
     service: SetupService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
+    x_setup_token: str | None = Header(
+        default=None,
+        alias="X-Setup-Token",
+        description="One-time system installation token printed in server log or set via SETUP_TOKEN.",
+        examples=["inno_setup_secret_token_123"],
+    ),
 ) -> SetupResult:
     """Install the system: create the database tables and the first organisation.
 
@@ -145,6 +165,7 @@ async def run_setup(
         body: Values collected by the setup wizard.
         service: Injected setup service.
         actor_id: Id of the calling user, if a token was sent.
+        x_setup_token: Setup token header parameter.
 
     Returns:
         The created organisation and install time.
