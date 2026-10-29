@@ -1,144 +1,69 @@
 ---
 title: Plug-ins
-description: How a plug-in is packaged and how the engines find it.
+description: Architectural summary of plug-in discovery, entry-point registration, and manifest loading.
 icon: Plug
 owner: Platform Architecture Team
 lastReviewed: 2026-10-29
 arc42: 5
 ---
 
-Engines never import a plug-in by name. A plug-in **registers itself**, and the engine loads every
-registered plug-in at startup. Adding a feature therefore never means editing an engine.
+innostes ERP implements a modular, plug-in architecture where both the backend engine (`apps/api-server`) and the UI engine (`apps/web-app`) discover extensions dynamically at startup without importing them by name.
 
-## Backend plug-ins
+```text
+ ┌────────────────────────────────────────────────────────┐
+ │                      Backend Engine                     │
+ │                     apps/api-server                    │
+ └───────────────────────────▲────────────────────────────┘
+                             │ discovers via entry-points
+ ┌───────────────────────────┴────────────────────────────┐
+ │                   innostes.modules                     │
+ │   ┌───────────────┬───────────────┬────────────────┐   │
+ │   │ kernel (core) │ hrms (domain) │ crm (domain)   │   │
+ │   └───────────────┴───────────────┴────────────────┘   │
+ └────────────────────────────────────────────────────────┘
+```
 
-A backend plug-in is a normal Python package with its own `pyproject.toml`. It registers its
-module object in the `innostes.modules` **entry-point group**:
+## Backend Plug-ins
 
-```toml title="kernel/backend/pyproject.toml"
-[project]
-name = "kernel"
-version = "0.1.0"
+Backend plug-ins are standard Python packages that publish their `BaseModule` instance in the `innostes.modules` entry-point group in `pyproject.toml`:
 
+```toml title="modules/hrms/backend/pyproject.toml"
 [project.entry-points."innostes.modules"]
-tenancy = "kernel.tenancy:module"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["kernel*"]
+hrms = "hrms:module"
 ```
 
-`kernel.tenancy:module` points to an instance of `BaseModule`:
-
-```py title="kernel/backend/kernel/tenancy/__init__.py"
-class TenancyModule(BaseModule):
-    name = "tenancy"
-    version = "0.1.0"
-    router = router                       # FastAPI routes to mount
-    openapi_tags = [{"name": "Tenancy", "description": "..."}]   # API docs section
-
-module = TenancyModule()
-```
-
-One package can register several modules (the kernel will register `tenancy`, `identity`,
-`access`, …), one entry-point line each.
-
-### Installing it into the engine
-
-`apps/api-server/requirements.txt` lists every backend plug-in:
-
-```text title="apps/api-server/requirements.txt"
--e ../../kernel/backend
-fastapi[standard]>=0.115
-```
-
-Then reinstall:
-
-```bash
-pnpm nx run api-server:install
-```
-
-- `-e` installs in **editable** mode: code changes are picked up without reinstalling.
-- Reinstall only when you **add a plug-in** or **change its `pyproject.toml`** (new dependency, new entry point).
-
-### How the engine loads it
-
-At startup, `apps/api-server/app/main.py` calls:
+During startup lifespan initialization, `ModuleLoader` inspects installed entry points, mounts route collections, injects custom OpenAPI tags, and configures startup/shutdown lifecycle hooks:
 
 ```py title="apps/api-server/app/main.py"
 loader = ModuleLoader(engine.registry)
-loader.discover()       # loads every "innostes.modules" entry point
+loader.discover()
 app = engine.create_app()
 ```
 
-For each registered module the engine:
+For the complete technical specification of module registration, lifecycle methods, and health check contracts, consult the canonical [Plug-in Contract](/docs/architecture/plugin-contract#the-basemodule-interface).
 
-1. mounts `module.router`,
-2. adds `module.openapi_tags` to the API docs,
-3. calls `on_startup` / `on_shutdown`,
-4. includes `health_check()` in `/health`.
+## Frontend Plug-ins
 
-A plug-in that fails to import is logged and skipped, so one broken module can't take the whole API
-down. `GET /` lists the modules that were loaded.
+Frontend plug-ins are pnpm workspace packages consumed directly from source. Each package exports a declarative module or plugin manifest declaring routes, navigation links, and sub-features:
 
-<Callout type="warn" title="Import names must be unique">
-  Every backend plug-in needs its own top-level Python package name (`kernel`, `sales`, `hr`, …).
-  Two plug-ins with the same package name will overwrite each other.
-</Callout>
+```ts title="apps/web-app/src/app/catalog.ts"
+import { hrmsManifest } from '@innostes/hrms';
+import { crmManifest } from '@innostes/crm';
+import { apiLoggerManifest } from '@innostes/api-logger';
 
-### The `BaseModule` contract
+export const BUSINESS_MODULES_CATALOG = [hrmsManifest, crmManifest];
+export const PLUGINS_CATALOG = [apiLoggerManifest];
+```
 
-| Member | Required | Purpose |
-| --- | --- | --- |
-| `name` | yes | Unique id, shown in `/` and `/health` |
-| `version` | yes | Module version |
-| `description` | no | Short summary |
-| `router` | no | `APIRouter` mounted by the engine |
-| `openapi_tags` | with a router | Describes each router tag in the API docs |
-| `configure(app)` | no | Runs while the app is built, before routes are mounted. Use it to add middleware |
-| `on_startup(app)` | no | Runs when the server starts |
-| `on_shutdown(app)` | no | Runs when the server stops |
-| `health_check()` | no | Returns `{"status": "HEALTHY" \| "UNHEALTHY", ...}` |
+The UI engine mounts navigation and route trees dynamically from this catalog, gating module visibility based on active tenant subscriptions.
 
-## Frontend plug-ins
-
-Each plug-in's `frontend/` is a pnpm workspace package. The first one exists: **`@innostes/kernel`**
-in `kernel/frontend`.
-
-<Files>
-  <Folder name="kernel/frontend" defaultOpen>
-    <Folder name="src" defaultOpen>
-      <Folder name="core">
-        <File name="api/client.ts" />
-      </Folder>
-      <Folder name="setup" />
-      <File name="index.ts" />
-    </Folder>
-    <File name="package.json" />
-    <File name="tsconfig.lib.json" />
-  </Folder>
-</Files>
-
-- **Source-only**: `exports` points at `src/index.ts` and there is no build step. Vite compiles it as part of web-app.
-- **Wired in like any workspace package**: web-app lists it as `"@innostes/kernel": "workspace:*"`,
-  and `pnpm-workspace.yaml` includes `kernel/*`.
-- **Tailwind must scan it**: the pages use Tailwind classes, so web-app's `styles.css` has
-  `@source '../../../kernel/frontend/src'`. Add a line like that for every frontend plug-in.
-- **API calls go through the shared client**: use `apiRequest` from `@innostes/kernel`. web-app sets the address once with
-  `configureApi({ baseUrl: import.meta.env.VITE_API_URL })`.
-
-Today web-app uses the kernel directly (`<SetupGate>`). The next step, still planned, is page registration:
-
-- Each frontend plug-in exports a manifest: its pages (routes), sidebar entries and required permissions.
-- `apps/web-app` depends on the packages with `workspace:*` and builds its router and navigation from
-  the manifests, the same way `api-server` builds its API from `BaseModule`s.
-- Pages are built with `@innostes/ui` and call the backend through the shared API client in
-  `kernel/frontend` (`core`).
+For manifest interfaces, route definitions, and packaging standards, see [Frontend Contract](/docs/architecture/plugin-contract#2-frontend-plug-in-contract).
 
 ---
 
-## Related Guides
+## Related References & Guides
 
-- [Creating a Business Module](/docs/guides/creating-a-module) — Scaffolding business apps (`modules/hrms`, `modules/crm`) with tenant-aware activation and App Switcher integration.
-- [Creating an Extensible Plugin](/docs/guides/creating-a-plugin) — Building extensible developer, telemetry, and system plugins (`plugins/api-logger`) with Plugin Switcher integration.
-
+- [Building Blocks](/docs/architecture/building-blocks) — C4 container and component diagrams.
+- [Plug-in Contract](/docs/architecture/plugin-contract) — Formal architectural contract and invariants.
+- [Creating a Business Module](/docs/guides/creating-a-module) — Step-by-step guide for scaffolding business modules (`modules/hrms`, `modules/crm`).
+- [Creating an Extensible Plugin](/docs/guides/creating-a-plugin) — Step-by-step guide for platform and telemetry extensions (`plugins/api-logger`).

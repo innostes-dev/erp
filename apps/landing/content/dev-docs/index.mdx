@@ -5,53 +5,72 @@ icon: BookOpen
 summary: Developer documentation for the innostes monorepo.
 ---
 
-innostes is built as a single **Nx monorepo** managed with **pnpm**. All apps and shared packages
-live in one repository, share one lockfile, and are built and tested with the same commands.
+innostes is built as a single **Nx monorepo** managed with **pnpm**. All apps, domain business modules, extensible plugins, and shared libraries live in one repository, share one lockfile, and are built and tested with uniform commands.
 
-## What's in the repo
+## Documentation Structure
+
+Our documentation follows the Diátaxis framework to serve distinct engineering needs:
 
 <Cards>
-  <Card icon={<Rocket />} title="landing" href="/docs/apps/landing">
-    Public website and documentation (this site). Next.js + Fumadocs.
+  <Card icon={<Terminal />} title="Tutorial: Getting Started" href="/docs/getting-started">
+    Step-by-step walkthrough to get from an empty machine to running the entire platform locally.
   </Card>
-  <Card icon={<Boxes />} title="web-app" href="/docs/apps/web-app">
-    The UI engine. React + Vite. Renders the pages that frontend plug-ins provide.
+  <Card icon={<Workflow />} title="Explanation: Architecture" href="/docs/architecture">
+    Complete arc42 v8 architecture specifications, C4 diagrams, ADRs, and STRIDE threat models.
   </Card>
-  <Card icon={<Server />} title="api-server" href="/docs/apps/api-server">
-    The backend engine. Python + FastAPI. Loads backend plug-ins.
+  <Card icon={<ListChecks />} title="How-To: Developer Guides" href="/docs/guides/building-a-feature">
+    Task-oriented guides for scaffolding business modules, plugins, and enforcing conventions.
   </Card>
-  <Card icon={<Cpu />} title="kernel" href="/docs/architecture/kernel">
-    The shared foundation plug-in: database, security, base classes, tenancy.
+  <Card icon={<ShieldCheck />} title="Operations: Runbooks" href="/docs/operations/deployment">
+    Production deployment topologies, PostgreSQL backup/restore runbooks, and cryptographic key rotation.
   </Card>
-  <Card icon={<Layers />} title="@innostes/ui" href="/docs/packages/ui">
-    The design system. React components on Base UI and Tailwind CSS, published to npm.
+  <Card icon={<Server />} title="Reference: API Reference" href="/api-reference">
+    Interactive OpenAPI documentation for all 7 active platform modules and endpoints.
+  </Card>
+  <Card icon={<Layers />} title="Reference: UI Component Library" href="/ui/docs">
+    Design system specifications, token references, and accessible React components.
   </Card>
 </Cards>
 
-## Tech stack
-
-| Area | Tools |
-| --- | --- |
-| Monorepo | Nx 23, pnpm workspaces |
-| Language | TypeScript 6, Python 3.12+ |
-| Front end | React 19, Vite 8, Next.js 16 |
-| Styling | Tailwind CSS v4, `@innostes/ui` |
-| Docs | Fumadocs (MDX) |
-| Backend | FastAPI |
-
-## Start here
+## Monorepo Layout
 
 <Cards>
-  <Card icon={<Terminal />} title="Getting Started" href="/docs/getting-started">
-    Install the tools and run every app locally.
+  <Card icon={<Rocket />} title="apps/landing" href="/docs/apps/landing">
+    Public website and unified documentation platform built with Next.js and Fumadocs.
   </Card>
-  <Card icon={<GitBranch />} title="Project Structure" href="/docs/project-structure">
-    Where things live and why.
+  <Card icon={<Boxes />} title="apps/web-app" href="/docs/apps/web-app">
+    The UI engine. React + Vite application shell that dynamically mounts module manifests.
   </Card>
-  <Card icon={<Workflow />} title="Architecture" href="/docs/architecture/overview">
-    Two engines and the plug-ins that add every feature.
+  <Card icon={<Server />} title="apps/api-server" href="/docs/apps/api-server">
+    The backend engine. Python + FastAPI application that discovers and mounts backend plug-ins.
   </Card>
-  <Card icon={<Plug />} title="Building a Feature" href="/docs/guides/building-a-feature">
-    The step-by-step process and the definition of done.
+  <Card icon={<Cpu />} title="kernel" href="/docs/architecture/kernel">
+    Shared platform foundation plug-in: database, security, multi-tenancy, and common base classes.
+  </Card>
+  <Card icon={<Layers />} title="packages/ui (@innostes/ui)" href="/docs/packages/ui">
+    Enterprise design system. Accessible React components built on Base UI and Tailwind CSS v4.
+  </Card>
+</Cards>
+
+## Tech Stack
+
+| Area | Tools & Versions |
+| --- | --- |
+| Monorepo | Nx 23, pnpm workspaces |
+| Languages | TypeScript 6, Python 3.12+ |
+| Front End | React 19, Vite 8, Next.js 16 |
+| Styling | Tailwind CSS v4, `@innostes/ui` |
+| Documentation | Fumadocs (MDX) |
+| Backend | FastAPI, SQLAlchemy 2 (async), Pydantic v2, Alembic |
+| Database | PostgreSQL 16+ |
+
+## Quick Navigation
+
+<Cards>
+  <Card icon={<FolderTree />} title="Project Structure" href="/docs/project-structure">
+    Monorepo directory organization, package dependencies, and boundaries.
+  </Card>
+  <Card icon={<FileText />} title="MADR Architecture Decisions" href="/docs/architecture/decisions">
+    Index of all 18 MADR architectural decision records.
   </Card>
 </Cards>

@@ -39,10 +39,10 @@ Each fundamental decision is catalogued as an Architecture Decision Record (ADR)
 | FastAPI Backend ASGI Engine | `ADR-0002` (see [api-server Overview](/docs/apps/api-server)) |
 | React 19 & Vite UI Engine | `ADR-0003` (see [web-app Overview](/docs/apps/web-app)) |
 | PostgreSQL 16 Relational Database | `ADR-0004` (see [Constraints](/docs/architecture/constraints)) |
-| UUIDv4 Primary Keys on Every Entity | `ADR-0007` (see [Common Columns](/docs/architecture/kernel#common-columns)) |
-| Universal Soft Delete Pattern | `ADR-0008` (see [Soft Delete Architecture](/docs/architecture/kernel#soft-delete)) |
-| JWT Tokens with Token Family Rotation | `ADR-0010` (see [Actor Authentication](/docs/architecture/kernel#who-made-the-change)) |
-| Multi-Tenancy Scoping via `X-Tenant-ID` | `ADR-0011` (see [Overview Request Flow](/docs/architecture/overview#how-a-request-flows)) |
+| UUIDv4 Primary Keys on Every Entity | `ADR-0007` (see [Common Columns](/docs/architecture/data-architecture#3-universal-model-conventions)) |
+| Universal Soft Delete Pattern | `ADR-0008` (see [Soft Delete Architecture](/docs/architecture/data-architecture#4-universal-soft-delete-softdeletemixin)) |
+| JWT Tokens with Token Family Rotation | `ADR-0010` (see [Actor Authentication](/docs/architecture/cross-cutting#1-authentication-architecture)) |
+| Multi-Tenancy Scoping via `X-Tenant-ID` | `ADR-0011` (see [Overview Request Flow](/docs/architecture/runtime-view#2-inbound-request-lifecycle-tenant-isolation)) |
 | First-Run Setup Security Token | `ADR-0012` (see [First-run Setup](/docs/architecture/setup)) |
 
 ---

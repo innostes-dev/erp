@@ -104,7 +104,7 @@ class SlugTakenError(ConflictError):
 
 ## Database
 
-- Every model inherits `BaseModel`. See [common columns](/docs/architecture/kernel#common-columns).
+- Every model inherits `BaseModel`. See [common columns](/docs/architecture/data-architecture#3-universal-model-conventions).
 - Never delete rows through the API. Use `soft_delete`.
 - Services `flush()` and never `commit()`. One request is one transaction.
 - Every schema change goes through a reviewed Alembic migration. Never edit a migration that has

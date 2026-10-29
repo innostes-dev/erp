@@ -1,21 +1,28 @@
 ---
 title: Kernel
-description: The shared foundation every plug-in builds on. Infrastructure, common columns and base classes.
+description: The shared platform foundation plug-in providing infrastructure, security, multi-tenancy, and common base classes.
 icon: Cpu
 owner: Platform Architecture Team
 lastReviewed: 2026-10-29
 arc42: [5, 8]
 ---
 
-The kernel is the first plug-in. It has two kinds of code:
+The kernel is the platform foundation plug-in for innostes ERP. It provides two distinct layers of functionality:
 
-- **`core`**: infrastructure with **no tables**: settings, database, security, the module contract,
-  and base classes for schemas and services.
-- **Platform features**: features every ERP module relies on, each with its own tables and API.
-  Today: **tenancy** and **setup** (first-run installation, see [First-run Setup](/docs/architecture/setup)).
-  Next: identity (users), access (roles and permissions), audit.
+1. **`core`**: Infrastructure and foundation utilities with **no dedicated tables**: configuration management, async database engine, authentication security primitives, the `BaseModule` contract, standard Pydantic schemas, and `BaseService` CRUD abstractions.
+2. **Platform features**: Foundational multi-tenant capabilities required by all enterprise business modules:
+   - **`setup`**: First-run system installation, token protection, and installation locking.
+   - **`tenancy`**: Tenant lifecycle management, isolation context, and tenant settings.
+   - **`user`**: Identity administration, user management, and role-based access control (RBAC).
+   - **`auth`**: Authentication, rotating refresh token families, password reset, and API key management.
 
-## Backend layout
+For comprehensive architectural specifications, consult the canonical arc42 documentation:
+- [Building Blocks](/docs/architecture/building-blocks#4-kernel-architecture-layering-c4-level-3) — C4 component diagrams and subpackage layering.
+- [Data Architecture](/docs/architecture/data-architecture#3-universal-model-conventions) — Entity-relationship diagrams, common mixins, and pooled database multi-tenancy.
+- [Cross-cutting Concepts](/docs/architecture/cross-cutting#1-authentication-architecture) — Authentication, authorisation, RFC 7807 error handling, and transaction lifecycle.
+- [Plug-in Contract](/docs/architecture/plugin-contract#1-backend-plug-in-contract) — Backend `BaseModule` specification and frontend manifest integration.
+
+## Backend Layout
 
 <Files>
   <Folder name="kernel/backend" defaultOpen>
@@ -29,190 +36,70 @@ The kernel is the first plug-in. It has two kinds of code:
         <Folder name="services" />
         <File name="http.py" />
       </Folder>
-      <Folder name="tenancy" defaultOpen>
-        <Folder name="models" />
-        <Folder name="schemas" />
-        <Folder name="services" />
-        <File name="router.py" />
-        <File name="__init__.py" />
-      </Folder>
-      <Folder name="setup">
-        <Folder name="models" />
-        <Folder name="schemas" />
-        <Folder name="services" />
-        <File name="dependencies.py" />
-        <File name="middleware.py" />
-        <File name="router.py" />
-        <File name="__main__.py" />
-        <File name="__init__.py" />
-      </Folder>
+      <Folder name="setup" />
+      <Folder name="tenancy" />
+      <Folder name="user" />
+      <Folder name="auth" />
       <File name="models.py" />
     </Folder>
     <Folder name="migrations" />
     <Folder name="tests" />
-    <Folder name="var" />
     <File name="alembic.ini" />
     <File name="pyproject.toml" />
   </Folder>
 </Files>
 
-| Path | Contents |
-| --- | --- |
-| `core/config` | `Settings`, loaded from `.env` files and environment variables |
-| `core/database` | Async engine, `get_db` session dependency, `Base`, `BaseModel`, column mixins, migration runner |
-| `core/module` | `BaseModule` contract and `ModuleRegistry` |
-| `core/schemas` | `BaseSchema`, `AuditReadSchema`, `Page`, `ErrorResponse`, `error_responses()` |
-| `core/http.py` | `register_error_handlers`: turns service errors into responses with their status |
-| `core/security` | JWT helpers, `get_actor_id` dependency |
-| `core/services` | `BaseService` (CRUD with soft delete and audit columns), and one HTTP error class per 4xx/5xx status (`NotFoundError`, `ConflictError`, `ServiceUnavailableError`, …), each with its `fastapi.status` constant |
-| `tenancy/` | The tenants feature |
-| `setup/` | First-run installation: `installation` table, token-protected `/setup` routes, the `setup_required` middleware, the command-line installer. See [First-run Setup](/docs/architecture/setup) |
-| `models.py` | Imports every kernel table so Alembic can see them |
-| `migrations/` | Alembic migrations for kernel tables |
-| `var/` | Runtime files, gitignored and kept out of Docker images (e.g. the generated setup token) |
-| `pyproject.toml` | Package metadata and the `innostes.modules` entry points (`setup`, `tenancy`) |
+| Path | Contents | Canonical Reference |
+| --- | --- | --- |
+| `core/config` | `Settings` loaded from `.env` files and environment variables. | [Deployment](/docs/architecture/deployment#4-configuration-reference) |
+| `core/database` | Async engine, `get_db` session dependency, `Base`, `BaseModel`, column mixins. | [Data Architecture](/docs/architecture/data-architecture#3-universal-model-conventions) |
+| `core/module` | `BaseModule` contract and `ModuleRegistry`. | [Plug-in Contract](/docs/architecture/plugin-contract#the-basemodule-interface) |
+| `core/schemas` | `BaseSchema`, `AuditReadSchema`, `Page`, RFC 7807 `ErrorResponse`. | [Cross-cutting Concepts](/docs/architecture/cross-cutting#4-uniform-error-handling-problem-details) |
+| `core/http.py` | `register_error_handlers`: transforms domain service errors into Problem Details. | [Cross-cutting Concepts](/docs/architecture/cross-cutting#4-uniform-error-handling-problem-details) |
+| `core/security` | Argon2id password hashing, JWT creation and decode, security dependencies. | [Cross-cutting Concepts](/docs/architecture/cross-cutting#1-authentication-architecture) |
+| `core/services` | `BaseService[T]` with soft-delete filtering, pagination, and audit column population. | [Data Architecture](/docs/architecture/data-architecture#3-universal-model-conventions) |
+| `setup/` | First-run installation routes, setup middleware lock, command-line installer. | [Runtime View](/docs/architecture/runtime-view#3-first-run-setup-flow) |
+| `tenancy/` | Tenant creation, profile updates, and tenant membership checks. | [Runtime View](/docs/architecture/runtime-view#2-inbound-request-lifecycle-tenant-isolation) |
+| `user/` | User administration, roles, permissions, and device tracking. | [Cross-cutting Concepts](/docs/architecture/cross-cutting#2-authorisation-role-based-access-control-rbac) |
+| `auth/` | Login, rotating refresh tokens, password reset tokens, and API key management. | [Runtime View](/docs/architecture/runtime-view#4-authentication-token-rotation-logout) |
 
-## Frontend layout
+## Frontend Layout
 
-`kernel/frontend` is the `@innostes/kernel` package that web-app renders. It mirrors the backend:
-shared `core`, then one folder per feature.
+The `@innostes/kernel` package (`kernel/frontend`) provides the client-side authentication gates, setup wizard, and shared HTTP client:
 
 <Files>
   <Folder name="kernel/frontend" defaultOpen>
     <Folder name="src" defaultOpen>
       <Folder name="core" defaultOpen>
-        <Folder name="api" defaultOpen>
+        <Folder name="api">
           <File name="client.ts" />
           <File name="http-status.ts" />
         </Folder>
       </Folder>
-      <Folder name="setup" defaultOpen>
-        <File name="api.ts" />
-        <File name="types.ts" />
+      <Folder name="setup">
         <File name="SetupGate.tsx" />
         <File name="SetupWizard.tsx" />
-        <File name="slug.ts" />
-        <File name="index.ts" />
+      </Folder>
+      <Folder name="auth">
+        <File name="AuthGate.tsx" />
+        <File name="LoginForm.tsx" />
       </Folder>
       <File name="index.ts" />
     </Folder>
     <File name="package.json" />
-    <File name="tsconfig.lib.json" />
   </Folder>
 </Files>
 
-| Path | Contents |
-| --- | --- |
-| `core/api/client.ts` | `configureApi`, `apiRequest`, `ApiError` (with `status`, `code`, `retryAfter`) |
-| `core/api/http-status.ts` | `HttpStatus` constants, the same codes as the backend error classes |
-| `setup/api.ts`, `types.ts` | Calls and types for the setup endpoints, `SetupErrorCode`, `isSetupRequired()` |
-| `setup/SetupGate.tsx` | Shows the wizard on a fresh install, the app afterwards |
-| `setup/SetupWizard.tsx` | The wizard. Lazy-loaded as its own bundle, never exported directly |
+- **Source compilation**: Consumed directly from source via `@innostes/source` export condition without intermediate build steps.
+- **Error handling**: Compares status codes using `HttpStatus` constants and standard error response interfaces.
+- **Shared API client**: Injects tenant context headers (`X-Tenant-ID`) and handles automatic token refreshing transparently.
 
-- **No build step.** The package is used from source; Vite compiles it as part of web-app.
-- **Compare errors with constants**, never with raw numbers or strings: `error.status === HttpStatus.CONFLICT`,
-  `error.code === SetupErrorCode.SETUP_REQUIRED`.
-- **Each feature gets a frontend folder**, mirroring its backend one: `api.ts` (calls), `types.ts` (matching
-  the backend schemas), and its components and pages.
+## Layering Invariants
 
-## Feature layout
+Within `kernel/backend`, subpackages obey strict one-way layering:
 
-Every feature has the same shape, so you always know where to look:
-
-| Folder / file | Holds | Base class |
-| --- | --- | --- |
-| `models/` | SQLAlchemy tables, only the feature's own columns | `BaseModel` |
-| `schemas/` | Request and response bodies | `BaseSchema`, `AuditReadSchema` |
-| `services/` | Business logic | `BaseService[Model]` |
-| `router.py` | HTTP endpoints | `APIRouter` |
-| `__init__.py` | Public exports and the `BaseModule` subclass | `BaseModule` |
-
-Other code imports a feature only through its package: `from kernel.tenancy import Tenant`.
-
-## Common columns
-
-Every table inherits `BaseModel` and gets these columns automatically, in this order:
-
-| Column | Type | Set by |
-| --- | --- | --- |
-| `id` | UUID, primary key | Python (`uuid4`) |
-| *the table's own columns* | | |
-| `created_at` | timestamptz | Database, on insert |
-| `created_by` | UUID, nullable | `BaseService.create` |
-| `updated_at` | timestamptz | Database, on every update |
-| `updated_by` | UUID, nullable | Every `BaseService` write |
-| `deleted_at` | timestamptz, nullable, indexed | `BaseService.soft_delete` |
-| `deleted_by` | UUID, nullable | `BaseService.soft_delete` |
-
-A model only declares what is specific to it:
-
-```py title="kernel/tenancy/models/tenant.py"
-class Tenant(BaseModel):
-    __tablename__ = "tenants"
-
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
+```text
+core  ───►  tenancy  ───►  user  ───►  auth
 ```
 
-The building blocks (`UUIDPrimaryKeyMixin`, `TimestampMixin`, `AuditMixin`, `SoftDeleteMixin`) are
-exported separately for special tables that need only some of them, such as link tables.
-
-`*_by` columns are plain UUIDs for now. They will reference the users table once the identity feature exists.
-
-## Soft delete
-
-Records are never removed by the API. Delete sets `deleted_at` and `deleted_by`. Then:
-
-- `BaseService.get` and `list` hide deleted records unless `include_deleted=True`.
-- `BaseService.restore` brings a record back.
-- List endpoints accept `?include_deleted=true`.
-
-## Base service
-
-A feature service only sets its model:
-
-```py title="kernel/tenancy/services/tenant_service.py"
-class TenantService(BaseService[Tenant]):
-    model = Tenant
-```
-
-and inherits:
-
-| Method | Does |
-| --- | --- |
-| `get(id, include_deleted=False)` | One record or `None` |
-| `list(offset, limit, include_deleted=False)` | `(items, total)`, newest first |
-| `create(data, actor_id)` | Insert, set `created_by` / `updated_by` |
-| `update(obj, data, actor_id)` | Change only the fields that were sent |
-| `soft_delete(obj, actor_id)` | Set `deleted_at` / `deleted_by` |
-| `restore(obj, actor_id)` | Clear the deleted markers |
-| `base_query(include_deleted)` | Override to add a filter to every read |
-
-Services only `flush()`. The `get_db` dependency commits once at the end of the request, or rolls
-back on any error, so one request is one transaction.
-
-## Who made the change
-
-`get_actor_id` reads `Authorization: Bearer <token>` and returns the token's `sub` as a UUID, or
-`None`. Routers pass it to the service, which stores it in the `*_by` columns.
-
-<Callout type="warn" title="No access control yet">
-  `get_actor_id` does not reject anonymous requests. Endpoints are open until the identity and
-  access features add authentication and permission checks.
-</Callout>
-
-## Migrations
-
-Kernel tables are migrated with Alembic from `kernel/backend`:
-
-```bash
-pnpm nx run kernel-backend:migration -- -m "create roles"   # generate from models
-pnpm nx run kernel-backend:migrate                          # apply (upgrade head)
-```
-
-- A new model is only seen by Alembic once it is imported in `kernel/models.py`.
-- Always read a generated migration before committing it.
-- On a fresh database you don't run migrations by hand: [first-run setup](/docs/architecture/setup)
-  applies them, whether started from the web wizard or with `pnpm nx run kernel-backend:setup -- install ...`.
-- With `AUTO_MIGRATE=true`, `api-server` applies kernel migrations on startup.
-- Migrations are safe to start from several places at once (API workers, replicas, the CLI). They
-  take a Postgres advisory lock, so one runs and the others wait, then find nothing left to do.
+Packages may only import from layers strictly to their left. The platform architecture fitness suite (`test_architecture_fitness.py` and `importlinter`) automatically validates these boundaries in continuous integration.

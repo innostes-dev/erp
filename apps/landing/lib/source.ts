@@ -6,8 +6,8 @@ import { z } from 'zod';
 import { devDocsRoute, docsRoute, apiDocsRoute } from './shared';
 
 const docsPageSchema = pageSchema.extend({
-  /** Badge shown next to the title, e.g. "Stable" or "Beta". */
-  status: z.enum(['Stable', 'Beta', 'Experimental']).optional(),
+  /** Badge shown next to the title, e.g. "Stable", "Beta", or ADR status "accepted". */
+  status: z.string().optional(),
   /** Short text shown on the right of the page header. */
   summary: z.string().optional(),
   /** Command shown (with a copy button) in the page header. */

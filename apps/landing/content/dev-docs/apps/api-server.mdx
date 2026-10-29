@@ -59,10 +59,15 @@ The engine's own endpoints. Everything else comes from plug-ins.
 
 Currently loaded plug-ins:
 
-| Module | Package | Endpoints |
-| --- | --- | --- |
-| `setup` | `kernel` | `/setup/status`, `/setup/checks`, `/setup`, plus the `setup_required` lock (see [First-run Setup](/docs/architecture/setup)) |
-| `tenancy` | `kernel` | `/tenants` (see `kernel/backend/kernel/tenancy/README.md`) |
+| Module | Package | Category | Endpoints / Responsibilities |
+| --- | --- | --- | --- |
+| `setup` | `kernel` | Kernel | `/setup/status`, `/setup/checks`, `/setup`, plus the `setup_required` lock (see [Building Blocks](/docs/architecture/building-blocks)) |
+| `tenancy` | `kernel` | Kernel | `/tenants`, `/tenants/{id}`, `/tenants/current/modules`, `/tenants/current/plugins` |
+| `user` | `kernel` | Kernel | `/users`, `/users/{id}`, `/roles`, `/permissions` (IAM and RBAC) |
+| `auth` | `kernel` | Kernel | `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/api-keys`, `/auth/sessions` |
+| `hrms` | `innostes-hrms` | Business | `/hrms/employees`, `/hrms/departments`, `/hrms/leaves` |
+| `crm` | `innostes-crm` | Business | `/crm/leads`, `/crm/deals`, `/crm/contacts` |
+| `api_logger` | `innostes-api-logger` | Extensible Plugin | `/api-logger/logs`, `/api-logger/stats` |
 
 ## How plug-ins are loaded
 

@@ -21,7 +21,7 @@ The example adds a **roles** feature to the kernel. For an ERP module, replace
 | A business area (sales, inventory, HR) | Its own plug-in: `<module>/backend/<package>/` |
 | Plumbing (logging, CORS, auth middleware) | The engine, rarely. Ask first. |
 
-Check the [dependency rules](/docs/architecture/overview#dependency-rules): your feature may import
+Check the [dependency rules](/docs/architecture/plugin-contract#5-architectural-invariants-forbidden-anti-patterns): your feature may import
 from `core` and the features below it, never the other way round.
 
 </Step>
@@ -258,17 +258,17 @@ Add a folder with the same name in the plug-in's `frontend/src`, mirroring the b
 
 ```text
 kernel/frontend/src/access/
-â”œâ”€â”€ api.ts      # calls: apiRequest('/roles', ...)
-â”œâ”€â”€ types.ts    # Role, RoleCreate ... matching the backend schemas
-â”œâ”€â”€ RolesPage.tsx
-â””â”€â”€ index.ts    # public exports
+├── api.ts      # calls: apiRequest('/roles', ...)
+├── types.ts    # Role, RoleCreate ... matching the backend schemas
+├── RolesPage.tsx
+└── index.ts    # public exports
 ```
 
 - Call the API through `apiRequest` from `core/api/client.ts`. Check errors with `HttpStatus` /
   error codes, never raw numbers.
 - Build screens with `@innostes/ui` components.
-- Export the feature from `src/index.ts`.
-- Until the web-app page loader exists, render the page from `apps/web-app` directly.
+- Export the feature and its module manifest from `src/index.ts`.
+- Register the frontend manifest in `apps/web-app/src/app/catalog.ts` so `AppRouter` and the sidebar dynamically discover your routes and navigation items. See [Plug-in Contract](/docs/architecture/plugin-contract#2-frontend-plug-in-contract) for the manifest structure.
 
 ```bash
 pnpm nx typecheck kernel-frontend web-app

@@ -16,12 +16,13 @@
     "threat-model",
     "---Decisions---",
     "...decisions",
-    "---Governance & Quality---",
+    "---Quality & Governance---",
     "quality-requirements",
     "risks-and-technical-debt",
     "glossary",
-    "plugins",
+    "---Platform Deep Dives---",
     "kernel",
+    "plugins",
     "setup"
   ]
 }

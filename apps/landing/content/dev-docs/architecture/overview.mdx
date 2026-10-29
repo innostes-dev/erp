@@ -7,9 +7,7 @@ lastReviewed: 2026-10-29
 arc42: [1, 3, 4, 5]
 ---
 
-innostes ERP is built from **two engines** and **plug-ins** that add features to them. The engines
-contain no business features of their own. Everything a user sees, from tenants to invoices,
-comes from a plug-in.
+innostes ERP is built from **two engines** and **plug-ins** that add features to them. The engines contain no business features of their own. Everything a user interacts with, from tenants and users to invoices and departments, comes from a plug-in.
 
 ```text
              ┌──────────────────────┐        ┌──────────────────────┐
@@ -21,7 +19,7 @@ comes from a plug-in.
         ┌───────────────┴───────────────┬───────────────┴───────────────┐
         │                               │                               │
  ┌──────┴────────┐               ┌──────┴────────┐               ┌──────┴────────┐
- │ kernel        │               │ module: sales │               │ module: hr    │  ...
+ │ kernel        │               │ module: hrms  │               │ module: crm   │  ...
  │ backend/      │               │ backend/      │               │ backend/      │
  │ frontend/     │               │ frontend/     │               │ frontend/     │
  └───────────────┘               └───────────────┘               └───────────────┘
@@ -31,15 +29,14 @@ comes from a plug-in.
 
 | Engine | Folder | Job |
 | --- | --- | --- |
-| Backend engine | `apps/api-server` | Starts FastAPI, runs migrations, finds every installed backend plug-in and mounts its routes, serves `/health` and the API docs. |
-| UI engine | `apps/web-app` | Starts the React app, the app shell (sidebar, top bar), routing and login, and renders the pages that frontend plug-ins provide. |
+| Backend engine | `apps/api-server` | Starts FastAPI, runs database migrations, discovers installed backend plug-ins and mounts their routers, serves `/health` and the OpenAPI specification. See [Building Blocks](/docs/architecture/building-blocks#1-container-view-c4-level-2). |
+| UI engine | `apps/web-app` | Mounts the React app shell (sidebar, navigation header, app switcher), enforces setup and authentication gates, and dynamically renders screens registered in module manifests. See [Plug-in Contract](/docs/architecture/plugin-contract#2-frontend-plug-in-contract). |
 
-An engine is plumbing. If you are about to write a table, an endpoint or a page **inside an engine**,
-it belongs in a plug-in instead.
+An engine is plumbing. Any database table, API endpoint, or user interface page belongs inside a plug-in or domain module, never inside an engine.
 
-## Plug-ins
+## Plug-ins and Modules
 
-A plug-in is a self-contained feature area with a backend part and a frontend part:
+A plug-in is a self-contained feature package with a backend part and a frontend part:
 
 <Files>
   <Folder name="<plug-in>" defaultOpen>
@@ -56,51 +53,40 @@ A plug-in is a self-contained feature area with a backend part and a frontend pa
   </Folder>
 </Files>
 
-- The **backend** part is a Python package. The backend engine installs it and loads it automatically.
-- The **frontend** part is a pnpm workspace package. The UI engine depends on it and renders its pages.
+- The **backend** part is a Python package. The backend engine installs it and discovers it automatically via `innostes.modules` entry points.
+- The **frontend** part is a pnpm workspace package. The UI engine depends on it and renders its routes and navigation items from its exported manifest.
 
-The **kernel** is the first plug-in. It holds what every other plug-in needs: shared
-infrastructure (`core`) and platform features such as tenancy. ERP business modules (sales,
-inventory, HR, …) are plug-ins too, with the same layout.
+The **kernel** is the platform foundation plug-in. It provides shared infrastructure (`core`), identity and access management (`auth`, `user`), and multi-tenancy (`tenancy`, `setup`). Domain business modules (`modules/hrms`, `modules/crm`) and platform plugins (`plugins/api-logger`) follow the identical two-part packaging convention.
 
-See [Plug-ins](/docs/architecture/plugins) for how loading works and [Kernel](/docs/architecture/kernel)
-for what the kernel provides.
+See [Building Blocks](/docs/architecture/building-blocks) for comprehensive container and engine designs, and [Plug-in Contract](/docs/architecture/plugin-contract) for the strict module integration contract.
 
 <Callout type="info" title="Status">
-  The kernel is in place on both sides. `kernel/backend` (setup and tenancy) is loaded by `api-server`.
-  `kernel/frontend` (`@innostes/kernel`, with the setup wizard) is rendered by `web-app`. Still to
-  come: a page loader in `web-app` so plug-ins can register their own pages and menu entries.
+  The kernel, HRMS, CRM, and API Logger plug-ins are active on both sides. `kernel/backend` is loaded dynamically by `api-server`. `kernel/frontend` and domain module manifests (`@innostes/hrms`, `@innostes/crm`, `@innostes/api-logger`) are registered in `apps/web-app/src/app/catalog.ts` and routed via `AppRouter`.
 </Callout>
 
-## Dependency rules
+## Invariant rules
 
-These rules keep plug-ins independent. Breaking them creates import cycles and makes features
-impossible to remove.
+These architectural invariants keep plug-ins completely decoupled:
 
-1. **Engines know nothing about specific plug-ins.** They discover plug-ins and never import one
-   by name.
-2. **Plug-ins never import an engine.** `kernel` must not import from `apps/api-server`.
-3. **Every plug-in may depend on the kernel. The kernel depends on no plug-in.**
-4. **Business modules don't import each other's internals.** If `sales` needs a customer, it imports
-   from the other module's public package (`from crm import Customer`), never from
-   `crm.services.customer_service`.
-5. **Inside the kernel, features follow a fixed order**: `core` ← `tenancy` ← `identity` ← `access`.
-   A feature may import from the features to its left, never to its right.
+1. **Engines know nothing about specific plug-ins**: Engines discover plug-ins through entry points and catalog manifests, never importing plug-ins by name.
+2. **Plug-ins never import an engine**: Neither `kernel` nor any domain module may import from `apps/api-server` or `apps/web-app`.
+3. **Every plug-in may depend on the kernel; the kernel depends on no plug-in**: Dependency flows strictly downward toward `kernel.core`.
+4. **Modules do not cross-import internals**: Modules interact through public contracts and database boundaries, never importing private service implementations across packages.
+5. **Kernel features follow a strict layer hierarchy**: `core` ← `tenancy` ← `user` ← `auth`. Imports flow only from higher layers to lower layers.
+
+Detailed architectural rules and fitness checks are detailed in [Plug-in Contract](/docs/architecture/plugin-contract#5-architectural-invariants-forbidden-anti-patterns).
 
 ## How a request flows
 
-1. `web-app` calls `POST /tenants` with the user's access token.
-2. **CORS** lets the browser call the API from web-app's address (`CORS_ORIGINS`).
-3. The **setup lock** checks the system is installed. Until [first-run setup](/docs/architecture/setup)
-   is done, it answers `503` with `code: "setup_required"` and the request goes no further.
-4. `api-server` routes it to the router that the **tenancy** plug-in mounted.
-5. The router validates the body with a **schema**, gets the user's id from the token, and calls the **service**.
-6. The service writes through the **model**, filling `created_by` / `updated_by` automatically. If a
-   business rule fails it raises an HTTP error class (e.g. `SlugTakenError`), and one shared handler
-   turns that into `{"detail", "code"}` with the right status.
-7. The `get_db` dependency commits the transaction and the response goes back as the read schema.
+1. `web-app` calls an endpoint (e.g. `POST /tenants`) with the client access token in the `Authorization` header.
+2. `CORSMiddleware` validates the browser origin against allowed `CORS_ORIGINS`.
+3. `SetupRequiredMiddleware` checks installation status. On uninstalled instances, it returns `503 Service Unavailable` with `setup_required`.
+4. `api-server` routes the request to the router mounted by the plug-in.
+5. Pydantic schemas validate input; dependency injection provides the transactional database session and authenticated identity.
+6. The service layer performs domain validation and flushes changes to PostgreSQL; standard audit mixins populate `created_by` and `updated_by`.
+7. The commit completes on successful response delivery, formatted as RFC 7807 Problem Details on failure.
 
-Before a fresh install can serve requests, it must be set up once. See [First-run Setup](/docs/architecture/setup).
+See [Runtime View](/docs/architecture/runtime-view#2-inbound-request-lifecycle-tenant-isolation) for complete sequence diagrams and failure branches.
 
 ## Repository layout
 
@@ -114,10 +100,14 @@ Before a fresh install can serve requests, it must be set up once. See [First-ru
     <Folder name="backend" />
     <Folder name="frontend" />
   </Folder>
-  <Folder name="modules">
-    <Folder name="(future ERP modules)" />
+  <Folder name="modules" defaultOpen>
+    <Folder name="hrms" />
+    <Folder name="crm" />
   </Folder>
-  <Folder name="packages">
+  <Folder name="plugins" defaultOpen>
+    <Folder name="api-logger" />
+  </Folder>
+  <Folder name="packages" defaultOpen>
     <Folder name="ui" />
   </Folder>
 </Files>
