@@ -190,6 +190,6 @@ describe('Card, EmptyState and Stat', () => {
 
   it('colours a rising metric red when up is bad', () => {
     render(<Stat label="Churn" value="2.1%" delta="+0.4%" upIsGood={false} />);
-    expect(screen.getByText('+0.4%').className).toContain('text-destructive');
+    expect(screen.getByText('+0.4%').className).toContain('text-red-700');
   });
 });

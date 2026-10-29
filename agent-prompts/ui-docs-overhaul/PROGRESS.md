@@ -641,6 +641,34 @@ drop, which doesn't work on touch screens.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 18 (Release readiness verification).
+- Non-blocking: none. Resolved in 18.
+
+
+## 18 – Release readiness review – 2026-10-29
+
+**Summary**: Conducted adversarial release readiness review as skeptical principal engineer and maintainer. Verified first 15-minute developer onboarding walkthrough, substantiated all documentation promises against automated test evidence, conducted cross-category consistency and library source audits, and ran full uncached verification suite. Authored `RELEASE-REVIEW.md` with official verdict: **Ready for 1.0.0**.
+
+**Changed**:
+- Documentation & Review Artefacts:
+  - `agent-prompts/ui-docs-overhaul/RELEASE-REVIEW.md`: Created comprehensive adversarial audit findings table (REL-001 through REL-007), evidence mapping for all public claims, comparison analysis against Base UI / Atlassian / Carbon / Polaris, and formal verdict.
+- Unit Test Synchronisation:
+  - `packages/ui/src/widgets/app-shell.test.tsx`: Synchronised `AppRailItem` and `UserMenu` test queries with accessible names matching WCAG 2.5.3 label-in-name fixes.
+  - `packages/ui/src/components/data-display/data-display.test.tsx`: Synchronised rising churn delta test assertion with high-contrast `text-red-700` token class.
+
+**Verification**:
+- `pnpm nx run-many -t test typecheck build -p ui --skip-nx-cache`: PASS (31 test files, 247 tests, 0 type errors, 238 symbols documented).
+- `pnpm nx run-many -t test typecheck -p ui-react17-tests ui-react18-tests --skip-nx-cache`: PASS (multi-version React 17 & 18 test suites passing).
+- `pnpm nx run landing:docs-check`: PASS (10 enforced quality gates green).
+- `pnpm nx check:size ui`: PASS (all 4 entry points within raw/gzip budgets).
+- `pnpm --filter @innostes/landing test:e2e`: PASS (538 total Playwright tests passing).
+- `packages/ui` `pnpm pack --dry-run`: PASS (clean production tarball contents).
+
+**Verdict**:
+- Ready for 1.0.0 (0 blocking issues).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 19 (Checklist verification and completion of UI Docs track).
+
 
 

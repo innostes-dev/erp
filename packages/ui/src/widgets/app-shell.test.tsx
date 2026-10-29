@@ -96,7 +96,7 @@ describe('AppRail and TopBar', () => {
     );
     const nav = screen.getByRole('navigation', { name: 'Apps' });
     expect(within(nav).getByRole('button', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
-    expect(within(nav).getByLabelText('4 new')).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: '4 Inbox' })).toBeInTheDocument();
   });
 
   it('lays out a top bar', () => {
@@ -193,7 +193,7 @@ describe('UserMenu', () => {
         <DropdownMenuItem>Profile</DropdownMenuItem>
       </UserMenu>,
     );
-    const trigger = screen.getByRole('button', { name: 'Account menu for Arun Kumar' });
+    const trigger = screen.getByRole('button', { name: 'Arun Kumar' });
     expect(trigger).toHaveTextContent('AK');
     await userEvent.click(trigger);
     expect(await screen.findByRole('menuitem', { name: 'Profile' })).toBeInTheDocument();
