@@ -274,7 +274,44 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 08 (Module author guide and template).
+- Non-blocking: none.
+
+## 08 – Module author guide: documenting new endpoints – 2026-10-29
+
+**Summary**: Authored developer-focused guide `content/dev-docs/guides/documenting-api-endpoints.mdx` walking through documenting FastAPI endpoints from scratch using worked example `POST /invoices`. Created copyable, fully tested module reference template in `kernel/backend/examples/module_template` (`InvoiceModule`, `router.py`, `schemas.py`, `services.py`) adhering to all checklist rules (E1–E17, S1–S8, T1–T3) and exercised by `test_module_template.py`. Created `.github/pull_request_template.md` with dedicated API change checklist and review guidelines. Cross-linked guide and template from `building-a-feature.mdx` and `kernel/backend/README.md`.
+
+**Changed**:
+- Created `apps/landing/content/dev-docs/guides/documenting-api-endpoints.mdx`: Comprehensive guide for backend developers covering router decorators, form-feed `\f` public vs private docstrings, `error_responses`, custom headers, pagination limits, schema constraints, tag metadata, spec export, contract testing, and manual code review checks.
+- Created `kernel/backend/examples/module_template/__init__.py`: Reference `BaseModule` implementation with `openapi_tags`.
+- Created `kernel/backend/examples/module_template/schemas.py`: Gold-standard Pydantic v2 schemas meeting S1–S8 with Northwind enterprise data examples.
+- Created `kernel/backend/examples/module_template/services.py`: Service layer demonstrating typed errors and business logic.
+- Created `kernel/backend/examples/module_template/router.py`: FastAPI router implementing E1–E17 with explicit security, response models, and error responses.
+- Created `kernel/backend/tests/test_module_template.py`: Unit and contract test suite exercising the module template to prevent bitrot.
+- Created `.github/pull_request_template.md`: Pull request template including dedicated API Change Checklist covering E1–E17, S1–S8, T1–T3, spec regeneration, and quality gates.
+- Updated `apps/landing/content/dev-docs/guides/meta.json`: Added `documenting-api-endpoints` to navigation.
+- Updated `apps/landing/content/dev-docs/guides/building-a-feature.mdx`: Added cross-links to API documentation guide and checklist.
+- Updated `kernel/backend/README.md`: Added reference links to documentation guide and copyable module template.
+
+**API changes**: none.
+
+**Decisions**:
+- Place copyable reference module template in `kernel/backend/examples/module_template` where it is automatically exercised by `pnpm nx test kernel-backend`.
+- Establish `.github/pull_request_template.md` with mandatory API change checklist to enforce docstrings, contract tests, and changelog updates on every PR touching API endpoints.
+
+**Verification**:
+- `pnpm nx test kernel-backend`: PASS (105 tests pass in 5.97s).
+- `pnpm nx test api-server`: PASS (119 tests pass).
+- `pnpm nx run api-server:contract-test`: PASS (103 contract tests pass).
+- `pnpm nx run api-server:openapi-check`: PASS.
+- `pnpm nx run api-server:openapi-lint`: PASS (0 defects).
+- `pnpm nx run landing:docs-check`: PASS (All 12 quality gates pass, 0 defects).
+- `pnpm nx run landing:typecheck`: PASS (0 type errors).
+- `pnpm nx run landing:build`: PASS (249 static pages generated successfully in 37s).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 09 (Editorial pass and verified code samples).
+
 
 
 

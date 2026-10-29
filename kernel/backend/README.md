@@ -66,6 +66,8 @@ The individual mixins (`UUIDPrimaryKeyMixin`, `TimestampMixin`, `AuditMixin`, `S
 5. Add tests in `tests/`.
 
 Full guide: developer docs → Guides → Building a Feature (`apps/landing/content/dev-docs/guides/building-a-feature.mdx`).
+API documentation guide: developer docs → Guides → Documenting API Endpoints (`apps/landing/content/dev-docs/guides/documenting-api-endpoints.mdx`).
+Copyable reference module template: `kernel/backend/examples/module_template/`.
 
 **Dependency rule:** features may import from `core` and from features below them (`tenancy` ← `identity` ← `access`), never the reverse. Import other features only through their package (`from kernel.tenancy import Tenant`), not their internals.
 

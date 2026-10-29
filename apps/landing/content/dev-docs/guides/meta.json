@@ -1,4 +1,4 @@
 {
   "title": "Guides",
-  "pages": ["creating-a-module", "creating-a-plugin", "building-a-feature", "backend-conventions", "nx", "dependencies", "new-project", "writing-docs", "releasing", "ci"]
+  "pages": ["creating-a-module", "creating-a-plugin", "building-a-feature", "backend-conventions", "documenting-api-endpoints", "nx", "dependencies", "new-project", "writing-docs", "releasing", "ci"]
 }
