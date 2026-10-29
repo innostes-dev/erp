@@ -63,6 +63,13 @@ if (proseErrors.length > 0) {
   console.log('✓ [PROSE] Zero banned marketing phrases, emoji, or invalid placeholders.');
 }
 
+if (spellingErrors.length > 0) {
+  console.error(`❌ [SPELLING] ${spellingErrors.length} American spelling violations:`);
+  for (const e of spellingErrors) console.error(`   ${e.file}:${e.line} - ${e.message}`);
+} else {
+  console.log('✓ [SPELLING] All prose adheres strictly to British English spelling.');
+}
+
 const frontmatterErrors = runFrontmatterCheck({ enforce: true });
 if (frontmatterErrors.length > 0) {
   console.error(`❌ [FRONTMATTER] ${frontmatterErrors.length} frontmatter issues:`);
@@ -87,13 +94,11 @@ if (templateErrors.length > 0) {
   console.log('✓ [TEMPLATE] All component pages follow the 7-section template strictly.');
 }
 
-// 2. Report-mode checks (tracked until prompt 17 switches spelling to enforce)
-console.log('\n--- REPORT-MODE GATES (Defect metrics tracking to zero) ---');
+// 2. Report-mode checks
+console.log('\n--- REPORT-MODE GATES ---');
 
 const apiTableErrors = runApiTablesCheck({ enforce: false });
-console.log(`ℹ️ [API TABLES] ${apiTableErrors.length} <ApiTable> entries with 0 props or missing (enforced in prompt 13)`);
-
-console.log(`ℹ️ [SPELLING] ${spellingErrors.length} American spelling occurrences (enforced in prompt 17)`);
+console.log(`ℹ️ [API TABLES] ${apiTableErrors.length} <ApiTable> entries with 0 props or missing (tracked)`);
 
 const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 console.log(`\nQuality gates finished in ${duration}s.`);
@@ -105,6 +110,7 @@ const totalEnforcedFailures =
   mdxSafetyErrors.length +
   consistencyErrors.length +
   proseErrors.length +
+  spellingErrors.length +
   frontmatterErrors.length +
   coverageErrors.length +
   templateErrors.length;

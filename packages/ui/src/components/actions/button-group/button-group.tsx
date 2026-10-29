@@ -16,7 +16,7 @@ export interface ButtonGroupProps extends ComponentProps<'div'> {
  * @example
  * <ButtonGroup aria-label="Text alignment">
  *   <Button variant="outline">Left</Button>
- *   <Button variant="outline">Center</Button>
+ *   <Button variant="outline">Centre</Button>
  *   <Button variant="outline">Right</Button>
  * </ButtonGroup>
  */

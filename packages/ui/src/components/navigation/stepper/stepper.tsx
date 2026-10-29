@@ -10,7 +10,7 @@ export type StepStatus = 'complete' | 'current' | 'upcoming' | 'error';
 
 /** One step of a `Stepper`. */
 export interface StepperStep {
-  /** Step title, e.g. "Organization". */
+  /** Step title, e.g. "Organisation". */
   title: ReactNode;
   /** Short hint under the title, e.g. "Basic details". */
   description?: ReactNode;
@@ -67,7 +67,7 @@ export interface StepperProps extends Omit<ComponentProps<'nav'>, 'onChange'> {
  *   currentStep={step}
  *   onStepClick={setStep}
  *   steps={[
- *     { title: 'Organization', description: 'Basic details' },
+ *     { title: 'Organisation', description: 'Basic details' },
  *     { title: 'Database', description: 'Connect & verify' },
  *     { title: 'Review', description: 'Confirm settings' },
  *   ]}

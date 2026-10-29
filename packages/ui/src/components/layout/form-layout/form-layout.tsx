@@ -23,7 +23,7 @@ const columnClass = {
  *
  * @example
  * <FormGrid>
- *   <Field>…Organization name…</Field>
+ *   <Field>…Organisation name…</Field>
  *   <Field>…Slug…</Field>
  *   <Field className="col-span-full">…Address…</Field>
  * </FormGrid>

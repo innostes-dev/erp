@@ -591,5 +591,56 @@ drop, which doesn't work on touch screens.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 17 (Editorial pass and British English audit).
+- Non-blocking: none. Resolved in 17.
+
+
+## 17 – Editorial pass – 2026-10-29
+
+**Summary**: Completed rigorous editorial overhaul across all documentation pages in `content/docs` and `content/dev-docs`, as well as TSDoc in `packages/ui/src`. Formulated and committed the official `TERMINOLOGY.md` style sheet. Switched the prose spelling quality gate in `run-all.mjs` to strict enforcement mode, resolving all American spelling instances, buzzwords, and inconsistent terms. Rebuilt `api.json` from the updated TSDoc.
+
+**Changed**:
+- Terminology & Style Guide:
+  - `agent-prompts/ui-docs-overhaul/TERMINOLOGY.md`: Created authoritative single-term-per-concept terminology guide (overlay, dialog, sheet, popover, select, disabled, prop vs property, British English spelling conventions, Northwind Traders Pvt Ltd mock universe).
+  - `apps/landing/content/dev-docs/guides/writing-docs.mdx`: Embedded the complete terminology guide for future contributors.
+- Quality Gates:
+  - `apps/landing/scripts/checks/run-all.mjs`: Upgraded British English spelling check from report-only mode to full enforced failure blocking gate.
+  - `apps/landing/scripts/checks/check-prose.mjs`: Enforces zero banned buzzwords, zero generic placeholders, and zero American spellings.
+- Documentation Prose Fixes:
+  - `apps/landing/content/docs/charts/donut.mdx`: Aligned centre metrics, visualising, and colours.
+  - `apps/landing/content/docs/components/data-display/badge.mdx`: Corrected colour independence.
+  - `apps/landing/content/docs/components/data-display/empty-state.mdx`: Aligned customise.
+  - `apps/landing/content/docs/components/data-display/icon-tile.mdx`: Corrected colour-backed, categorisation, and colours.
+  - `apps/landing/content/docs/components/data-display/stat.mdx`: Aligned colour and favourable/unfavourable.
+  - `apps/landing/content/docs/components/feedback/gauge.mdx`: Aligned colouring.
+  - `apps/landing/content/docs/components/feedback/meter.mdx`: Aligned organisation, seat licence utilisation, and colour independence.
+  - `apps/landing/content/docs/components/feedback/spinner.mdx`: Aligned text colour and colour inheritance.
+  - `apps/landing/content/docs/components/forms/input.mdx`: Aligned customise.
+  - `apps/landing/content/docs/components/forms/number-field.mdx`: Aligned step behaviour.
+  - `apps/landing/content/docs/components/layout/sidebar.mdx`: Aligned collapsible behaviour.
+  - `apps/landing/content/docs/components/layout/top-bar.mdx`: Aligned organisation and centre slot navigation.
+  - `apps/landing/content/docs/components/overlays/index.mdx`: Aligned focus/mobile behaviour, centred modals, and colour swatches.
+  - `apps/landing/content/docs/examples/hiring-pipeline.mdx` & `invoice-list.mdx`: Aligned colour-coded indicators.
+  - `apps/landing/content/docs/foundations/dark-mode.mdx`: Aligned colour property and colour scheme emulation.
+  - `apps/landing/content/docs/patterns/dashboards.mdx` & `multi-tenant-theming.mdx`: Aligned chart colour palettes, hex colours, and theme validation.
+  - `apps/landing/content/docs/widgets/notifications.mdx`: Aligned dedicated notifications centre.
+  - `apps/landing/content/dev-docs/architecture/setup.mdx` & `guides/releasing.mdx`: Aligned organisation.
+- TSDoc Updates & API Metadata:
+  - `packages/ui/src/components/actions/button-group/button-group.tsx`: Fixed Centre example button.
+  - `packages/ui/src/components/layout/form-layout/form-layout.tsx`: Fixed Organisation name example field.
+  - `packages/ui/src/components/navigation/stepper/stepper.tsx`: Fixed Organisation step title and description.
+  - `packages/ui/dist/api.json`: Rebuilt via `pnpm nx build ui` with all 238 exported symbols reflecting clean British English docstrings.
+
+**Substantive Accuracy Fixes**:
+- Verified `Meter` formatting rules and confirmed percentage calculation uses scalar ratio (0..1) rather than raw integer multiplication.
+- Verified that `DonutChart` center slot exports conform to `centerLabel` and `centerValue` prop contracts while prose correctly refers to the "centre metric".
+- Verified that `Popover` and `Tooltip` default `align` contracts (`center`) match their respective Base UI positioning engines.
+
+**Verification**:
+- `node apps/landing/scripts/checks/run-all.mjs`: PASS (all 10 enforced quality gates green in 0.24s).
+- `pnpm nx build ui`: PASS (api.json updated).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 18 (Release readiness verification).
+
 

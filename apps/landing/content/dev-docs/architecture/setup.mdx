@@ -5,7 +5,7 @@ icon: Wand
 ---
 
 A fresh innostes install has an empty database. It must be **installed once**: setup creates the
-tables and the first organization. That can happen two ways:
+tables and the first organisation. That can happen two ways:
 
 | Way | For | Protection |
 | --- | --- | --- |
@@ -35,7 +35,7 @@ After setup, the setup actions are gone: their routes answer **404**, as if they
 | --- | --- | --- | --- |
 | `GET /setup/status` | none | `{"installed": false}` | `{"installed": true}` |
 | `GET /setup/checks` | `X-Setup-Token` | `{"database_connected", "migrations_pending"}` | 404 |
-| `POST /setup` | `X-Setup-Token` | 201, creates the organization | 404 |
+| `POST /setup` | `X-Setup-Token` | 201, creates the organisation | 404 |
 | any other route | normal | 503 `setup_required` | normal |
 
 `/setup/status` reveals only the installed flag. If the database can't be reached, every one of these
@@ -81,7 +81,7 @@ docker compose run --rm \n  -e SETUP_ORG_NAME="Acme Corporation" -e SETUP_ORG_SL
    ```
 2. Open web-app. `SetupGate` sees `{"installed": false}` and loads the wizard at `/setup`.
 3. **Verify**: paste the token. It is checked via `/setup/checks` and kept only in memory, never stored.
-4. **Organization**, **Database**, **Review**, then **Install**.
+4. **Organisation**, **Database**, **Review**, then **Install**.
 5. Done: the token file is deleted, the setup routes return 404, and the app opens.
 
 ## Production checklist

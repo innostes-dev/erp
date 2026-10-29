@@ -158,7 +158,7 @@ export function TenantProvider({
 
 ## Administrative brand preview and safety audit
 
-In the tenant settings panel, provide real-time contrast auditing to prevent administrators from saving non-compliant color schemes:
+In the tenant settings panel, provide real-time contrast auditing to prevent administrators from saving non-compliant colour schemes:
 
 ```tsx
 'use client';
@@ -237,12 +237,12 @@ export function TenantThemeEditor() {
 ## Accessibility notes
 
 - **Strict WCAG 2.1 compliance**: Enterprise business software requires a minimum 4.5:1 contrast ratio for regular body text and buttons, and 3:1 for large typography and essential user interface boundaries.
-- **Automated fallback enforcement**: If a tenant saves an invalid color below 4.5:1, adjust the lightness channel automatically in your theme parser to guarantee baseline compliance.
+- **Automated fallback enforcement**: If a tenant saves an invalid colour below 4.5:1, adjust the lightness channel automatically in your theme parser to guarantee baseline compliance.
 - **Focus ring visibility**: Ensure `--ring` custom properties maintain a 3:1 contrast ratio against the page background so keyboard focus indicators remain distinct.
 
 ## Common mistakes
 
-- **Saving unverified hex colors**: Allowing tenant admins to type arbitrary hex codes without validation leads to broken buttons with invisible text.
+- **Saving unverified hex colours**: Allowing tenant admins to type arbitrary hex codes without validation leads to broken buttons with invisible text.
 - **Global `body` style overrides**: Injecting tenant styles onto the top-level `document.body` breaks multi-tenant tab switching or unified super-admin consoles where multiple tenants are inspected simultaneously.
 - **Ignoring dark mode inversion**: A dark navy blue works well as primary on white backgrounds, but becomes virtually invisible when rendered against a `#09090b` dark mode background. Always supply a distinct dark mode value.
 

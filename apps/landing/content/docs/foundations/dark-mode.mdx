@@ -75,7 +75,7 @@ A common issue in server-rendered applications is Flash of Unstyled Theme (FOUT)
 To prevent FOUT:
 
 1. **Add `suppressHydrationWarning`**: Always add this prop to the `<html>` tag in your root layout. This tells React to ignore differences between the server-rendered HTML and client-injected theme classes.
-2. **Use `disableTransitionOnChange`**: When switching themes, temporarily disable CSS transitions to prevent color property interpolation flickers across buttons and borders.
+2. **Use `disableTransitionOnChange`**: When switching themes, temporarily disable CSS transitions to prevent colour property interpolation flickers across buttons and borders.
 3. **Vanilla / Vite blocking script**: For client-side Single Page Applications without `next-themes`, place a tiny synchronous script inside the `<head>` tag of `index.html`:
 
 ```html title="index.html"
@@ -123,7 +123,7 @@ describe('Dark mode rendering', () => {
 
 ### End-to-end testing with Playwright
 
-Test dark theme visual rendering and token contrast using Playwright's color scheme emulation:
+Test dark theme visual rendering and token contrast using Playwright's colour scheme emulation:
 
 ```ts title="tests/theme.spec.ts"
 import { test, expect } from '@playwright/test';

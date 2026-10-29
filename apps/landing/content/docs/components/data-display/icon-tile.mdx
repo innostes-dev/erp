@@ -1,6 +1,6 @@
 ---
 title: Icon Tile
-description: Color-backed square or circular badge container holding an icon for visual module categorization.
+description: Colour-backed square or circular badge container holding an icon for visual module categorisation.
 icon: SquareDashed
 status: Stable
 summary: Visual icon container offering semantic and categorical chart tones, soft/solid treatments, and four standard sizes.
@@ -18,7 +18,7 @@ import { IconTile, type IconTileProps, type IconTileTone } from '@innostes/ui';
 
 Use `IconTile` to highlight an icon with a tinted or solid background container in dashboard summaries, module navigation lists, or feature cards:
 
-- Categorizing ERP modules (Procurement, Inventory, Ledgers, Logistics) with dedicated palette colors.
+- Categorising ERP modules (Procurement, Inventory, Ledgers, Logistics) with dedicated palette colours.
 - Visually anchoring metric tiles ([MetricCard](/ui/docs/widgets/metric-card) and [Stat](/ui/docs/components/data-display/stat)).
 - Reinforcing empty state or workflow step headers with prominent iconography.
 
@@ -31,7 +31,7 @@ When choosing icon components:
 
 ### Semantic and categorical tones
 
-`IconTile` provides both semantic roles (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) and eight categorical chart tones (`chart-1` through `chart-8`). Categorical tones match design system charts, allowing dashboards to share uniform color coding across charts and tiles.
+`IconTile` provides both semantic roles (`primary`, `success`, `warning`, `destructive`, `info`, `neutral`) and eight categorical chart tones (`chart-1` through `chart-8`). Categorical tones match design system charts, allowing dashboards to share uniform colour coding across charts and tiles.
 
 ```tsx
 import { IconTile } from '@innostes/ui';
@@ -116,7 +116,7 @@ export function BorderedTile() {
 - Embedded icons render with `aria-hidden="true"` by default.
 - `IconTile` itself is decorative. Never use an isolated `IconTile` without adjacent descriptive text (such as a card title or list label) or an explicit `aria-label` when wrapped inside an interactive container.
 
-### Color contrast
+### Colour contrast
 
 All `soft` and `solid` variants meet WCAG 2.2 AA non-text contrast requirements (> 3:1 for graphical objects and boundaries) across light and dark display modes.
 
