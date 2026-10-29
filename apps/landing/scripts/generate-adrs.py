@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-decisions_dir = Path(__file__).resolve().parents[2] / "content" / "dev-docs" / "architecture" / "decisions"
+decisions_dir = Path(__file__).resolve().parents[1] / "content" / "dev-docs" / "architecture" / "decisions"
 decisions_dir.mkdir(parents=True, exist_ok=True)
 
 adrs_data = [

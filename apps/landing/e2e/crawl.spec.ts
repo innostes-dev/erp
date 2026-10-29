@@ -9,7 +9,7 @@ function getSitemapPaths(): string[] {
   if (existsSync(sitemapPath)) {
     const xml = readFileSync(sitemapPath, 'utf8');
     const matches = Array.from(xml.matchAll(/<loc>https?:\/\/[^/]+(\/[^<]*)<\/loc>/g));
-    const paths = matches.map((m) => m[1] || '/').filter((p) => p.startsWith('/ui') || p.startsWith('/api-reference') || p === '/');
+    const paths = matches.map((m) => m[1] || '/').filter((p) => p.startsWith('/ui') || p.startsWith('/api-reference') || p.startsWith('/docs') || p === '/');
     return Array.from(new Set(paths));
   }
   // Fallback list of key sections if sitemap file is not present
@@ -39,6 +39,30 @@ function getSitemapPaths(): string[] {
     '/api-reference/policies/limits-and-quotas',
     '/api-reference/policies/security',
     '/api-reference/policies/changelog',
+    '/docs',
+    '/docs/getting-started',
+    '/docs/project-structure',
+    '/docs/architecture',
+    '/docs/architecture/building-blocks',
+    '/docs/architecture/plugin-contract',
+    '/docs/architecture/runtime-view',
+    '/docs/architecture/data-architecture',
+    '/docs/architecture/deployment',
+    '/docs/architecture/cross-cutting',
+    '/docs/architecture/threat-model',
+    '/docs/architecture/decisions',
+    '/docs/architecture/quality-requirements',
+    '/docs/architecture/risks-and-technical-debt',
+    '/docs/architecture/glossary',
+    '/docs/operations/deployment',
+    '/docs/operations/backup-restore',
+    '/docs/operations/key-rotation',
+    '/docs/guides/building-a-feature',
+    '/docs/guides/backend-conventions',
+    '/docs/guides/ci',
+    '/docs/apps/api-server',
+    '/docs/apps/web-app',
+    '/docs/packages/ui',
   ];
 }
 

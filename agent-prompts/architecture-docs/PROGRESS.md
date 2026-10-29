@@ -293,3 +293,23 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed, 0 broken links).
 **Open issues**:
 - None.
+
+
+## 12 – QA and editorial pass – 2026-10-29
+**Summary**: Executed QA, editorial consistency audit, and end-to-end rendered validation across all documentation sections:
+1. Extended Playwright crawl test suite (`apps/landing/e2e/crawl.spec.ts`) to cover all `/docs/**` routes in light/dark modes and mobile (360px) / desktop viewports with Axe-core WCAG 2.2 AA accessibility checks.
+2. Verified all 288 static SSG and prerendered routes compile with zero failures in `pnpm nx build landing`.
+3. Registered missing Lucide icon components (`ListChecks`, `ShieldCheck`, `FolderTree`, `FileText`) in `components/mdx.tsx`.
+4. Corrected `apps/landing/scripts/generate-adrs.py` relative directory resolution and verified all 6 code generator stale checks pass with zero diff.
+5. Confirmed British English, sentence case, and absence of marketing jargon across all architecture and developer guides.
+**Changed**: `apps/landing/components/mdx.tsx`, `apps/landing/e2e/crawl.spec.ts`, `apps/landing/lib/tokens-data.json`, `apps/landing/scripts/generate-adrs.py`, `PROGRESS.md`, `12-qa-editorial.md` deleted.
+**Code changes**: Registered MDX icons, fixed script path in `generate-adrs.py`.
+**Decisions**:
+- Integrated `/docs/**` into automated Playwright crawl and accessibility audit.
+**Verification**:
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed, 12/12 arc42 sections enforced, 42 architecture pages verified).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
+- `pnpm nx build landing`: PASSED (288/288 static pages compiled with 0 errors).
+**Open issues**:
+- None.
