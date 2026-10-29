@@ -343,7 +343,33 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 10 (Checklist verification).
+- Non-blocking: none.
+
+## 10 – Checklist verification – 2026-10-29
+
+**Summary**: Completed final verification of every endpoint, schema, tag, and guide page against all checklists in `STANDARDS.md` §5 (E1–E17, S1–S8, T1–T3, G1–G8). Verified 33 operations, 41 reachable schemas, 9 tags, and 17 documentation pages with automated test and lint evidence. Generated comprehensive compliance audit report `CHECKLIST-REPORT.md` confirming 100% compliance across all 4 scope matrices with zero defects and zero failing items. Track 2 (API Docs) is now 100% complete.
+
+**Changed**:
+- Created `agent-prompts/api-docs/CHECKLIST-REPORT.md`: Comprehensive audit report with detailed evidence matrices for operations (E1–E17), schemas (S1–S8), tags (T1–T3), and guide pages (G1–G8), and mechanical quality gate execution summaries.
+- Deleted `agent-prompts/api-docs/10-checklist-verification.md`.
+
+**API changes**: none.
+
+**Decisions**:
+- Conclude API documentation overhaul runbook with all 33 endpoints, 41 schemas, 9 tags, 9 caller guides, and 6 policy catalogues fully implemented, drift-free, and enforced by CI quality gates.
+
+**Verification**:
+- `pnpm nx test api-server`: PASS (120 tests pass).
+- `pnpm nx run api-server:contract-test`: PASS (103 contract tests pass).
+- `pnpm nx test kernel-backend`: PASS (105 tests pass).
+- `pnpm nx run api-server:openapi-check`: PASS (0 diff).
+- `pnpm nx run api-server:openapi-lint`: PASS (0 defects).
+- `pnpm nx run landing:docs-check`: PASS (All 13 quality gates pass, 0 defects).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: none.
+
 
 
 
