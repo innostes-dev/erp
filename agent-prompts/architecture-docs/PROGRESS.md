@@ -275,3 +275,21 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed).
 **Open issues**:
 - None blocking. All risks and debt items are catalogued with designated owners in `risks-and-technical-debt.mdx`.
+
+
+## 11 – Developer docs alignment – 2026-10-29
+**Summary**: Aligned all developer guides and tutorial pages with the completed architecture documentation and verified repository reality:
+1. Updated `getting-started.mdx` (Diátaxis tutorial) with explicit "Make your first change" step verifying hot-reload in `web-app` and test pipelines.
+2. Synchronised `ci.mdx` with current `.github/workflows/ci.yml`: documented `pnpm/action-setup@v4`, `actions/setup-python`, Playwright browser dependencies, test suites, and fitness function gates (`pnpm run arch-check`). Removed obsolete warning about npm template.
+3. Aligned `project-structure.mdx` cross-references with `overview.mdx` (#invariant-rules) and building-blocks.
+4. Verified Diátaxis typing, icons, descriptions, and metadata completeness across all developer guide pages.
+**Changed**: `apps/landing/content/dev-docs/getting-started.mdx`, `apps/landing/content/dev-docs/guides/ci.mdx`, `apps/landing/content/dev-docs/project-structure.mdx`, `PROGRESS.md`, `11-devdocs-alignment.md` deleted.
+**Code changes**: none.
+**Decisions**:
+- Maintained single source of truth for repository structure and dependency rules in architecture docs with cross-links from developer guides.
+**Verification**:
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED (all 6 gates passed, 12/12 arc42 sections enforced, 42 architecture pages verified).
+- `pnpm nx run landing:docs-check`: PASSED (all 16 quality gates passed, 0 broken links).
+**Open issues**:
+- None.

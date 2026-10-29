@@ -74,7 +74,7 @@ icon: FolderTree
 
 | Path | What it is |
 | --- | --- |
-| `apps/` | Deployable applications. `api-server` and `web-app` are the two **engines**; `landing` is the website and docs. Apps can depend on packages, never on other apps. |
+| `apps/` | Deployable applications. `api-server` and `web-app` are the two **engines**; `landing` is the website and docs. Apps can depend on packages, never on other apps (enforced via [Invariant Rules](/docs/architecture/overview#invariant-rules)). |
 | `kernel/` | The first **plug-in**: shared foundation for all ERP modules, with a `backend/` (Python) and a `frontend/` (React) part. See [Building Blocks](/docs/architecture/building-blocks). |
 | `modules/` | Domain-specific business modules (`hrms`, `crm`) implementing the [Plug-in Contract](/docs/architecture/plugin-contract). |
 | `plugins/` | Extensible telemetry and platform developer plugins (`api-logger`). |

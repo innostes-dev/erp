@@ -96,13 +96,31 @@ See [First-run Setup](/docs/architecture/setup) for details and how to reset it.
 </Step>
 <Step>
 
+### Make your first change
+
+Verify that hot reload and test pipelines work as expected:
+
+1. Open `apps/web-app/src/app/App.tsx`.
+2. Make a small text edit in a greeting or heading.
+3. Observe instant hot module replacement in the running browser on http://localhost:4200.
+4. Run the automated quality checks:
+   ```bash
+   pnpm nx run-many -t build typecheck
+   ```
+5. Revert your test edit once confirmed.
+
+</Step>
+<Step>
+
 ### Check your changes
+
+Before opening a pull request, verify that all build, typecheck, and quality gates pass:
 
 ```bash
 pnpm nx run-many -t build typecheck
+pnpm run arch-check
+pnpm nx run landing:docs-check
 ```
-
-Before opening a pull request, make sure this passes.
 
 </Step>
 </Steps>

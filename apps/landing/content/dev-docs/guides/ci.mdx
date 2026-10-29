@@ -10,18 +10,21 @@ request.
 ## What it checks
 
 ```bash
-nx format:check --base=origin/main
-nx run-many -t lint test build typecheck e2e
+pnpm nx format:check --base="remotes/origin/main"
+pnpm nx run-many -t lint test contract-test build typecheck e2e docs-check docs-e2e verify-checklist openapi-check openapi-lint arch-docs-check
+pnpm run arch-check
 ```
 
-Nx skips tasks a project doesn't have, so this covers every project that defines them.
+Nx distributes and parallelises tasks across GitHub Actions workers with pnpm caching and task caching enabled.
 
-<Callout type="warn" title="Needs updating">
-  The workflow still comes from the Nx template: it installs with `npm ci` on Node 24 and connects to
-  Nx Cloud. This repo uses pnpm, so CI must switch to `pnpm install --frozen-lockfile` (with
-  `pnpm/action-setup`) before it can pass. Remove the `nx start-ci-run` and `nx fix-ci` steps unless
-  you set up Nx Cloud.
-</Callout>
+## Environment & setup
+
+The CI workflow uses:
+- **Package manager**: `pnpm/action-setup@v4` with `pnpm install --frozen-lockfile`
+- **Node runtime**: Node.js 24 with pnpm caching (`cache: 'pnpm'`)
+- **Python runtime**: Python 3.11/3.12 with `pnpm nx run api-server:install` for backend virtual environment setup
+- **Browser automation**: Chromium installed via `pnpm exec playwright install --with-deps chromium` for e2e and visual regression testing
+- **Architecture fitness**: `pnpm run arch-check` enforcing all 6 architectural fitness functions and import rules
 
 ## Run the same checks locally
 
