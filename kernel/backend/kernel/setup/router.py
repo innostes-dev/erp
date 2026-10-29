@@ -67,7 +67,9 @@ def get_service(session: AsyncSession = Depends(get_db)) -> SetupService:
     openapi_extra={"security": []},
     responses=error_responses(DatabaseUnavailableError),
 )
-async def get_setup_status() -> SetupStatus:
+async def get_setup_status(
+    installed: bool = Depends(is_installed_cached),
+) -> SetupStatus:
     """Tell the UI whether to show the setup wizard. Reveals nothing else.
 
     Returns **503** if the database can't be reached: the setup state is
@@ -79,7 +81,7 @@ async def get_setup_status() -> SetupStatus:
     Raises:
         DatabaseUnavailableError: The database is unreachable (503).
     """
-    return SetupStatus(installed=await is_installed_cached())
+    return SetupStatus(installed=installed)
 
 
 @router.get(
@@ -139,7 +141,6 @@ async def get_setup_checks(
         AlreadyInstalledError,
         TooManyRequestsError,
         DatabaseUnavailableError,
-        UnprocessableContentError,
     ),
 )
 async def run_setup(

@@ -147,11 +147,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -210,11 +210,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -253,11 +253,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -316,11 +316,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -379,11 +379,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -439,11 +439,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -577,11 +577,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -662,11 +662,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -970,11 +970,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1040,11 +1040,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1058,6 +1058,14 @@
         "summary": "List tenants",
         "description": "List tenants with pagination, newest first.\n\nRequires Bearer authentication. Soft-deleted tenants are hidden unless\n`include_deleted=true` is requested.",
         "operationId": "tenants_list",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "offset",
@@ -1130,21 +1138,16 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/tenants/{tenant_id}": {
@@ -1155,6 +1158,14 @@
         "summary": "Get a tenant",
         "description": "Get one tenant organisation by unique id.\n\nRequires Bearer authentication. Soft-deleted tenants return 404.",
         "operationId": "tenants_get",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "tenant_id",
@@ -1204,21 +1215,16 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
+        }
       },
       "patch": {
         "tags": [
@@ -1304,11 +1310,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1379,11 +1385,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1456,11 +1462,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1648,11 +1654,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1756,11 +1762,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1948,11 +1954,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -2056,11 +2062,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -2118,11 +2124,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -2203,11 +2209,11 @@
             }
           },
           "422": {
-            "description": "Unprocessable content",
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }

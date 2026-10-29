@@ -28,6 +28,13 @@
         "command": "node scripts/venv-python.js -m unittest discover -s tests -p \"test_*.py\""
       }
     },
+    "contract-test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "apps/api-server",
+        "command": "node scripts/venv-python.js -m unittest discover -s tests -p \"test_contract_*.py\""
+      }
+    },
     "openapi": {
       "executor": "nx:run-commands",
       "options": {

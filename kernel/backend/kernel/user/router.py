@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from kernel.core.database import get_db
 from kernel.core.schemas import error_responses
-from kernel.core.services.errors import UnauthorizedError, UnprocessableContentError
+from kernel.core.services.errors import UnauthorizedError
 from kernel.user.models.user import User
 from kernel.user.schemas import UserCreate, UserRead
 from kernel.user.services import EmailAlreadyExistsError, UserNotFoundError, UserService
@@ -23,18 +23,21 @@ _bearer_scheme = HTTPBearer(
 )
 
 
+def get_service() -> UserService:
+    return UserService()
+
+
 async def get_current_user_dep(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     session: AsyncSession = Depends(get_db),
+    service: UserService = Depends(get_service),
 ) -> User:
     """Lazy-load get_current_user to eliminate circular import."""
     from kernel.auth.dependencies import get_current_user
-    return await get_current_user(request=request, credentials=credentials, session=session)
-
-
-def get_service() -> UserService:
-    return UserService()
+    return await get_current_user(
+        request=request, credentials=credentials, session=session, user_service=service
+    )
 
 
 @router.post(
@@ -47,7 +50,6 @@ def get_service() -> UserService:
     responses=error_responses(
         EmailAlreadyExistsError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def create_user(
@@ -85,7 +87,6 @@ async def create_user(
     responses=error_responses(
         UserNotFoundError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def get_user(

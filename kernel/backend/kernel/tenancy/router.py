@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from importlib.metadata import entry_points
 import uuid
 
-from fastapi import APIRouter, Depends, Header, Path, Query, status
+from fastapi import APIRouter, Depends, Header, Path, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from kernel.core.database import get_db
 from kernel.core.schemas import Page, error_responses
 from kernel.core.security import get_actor_id
-from kernel.core.services.errors import ForbiddenError, UnauthorizedError, UnprocessableContentError
+from kernel.core.services.errors import ForbiddenError, UnauthorizedError
 from kernel.tenancy.models import Tenant, TenantMember, TenantMemberStatus, TenantModule, TenantPlugin
 from kernel.tenancy.schemas import (
     ActivationResponse,
@@ -38,11 +38,12 @@ _bearer_scheme = HTTPBearer(
 
 
 async def get_current_user_dep(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
     session: AsyncSession = Depends(get_db),
 ) -> "User":
     from kernel.auth.dependencies import get_current_user
-    return await get_current_user(credentials=credentials, session=session)
+    return await get_current_user(request=request, credentials=credentials, session=session)
 
 
 async def require_super_admin_dep(
@@ -108,7 +109,6 @@ async def _get_or_404(
     responses=error_responses(
         SlugTakenError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def create_tenant(
@@ -142,13 +142,14 @@ async def create_tenant(
     response_description="One page of tenants, newest first.",
     operation_id="tenants_list",
     openapi_extra={"security": [{"BearerAuth": []}]},
-    responses=error_responses(UnauthorizedError, UnprocessableContentError),
+    responses=error_responses(UnauthorizedError),
 )
 async def list_tenants(
     offset: int = Query(0, ge=0, description="Number of tenants to skip.", examples=[0]),
     limit: int = Query(50, ge=1, le=200, description="Maximum tenants to return (1-200).", examples=[50]),
     include_deleted: bool = Query(False, description="Also return soft-deleted tenants.", examples=[False]),
     service: TenantService = Depends(get_service),
+    actor_id: uuid.UUID | None = Depends(get_actor_id),
 ) -> Page[TenantRead]:
     """List tenants with pagination, newest first.
 
@@ -183,12 +184,12 @@ async def list_tenants(
     responses=error_responses(
         TenantNotFoundError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def get_tenant(
     tenant_id: uuid.UUID = TenantId,
     service: TenantService = Depends(get_service),
+    actor_id: uuid.UUID | None = Depends(get_actor_id),
 ) -> Tenant:
     """Get one tenant organisation by unique id.
 
@@ -197,6 +198,7 @@ async def get_tenant(
     Args:
         tenant_id: Tenant id from the URL.
         service: Injected tenant service.
+        actor_id: Injected id of the calling user, or None.
 
     Returns:
         The tenant.
@@ -218,7 +220,6 @@ async def get_tenant(
         TenantNotFoundError,
         SlugTakenError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def update_tenant(
@@ -259,7 +260,6 @@ async def update_tenant(
     responses=error_responses(
         TenantNotFoundError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def delete_tenant(
@@ -298,7 +298,6 @@ async def delete_tenant(
     responses=error_responses(
         TenantNotFoundError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def restore_tenant(
@@ -331,12 +330,19 @@ async def restore_tenant(
 # ---------------------------------------------------------------------------
 
 
-async def _get_current_tenant_id(
-    session: AsyncSession, user: User, explicit_tenant_id: uuid.UUID | None = None
+async def get_current_tenant_id(
+    session: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
 ) -> uuid.UUID:
     """Resolve active tenant ID for calling user, respecting explicit header or membership."""
-    if explicit_tenant_id:
-        return explicit_tenant_id
+    if x_tenant_id:
+        return x_tenant_id
 
     res = await session.execute(
         select(TenantMember.tenant_id)
@@ -367,12 +373,7 @@ async def _get_current_tenant_id(
 async def list_current_modules(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_dep),
-    x_tenant_id: uuid.UUID | None = Header(
-        default=None,
-        alias="X-Tenant-ID",
-        description="Active tenant UUID context.",
-        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
-    ),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
 ) -> ModuleListResponse:
     """Return catalog of business modules and their activation status.
 
@@ -387,8 +388,6 @@ async def list_current_modules(
     Returns:
         ModuleListResponse containing all discoverable modules and active IDs.
     """
-    tenant_id = await _get_current_tenant_id(session, current_user, x_tenant_id)
-
     res = await session.execute(
         select(TenantModule).where(TenantModule.tenant_id == tenant_id, TenantModule.is_active.is_(True))
     )
@@ -457,19 +456,13 @@ async def list_current_modules(
         UnauthorizedError,
         ForbiddenError,
         TenantNotFoundError,
-        UnprocessableContentError,
     ),
 )
 async def activate_module(
     module_id: str = Path(description="Package identifier of business module to activate.", examples=["hrms"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
-    x_tenant_id: uuid.UUID | None = Header(
-        default=None,
-        alias="X-Tenant-ID",
-        description="Active tenant UUID context.",
-        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
-    ),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
 ) -> ActivationResponse:
     """Activate a business module for the current tenant.
 
@@ -480,13 +473,11 @@ async def activate_module(
         module_id: Identifier of target module.
         session: Active async database session.
         admin_user: Authenticated administrator.
-        x_tenant_id: Optional explicit tenant context header.
+        tenant_id: Active tenant UUID context.
 
     Returns:
         ActivationResponse confirming enabled state.
     """
-    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
-
     res = await session.execute(
         select(TenantModule).where(TenantModule.tenant_id == tenant_id, TenantModule.module_id == module_id)
     )
@@ -523,19 +514,13 @@ async def activate_module(
         UnauthorizedError,
         ForbiddenError,
         TenantNotFoundError,
-        UnprocessableContentError,
     ),
 )
 async def deactivate_module(
     module_id: str = Path(description="Package identifier of business module to deactivate.", examples=["hrms"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
-    x_tenant_id: uuid.UUID | None = Header(
-        default=None,
-        alias="X-Tenant-ID",
-        description="Active tenant UUID context.",
-        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
-    ),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
 ) -> ActivationResponse:
     """Deactivate a business module for the current tenant.
 
@@ -546,12 +531,11 @@ async def deactivate_module(
         module_id: Identifier of target module.
         session: Active async database session.
         admin_user: Authenticated administrator.
-        x_tenant_id: Optional explicit tenant context header.
+        tenant_id: Active tenant UUID context.
 
     Returns:
         ActivationResponse confirming deactivated state.
     """
-    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
     res = await session.execute(
         select(TenantModule).where(TenantModule.tenant_id == tenant_id, TenantModule.module_id == module_id)
     )
@@ -579,12 +563,7 @@ async def deactivate_module(
 async def list_current_plugins(
     session: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_dep),
-    x_tenant_id: uuid.UUID | None = Header(
-        default=None,
-        alias="X-Tenant-ID",
-        description="Active tenant UUID context.",
-        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
-    ),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
 ) -> PluginListResponse:
     """Return catalog of extensible plugins and their activation status.
 
@@ -593,14 +572,11 @@ async def list_current_plugins(
     \f
     Args:
         session: Active async database session.
-        current_user: Authenticated actor.
-        x_tenant_id: Optional explicit tenant context header.
+        tenant_id: Active tenant UUID context.
 
     Returns:
         PluginListResponse with all discoverable plugins and active IDs.
     """
-    tenant_id = await _get_current_tenant_id(session, current_user, x_tenant_id)
-
     res = await session.execute(
         select(TenantPlugin).where(TenantPlugin.tenant_id == tenant_id, TenantPlugin.is_active.is_(True))
     )
@@ -661,19 +637,13 @@ async def list_current_plugins(
         UnauthorizedError,
         ForbiddenError,
         TenantNotFoundError,
-        UnprocessableContentError,
     ),
 )
 async def activate_plugin(
     plugin_id: str = Path(description="Package identifier of extensible plugin to activate.", examples=["api-logger"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
-    x_tenant_id: uuid.UUID | None = Header(
-        default=None,
-        alias="X-Tenant-ID",
-        description="Active tenant UUID context.",
-        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
-    ),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
 ) -> ActivationResponse:
     """Activate an extensible plugin for the current tenant.
 
@@ -684,13 +654,11 @@ async def activate_plugin(
         plugin_id: Identifier of target plugin.
         session: Active async database session.
         admin_user: Authenticated administrator.
-        x_tenant_id: Optional explicit tenant context header.
+        tenant_id: Active tenant UUID context.
 
     Returns:
         ActivationResponse confirming enabled state.
     """
-    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
-
     res = await session.execute(
         select(TenantPlugin).where(TenantPlugin.tenant_id == tenant_id, TenantPlugin.plugin_id == plugin_id)
     )
@@ -727,19 +695,13 @@ async def activate_plugin(
         UnauthorizedError,
         ForbiddenError,
         TenantNotFoundError,
-        UnprocessableContentError,
     ),
 )
 async def deactivate_plugin(
     plugin_id: str = Path(description="Package identifier of extensible plugin to deactivate.", examples=["api-logger"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
-    x_tenant_id: uuid.UUID | None = Header(
-        default=None,
-        alias="X-Tenant-ID",
-        description="Active tenant UUID context.",
-        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
-    ),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
 ) -> ActivationResponse:
     """Deactivate an extensible plugin for the current tenant.
 
@@ -750,12 +712,11 @@ async def deactivate_plugin(
         plugin_id: Identifier of target plugin.
         session: Active async database session.
         admin_user: Authenticated administrator.
-        x_tenant_id: Optional explicit tenant context header.
+        tenant_id: Active tenant UUID context.
 
     Returns:
         ActivationResponse confirming deactivated state.
     """
-    tenant_id = await _get_current_tenant_id(session, admin_user, x_tenant_id)
     res = await session.execute(
         select(TenantPlugin).where(TenantPlugin.tenant_id == tenant_id, TenantPlugin.plugin_id == plugin_id)
     )

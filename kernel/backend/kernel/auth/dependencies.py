@@ -4,6 +4,7 @@ from collections.abc import Callable
 import uuid
 
 from fastapi import Depends, Header, Request
+from fastapi.params import Depends as DependsParam
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,14 +22,27 @@ _bearer_scheme = HTTPBearer(
 )
 
 
+def get_user_service() -> UserService:
+    return UserService()
+
+
+def get_api_key_service() -> ApiKeyService:
+    return ApiKeyService()
+
+
 async def get_current_user(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     session: AsyncSession = Depends(get_db),
-    user_service: UserService = Depends(lambda: UserService()),
-    api_key_service: ApiKeyService = Depends(lambda: ApiKeyService()),
+    user_service: UserService = Depends(get_user_service),
+    api_key_service: ApiKeyService = Depends(get_api_key_service),
 ) -> User:
     """Validate JWT access token, HttpOnly cookie, or API key and return active User instance."""
+    if isinstance(user_service, DependsParam):
+        user_service = get_user_service()
+    if isinstance(api_key_service, DependsParam):
+        api_key_service = get_api_key_service()
+
     raw_token: str | None = None
 
     if credentials and credentials.credentials:

@@ -32,11 +32,11 @@ _token_header = APIKeyHeader(
 )
 
 
-async def is_installed_cached(timeout: float = 3.0) -> bool:
-    """Installed flag via the process cache, with a timeout on the database check.
+INSTALL_CHECK_TIMEOUT: float = 3.0
 
-    Args:
-        timeout: Seconds to wait for the database.
+
+async def is_installed_cached() -> bool:
+    """Installed flag via the process cache, with a timeout on the database check.
 
     Returns:
         True if setup has been completed.
@@ -45,7 +45,9 @@ async def is_installed_cached(timeout: float = 3.0) -> bool:
         DatabaseUnavailableError: The database could not be checked.
     """
     try:
-        return await install_state.is_installed(lambda: asyncio.wait_for(installation_exists(), timeout))
+        return await install_state.is_installed(
+            lambda: asyncio.wait_for(installation_exists(), INSTALL_CHECK_TIMEOUT)
+        )
     except Exception as exc:
         raise DatabaseUnavailableError() from exc
 

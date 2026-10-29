@@ -133,7 +133,59 @@ Facts observed before the runbook started. Prompt 01 must verify them.
 
 **Open issues**:
 - Blocking: none.
-- Non-blocking: Prompt 04 (Contract tests).
+- Non-blocking: none.
+
+## 04 – Contract tests – 2026-10-29
+
+**Summary**: Built a comprehensive contract test suite asserting runtime conformance against the generated OpenAPI specification for every operation and every documented HTTP response status code. Created JSON Schema validator with Draft 2020-12 and internal `$ref` resolution via `referencing.Registry`. Implemented an automated undocumented-status guard and request example executability tests over all 33 operations. Added behaviour-fact tests verifying token rotation, expiry rejection, session revocation on logout, `X-Tenant-ID` multi-tenancy scoping, setup attempt rate limits, pagination maximum bounds, soft deletion semantics, and audit field tracking.
+
+**Changed**:
+- Created `apps/api-server/tests/contract_utils.py`: JSON Schema validation engine resolving live spec components and validating status-code payload contracts.
+- Created `apps/api-server/tests/test_contract_general.py`: Contract tests for root (`/`), config (`/config`), and health (`/health`) endpoints across 200 and 503 statuses.
+- Created `apps/api-server/tests/test_contract_auth.py`: 27 contract tests covering all authentication and API key operations across 200, 201, 401, 404, 409, 422.
+- Created `apps/api-server/tests/test_contract_setup.py`: 14 contract tests covering setup status, pre-install checks, and first-run install across 200, 201, 401, 404, 409, 422, 429, 503.
+- Created `apps/api-server/tests/test_contract_tenancy.py`: 46 contract tests covering all 12 tenant, module, and plugin operations across 200, 201, 401, 403, 404, 409, 422.
+- Created `apps/api-server/tests/test_contract_user.py`: 8 contract tests covering user registration and retrieval across 200, 201, 401, 409, 422.
+- Created `apps/api-server/tests/test_contract_modules.py`: 3 contract tests covering metadata discovery for CRM, HRMS, and API Logger.
+- Created `apps/api-server/tests/test_contract_guard.py`: Undocumented-status guard asserting all operations return only documented statuses, plus request example executability test verifying all spec examples succeed.
+- Created `apps/api-server/tests/test_behaviour_facts.py`: Verified runtime facts cited in Prompt 06 guides.
+- Updated `apps/api-server/requirements.txt`: Added `jsonschema>=4.20.0`.
+- Updated `apps/api-server/project.json`: Added `contract-test` target.
+- Updated `.github/workflows/ci.yml`: Added `contract-test` to the CI test step.
+- Updated `kernel/backend/kernel/auth/dependencies.py`: Replaced generic `hasattr` inspection with `isinstance(..., DependsParam)` to protect mocked dependencies.
+- Updated `kernel/backend/kernel/tenancy/router.py`: Injected `get_current_tenant_id` dependency for clean tenant scoping and contract testability.
+- Updated `kernel/backend/kernel/setup/dependencies.py`: Removed internal `timeout` parameter from `is_installed_cached` signature to eliminate undocumented query parameter defect.
+
+**Behaviour facts test catalogue (cited by Prompt 06 guides)**:
+- `test_token_rotation__rejects_old_refresh_token`: Refresh token rotation invalidates previous refresh token immediately.
+- `test_token_expiry__rejects_expired_access_token`: Access tokens with expired timestamps return 401 Unauthorized.
+- `test_logout_revocation__invalidates_subsequent_token_calls`: POST /auth/logout clears sessions and revokes access.
+- `test_x_tenant_id__scopes_request_to_explicit_tenant`: Explicit `X-Tenant-ID` header scopes operation data queries to the specified tenant.
+- `test_setup_token_attempt_limit__locks_out_after_max_guesses`: Exceeding setup token attempt limit returns 429 Too Many Requests.
+- `test_pagination_bounds__rejects_limit_exceeding_200`: Requesting pagination limit > 200 returns 422 Unprocessable Content.
+- `test_soft_delete__hides_record_by_default`: Soft-deleted tenant records are omitted from standard listings.
+- `test_soft_delete__include_deleted_shows_records`: Passing `include_deleted=true` returns soft-deleted tenant records.
+- `test_soft_delete__restore_makes_record_active`: POST /tenants/{tenant_id}/restore clears `deleted_at` and restores active status.
+- `test_audit_fields__populated_on_create_and_update`: Operations automatically populate `created_at`, `created_by`, `updated_at`, `updated_by`.
+
+**API changes**:
+- Removed internal `timeout` query parameter from `/setup/status`.
+
+**Decisions**:
+- Use `referencing.Registry` with Draft 2020-12 for JSON Schema validation to resolve all spec schemas without network overhead.
+- Structure contract tests by tag with sentence-like test names (`test_<operation>__<status>_<condition>`).
+
+**Verification**:
+- `pnpm nx test api-server`: PASS (119 tests in 3.28s).
+- `pnpm nx run api-server:contract-test`: PASS (103 contract tests in 2.85s).
+- `pnpm nx test kernel-backend`: PASS (100 tests in 5.96s).
+- `pnpm nx run api-server:openapi-check`: PASS (0 diff against code).
+- `pnpm nx run api-server:openapi-lint`: PASS (Spectral clean, 0 enforced defects, 0 report-mode observations).
+
+**Open issues**:
+- Blocking: none.
+- Non-blocking: Prompt 05 (Reference site).
+
 
 
 

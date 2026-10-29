@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Depends, Header, Path, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from kernel.auth.dependencies import get_current_user
+from kernel.auth.dependencies import get_current_user, get_user_service
 from kernel.auth.schemas import (
     ApiKeyCreatedResponse,
     ApiKeyListResponse,
@@ -35,7 +35,7 @@ from kernel.auth.services import (
 )
 from kernel.core.database import get_db
 from kernel.core.schemas import error_responses
-from kernel.core.services.errors import NotFoundError, UnauthorizedError, UnprocessableContentError
+from kernel.core.services.errors import NotFoundError, UnauthorizedError
 from kernel.user.models.user import User
 from kernel.user.schemas import UserRead
 from kernel.user.services import UserService
@@ -75,7 +75,6 @@ def get_client_ip(request: Request) -> str | None:
         AccountSuspendedError,
         TemporaryPasswordExpiredError,
         DeviceWipedError,
-        UnprocessableContentError,
     ),
 )
 async def login(
@@ -138,7 +137,6 @@ async def login(
     responses=error_responses(
         InvalidTokenError,
         DeviceWipedError,
-        UnprocessableContentError,
     ),
 )
 async def refresh_token(
@@ -204,7 +202,6 @@ async def refresh_token(
     summary="Request password reset",
     operation_id="auth_forgot_password",
     openapi_extra={"security": []},
-    responses=error_responses(UnprocessableContentError),
 )
 async def forgot_password(
     body: ForgotPasswordRequest,
@@ -239,7 +236,6 @@ async def forgot_password(
     responses=error_responses(
         InvalidTokenError,
         PasswordRecentlyUsedError,
-        UnprocessableContentError,
     ),
 )
 async def reset_password(
@@ -276,7 +272,6 @@ async def reset_password(
         InvalidCredentialsError,
         PasswordRecentlyUsedError,
         UnauthorizedError,
-        UnprocessableContentError,
     ),
 )
 async def change_password(
@@ -311,7 +306,7 @@ async def change_password(
     summary="Revoke session tokens",
     operation_id="auth_logout",
     openapi_extra={"security": [{"BearerAuth": []}]},
-    responses=error_responses(UnauthorizedError, UnprocessableContentError),
+    responses=error_responses(UnauthorizedError),
 )
 async def logout(
     body: LogoutRequest,
@@ -356,7 +351,7 @@ async def logout(
 )
 async def get_me(
     current_user: User = Depends(get_current_user),
-    user_service: UserService = Depends(lambda: UserService()),
+    user_service: UserService = Depends(get_user_service),
 ) -> UserRead:
     """Retrieves profile and identity details of the authenticated actor.
 
@@ -417,7 +412,7 @@ async def list_api_keys(
     summary="Generate API key",
     operation_id="auth_create_api_key",
     openapi_extra={"security": [{"BearerAuth": []}]},
-    responses=error_responses(UnauthorizedError, UnprocessableContentError),
+    responses=error_responses(UnauthorizedError),
 )
 async def create_api_key(
     body: CreateApiKeyRequest,
@@ -459,7 +454,7 @@ async def create_api_key(
     summary="Revoke API key",
     operation_id="auth_revoke_api_key",
     openapi_extra={"security": [{"BearerAuth": []}]},
-    responses=error_responses(UnauthorizedError, NotFoundError, UnprocessableContentError),
+    responses=error_responses(UnauthorizedError, NotFoundError),
 )
 async def revoke_api_key(
     key_id: uuid.UUID = Path(

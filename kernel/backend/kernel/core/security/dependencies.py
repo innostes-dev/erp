@@ -39,4 +39,5 @@ async def get_actor_id(
         payload = decode_token(credentials.credentials)
         return uuid.UUID(str(payload.get("sub")))
     except (jwt.PyJWTError, ValueError, TypeError):
-        return None
+        from kernel.core.services.errors import UnauthorizedError
+        raise UnauthorizedError("Invalid or expired authentication token.")
