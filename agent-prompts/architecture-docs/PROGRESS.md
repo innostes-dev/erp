@@ -136,3 +136,26 @@ Observed before the runbook started. Prompt 01 must verify every one.
 - Python test suite: 107 backend unit tests PASSED in 5.9s.
 **Open issues**:
 - Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
+
+## 06 – Data architecture, multi-tenancy and migrations – 2026-10-29
+**Summary**: Authored arc42 sections 5 and 8 (Data Architecture and Cross-cutting Concepts) in `apps/landing/content/dev-docs/architecture/data-architecture.mdx`:
+1. Documented complete relational schema across all 18 core tables managed by `Base.metadata` in PostgreSQL 16.
+2. Rendered full Entity-Relationship diagram in `<Diagram>` using Mermaid `erDiagram`.
+3. Created table inventory reference detailing table names, owning features, key columns, and multi-tenant scoping boundaries.
+4. Detailed universal model conventions inherited from `BaseModel`: `UUIDPrimaryKeyMixin` (UUID v4 primary keys), `TimestampMixin` (UTC timestamps), `AuditMixin` (actor tracking via `created_by`/`updated_by`), and `SoftDeleteMixin` (universal soft-deletion via `deleted_at`/`deleted_by`).
+5. Documented pooled single-database multi-tenancy strategy, `X-Tenant-ID` header resolution, application-level isolation, and future PostgreSQL Row-Level Security (RLS) plans.
+6. Documented Alembic migration strategy, zero-downtime expand-and-contract patterns, and PostgreSQL transaction advisory locking (`SELECT pg_advisory_xact_lock(727001)`) for concurrent startup safety.
+7. Documented data lifecycle, retention policies, and cryptographic protection (salted bcrypt password hashes, AES-256-CBC/Fernet ciphertext for personal identities).
+8. Implemented automated data dictionary verification script (`apps/landing/scripts/generate-data-dictionary.py --check`) verifying all 18 tables in `Base.metadata`.
+**Changed**: `apps/landing/content/dev-docs/architecture/data-architecture.mdx`, `apps/landing/scripts/generate-data-dictionary.py`, `PROGRESS.md`, `06-data-architecture.md` deleted.
+**Code changes**: Added `generate-data-dictionary.py`.
+**Decisions**:
+- Standardised database primary keys on application-generated UUID v4 strings for pre-persistence referenceability.
+- Protected database migration concurrency across horizontally scaled API replicas using PostgreSQL advisory transaction locks.
+**Verification**:
+- `apps/api-server/.venv/bin/python apps/landing/scripts/generate-data-dictionary.py --check`: PASSED (18 tables verified).
+- `pnpm run arch-check`: PASSED.
+- `pnpm nx run landing:arch-docs-check`: PASSED.
+- `pnpm nx run landing:docs-check`: PASSED.
+**Open issues**:
+- Non-blocking: `ARC-002` (feature circular dependencies recorded with narrow exceptions in `.importlinter`, to be addressed in Prompt 10).
