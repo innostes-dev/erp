@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import sys
 import unittest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 import uuid
 
 app_root = Path(__file__).resolve().parents[1]
@@ -151,9 +151,23 @@ class TestContractGuard(unittest.TestCase):
         app.dependency_overrides[require_setup_available] = lambda: None
         app.dependency_overrides[require_setup_token] = lambda: "inno_setup_secret_token_123"
         async def fake_installed():
-            return False
+            return True
 
         app.dependency_overrides[is_installed_cached] = fake_installed
+
+        self.ping_patcher = patch(
+            "app.engine.server.ping_db",
+            AsyncMock(
+                return_value={
+                    "status": "HEALTHY",
+                    "latency_ms": 1.0,
+                    "pool": {"size": 5, "checked_in": 5, "checked_out": 0, "overflow": 0},
+                    "error": None,
+                }
+            ),
+        )
+        self.ping_patcher.start()
+        self.addCleanup(self.ping_patcher.stop)
 
         # Auth service overrides
         mock_auth = MagicMock()

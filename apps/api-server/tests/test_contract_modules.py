@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from kernel.core.database import get_db
+from kernel.setup.services import install_state
 from tests.contract_utils import validate_response_contract
 
 
@@ -21,6 +22,7 @@ class TestContractModules(unittest.TestCase):
     """Contract tests verifying responses for module and plugin info endpoints."""
 
     def setUp(self) -> None:
+        install_state.mark_installed()
         self.client = TestClient(app)
 
         async def fake_db():
