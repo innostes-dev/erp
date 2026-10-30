@@ -40,7 +40,7 @@ class TenantMember(BaseModel):
         index=True,
     )
     status: Mapped[TenantMemberStatus] = mapped_column(
-        ENUM(TenantMemberStatus, name="tenant_member_status_enum", create_type=False),
+        ENUM(TenantMemberStatus, name="tenant_member_status_enum", create_type=False, values_callable=lambda x: [e.value for e in x]),
         default=TenantMemberStatus.ACTIVE,
         nullable=False,
         index=True,

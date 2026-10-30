@@ -43,7 +43,7 @@ class User(BaseModel):
     # Authentication & Security
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[UserStatus] = mapped_column(
-        ENUM(UserStatus, name="user_status_enum", create_type=False),
+        ENUM(UserStatus, name="user_status_enum", create_type=False, values_callable=lambda x: [e.value for e in x]),
         default=UserStatus.ACTIVE,
         nullable=False,
         index=True,

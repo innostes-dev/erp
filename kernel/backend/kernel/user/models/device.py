@@ -45,7 +45,7 @@ class UserDevice(BaseModel):
     device_fingerprint: Mapped[str] = mapped_column(String(128), index=True, nullable=False)
     device_name: Mapped[str] = mapped_column(String(255), nullable=False)
     device_type: Mapped[DeviceType] = mapped_column(
-        ENUM(DeviceType, name="device_type_enum", create_type=False),
+        ENUM(DeviceType, name="device_type_enum", create_type=False, values_callable=lambda x: [e.value for e in x]),
         default=DeviceType.DESKTOP,
         nullable=False,
     )
@@ -60,7 +60,7 @@ class UserDevice(BaseModel):
     is_corporate_managed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     status: Mapped[DeviceStatus] = mapped_column(
-        ENUM(DeviceStatus, name="device_status_enum", create_type=False),
+        ENUM(DeviceStatus, name="device_status_enum", create_type=False, values_callable=lambda x: [e.value for e in x]),
         default=DeviceStatus.ACTIVE,
         nullable=False,
         index=True,

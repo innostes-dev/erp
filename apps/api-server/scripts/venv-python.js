@@ -14,8 +14,10 @@ if (!fs.existsSync(pythonExe)) {
   process.exit(1);
 }
 
+const pythonPath = [process.cwd(), process.env.PYTHONPATH].filter(Boolean).join(path.delimiter);
+
 const result = spawnSync(pythonExe, process.argv.slice(2), {
   stdio: 'inherit',
-  env: { ...process.env, PYTHONUTF8: '1' },
+  env: { ...process.env, PYTHONUTF8: '1', PYTHONPATH: pythonPath },
 });
 process.exit(result.status ?? 1);
