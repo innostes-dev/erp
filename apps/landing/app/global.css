@@ -15,7 +15,7 @@
   --color-fd-background: #ffffff;
   --color-fd-foreground: var(--color-slate-900);
   --color-fd-muted: var(--color-slate-50);
-  --color-fd-muted-foreground: var(--color-slate-600);
+  --color-fd-muted-foreground: var(--color-slate-700);
   --color-fd-popover: #ffffff;
   --color-fd-popover-foreground: var(--color-slate-900);
   --color-fd-card: #ffffff;
@@ -34,7 +34,7 @@
   --color-fd-background: var(--color-slate-950);
   --color-fd-foreground: var(--color-slate-100);
   --color-fd-muted: var(--color-slate-900);
-  --color-fd-muted-foreground: var(--color-slate-400);
+  --color-fd-muted-foreground: var(--color-slate-300);
   --color-fd-popover: var(--color-slate-900);
   --color-fd-popover-foreground: var(--color-slate-100);
   --color-fd-card: var(--color-slate-900);
@@ -53,10 +53,10 @@
   --color-fd-ring: var(--color-blue-400);
 }
 
-.dark span[style*="--shiki-dark:#6A737D"],
-.dark span[style*="--shiki-dark:#6a737d"],
-.dark span[style*="#6A737D"],
-.dark span[style*="#6a737d"] {
+.dark span[style*='--shiki-dark:#6A737D'],
+.dark span[style*='--shiki-dark:#6a737d'],
+.dark span[style*='#6A737D'],
+.dark span[style*='#6a737d'] {
   color: #94a3b8 !important;
 }
 
@@ -79,10 +79,10 @@ html > body[data-scroll-locked] {
   header,
   nav,
   aside,
-  [data-slot="toc"],
+  [data-slot='toc'],
   .fd-toc,
   .fd-sidebar,
-  [role="tablist"],
+  [role='tablist'],
   button {
     display: none !important;
   }
