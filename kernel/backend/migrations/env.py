@@ -1,9 +1,32 @@
 import asyncio
 from logging.config import fileConfig
-from sqlalchemy import String, pool, text
+from typing import Any
+from sqlalchemy import Column, MetaData, PrimaryKeyConstraint, String, Table, pool, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
+from alembic.ddl.impl import DefaultImpl
+
+# Ensure alembic_version table uses String(128) to accommodate long migration revision IDs
+def _custom_version_table_impl(
+    self: Any,
+    *,
+    version_table: str,
+    version_table_schema: str | None,
+    version_table_pk: bool,
+    **kw: Any,
+) -> Table:
+    vt = Table(
+        version_table,
+        MetaData(),
+        Column("version_num", String(128), nullable=False),
+        schema=version_table_schema,
+    )
+    if version_table_pk:
+        vt.append_constraint(PrimaryKeyConstraint("version_num", name=f"{version_table}_pkc"))
+    return vt
+
+DefaultImpl.version_table_impl = _custom_version_table_impl
 
 from kernel.core.config import get_settings
 from kernel.core.database import Base
@@ -58,6 +81,7 @@ def do_run_migrations(connection: Connection) -> None:
         # Only one process migrates at a time (other API workers, replicas, the setup
         # CLI). Others wait here, then find nothing left to do. Released at commit.
         connection.execute(text("SELECT pg_advisory_xact_lock(:id)"), {"id": MIGRATION_LOCK_ID})
+        connection.execute(text("ALTER TABLE IF EXISTS alembic_version ALTER COLUMN version_num TYPE character varying(128)"))
         context.run_migrations()
 
 

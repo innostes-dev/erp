@@ -1,0 +1,17 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/api-server/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/apps/api-server",
+    "${workspaceFolder}/kernel/backend",
+    "${workspaceFolder}/modules/crm/backend",
+    "${workspaceFolder}/modules/hrms/backend",
+    "${workspaceFolder}/plugins/api-logger/backend"
+  ],
+  "python-envs.pythonProjects": [
+    {
+      "path": "apps/api-server",
+      "envManager": "ms-python.python:venv",
+      "packageManager": "ms-python.python:pip"
+    }
+  ]
+}

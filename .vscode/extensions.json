@@ -1,3 +1,8 @@
 {
-  "recommendations": ["nrwl.angular-console", "esbenp.prettier-vscode"]
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.debugpy",
+    "nrwl.angular-console",
+    "esbenp.prettier-vscode"
+  ]
 }
