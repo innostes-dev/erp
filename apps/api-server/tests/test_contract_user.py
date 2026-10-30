@@ -18,6 +18,7 @@ from app.main import app
 from kernel.core.database import get_db
 from kernel.core.security.jwt import create_access_token
 from kernel.core.services.errors import UnauthorizedError
+from kernel.setup.services import install_state
 from kernel.user.models.user import User, UserStatus
 from kernel.user.router import get_current_user_dep, get_service
 from kernel.user.schemas import UserRead
@@ -29,6 +30,7 @@ class TestContractUser(unittest.TestCase):
     """Contract tests verifying request and response adherence for /users endpoints."""
 
     def setUp(self) -> None:
+        install_state.mark_installed()
         self.client = TestClient(app)
         self.mock_service = MagicMock()
         self.user_id = uuid.UUID("3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f")

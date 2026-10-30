@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import sys
 import unittest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 import uuid
 
 app_root = Path(__file__).resolve().parents[1]
@@ -47,6 +47,20 @@ class TestApiGuideSamples(unittest.TestCase):
     def setUp(self) -> None:
         self.client = TestClient(app)
         self.now = datetime.now(timezone.utc)
+        self.ping_patcher = patch(
+            "app.engine.server.ping_db",
+            AsyncMock(
+                return_value={
+                    "status": "HEALTHY",
+                    "latency_ms": 1.0,
+                    "pool": {"size": 5, "checked_in": 5, "checked_out": 0, "overflow": 0},
+                    "error": None,
+                }
+            ),
+        )
+        self.ping_patcher.start()
+        self.addCleanup(self.ping_patcher.stop)
+        install_state.mark_installed()
         self.user_id = uuid.UUID("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")
         self.tenant_id = uuid.UUID("3f2b1c9e-4d5a-6b7c-8e9f-0a1b2c3d4e5f")
 
@@ -169,6 +183,7 @@ class TestApiGuideSamples(unittest.TestCase):
         install_data = install_res.json()
         self.assertEqual(install_data["tenant"]["name"], "Northwind Traders Pvt Ltd")
         self.assertEqual(install_data["admin"]["email"], "priya.shah@northwind.example")
+        app.dependency_overrides[is_installed_cached] = lambda: True
 
         # Step 4: Login (POST /auth/login)
         mock_auth = MagicMock()

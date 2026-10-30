@@ -1,6 +1,7 @@
 """Contract tests for General and Observability operations."""
 
 import unittest
+from unittest.mock import AsyncMock, patch
 from fastapi import status
 from fastapi.testclient import TestClient
 
@@ -12,6 +13,7 @@ if str(app_root) not in sys.path:
     sys.path.insert(0, str(app_root))
 
 from app.main import app
+from kernel.setup.services import install_state
 from tests.contract_utils import validate_response_contract
 
 
@@ -19,6 +21,20 @@ class TestContractGeneral(unittest.TestCase):
     """Contract tests for service info, config, and health checks."""
 
     def setUp(self) -> None:
+        install_state.mark_installed()
+        self.ping_patcher = patch(
+            "app.engine.server.ping_db",
+            AsyncMock(
+                return_value={
+                    "status": "HEALTHY",
+                    "latency_ms": 1.0,
+                    "pool": {"size": 5, "checked_in": 5, "checked_out": 0, "overflow": 0},
+                    "error": None,
+                }
+            ),
+        )
+        self.ping_patcher.start()
+        self.addCleanup(self.ping_patcher.stop)
         self.client = TestClient(app)
 
     def test_system_root__200_returns_service_info(self) -> None:

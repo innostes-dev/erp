@@ -34,6 +34,7 @@ from kernel.core.database import get_db
 from kernel.core.security.jwt import create_access_token
 from kernel.core.services import TooManyRequestsError
 from kernel.setup.dependencies import require_setup_available, require_setup_token
+from kernel.setup.services import install_state
 from kernel.tenancy.models import Tenant
 from kernel.tenancy.router import get_current_tenant_id, get_current_user_dep, get_service
 from kernel.tenancy.schemas import TenantRead
@@ -45,6 +46,7 @@ class TestBehaviourFacts(unittest.TestCase):
     """Behavioural verification tests cited in API guides."""
 
     def setUp(self) -> None:
+        install_state.mark_installed()
         self.client = TestClient(app)
         self.tenant_id = uuid.UUID("3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f")
         self.user_id = uuid.UUID("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11")

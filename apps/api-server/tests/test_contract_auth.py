@@ -28,6 +28,7 @@ from kernel.auth.services import InvalidCredentialsError, InvalidTokenError
 from kernel.core.database import get_db
 from kernel.core.security.jwt import create_access_token
 from kernel.core.services.errors import NotFoundError
+from kernel.setup.services import install_state
 from kernel.user.models.user import User, UserStatus
 from kernel.user.schemas import UserRead
 from kernel.user.services import UserService
@@ -38,6 +39,7 @@ class TestContractAuth(unittest.TestCase):
     """Contract tests verifying request and response adherence for /auth endpoints."""
 
     def setUp(self) -> None:
+        install_state.mark_installed()
         self.client = TestClient(app)
         self.mock_auth = MagicMock()
         self.mock_api_key = MagicMock()
