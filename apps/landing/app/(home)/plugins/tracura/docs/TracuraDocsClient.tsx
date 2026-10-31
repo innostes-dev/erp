@@ -798,6 +798,12 @@ export function TracuraDocsClient() {
                 >
                   PII Redaction & GDPR Masking
                 </a>
+                <a
+                  href="#enterprise-scoping"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground transition-colors"
+                >
+                  Enterprise Scoping & Correlation
+                </a>
               </nav>
 
               <div className="pt-3 border-t border-fd-border">
@@ -1143,7 +1149,44 @@ async def tracura_middleware(request: Request, call_next):
               </div>
             </section>
 
-            {/* 6. COMPLETE API REFERENCE (ALL 20 ENDPOINTS) */}
+            {/* 6. ENTERPRISE SCOPING & CORRELATION */}
+            <section id="enterprise-scoping" className="scroll-mt-24 space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                <Layers className="size-4" />
+                <span>Enterprise Architecture</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Deterministic Scoping, Fallbacks & Audit Correlation
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Tracura is engineered to support mission-critical enterprise deployments where multi-tenant isolation, zero-latency ingestion, and regulatory compliance are non-negotiable.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
+                  <div className="font-semibold text-xs text-blue-600 dark:text-blue-400">Deterministic UUIDv5 Scoping</div>
+                  <p className="text-xs text-fd-muted-foreground leading-relaxed">
+                    Host ERP telemetry is deterministically bound to the tenant using <code className="font-mono bg-fd-muted px-1 rounded">uuid5(tenant_id, &quot;project:innostes-erp&quot;)</code>. Never blocks the request loop with database checks.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
+                  <div className="font-semibold text-xs text-purple-600 dark:text-purple-400">Multi-Tiered Fallback Ladder</div>
+                  <p className="text-xs text-fd-muted-foreground leading-relaxed">
+                    Seamlessly resolves environment from <code className="font-mono bg-fd-muted px-1 rounded">X-Environment</code> headers, falling back to <code className="font-mono bg-fd-muted px-1 rounded">APP_ENV</code>, and safely defaulting to <code className="font-mono bg-fd-muted px-1 rounded">&quot;development&quot;</code> if unset.
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
+                  <div className="font-semibold text-xs text-emerald-600 dark:text-emerald-400">Kernel Audit Trail Cross-Link</div>
+                  <p className="text-xs text-fd-muted-foreground leading-relaxed">
+                    Propagates <code className="font-mono bg-fd-muted px-1 rounded">X-Correlation-ID</code> across both systems. Enables 1-click cross-navigation between Tracura HTTP telemetry and Kernel Audit Trail compliance records.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* 7. COMPLETE API REFERENCE (ALL 20 ENDPOINTS) */}
             <section id="api-reference" className="scroll-mt-24 space-y-8 pt-6 border-t border-fd-border">
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">

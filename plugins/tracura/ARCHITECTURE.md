@@ -33,7 +33,7 @@ flowchart TD
     end
 
     subgraph CentralIngestionGateway ["Universal Ingestion Gateway (External Surface)"]
-        IngestEndpoint["POST /api-logger/v1/ingest<br/>(Single or Batch up to 250)"]
+        IngestEndpoint["POST /tracura/v1/ingest<br/>(Single or Batch up to 250)"]
         AuthValidator["Google-Style Scoped Key Validator<br/>(Project & Environment Restrictions, IP Allowlists)"]
         SanitizationEngine["Multi-Vector PII & Secret Redactor<br/>(Headers, Query Params, JSON Trees, JWT Regex)"]
         AsyncRingBuffer["Non-Blocking Async Memory Buffer<br/>(Batch Accumulator)"]
@@ -274,8 +274,8 @@ Any project can attach arbitrary custom metadata without schema migrations:
 ## 4. Ingestion Engine & Universal Payload Specification
 
 ### 4.1 Ingestion Endpoints
-* `POST /api-logger/v1/ingest` (Single entry)
-* `POST /api-logger/v1/ingest/batch` (Batch upload up to 250 entries)
+* `POST /tracura/v1/ingest` (Single entry)
+* `POST /tracura/v1/ingest/batch` (Batch upload up to 250 entries)
 
 ### 4.2 Authentication & Verification
 * Header: `X-API-Key: inno_log_live_********************`
@@ -394,7 +394,7 @@ plugins/tracura/
 │           ├── logs.py                  # Log Explorer endpoints
 │           └── analytics.py             # Telemetry & charts endpoints
 │
-├── frontend/                            # Standalone UI package (@innostes/api-logger)
+├── frontend/                            # Standalone UI package (@innostes/tracura)
 │   ├── src/
 │   │   ├── TracuraPage.tsx              # Full UI (Explorer, Keys, Metrics, Settings)
 │   │   ├── manifest.ts                  # Subfeature definitions
@@ -414,7 +414,7 @@ plugins/tracura/
 
 ### 7.1 Frontend Architecture Overview & Design System Foundation
 
-The frontend for the API Logger plugin is implemented as a standalone package located at `plugins/api-logger/frontend` (`@innostes/api-logger`). It is integrated into the Innostes enterprise workspace using:
+The frontend for the Tracura plugin is implemented as a standalone package located at `plugins/tracura/frontend` (`@innostes/tracura`). It is integrated into the Innostes enterprise workspace using:
 * **React 19 & TypeScript**: Strict typing for all telemetry models, filter parameters, and inspection states.
 * **`@innostes/ui` Design System**: Enterprise UI components including `MetricCard`, `DataTable`, `Tabs`, `Sheet`, `Drawer`, `Dialog`, `Badge`, `Button`, `SearchInput`, and `EmptyState`.
 * **Tailwind CSS (v4)**: Responsive layouts, semantic dark/light theme tokens, and color-coded status badges.
@@ -422,17 +422,17 @@ The frontend for the API Logger plugin is implemented as a standalone package lo
 
 ```mermaid
 flowchart TD
-    Shell["PluginShellLayout (apps/web-app)"] --> Check{"isPluginActive('api-logger')?"}
+    Shell["PluginShellLayout (apps/web-app)"] --> Check{"isPluginActive('tracura')?"}
     Check -- "No (Inactive)" --> InactiveState["EmptyState: Activate Plugin CTA"]
-    Check -- "Yes (Active)" --> ApiLoggerPage["ApiLoggerPage (@innostes/api-logger)"]
+    Check -- "Yes (Active)" --> TracuraPage["TracuraPage (@innostes/tracura)"]
 
-    ApiLoggerPage --> GlobalBar["Global Control & Context Header"]
+    TracuraPage --> GlobalBar["Global Control & Context Header"]
     GlobalBar --> ProjectSelect["Project Context Selector (All / Specific)"]
     GlobalBar --> EnvSelect["Environment Context Selector (Prod / Staging / Dev)"]
     GlobalBar --> LivePolling["Live Polling Toggle (Paused / 5s / 15s / 30s)"]
     GlobalBar --> KeyModalTrigger["'Generate Ingestion Key' Action Modal"]
 
-    ApiLoggerPage --> TabNav["Subfeature Tabs Navigation"]
+    TracuraPage --> TabNav["Subfeature Tabs Navigation"]
     TabNav --> OverviewView["Tab 1: Overview & KPI Analytics"]
     TabNav --> ExplorerView["Tab 2: Request Logs Explorer"]
     TabNav --> KeysView["Tab 3: Ingestion Keys Manager"]
@@ -458,7 +458,7 @@ flowchart TD
 
 ### 7.2 Component Hierarchy & State Flow
 
-The root component is [`TracuraPage.tsx`](file:///home/sai/Documents/GitHub/innostes_projects/erp/plugins/api-logger/frontend/src/TracuraPage.tsx). It encapsulates all telemetry states, filters, polling timers, and modal dialogs:
+The root component is [`TracuraPage.tsx`](file:///home/sai/Documents/GitHub/innostes_projects/erp/plugins/tracura/frontend/src/TracuraPage.tsx). It encapsulates all telemetry states, filters, polling timers, and modal dialogs:
 
 | State Variable | Type | Description |
 | :--- | :--- | :--- |
@@ -559,40 +559,40 @@ sequenceDiagram
     participant Ctx as PluginsContext (React Context)
     participant Storage as LocalStorage (innostes_active_plugins)
     participant API as Kernel Backend (/tenants/current/plugins)
-    participant Shell as PluginShellLayout (/plugins/api-logger)
+    participant Shell as PluginShellLayout (/plugins/tracura)
 
     Admin->>UI: Navigate to "/plugins"
     UI->>Ctx: Read activePluginIds
     Ctx->>API: GET /tenants/current/plugins (Bearer JWT)
-    API-->>Ctx: [{ id: "api-logger", is_active: false }]
-    Ctx-->>UI: Display API Logger Card in Catalog (Inactive State)
+    API-->>Ctx: [{ id: "tracura", is_active: false }]
+    Ctx-->>UI: Display Tracura Card in Catalog (Inactive State)
 
-    Admin->>UI: Click "Activate API Logger"
-    UI->>Ctx: activatePlugin("api-logger")
-    Ctx->>Storage: Optimistically persist ["api-logger"] in localStorage
-    Ctx->>API: POST /tenants/current/plugins/api-logger/activate
+    Admin->>UI: Click "Activate Tracura"
+    UI->>Ctx: activatePlugin("tracura")
+    Ctx->>Storage: Optimistically persist ["tracura"] in localStorage
+    Ctx->>API: POST /tenants/current/plugins/tracura/activate
     API-->>Ctx: 200 OK (tenant_plugins updated in database)
     UI-->>Admin: Plugin shows "Active", Sidebar badge incremented
 
-    Admin->>Shell: Navigate to "/plugins/api-logger"
-    Shell->>Ctx: isPluginActive("api-logger")
+    Admin->>Shell: Navigate to "/plugins/tracura"
+    Shell->>Ctx: isPluginActive("tracura")
     Ctx-->>Shell: true
-    Shell->>Shell: Mount <ApiLoggerPage />
+    Shell->>Shell: Mount <TracuraPage />
     Shell-->>Admin: Full Telemetry Dashboard & Logs Explorer rendered
 ```
 
 ### 8.1 Discovery & Manifest Registration
-1. The frontend plugin declares its metadata, subfeatures, and routing path in [`manifest.ts`](file:///home/sai/Documents/GitHub/innostes_projects/erp/plugins/api-logger/frontend/src/manifest.ts):
+1. The frontend plugin declares its metadata, subfeatures, and routing path in [`manifest.ts`](file:///home/sai/Documents/GitHub/innostes_projects/erp/plugins/tracura/frontend/src/manifest.ts):
    ```typescript
-   export const apiLoggerManifest: PluginManifest = {
-     id: 'api-logger',
-     name: 'API Logger',
+   export const tracuraManifest: PluginManifest = {
+     id: 'tracura',
+     name: 'Tracura',
      version: '0.1.0',
      description: 'Enterprise API logging, telemetry, and distributed request inspection',
      type: 'plugin',
      tags: ['Logs', 'Telemetry', 'Analytics', 'Enterprise'],
      tone: 'chart-5',
-     href: '/plugins/api-logger',
+     href: '/plugins/tracura',
      subFeatures: [
        { id: 'overview', label: 'Overview', description: 'Real-time telemetry, error rates, and request latency KPIs.' },
        { id: 'logs', label: 'Request Logs', description: 'Live HTTP request/response payloads, headers, and trace inspection.' },
@@ -603,8 +603,8 @@ sequenceDiagram
    ```
 2. The host application imports the manifest in [`apps/web-app/src/app/catalog.ts`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/web-app/src/app/catalog.ts):
    ```typescript
-   import { apiLoggerManifest } from '@innostes/api-logger';
-   export const PLUGINS_CATALOG: CatalogItem[] = [ apiLoggerManifest ];
+   import { tracuraManifest } from '@innostes/tracura';
+   export const PLUGINS_CATALOG: CatalogItem[] = [ tracuraManifest ];
    ```
 
 ### 8.2 Tenant Plugin State & Activation Engine
@@ -612,8 +612,8 @@ sequenceDiagram
 * **Tenant Isolation**: Each organization tenant has independent plugin activations recorded in the kernel `tenant_plugins` database table.
 * **Activation API**:
   - `GET /tenants/current/plugins`: Returns all active plugins for the calling user's tenant.
-  - `POST /tenants/current/plugins/api-logger/activate`: Activates the plugin for the tenant.
-  - `POST /tenants/current/plugins/api-logger/deactivate`: Deactivates the plugin for the tenant.
+  - `POST /tenants/current/plugins/tracura/activate`: Activates the plugin for the tenant.
+  - `POST /tenants/current/plugins/tracura/deactivate`: Deactivates the plugin for the tenant.
 * **Optimistic Local Caching**: Active IDs are synchronized to `localStorage['innostes_active_plugins']` for instant zero-flicker rendering upon browser refresh.
 
 ### 8.3 Main Application Shell Integration
@@ -627,8 +627,8 @@ sequenceDiagram
   }
   ```
 * **Activation Guard**: In [`PluginShellLayout.tsx`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/web-app/src/app/components/PluginShellLayout.tsx):
-  - If `isPluginActive('api-logger') === false`: Renders an enterprise `<EmptyState>` with a direct "Activate API Logger" action button.
-  - If `isPluginActive('api-logger') === true`: Renders the full `<ApiLoggerPage />`.
+  - If `isPluginActive('tracura') === false`: Renders an enterprise `<EmptyState>` with a direct "Activate Tracura" action button.
+  - If `isPluginActive('tracura') === true`: Renders the full `<TracuraPage />`.
 
 ### 8.4 Sidebar Navigation & App Switcher
 * **Sidebar Menu**: [`SidebarNav.tsx`](file:///home/sai/Documents/GitHub/innostes_projects/erp/apps/web-app/src/app/components/SidebarNav.tsx) displays the "Plugins" menu button with an active badge counter reflecting total enabled plugins.
@@ -643,23 +643,23 @@ sequenceDiagram
     autonumber
     actor ExtApp as Any Microservice / Stack
     actor Admin as Developer / Administrator
-    participant Gateway as Ingestion Gateway (/api-logger/v1/ingest)
+    participant Gateway as Ingestion Gateway (/tracura/v1/ingest)
     participant Auth as Scoped Key Validator (ApiKeyService)
     participant Sanitizer as PII & Secret Redactor
     participant Buffer as Async Ring Buffer (LogBuffer)
     participant DB as PostgreSQL (api_logs)
-    participant ControlPlane as Control Plane (/plugins/api-logger/v1/logs)
-    participant UI as Observability UI (ApiLoggerPage)
+    participant ControlPlane as Control Plane (/plugins/tracura/v1/logs)
+    participant UI as Observability UI (TracuraPage)
 
     Note over Admin,DB: Phase 1: Ingestion Key Provisioning
     Admin->>UI: Open "Ingestion Keys" Tab -> Click "Generate Ingestion Key"
-    UI->>ControlPlane: POST /plugins/api-logger/v1/keys (Bearer JWT)
+    UI->>ControlPlane: POST /plugins/tracura/v1/keys (Bearer JWT)
     ControlPlane->>DB: INSERT into api_log_api_keys (Hash, Scopes, Rate Limits)
     ControlPlane-->>UI: Return inno_log_live_* Raw Secret
     UI-->>Admin: Display Key in One-Time Copy Dialog with cURL Code Snippet
 
     Note over ExtApp,DB: Phase 2: Asynchronous High-Throughput Ingestion (< 5ms)
-    ExtApp->>Gateway: POST /api-logger/v1/ingest (Header: X-API-Key: inno_log_live_*)
+    ExtApp->>Gateway: POST /tracura/v1/ingest (Header: X-API-Key: inno_log_live_*)
     Gateway->>Auth: Validate key hash, check expiration, IP allowlist, and project/env scope
     Auth-->>Gateway: Key Validated (Tenant ID resolved server-side)
     Gateway->>Sanitizer: Scrub sensitive headers, query params, JWT patterns, JSON keys; mask IP
@@ -674,7 +674,7 @@ sequenceDiagram
 
     Note over Admin,DB: Phase 4: Observability, Search & Inspector
     Admin->>UI: View "Request Logs" -> Toggle "Errors Only" or search route
-    UI->>ControlPlane: GET /plugins/api-logger/v1/logs?errors_only=true (Bearer JWT)
+    UI->>ControlPlane: GET /plugins/tracura/v1/logs?errors_only=true (Bearer JWT)
     ControlPlane->>DB: SELECT * FROM api_logs WHERE tenant_id = :t AND status_code >= 400
     DB-->>ControlPlane: Return matching telemetry records
     ControlPlane-->>UI: Render rows in dense table
@@ -697,7 +697,7 @@ sequenceDiagram
 | **Backend** | Control Plane Endpoints | Verified | Projects, Keys, Settings, Logs Explorer, and Analytics Dashboard |
 | **Backend** | Architectural Fitness (`pnpm arch-check`) | Verified | 5 contracts kept, 0 broken; zero kernel-to-plugin leakage |
 | **Backend** | Unit & Integration Tests | Verified | 15/15 unit tests passing in 0.119s |
-| **Frontend** | Manifest & Catalog Registration | Verified | `apiLoggerManifest` registered in `@innostes/api-logger` & `catalog.ts` |
+| **Frontend** | Manifest & Catalog Registration | Verified | `tracuraManifest` registered in `@innostes/tracura` & `catalog.ts` |
 | **Frontend** | Main Application Activation Gate | Verified | `PluginsContext` tenant state & `<EmptyState>` activation CTA |
 | **Frontend** | Complete Observability UI | Verified | Overview KPIs, Logs Explorer, Slide-Out Drawer, Key Modal, Settings Form |
 | **Frontend** | Production Bundle Build (`pnpm nx build web-app`) | Verified | Successfully built in 595ms |
@@ -716,7 +716,7 @@ flowchart TD
     end
 
     subgraph ExternalServices ["External Stacks & Microservices"]
-        ExtApps["Polyglot Services<br/>(Node, Go, Python, cURL)"] --> HTTPGate["REST Ingest Route<br/>POST /api-logger/v1/ingest"]
+        ExtApps["Polyglot Services<br/>(Node, Go, Python, cURL)"] --> HTTPGate["REST Ingest Route<br/>POST /tracura/v1/ingest"]
         HTTPGate --> KeyVerify["X-API-Key Verification<br/>(IP Allowlist & Environment Scopes)"]
     end
 
