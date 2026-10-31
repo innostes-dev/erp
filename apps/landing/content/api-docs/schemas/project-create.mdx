@@ -1,0 +1,24 @@
+---
+title: "ProjectCreate"
+description: "Payload to create a new telemetry project."
+---
+
+Payload to create a new telemetry project.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string | Yes | — | Project display name |
+| `slug` | string | Yes | — | URL/slug identifier |
+| `description` | string \| null | No | — | Optional description of the project |
+
+## Example payload
+
+```json
+{
+  "name": "Payment Gateway",
+  "slug": "payment-gateway",
+  "description": {}
+}
+```

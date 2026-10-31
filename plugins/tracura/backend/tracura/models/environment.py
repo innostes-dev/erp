@@ -35,3 +35,8 @@ class ApiLogEnvironment(BaseModel):
     )
 
     project = relationship("ApiLogProject", back_populates="environments")
+
+    def __init__(self, **kwargs: object) -> None:
+        kwargs.setdefault("is_active", True)
+        kwargs.setdefault("color_badge", "blue")
+        super().__init__(**kwargs)

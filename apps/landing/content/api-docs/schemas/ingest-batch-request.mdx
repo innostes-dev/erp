@@ -1,0 +1,42 @@
+---
+title: "IngestBatchRequest"
+description: "Batch ingestion request payload."
+---
+
+Batch ingestion request payload.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `items` | [IngestLogItem](/api-reference/schemas/ingest-log-item)[] | Yes | — | List of telemetry logs to ingest in a single batch (max 250). |
+
+## Example payload
+
+```json
+{
+  "items": [
+    {
+      "project": null,
+      "environment": null,
+      "correlation_id": null,
+      "user_id": null,
+      "client_ip": null,
+      "user_agent": null,
+      "http_method": null,
+      "url": null,
+      "path": null,
+      "status_code": null,
+      "duration_ms": null,
+      "request_headers": null,
+      "query_params": null,
+      "request_body": null,
+      "response_headers": null,
+      "response_body": null,
+      "error": null,
+      "meta": null,
+      "created_at": null
+    }
+  ]
+}
+```

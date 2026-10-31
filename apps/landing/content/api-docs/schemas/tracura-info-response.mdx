@@ -1,36 +1,44 @@
 ---
-title: "ApiLoggerInfoResponse"
-description: "Information schema for API Logger plugin."
+title: "TracuraInfoResponse"
+description: "Information schema for Tracura plugin."
 ---
 
-Information schema for API Logger plugin.
+Information schema for Tracura plugin.
 
 ## Properties
 
 | Property | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `id` | string | No | `"api-logger"` | Unique plugin identifier string. |
-| `name` | string | No | `"API Logger"` | Human-readable plugin title. |
+| `id` | string | No | `"tracura"` | Unique plugin identifier string. |
+| `name` | string | No | `"Tracura"` | Human-readable plugin title. |
 | `version` | string | No | `"0.1.0"` | Semver version string. |
-| `status` | string | No | `"scaffold_ready"` | Operational readiness status of plugin. |
+| `status` | string | No | `"active"` | Operational readiness status of plugin. |
 | `type` | string | No | `"plugin"` | Package type classification. |
-| `features` | string[] | No | `["requests","webhooks","analytics","filters"]` | List of telemetry features provided by plugin. |
-| `description` | string | No | `"API request logging, webhook inspection, and debugging"` | Plugin functional overview. |
+| `features` | string[] | No | `["universal_telemetry","scoped_api_keys","pii_redaction","async_buffer","explorer","analytics"]` | List of telemetry features provided by plugin. |
+| `endpoints` | object[] | No | `[{"method":"GET","path":"/plugins/tracura/info","description":"Get plugin metadata and operational status"},{"method":"POST","path":"/tracura/v1/ingest","description":"Ingest single telemetry record (X-API-Key)"},{"method":"POST","path":"/tracura/v1/ingest/batch","description":"Batch ingest up to 250 telemetry records"},{"method":"GET","path":"/plugins/tracura/v1/projects","description":"List all telemetry projects for tenant"},{"method":"POST","path":"/plugins/tracura/v1/projects","description":"Create new telemetry project with environments"},{"method":"GET","path":"/plugins/tracura/v1/keys","description":"List scoped ingestion API keys"},{"method":"POST","path":"/plugins/tracura/v1/keys","description":"Generate new scoped ingestion API key"},{"method":"DELETE","path":"/plugins/tracura/v1/keys/{key_id}","description":"Revoke ingestion API key"},{"method":"GET","path":"/plugins/tracura/v1/settings","description":"Get effective retention & scrubbing policy"},{"method":"PATCH","path":"/plugins/tracura/v1/settings","description":"Update retention, sampling, or PII scrubbing"},{"method":"GET","path":"/plugins/tracura/v1/logs","description":"Query and filter telemetry logs"},{"method":"GET","path":"/plugins/tracura/v1/analytics/dashboard","description":"Analytics KPIs, charts, and top errors"}]` | Summary catalog of available Tracura API endpoints. |
 
 ## Example payload
 
 ```json
 {
-  "description": "API request logging, webhook inspection, and debugging",
-  "features": [
-    "requests",
-    "webhooks",
-    "analytics",
-    "filters"
+  "endpoints": [
+    {
+      "description": "Get plugin metadata and operational status",
+      "method": "GET",
+      "path": "/plugins/tracura/info"
+    }
   ],
-  "id": "api-logger",
-  "name": "API Logger",
-  "status": "scaffold_ready",
+  "features": [
+    "universal_telemetry",
+    "scoped_api_keys",
+    "pii_redaction",
+    "async_buffer",
+    "explorer",
+    "analytics"
+  ],
+  "id": "tracura",
+  "name": "Tracura",
+  "status": "active",
   "type": "plugin",
   "version": "0.1.0"
 }

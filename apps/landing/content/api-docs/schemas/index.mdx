@@ -3,38 +3,52 @@ title: "Schemas"
 description: "Data models and payload schemas across the innostes ERP API."
 ---
 
-Complete alphabetical catalogue of all 41 data transfer objects, request models, and response envelopes used across the API endpoints.
+Complete alphabetical catalogue of all 63 data transfer objects, request models, and response envelopes used across the API endpoints.
 
 | Schema | Type | Description |
 | --- | --- | --- |
 | [ActivationResponse](/api-reference/schemas/activation-response) | `object` | Response returned upon activation or deactivation. |
 | [AdminUserCreate](/api-reference/schemas/admin-user-create) | `object` | Administrator credentials and profile collected during first-run setup. |
-| [ApiKeyCreatedResponse](/api-reference/schemas/api-key-created-response) | `object` | Returned exclusively on key creation. The raw_key will never be shown again. |
+| [AnalyticsDashboard](/api-reference/schemas/analytics-dashboard) | `object` | Combined dashboard response for the UI. |
+| [ApiKeyCreate](/api-reference/schemas/api-key-create) | `object` | Payload to generate a new scoped ingestion API key. |
 | [ApiKeyListResponse](/api-reference/schemas/api-key-list-response) | `object` | List of all API keys for tenant. |
-| [ApiKeyRead](/api-reference/schemas/api-key-read) | `object` | Safe public representation of an API key without secret hash. |
-| [ApiLoggerInfoResponse](/api-reference/schemas/tracura-info-response) | `object` | Information schema for API Logger plugin. |
 | [AppConfigRead](/api-reference/schemas/app-config-read) | `object` | Public application metadata and frontend bootstrapping configuration. |
 | [ChangePasswordRequest](/api-reference/schemas/change-password-request) | `object` | Authenticated request to update credentials (or complete first-login reset). |
 | [CreateApiKeyRequest](/api-reference/schemas/create-api-key-request) | `object` | Payload to generate a new API key. |
 | [CrmInfoResponse](/api-reference/schemas/crm-info-response) | `object` | Information schema for CRM scaffold module. |
 | [DeviceType](/api-reference/schemas/device-type) | `string` | Classification of client devices. |
+| [EnvironmentCreate](/api-reference/schemas/environment-create) | `object` | Payload to add a deployment environment to a project. |
+| [EnvironmentHealthItem](/api-reference/schemas/environment-health-item) | `object` | Per-environment health and error statistics. |
+| [EnvironmentRead](/api-reference/schemas/environment-read) | `object` | Environment details. |
+| [EnvironmentUpdate](/api-reference/schemas/environment-update) | `object` | Payload to update an environment. |
 | [ErrorResponse](/api-reference/schemas/error-response) | `object` | Body returned for handled errors, e.g. a not-found or conflict error. Attributes:     detail: Human-readable error message.     code: Machine-readable error id, only for some errors (e.g. "setup_required"). |
 | [ForgotPasswordRequest](/api-reference/schemas/forgot-password-request) | `object` | Initiates an anti-enumeration password reset and temporary password dispatch. |
 | [ForgotPasswordResponse](/api-reference/schemas/forgot-password-response) | `object` | Generic status response guaranteeing timing and anti-enumeration defense. |
 | [HTTPValidationError](/api-reference/schemas/httpvalidation-error) | `object` | Data schema model. |
 | [HealthCheckRead](/api-reference/schemas/health-check-read) | `object` | System health check and diagnostic status. |
 | [HrmsInfoResponse](/api-reference/schemas/hrms-info-response) | `object` | Information schema for HRMS scaffold module. |
+| [IngestBatchRequest](/api-reference/schemas/ingest-batch-request) | `object` | Batch ingestion request payload. |
+| [IngestLogItem](/api-reference/schemas/ingest-log-item) | `object` | A single request/response telemetry log entry. |
+| [IngestResponse](/api-reference/schemas/ingest-response) | `object` | Ingestion receipt confirmation. |
 | [ItemCatalogRead](/api-reference/schemas/item-catalog-read) | `object` | Metadata describing an installed module or plugin package in the catalog. |
+| [KpiSummary](/api-reference/schemas/kpi-summary) | `object` | High-level telemetry KPIs. |
+| [LogListResponse](/api-reference/schemas/log-list-response) | `object` | Paginated list of logs. |
+| [LogRead](/api-reference/schemas/log-read) | `object` | Detailed log record representation. |
 | [LoginRequest](/api-reference/schemas/login-request) | `object` | User login credentials and client hardware context. |
 | [LogoutRequest](/api-reference/schemas/logout-request) | `object` | Request to revoke session refresh tokens. |
 | [MessageResponse](/api-reference/schemas/message-response) | `object` | Standard operation message response. |
 | [ModuleListResponse](/api-reference/schemas/module-list-response) | `object` | Catalog of business modules with current tenant activation status. |
 | [Page_TenantRead_](/api-reference/schemas/page-tenant-read-) | `object` | Data schema model. |
 | [PluginListResponse](/api-reference/schemas/plugin-list-response) | `object` | Catalog of extensible plugins with current tenant activation status. |
+| [ProjectCreate](/api-reference/schemas/project-create) | `object` | Payload to create a new telemetry project. |
+| [ProjectRead](/api-reference/schemas/project-read) | `object` | Project details with associated environments. |
+| [ProjectUpdate](/api-reference/schemas/project-update) | `object` | Payload to update an existing project. |
 | [RefreshTokenRequest](/api-reference/schemas/refresh-token-request) | `object` | Payload to rotate a refresh token and obtain a new access token. |
 | [RefreshTokenResponse](/api-reference/schemas/refresh-token-response) | `object` | New token pair issued following successful refresh token rotation. |
 | [ResetPasswordRequest](/api-reference/schemas/reset-password-request) | `object` | Payload to reset account password using single-use signed reset token. |
 | [ServiceInfoRead](/api-reference/schemas/service-info-read) | `object` | Core service identification and runtime module metadata. |
+| [SettingsRead](/api-reference/schemas/settings-read) | `object` | API Logger settings details. |
+| [SettingsUpdate](/api-reference/schemas/settings-update) | `object` | Payload to update retention, sampling, or scrubbing rules. |
 | [SetupBrandingCreate](/api-reference/schemas/setup-branding-create) | `object` | Optional branding preferences collected during first-run setup. |
 | [SetupChecks](/api-reference/schemas/setup-checks) | `object` | Pre-install diagnostics for holders of the one-time setup token. |
 | [SetupRequest](/api-reference/schemas/setup-request) | `object` | System configuration parameters collected by the setup wizard. |
@@ -43,8 +57,16 @@ Complete alphabetical catalogue of all 41 data transfer objects, request models,
 | [TenantCreate](/api-reference/schemas/tenant-create) | `object` | Body for creating a customer organisation (tenant). |
 | [TenantRead](/api-reference/schemas/tenant-read) | `object` | A tenant organisation as returned by the API (includes common audit trail fields). |
 | [TenantUpdate](/api-reference/schemas/tenant-update) | `object` | Body for updating a tenant organisation. Send only the fields you wish to modify. |
+| [TimeseriesPoint](/api-reference/schemas/timeseries-point) | `object` | Timeseries data point for traffic and errors. |
 | [TokenResponse](/api-reference/schemas/token-response) | `object` | Successful authentication response containing JWT credentials and user identity. |
+| [TopEndpointItem](/api-reference/schemas/top-endpoint-item) | `object` | Most requested API endpoints and performance. |
+| [TopErrorItem](/api-reference/schemas/top-error-item) | `object` | Aggregated top errors encountered. |
+| [TracuraInfoResponse](/api-reference/schemas/tracura-info-response) | `object` | Information schema for Tracura plugin. |
 | [UserCreate](/api-reference/schemas/user-create) | `object` | Payload to create a new user account. |
 | [UserRead](/api-reference/schemas/user-read) | `object` | User identity record as returned by the API (with decrypted email and mobile). |
 | [UserStatus](/api-reference/schemas/user-status) | `string` | Lifecycle status for user accounts. |
 | [ValidationError](/api-reference/schemas/validation-error) | `object` | Data schema model. |
+| [kernel__auth__schemas__api_key__ApiKeyCreatedResponse](/api-reference/schemas/kernel-auth-schemas-api-key-api-key-created-response) | `object` | Returned exclusively on key creation. The raw_key will never be shown again. |
+| [kernel__auth__schemas__api_key__ApiKeyRead](/api-reference/schemas/kernel-auth-schemas-api-key-api-key-read) | `object` | Safe public representation of an API key without secret hash. |
+| [tracura__schemas__api_key__ApiKeyCreatedResponse](/api-reference/schemas/tracura-schemas-api-key-api-key-created-response) | `object` | Returned ONLY ONCE upon key generation, containing the raw plaintext secret. |
+| [tracura__schemas__api_key__ApiKeyRead](/api-reference/schemas/tracura-schemas-api-key-api-key-read) | `object` | Public metadata for an API key (secret is never returned). |

@@ -25,6 +25,148 @@
     }
   ],
   "paths": {
+    "/tracura/v1/ingest": {
+      "post": {
+        "tags": [
+          "Tracura - Ingestion",
+          "API logger - Ingestion"
+        ],
+        "summary": "Ingest a single request/response telemetry log",
+        "description": "High-throughput asynchronous ingestion endpoint. Accepts an inno_log_live_* key via X-API-Key header.",
+        "operationId": "ingest_single_log_tracura_v1_ingest_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestLogItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tracura/v1/ingest/batch": {
+      "post": {
+        "tags": [
+          "Tracura - Ingestion",
+          "API logger - Ingestion"
+        ],
+        "summary": "Ingest a batch of request/response telemetry logs",
+        "description": "High-throughput batch ingestion endpoint (up to 250 items). Authenticates via X-API-Key.",
+        "operationId": "ingest_batch_logs_tracura_v1_ingest_batch_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "tags": [
@@ -561,7 +703,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiKeyCreatedResponse"
+                  "$ref": "#/components/schemas/kernel__auth__schemas__api_key__ApiKeyCreatedResponse"
                 }
               }
             }
@@ -636,7 +778,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiKeyRead"
+                  "$ref": "#/components/schemas/kernel__auth__schemas__api_key__ApiKeyRead"
                 }
               }
             }
@@ -1883,7 +2025,7 @@
               "type": "string",
               "description": "Package identifier of extensible plugin to activate.",
               "examples": [
-                "api-logger"
+                "tracura"
               ],
               "title": "Plugin Id"
             },
@@ -1991,7 +2133,7 @@
               "type": "string",
               "description": "Package identifier of extensible plugin to deactivate.",
               "examples": [
-                "api-logger"
+                "tracura"
               ],
               "title": "Plugin Id"
             },
@@ -2221,27 +2363,2003 @@
         }
       }
     },
-    "/plugins/api-logger/info": {
+    "/plugins/tracura/info": {
       "get": {
         "tags": [
-          "API logger"
+          "Tracura"
         ],
-        "summary": "Get API logger plugin metadata and status",
-        "description": "Return API Logger plugin metadata and status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
-        "operationId": "api_logger_get_info",
+        "summary": "Get Tracura plugin metadata and status",
+        "description": "Return Tracura plugin metadata and status.",
+        "operationId": "tracura_get_info",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiLoggerInfoResponse"
+                  "$ref": "#/components/schemas/TracuraInfoResponse"
                 }
               }
             }
           }
         },
         "security": []
+      }
+    },
+    "/plugins/tracura/v1/ingest": {
+      "post": {
+        "tags": [
+          "Tracura",
+          "API logger - Ingestion"
+        ],
+        "summary": "Ingest a single request/response telemetry log",
+        "description": "High-throughput asynchronous ingestion endpoint. Accepts an inno_log_live_* key via X-API-Key header.",
+        "operationId": "ingest_single_log_plugins_tracura_v1_ingest_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestLogItem"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/ingest/batch": {
+      "post": {
+        "tags": [
+          "Tracura",
+          "API logger - Ingestion"
+        ],
+        "summary": "Ingest a batch of request/response telemetry logs",
+        "description": "High-throughput batch ingestion endpoint (up to 250 items). Authenticates via X-API-Key.",
+        "operationId": "ingest_batch_logs_plugins_tracura_v1_ingest_batch_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestBatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid or missing API key"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/projects": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "List all projects for current tenant",
+        "operationId": "list_projects_plugins_tracura_v1_projects_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectRead"
+                  },
+                  "title": "Response List Projects Plugins Tracura V1 Projects Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "Create a new telemetry project",
+        "operationId": "create_project_plugins_tracura_v1_projects_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/projects/{project_id}": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "Get project details",
+        "operationId": "get_project_plugins_tracura_v1_projects__project_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "Update project",
+        "operationId": "update_project_plugins_tracura_v1_projects__project_id__patch",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "Delete project",
+        "operationId": "delete_project_plugins_tracura_v1_projects__project_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/projects/{project_id}/environments": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "List environments for a project",
+        "operationId": "list_environments_plugins_tracura_v1_projects__project_id__environments_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EnvironmentRead"
+                  },
+                  "title": "Response List Environments Plugins Tracura V1 Projects  Project Id  Environments Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "Create an environment",
+        "operationId": "create_environment_plugins_tracura_v1_projects__project_id__environments_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "409": {
+            "description": "Environment exists"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/projects/{project_id}/environments/{environment_id}": {
+      "patch": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "Update an environment",
+        "operationId": "update_environment_plugins_tracura_v1_projects__project_id__environments__environment_id__patch",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "environment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Environment Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentRead"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Environment not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tracura",
+          "API logger - Projects"
+        ],
+        "summary": "Delete an environment",
+        "operationId": "delete_environment_plugins_tracura_v1_projects__project_id__environments__environment_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "environment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Environment Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Environment not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/keys": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - API Keys"
+        ],
+        "summary": "List ingestion keys for tenant",
+        "operationId": "list_api_keys_plugins_tracura_v1_keys_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by project UUID",
+              "title": "Project Id"
+            },
+            "description": "Filter by project UUID"
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/tracura__schemas__api_key__ApiKeyRead"
+                  },
+                  "title": "Response List Api Keys Plugins Tracura V1 Keys Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tracura",
+          "API logger - API Keys"
+        ],
+        "summary": "Generate new scoped ingestion key",
+        "description": "Generate a new scoped ingestion API key. The raw secret is returned ONCE in this response.",
+        "operationId": "create_api_key_plugins_tracura_v1_keys_post",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tracura__schemas__api_key__ApiKeyCreatedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "Tracura",
+          "API logger - API Keys"
+        ],
+        "summary": "Revoke an ingestion API key",
+        "operationId": "revoke_api_key_plugins_tracura_v1_keys__key_id__delete",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Key Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "API key not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/settings": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - Settings"
+        ],
+        "summary": "Get effective settings and policies",
+        "operationId": "get_settings_plugins_tracura_v1_settings_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Project scope override",
+              "title": "Project Id"
+            },
+            "description": "Project scope override"
+          },
+          {
+            "name": "environment_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Environment scope override",
+              "title": "Environment Id"
+            },
+            "description": "Environment scope override"
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tracura",
+          "API logger - Settings"
+        ],
+        "summary": "Update retention, sampling, or scrubbing settings",
+        "operationId": "update_settings_plugins_tracura_v1_settings_patch",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Project scope override",
+              "title": "Project Id"
+            },
+            "description": "Project scope override"
+          },
+          {
+            "name": "environment_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Environment scope override",
+              "title": "Environment Id"
+            },
+            "description": "Environment scope override"
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/logs": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - Explorer"
+        ],
+        "summary": "Query telemetry logs with multi-attribute filtering",
+        "operationId": "query_logs_plugins_tracura_v1_logs_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by project UUID",
+              "title": "Project Id"
+            },
+            "description": "Filter by project UUID"
+          },
+          {
+            "name": "environment_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by environment UUID",
+              "title": "Environment Id"
+            },
+            "description": "Filter by environment UUID"
+          },
+          {
+            "name": "correlation_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by trace/correlation ID",
+              "title": "Correlation Id"
+            },
+            "description": "Filter by trace/correlation ID"
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by user ID",
+              "title": "User Id"
+            },
+            "description": "Filter by user ID"
+          },
+          {
+            "name": "http_method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by HTTP method (GET, POST, etc.)",
+              "title": "Http Method"
+            },
+            "description": "Filter by HTTP method (GET, POST, etc.)"
+          },
+          {
+            "name": "status_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by exact HTTP status code",
+              "title": "Status Code"
+            },
+            "description": "Filter by exact HTTP status code"
+          },
+          {
+            "name": "errors_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Filter error responses only (status >= 400)",
+              "default": false,
+              "title": "Errors Only"
+            },
+            "description": "Filter error responses only (status >= 400)"
+          },
+          {
+            "name": "slow_requests_ms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter slow requests exceeding latency ms",
+              "title": "Slow Requests Ms"
+            },
+            "description": "Filter slow requests exceeding latency ms"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Substring search in URL, path, or trace ID",
+              "title": "Search"
+            },
+            "description": "Substring search in URL, path, or trace ID"
+          },
+          {
+            "name": "start_time",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start time UTC",
+              "title": "Start Time"
+            },
+            "description": "Start time UTC"
+          },
+          {
+            "name": "end_time",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End time UTC",
+              "title": "End Time"
+            },
+            "description": "End time UTC"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Offset for pagination",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Offset for pagination"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "description": "Page limit",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Page limit"
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/logs/{log_id}": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - Explorer"
+        ],
+        "summary": "Get single log entry details for Inspector drawer",
+        "operationId": "get_log_plugins_tracura_v1_logs__log_id__get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "log_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Log Id"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogRead"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plugins/tracura/v1/analytics/dashboard": {
+      "get": {
+        "tags": [
+          "Tracura",
+          "API logger - Analytics"
+        ],
+        "summary": "Get high-level KPIs and timeseries metrics",
+        "operationId": "get_dashboard_metrics_plugins_tracura_v1_analytics_dashboard_get",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Project scope",
+              "title": "Project Id"
+            },
+            "description": "Project scope"
+          },
+          {
+            "name": "environment_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Environment scope",
+              "title": "Environment Id"
+            },
+            "description": "Environment scope"
+          },
+          {
+            "name": "lookback_hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 720,
+              "minimum": 1,
+              "description": "Lookback window in hours",
+              "default": 24,
+              "title": "Lookback Hours"
+            },
+            "description": "Lookback window in hours"
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context UUID",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context UUID"
+          },
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Scoped Ingestion / Management API Key (inno_log_live_...)",
+              "title": "X-Api-Key"
+            },
+            "description": "Scoped Ingestion / Management API Key (inno_log_live_...)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsDashboard"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -2363,138 +4481,152 @@
         "title": "AdminUserCreate",
         "description": "Administrator credentials and profile collected during first-run setup."
       },
-      "ApiKeyCreatedResponse": {
+      "AnalyticsDashboard": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id",
-            "description": "Unique identifier of the API key.",
-            "examples": [
-              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
-            ]
+          "kpi": {
+            "$ref": "#/components/schemas/KpiSummary"
           },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Human-readable label for the API key.",
-            "examples": [
-              "Zapier CRM Sync"
-            ]
-          },
-          "key_prefix": {
-            "type": "string",
-            "title": "Key Prefix",
-            "description": "Public prefix used to identify the token key (e.g. inno_live_...).",
-            "examples": [
-              "inno_live_xK9p"
-            ]
-          },
-          "scopes": {
+          "timeseries": {
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/TimeseriesPoint"
             },
             "type": "array",
-            "title": "Scopes",
-            "description": "Authorized permission scopes granted to this key.",
-            "examples": [
-              [
-                "crm:read",
-                "hrms:read"
-              ]
-            ]
+            "title": "Timeseries"
           },
-          "expires_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expires At",
-            "description": "Expiration timestamp in ISO 8601 UTC format. Null for perpetual keys.",
-            "examples": [
-              "2026-11-28T10:00:00Z"
-            ]
+          "environment_health": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentHealthItem"
+            },
+            "type": "array",
+            "title": "Environment Health",
+            "default": []
           },
-          "last_used_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Used At",
-            "description": "Timestamp when key was last presented in an authenticated request.",
-            "examples": [
-              "2026-10-29T10:15:00Z"
-            ]
+          "top_endpoints": {
+            "items": {
+              "$ref": "#/components/schemas/TopEndpointItem"
+            },
+            "type": "array",
+            "title": "Top Endpoints",
+            "default": []
           },
-          "is_revoked": {
-            "type": "boolean",
-            "title": "Is Revoked",
-            "description": "Flag indicating whether this API key has been revoked.",
-            "examples": [
-              false
-            ]
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At",
-            "description": "Timestamp when key was created.",
-            "examples": [
-              "2026-10-29T09:00:00Z"
-            ]
-          },
-          "raw_key": {
-            "type": "string",
-            "title": "Raw Key",
-            "description": "The plaintext secret API token (e.g. inno_live_...). Copy this immediately as it cannot be recovered.",
-            "examples": [
-              "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH"
-            ]
+          "top_errors": {
+            "items": {
+              "$ref": "#/components/schemas/TopErrorItem"
+            },
+            "type": "array",
+            "title": "Top Errors",
+            "default": []
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "name",
-          "key_prefix",
-          "scopes",
-          "is_revoked",
-          "created_at",
-          "raw_key"
+          "kpi",
+          "timeseries"
         ],
-        "title": "ApiKeyCreatedResponse",
-        "description": "Returned exclusively on key creation. The raw_key will never be shown again.",
-        "examples": [
-          {
-            "created_at": "2026-10-29T09:00:00Z",
-            "expires_at": "2026-11-28T10:00:00Z",
-            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
-            "is_revoked": false,
-            "key_prefix": "inno_live_xK9p",
-            "name": "Zapier CRM Sync",
-            "raw_key": "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH",
-            "scopes": [
-              "crm:read",
-              "hrms:read"
+        "title": "AnalyticsDashboard",
+        "description": "Combined dashboard response for the UI."
+      },
+      "ApiKeyCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Key name / label",
+            "examples": [
+              "Prod Cluster Ingestion Key"
             ]
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id",
+            "description": "Scope to a specific project. If None, permitted across all tenant projects."
+          },
+          "allowed_environments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Environments",
+            "description": "Allowed environments, e.g. ['production'] or ['*']",
+            "default": [
+              "*"
+            ]
+          },
+          "ip_allowlist": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Allowlist",
+            "description": "Optional list of permitted client CIDRs or IPs"
+          },
+          "allowed_origins": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Origins",
+            "description": "Optional list of permitted HTTP Origin headers"
+          },
+          "rate_limit_rpm": {
+            "type": "integer",
+            "maximum": 120000.0,
+            "minimum": 60.0,
+            "title": "Rate Limit Rpm",
+            "description": "Rate limit requests per minute",
+            "default": 1200
+          },
+          "expires_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Days",
+            "description": "Key expiry in days from creation"
           }
-        ]
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ApiKeyCreate",
+        "description": "Payload to generate a new scoped ingestion API key."
       },
       "ApiKeyListResponse": {
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/ApiKeyRead"
+              "$ref": "#/components/schemas/kernel__auth__schemas__api_key__ApiKeyRead"
             },
             "type": "array",
             "title": "Items",
@@ -2541,223 +4673,6 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      "ApiKeyRead": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id",
-            "description": "Unique identifier of the API key.",
-            "examples": [
-              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
-            ]
-          },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Human-readable label for the API key.",
-            "examples": [
-              "Zapier CRM Sync"
-            ]
-          },
-          "key_prefix": {
-            "type": "string",
-            "title": "Key Prefix",
-            "description": "Public prefix used to identify the token key (e.g. inno_live_...).",
-            "examples": [
-              "inno_live_xK9p"
-            ]
-          },
-          "scopes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Scopes",
-            "description": "Authorized permission scopes granted to this key.",
-            "examples": [
-              [
-                "crm:read",
-                "hrms:read"
-              ]
-            ]
-          },
-          "expires_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expires At",
-            "description": "Expiration timestamp in ISO 8601 UTC format. Null for perpetual keys.",
-            "examples": [
-              "2026-11-28T10:00:00Z"
-            ]
-          },
-          "last_used_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Used At",
-            "description": "Timestamp when key was last presented in an authenticated request.",
-            "examples": [
-              "2026-10-29T10:15:00Z"
-            ]
-          },
-          "is_revoked": {
-            "type": "boolean",
-            "title": "Is Revoked",
-            "description": "Flag indicating whether this API key has been revoked.",
-            "examples": [
-              false
-            ]
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At",
-            "description": "Timestamp when key was created.",
-            "examples": [
-              "2026-10-29T09:00:00Z"
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "key_prefix",
-          "scopes",
-          "is_revoked",
-          "created_at"
-        ],
-        "title": "ApiKeyRead",
-        "description": "Safe public representation of an API key without secret hash.",
-        "examples": [
-          {
-            "created_at": "2026-10-29T09:00:00Z",
-            "expires_at": "2026-11-28T10:00:00Z",
-            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
-            "is_revoked": false,
-            "key_prefix": "inno_live_xK9p",
-            "last_used_at": "2026-10-29T10:15:00Z",
-            "name": "Zapier CRM Sync",
-            "scopes": [
-              "crm:read",
-              "hrms:read"
-            ]
-          }
-        ]
-      },
-      "ApiLoggerInfoResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "Unique plugin identifier string.",
-            "default": "api-logger",
-            "examples": [
-              "api-logger"
-            ]
-          },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Human-readable plugin title.",
-            "default": "API Logger",
-            "examples": [
-              "API Logger"
-            ]
-          },
-          "version": {
-            "type": "string",
-            "title": "Version",
-            "description": "Semver version string.",
-            "default": "0.1.0",
-            "examples": [
-              "0.1.0"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Operational readiness status of plugin.",
-            "default": "scaffold_ready",
-            "examples": [
-              "scaffold_ready"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "title": "Type",
-            "description": "Package type classification.",
-            "default": "plugin",
-            "examples": [
-              "plugin"
-            ]
-          },
-          "features": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Features",
-            "description": "List of telemetry features provided by plugin.",
-            "default": [
-              "requests",
-              "webhooks",
-              "analytics",
-              "filters"
-            ],
-            "examples": [
-              [
-                "requests",
-                "webhooks",
-                "analytics",
-                "filters"
-              ]
-            ]
-          },
-          "description": {
-            "type": "string",
-            "title": "Description",
-            "description": "Plugin functional overview.",
-            "default": "API request logging, webhook inspection, and debugging",
-            "examples": [
-              "API request logging, webhook inspection, and debugging"
-            ]
-          }
-        },
-        "type": "object",
-        "title": "ApiLoggerInfoResponse",
-        "description": "Information schema for API Logger plugin.",
-        "examples": [
-          {
-            "description": "API request logging, webhook inspection, and debugging",
-            "features": [
-              "requests",
-              "webhooks",
-              "analytics",
-              "filters"
-            ],
-            "id": "api-logger",
-            "name": "API Logger",
-            "status": "scaffold_ready",
-            "type": "plugin",
-            "version": "0.1.0"
           }
         ]
       },
@@ -2987,6 +4902,276 @@
         ],
         "title": "DeviceType",
         "description": "Classification of client devices."
+      },
+      "EnvironmentCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Environment display name",
+            "examples": [
+              "Production"
+            ]
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "pattern": "^[a-z0-9-]+$",
+            "title": "Slug",
+            "description": "Slug identifier",
+            "examples": [
+              "production"
+            ]
+          },
+          "color_badge": {
+            "type": "string",
+            "maxLength": 16,
+            "title": "Color Badge",
+            "description": "Badge color in UI",
+            "default": "blue",
+            "examples": [
+              "emerald",
+              "blue",
+              "amber"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "EnvironmentCreate",
+        "description": "Payload to add a deployment environment to a project."
+      },
+      "EnvironmentHealthItem": {
+        "properties": {
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "environment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Id"
+          },
+          "color_badge": {
+            "type": "string",
+            "title": "Color Badge",
+            "default": "emerald"
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "error_rate_pct": {
+            "type": "number",
+            "title": "Error Rate Pct"
+          },
+          "avg_latency_ms": {
+            "type": "number",
+            "title": "Avg Latency Ms"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Healthy, Degraded, or Issues",
+            "default": "Healthy"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environment",
+          "requests",
+          "error_rate_pct",
+          "avg_latency_ms"
+        ],
+        "title": "EnvironmentHealthItem",
+        "description": "Per-environment health and error statistics."
+      },
+      "EnvironmentRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the record in UUID v4 format.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when the record was created in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:00:00Z"
+            ]
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By",
+            "description": "Unique identifier of the user who created the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At",
+            "description": "Timestamp when the record was last modified in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:30:00Z"
+            ]
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By",
+            "description": "Unique identifier of the user who last modified the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At",
+            "description": "Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "deleted_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted By",
+            "description": "Unique identifier of the user who soft-deleted the record. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Project Id"
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenant Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "color_badge": {
+            "type": "string",
+            "title": "Color Badge"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "project_id",
+          "tenant_id",
+          "name",
+          "slug",
+          "color_badge",
+          "is_active"
+        ],
+        "title": "EnvironmentRead",
+        "description": "Environment details."
+      },
+      "EnvironmentUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "color_badge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Badge"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "EnvironmentUpdate",
+        "description": "Payload to update an environment."
       },
       "ErrorResponse": {
         "properties": {
@@ -3244,12 +5429,305 @@
           }
         ]
       },
+      "IngestBatchRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IngestLogItem"
+            },
+            "type": "array",
+            "maxItems": 250,
+            "minItems": 1,
+            "title": "Items",
+            "description": "List of telemetry logs to ingest in a single batch (max 250)."
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "IngestBatchRequest",
+        "description": "Batch ingestion request payload."
+      },
+      "IngestLogItem": {
+        "properties": {
+          "project": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Project",
+            "description": "Project slug or UUID string",
+            "examples": [
+              "payment-gateway"
+            ]
+          },
+          "environment": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Environment",
+            "description": "Environment slug or UUID string",
+            "examples": [
+              "production"
+            ]
+          },
+          "correlation_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Correlation Id",
+            "description": "Unique trace / request ID",
+            "examples": [
+              "req_88fbc09d12"
+            ]
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "Authenticated actor ID if present",
+            "examples": [
+              "cust_992144"
+            ]
+          },
+          "client_ip": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 45
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Ip",
+            "description": "Client IP address",
+            "examples": [
+              "103.21.244.1"
+            ]
+          },
+          "user_agent": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Agent",
+            "description": "Client user agent",
+            "examples": [
+              "Mozilla/5.0..."
+            ]
+          },
+          "http_method": {
+            "type": "string",
+            "maxLength": 10,
+            "minLength": 1,
+            "title": "Http Method",
+            "description": "HTTP method",
+            "examples": [
+              "POST"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "Full target request URL",
+            "examples": [
+              "https://api.company.com/v1/payments/charges"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Path",
+            "description": "Path component",
+            "examples": [
+              "/v1/payments/charges"
+            ]
+          },
+          "status_code": {
+            "type": "integer",
+            "maximum": 599.0,
+            "minimum": 100.0,
+            "title": "Status Code",
+            "description": "HTTP response status code",
+            "examples": [
+              200
+            ]
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Duration Ms",
+            "description": "Total latency in milliseconds",
+            "examples": [
+              138.45
+            ]
+          },
+          "request_headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Headers",
+            "description": "Request headers (redacted on server)"
+          },
+          "query_params": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query Params",
+            "description": "URL query parameters"
+          },
+          "request_body": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Body",
+            "description": "Raw request JSON or text"
+          },
+          "response_headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Headers",
+            "description": "Response headers"
+          },
+          "response_body": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Body",
+            "description": "Response JSON or text"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "Error diagnostics (code, message, stack trace)"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta",
+            "description": "Developer custom data escape hatch (AI tokens, Stripe ID, git commit, pod)",
+            "examples": [
+              {
+                "model": "gpt-4o",
+                "tokens": 420
+              }
+            ]
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At",
+            "description": "Timestamp when request occurred"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project",
+          "environment",
+          "correlation_id",
+          "http_method",
+          "url",
+          "path",
+          "status_code",
+          "duration_ms"
+        ],
+        "title": "IngestLogItem",
+        "description": "A single request/response telemetry log entry."
+      },
+      "IngestResponse": {
+        "properties": {
+          "accepted": {
+            "type": "integer",
+            "title": "Accepted",
+            "description": "Number of log records enqueued"
+          },
+          "dropped": {
+            "type": "integer",
+            "title": "Dropped",
+            "description": "Number of logs dropped due to sampling or excluded path",
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status code string",
+            "default": "accepted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "accepted"
+        ],
+        "title": "IngestResponse",
+        "description": "Ingestion receipt confirmation."
+      },
       "ItemCatalogRead": {
         "properties": {
           "id": {
             "type": "string",
             "title": "Id",
-            "description": "Unique package identifier string (e.g. 'hrms', 'crm', 'api-logger').",
+            "description": "Unique package identifier string (e.g. 'hrms', 'crm', 'tracura').",
             "examples": [
               "hrms"
             ]
@@ -3363,6 +5841,296 @@
             "version": "0.1.0"
           }
         ]
+      },
+      "KpiSummary": {
+        "properties": {
+          "total_requests": {
+            "type": "integer",
+            "title": "Total Requests",
+            "description": "Total requests processed in period"
+          },
+          "successful_requests": {
+            "type": "integer",
+            "title": "Successful Requests",
+            "description": "Total successful requests (status < 400)",
+            "default": 0
+          },
+          "success_rate_pct": {
+            "type": "number",
+            "title": "Success Rate Pct",
+            "description": "Percentage of requests with status < 400",
+            "default": 100.0
+          },
+          "error_requests": {
+            "type": "integer",
+            "title": "Error Requests",
+            "description": "Total error requests (status >= 400)",
+            "default": 0
+          },
+          "error_rate_pct": {
+            "type": "number",
+            "title": "Error Rate Pct",
+            "description": "Percentage of requests with status >= 400"
+          },
+          "avg_latency_ms": {
+            "type": "number",
+            "title": "Avg Latency Ms",
+            "description": "Average latency in ms"
+          },
+          "p95_latency_ms": {
+            "type": "number",
+            "title": "P95 Latency Ms",
+            "description": "95th percentile latency in ms"
+          },
+          "p99_latency_ms": {
+            "type": "number",
+            "title": "P99 Latency Ms",
+            "description": "99th percentile latency in ms"
+          },
+          "status_breakdown": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Status Breakdown",
+            "description": "Counts grouped by 2xx, 3xx, 4xx, 5xx"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_requests",
+          "error_rate_pct",
+          "avg_latency_ms",
+          "p95_latency_ms",
+          "p99_latency_ms",
+          "status_breakdown"
+        ],
+        "title": "KpiSummary",
+        "description": "High-level telemetry KPIs."
+      },
+      "LogListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LogRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "offset",
+          "limit"
+        ],
+        "title": "LogListResponse",
+        "description": "Paginated list of logs."
+      },
+      "LogRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenant Id"
+          },
+          "project_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Project Id"
+          },
+          "environment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Environment Id"
+          },
+          "api_key_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key Id"
+          },
+          "correlation_id": {
+            "type": "string",
+            "title": "Correlation Id"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "client_ip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Ip"
+          },
+          "user_agent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Agent"
+          },
+          "http_method": {
+            "type": "string",
+            "title": "Http Method"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "status_code": {
+            "type": "integer",
+            "title": "Status Code"
+          },
+          "duration_ms": {
+            "type": "number",
+            "title": "Duration Ms"
+          },
+          "request_headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Headers"
+          },
+          "query_params": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Query Params"
+          },
+          "request_body": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Body"
+          },
+          "response_headers": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Headers"
+          },
+          "response_body": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Body"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meta"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tenant_id",
+          "project_id",
+          "environment_id",
+          "correlation_id",
+          "http_method",
+          "url",
+          "path",
+          "status_code",
+          "duration_ms",
+          "created_at"
+        ],
+        "title": "LogRead",
+        "description": "Detailed log record representation."
       },
       "LoginRequest": {
         "properties": {
@@ -3620,13 +6388,13 @@
               [
                 {
                   "activated_at": "2026-10-29T10:00:00Z",
-                  "description": "API request logging, webhook inspection, and debugging",
-                  "id": "api-logger",
+                  "description": "Enterprise API observability and telemetry",
+                  "id": "tracura",
                   "is_active": true,
-                  "name": "API Logger",
+                  "name": "Tracura",
                   "tags": [
                     "Logs",
-                    "Webhooks",
+                    "Telemetry",
                     "Analytics"
                   ],
                   "tone": "chart-5",
@@ -3645,7 +6413,7 @@
             "description": "List of plugin IDs currently enabled for the tenant.",
             "examples": [
               [
-                "api-logger"
+                "tracura"
               ]
             ]
           }
@@ -3660,18 +6428,18 @@
         "examples": [
           {
             "active_ids": [
-              "api-logger"
+              "tracura"
             ],
             "installed": [
               {
                 "activated_at": "2026-10-29T10:00:00Z",
-                "description": "API request logging, webhook inspection, and debugging",
-                "id": "api-logger",
+                "description": "Enterprise API observability and telemetry",
+                "id": "tracura",
                 "is_active": true,
-                "name": "API Logger",
+                "name": "Tracura",
                 "tags": [
                   "Logs",
-                  "Webhooks",
+                  "Telemetry",
                   "Analytics"
                 ],
                 "tone": "chart-5",
@@ -3681,6 +6449,235 @@
             ]
           }
         ]
+      },
+      "ProjectCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Project display name",
+            "examples": [
+              "Payment Gateway"
+            ]
+          },
+          "slug": {
+            "type": "string",
+            "maxLength": 63,
+            "minLength": 1,
+            "pattern": "^[a-z0-9-]+$",
+            "title": "Slug",
+            "description": "URL/slug identifier",
+            "examples": [
+              "payment-gateway"
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Optional description of the project"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "ProjectCreate",
+        "description": "Payload to create a new telemetry project."
+      },
+      "ProjectRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the record in UUID v4 format.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when the record was created in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:00:00Z"
+            ]
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By",
+            "description": "Unique identifier of the user who created the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At",
+            "description": "Timestamp when the record was last modified in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:30:00Z"
+            ]
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By",
+            "description": "Unique identifier of the user who last modified the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At",
+            "description": "Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "deleted_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted By",
+            "description": "Unique identifier of the user who soft-deleted the record. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenant Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentRead"
+            },
+            "type": "array",
+            "title": "Environments",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "tenant_id",
+          "name",
+          "slug",
+          "is_active"
+        ],
+        "title": "ProjectRead",
+        "description": "Project details with associated environments."
+      },
+      "ProjectUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "ProjectUpdate",
+        "description": "Payload to update an existing project."
       },
       "RefreshTokenRequest": {
         "properties": {
@@ -3821,9 +6818,10 @@
                 "setup",
                 "tenancy",
                 "user",
+                "audit",
                 "crm",
                 "hrms",
-                "api-logger"
+                "tracura"
               ]
             ]
           }
@@ -3845,14 +6843,280 @@
               "setup",
               "tenancy",
               "user",
+              "audit",
               "crm",
               "hrms",
-              "api-logger"
+              "tracura"
             ],
             "service": "Innostes ERP API Server",
             "status": "online"
           }
         ]
+      },
+      "SettingsRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenant Id"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "environment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Id"
+          },
+          "retention_days": {
+            "type": "integer",
+            "title": "Retention Days"
+          },
+          "max_body_size_bytes": {
+            "type": "integer",
+            "title": "Max Body Size Bytes"
+          },
+          "sampling_rate": {
+            "type": "number",
+            "title": "Sampling Rate"
+          },
+          "capture_headers": {
+            "type": "boolean",
+            "title": "Capture Headers"
+          },
+          "capture_body": {
+            "type": "boolean",
+            "title": "Capture Body"
+          },
+          "log_errors_only": {
+            "type": "boolean",
+            "title": "Log Errors Only"
+          },
+          "excluded_paths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Excluded Paths"
+          },
+          "sensitive_headers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sensitive Headers"
+          },
+          "sensitive_body_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sensitive Body Fields"
+          },
+          "mask_client_ip": {
+            "type": "boolean",
+            "title": "Mask Client Ip"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tenant_id",
+          "project_id",
+          "environment_id",
+          "retention_days",
+          "max_body_size_bytes",
+          "sampling_rate",
+          "capture_headers",
+          "capture_body",
+          "log_errors_only",
+          "excluded_paths",
+          "sensitive_headers",
+          "sensitive_body_fields",
+          "mask_client_ip"
+        ],
+        "title": "SettingsRead",
+        "description": "API Logger settings details."
+      },
+      "SettingsUpdate": {
+        "properties": {
+          "retention_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 730.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retention Days",
+            "description": "Log retention period in days"
+          },
+          "max_body_size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 65536.0,
+                "minimum": 512.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Body Size Bytes",
+            "description": "Max body capture bytes before truncation"
+          },
+          "sampling_rate": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.01
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sampling Rate",
+            "description": "Sampling rate from 0.01 (1%) to 1.00 (100%)"
+          },
+          "capture_headers": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture Headers"
+          },
+          "capture_body": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture Body"
+          },
+          "log_errors_only": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Log Errors Only"
+          },
+          "excluded_paths": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Excluded Paths"
+          },
+          "sensitive_headers": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sensitive Headers"
+          },
+          "sensitive_body_fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sensitive Body Fields"
+          },
+          "mask_client_ip": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mask Client Ip"
+          }
+        },
+        "type": "object",
+        "title": "SettingsUpdate",
+        "description": "Payload to update retention, sampling, or scrubbing rules."
       },
       "SetupBrandingCreate": {
         "properties": {
@@ -4519,6 +7783,47 @@
           }
         ]
       },
+      "TimeseriesPoint": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "Hour label, e.g. 12 AM",
+            "default": ""
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "errors": {
+            "type": "integer",
+            "title": "Errors"
+          },
+          "avg_latency_ms": {
+            "type": "number",
+            "title": "Avg Latency Ms"
+          },
+          "p95_latency_ms": {
+            "type": "number",
+            "title": "P95 Latency Ms",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "timestamp",
+          "requests",
+          "errors",
+          "avg_latency_ms"
+        ],
+        "title": "TimeseriesPoint",
+        "description": "Timeseries data point for traffic and errors."
+      },
       "TokenResponse": {
         "properties": {
           "access_token": {
@@ -4602,6 +7907,248 @@
               "token_version": 1,
               "updated_at": "2026-10-29T10:00:00Z"
             }
+          }
+        ]
+      },
+      "TopEndpointItem": {
+        "properties": {
+          "http_method": {
+            "type": "string",
+            "title": "Http Method"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "error_rate_pct": {
+            "type": "number",
+            "title": "Error Rate Pct"
+          },
+          "avg_latency_ms": {
+            "type": "number",
+            "title": "Avg Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "http_method",
+          "path",
+          "requests",
+          "error_rate_pct",
+          "avg_latency_ms"
+        ],
+        "title": "TopEndpointItem",
+        "description": "Most requested API endpoints and performance."
+      },
+      "TopErrorItem": {
+        "properties": {
+          "error_type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "last_seen": {
+            "type": "string",
+            "title": "Last Seen"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error_type",
+          "count",
+          "last_seen"
+        ],
+        "title": "TopErrorItem",
+        "description": "Aggregated top errors encountered."
+      },
+      "TracuraInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique plugin identifier string.",
+            "default": "tracura",
+            "examples": [
+              "tracura"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable plugin title.",
+            "default": "Tracura",
+            "examples": [
+              "Tracura"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string.",
+            "default": "0.1.0",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Operational readiness status of plugin.",
+            "default": "active",
+            "examples": [
+              "active"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "description": "Package type classification.",
+            "default": "plugin",
+            "examples": [
+              "plugin"
+            ]
+          },
+          "features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Features",
+            "description": "List of telemetry features provided by plugin.",
+            "default": [
+              "universal_telemetry",
+              "scoped_api_keys",
+              "pii_redaction",
+              "async_buffer",
+              "explorer",
+              "analytics"
+            ],
+            "examples": [
+              [
+                "universal_telemetry",
+                "scoped_api_keys",
+                "pii_redaction",
+                "async_buffer",
+                "explorer",
+                "analytics"
+              ]
+            ]
+          },
+          "endpoints": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Endpoints",
+            "description": "Summary catalog of available Tracura API endpoints.",
+            "default": [
+              {
+                "method": "GET",
+                "path": "/plugins/tracura/info",
+                "description": "Get plugin metadata and operational status"
+              },
+              {
+                "method": "POST",
+                "path": "/tracura/v1/ingest",
+                "description": "Ingest single telemetry record (X-API-Key)"
+              },
+              {
+                "method": "POST",
+                "path": "/tracura/v1/ingest/batch",
+                "description": "Batch ingest up to 250 telemetry records"
+              },
+              {
+                "method": "GET",
+                "path": "/plugins/tracura/v1/projects",
+                "description": "List all telemetry projects for tenant"
+              },
+              {
+                "method": "POST",
+                "path": "/plugins/tracura/v1/projects",
+                "description": "Create new telemetry project with environments"
+              },
+              {
+                "method": "GET",
+                "path": "/plugins/tracura/v1/keys",
+                "description": "List scoped ingestion API keys"
+              },
+              {
+                "method": "POST",
+                "path": "/plugins/tracura/v1/keys",
+                "description": "Generate new scoped ingestion API key"
+              },
+              {
+                "method": "DELETE",
+                "path": "/plugins/tracura/v1/keys/{key_id}",
+                "description": "Revoke ingestion API key"
+              },
+              {
+                "method": "GET",
+                "path": "/plugins/tracura/v1/settings",
+                "description": "Get effective retention & scrubbing policy"
+              },
+              {
+                "method": "PATCH",
+                "path": "/plugins/tracura/v1/settings",
+                "description": "Update retention, sampling, or PII scrubbing"
+              },
+              {
+                "method": "GET",
+                "path": "/plugins/tracura/v1/logs",
+                "description": "Query and filter telemetry logs"
+              },
+              {
+                "method": "GET",
+                "path": "/plugins/tracura/v1/analytics/dashboard",
+                "description": "Analytics KPIs, charts, and top errors"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "TracuraInfoResponse",
+        "description": "Information schema for Tracura plugin.",
+        "examples": [
+          {
+            "endpoints": [
+              {
+                "description": "Get plugin metadata and operational status",
+                "method": "GET",
+                "path": "/plugins/tracura/info"
+              }
+            ],
+            "features": [
+              "universal_telemetry",
+              "scoped_api_keys",
+              "pii_redaction",
+              "async_buffer",
+              "explorer",
+              "analytics"
+            ],
+            "id": "tracura",
+            "name": "Tracura",
+            "status": "active",
+            "type": "plugin",
+            "version": "0.1.0"
           }
         ]
       },
@@ -4928,6 +8475,480 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "kernel__auth__schemas__api_key__ApiKeyCreatedResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the API key.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable label for the API key.",
+            "examples": [
+              "Zapier CRM Sync"
+            ]
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix",
+            "description": "Public prefix used to identify the token key (e.g. inno_live_...).",
+            "examples": [
+              "inno_live_xK9p"
+            ]
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "Authorized permission scopes granted to this key.",
+            "examples": [
+              [
+                "crm:read",
+                "hrms:read"
+              ]
+            ]
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "Expiration timestamp in ISO 8601 UTC format. Null for perpetual keys.",
+            "examples": [
+              "2026-11-28T10:00:00Z"
+            ]
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At",
+            "description": "Timestamp when key was last presented in an authenticated request.",
+            "examples": [
+              "2026-10-29T10:15:00Z"
+            ]
+          },
+          "is_revoked": {
+            "type": "boolean",
+            "title": "Is Revoked",
+            "description": "Flag indicating whether this API key has been revoked.",
+            "examples": [
+              false
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when key was created.",
+            "examples": [
+              "2026-10-29T09:00:00Z"
+            ]
+          },
+          "raw_key": {
+            "type": "string",
+            "title": "Raw Key",
+            "description": "The plaintext secret API token (e.g. inno_live_...). Copy this immediately as it cannot be recovered.",
+            "examples": [
+              "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "scopes",
+          "is_revoked",
+          "created_at",
+          "raw_key"
+        ],
+        "title": "ApiKeyCreatedResponse",
+        "description": "Returned exclusively on key creation. The raw_key will never be shown again.",
+        "examples": [
+          {
+            "created_at": "2026-10-29T09:00:00Z",
+            "expires_at": "2026-11-28T10:00:00Z",
+            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+            "is_revoked": false,
+            "key_prefix": "inno_live_xK9p",
+            "name": "Zapier CRM Sync",
+            "raw_key": "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH",
+            "scopes": [
+              "crm:read",
+              "hrms:read"
+            ]
+          }
+        ]
+      },
+      "kernel__auth__schemas__api_key__ApiKeyRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the API key.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable label for the API key.",
+            "examples": [
+              "Zapier CRM Sync"
+            ]
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix",
+            "description": "Public prefix used to identify the token key (e.g. inno_live_...).",
+            "examples": [
+              "inno_live_xK9p"
+            ]
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "Authorized permission scopes granted to this key.",
+            "examples": [
+              [
+                "crm:read",
+                "hrms:read"
+              ]
+            ]
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "Expiration timestamp in ISO 8601 UTC format. Null for perpetual keys.",
+            "examples": [
+              "2026-11-28T10:00:00Z"
+            ]
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At",
+            "description": "Timestamp when key was last presented in an authenticated request.",
+            "examples": [
+              "2026-10-29T10:15:00Z"
+            ]
+          },
+          "is_revoked": {
+            "type": "boolean",
+            "title": "Is Revoked",
+            "description": "Flag indicating whether this API key has been revoked.",
+            "examples": [
+              false
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when key was created.",
+            "examples": [
+              "2026-10-29T09:00:00Z"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "scopes",
+          "is_revoked",
+          "created_at"
+        ],
+        "title": "ApiKeyRead",
+        "description": "Safe public representation of an API key without secret hash.",
+        "examples": [
+          {
+            "created_at": "2026-10-29T09:00:00Z",
+            "expires_at": "2026-11-28T10:00:00Z",
+            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+            "is_revoked": false,
+            "key_prefix": "inno_live_xK9p",
+            "last_used_at": "2026-10-29T10:15:00Z",
+            "name": "Zapier CRM Sync",
+            "scopes": [
+              "crm:read",
+              "hrms:read"
+            ]
+          }
+        ]
+      },
+      "tracura__schemas__api_key__ApiKeyCreatedResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix"
+          },
+          "raw_key": {
+            "type": "string",
+            "title": "Raw Key",
+            "description": "Plaintext secret key. Store this securely; it cannot be retrieved again.",
+            "examples": [
+              "inno_log_live_a1b2c3d4e5..."
+            ]
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "allowed_environments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Environments"
+          },
+          "ip_allowlist": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Allowlist"
+          },
+          "rate_limit_rpm": {
+            "type": "integer",
+            "title": "Rate Limit Rpm"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "raw_key",
+          "project_id",
+          "allowed_environments",
+          "ip_allowlist",
+          "rate_limit_rpm",
+          "expires_at",
+          "created_at"
+        ],
+        "title": "ApiKeyCreatedResponse",
+        "description": "Returned ONLY ONCE upon key generation, containing the raw plaintext secret."
+      },
+      "tracura__schemas__api_key__ApiKeyRead": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Tenant Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "project_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Name"
+          },
+          "allowed_environments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Environments"
+          },
+          "ip_allowlist": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Allowlist"
+          },
+          "allowed_origins": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Origins"
+          },
+          "rate_limit_rpm": {
+            "type": "integer",
+            "title": "Rate Limit Rpm"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tenant_id",
+          "name",
+          "key_prefix",
+          "status",
+          "project_id",
+          "allowed_environments",
+          "ip_allowlist",
+          "allowed_origins",
+          "rate_limit_rpm",
+          "expires_at",
+          "last_used_at",
+          "created_at"
+        ],
+        "title": "ApiKeyRead",
+        "description": "Public metadata for an API key (secret is never returned)."
       }
     },
     "securitySchemes": {
@@ -4979,8 +9000,32 @@
       "description": "Human Resource Management System endpoints."
     },
     {
-      "name": "API logger",
-      "description": "API logger request inspection and webhook telemetry plugin."
+      "name": "Tracura",
+      "description": "Tracura plugin status and runtime diagnostics."
+    },
+    {
+      "name": "Tracura - Ingestion",
+      "description": "High-throughput log ingestion endpoints (X-API-Key)."
+    },
+    {
+      "name": "Tracura - Projects",
+      "description": "Project and deployment environment lifecycle management."
+    },
+    {
+      "name": "Tracura - API Keys",
+      "description": "Google developer-style scoped ingestion key management."
+    },
+    {
+      "name": "Tracura - Settings",
+      "description": "Sampling, retention, and multi-vector PII scrubbing policies."
+    },
+    {
+      "name": "Tracura - Explorer",
+      "description": "Telemetry query filters, search, and drawer inspection."
+    },
+    {
+      "name": "Tracura - Analytics",
+      "description": "High-level KPIs, error rates, and timeseries aggregations."
     }
   ]
 }

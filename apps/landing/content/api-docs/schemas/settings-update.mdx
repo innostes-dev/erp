@@ -1,0 +1,38 @@
+---
+title: "SettingsUpdate"
+description: "Payload to update retention, sampling, or scrubbing rules."
+---
+
+Payload to update retention, sampling, or scrubbing rules.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `retention_days` | integer \| null | No | — | Log retention period in days |
+| `max_body_size_bytes` | integer \| null | No | — | Max body capture bytes before truncation |
+| `sampling_rate` | number \| null | No | — | Sampling rate from 0.01 (1%) to 1.00 (100%) |
+| `capture_headers` | boolean \| null | No | — | — |
+| `capture_body` | boolean \| null | No | — | — |
+| `log_errors_only` | boolean \| null | No | — | — |
+| `excluded_paths` | string[] \| null | No | — | — |
+| `sensitive_headers` | string[] \| null | No | — | — |
+| `sensitive_body_fields` | string[] \| null | No | — | — |
+| `mask_client_ip` | boolean \| null | No | — | — |
+
+## Example payload
+
+```json
+{
+  "retention_days": {},
+  "max_body_size_bytes": {},
+  "sampling_rate": {},
+  "capture_headers": {},
+  "capture_body": {},
+  "log_errors_only": {},
+  "excluded_paths": {},
+  "sensitive_headers": {},
+  "sensitive_body_fields": {},
+  "mask_client_ip": {}
+}
+```

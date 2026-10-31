@@ -34,3 +34,8 @@ class ApiLogProject(BaseModel):
         cascade="all, delete-orphan",
         order_by="ApiLogEnvironment.name",
     )
+
+    def __init__(self, **kwargs: object) -> None:
+        kwargs.setdefault("is_active", True)
+        kwargs.setdefault("environments", [])
+        super().__init__(**kwargs)

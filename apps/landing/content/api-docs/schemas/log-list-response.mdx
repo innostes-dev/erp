@@ -1,0 +1,51 @@
+---
+title: "LogListResponse"
+description: "Paginated list of logs."
+---
+
+Paginated list of logs.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `items` | [LogRead](/api-reference/schemas/log-read)[] | Yes | — | — |
+| `total` | integer | Yes | — | — |
+| `offset` | integer | Yes | — | — |
+| `limit` | integer | Yes | — | — |
+
+## Example payload
+
+```json
+{
+  "items": [
+    {
+      "id": null,
+      "tenant_id": null,
+      "project_id": null,
+      "environment_id": null,
+      "api_key_id": null,
+      "correlation_id": null,
+      "user_id": null,
+      "client_ip": null,
+      "user_agent": null,
+      "http_method": null,
+      "url": null,
+      "path": null,
+      "status_code": null,
+      "duration_ms": null,
+      "request_headers": null,
+      "query_params": null,
+      "request_body": null,
+      "response_headers": null,
+      "response_body": null,
+      "error": null,
+      "meta": null,
+      "created_at": null
+    }
+  ],
+  "total": 1,
+  "offset": 1,
+  "limit": 1
+}
+```

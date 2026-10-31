@@ -1,0 +1,32 @@
+---
+title: "EnvironmentHealthItem"
+description: "Per-environment health and error statistics."
+---
+
+Per-environment health and error statistics.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `environment` | string | Yes | — | — |
+| `environment_id` | string \| null | No | — | — |
+| `color_badge` | string | No | `"emerald"` | — |
+| `requests` | integer | Yes | — | — |
+| `error_rate_pct` | number | Yes | — | — |
+| `avg_latency_ms` | number | Yes | — | — |
+| `status` | string | No | `"Healthy"` | Healthy, Degraded, or Issues |
+
+## Example payload
+
+```json
+{
+  "environment": "string",
+  "environment_id": {},
+  "color_badge": "string",
+  "requests": 1,
+  "error_rate_pct": 1,
+  "avg_latency_ms": 1,
+  "status": "string"
+}
+```

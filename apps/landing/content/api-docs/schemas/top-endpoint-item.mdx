@@ -1,0 +1,28 @@
+---
+title: "TopEndpointItem"
+description: "Most requested API endpoints and performance."
+---
+
+Most requested API endpoints and performance.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `http_method` | string | Yes | — | — |
+| `path` | string | Yes | — | — |
+| `requests` | integer | Yes | — | — |
+| `error_rate_pct` | number | Yes | — | — |
+| `avg_latency_ms` | number | Yes | — | — |
+
+## Example payload
+
+```json
+{
+  "http_method": "string",
+  "path": "string",
+  "requests": 1,
+  "error_rate_pct": 1,
+  "avg_latency_ms": 1
+}
+```

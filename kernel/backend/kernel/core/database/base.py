@@ -1,6 +1,6 @@
 """Database Declarative Base and Abstract Base Model."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 import uuid
 
@@ -47,6 +47,9 @@ class BaseModel(
 
     def __init__(self, **kwargs: Any) -> None:
         kwargs.setdefault("id", uuid.uuid4())
+        now = datetime.now(timezone.utc)
+        kwargs.setdefault("created_at", now)
+        kwargs.setdefault("updated_at", now)
         super().__init__(**kwargs)
 
     def to_dict(self) -> dict[str, Any]:

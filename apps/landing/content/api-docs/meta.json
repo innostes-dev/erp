@@ -13,7 +13,6 @@
     "...user-management",
     "...crm",
     "...hrms",
-    "...tracura",
     "---Data Models---",
     "...schemas",
     "---Policies & Reference---",

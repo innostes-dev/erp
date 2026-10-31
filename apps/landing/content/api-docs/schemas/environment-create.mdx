@@ -1,0 +1,24 @@
+---
+title: "EnvironmentCreate"
+description: "Payload to add a deployment environment to a project."
+---
+
+Payload to add a deployment environment to a project.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string | Yes | — | Environment display name |
+| `slug` | string | Yes | — | Slug identifier |
+| `color_badge` | string | No | `"blue"` | Badge color in UI |
+
+## Example payload
+
+```json
+{
+  "name": "Production",
+  "slug": "production",
+  "color_badge": "emerald"
+}
+```

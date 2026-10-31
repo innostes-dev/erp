@@ -1,0 +1,72 @@
+---
+title: "AnalyticsDashboard"
+description: "Combined dashboard response for the UI."
+---
+
+Combined dashboard response for the UI.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `kpi` | [KpiSummary](/api-reference/schemas/kpi-summary) | Yes | — | — |
+| `timeseries` | [TimeseriesPoint](/api-reference/schemas/timeseries-point)[] | Yes | — | — |
+| `environment_health` | [EnvironmentHealthItem](/api-reference/schemas/environment-health-item)[] | No | `[]` | — |
+| `top_endpoints` | [TopEndpointItem](/api-reference/schemas/top-endpoint-item)[] | No | `[]` | — |
+| `top_errors` | [TopErrorItem](/api-reference/schemas/top-error-item)[] | No | `[]` | — |
+
+## Example payload
+
+```json
+{
+  "kpi": {
+    "total_requests": 1,
+    "successful_requests": 1,
+    "success_rate_pct": 1,
+    "error_requests": 1,
+    "error_rate_pct": 1,
+    "avg_latency_ms": 1,
+    "p95_latency_ms": 1,
+    "p99_latency_ms": 1,
+    "status_breakdown": {}
+  },
+  "timeseries": [
+    {
+      "timestamp": null,
+      "label": null,
+      "requests": null,
+      "errors": null,
+      "avg_latency_ms": null,
+      "p95_latency_ms": null
+    }
+  ],
+  "environment_health": [
+    {
+      "environment": null,
+      "environment_id": null,
+      "color_badge": null,
+      "requests": null,
+      "error_rate_pct": null,
+      "avg_latency_ms": null,
+      "status": null
+    }
+  ],
+  "top_endpoints": [
+    {
+      "http_method": null,
+      "path": null,
+      "requests": null,
+      "error_rate_pct": null,
+      "avg_latency_ms": null
+    }
+  ],
+  "top_errors": [
+    {
+      "error_type": null,
+      "error_message": null,
+      "count": null,
+      "last_seen": null
+    }
+  ]
+}
+```

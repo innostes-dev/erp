@@ -1,0 +1,56 @@
+---
+title: "SettingsRead"
+description: "API Logger settings details."
+---
+
+API Logger settings details.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | Yes | — | — |
+| `tenant_id` | string | Yes | — | — |
+| `project_id` | string \| null | Yes | — | — |
+| `environment_id` | string \| null | Yes | — | — |
+| `retention_days` | integer | Yes | — | — |
+| `max_body_size_bytes` | integer | Yes | — | — |
+| `sampling_rate` | number | Yes | — | — |
+| `capture_headers` | boolean | Yes | — | — |
+| `capture_body` | boolean | Yes | — | — |
+| `log_errors_only` | boolean | Yes | — | — |
+| `excluded_paths` | string[] | Yes | — | — |
+| `sensitive_headers` | string[] | Yes | — | — |
+| `sensitive_body_fields` | string[] | Yes | — | — |
+| `mask_client_ip` | boolean | Yes | — | — |
+| `created_at` | string \| null | No | — | — |
+| `updated_at` | string \| null | No | — | — |
+
+## Example payload
+
+```json
+{
+  "id": "string",
+  "tenant_id": "string",
+  "project_id": {},
+  "environment_id": {},
+  "retention_days": 1,
+  "max_body_size_bytes": 1,
+  "sampling_rate": 1,
+  "capture_headers": true,
+  "capture_body": true,
+  "log_errors_only": true,
+  "excluded_paths": [
+    "string"
+  ],
+  "sensitive_headers": [
+    "string"
+  ],
+  "sensitive_body_fields": [
+    "string"
+  ],
+  "mask_client_ip": true,
+  "created_at": {},
+  "updated_at": {}
+}
+```

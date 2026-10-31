@@ -1,0 +1,36 @@
+---
+title: "KpiSummary"
+description: "High-level telemetry KPIs."
+---
+
+High-level telemetry KPIs.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `total_requests` | integer | Yes | — | Total requests processed in period |
+| `successful_requests` | integer | No | `0` | Total successful requests (status < 400) |
+| `success_rate_pct` | number | No | `100` | Percentage of requests with status < 400 |
+| `error_requests` | integer | No | `0` | Total error requests (status >= 400) |
+| `error_rate_pct` | number | Yes | — | Percentage of requests with status >= 400 |
+| `avg_latency_ms` | number | Yes | — | Average latency in ms |
+| `p95_latency_ms` | number | Yes | — | 95th percentile latency in ms |
+| `p99_latency_ms` | number | Yes | — | 99th percentile latency in ms |
+| `status_breakdown` | object | Yes | — | Counts grouped by 2xx, 3xx, 4xx, 5xx |
+
+## Example payload
+
+```json
+{
+  "total_requests": 1,
+  "successful_requests": 1,
+  "success_rate_pct": 1,
+  "error_requests": 1,
+  "error_rate_pct": 1,
+  "avg_latency_ms": 1,
+  "p95_latency_ms": 1,
+  "p99_latency_ms": 1,
+  "status_breakdown": {}
+}
+```

@@ -1,0 +1,59 @@
+---
+title: "IngestLogItem"
+description: "A single request/response telemetry log entry."
+---
+
+A single request/response telemetry log entry.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `project` | string | Yes | — | Project slug or UUID string |
+| `environment` | string | Yes | — | Environment slug or UUID string |
+| `correlation_id` | string | Yes | — | Unique trace / request ID |
+| `user_id` | string \| null | No | — | Authenticated actor ID if present |
+| `client_ip` | string \| null | No | — | Client IP address |
+| `user_agent` | string \| null | No | — | Client user agent |
+| `http_method` | string | Yes | — | HTTP method |
+| `url` | string | Yes | — | Full target request URL |
+| `path` | string | Yes | — | Path component |
+| `status_code` | integer | Yes | — | HTTP response status code |
+| `duration_ms` | number | Yes | — | Total latency in milliseconds |
+| `request_headers` | object \| null | No | — | Request headers (redacted on server) |
+| `query_params` | object \| null | No | — | URL query parameters |
+| `request_body` | string \| null | No | — | Raw request JSON or text |
+| `response_headers` | object \| null | No | — | Response headers |
+| `response_body` | string \| null | No | — | Response JSON or text |
+| `error` | object \| null | No | — | Error diagnostics (code, message, stack trace) |
+| `meta` | object \| null | No | — | Developer custom data escape hatch (AI tokens, Stripe ID, git commit, pod) |
+| `created_at` | string \| null | No | — | Timestamp when request occurred |
+
+## Example payload
+
+```json
+{
+  "project": "payment-gateway",
+  "environment": "production",
+  "correlation_id": "req_88fbc09d12",
+  "user_id": "cust_992144",
+  "client_ip": "103.21.244.1",
+  "user_agent": "Mozilla/5.0...",
+  "http_method": "POST",
+  "url": "https://api.company.com/v1/payments/charges",
+  "path": "/v1/payments/charges",
+  "status_code": 200,
+  "duration_ms": 138.45,
+  "request_headers": {},
+  "query_params": {},
+  "request_body": {},
+  "response_headers": {},
+  "response_body": {},
+  "error": {},
+  "meta": {
+    "model": "gpt-4o",
+    "tokens": 420
+  },
+  "created_at": {}
+}
+```

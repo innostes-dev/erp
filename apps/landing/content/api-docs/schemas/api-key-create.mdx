@@ -1,0 +1,34 @@
+---
+title: "ApiKeyCreate"
+description: "Payload to generate a new scoped ingestion API key."
+---
+
+Payload to generate a new scoped ingestion API key.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `name` | string | Yes | — | Key name / label |
+| `project_id` | string \| null | No | — | Scope to a specific project. If None, permitted across all tenant projects. |
+| `allowed_environments` | string[] | No | `["*"]` | Allowed environments, e.g. ['production'] or ['*'] |
+| `ip_allowlist` | string[] \| null | No | — | Optional list of permitted client CIDRs or IPs |
+| `allowed_origins` | string[] \| null | No | — | Optional list of permitted HTTP Origin headers |
+| `rate_limit_rpm` | integer | No | `1200` | Rate limit requests per minute |
+| `expires_in_days` | integer \| null | No | — | Key expiry in days from creation |
+
+## Example payload
+
+```json
+{
+  "name": "Prod Cluster Ingestion Key",
+  "project_id": {},
+  "allowed_environments": [
+    "string"
+  ],
+  "ip_allowlist": {},
+  "allowed_origins": {},
+  "rate_limit_rpm": 1,
+  "expires_in_days": {}
+}
+```

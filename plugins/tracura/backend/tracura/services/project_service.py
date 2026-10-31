@@ -114,6 +114,7 @@ class ProjectService:
             )
             envs_to_add.append(custom_env)
 
+        project.environments = envs_to_add
         session.add_all(envs_to_add)
         await session.flush()
 
@@ -205,6 +206,7 @@ class ProjectService:
             color_badge="blue",
             created_by=actor_id,
         )
+        project.environments = [prod_env, dev_env]
         session.add_all([prod_env, dev_env])
         await session.flush()
 

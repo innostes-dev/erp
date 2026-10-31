@@ -1,0 +1,30 @@
+---
+title: "TimeseriesPoint"
+description: "Timeseries data point for traffic and errors."
+---
+
+Timeseries data point for traffic and errors.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `timestamp` | string | Yes | — | — |
+| `label` | string | No | `""` | Hour label, e.g. 12 AM |
+| `requests` | integer | Yes | — | — |
+| `errors` | integer | Yes | — | — |
+| `avg_latency_ms` | number | Yes | — | — |
+| `p95_latency_ms` | number | No | `0` | — |
+
+## Example payload
+
+```json
+{
+  "timestamp": "2026-10-29T10:00:00Z",
+  "label": "string",
+  "requests": 1,
+  "errors": 1,
+  "avg_latency_ms": 1,
+  "p95_latency_ms": 1
+}
+```

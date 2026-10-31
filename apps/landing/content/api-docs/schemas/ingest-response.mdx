@@ -1,0 +1,24 @@
+---
+title: "IngestResponse"
+description: "Ingestion receipt confirmation."
+---
+
+Ingestion receipt confirmation.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `accepted` | integer | Yes | — | Number of log records enqueued |
+| `dropped` | integer | No | `0` | Number of logs dropped due to sampling or excluded path |
+| `status` | string | No | `"accepted"` | Status code string |
+
+## Example payload
+
+```json
+{
+  "accepted": 1,
+  "dropped": 1,
+  "status": "string"
+}
+```
