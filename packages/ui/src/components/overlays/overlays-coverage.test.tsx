@@ -65,7 +65,9 @@ describe('CommandPalette full functionality', () => {
       />,
     );
 
-    expect(screen.getByPlaceholderText('Type a command...')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Type a command...'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Orders List')).toBeInTheDocument();
     expect(screen.getByText('Create Invoice')).toBeInTheDocument();
     expect(screen.getByText('Press Esc to exit')).toBeInTheDocument();
@@ -122,10 +124,16 @@ describe('Dialog, Sheet, and AlertDialog full anatomy', () => {
       </Dialog>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Update Profile' })).toBeInTheDocument();
-    expect(screen.getByText('Modify your personal details')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Update Profile' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Modify your personal details'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Form Content')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Dismiss modal' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Dismiss modal' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
 
@@ -145,10 +153,14 @@ describe('Dialog, Sheet, and AlertDialog full anatomy', () => {
       </Sheet>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Audit Log Filters' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Audit Log Filters' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Filter system events')).toBeInTheDocument();
     expect(screen.getByText('Log details')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Dismiss drawer' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Dismiss drawer' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Apply' })).toBeInTheDocument();
   });
 
@@ -158,7 +170,9 @@ describe('Dialog, Sheet, and AlertDialog full anatomy', () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Permanently delete records?</AlertDialogTitle>
-            <AlertDialogDescription>Action is irreversible.</AlertDialogDescription>
+            <AlertDialogDescription>
+              Action is irreversible.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogClose>Abort</AlertDialogClose>
@@ -168,9 +182,13 @@ describe('Dialog, Sheet, and AlertDialog full anatomy', () => {
       </AlertDialog>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Permanently delete records?' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Permanently delete records?' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Action is irreversible.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Abort' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Confirm Delete' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Confirm Delete' }),
+    ).toBeInTheDocument();
   });
 });

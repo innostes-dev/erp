@@ -35,7 +35,16 @@ export interface PageHeaderProps extends Omit<
  */
 export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
   function PageHeader(
-    { className, title, description, breadcrumb, actions, classNames, children, ...props },
+    {
+      className,
+      title,
+      description,
+      breadcrumb,
+      actions,
+      classNames,
+      children,
+      ...props
+    },
     ref,
   ) {
     return (
@@ -50,14 +59,20 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
           <div className="flex min-w-0 flex-col gap-1">
             <h1
               data-slot="page-header-title"
-              className={cn('text-heading font-semibold tracking-tight text-foreground', classNames?.title)}
+              className={cn(
+                'text-heading font-semibold tracking-tight text-foreground',
+                classNames?.title,
+              )}
             >
               {title}
             </h1>
             {description && (
               <p
                 data-slot="page-header-description"
-                className={cn('text-sm text-muted-foreground', classNames?.description)}
+                className={cn(
+                  'text-sm text-muted-foreground',
+                  classNames?.description,
+                )}
               >
                 {description}
               </p>
@@ -66,7 +81,10 @@ export const PageHeader = forwardRef<HTMLElement, PageHeaderProps>(
           {actions && (
             <div
               data-slot="page-header-actions"
-              className={cn('flex shrink-0 flex-wrap items-center gap-2', classNames?.actions)}
+              className={cn(
+                'flex shrink-0 flex-wrap items-center gap-2',
+                classNames?.actions,
+              )}
             >
               {actions}
             </div>

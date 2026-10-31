@@ -24,58 +24,58 @@ export type FieldProps = BaseField.Root.Props;
  * </Field>
  */
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
-  { className, ...props },
-  ref,
+    { className, ...props },
+    ref,
 ) {
-  return (
-    <BaseField.Root
-      ref={ref}
-      data-slot="field"
-      className={mergeClassName('flex flex-col gap-2', className)}
-      {...props}
-    />
-  );
+    return (
+        <BaseField.Root
+            ref={ref}
+            data-slot="field"
+            className={mergeClassName('flex flex-col gap-2', className)}
+            {...props}
+        />
+    );
 });
 
 export interface FieldLabelProps extends BaseField.Label.Props {
-  /** Append a required marker. Purely visual; set `required` on the control too. */
-  required?: boolean;
+    /** Append a required marker. Purely visual; set `required` on the control too. */
+    required?: boolean;
 }
 
 /** The label of a `Field`. Linked to the control automatically. */
 export const FieldLabel = forwardRef<HTMLElement, FieldLabelProps>(
-  function FieldLabel({ className, required, children, ...props }, ref) {
-    return (
-      <BaseField.Label
-        ref={ref}
-        data-slot="field-label"
-        className={mergeClassName(labelClassName, className)}
-        {...props}
-      >
-        {children}
-        {required && (
-          <span aria-hidden="true" className="text-destructive">
-            *
-          </span>
-        )}
-      </BaseField.Label>
-    );
-  },
+    function FieldLabel({ className, required, children, ...props }, ref) {
+        return (
+            <BaseField.Label
+                ref={ref}
+                data-slot="field-label"
+                className={mergeClassName(labelClassName, className)}
+                {...props}
+            >
+                {children}
+                {required && (
+                    <span aria-hidden="true" className="text-destructive">
+                        *
+                    </span>
+                )}
+            </BaseField.Label>
+        );
+    },
 );
 
 /** Help text for a `Field`. Announced with the control via `aria-describedby`. */
 export const FieldDescription = forwardRef<
-  HTMLParagraphElement,
-  BaseField.Description.Props
+    HTMLParagraphElement,
+    BaseField.Description.Props
 >(function FieldDescription({ className, ...props }, ref) {
-  return (
-    <BaseField.Description
-      ref={ref}
-      data-slot="field-description"
-      className={mergeClassName('text-sm text-muted-foreground', className)}
-      {...props}
-    />
-  );
+    return (
+        <BaseField.Description
+            ref={ref}
+            data-slot="field-description"
+            className={mergeClassName('text-sm text-muted-foreground', className)}
+            {...props}
+        />
+    );
 });
 
 /**
@@ -83,19 +83,19 @@ export const FieldDescription = forwardRef<
  * and `match` (e.g. `match="valueMissing"`) to customise per error.
  */
 export const FieldError = forwardRef<HTMLDivElement, BaseField.Error.Props>(
-  function FieldError({ className, ...props }, ref) {
-    return (
-      <BaseField.Error
-        ref={ref}
-        data-slot="field-error"
-        className={mergeClassName(
-          'text-sm font-medium text-destructive',
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
+    function FieldError({ className, ...props }, ref) {
+        return (
+            <BaseField.Error
+                ref={ref}
+                data-slot="field-error"
+                className={mergeClassName(
+                    'text-sm font-medium text-destructive',
+                    className,
+                )}
+                {...props}
+            />
+        );
+    },
 );
 
 /**
@@ -103,14 +103,14 @@ export const FieldError = forwardRef<HTMLDivElement, BaseField.Error.Props>(
  * so each option gets its own label.
  */
 export const FieldItem = forwardRef<HTMLDivElement, BaseField.Item.Props>(
-  function FieldItem({ className, ...props }, ref) {
-    return (
-      <BaseField.Item
-        ref={ref}
-        data-slot="field-item"
-        className={mergeClassName(cn('flex items-center gap-2'), className)}
-        {...props}
-      />
-    );
-  },
+    function FieldItem({ className, ...props }, ref) {
+        return (
+            <BaseField.Item
+                ref={ref}
+                data-slot="field-item"
+                className={mergeClassName(cn('flex items-center gap-2'), className)}
+                {...props}
+            />
+        );
+    },
 );

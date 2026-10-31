@@ -87,7 +87,10 @@ export function moveKanbanItem<T extends { id: string }>(
   });
 }
 
-function locate<T extends { id: string }>(columns: readonly KanbanColumn<T>[], itemId: string) {
+function locate<T extends { id: string }>(
+  columns: readonly KanbanColumn<T>[],
+  itemId: string,
+) {
   for (let c = 0; c < columns.length; c++) {
     const i = columns[c]!.items.findIndex((it) => it.id === itemId);
     if (i !== -1) return { col: c, index: i };
@@ -99,9 +102,19 @@ export interface KanbanLabels {
   /** Read when a card is focused. @default 'Press Space to pick up. While holding, use arrow keys to move, Space to drop and Escape to cancel.' */
   instructions?: string;
   /** @default (item, column, pos, total) => `Picked up ${item}. In ${column}, position ${pos} of ${total}.` */
-  pickedUp?: (item: string, column: string, position: number, total: number) => string;
+  pickedUp?: (
+    item: string,
+    column: string,
+    position: number,
+    total: number,
+  ) => string;
   /** @default (item, column, pos, total) => `${item} moved to ${column}, position ${pos} of ${total}.` */
-  moved?: (item: string, column: string, position: number, total: number) => string;
+  moved?: (
+    item: string,
+    column: string,
+    position: number,
+    total: number,
+  ) => string;
   /** @default (item, column, pos) => `${item} dropped in ${column}, position ${pos}.` */
   dropped?: (item: string, column: string, position: number) => string;
   /** @default (item) => `Move cancelled. ${item} returned to its place.` */
@@ -127,8 +140,10 @@ export type KanbanBoardSlot =
   | 'cardMoveSelect'
   | 'empty';
 
-export interface KanbanBoardProps<T extends { id: string }>
-  extends Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'children'> {
+export interface KanbanBoardProps<T extends { id: string }> extends Omit<
+  ComponentProps<'div'>,
+  'defaultValue' | 'onChange' | 'children'
+> {
   /** Accessible name, e.g. "Recruitment pipeline". */
   'aria-label': string;
   /** The columns and their cards (controlled). */
@@ -160,7 +175,8 @@ const defaults = {
     `Picked up ${item}. In ${column}, position ${pos} of ${total}.`,
   moved: (item: string, column: string, pos: number, total: number) =>
     `${item} moved to ${column}, position ${pos} of ${total}.`,
-  dropped: (item: string, column: string, pos: number) => `${item} dropped in ${column}, position ${pos}.`,
+  dropped: (item: string, column: string, pos: number) =>
+    `${item} dropped in ${column}, position ${pos}.`,
   cancelled: (item: string) => `Move cancelled. ${item} returned to its place.`,
   moveAction: 'Move to…',
   moveTo: (item: string) => `Move ${item}`,
@@ -184,17 +200,26 @@ function KanbanBoardImpl<T extends { id: string }>(
   }: KanbanBoardProps<T>,
   ref: ForwardedRef<HTMLDivElement>,
 ) {
-  const [columns, setColumns] = useControllableState<KanbanColumn<T>[]>({ value, defaultValue });
+  const [columns, setColumns] = useControllableState<KanbanColumn<T>[]>({
+    value,
+    defaultValue,
+  });
   const t = { ...defaults, ...labels };
   const baseId = useId();
   const instructionsId = `${baseId}-instructions`;
 
   // Keyboard move in progress: the preview columns and where the card started.
-  const [held, setHeld] = useState<{ itemId: string; preview: KanbanColumn<T>[] } | null>(null);
+  const [held, setHeld] = useState<{
+    itemId: string;
+    preview: KanbanColumn<T>[];
+  } | null>(null);
   const shown = held?.preview ?? columns;
 
   const [dragId, setDragId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<{ columnId: string; index: number } | null>(null);
+  const [dropTarget, setDropTarget] = useState<{
+    columnId: string;
+    index: number;
+  } | null>(null);
 
   const [announcement, setAnnouncement] = useState('');
   const cardRefs = useRef(new Map<string, HTMLLIElement>());
@@ -214,11 +239,21 @@ function KanbanBoardImpl<T extends { id: string }>(
     return '';
   };
 
-  const commit = (itemId: string, toColumnId: string, toIndex: number): boolean => {
+  const commit = (
+    itemId: string,
+    toColumnId: string,
+    toIndex: number,
+  ): boolean => {
     const from = locate(columns, itemId);
     if (!from) return false;
     const fromCol = columns[from.col]!;
-    const move: KanbanMove = { itemId, fromColumnId: fromCol.id, fromIndex: from.index, toColumnId, toIndex };
+    const move: KanbanMove = {
+      itemId,
+      fromColumnId: fromCol.id,
+      fromIndex: from.index,
+      toColumnId,
+      toIndex,
+    };
     if (fromCol.id === toColumnId && from.index === toIndex) return true;
     if (canMove && !canMove(move)) return false;
     const next = moveKanbanItem(columns, itemId, toColumnId, toIndex);
@@ -240,7 +275,16 @@ function KanbanBoardImpl<T extends { id: string }>(
     const key = event.key;
 
     if (held) {
-      const handled = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter', 'Escape', 'Tab'];
+      const handled = [
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        ' ',
+        'Enter',
+        'Escape',
+        'Tab',
+      ];
       if (!handled.includes(key)) return;
       event.preventDefault();
       if (key === 'Escape' || key === 'Tab') {
@@ -255,7 +299,9 @@ function KanbanBoardImpl<T extends { id: string }>(
         setHeld(null);
         focusRequest.current = item.id;
         setAnnouncement(
-          ok ? t.dropped(getItemLabel(item), column.title, pos.index + 1) : t.cancelled(getItemLabel(item)),
+          ok
+            ? t.dropped(getItemLabel(item), column.title, pos.index + 1)
+            : t.cancelled(getItemLabel(item)),
         );
         return;
       }
@@ -273,13 +319,21 @@ function KanbanBoardImpl<T extends { id: string }>(
       else if (key === back) col--;
       if (col < 0 || col >= shown.length) return;
       const target = shown[col]!;
-      const max = col === pos.col ? target.items.length - 1 : target.items.length;
+      const max =
+        col === pos.col ? target.items.length - 1 : target.items.length;
       index = Math.max(0, Math.min(index, max));
       if (col === pos.col && index === pos.index) return;
       const preview = moveKanbanItem(shown, item.id, target.id, index);
       setHeld({ ...held, preview });
       focusRequest.current = item.id;
-      setAnnouncement(t.moved(getItemLabel(item), target.title, index + 1, preview[col]!.items.length));
+      setAnnouncement(
+        t.moved(
+          getItemLabel(item),
+          target.title,
+          index + 1,
+          preview[col]!.items.length,
+        ),
+      );
       return;
     }
 
@@ -287,7 +341,14 @@ function KanbanBoardImpl<T extends { id: string }>(
       event.preventDefault();
       const column = shown[pos.col]!;
       setHeld({ itemId: item.id, preview: shown });
-      setAnnouncement(t.pickedUp(getItemLabel(item), column.title, pos.index + 1, column.items.length));
+      setAnnouncement(
+        t.pickedUp(
+          getItemLabel(item),
+          column.title,
+          pos.index + 1,
+          column.items.length,
+        ),
+      );
     } else if (key === 'Enter') {
       if (onCardOpen) {
         event.preventDefault();
@@ -295,7 +356,9 @@ function KanbanBoardImpl<T extends { id: string }>(
       }
     } else if (key === 'ArrowDown' || key === 'ArrowUp') {
       event.preventDefault();
-      focusCard(shown[pos.col]!.items[pos.index + (key === 'ArrowDown' ? 1 : -1)]?.id);
+      focusCard(
+        shown[pos.col]!.items[pos.index + (key === 'ArrowDown' ? 1 : -1)]?.id,
+      );
     } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
       event.preventDefault();
       const rtl =
@@ -313,10 +376,13 @@ function KanbanBoardImpl<T extends { id: string }>(
     }
   };
 
-  const indexFromPointer = (event: DragEvent<HTMLElement>, list: HTMLElement) => {
-    const cards = Array.from(list.querySelectorAll<HTMLElement>(':scope > [data-slot=kanban-card]')).filter(
-      (el) => el.dataset.id !== dragId,
-    );
+  const indexFromPointer = (
+    event: DragEvent<HTMLElement>,
+    list: HTMLElement,
+  ) => {
+    const cards = Array.from(
+      list.querySelectorAll<HTMLElement>(':scope > [data-slot=kanban-card]'),
+    ).filter((el) => el.dataset.id !== dragId);
     const i = cards.findIndex((el) => {
       const r = el.getBoundingClientRect();
       return event.clientY < r.top + r.height / 2;
@@ -329,7 +395,11 @@ function KanbanBoardImpl<T extends { id: string }>(
       ref={ref}
       role="region"
       data-slot="kanban-board"
-      className={cn('flex w-full gap-4 overflow-x-auto pb-2', classNames?.root, className)}
+      className={cn(
+        'flex w-full gap-4 overflow-x-auto pb-2',
+        classNames?.root,
+        className,
+      )}
       {...props}
     >
       <p id={instructionsId} hidden>
@@ -357,12 +427,28 @@ function KanbanBoardImpl<T extends { id: string }>(
           >
             <header
               data-slot="kanban-column-header"
-              className={cn('flex items-center gap-2 px-3 pt-3 pb-2', classNames?.columnHeader)}
+              className={cn(
+                'flex items-center gap-2 px-3 pt-3 pb-2',
+                classNames?.columnHeader,
+              )}
             >
               {column.tone && (
-                <span aria-hidden="true" className={cn('size-2 shrink-0 rounded-full', toneDot[column.tone])} />
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'size-2 shrink-0 rounded-full',
+                    toneDot[column.tone],
+                  )}
+                />
               )}
-              <h3 id={headingId} data-slot="kanban-column-title" className={cn('truncate text-sm font-semibold', classNames?.columnTitle)}>
+              <h3
+                id={headingId}
+                data-slot="kanban-column-title"
+                className={cn(
+                  'truncate text-sm font-semibold',
+                  classNames?.columnTitle,
+                )}
+              >
                 {column.title}
               </h3>
               <span
@@ -374,9 +460,15 @@ function KanbanBoardImpl<T extends { id: string }>(
                   classNames?.count,
                 )}
               >
-                {column.limit !== undefined ? `${count}/${column.limit}` : count}
+                {column.limit !== undefined
+                  ? `${count}/${column.limit}`
+                  : count}
               </span>
-              {columnActions && <div className="ms-auto flex items-center gap-1">{columnActions(column)}</div>}
+              {columnActions && (
+                <div className="ms-auto flex items-center gap-1">
+                  {columnActions(column)}
+                </div>
+              )}
             </header>
             <ul
               aria-labelledby={headingId}
@@ -386,23 +478,31 @@ function KanbanBoardImpl<T extends { id: string }>(
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
                 const index = indexFromPointer(e, e.currentTarget);
-                if (dropTarget?.columnId !== column.id || dropTarget.index !== index) {
+                if (
+                  dropTarget?.columnId !== column.id ||
+                  dropTarget.index !== index
+                ) {
                   setDropTarget({ columnId: column.id, index });
                 }
               }}
               onDragLeave={(e) => {
-                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDropTarget(null);
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+                  setDropTarget(null);
               }}
               onDrop={(e) => {
                 if (!dragId) return;
                 e.preventDefault();
                 const index = indexFromPointer(e, e.currentTarget);
                 const label = labelOf(dragId);
-                if (commit(dragId, column.id, index)) setAnnouncement(t.dropped(label, column.title, index + 1));
+                if (commit(dragId, column.id, index))
+                  setAnnouncement(t.dropped(label, column.title, index + 1));
                 setDragId(null);
                 setDropTarget(null);
               }}
-              className={cn('flex min-h-24 flex-1 flex-col gap-2 px-2 pb-2', classNames?.list)}
+              className={cn(
+                'flex min-h-24 flex-1 flex-col gap-2 px-2 pb-2',
+                classNames?.list,
+              )}
             >
               {column.items.map((item, i) => {
                 const isHeld = held?.itemId === item.id;
@@ -440,11 +540,16 @@ function KanbanBoardImpl<T extends { id: string }>(
                       'focus-visible:ring-2 focus-visible:ring-ring',
                       'data-held:rotate-1 data-held:shadow-lg data-held:ring-2 data-held:ring-primary',
                       'data-dragging:opacity-40',
-                      isTarget && dropTarget?.index === i && 'before:absolute before:inset-x-0 before:-top-1.5 before:h-0.5 before:rounded-full before:bg-primary',
+                      isTarget &&
+                        dropTarget?.index === i &&
+                        'before:absolute before:inset-x-0 before:-top-1.5 before:h-0.5 before:rounded-full before:bg-primary',
                       classNames?.card,
                     )}
                   >
-                    <GripVerticalIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground" />
+                    <GripVerticalIcon
+                      aria-hidden="true"
+                      className="mt-0.5 size-4 shrink-0 text-muted-foreground/60 group-hover:text-muted-foreground"
+                    />
                     <div className="min-w-0 flex-1">{renderCard(item)}</div>
                     {shown.length > 1 && (
                       <select
@@ -455,11 +560,23 @@ function KanbanBoardImpl<T extends { id: string }>(
                           e.stopPropagation();
                           const targetColId = e.target.value;
                           if (!targetColId) return;
-                          const targetCol = shown.find((c) => c.id === targetColId);
+                          const targetCol = shown.find(
+                            (c) => c.id === targetColId,
+                          );
                           if (!targetCol) return;
-                          const ok = commit(item.id, targetCol.id, targetCol.items.length);
+                          const ok = commit(
+                            item.id,
+                            targetCol.id,
+                            targetCol.items.length,
+                          );
                           if (ok) {
-                            setAnnouncement(t.dropped(getItemLabel(item), targetCol.title, targetCol.items.length + 1));
+                            setAnnouncement(
+                              t.dropped(
+                                getItemLabel(item),
+                                targetCol.title,
+                                targetCol.items.length + 1,
+                              ),
+                            );
                           }
                         }}
                         onClick={(e) => e.stopPropagation()}
@@ -484,9 +601,15 @@ function KanbanBoardImpl<T extends { id: string }>(
                   </li>
                 );
               })}
-              {isTarget && dropTarget!.index >= column.items.filter((it) => it.id !== dragId).length && column.items.length > 0 && (
-                <li aria-hidden="true" className="h-0.5 rounded-full bg-primary" />
-              )}
+              {isTarget &&
+                dropTarget!.index >=
+                  column.items.filter((it) => it.id !== dragId).length &&
+                column.items.length > 0 && (
+                  <li
+                    aria-hidden="true"
+                    className="h-0.5 rounded-full bg-primary"
+                  />
+                )}
               {column.items.length === 0 && (
                 <li
                   data-slot="kanban-empty"
@@ -522,6 +645,8 @@ function KanbanBoardImpl<T extends { id: string }>(
  * />
  */
 // forwardRef drops generics, so cast back to a generic component (T is inferred from `value`).
-export const KanbanBoard = forwardRef(KanbanBoardImpl) as <T extends { id: string }>(
+export const KanbanBoard = forwardRef(KanbanBoardImpl) as <
+  T extends { id: string },
+>(
   props: KanbanBoardProps<T> & { ref?: Ref<HTMLDivElement> },
 ) => ReactElement;

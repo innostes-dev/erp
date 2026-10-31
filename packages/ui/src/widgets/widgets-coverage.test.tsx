@@ -6,7 +6,10 @@ import { PermissionMatrix } from './permission-matrix/permission-matrix';
 import { ChangeLog } from './change-log/change-log';
 import { ActionList } from './action-list/action-list';
 import { AppSwitcher } from './app-switcher/app-switcher';
-import { NotificationBell, NotificationList } from './notifications/notifications';
+import {
+  NotificationBell,
+  NotificationList,
+} from './notifications/notifications';
 import { MetricCard } from './metric-card/metric-card';
 
 describe('Widgets coverage and benchmarks', () => {
@@ -19,16 +22,19 @@ describe('Widgets coverage and benchmarks', () => {
       }
 
       // 5 columns x 100 cards = 500 cards
-      const columns: KanbanColumn<TestItem>[] = Array.from({ length: 5 }, (_, cIndex) => ({
-        id: `col-${cIndex}`,
-        title: `Column ${cIndex + 1}`,
-        limit: 120,
-        items: Array.from({ length: 100 }, (_, iIndex) => ({
-          id: `item-${cIndex}-${iIndex}`,
-          title: `Task ${cIndex}-${iIndex}`,
-          priority: 'High',
-        })),
-      }));
+      const columns: KanbanColumn<TestItem>[] = Array.from(
+        { length: 5 },
+        (_, cIndex) => ({
+          id: `col-${cIndex}`,
+          title: `Column ${cIndex + 1}`,
+          limit: 120,
+          items: Array.from({ length: 100 }, (_, iIndex) => ({
+            id: `item-${cIndex}-${iIndex}`,
+            title: `Task ${cIndex}-${iIndex}`,
+            priority: 'High',
+          })),
+        }),
+      );
 
       const start = performance.now();
       const onValueChange = vi.fn();
@@ -48,7 +54,9 @@ describe('Widgets coverage and benchmarks', () => {
       expect(renderDuration).toBeLessThan(3000);
 
       // Verify accessible region and column titles
-      expect(screen.getByRole('region', { name: 'High-volume enterprise pipeline' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('region', { name: 'High-volume enterprise pipeline' }),
+      ).toBeInTheDocument();
       expect(screen.getByText('Column 1')).toBeInTheDocument();
 
       // Test touch move select on the first card
@@ -102,7 +110,9 @@ describe('Widgets coverage and benchmarks', () => {
 
       // Open with Enter
       await user.keyboard('{Enter}');
-      expect(onCardOpen).toHaveBeenCalledWith(expect.objectContaining({ id: 'card-1' }));
+      expect(onCardOpen).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'card-1' }),
+      );
 
       // Pick up with Space
       await user.keyboard(' ');
@@ -119,7 +129,14 @@ describe('Widgets coverage and benchmarks', () => {
     it('supports native HTML drag and drop on KanbanBoard', () => {
       const onValueChange = vi.fn();
       const columns: KanbanColumn<{ id: string; name: string }>[] = [
-        { id: 'c1', title: 'Col 1', items: [{ id: 'card-1', name: 'Item 1' }, { id: 'card-2', name: 'Item 2' }] },
+        {
+          id: 'c1',
+          title: 'Col 1',
+          items: [
+            { id: 'card-1', name: 'Item 1' },
+            { id: 'card-2', name: 'Item 2' },
+          ],
+        },
         { id: 'c2', title: 'Col 2', items: [] },
       ];
 
@@ -172,8 +189,10 @@ describe('Widgets coverage and benchmarks', () => {
       const resources = [
         {
           id: 'inventory',
-          label: 'Northwind Enterprise Global Warehouse Inventory Management Service',
-          description: 'Comprehensive audit trail for inventory balance adjustments',
+          label:
+            'Northwind Enterprise Global Warehouse Inventory Management Service',
+          description:
+            'Comprehensive audit trail for inventory balance adjustments',
           group: 'Supply Chain',
         },
       ];
@@ -253,7 +272,9 @@ describe('Widgets coverage and benchmarks', () => {
       expect(screen.getByText('Priya Sharma')).toBeInTheDocument();
       expect(screen.getByText('Pending')).toBeInTheDocument();
       expect(screen.getByText('Approved')).toBeInTheDocument();
-      expect(screen.getByText('Approved after verification of business documents.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Approved after verification of business documents.'),
+      ).toBeInTheDocument();
     });
 
     it('renders ActionList with disabled and custom items', () => {
@@ -262,8 +283,20 @@ describe('Widgets coverage and benchmarks', () => {
         <ActionList
           aria-label="Quick operations"
           items={[
-            { id: 'a1', title: 'Print Invoice', action: { label: 'Print', onClick: onSelect } },
-            { id: 'a2', title: 'Delete Record', action: <button disabled type="button">Delete</button> },
+            {
+              id: 'a1',
+              title: 'Print Invoice',
+              action: { label: 'Print', onClick: onSelect },
+            },
+            {
+              id: 'a2',
+              title: 'Delete Record',
+              action: (
+                <button disabled type="button">
+                  Delete
+                </button>
+              ),
+            },
           ]}
         />,
       );
@@ -330,13 +363,12 @@ describe('Widgets coverage and benchmarks', () => {
             variant="split"
             label="Split Regional"
             value="850"
-            items={[{ label: 'Online', value: '500' }, { label: 'In-store', value: '350' }]}
+            items={[
+              { label: 'Online', value: '500' },
+              { label: 'In-store', value: '350' },
+            ]}
           />
-          <MetricCard
-            loading
-            label="Loading Card"
-            value="—"
-          />
+          <MetricCard loading label="Loading Card" value="—" />
         </div>,
       );
 
@@ -376,8 +408,18 @@ describe('Widgets coverage and benchmarks', () => {
               {
                 label: 'Core Systems',
                 apps: [
-                  { id: 'erp', name: 'ERP Finance', description: 'General ledger and AP/AR', icon: <span data-testid="erp-icon" /> },
-                  { id: 'hrms', name: 'HRMS People', description: 'Payroll and recruitment', icon: <span data-testid="hrms-icon" /> },
+                  {
+                    id: 'erp',
+                    name: 'ERP Finance',
+                    description: 'General ledger and AP/AR',
+                    icon: <span data-testid="erp-icon" />,
+                  },
+                  {
+                    id: 'hrms',
+                    name: 'HRMS People',
+                    description: 'Payroll and recruitment',
+                    icon: <span data-testid="hrms-icon" />,
+                  },
                 ],
               },
             ]}
@@ -392,12 +434,16 @@ describe('Widgets coverage and benchmarks', () => {
       expect(onItemClick).toHaveBeenCalled();
 
       // Test AppSwitcher popover & search filtering
-      const appTrigger = screen.getByRole('button', { name: /Switch application/i });
+      const appTrigger = screen.getByRole('button', {
+        name: /Switch application/i,
+      });
       await user.click(appTrigger);
       const searchInput = screen.getByRole('searchbox');
       await user.type(searchInput, 'payroll');
       expect(screen.getByText('HRMS People')).toBeInTheDocument();
-      expect(screen.queryByText('General ledger and AP/AR')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('General ledger and AP/AR'),
+      ).not.toBeInTheDocument();
     });
   });
 });

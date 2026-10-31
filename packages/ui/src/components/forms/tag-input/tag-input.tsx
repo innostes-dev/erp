@@ -16,7 +16,8 @@ import type { SlotClassNames } from '../../../lib/slots';
 import { useControllableState } from '../../../lib/use-controllable-state';
 import { inputVariants, type InputSize } from '../input/input-variants';
 
-export type TagInputSlot = 'root' | 'tag' | 'tagRemove' | 'input' | 'popup' | 'item';
+export type TagInputSlot =
+  'root' | 'tag' | 'tagRemove' | 'input' | 'popup' | 'item';
 
 export interface TagInputProps {
   /** The tags (controlled). */
@@ -80,191 +81,207 @@ const minHeight: Record<InputSize, string> = {
  *   max={5}
  * />
  */
-export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(function TagInput(
-  {
-    value,
-    defaultValue = [],
-    onValueChange,
-    suggestions,
-    allowCustom = true,
-    delimiters = [','],
-    max,
-    validate,
-    placeholder,
-    name,
-    disabled = false,
-    id,
-    size = 'md',
-    addLabel = (tag) => `Add "${tag}"`,
-    removeLabel = (tag) => `Remove ${tag}`,
-    className,
-    classNames,
-    ...props
-  },
-  ref,
-) {
-  const [tags, setTags] = useControllableState({ value, defaultValue, onChange: onValueChange });
-  const [query, setQuery] = useState('');
-  const highlighted = useRef<string | undefined>(undefined);
-  const full = max !== undefined && tags.length >= max;
+export const TagInput = forwardRef<HTMLDivElement, TagInputProps>(
+  function TagInput(
+    {
+      value,
+      defaultValue = [],
+      onValueChange,
+      suggestions,
+      allowCustom = true,
+      delimiters = [','],
+      max,
+      validate,
+      placeholder,
+      name,
+      disabled = false,
+      id,
+      size = 'md',
+      addLabel = (tag) => `Add "${tag}"`,
+      removeLabel = (tag) => `Remove ${tag}`,
+      className,
+      classNames,
+      ...props
+    },
+    ref,
+  ) {
+    const [tags, setTags] = useControllableState({
+      value,
+      defaultValue,
+      onChange: onValueChange,
+    });
+    const [query, setQuery] = useState('');
+    const highlighted = useRef<string | undefined>(undefined);
+    const full = max !== undefined && tags.length >= max;
 
-  const accept = (current: string[], raw: string): string[] => {
-    const tag = raw.trim();
-    if (!tag || (max !== undefined && current.length >= max)) return current;
-    const lower = tag.toLocaleLowerCase();
-    if (current.some((t) => t.toLocaleLowerCase() === lower)) return current;
-    const known = suggestions?.find((s) => s.toLocaleLowerCase() === lower);
-    if (!known && !allowCustom) return current;
-    if (validate && !validate(known ?? tag)) return current;
-    return [...current, known ?? tag];
-  };
+    const accept = (current: string[], raw: string): string[] => {
+      const tag = raw.trim();
+      if (!tag || (max !== undefined && current.length >= max)) return current;
+      const lower = tag.toLocaleLowerCase();
+      if (current.some((t) => t.toLocaleLowerCase() === lower)) return current;
+      const known = suggestions?.find((s) => s.toLocaleLowerCase() === lower);
+      if (!known && !allowCustom) return current;
+      if (validate && !validate(known ?? tag)) return current;
+      return [...current, known ?? tag];
+    };
 
-  const commit = (texts: string[]) => {
-    const next = texts.reduce(accept, tags);
-    if (next !== tags) setTags(next);
-    setQuery('');
-  };
+    const commit = (texts: string[]) => {
+      const next = texts.reduce(accept, tags);
+      if (next !== tags) setTags(next);
+      setQuery('');
+    };
 
-  const splitPattern = new RegExp(
-    `[${delimiters.map((d) => d.replace(/[\\\]^-]/g, '\\$&')).join('')}\\n]`,
-  );
+    const splitPattern = new RegExp(
+      `[${delimiters.map((d) => d.replace(/[\\\]^-]/g, '\\$&')).join('')}\\n]`,
+    );
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    const isDelimiter = delimiters.includes(event.key);
-    if (event.key === 'Enter' && highlighted.current === undefined) {
-      if (!query.trim()) return;
+    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+      const isDelimiter = delimiters.includes(event.key);
+      if (event.key === 'Enter' && highlighted.current === undefined) {
+        if (!query.trim()) return;
+        event.preventDefault();
+        commit([query]);
+      } else if (isDelimiter) {
+        event.preventDefault();
+        commit([query]);
+      }
+    };
+
+    const handlePaste = (event: ClipboardEvent<HTMLInputElement>) => {
+      const text = event.clipboardData.getData('text');
+      if (!splitPattern.test(text)) return;
       event.preventDefault();
-      commit([query]);
-    } else if (isDelimiter) {
-      event.preventDefault();
-      commit([query]);
-    }
-  };
+      commit((query + text).split(splitPattern));
+    };
 
-  const handlePaste = (event: ClipboardEvent<HTMLInputElement>) => {
-    const text = event.clipboardData.getData('text');
-    if (!splitPattern.test(text)) return;
-    event.preventDefault();
-    commit((query + text).split(splitPattern));
-  };
+    const trimmed = query.trim();
+    const lowered = trimmed.toLocaleLowerCase();
+    const exact = suggestions?.some((s) => s.toLocaleLowerCase() === lowered);
+    const items =
+      suggestions && trimmed && allowCustom && !exact
+        ? [...suggestions, trimmed]
+        : (suggestions ?? []);
 
-  const trimmed = query.trim();
-  const lowered = trimmed.toLocaleLowerCase();
-  const exact = suggestions?.some((s) => s.toLocaleLowerCase() === lowered);
-  const items =
-    suggestions && trimmed && allowCustom && !exact ? [...suggestions, trimmed] : (suggestions ?? []);
-
-  return (
-    <BaseCombobox.Root
-      items={items}
-      multiple
-      value={tags}
-      onValueChange={(next: string[]) => {
-        const added = next.filter((t) => !tags.includes(t));
-        const kept = next.filter((t) => tags.includes(t));
-        setTags(added.reduce(accept, kept));
-        setQuery('');
-      }}
-      inputValue={query}
-      onInputValueChange={setQuery}
-      onItemHighlighted={(item: string | undefined) => {
-        highlighted.current = item;
-      }}
-      name={name}
-      disabled={disabled}
-    >
-      <BaseCombobox.InputGroup
-        ref={ref}
-        data-slot="tag-input"
-        className={cn(
-          inputVariants({ size }),
-          'flex h-auto cursor-text flex-wrap items-center gap-1 pe-1.5',
-          'focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25',
-          minHeight[size],
-          classNames?.root,
-          className,
-        )}
+    return (
+      <BaseCombobox.Root
+        items={items}
+        multiple
+        value={tags}
+        onValueChange={(next: string[]) => {
+          const added = next.filter((t) => !tags.includes(t));
+          const kept = next.filter((t) => tags.includes(t));
+          setTags(added.reduce(accept, kept));
+          setQuery('');
+        }}
+        inputValue={query}
+        onInputValueChange={setQuery}
+        onItemHighlighted={(item: string | undefined) => {
+          highlighted.current = item;
+        }}
+        name={name}
+        disabled={disabled}
       >
-        <BaseCombobox.Chips
-          className="contents"
-          aria-label={tags.length > 0 ? props['aria-label'] : undefined}
+        <BaseCombobox.InputGroup
+          ref={ref}
+          data-slot="tag-input"
+          className={cn(
+            inputVariants({ size }),
+            'flex h-auto cursor-text flex-wrap items-center gap-1 pe-1.5',
+            'focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25',
+            minHeight[size],
+            classNames?.root,
+            className,
+          )}
         >
-          {tags.map((tag) => (
-            <BaseCombobox.Chip
-              key={tag}
-              data-slot="tag-input-tag"
-              aria-label={tag}
-              className={cn(
-                'inline-flex h-6 max-w-full items-center gap-1 rounded-sm bg-secondary ps-2 pe-0.5 text-xs font-medium text-secondary-foreground outline-none',
-                'focus-visible:ring-2 focus-visible:ring-ring data-highlighted:ring-2 data-highlighted:ring-ring',
-                classNames?.tag,
-              )}
-            >
-              <span className="truncate">{tag}</span>
-              <BaseCombobox.ChipRemove
-                data-slot="tag-input-tag-remove"
-                aria-label={removeLabel(tag)}
+          <BaseCombobox.Chips
+            className="contents"
+            aria-label={tags.length > 0 ? props['aria-label'] : undefined}
+          >
+            {tags.map((tag) => (
+              <BaseCombobox.Chip
+                key={tag}
+                data-slot="tag-input-tag"
+                aria-label={tag}
                 className={cn(
-                  'flex size-5 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-background hover:text-foreground',
-                  classNames?.tagRemove,
+                  'inline-flex h-6 max-w-full items-center gap-1 rounded-sm bg-secondary ps-2 pe-0.5 text-xs font-medium text-secondary-foreground outline-none',
+                  'focus-visible:ring-2 focus-visible:ring-ring data-highlighted:ring-2 data-highlighted:ring-ring',
+                  classNames?.tag,
                 )}
               >
-                <XIcon className="size-3" />
-              </BaseCombobox.ChipRemove>
-            </BaseCombobox.Chip>
-          ))}
-          <BaseCombobox.Input
-            id={id}
-            data-slot="tag-input-input"
-            aria-label={props['aria-label']}
-            placeholder={tags.length === 0 ? placeholder : undefined}
-            disabled={disabled || full}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            className={cn(
-              'h-6 min-w-16 flex-1 border-0 bg-transparent px-1 outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed',
-              classNames?.input,
-            )}
-          />
-        </BaseCombobox.Chips>
-      </BaseCombobox.InputGroup>
-      {suggestions && (
-        <BaseCombobox.Portal>
-          <BaseCombobox.Positioner className="z-50 outline-none" sideOffset={4} align="start">
-            <BaseCombobox.Popup
-              data-slot="tag-input-popup"
+                <span className="truncate">{tag}</span>
+                <BaseCombobox.ChipRemove
+                  data-slot="tag-input-tag-remove"
+                  aria-label={removeLabel(tag)}
+                  className={cn(
+                    'flex size-5 cursor-pointer items-center justify-center rounded-sm text-muted-foreground hover:bg-background hover:text-foreground',
+                    classNames?.tagRemove,
+                  )}
+                >
+                  <XIcon className="size-3" />
+                </BaseCombobox.ChipRemove>
+              </BaseCombobox.Chip>
+            ))}
+            <BaseCombobox.Input
+              id={id}
+              data-slot="tag-input-input"
+              aria-label={props['aria-label']}
+              placeholder={tags.length === 0 ? placeholder : undefined}
+              disabled={disabled || full}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
               className={cn(
-                popupSurface,
-                'max-h-[min(var(--available-height),18rem)] w-(--anchor-width) overflow-y-auto p-1 empty:hidden',
-                classNames?.popup,
+                'h-6 min-w-16 flex-1 border-0 bg-transparent px-1 outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed',
+                classNames?.input,
               )}
+            />
+          </BaseCombobox.Chips>
+        </BaseCombobox.InputGroup>
+        {suggestions && (
+          <BaseCombobox.Portal>
+            <BaseCombobox.Positioner
+              className="z-50 outline-none"
+              sideOffset={4}
+              align="start"
             >
-              <BaseCombobox.List className="outline-none data-empty:p-0">
-                {(item: string) => (
-                  <BaseCombobox.Item
-                    key={item}
-                    value={item}
-                    data-slot="tag-input-item"
-                    className={cn(listItem, 'cursor-pointer pe-8', classNames?.item)}
-                  >
-                    {item === trimmed && !exact ? (
-                      <>
-                        <PlusIcon />
-                        {addLabel(item)}
-                      </>
-                    ) : (
-                      item
-                    )}
-                    <BaseCombobox.ItemIndicator className="absolute end-2 flex items-center">
-                      <CheckIcon className="size-4" />
-                    </BaseCombobox.ItemIndicator>
-                  </BaseCombobox.Item>
+              <BaseCombobox.Popup
+                data-slot="tag-input-popup"
+                className={cn(
+                  popupSurface,
+                  'max-h-[min(var(--available-height),18rem)] w-(--anchor-width) overflow-y-auto p-1 empty:hidden',
+                  classNames?.popup,
                 )}
-              </BaseCombobox.List>
-            </BaseCombobox.Popup>
-          </BaseCombobox.Positioner>
-        </BaseCombobox.Portal>
-      )}
-    </BaseCombobox.Root>
-  );
-});
+              >
+                <BaseCombobox.List className="outline-none data-empty:p-0">
+                  {(item: string) => (
+                    <BaseCombobox.Item
+                      key={item}
+                      value={item}
+                      data-slot="tag-input-item"
+                      className={cn(
+                        listItem,
+                        'cursor-pointer pe-8',
+                        classNames?.item,
+                      )}
+                    >
+                      {item === trimmed && !exact ? (
+                        <>
+                          <PlusIcon />
+                          {addLabel(item)}
+                        </>
+                      ) : (
+                        item
+                      )}
+                      <BaseCombobox.ItemIndicator className="absolute end-2 flex items-center">
+                        <CheckIcon className="size-4" />
+                      </BaseCombobox.ItemIndicator>
+                    </BaseCombobox.Item>
+                  )}
+                </BaseCombobox.List>
+              </BaseCombobox.Popup>
+            </BaseCombobox.Positioner>
+          </BaseCombobox.Portal>
+        )}
+      </BaseCombobox.Root>
+    );
+  },
+);

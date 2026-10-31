@@ -23,7 +23,11 @@ import { useControllableState } from '../../../lib/use-controllable-state';
 import { useMediaQuery } from '../../../lib/use-media-query';
 import { Button, type ButtonProps } from '../../actions/button/button';
 import { Separator } from '../separator/separator';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../overlays/tooltip/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '../../overlays/tooltip/tooltip';
 
 /* -------------------------------------------------------------------------------------------------
  * State
@@ -65,7 +69,8 @@ const SidebarConfigContext = createContext<SidebarConfig>({
  */
 export function useSidebar(): SidebarContextValue {
   const context = useContext(SidebarContext);
-  if (!context) throw new Error('useSidebar must be used inside <SidebarProvider>.');
+  if (!context)
+    throw new Error('useSidebar must be used inside <SidebarProvider>.');
   return context;
 }
 
@@ -108,75 +113,84 @@ export interface SidebarProviderProps extends ComponentProps<'div'> {
  *   <SidebarInset>…</SidebarInset>
  * </SidebarProvider>
  */
-export const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(function SidebarProvider(
-  {
-    open: openProp,
-    defaultOpen = true,
-    onOpenChange,
-    keyboardShortcut = 'b',
-    mobileQuery = '(max-width: 767px)',
-    width = '16rem',
-    iconWidth = '3.5rem',
-    mobileWidth = 'min(18rem, 85vw)',
-    className,
-    style,
-    children,
-    ...props
-  },
-  ref,
-) {
-  const isMobile = useMediaQuery(mobileQuery);
-  const [open, setOpen] = useControllableState({ value: openProp, defaultValue: defaultOpen, onChange: onOpenChange });
-  const [openMobile, setOpenMobile] = useState(false);
+export const SidebarProvider = forwardRef<HTMLDivElement, SidebarProviderProps>(
+  function SidebarProvider(
+    {
+      open: openProp,
+      defaultOpen = true,
+      onOpenChange,
+      keyboardShortcut = 'b',
+      mobileQuery = '(max-width: 767px)',
+      width = '16rem',
+      iconWidth = '3.5rem',
+      mobileWidth = 'min(18rem, 85vw)',
+      className,
+      style,
+      children,
+      ...props
+    },
+    ref,
+  ) {
+    const isMobile = useMediaQuery(mobileQuery);
+    const [open, setOpen] = useControllableState({
+      value: openProp,
+      defaultValue: defaultOpen,
+      onChange: onOpenChange,
+    });
+    const [openMobile, setOpenMobile] = useState(false);
 
-  const toggle = useCallback(() => {
-    if (isMobile) setOpenMobile(!openMobile);
-    else setOpen(!open);
-  }, [isMobile, open, openMobile, setOpen]);
+    const toggle = useCallback(() => {
+      if (isMobile) setOpenMobile(!openMobile);
+      else setOpen(!open);
+    }, [isMobile, open, openMobile, setOpen]);
 
-  useEffect(() => {
-    if (!keyboardShortcut) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === keyboardShortcut.toLowerCase() && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        toggle();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [keyboardShortcut, toggle]);
-
-  const value = useMemo(
-    () => ({ open, setOpen, openMobile, setOpenMobile, isMobile, toggle }),
-    [open, setOpen, openMobile, isMobile, toggle],
-  );
-
-  return (
-    <SidebarContext.Provider value={value}>
-      <div
-        ref={ref}
-        data-slot="sidebar-provider"
-        data-state={open ? 'expanded' : 'collapsed'}
-        style={
-          {
-            '--sidebar-width': width,
-            '--sidebar-width-icon': iconWidth,
-            '--sidebar-width-mobile': mobileWidth,
-            ...style,
-          } as CSSProperties
+    useEffect(() => {
+      if (!keyboardShortcut) return;
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (
+          event.key.toLowerCase() === keyboardShortcut.toLowerCase() &&
+          (event.metaKey || event.ctrlKey)
+        ) {
+          event.preventDefault();
+          toggle();
         }
-        className={cn(
-          'group/sidebar-provider flex min-h-svh w-full',
-          'has-[[data-slot=sidebar][data-variant=inset]]:bg-sidebar',
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </div>
-    </SidebarContext.Provider>
-  );
-});
+      };
+      window.addEventListener('keydown', onKeyDown);
+      return () => window.removeEventListener('keydown', onKeyDown);
+    }, [keyboardShortcut, toggle]);
+
+    const value = useMemo(
+      () => ({ open, setOpen, openMobile, setOpenMobile, isMobile, toggle }),
+      [open, setOpen, openMobile, isMobile, toggle],
+    );
+
+    return (
+      <SidebarContext.Provider value={value}>
+        <div
+          ref={ref}
+          data-slot="sidebar-provider"
+          data-state={open ? 'expanded' : 'collapsed'}
+          style={
+            {
+              '--sidebar-width': width,
+              '--sidebar-width-icon': iconWidth,
+              '--sidebar-width-mobile': mobileWidth,
+              ...style,
+            } as CSSProperties
+          }
+          className={cn(
+            'group/sidebar-provider flex min-h-svh w-full',
+            'has-[[data-slot=sidebar][data-variant=inset]]:bg-sidebar',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </div>
+      </SidebarContext.Provider>
+    );
+  },
+);
 
 /* -------------------------------------------------------------------------------------------------
  * Sidebar
@@ -227,13 +241,19 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
   const { open, isMobile, openMobile, setOpenMobile } = useSidebar();
   const expanded = collapsible === 'none' || open;
   const config = useMemo(
-    () => ({ collapsible, side, iconCollapsed: !isMobile && !expanded && collapsible === 'icon' }),
+    () => ({
+      collapsible,
+      side,
+      iconCollapsed: !isMobile && !expanded && collapsible === 'icon',
+    }),
     [collapsible, side, isMobile, expanded],
   );
 
   if (isMobile) {
     return (
-      <SidebarConfigContext.Provider value={{ ...config, iconCollapsed: false }}>
+      <SidebarConfigContext.Provider
+        value={{ ...config, iconCollapsed: false }}
+      >
         <BaseDialog.Root open={openMobile} onOpenChange={setOpenMobile}>
           <BaseDialog.Portal>
             <BaseDialog.Backdrop className={backdrop} />
@@ -279,13 +299,22 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
           'transition-[width] duration-200 ease-out motion-reduce:transition-none',
           side === 'right' && 'order-last',
           // width
-          expanded ? 'w-(--sidebar-width)' : collapsible === 'icon' ? 'w-(--sidebar-width-icon)' : 'w-0',
+          expanded
+            ? 'w-(--sidebar-width)'
+            : collapsible === 'icon'
+              ? 'w-(--sidebar-width-icon)'
+              : 'w-0',
           // variant
           variant === 'floating'
-            ? cn('sticky top-2 m-2 h-[calc(100svh-1rem)] rounded-xl border border-sidebar-border shadow-sm', !expanded && collapsible === 'offcanvas' && 'm-0 border-0')
+            ? cn(
+                'sticky top-2 m-2 h-[calc(100svh-1rem)] rounded-xl border border-sidebar-border shadow-sm',
+                !expanded && collapsible === 'offcanvas' && 'm-0 border-0',
+              )
             : 'sticky top-0 h-svh',
           variant === 'sidebar' &&
-            (side === 'left' ? 'border-e border-sidebar-border' : 'border-s border-sidebar-border'),
+            (side === 'left'
+              ? 'border-e border-sidebar-border'
+              : 'border-s border-sidebar-border'),
           !expanded && collapsible === 'offcanvas' && 'border-0',
           className,
         )}
@@ -295,7 +324,8 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
           aria-label={label}
           className={cn(
             'flex min-h-0 flex-1 flex-col',
-            collapsible === 'offcanvas' && 'w-(--sidebar-width) min-w-(--sidebar-width)',
+            collapsible === 'offcanvas' &&
+              'w-(--sidebar-width) min-w-(--sidebar-width)',
           )}
         >
           {children}
@@ -310,48 +340,58 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
  * -----------------------------------------------------------------------------------------------*/
 
 /** Top of the sidebar, e.g. logo or workspace switcher. */
-export const SidebarHeader = forwardRef<HTMLDivElement, ComponentProps<'div'>>(function SidebarHeader(
-  { className, ...props },
-  ref,
-) {
-  return <div ref={ref} data-slot="sidebar-header" className={cn('flex flex-col gap-2 p-3', className)} {...props} />;
-});
+export const SidebarHeader = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  function SidebarHeader({ className, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        data-slot="sidebar-header"
+        className={cn('flex flex-col gap-2 p-3', className)}
+        {...props}
+      />
+    );
+  },
+);
 
 /** Scrollable middle of the sidebar that holds the groups. */
-export const SidebarContent = forwardRef<HTMLDivElement, ComponentProps<'div'>>(function SidebarContent(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <div
-      ref={ref}
-      data-slot="sidebar-content"
-      className={cn('flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto overscroll-contain', className)}
-      {...props}
-    />
-  );
-});
+export const SidebarContent = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  function SidebarContent({ className, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        data-slot="sidebar-content"
+        className={cn(
+          'flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto overscroll-contain',
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 /** Bottom of the sidebar, e.g. the user menu. */
-export const SidebarFooter = forwardRef<HTMLDivElement, ComponentProps<'div'>>(function SidebarFooter(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <div
-      ref={ref}
-      data-slot="sidebar-footer"
-      className={cn('mt-auto flex flex-col gap-2 border-t border-sidebar-border p-3', className)}
-      {...props}
-    />
-  );
-});
+export const SidebarFooter = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  function SidebarFooter({ className, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        data-slot="sidebar-footer"
+        className={cn(
+          'mt-auto flex flex-col gap-2 border-t border-sidebar-border p-3',
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 /** A divider between sidebar sections. */
-export const SidebarSeparator = forwardRef<HTMLDivElement, ComponentProps<typeof Separator>>(function SidebarSeparator(
-  { className, ...props },
-  ref,
-) {
+export const SidebarSeparator = forwardRef<
+  HTMLDivElement,
+  ComponentProps<typeof Separator>
+>(function SidebarSeparator({ className, ...props }, ref) {
   return (
     <Separator
       ref={ref}
@@ -363,20 +403,24 @@ export const SidebarSeparator = forwardRef<HTMLDivElement, ComponentProps<typeof
 });
 
 /** A section of related links. Wrap in `Collapsible` to make it expandable (see docs). */
-export const SidebarGroup = forwardRef<HTMLDivElement, ComponentProps<'div'>>(function SidebarGroup(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <div ref={ref} data-slot="sidebar-group" className={cn('relative flex flex-col gap-1 px-2 py-1', className)} {...props} />
-  );
-});
+export const SidebarGroup = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  function SidebarGroup({ className, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        data-slot="sidebar-group"
+        className={cn('relative flex flex-col gap-1 px-2 py-1', className)}
+        {...props}
+      />
+    );
+  },
+);
 
 /** The heading of a group. Hidden (but still announced) when collapsed to icons. */
-export const SidebarGroupLabel = forwardRef<HTMLDivElement, ComponentProps<'div'>>(function SidebarGroupLabel(
-  { className, ...props },
-  ref,
-) {
+export const SidebarGroupLabel = forwardRef<
+  HTMLDivElement,
+  ComponentProps<'div'>
+>(function SidebarGroupLabel({ className, ...props }, ref) {
   return (
     <div
       ref={ref}
@@ -384,7 +428,7 @@ export const SidebarGroupLabel = forwardRef<HTMLDivElement, ComponentProps<'div'
       className={cn(
         'flex h-8 shrink-0 items-center gap-2 rounded-md px-2.5 text-xs font-medium tracking-wide text-sidebar-muted-foreground uppercase outline-none',
         'focus-visible:outline-2 focus-visible:outline-sidebar-ring',
-        "[&>svg]:size-4 [&>svg]:shrink-0",
+        '[&>svg]:size-4 [&>svg]:shrink-0',
         'group-data-[collapsible=icon]/sidebar:sr-only',
         className,
       )}
@@ -394,10 +438,10 @@ export const SidebarGroupLabel = forwardRef<HTMLDivElement, ComponentProps<'div'
 });
 
 /** A small button at the top end of a group, e.g. "+ New project". Give it an `aria-label`. */
-export const SidebarGroupAction = forwardRef<HTMLButtonElement, ComponentProps<'button'>>(function SidebarGroupAction(
-  { className, type = 'button', ...props },
-  ref,
-) {
+export const SidebarGroupAction = forwardRef<
+  HTMLButtonElement,
+  ComponentProps<'button'>
+>(function SidebarGroupAction({ className, type = 'button', ...props }, ref) {
   return (
     <button
       ref={ref}
@@ -406,7 +450,7 @@ export const SidebarGroupAction = forwardRef<HTMLButtonElement, ComponentProps<'
       className={cn(
         'absolute end-3 top-2.5 flex size-6 cursor-pointer items-center justify-center rounded-md text-sidebar-muted-foreground transition-colors',
         'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-sidebar-ring',
-        "[&>svg]:size-4 group-data-[collapsible=icon]/sidebar:hidden",
+        '[&>svg]:size-4 group-data-[collapsible=icon]/sidebar:hidden',
         className,
       )}
       {...props}
@@ -415,20 +459,32 @@ export const SidebarGroupAction = forwardRef<HTMLButtonElement, ComponentProps<'
 });
 
 /** A list of navigation items. */
-export const SidebarMenu = forwardRef<HTMLUListElement, ComponentProps<'ul'>>(function SidebarMenu(
-  { className, ...props },
-  ref,
-) {
-  return <ul ref={ref} data-slot="sidebar-menu" className={cn('flex flex-col gap-0.5', className)} {...props} />;
-});
+export const SidebarMenu = forwardRef<HTMLUListElement, ComponentProps<'ul'>>(
+  function SidebarMenu({ className, ...props }, ref) {
+    return (
+      <ul
+        ref={ref}
+        data-slot="sidebar-menu"
+        className={cn('flex flex-col gap-0.5', className)}
+        {...props}
+      />
+    );
+  },
+);
 
 /** One entry of a `SidebarMenu`. Holds a button, and optionally an action, a badge or a sub-menu. */
-export const SidebarMenuItem = forwardRef<HTMLLIElement, ComponentProps<'li'>>(function SidebarMenuItem(
-  { className, ...props },
-  ref,
-) {
-  return <li ref={ref} data-slot="sidebar-menu-item" className={cn('group/menu-item relative', className)} {...props} />;
-});
+export const SidebarMenuItem = forwardRef<HTMLLIElement, ComponentProps<'li'>>(
+  function SidebarMenuItem({ className, ...props }, ref) {
+    return (
+      <li
+        ref={ref}
+        data-slot="sidebar-menu-item"
+        className={cn('group/menu-item relative', className)}
+        {...props}
+      />
+    );
+  },
+);
 
 /* -------------------------------------------------------------------------------------------------
  * Menu button
@@ -466,7 +522,10 @@ export interface SidebarMenuButtonProps extends useRender.ComponentProps<'button
  * navigation so it uses your router. Style hooks: `data-active`, `data-slot="sidebar-menu-button"`,
  * and the label `data-slot="sidebar-menu-label"`.
  */
-export const SidebarMenuButton = forwardRef<HTMLElement, SidebarMenuButtonProps>(function SidebarMenuButton(
+export const SidebarMenuButton = forwardRef<
+  HTMLElement,
+  SidebarMenuButtonProps
+>(function SidebarMenuButton(
   {
     className,
     isActive = false,
@@ -496,7 +555,8 @@ export const SidebarMenuButton = forwardRef<HTMLElement, SidebarMenuButtonProps>
           'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-sidebar-ring',
           "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4.5",
           menuButtonSize[size],
-          isActive && 'bg-sidebar-primary-soft font-medium text-sidebar-primary hover:bg-sidebar-primary-soft hover:text-sidebar-primary',
+          isActive &&
+            'bg-sidebar-primary-soft font-medium text-sidebar-primary hover:bg-sidebar-primary-soft hover:text-sidebar-primary',
           isActive &&
             activeIndicator &&
             !collapsed &&
@@ -514,10 +574,15 @@ export const SidebarMenuButton = forwardRef<HTMLElement, SidebarMenuButtonProps>
         children: (
           <>
             {icon}
-            <span data-slot="sidebar-menu-label" className={cn('flex-1 truncate', collapsed && 'sr-only')}>
+            <span
+              data-slot="sidebar-menu-label"
+              className={cn('flex-1 truncate', collapsed && 'sr-only')}
+            >
               {children}
             </span>
-            {badge && !collapsed && <span className="ms-auto shrink-0 text-xs">{badge}</span>}
+            {badge && !collapsed && (
+              <span className="ms-auto shrink-0 text-xs">{badge}</span>
+            )}
           </>
         ),
       } as ComponentProps<'button'>,
@@ -542,7 +607,10 @@ export interface SidebarMenuActionProps extends ComponentProps<'button'> {
 }
 
 /** A small button at the end of a menu item, e.g. "⋯" for item options. Give it an `aria-label`. */
-export const SidebarMenuAction = forwardRef<HTMLButtonElement, SidebarMenuActionProps>(function SidebarMenuAction(
+export const SidebarMenuAction = forwardRef<
+  HTMLButtonElement,
+  SidebarMenuActionProps
+>(function SidebarMenuAction(
   { className, showOnHover = false, type = 'button', ...props },
   ref,
 ) {
@@ -565,10 +633,10 @@ export const SidebarMenuAction = forwardRef<HTMLButtonElement, SidebarMenuAction
 });
 
 /** A count or status at the end of a menu item. Hidden when collapsed to icons. */
-export const SidebarMenuBadge = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(function SidebarMenuBadge(
-  { className, ...props },
-  ref,
-) {
+export const SidebarMenuBadge = forwardRef<
+  HTMLSpanElement,
+  ComponentProps<'span'>
+>(function SidebarMenuBadge({ className, ...props }, ref) {
   return (
     <span
       ref={ref}
@@ -584,10 +652,10 @@ export const SidebarMenuBadge = forwardRef<HTMLSpanElement, ComponentProps<'span
 });
 
 /** Nested items under a menu item. Hidden when collapsed to icons. */
-export const SidebarMenuSub = forwardRef<HTMLUListElement, ComponentProps<'ul'>>(function SidebarMenuSub(
-  { className, ...props },
-  ref,
-) {
+export const SidebarMenuSub = forwardRef<
+  HTMLUListElement,
+  ComponentProps<'ul'>
+>(function SidebarMenuSub({ className, ...props }, ref) {
   return (
     <ul
       ref={ref}
@@ -603,11 +671,18 @@ export const SidebarMenuSub = forwardRef<HTMLUListElement, ComponentProps<'ul'>>
 });
 
 /** One nested item. */
-export const SidebarMenuSubItem = forwardRef<HTMLLIElement, ComponentProps<'li'>>(function SidebarMenuSubItem(
-  { className, ...props },
-  ref,
-) {
-  return <li ref={ref} data-slot="sidebar-menu-sub-item" className={cn('relative', className)} {...props} />;
+export const SidebarMenuSubItem = forwardRef<
+  HTMLLIElement,
+  ComponentProps<'li'>
+>(function SidebarMenuSubItem({ className, ...props }, ref) {
+  return (
+    <li
+      ref={ref}
+      data-slot="sidebar-menu-sub-item"
+      className={cn('relative', className)}
+      {...props}
+    />
+  );
 });
 
 export interface SidebarMenuSubButtonProps extends useRender.ComponentProps<'a'> {
@@ -616,7 +691,10 @@ export interface SidebarMenuSubButtonProps extends useRender.ComponentProps<'a'>
 }
 
 /** A nested navigation link. Renders an `<a>`; use `render` for your router's link. */
-export const SidebarMenuSubButton = forwardRef<HTMLElement, SidebarMenuSubButtonProps>(function SidebarMenuSubButton(
+export const SidebarMenuSubButton = forwardRef<
+  HTMLElement,
+  SidebarMenuSubButtonProps
+>(function SidebarMenuSubButton(
   { className, isActive = false, render, ...props },
   ref,
 ) {
@@ -650,45 +728,52 @@ export const SidebarMenuSubButton = forwardRef<HTMLElement, SidebarMenuSubButton
  * -----------------------------------------------------------------------------------------------*/
 
 /** Opens/closes the sidebar. Place it in the page header. */
-export const SidebarTrigger = forwardRef<HTMLElement, ButtonProps>(function SidebarTrigger(
-  { className, onClick, children, ...props },
-  ref,
-) {
-  const { toggle, open, isMobile, openMobile } = useSidebar();
-  return (
-    <Button
-      ref={ref}
-      data-slot="sidebar-trigger"
-      variant="ghost"
-      size="sm"
-      iconOnly
-      aria-label="Toggle sidebar"
-      aria-expanded={isMobile ? openMobile : open}
-      className={className}
-      onClick={(event) => {
-        onClick?.(event);
-        toggle();
-      }}
-      {...props}
-    >
-      {children ?? (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect width="18" height="18" x="3" y="3" rx="2" />
-          <path d="M9 3v18" />
-        </svg>
-      )}
-    </Button>
-  );
-});
+export const SidebarTrigger = forwardRef<HTMLElement, ButtonProps>(
+  function SidebarTrigger({ className, onClick, children, ...props }, ref) {
+    const { toggle, open, isMobile, openMobile } = useSidebar();
+    return (
+      <Button
+        ref={ref}
+        data-slot="sidebar-trigger"
+        variant="ghost"
+        size="sm"
+        iconOnly
+        aria-label="Toggle sidebar"
+        aria-expanded={isMobile ? openMobile : open}
+        className={className}
+        onClick={(event) => {
+          onClick?.(event);
+          toggle();
+        }}
+        {...props}
+      >
+        {children ?? (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M9 3v18" />
+          </svg>
+        )}
+      </Button>
+    );
+  },
+);
 
 /**
  * A thin strip on the sidebar's inner edge that toggles it on click, like many desktop apps.
  * Place it as the last child of `Sidebar`. Hidden on mobile.
  */
-export const SidebarRail = forwardRef<HTMLButtonElement, ComponentProps<'button'>>(function SidebarRail(
-  { className, ...props },
-  ref,
-) {
+export const SidebarRail = forwardRef<
+  HTMLButtonElement,
+  ComponentProps<'button'>
+>(function SidebarRail({ className, ...props }, ref) {
   const { toggle, open } = useSidebar();
   const { side } = useContext(SidebarConfigContext);
   return (
@@ -711,21 +796,20 @@ export const SidebarRail = forwardRef<HTMLButtonElement, ComponentProps<'button'
 });
 
 /** The main area next to the sidebar. Put your page header and content in it. */
-export const SidebarInset = forwardRef<HTMLDivElement, ComponentProps<'div'>>(function SidebarInset(
-  { className, ...props },
-  ref,
-) {
-  return (
-    <div
-      ref={ref}
-      data-slot="sidebar-inset"
-      className={cn(
-        'flex min-w-0 flex-1 flex-col bg-background',
-        'md:peer-data-[variant=inset]:my-2 md:peer-data-[variant=inset]:me-2 md:peer-data-[variant=inset]:overflow-hidden md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:border md:peer-data-[variant=inset]:border-sidebar-border md:peer-data-[variant=inset]:shadow-sm',
-        'md:peer-data-[variant=inset]:peer-data-[collapsible=offcanvas]:ms-2',
-        className,
-      )}
-      {...props}
-    />
-  );
-});
+export const SidebarInset = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
+  function SidebarInset({ className, ...props }, ref) {
+    return (
+      <div
+        ref={ref}
+        data-slot="sidebar-inset"
+        className={cn(
+          'flex min-w-0 flex-1 flex-col bg-background',
+          'md:peer-data-[variant=inset]:my-2 md:peer-data-[variant=inset]:me-2 md:peer-data-[variant=inset]:overflow-hidden md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:border md:peer-data-[variant=inset]:border-sidebar-border md:peer-data-[variant=inset]:shadow-sm',
+          'md:peer-data-[variant=inset]:peer-data-[collapsible=offcanvas]:ms-2',
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);

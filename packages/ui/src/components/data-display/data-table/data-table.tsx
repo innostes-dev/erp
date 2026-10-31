@@ -65,7 +65,8 @@ export interface DataTableColumn<TRow> {
 }
 
 /** Inner parts of a `DataTable`, for `classNames`. */
-export type DataTableSlot = 'wrapper' | 'table' | 'header' | 'headerCell' | 'row' | 'cell' | 'footer';
+export type DataTableSlot =
+  'wrapper' | 'table' | 'header' | 'headerCell' | 'row' | 'cell' | 'footer';
 
 export interface DataTableProps<TRow> {
   /** The rows to show. With client-side pagination, pass all rows. */
@@ -290,7 +291,11 @@ function DataTableImpl<TRow>(
     >
       <div
         data-slot="data-table-wrapper"
-        className={cn('overflow-hidden rounded-lg border border-border', stack && '@max-2xl:border-0', classNames?.wrapper)}
+        className={cn(
+          'overflow-hidden rounded-lg border border-border',
+          stack && '@max-2xl:border-0',
+          classNames?.wrapper,
+        )}
       >
         <Table
           aria-label={ariaLabel}
@@ -369,7 +374,11 @@ function DataTableImpl<TRow>(
               })}
             </TableRow>
           </TableHeader>
-          <TableBody className={cn(stack && '@max-2xl:flex @max-2xl:flex-col @max-2xl:gap-2')}>
+          <TableBody
+            className={cn(
+              stack && '@max-2xl:flex @max-2xl:flex-col @max-2xl:gap-2',
+            )}
+          >
             {loading ? (
               Array.from({ length: loadingRowCount }, (_, i) => (
                 <TableRow key={`loading-${i}`} className="hover:bg-transparent">
@@ -403,7 +412,11 @@ function DataTableImpl<TRow>(
                     key={id}
                     data-state={isSelected ? 'selected' : undefined}
                     onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={cn(onRowClick && 'cursor-pointer', stack && stackRow, classNames?.row)}
+                    className={cn(
+                      onRowClick && 'cursor-pointer',
+                      stack && stackRow,
+                      classNames?.row,
+                    )}
                   >
                     {selectable && (
                       <TableCell
@@ -425,7 +438,12 @@ function DataTableImpl<TRow>(
                     {columns.map((column) => (
                       <TableCell
                         key={column.id}
-                        data-label={column.label ?? (typeof column.header === 'string' ? column.header : column.id)}
+                        data-label={
+                          column.label ??
+                          (typeof column.header === 'string'
+                            ? column.header
+                            : column.id)
+                        }
                         className={cn(
                           alignClass[column.align ?? 'start'],
                           column.align === 'end' && 'tabular-nums',
@@ -450,7 +468,10 @@ function DataTableImpl<TRow>(
       {(paginated || (selectable && selected.length > 0)) && (
         <div
           data-slot="data-table-footer"
-          className={cn('flex flex-col items-center justify-between gap-3 text-sm text-muted-foreground @md:flex-row', classNames?.footer)}
+          className={cn(
+            'flex flex-col items-center justify-between gap-3 text-sm text-muted-foreground @md:flex-row',
+            classNames?.footer,
+          )}
         >
           <div aria-live="polite">
             {selectable && selected.length > 0

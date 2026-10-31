@@ -16,8 +16,16 @@ import {
 describe('formatRelativeTime', () => {
   const now = new Date(2026, 9, 25, 12, 0);
   it('formats recent and older dates', () => {
-    expect(formatRelativeTime(new Date(2026, 9, 25, 11, 58), { now, locale: 'en' })).toBe('2 min. ago');
-    expect(formatRelativeTime(new Date(2026, 9, 24, 12, 0), { now, locale: 'en', style: 'long' })).toBe('yesterday');
+    expect(
+      formatRelativeTime(new Date(2026, 9, 25, 11, 58), { now, locale: 'en' }),
+    ).toBe('2 min. ago');
+    expect(
+      formatRelativeTime(new Date(2026, 9, 24, 12, 0), {
+        now,
+        locale: 'en',
+        style: 'long',
+      }),
+    ).toBe('yesterday');
     expect(formatRelativeTime('Last week', { now })).toBe('Last week');
   });
 });
@@ -28,11 +36,20 @@ describe('EntityList', () => {
     render(
       <EntityList
         onItemClick={onItemClick}
-        items={[{ id: '1', title: 'Sravani Reddy', subtitle: 'UI/UX Designer', meta: '15 Apr' }]}
+        items={[
+          {
+            id: '1',
+            title: 'Sravani Reddy',
+            subtitle: 'UI/UX Designer',
+            meta: '15 Apr',
+          },
+        ]}
       />,
     );
     expect(screen.getByText('SR')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /Sravani Reddy/ }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /Sravani Reddy/ }),
+    );
     expect(onItemClick).toHaveBeenCalled();
   });
 
@@ -44,19 +61,26 @@ describe('EntityList', () => {
 
 describe('ActivityFeed', () => {
   it('groups by day with machine-readable times', () => {
-    const now = new Date("2026-10-26T12:00:00Z");
+    const now = new Date('2026-10-26T12:00:00Z');
     const { container } = render(
       <ActivityFeed
         groupByDay
-        locale="en" now={now}
+        locale="en"
+        now={now}
         items={[
           { id: '1', title: 'New employee joined', time: now },
-          { id: '2', title: 'Document uploaded', time: new Date(now.getTime() - 24 * 3_600_000) },
+          {
+            id: '2',
+            title: 'Document uploaded',
+            time: new Date(now.getTime() - 24 * 3_600_000),
+          },
         ]}
       />,
     );
     expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Yesterday' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Yesterday' }),
+    ).toBeInTheDocument();
     expect(container.querySelectorAll('time[datetime]')).toHaveLength(2);
   });
 });
@@ -67,21 +91,40 @@ describe('ActionList', () => {
     render(
       <ActionList
         items={[
-          { id: '1', title: 'Approve leave', action: { label: 'Review', onClick } },
-          { id: '2', title: 'Onboarding', action: { label: 'View', href: '/onboarding' } },
+          {
+            id: '1',
+            title: 'Approve leave',
+            action: { label: 'Review', onClick },
+          },
+          {
+            id: '2',
+            title: 'Onboarding',
+            action: { label: 'View', href: '/onboarding' },
+          },
         ]}
       />,
     );
     await userEvent.click(screen.getByRole('button', { name: 'Review' }));
     expect(onClick).toHaveBeenCalled();
-    expect(screen.getByRole('link', { name: 'View' })).toHaveAttribute('href', '/onboarding');
+    expect(screen.getByRole('link', { name: 'View' })).toHaveAttribute(
+      'href',
+      '/onboarding',
+    );
   });
 });
 
 describe('WelcomeBanner and QuickActions', () => {
   it('renders the greeting as a heading', () => {
-    render(<WelcomeBanner eyebrow="April 2025" title="Welcome back, Arun" quote="Great people build great companies." />);
-    expect(screen.getByRole('heading', { name: 'Welcome back, Arun' })).toBeInTheDocument();
+    render(
+      <WelcomeBanner
+        eyebrow="April 2025"
+        title="Welcome back, Arun"
+        quote="Great people build great companies."
+      />,
+    );
+    expect(
+      screen.getByRole('heading', { name: 'Welcome back, Arun' }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Great people/)).toBeInTheDocument();
   });
 
@@ -89,21 +132,40 @@ describe('WelcomeBanner and QuickActions', () => {
     render(
       <QuickActions
         items={[
-          { id: 'a', label: 'New invoice', icon: <span />, href: '/invoices/new' },
+          {
+            id: 'a',
+            label: 'New invoice',
+            icon: <span />,
+            href: '/invoices/new',
+          },
           { id: 'b', label: 'Add employee', icon: <span />, onClick: () => {} },
         ]}
       />,
     );
-    expect(screen.getByRole('link', { name: 'New invoice' })).toHaveAttribute('href', '/invoices/new');
-    expect(screen.getByRole('button', { name: 'Add employee' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'New invoice' })).toHaveAttribute(
+      'href',
+      '/invoices/new',
+    );
+    expect(
+      screen.getByRole('button', { name: 'Add employee' }),
+    ).toBeInTheDocument();
   });
 });
 
 describe('customisation hooks', () => {
   it('applies classNames to MetricCard parts, after the defaults', () => {
-    render(<MetricCard label="Revenue" value="€1" classNames={{ value: 'text-primary', label: 'uppercase' }} />);
+    render(
+      <MetricCard
+        label="Revenue"
+        value="€1"
+        classNames={{ value: 'text-primary', label: 'uppercase' }}
+      />,
+    );
     expect(screen.getByText('€1')).toHaveClass('text-primary');
-    expect(screen.getByText('€1')).toHaveAttribute('data-slot', 'metric-card-value');
+    expect(screen.getByText('€1')).toHaveAttribute(
+      'data-slot',
+      'metric-card-value',
+    );
     expect(screen.getByText('Revenue')).toHaveClass('uppercase');
   });
 
@@ -112,11 +174,24 @@ describe('customisation hooks', () => {
       id: string;
       name: string;
     }
-    const columns: DataTableColumn<Row>[] = [{ id: 'name', header: 'Name', accessor: (r) => r.name }];
+    const columns: DataTableColumn<Row>[] = [
+      { id: 'name', header: 'Name', accessor: (r) => r.name },
+    ];
     const { container } = render(
-      <DataTable aria-label="People" responsive="stack" data={[{ id: '1', name: 'Ada' }]} columns={columns} getRowId={(r) => r.id} />,
+      <DataTable
+        aria-label="People"
+        responsive="stack"
+        data={[{ id: '1', name: 'Ada' }]}
+        columns={columns}
+        getRowId={(r) => r.id}
+      />,
     );
-    expect(container.querySelector('[data-slot=data-table]')).toHaveAttribute('data-responsive', 'stack');
-    expect(within(screen.getByRole('table')).getByText('Ada').closest('td')).toHaveAttribute('data-label', 'Name');
+    expect(container.querySelector('[data-slot=data-table]')).toHaveAttribute(
+      'data-responsive',
+      'stack',
+    );
+    expect(
+      within(screen.getByRole('table')).getByText('Ada').closest('td'),
+    ).toHaveAttribute('data-label', 'Name');
   });
 });

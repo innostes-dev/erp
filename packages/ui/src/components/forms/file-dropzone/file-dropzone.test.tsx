@@ -18,7 +18,9 @@ describe('file helpers', () => {
     expect(fileMatchesAccept(pdf, '.pdf')).toBe(true);
     expect(fileMatchesAccept(pdf, 'application/pdf')).toBe(true);
     expect(fileMatchesAccept(pdf, 'image/*')).toBe(false);
-    expect(fileMatchesAccept(file('x.png', 'image/png'), 'image/*, .pdf')).toBe(true);
+    expect(fileMatchesAccept(file('x.png', 'image/png'), 'image/*, .pdf')).toBe(
+      true,
+    );
     expect(fileMatchesAccept(pdf, undefined)).toBe(true);
   });
 
@@ -33,8 +35,12 @@ describe('FileDropzone', () => {
   it('adds picked files and lists them with a remove button', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
-    const { container } = render(<FileDropzone name="docs" onValueChange={onValueChange} />);
-    const input = container.querySelector('input[type=file]') as HTMLInputElement;
+    const { container } = render(
+      <FileDropzone name="docs" onValueChange={onValueChange} />,
+    );
+    const input = container.querySelector(
+      'input[type=file]',
+    ) as HTMLInputElement;
     const a = file('a.pdf', 'application/pdf');
     await user.upload(input, [a]);
     expect(onValueChange).toHaveBeenLastCalledWith([a]);
@@ -69,7 +75,9 @@ describe('FileDropzone', () => {
       { file: img, reasons: ['type'] },
       { file: extra, reasons: ['count'] },
     ]);
-    expect(screen.getByRole('alert')).toHaveTextContent('big.pdf: file too large');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'big.pdf: file too large',
+    );
   });
 
   it('replaces the file when multiple is off', () => {

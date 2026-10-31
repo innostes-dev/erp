@@ -22,15 +22,15 @@ export type FormProps = BaseForm.Props;
  * </Form>
  */
 export const Form = forwardRef<HTMLFormElement, FormProps>(function Form(
-  { className, ...props },
-  ref,
+    { className, ...props },
+    ref,
 ) {
-  return (
-    <BaseForm
-      ref={ref}
-      data-slot="form"
-      className={mergeClassName('flex flex-col gap-5', className)}
-      {...props}
-    />
-  );
+    return (
+        <BaseForm
+            ref={ref}
+            data-slot="form"
+            className={mergeClassName('flex flex-col gap-5', className)}
+            {...props}
+        />
+    );
 });

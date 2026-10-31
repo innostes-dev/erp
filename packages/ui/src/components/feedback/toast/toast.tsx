@@ -228,7 +228,13 @@ function ToastList({ closeLabel }: { closeLabel?: string }) {
  */
 export const Toaster = forwardRef<HTMLDivElement, ToasterProps>(
   function Toaster(
-    { position = 'bottom-right', limit = 3, timeout = 5000, closeLabel, className },
+    {
+      position = 'bottom-right',
+      limit = 3,
+      timeout = 5000,
+      closeLabel,
+      className,
+    },
     ref,
   ) {
     return (

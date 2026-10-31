@@ -1,13 +1,21 @@
 'use client';
 
-import { forwardRef, useMemo, type ComponentProps, type ReactNode } from 'react';
+import {
+  forwardRef,
+  useMemo,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import { Popover as BasePopover } from '@base-ui/react/popover';
 import { cn } from '../../lib/cn';
 import { ArrowDownIcon } from '../../lib/icons';
 import { formatRelativeTime } from '../../lib/relative-time';
 import { popupSurface } from '../../lib/styles';
 import type { SlotClassNames } from '../../lib/slots';
-import { IconTile, type IconTileTone } from '../../components/data-display/icon-tile/icon-tile';
+import {
+  IconTile,
+  type IconTileTone,
+} from '../../components/data-display/icon-tile/icon-tile';
 
 /** One notification. */
 export interface NotificationItem {
@@ -31,9 +39,13 @@ export interface NotificationItem {
   href?: string;
 }
 
-export type NotificationListSlot = 'root' | 'item' | 'title' | 'description' | 'time' | 'empty';
+export type NotificationListSlot =
+  'root' | 'item' | 'title' | 'description' | 'time' | 'empty';
 
-export interface NotificationListProps extends Omit<ComponentProps<'ul'>, 'children'> {
+export interface NotificationListProps extends Omit<
+  ComponentProps<'ul'>,
+  'children'
+> {
   /** The notifications, newest first. */
   items: readonly NotificationItem[];
   /** Called when a notification is clicked (e.g. to mark it read or navigate). */
@@ -53,41 +65,88 @@ export interface NotificationListProps extends Omit<ComponentProps<'ul'>, 'child
  * @example
  * <NotificationList items={notifications} onItemClick={(n) => markRead(n.id)} />
  */
-export const NotificationList = forwardRef<HTMLUListElement, NotificationListProps>(function NotificationList(
-  { className, items, onItemClick, emptyText = "You're all caught up.", locale, classNames, ...props },
+export const NotificationList = forwardRef<
+  HTMLUListElement,
+  NotificationListProps
+>(function NotificationList(
+  {
+    className,
+    items,
+    onItemClick,
+    emptyText = "You're all caught up.",
+    locale,
+    classNames,
+    ...props
+  },
   ref,
 ) {
   if (items.length === 0) {
     return (
-      <p data-slot="notification-list-empty" className={cn('py-8 text-center text-sm text-muted-foreground', classNames?.empty)}>
+      <p
+        data-slot="notification-list-empty"
+        className={cn(
+          'py-8 text-center text-sm text-muted-foreground',
+          classNames?.empty,
+        )}
+      >
         {emptyText}
       </p>
     );
   }
   return (
-    <ul ref={ref} data-slot="notification-list" className={cn('flex flex-col', classNames?.root, className)} {...props}>
+    <ul
+      ref={ref}
+      data-slot="notification-list"
+      className={cn('flex flex-col', classNames?.root, className)}
+      {...props}
+    >
       {items.map((item) => {
         const unread = !item.read;
         const body = (
           <>
             {item.avatar ?? (
-              <IconTile tone={item.tone ?? 'primary'} size="sm" className="size-9">
+              <IconTile
+                tone={item.tone ?? 'primary'}
+                size="sm"
+                className="size-9"
+              >
                 {item.icon}
               </IconTile>
             )}
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span data-slot="notification-title" className={cn('text-sm', unread ? 'font-semibold' : 'font-medium text-foreground/90', classNames?.title)}>
+              <span
+                data-slot="notification-title"
+                className={cn(
+                  'text-sm',
+                  unread ? 'font-semibold' : 'font-medium text-foreground/90',
+                  classNames?.title,
+                )}
+              >
                 {item.title}
               </span>
               {item.description && (
-                <span data-slot="notification-description" className={cn('text-xs text-muted-foreground', classNames?.description)}>
+                <span
+                  data-slot="notification-description"
+                  className={cn(
+                    'text-xs text-muted-foreground',
+                    classNames?.description,
+                  )}
+                >
                   {item.description}
                 </span>
               )}
               {item.time && (
-                <span data-slot="notification-time" className={cn('text-xs text-muted-foreground', classNames?.time)}>
+                <span
+                  data-slot="notification-time"
+                  className={cn(
+                    'text-xs text-muted-foreground',
+                    classNames?.time,
+                  )}
+                >
                   {item.time instanceof Date ? (
-                    <time dateTime={item.time.toISOString()}>{formatRelativeTime(item.time, { locale })}</time>
+                    <time dateTime={item.time.toISOString()}>
+                      {formatRelativeTime(item.time, { locale })}
+                    </time>
                   ) : (
                     item.time
                   )}
@@ -103,18 +162,31 @@ export const NotificationList = forwardRef<HTMLUListElement, NotificationListPro
         );
         const itemClass = cn(
           'flex w-full items-start gap-3 rounded-lg p-2.5 text-start transition-colors outline-none',
-          (item.href || onItemClick) && 'cursor-pointer hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring',
+          (item.href || onItemClick) &&
+            'cursor-pointer hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring',
           unread && 'bg-primary/[0.03]',
           classNames?.item,
         );
         return (
-          <li key={item.id} data-slot="notification-item" data-unread={unread ? '' : undefined}>
+          <li
+            key={item.id}
+            data-slot="notification-item"
+            data-unread={unread ? '' : undefined}
+          >
             {item.href ? (
-              <a href={item.href} className={itemClass} onClick={() => onItemClick?.(item)}>
+              <a
+                href={item.href}
+                className={itemClass}
+                onClick={() => onItemClick?.(item)}
+              >
                 {body}
               </a>
             ) : onItemClick ? (
-              <button type="button" className={itemClass} onClick={() => onItemClick(item)}>
+              <button
+                type="button"
+                className={itemClass}
+                onClick={() => onItemClick(item)}
+              >
                 {body}
               </button>
             ) : (
@@ -127,7 +199,8 @@ export const NotificationList = forwardRef<HTMLUListElement, NotificationListPro
   );
 });
 
-export type NotificationBellSlot = 'trigger' | 'badge' | 'content' | 'header' | 'footer';
+export type NotificationBellSlot =
+  'trigger' | 'badge' | 'content' | 'header' | 'footer';
 
 export interface NotificationBellProps {
   /** The notifications, newest first. */
@@ -153,7 +226,11 @@ export interface NotificationBellProps {
   /** Classes for inner parts. */
   classNames?: SlotClassNames<NotificationBellSlot>;
   /** Labels, for translation. */
-  labels?: { trigger?: (unread: number) => string; markAllRead?: string; viewAll?: string };
+  labels?: {
+    trigger?: (unread: number) => string;
+    markAllRead?: string;
+    viewAll?: string;
+  };
 }
 
 /**
@@ -162,7 +239,10 @@ export interface NotificationBellProps {
  * @example
  * <NotificationBell items={notifications} onMarkAllRead={markAllRead} viewAll={{ href: '/notifications' }} />
  */
-export const NotificationBell = forwardRef<HTMLButtonElement, NotificationBellProps>(function NotificationBell(
+export const NotificationBell = forwardRef<
+  HTMLButtonElement,
+  NotificationBellProps
+>(function NotificationBell(
   {
     items,
     unreadCount,
@@ -179,8 +259,13 @@ export const NotificationBell = forwardRef<HTMLButtonElement, NotificationBellPr
   },
   ref,
 ) {
-  const unread = useMemo(() => unreadCount ?? items.filter((i) => !i.read).length, [items, unreadCount]);
-  const triggerLabel = labels?.trigger?.(unread) ?? (unread > 0 ? `Notifications, ${unread} unread` : 'Notifications');
+  const unread = useMemo(
+    () => unreadCount ?? items.filter((i) => !i.read).length,
+    [items, unreadCount],
+  );
+  const triggerLabel =
+    labels?.trigger?.(unread) ??
+    (unread > 0 ? `Notifications, ${unread} unread` : 'Notifications');
 
   return (
     <BasePopover.Root>
@@ -196,7 +281,15 @@ export const NotificationBell = forwardRef<HTMLButtonElement, NotificationBellPr
         )}
       >
         {icon ?? (
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M10.268 21a2 2 0 0 0 3.464 0" />
             <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
           </svg>
@@ -217,29 +310,66 @@ export const NotificationBell = forwardRef<HTMLButtonElement, NotificationBellPr
         <BasePopover.Positioner className="z-50" align={align} sideOffset={6}>
           <BasePopover.Popup
             data-slot="notification-bell-content"
-            className={cn(popupSurface, 'flex max-h-[min(32rem,var(--available-height))] w-[min(24rem,calc(100vw-1rem))] flex-col', classNames?.content)}
+            className={cn(
+              popupSurface,
+              'flex max-h-[min(32rem,var(--available-height))] w-[min(24rem,calc(100vw-1rem))] flex-col',
+              classNames?.content,
+            )}
           >
-            <div className={cn('flex items-center justify-between gap-2 border-b border-border px-4 py-3', classNames?.header)}>
-              <BasePopover.Title className="text-sm font-semibold">{title}</BasePopover.Title>
+            <div
+              className={cn(
+                'flex items-center justify-between gap-2 border-b border-border px-4 py-3',
+                classNames?.header,
+              )}
+            >
+              <BasePopover.Title className="text-sm font-semibold">
+                {title}
+              </BasePopover.Title>
               {onMarkAllRead && unread > 0 && (
-                <button type="button" onClick={onMarkAllRead} className="cursor-pointer text-xs font-medium text-primary hover:underline">
+                <button
+                  type="button"
+                  onClick={onMarkAllRead}
+                  className="cursor-pointer text-xs font-medium text-primary hover:underline"
+                >
                   {labels?.markAllRead ?? 'Mark all as read'}
                 </button>
               )}
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
-              <NotificationList items={items} onItemClick={onItemClick} emptyText={emptyText} locale={locale} />
+              <NotificationList
+                items={items}
+                onItemClick={onItemClick}
+                emptyText={emptyText}
+                locale={locale}
+              />
             </div>
             {viewAll && (
-              <div className={cn('border-t border-border p-2 text-center', classNames?.footer)}>
+              <div
+                className={cn(
+                  'border-t border-border p-2 text-center',
+                  classNames?.footer,
+                )}
+              >
                 {viewAll.href ? (
-                  <a href={viewAll.href} onClick={viewAll.onClick} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-                    {viewAll.label ?? labels?.viewAll ?? 'View all notifications'}
+                  <a
+                    href={viewAll.href}
+                    onClick={viewAll.onClick}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  >
+                    {viewAll.label ??
+                      labels?.viewAll ??
+                      'View all notifications'}
                     <ArrowDownIcon className="size-3.5 -rotate-90 rtl:rotate-90" />
                   </a>
                 ) : (
-                  <button type="button" onClick={viewAll.onClick} className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-primary hover:underline">
-                    {viewAll.label ?? labels?.viewAll ?? 'View all notifications'}
+                  <button
+                    type="button"
+                    onClick={viewAll.onClick}
+                    className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  >
+                    {viewAll.label ??
+                      labels?.viewAll ??
+                      'View all notifications'}
                     <ArrowDownIcon className="size-3.5 -rotate-90 rtl:rotate-90" />
                   </button>
                 )}

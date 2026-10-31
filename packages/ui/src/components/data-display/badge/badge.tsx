@@ -21,8 +21,7 @@ export const badgeVariants = cva(
           'bg-amber-500/10 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 ring-1 ring-amber-600/20 ring-inset',
         destructive:
           'bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400 ring-1 ring-red-600/20 ring-inset',
-        info:
-          'bg-sky-500/10 text-sky-700 dark:bg-sky-500/15 dark:text-sky-400 ring-1 ring-sky-600/20 ring-inset',
+        info: 'bg-sky-500/10 text-sky-700 dark:bg-sky-500/15 dark:text-sky-400 ring-1 ring-sky-600/20 ring-inset',
       },
       size: {
         sm: 'h-5 px-1.5 text-[11px]',

@@ -1,6 +1,11 @@
 'use client';
 
-import { forwardRef, useState, type CSSProperties, type ReactNode } from 'react';
+import {
+  forwardRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { cn } from '../lib/cn';
 import type { IconTileTone } from '../components/data-display/icon-tile/icon-tile';
 
@@ -35,10 +40,15 @@ const tones = new Set([
 ]);
 
 /** Turns a `ChartColor` into a CSS colour that follows the theme (and dark mode). @internal */
-export function resolveChartColor(color: ChartColor | undefined, index: number): string {
+export function resolveChartColor(
+  color: ChartColor | undefined,
+  index: number,
+): string {
   const value = color ?? `chart-${(index % 8) + 1}`;
   if (!tones.has(value)) return value;
-  return value === 'neutral' ? 'var(--color-muted-foreground)' : `var(--color-${value})`;
+  return value === 'neutral'
+    ? 'var(--color-muted-foreground)'
+    : `var(--color-${value})`;
 }
 
 /** Default number format for chart values. @internal */
@@ -53,7 +63,10 @@ export const axisProps = {
   tickLine: false,
   axisLine: false,
 } as const;
-export const gridProps = { stroke: 'var(--color-border)', strokeDasharray: '3 3' } as const;
+export const gridProps = {
+  stroke: 'var(--color-border)',
+  strokeDasharray: '3 3',
+} as const;
 
 /** Tracks which series are hidden through the legend. @internal */
 export function useHiddenSeries() {
@@ -113,19 +126,34 @@ export function ChartTooltipContent({
   return (
     <div
       data-slot="chart-tooltip"
-      className={cn('min-w-32 rounded-lg border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-lg', className)}
+      className={cn(
+        'min-w-32 rounded-lg border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-lg',
+        className,
+      )}
     >
       {!hideLabel && label !== undefined && label !== '' && (
-        <div className="mb-1.5 font-medium">{labelFormatter ? labelFormatter(label) : String(label)}</div>
+        <div className="mb-1.5 font-medium">
+          {labelFormatter ? labelFormatter(label) : String(label)}
+        </div>
       )}
       <div className="flex flex-col gap-1">
         {payload.map((entry, i) => {
           const s = series?.find((x) => x.key === entry.dataKey);
-          const value = Array.isArray(entry.value) ? entry.value.join(' – ') : entry.value;
+          const value = Array.isArray(entry.value)
+            ? entry.value.join(' – ')
+            : entry.value;
           return (
-            <div key={`${entry.dataKey ?? i}`} className="flex items-center gap-2">
-              <span className="size-2.5 shrink-0 rounded-xs" style={{ background: entry.color }} />
-              <span className="text-muted-foreground">{s?.label ?? entry.name}</span>
+            <div
+              key={`${entry.dataKey ?? i}`}
+              className="flex items-center gap-2"
+            >
+              <span
+                className="size-2.5 shrink-0 rounded-xs"
+                style={{ background: entry.color }}
+              />
+              <span className="text-muted-foreground">
+                {s?.label ?? entry.name}
+              </span>
               <span className="ms-auto ps-3 font-medium tabular-nums">
                 {typeof value === 'number' ? valueFormatter(value) : value}
               </span>
@@ -151,7 +179,13 @@ export interface ChartLegendProps {
 }
 
 /** Legend in the innostes UI style; items can toggle their series. */
-export function ChartLegend({ series, hidden, onToggle, orientation = 'row', className }: ChartLegendProps) {
+export function ChartLegend({
+  series,
+  hidden,
+  onToggle,
+  orientation = 'row',
+  className,
+}: ChartLegendProps) {
   return (
     <ul
       data-slot="chart-legend"
@@ -165,13 +199,27 @@ export function ChartLegend({ series, hidden, onToggle, orientation = 'row', cla
         const off = hidden?.has(s.key);
         const inner = (
           <>
-            <span className="size-2.5 shrink-0 rounded-full" style={{ background: s.color, opacity: off ? 0.35 : 1 }} />
-            <span className={cn('text-muted-foreground', off && 'line-through')}>{s.label}</span>
-            {s.value !== undefined && <span className="ms-auto ps-4 font-semibold text-foreground tabular-nums">{s.value}</span>}
+            <span
+              className="size-2.5 shrink-0 rounded-full"
+              style={{ background: s.color, opacity: off ? 0.35 : 1 }}
+            />
+            <span
+              className={cn('text-muted-foreground', off && 'line-through')}
+            >
+              {s.label}
+            </span>
+            {s.value !== undefined && (
+              <span className="ms-auto ps-4 font-semibold text-foreground tabular-nums">
+                {s.value}
+              </span>
+            )}
           </>
         );
         return (
-          <li key={s.key} className={orientation === 'column' ? 'w-full' : undefined}>
+          <li
+            key={s.key}
+            className={orientation === 'column' ? 'w-full' : undefined}
+          >
             {onToggle ? (
               <button
                 type="button"
@@ -212,43 +260,51 @@ export interface ChartFrameProps {
  * Wraps a chart in a `<figure>` with its legend and a visually hidden data table, so screen
  * readers get the numbers and not just "graphic". @internal
  */
-export const ChartFrame = forwardRef<HTMLElement, ChartFrameProps>(function ChartFrame(
-  { label, height, children, legend, table, className, style },
-  ref,
-) {
-  return (
-    <figure ref={ref} data-slot="chart" aria-label={label} className={cn('m-0 flex w-full min-w-0 flex-col gap-3', className)} style={style}>
-      <div className="w-full min-w-0" style={{ height }}>
-        {children}
-      </div>
-      {legend}
-      <table className="sr-only">
-        <caption>{label}</caption>
-        <thead>
-          <tr>
-            {table.columns.map((c) => (
-              <th key={c} scope="col">
-                {c}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {table.rows.map((row, i) => (
-            <tr key={i}>
-              {row.map((cell, j) =>
-                j === 0 ? (
-                  <th key={j} scope="row">
-                    {cell}
-                  </th>
-                ) : (
-                  <td key={j}>{cell}</td>
-                ),
-              )}
+export const ChartFrame = forwardRef<HTMLElement, ChartFrameProps>(
+  function ChartFrame(
+    { label, height, children, legend, table, className, style },
+    ref,
+  ) {
+    return (
+      <figure
+        ref={ref}
+        data-slot="chart"
+        aria-label={label}
+        className={cn('m-0 flex w-full min-w-0 flex-col gap-3', className)}
+        style={style}
+      >
+        <div className="w-full min-w-0" style={{ height }}>
+          {children}
+        </div>
+        {legend}
+        <table className="sr-only">
+          <caption>{label}</caption>
+          <thead>
+            <tr>
+              {table.columns.map((c) => (
+                <th key={c} scope="col">
+                  {c}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </figure>
-  );
-});
+          </thead>
+          <tbody>
+            {table.rows.map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) =>
+                  j === 0 ? (
+                    <th key={j} scope="row">
+                      {cell}
+                    </th>
+                  ) : (
+                    <td key={j}>{cell}</td>
+                  ),
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </figure>
+    );
+  },
+);

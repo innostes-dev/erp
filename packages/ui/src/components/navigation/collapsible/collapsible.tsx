@@ -15,40 +15,40 @@ import { mergeClassName } from '../../../lib/merge-class-name';
  * </Collapsible>
  */
 export const Collapsible = forwardRef<
-  HTMLDivElement,
-  BaseCollapsible.Root.Props
+    HTMLDivElement,
+    BaseCollapsible.Root.Props
 >(function Collapsible(props, ref) {
-  return <BaseCollapsible.Root ref={ref} data-slot="collapsible" {...props} />;
+    return <BaseCollapsible.Root ref={ref} data-slot="collapsible" {...props} />;
 });
 
 /** Toggles the panel. Gets `data-panel-open` while open, for styling (e.g. rotating an icon). */
 export const CollapsibleTrigger = forwardRef<
-  HTMLButtonElement,
-  BaseCollapsible.Trigger.Props
+    HTMLButtonElement,
+    BaseCollapsible.Trigger.Props
 >(function CollapsibleTrigger(props, ref) {
-  return (
-    <BaseCollapsible.Trigger
-      ref={ref}
-      data-slot="collapsible-trigger"
-      {...props}
-    />
-  );
+    return (
+        <BaseCollapsible.Trigger
+            ref={ref}
+            data-slot="collapsible-trigger"
+            {...props}
+        />
+    );
 });
 
 /** The content that shows and hides. Animates its height. */
 export const CollapsiblePanel = forwardRef<
-  HTMLDivElement,
-  BaseCollapsible.Panel.Props
+    HTMLDivElement,
+    BaseCollapsible.Panel.Props
 >(function CollapsiblePanel({ className, ...props }, ref) {
-  return (
-    <BaseCollapsible.Panel
-      ref={ref}
-      data-slot="collapsible-panel"
-      className={mergeClassName(
-        'h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0',
-        className,
-      )}
-      {...props}
-    />
-  );
+    return (
+        <BaseCollapsible.Panel
+            ref={ref}
+            data-slot="collapsible-panel"
+            className={mergeClassName(
+                'h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0',
+                className,
+            )}
+            {...props}
+        />
+    );
 });

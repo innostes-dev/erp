@@ -11,20 +11,20 @@ import { useEffect, useState } from 'react';
  * @internal
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
+    const [matches, setMatches] = useState(false);
 
-  useEffect(() => {
-    const mql = window.matchMedia(query);
-    const update = () => setMatches(mql.matches);
-    update();
-    // Safari < 14 only supports the deprecated addListener API.
-    if (mql.addEventListener) {
-      mql.addEventListener('change', update);
-      return () => mql.removeEventListener('change', update);
-    }
-    mql.addListener(update);
-    return () => mql.removeListener(update);
-  }, [query]);
+    useEffect(() => {
+        const mql = window.matchMedia(query);
+        const update = () => setMatches(mql.matches);
+        update();
+        // Safari < 14 only supports the deprecated addListener API.
+        if (mql.addEventListener) {
+            mql.addEventListener('change', update);
+            return () => mql.removeEventListener('change', update);
+        }
+        mql.addListener(update);
+        return () => mql.removeListener(update);
+    }, [query]);
 
-  return matches;
+    return matches;
 }

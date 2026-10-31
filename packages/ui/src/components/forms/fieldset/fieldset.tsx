@@ -15,35 +15,35 @@ import { mergeClassName } from '../../../lib/merge-class-name';
  * </Fieldset>
  */
 export const Fieldset = forwardRef<HTMLElement, BaseFieldset.Root.Props>(
-  function Fieldset({ className, ...props }, ref) {
-    return (
-      <BaseFieldset.Root
-        ref={ref}
-        data-slot="fieldset"
-        className={mergeClassName(
-          'flex min-w-0 flex-col gap-4 border-0 p-0',
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
+    function Fieldset({ className, ...props }, ref) {
+        return (
+            <BaseFieldset.Root
+                ref={ref}
+                data-slot="fieldset"
+                className={mergeClassName(
+                    'flex min-w-0 flex-col gap-4 border-0 p-0',
+                    className,
+                )}
+                {...props}
+            />
+        );
+    },
 );
 
 /** The heading of a `Fieldset`. */
 export const FieldsetLegend = forwardRef<
-  HTMLDivElement,
-  BaseFieldset.Legend.Props
+    HTMLDivElement,
+    BaseFieldset.Legend.Props
 >(function FieldsetLegend({ className, ...props }, ref) {
-  return (
-    <BaseFieldset.Legend
-      ref={ref}
-      data-slot="fieldset-legend"
-      className={mergeClassName(
-        'text-base font-semibold text-foreground',
-        className,
-      )}
-      {...props}
-    />
-  );
+    return (
+        <BaseFieldset.Legend
+            ref={ref}
+            data-slot="fieldset-legend"
+            className={mergeClassName(
+                'text-base font-semibold text-foreground',
+                className,
+            )}
+            {...props}
+        />
+    );
 });

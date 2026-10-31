@@ -18,49 +18,49 @@ export type RadioGroupProps = BaseRadioGroup.Props;
  * </RadioGroup>
  */
 export const RadioGroup = forwardRef<HTMLDivElement, RadioGroupProps>(
-  function RadioGroup({ className, ...props }, ref) {
-    return (
-      <BaseRadioGroup
-        ref={ref}
-        data-slot="radio-group"
-        className={mergeClassName(
-          'flex flex-col items-start gap-3 data-[orientation=horizontal]:flex-row',
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
+    function RadioGroup({ className, ...props }, ref) {
+        return (
+            <BaseRadioGroup
+                ref={ref}
+                data-slot="radio-group"
+                className={mergeClassName(
+                    'flex flex-col items-start gap-3 data-[orientation=horizontal]:flex-row',
+                    className,
+                )}
+                {...props}
+            />
+        );
+    },
 );
 
 export type RadioProps = BaseRadio.Root.Props;
 
 /** One option in a `RadioGroup`. */
 export const Radio = forwardRef<HTMLElement, RadioProps>(function Radio(
-  { className, ...props },
-  ref,
+    { className, ...props },
+    ref,
 ) {
-  return (
-    <BaseRadio.Root
-      ref={ref}
-      data-slot="radio"
-      className={mergeClassName(
-        [
-          'peer inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs',
-          'cursor-pointer transition-colors outline-none',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-          'data-checked:border-primary data-checked:bg-primary',
-          'data-invalid:border-destructive',
-          'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-        ].join(' '),
-        className,
-      )}
-      {...props}
-    >
-      <BaseRadio.Indicator
-        data-slot="radio-indicator"
-        className="size-1.5 rounded-full bg-primary-foreground data-unchecked:hidden"
-      />
-    </BaseRadio.Root>
-  );
+    return (
+        <BaseRadio.Root
+            ref={ref}
+            data-slot="radio"
+            className={mergeClassName(
+                [
+                    'peer inline-flex size-4 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs',
+                    'cursor-pointer transition-colors outline-none',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                    'data-checked:border-primary data-checked:bg-primary',
+                    'data-invalid:border-destructive',
+                    'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+                ].join(' '),
+                className,
+            )}
+            {...props}
+        >
+            <BaseRadio.Indicator
+                data-slot="radio-indicator"
+                className="size-1.5 rounded-full bg-primary-foreground data-unchecked:hidden"
+            />
+        </BaseRadio.Root>
+    );
 });

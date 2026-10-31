@@ -43,10 +43,10 @@ export const SheetClose = forwardRef<HTMLButtonElement, BaseDialog.Close.Props>(
 const sideClass = {
   right:
     'inset-y-0 end-0 h-full w-[min(28rem,100vw)] border-s data-starting-style:translate-x-full data-ending-style:translate-x-full rtl:data-starting-style:-translate-x-full rtl:data-ending-style:-translate-x-full',
-  end:
-    'inset-y-0 end-0 h-full w-[min(28rem,100vw)] border-s data-starting-style:translate-x-full data-ending-style:translate-x-full rtl:data-starting-style:-translate-x-full rtl:data-ending-style:-translate-x-full',
+  end: 'inset-y-0 end-0 h-full w-[min(28rem,100vw)] border-s data-starting-style:translate-x-full data-ending-style:translate-x-full rtl:data-starting-style:-translate-x-full rtl:data-ending-style:-translate-x-full',
   left: 'inset-y-0 start-0 h-full w-[min(28rem,100vw)] border-e data-starting-style:-translate-x-full data-ending-style:-translate-x-full rtl:data-starting-style:translate-x-full rtl:data-ending-style:translate-x-full',
-  start: 'inset-y-0 start-0 h-full w-[min(28rem,100vw)] border-e data-starting-style:-translate-x-full data-ending-style:-translate-x-full rtl:data-starting-style:translate-x-full rtl:data-ending-style:translate-x-full',
+  start:
+    'inset-y-0 start-0 h-full w-[min(28rem,100vw)] border-e data-starting-style:-translate-x-full data-ending-style:-translate-x-full rtl:data-starting-style:translate-x-full rtl:data-ending-style:translate-x-full',
   top: 'inset-x-0 top-0 max-h-[85dvh] border-b data-starting-style:-translate-y-full data-ending-style:-translate-y-full',
   bottom:
     'inset-x-0 bottom-0 max-h-[85dvh] border-t data-starting-style:translate-y-full data-ending-style:translate-y-full',

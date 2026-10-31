@@ -11,7 +11,10 @@ export interface FileRejection {
  * Whether a file matches an `accept` string like the native input's: extensions (`.pdf`),
  * exact MIME types (`application/pdf`) or wildcards (`image/*`).
  */
-export function fileMatchesAccept(file: File, accept: string | undefined): boolean {
+export function fileMatchesAccept(
+  file: File,
+  accept: string | undefined,
+): boolean {
   if (!accept) return true;
   const name = file.name.toLowerCase();
   const type = file.type.toLowerCase();
@@ -33,7 +36,13 @@ export function fileMatchesAccept(file: File, accept: string | undefined): boole
  * formatBytes(1536) // → '1.5 kB'
  */
 export function formatBytes(bytes: number, locale?: string): string {
-  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte'] as const;
+  const units = [
+    'byte',
+    'kilobyte',
+    'megabyte',
+    'gigabyte',
+    'terabyte',
+  ] as const;
   let value = bytes;
   let unit = 0;
   while (value >= 1000 && unit < units.length - 1) {

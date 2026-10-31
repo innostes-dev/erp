@@ -21,7 +21,8 @@ export interface StepperStep {
 }
 
 /** Inner parts of a `Stepper`, for `classNames`. */
-export type StepperSlot = 'list' | 'item' | 'marker' | 'title' | 'description' | 'connector';
+export type StepperSlot =
+  'list' | 'item' | 'marker' | 'title' | 'description' | 'connector';
 
 export interface StepperProps extends Omit<ComponentProps<'nav'>, 'onChange'> {
   /** The steps, in order. */
@@ -105,7 +106,13 @@ export const Stepper = forwardRef<HTMLElement, StepperProps>(function Stepper(
       className={cn(!vertical && '@container', className)}
       {...props}
     >
-      <ol className={cn('flex', vertical ? 'flex-col' : 'w-full items-start', classNames?.list)}>
+      <ol
+        className={cn(
+          'flex',
+          vertical ? 'flex-col' : 'w-full items-start',
+          classNames?.list,
+        )}
+      >
         {steps.map((step, index) => {
           const status: StepStatus =
             step.status ??

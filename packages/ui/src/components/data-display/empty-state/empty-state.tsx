@@ -32,7 +32,16 @@ export interface EmptyStateProps extends Omit<ComponentProps<'div'>, 'title'> {
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
   function EmptyState(
-    { className, icon, title, description, actions, classNames, children, ...props },
+    {
+      className,
+      icon,
+      title,
+      description,
+      actions,
+      classNames,
+      children,
+      ...props
+    },
     ref,
   ) {
     return (
@@ -59,14 +68,20 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         <div className="flex max-w-sm flex-col gap-1.5">
           <h3
             data-slot="empty-state-title"
-            className={cn('text-subheading font-semibold text-foreground', classNames?.title)}
+            className={cn(
+              'text-subheading font-semibold text-foreground',
+              classNames?.title,
+            )}
           >
             {title}
           </h3>
           {description && (
             <p
               data-slot="empty-state-description"
-              className={cn('text-sm text-muted-foreground', classNames?.description)}
+              className={cn(
+                'text-sm text-muted-foreground',
+                classNames?.description,
+              )}
             >
               {description}
             </p>
@@ -75,7 +90,10 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         {actions && (
           <div
             data-slot="empty-state-actions"
-            className={cn('flex flex-wrap items-center justify-center gap-2', classNames?.actions)}
+            className={cn(
+              'flex flex-wrap items-center justify-center gap-2',
+              classNames?.actions,
+            )}
           >
             {actions}
           </div>

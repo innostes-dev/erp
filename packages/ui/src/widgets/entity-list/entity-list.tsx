@@ -3,8 +3,15 @@
 import { forwardRef, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import type { SlotClassNames } from '../../lib/slots';
-import { Avatar, AvatarFallback, AvatarImage } from '../../components/data-display/avatar/avatar';
-import { IconTile, type IconTileTone } from '../../components/data-display/icon-tile/icon-tile';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '../../components/data-display/avatar/avatar';
+import {
+  IconTile,
+  type IconTileTone,
+} from '../../components/data-display/icon-tile/icon-tile';
 
 /** One row of an `EntityList`: a person, company, product or record. */
 export interface EntityListItem {
@@ -32,9 +39,20 @@ export interface EntityListItem {
   href?: string;
 }
 
-export type EntityListSlot = 'root' | 'item' | 'leading' | 'title' | 'subtitle' | 'meta' | 'action' | 'empty';
+export type EntityListSlot =
+  | 'root'
+  | 'item'
+  | 'leading'
+  | 'title'
+  | 'subtitle'
+  | 'meta'
+  | 'action'
+  | 'empty';
 
-export interface EntityListProps extends Omit<ComponentProps<'ul'>, 'children'> {
+export interface EntityListProps extends Omit<
+  ComponentProps<'ul'>,
+  'children'
+> {
   /** The rows. */
   items: readonly EntityListItem[];
   /** Called when a row is clicked. Makes rows buttons (unless they have `href`). */
@@ -86,83 +104,150 @@ const avatarTone: Partial<Record<IconTileTone, string>> = {
  *   <EntityList items={people.map((p) => ({ id: p.id, title: p.name, subtitle: p.role, avatarSrc: p.photo, meta: format(p.birthday) }))} />
  * </WidgetCard>
  */
-export const EntityList = forwardRef<HTMLUListElement, EntityListProps>(function EntityList(
-  { className, items, onItemClick, divided = false, density = 'md', emptyText = 'Nothing to show.', classNames, ...props },
-  ref,
-) {
-  if (items.length === 0) {
-    return <p className={cn('py-6 text-center text-sm text-muted-foreground', classNames?.empty)}>{emptyText}</p>;
-  }
-  return (
-    <ul
-      ref={ref}
-      data-slot="entity-list"
-      className={cn('flex flex-col', divided ? 'divide-y divide-border' : 'gap-1', classNames?.root, className)}
-      {...props}
-    >
-      {items.map((item) => {
-        const leading =
-          item.leading ??
-          (item.icon ? (
-            <IconTile tone={item.tone ?? 'primary'} size={density === 'sm' ? 'sm' : 'md'}>
-              {item.icon}
-            </IconTile>
-          ) : (
-            <Avatar size={density === 'sm' ? 'sm' : 'md'}>
-              {item.avatarSrc && <AvatarImage src={item.avatarSrc} alt="" />}
-              <AvatarFallback className={item.tone ? avatarTone[item.tone] : undefined}>
-                {item.initials ?? initialsOf(item.title)}
-              </AvatarFallback>
-            </Avatar>
-          ));
-        const content = (
-          <>
-            <span data-slot="entity-list-leading" className={cn('flex shrink-0', classNames?.leading)}>
-              {leading}
-            </span>
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span data-slot="entity-list-title" className={cn('truncate text-sm font-medium', classNames?.title)}>
-                {item.title}
+export const EntityList = forwardRef<HTMLUListElement, EntityListProps>(
+  function EntityList(
+    {
+      className,
+      items,
+      onItemClick,
+      divided = false,
+      density = 'md',
+      emptyText = 'Nothing to show.',
+      classNames,
+      ...props
+    },
+    ref,
+  ) {
+    if (items.length === 0) {
+      return (
+        <p
+          className={cn(
+            'py-6 text-center text-sm text-muted-foreground',
+            classNames?.empty,
+          )}
+        >
+          {emptyText}
+        </p>
+      );
+    }
+    return (
+      <ul
+        ref={ref}
+        data-slot="entity-list"
+        className={cn(
+          'flex flex-col',
+          divided ? 'divide-y divide-border' : 'gap-1',
+          classNames?.root,
+          className,
+        )}
+        {...props}
+      >
+        {items.map((item) => {
+          const leading =
+            item.leading ??
+            (item.icon ? (
+              <IconTile
+                tone={item.tone ?? 'primary'}
+                size={density === 'sm' ? 'sm' : 'md'}
+              >
+                {item.icon}
+              </IconTile>
+            ) : (
+              <Avatar size={density === 'sm' ? 'sm' : 'md'}>
+                {item.avatarSrc && <AvatarImage src={item.avatarSrc} alt="" />}
+                <AvatarFallback
+                  className={item.tone ? avatarTone[item.tone] : undefined}
+                >
+                  {item.initials ?? initialsOf(item.title)}
+                </AvatarFallback>
+              </Avatar>
+            ));
+          const content = (
+            <>
+              <span
+                data-slot="entity-list-leading"
+                className={cn('flex shrink-0', classNames?.leading)}
+              >
+                {leading}
               </span>
-              {item.subtitle && (
-                <span data-slot="entity-list-subtitle" className={cn('truncate text-xs text-muted-foreground', classNames?.subtitle)}>
-                  {item.subtitle}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span
+                  data-slot="entity-list-title"
+                  className={cn(
+                    'truncate text-sm font-medium',
+                    classNames?.title,
+                  )}
+                >
+                  {item.title}
+                </span>
+                {item.subtitle && (
+                  <span
+                    data-slot="entity-list-subtitle"
+                    className={cn(
+                      'truncate text-xs text-muted-foreground',
+                      classNames?.subtitle,
+                    )}
+                  >
+                    {item.subtitle}
+                  </span>
+                )}
+              </span>
+              {item.meta && (
+                <span
+                  data-slot="entity-list-meta"
+                  className={cn(
+                    'shrink-0 text-xs text-muted-foreground tabular-nums',
+                    classNames?.meta,
+                  )}
+                >
+                  {item.meta}
                 </span>
               )}
-            </span>
-            {item.meta && (
-              <span data-slot="entity-list-meta" className={cn('shrink-0 text-xs text-muted-foreground tabular-nums', classNames?.meta)}>
-                {item.meta}
-              </span>
-            )}
-          </>
-        );
-        const rowClass = cn(
-          'flex min-w-0 flex-1 items-center gap-3 rounded-lg text-start outline-none',
-          density === 'sm' ? 'py-1.5' : 'py-2',
-          (item.href || onItemClick) && '-mx-2 cursor-pointer px-2 transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring',
-        );
-        return (
-          <li key={item.id} data-slot="entity-list-item" className={cn('flex items-center gap-2', classNames?.item)}>
-            {item.href ? (
-              <a href={item.href} className={rowClass} onClick={() => onItemClick?.(item)}>
-                {content}
-              </a>
-            ) : onItemClick ? (
-              <button type="button" className={rowClass} onClick={() => onItemClick(item)}>
-                {content}
-              </button>
-            ) : (
-              <div className={rowClass}>{content}</div>
-            )}
-            {item.action && (
-              <span data-slot="entity-list-action" className={cn('flex shrink-0', classNames?.action)}>
-                {item.action}
-              </span>
-            )}
-          </li>
-        );
-      })}
-    </ul>
-  );
-});
+            </>
+          );
+          const rowClass = cn(
+            'flex min-w-0 flex-1 items-center gap-3 rounded-lg text-start outline-none',
+            density === 'sm' ? 'py-1.5' : 'py-2',
+            (item.href || onItemClick) &&
+              '-mx-2 cursor-pointer px-2 transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring',
+          );
+          return (
+            <li
+              key={item.id}
+              data-slot="entity-list-item"
+              className={cn('flex items-center gap-2', classNames?.item)}
+            >
+              {item.href ? (
+                <a
+                  href={item.href}
+                  className={rowClass}
+                  onClick={() => onItemClick?.(item)}
+                >
+                  {content}
+                </a>
+              ) : onItemClick ? (
+                <button
+                  type="button"
+                  className={rowClass}
+                  onClick={() => onItemClick(item)}
+                >
+                  {content}
+                </button>
+              ) : (
+                <div className={rowClass}>{content}</div>
+              )}
+              {item.action && (
+                <span
+                  data-slot="entity-list-action"
+                  className={cn('flex shrink-0', classNames?.action)}
+                >
+                  {item.action}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    );
+  },
+);

@@ -1,6 +1,12 @@
 'use client';
 
-import { forwardRef, Fragment, useMemo, type ComponentProps, type ReactNode } from 'react';
+import {
+  forwardRef,
+  Fragment,
+  useMemo,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import { cn } from '../../lib/cn';
 import type { SlotClassNames } from '../../lib/slots';
 import { useControllableState } from '../../lib/use-controllable-state';
@@ -33,10 +39,13 @@ export function permissionKey(resourceId: string, actionId: string): string {
   return `${resourceId}:${actionId}`;
 }
 
-export type PermissionMatrixSlot = 'root' | 'table' | 'groupRow' | 'row' | 'resource' | 'cell';
+export type PermissionMatrixSlot =
+  'root' | 'table' | 'groupRow' | 'row' | 'resource' | 'cell';
 
-export interface PermissionMatrixProps
-  extends Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange'> {
+export interface PermissionMatrixProps extends Omit<
+  ComponentProps<'div'>,
+  'defaultValue' | 'onChange'
+> {
   /** Accessible name of the table, e.g. "Permissions for Accountant". */
   'aria-label': string;
   /** The rows. */
@@ -78,7 +87,10 @@ type ToggleState = { checked: boolean; indeterminate: boolean };
 
 function stateOf(keys: string[], granted: ReadonlySet<string>): ToggleState {
   const on = keys.filter((k) => granted.has(k)).length;
-  return { checked: on > 0 && on === keys.length, indeterminate: on > 0 && on < keys.length };
+  return {
+    checked: on > 0 && on === keys.length,
+    indeterminate: on > 0 && on < keys.length,
+  };
 }
 
 /**
@@ -98,7 +110,10 @@ function stateOf(keys: string[], granted: ReadonlySet<string>): ToggleState {
  *   onValueChange={setGranted}
  * />
  */
-export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps>(function PermissionMatrix(
+export const PermissionMatrix = forwardRef<
+  HTMLDivElement,
+  PermissionMatrixProps
+>(function PermissionMatrix(
   {
     resources,
     actions,
@@ -118,12 +133,21 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
   },
   ref,
 ) {
-  const [list, setList] = useControllableState({ value, defaultValue, onChange: onValueChange });
+  const [list, setList] = useControllableState({
+    value,
+    defaultValue,
+    onChange: onValueChange,
+  });
   const granted = useMemo(() => new Set(list), [list]);
 
-  const applies = (r: PermissionResource, a: PermissionAction) => !r.actions || r.actions.includes(a.id);
-  const rowKeys = (r: PermissionResource) => actions.filter((a) => applies(r, a)).map((a) => permissionKey(r.id, a.id));
-  const columnKeys = (a: PermissionAction) => resources.filter((r) => applies(r, a)).map((r) => permissionKey(r.id, a.id));
+  const applies = (r: PermissionResource, a: PermissionAction) =>
+    !r.actions || r.actions.includes(a.id);
+  const rowKeys = (r: PermissionResource) =>
+    actions.filter((a) => applies(r, a)).map((a) => permissionKey(r.id, a.id));
+  const columnKeys = (a: PermissionAction) =>
+    resources
+      .filter((r) => applies(r, a))
+      .map((r) => permissionKey(r.id, a.id));
 
   const setMany = (keys: string[], on: boolean) => {
     if (readOnly) return;
@@ -172,106 +196,155 @@ export const PermissionMatrix = forwardRef<HTMLDivElement, PermissionMatrixProps
           data-slot="permission-matrix-table"
           className={cn('w-full border-collapse text-sm', classNames?.table)}
         >
-        <thead className={cn('bg-muted/50', stickyHeader && 'sticky top-0 z-20 bg-muted')}>
-          <tr>
-            <th
-              scope="col"
-              className={cn(
-                'px-4 py-2.5 text-start font-medium text-muted-foreground',
-                stickyColumn && 'sticky start-0 z-10 bg-muted/95',
-              )}
-            >
-              {resourceLabel}
-            </th>
-            {actions.map((a) => {
-              const keys = columnKeys(a);
-              const s = stateOf(keys, granted);
-              return (
-                <th key={a.id} scope="col" className="px-3 py-2.5 text-center font-medium text-muted-foreground">
-                  <span className="flex flex-col items-center gap-1.5">
-                    {a.label}
-                    {bulkToggles && !readOnly && keys.length > 0 && (
-                      <Checkbox
-                        aria-label={labels?.mixed && s.indeterminate ? labels.mixed(a.label) : colLabel(a.label)}
-                        checked={s.checked}
-                        indeterminate={s.indeterminate}
-                        onCheckedChange={() => setMany(keys, !s.checked)}
-                      />
-                    )}
-                  </span>
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {groups.map(([group, rows]) => (
-            <Fragment key={group ?? '__none'}>
-              {group && (
-                <tr data-slot="permission-matrix-group-row" className={cn('border-t border-border bg-muted/25', classNames?.groupRow)}>
-                  <th scope="colgroup" colSpan={colCount} className="px-4 py-1.5 text-start text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    {group}
-                  </th>
-                </tr>
-              )}
-              {rows.map((r) => {
-                const keys = rowKeys(r);
+          <thead
+            className={cn(
+              'bg-muted/50',
+              stickyHeader && 'sticky top-0 z-20 bg-muted',
+            )}
+          >
+            <tr>
+              <th
+                scope="col"
+                className={cn(
+                  'px-4 py-2.5 text-start font-medium text-muted-foreground',
+                  stickyColumn && 'sticky start-0 z-10 bg-muted/95',
+                )}
+              >
+                {resourceLabel}
+              </th>
+              {actions.map((a) => {
+                const keys = columnKeys(a);
                 const s = stateOf(keys, granted);
                 return (
-                  <tr key={r.id} data-slot="permission-matrix-row" className={cn('border-t border-border hover:bg-muted/30', classNames?.row)}>
-                    <th
-                      scope="row"
-                      data-slot="permission-matrix-resource"
-                      className={cn(
-                        'px-4 py-2.5 text-start font-normal',
-                        stickyColumn && 'sticky start-0 z-10 bg-card/95',
-                        classNames?.resource,
+                  <th
+                    key={a.id}
+                    scope="col"
+                    className="px-3 py-2.5 text-center font-medium text-muted-foreground"
+                  >
+                    <span className="flex flex-col items-center gap-1.5">
+                      {a.label}
+                      {bulkToggles && !readOnly && keys.length > 0 && (
+                        <Checkbox
+                          aria-label={
+                            labels?.mixed && s.indeterminate
+                              ? labels.mixed(a.label)
+                              : colLabel(a.label)
+                          }
+                          checked={s.checked}
+                          indeterminate={s.indeterminate}
+                          onCheckedChange={() => setMany(keys, !s.checked)}
+                        />
                       )}
-                    >
-                      <span className="flex items-center gap-3">
-                        {bulkToggles && !readOnly && keys.length > 0 && (
-                          <Checkbox
-                            aria-label={labels?.mixed && s.indeterminate ? labels.mixed(r.label) : rowLabel(r.label)}
-                            checked={s.checked}
-                            indeterminate={s.indeterminate}
-                            onCheckedChange={() => setMany(keys, !s.checked)}
-                          />
-                        )}
-                        <span className="flex min-w-0 flex-col">
-                          <span className="font-medium text-foreground break-words">{r.label}</span>
-                          {r.description && <span className="text-xs text-muted-foreground break-words">{r.description}</span>}
-                        </span>
-                      </span>
-                    </th>
-                    {actions.map((a) => {
-                      const key = permissionKey(r.id, a.id);
-                      return (
-                        <td key={a.id} data-slot="permission-matrix-cell" className={cn('px-3 py-2.5 text-center', classNames?.cell)}>
-                          {applies(r, a) ? (
-                            <Checkbox
-                              aria-label={`${a.label} ${r.label}`}
-                              checked={granted.has(key)}
-                              readOnly={readOnly}
-                              disabled={readOnly}
-                              onCheckedChange={(on) => setMany([key], on)}
-                              className="align-middle"
-                            />
-                          ) : (
-                            <span className="text-muted-foreground">
-                              <span aria-hidden="true">—</span>
-                              <span className="sr-only">{notApplicableText}</span>
-                            </span>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
+                    </span>
+                  </th>
                 );
               })}
-            </Fragment>
-          ))}
-        </tbody>
-      </table>
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map(([group, rows]) => (
+              <Fragment key={group ?? '__none'}>
+                {group && (
+                  <tr
+                    data-slot="permission-matrix-group-row"
+                    className={cn(
+                      'border-t border-border bg-muted/25',
+                      classNames?.groupRow,
+                    )}
+                  >
+                    <th
+                      scope="colgroup"
+                      colSpan={colCount}
+                      className="px-4 py-1.5 text-start text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                    >
+                      {group}
+                    </th>
+                  </tr>
+                )}
+                {rows.map((r) => {
+                  const keys = rowKeys(r);
+                  const s = stateOf(keys, granted);
+                  return (
+                    <tr
+                      key={r.id}
+                      data-slot="permission-matrix-row"
+                      className={cn(
+                        'border-t border-border hover:bg-muted/30',
+                        classNames?.row,
+                      )}
+                    >
+                      <th
+                        scope="row"
+                        data-slot="permission-matrix-resource"
+                        className={cn(
+                          'px-4 py-2.5 text-start font-normal',
+                          stickyColumn && 'sticky start-0 z-10 bg-card/95',
+                          classNames?.resource,
+                        )}
+                      >
+                        <span className="flex items-center gap-3">
+                          {bulkToggles && !readOnly && keys.length > 0 && (
+                            <Checkbox
+                              aria-label={
+                                labels?.mixed && s.indeterminate
+                                  ? labels.mixed(r.label)
+                                  : rowLabel(r.label)
+                              }
+                              checked={s.checked}
+                              indeterminate={s.indeterminate}
+                              onCheckedChange={() => setMany(keys, !s.checked)}
+                            />
+                          )}
+                          <span className="flex min-w-0 flex-col">
+                            <span className="font-medium text-foreground break-words">
+                              {r.label}
+                            </span>
+                            {r.description && (
+                              <span className="text-xs text-muted-foreground break-words">
+                                {r.description}
+                              </span>
+                            )}
+                          </span>
+                        </span>
+                      </th>
+                      {actions.map((a) => {
+                        const key = permissionKey(r.id, a.id);
+                        return (
+                          <td
+                            key={a.id}
+                            data-slot="permission-matrix-cell"
+                            className={cn(
+                              'px-3 py-2.5 text-center',
+                              classNames?.cell,
+                            )}
+                          >
+                            {applies(r, a) ? (
+                              <Checkbox
+                                aria-label={`${a.label} ${r.label}`}
+                                checked={granted.has(key)}
+                                readOnly={readOnly}
+                                disabled={readOnly}
+                                onCheckedChange={(on) => setMany([key], on)}
+                                className="align-middle"
+                              />
+                            ) : (
+                              <span className="text-muted-foreground">
+                                <span aria-hidden="true">—</span>
+                                <span className="sr-only">
+                                  {notApplicableText}
+                                </span>
+                              </span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

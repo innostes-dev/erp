@@ -17,14 +17,14 @@ export type CheckboxGroupProps = BaseCheckboxGroup.Props;
  * </CheckboxGroup>
  */
 export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(
-  function CheckboxGroup({ className, ...props }, ref) {
-    return (
-      <BaseCheckboxGroup
-        ref={ref}
-        data-slot="checkbox-group"
-        className={mergeClassName('flex flex-col items-start gap-3', className)}
-        {...props}
-      />
-    );
-  },
+    function CheckboxGroup({ className, ...props }, ref) {
+        return (
+            <BaseCheckboxGroup
+                ref={ref}
+                data-slot="checkbox-group"
+                className={mergeClassName('flex flex-col items-start gap-3', className)}
+                {...props}
+            />
+        );
+    },
 );

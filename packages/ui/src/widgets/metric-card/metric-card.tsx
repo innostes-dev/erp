@@ -31,7 +31,16 @@ export type MetricCardVariant =
   | 'accent';
 
 /** Inner parts of a `MetricCard`, for `classNames`. */
-export type MetricCardSlot = 'label' | 'value' | 'delta' | 'comparison' | 'icon' | 'progress' | 'items' | 'footer' | 'action';
+export type MetricCardSlot =
+  | 'label'
+  | 'value'
+  | 'delta'
+  | 'comparison'
+  | 'icon'
+  | 'progress'
+  | 'items'
+  | 'footer'
+  | 'action';
 
 /** One sub-value of the `split` variant. */
 export interface MetricCardItem {
@@ -269,7 +278,10 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
     const labelNode = (
       <div
         data-slot="metric-card-label"
-        className={cn('text-sm font-medium text-muted-foreground', classNames?.label)}
+        className={cn(
+          'text-sm font-medium text-muted-foreground',
+          classNames?.label,
+        )}
       >
         {label}
       </div>
@@ -342,7 +354,10 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
               aria-valuenow={Math.round(pct * 100)}
               aria-label={typeof label === 'string' ? label : undefined}
               data-slot="metric-card-progress"
-              className={cn('h-2 overflow-hidden rounded-full bg-muted', classNames?.progress)}
+              className={cn(
+                'h-2 overflow-hidden rounded-full bg-muted',
+                classNames?.progress,
+              )}
             >
               <div
                 className={cn(
@@ -407,7 +422,10 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
             {items && items.length > 0 && (
               <dl
                 data-slot="metric-card-items"
-                className={cn('grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-3 border-t border-border pt-3', classNames?.items)}
+                className={cn(
+                  'grid grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] gap-3 border-t border-border pt-3',
+                  classNames?.items,
+                )}
               >
                 {items.map((item, i) => (
                   <div key={i} className="flex flex-col gap-0.5">
@@ -475,13 +493,18 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
           children: (
             <>
               {action && !interactive && (
-                <div className={cn('absolute end-3 top-3', classNames?.action)}>{action}</div>
+                <div className={cn('absolute end-3 top-3', classNames?.action)}>
+                  {action}
+                </div>
               )}
               {content}
               {footer && (
                 <div
                   data-slot="metric-card-footer"
-                  className={cn('border-t border-border pt-3 text-xs text-muted-foreground', classNames?.footer)}
+                  className={cn(
+                    'border-t border-border pt-3 text-xs text-muted-foreground',
+                    classNames?.footer,
+                  )}
                 >
                   {footer}
                 </div>

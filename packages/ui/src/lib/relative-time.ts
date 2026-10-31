@@ -17,15 +17,23 @@ const units: [Intl.RelativeTimeFormatUnit, number][] = [
  */
 export function formatRelativeTime(
   value: Date | string | number,
-  options: { locale?: string; now?: Date; style?: Intl.RelativeTimeFormatStyle } = {},
+  options: {
+    locale?: string;
+    now?: Date;
+    style?: Intl.RelativeTimeFormatStyle;
+  } = {},
 ): string {
   if (typeof value === 'string') return value;
   const date = typeof value === 'number' ? new Date(value) : value;
   const now = options.now ?? new Date();
   const seconds = Math.round((date.getTime() - now.getTime()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat(options.locale, { numeric: 'auto', style: options.style ?? 'short' });
+  const rtf = new Intl.RelativeTimeFormat(options.locale, {
+    numeric: 'auto',
+    style: options.style ?? 'short',
+  });
   for (const [unit, size] of units) {
-    if (Math.abs(seconds) >= size) return rtf.format(Math.round(seconds / size), unit);
+    if (Math.abs(seconds) >= size)
+      return rtf.format(Math.round(seconds / size), unit);
   }
   return rtf.format(0, 'second');
 }

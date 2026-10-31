@@ -22,7 +22,8 @@ import {
   type FileRejectionReason,
 } from './file-utils';
 
-export type FileDropzoneSlot = 'root' | 'zone' | 'icon' | 'title' | 'hint' | 'list' | 'file' | 'errors';
+export type FileDropzoneSlot =
+  'root' | 'zone' | 'icon' | 'title' | 'hint' | 'list' | 'file' | 'errors';
 
 export interface FileDropzoneLabels {
   /** @default 'Drag files here or' */
@@ -35,8 +36,10 @@ export interface FileDropzoneLabels {
   rejection?: (rejection: FileRejection) => ReactNode;
 }
 
-export interface FileDropzoneProps
-  extends Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'children'> {
+export interface FileDropzoneProps extends Omit<
+  ComponentProps<'div'>,
+  'defaultValue' | 'onChange' | 'children'
+> {
   /** The selected files (controlled). */
   value?: File[];
   /** The initial files (uncontrolled). @default [] */
@@ -95,200 +98,237 @@ const reasonText: Record<FileRejectionReason, string> = {
  *   onValueChange={setFiles}
  * />
  */
-export const FileDropzone = forwardRef<HTMLDivElement, FileDropzoneProps>(function FileDropzone(
-  {
-    value,
-    defaultValue = [],
-    onValueChange,
-    onReject,
-    accept,
-    multiple = true,
-    maxSize,
-    maxFiles,
-    name,
-    required = false,
-    invalid = false,
-    disabled = false,
-    hint,
-    showFileList = true,
-    showPreviews = true,
-    locale,
-    labels,
-    className,
-    classNames,
-    id,
-    ...props
-  },
-  ref,
-) {
-  const inputId = useId(id);
-  const hintId = `${inputId}-hint`;
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useControllableState({ value, defaultValue, onChange: onValueChange });
-  const [rejections, setRejections] = useState<FileRejection[]>([]);
-  const [dragging, setDragging] = useState(false);
-  // Bumped on every pick, so the input is re-synced even when nothing was accepted.
-  const [picks, setPicks] = useState(0);
-  const limit = multiple ? maxFiles : 1;
+export const FileDropzone = forwardRef<HTMLDivElement, FileDropzoneProps>(
+  function FileDropzone(
+    {
+      value,
+      defaultValue = [],
+      onValueChange,
+      onReject,
+      accept,
+      multiple = true,
+      maxSize,
+      maxFiles,
+      name,
+      required = false,
+      invalid = false,
+      disabled = false,
+      hint,
+      showFileList = true,
+      showPreviews = true,
+      locale,
+      labels,
+      className,
+      classNames,
+      id,
+      ...props
+    },
+    ref,
+  ) {
+    const inputId = useId(id);
+    const hintId = `${inputId}-hint`;
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [files, setFiles] = useControllableState({
+      value,
+      defaultValue,
+      onChange: onValueChange,
+    });
+    const [rejections, setRejections] = useState<FileRejection[]>([]);
+    const [dragging, setDragging] = useState(false);
+    // Bumped on every pick, so the input is re-synced even when nothing was accepted.
+    const [picks, setPicks] = useState(0);
+    const limit = multiple ? maxFiles : 1;
 
-  // Mirror the list into the native input so a surrounding form submits it.
-  useEffect(() => {
-    const input = inputRef.current;
-    if (!input || typeof DataTransfer === 'undefined') return;
-    try {
-      const transfer = new DataTransfer();
-      files.forEach((f) => transfer.items.add(f));
-      input.files = transfer.files;
-    } catch {
-      // Older browsers can't assign `files`; the list still works, only native submit is lost.
-    }
-  }, [files, picks]);
-
-  const addFiles = (incoming: File[]) => {
-    const accepted: File[] = [];
-    const rejected: FileRejection[] = [];
-    const base = multiple ? files : [];
-    for (const file of incoming) {
-      const reasons: FileRejectionReason[] = [];
-      if (!fileMatchesAccept(file, accept)) reasons.push('type');
-      if (maxSize !== undefined && file.size > maxSize) reasons.push('size');
-      if (reasons.length === 0 && limit !== undefined && base.length + accepted.length >= limit) {
-        reasons.push('count');
+    // Mirror the list into the native input so a surrounding form submits it.
+    useEffect(() => {
+      const input = inputRef.current;
+      if (!input || typeof DataTransfer === 'undefined') return;
+      try {
+        const transfer = new DataTransfer();
+        files.forEach((f) => transfer.items.add(f));
+        input.files = transfer.files;
+      } catch {
+        // Older browsers can't assign `files`; the list still works, only native submit is lost.
       }
-      if (reasons.length) rejected.push({ file, reasons });
-      else accepted.push(file);
-    }
-    setRejections(rejected);
-    if (rejected.length) onReject?.(rejected);
-    if (accepted.length) setFiles([...base, ...accepted]);
-  };
+    }, [files, picks]);
 
-  const removeFile = (file: File) => {
-    setFiles(files.filter((f) => f !== file));
-    setRejections([]);
-  };
+    const addFiles = (incoming: File[]) => {
+      const accepted: File[] = [];
+      const rejected: FileRejection[] = [];
+      const base = multiple ? files : [];
+      for (const file of incoming) {
+        const reasons: FileRejectionReason[] = [];
+        if (!fileMatchesAccept(file, accept)) reasons.push('type');
+        if (maxSize !== undefined && file.size > maxSize) reasons.push('size');
+        if (
+          reasons.length === 0 &&
+          limit !== undefined &&
+          base.length + accepted.length >= limit
+        ) {
+          reasons.push('count');
+        }
+        if (reasons.length) rejected.push({ file, reasons });
+        else accepted.push(file);
+      }
+      setRejections(rejected);
+      if (rejected.length) onReject?.(rejected);
+      if (accepted.length) setFiles([...base, ...accepted]);
+    };
 
-  const onDragOver = (event: DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'copy';
-    setDragging(true);
-  };
+    const removeFile = (file: File) => {
+      setFiles(files.filter((f) => f !== file));
+      setRejections([]);
+    };
 
-  const onDrop = (event: DragEvent<HTMLDivElement>) => {
-    if (disabled) return;
-    event.preventDefault();
-    setDragging(false);
-    addFiles(Array.from(event.dataTransfer.files));
-  };
+    const onDragOver = (event: DragEvent<HTMLDivElement>) => {
+      if (disabled) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      setDragging(true);
+    };
 
-  const rejectionText =
-    labels?.rejection ??
-    ((r: FileRejection) => `${r.file.name}: ${r.reasons.map((x) => reasonText[x]).join(', ')}`);
+    const onDrop = (event: DragEvent<HTMLDivElement>) => {
+      if (disabled) return;
+      event.preventDefault();
+      setDragging(false);
+      addFiles(Array.from(event.dataTransfer.files));
+    };
 
-  const isInvalid = invalid || rejections.length > 0;
-  const describedBy = [hint ? hintId : null, props['aria-describedby']]
-    .filter(Boolean)
-    .join(' ') || undefined;
+    const rejectionText =
+      labels?.rejection ??
+      ((r: FileRejection) =>
+        `${r.file.name}: ${r.reasons.map((x) => reasonText[x]).join(', ')}`);
 
-  return (
-    <div
-      ref={ref}
-      data-slot="file-dropzone"
-      className={cn('flex w-full flex-col gap-3', classNames?.root, className)}
-      {...props}
-    >
+    const isInvalid = invalid || rejections.length > 0;
+    const describedBy =
+      [hint ? hintId : null, props['aria-describedby']]
+        .filter(Boolean)
+        .join(' ') || undefined;
+
+    return (
       <div
-        data-slot="file-dropzone-zone"
-        data-dragging={dragging ? '' : undefined}
-        data-disabled={disabled ? '' : undefined}
-        data-invalid={isInvalid ? '' : undefined}
-        onDragEnter={onDragOver}
-        onDragOver={onDragOver}
-        onDragLeave={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
-        }}
-        onDrop={onDrop}
+        ref={ref}
+        data-slot="file-dropzone"
         className={cn(
-          'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input bg-background px-6 py-8 text-center transition-colors',
-          'has-[input:focus-visible]:border-ring',
-          'data-dragging:border-primary data-dragging:bg-primary/5',
-          'data-invalid:border-destructive',
-          'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-          classNames?.zone,
+          'flex w-full flex-col gap-3',
+          classNames?.root,
+          className,
         )}
+        {...props}
       >
-        <span
-          data-slot="file-dropzone-icon"
-          className={cn('flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground', classNames?.icon)}
+        <div
+          data-slot="file-dropzone-zone"
+          data-dragging={dragging ? '' : undefined}
+          data-disabled={disabled ? '' : undefined}
+          data-invalid={isInvalid ? '' : undefined}
+          onDragEnter={onDragOver}
+          onDragOver={onDragOver}
+          onDragLeave={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+              setDragging(false);
+          }}
+          onDrop={onDrop}
+          className={cn(
+            'flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input bg-background px-6 py-8 text-center transition-colors',
+            'has-[input:focus-visible]:border-ring',
+            'data-dragging:border-primary data-dragging:bg-primary/5',
+            'data-invalid:border-destructive',
+            'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+            classNames?.zone,
+          )}
         >
-          <UploadIcon className="size-5" />
-        </span>
-        <p data-slot="file-dropzone-title" className={cn('text-sm text-foreground', classNames?.title)}>
-          {labels?.title ?? 'Drag files here or'}{' '}
-          <Button
-            variant="link"
+          <span
+            data-slot="file-dropzone-icon"
+            className={cn(
+              'flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground',
+              classNames?.icon,
+            )}
+          >
+            <UploadIcon className="size-5" />
+          </span>
+          <p
+            data-slot="file-dropzone-title"
+            className={cn('text-sm text-foreground', classNames?.title)}
+          >
+            {labels?.title ?? 'Drag files here or'}{' '}
+            <Button
+              variant="link"
+              disabled={disabled}
+              onClick={() => inputRef.current?.click()}
+              aria-invalid={isInvalid || undefined}
+              aria-describedby={describedBy}
+            >
+              {labels?.browse ?? 'Browse files'}
+            </Button>
+          </p>
+          {hint && (
+            <p
+              id={hintId}
+              data-slot="file-dropzone-hint"
+              className={cn('text-xs text-muted-foreground', classNames?.hint)}
+            >
+              {hint}
+            </p>
+          )}
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="file"
+            name={name}
+            accept={accept}
+            multiple={multiple}
+            required={required && files.length === 0}
             disabled={disabled}
-            onClick={() => inputRef.current?.click()}
             aria-invalid={isInvalid || undefined}
             aria-describedby={describedBy}
+            tabIndex={-1}
+            aria-hidden="true"
+            className="sr-only"
+            onChange={(e) => {
+              const picked = Array.from(e.currentTarget.files ?? []);
+              if (picked.length) addFiles(picked);
+              setPicks((n) => n + 1);
+            }}
+          />
+        </div>
+
+        {rejections.length > 0 && (
+          <ul
+            role="alert"
+            data-slot="file-dropzone-errors"
+            className={cn(
+              'flex flex-col gap-1 text-sm text-destructive',
+              classNames?.errors,
+            )}
           >
-            {labels?.browse ?? 'Browse files'}
-          </Button>
-        </p>
-        {hint && (
-          <p id={hintId} data-slot="file-dropzone-hint" className={cn('text-xs text-muted-foreground', classNames?.hint)}>
-            {hint}
-          </p>
+            {rejections.map((r, i) => (
+              <li key={`${r.file.name}-${i}`}>{rejectionText(r)}</li>
+            ))}
+          </ul>
         )}
-        <input
-          ref={inputRef}
-          id={inputId}
-          type="file"
-          name={name}
-          accept={accept}
-          multiple={multiple}
-          required={required && files.length === 0}
-          disabled={disabled}
-          aria-invalid={isInvalid || undefined}
-          aria-describedby={describedBy}
-          tabIndex={-1}
-          aria-hidden="true"
-          className="sr-only"
-          onChange={(e) => {
-            const picked = Array.from(e.currentTarget.files ?? []);
-            if (picked.length) addFiles(picked);
-            setPicks((n) => n + 1);
-          }}
-        />
+
+        {showFileList && files.length > 0 && (
+          <ul
+            data-slot="file-dropzone-list"
+            className={cn('flex flex-col gap-2', classNames?.list)}
+          >
+            {files.map((file, i) => (
+              <FileRow
+                key={`${file.name}-${file.size}-${file.lastModified}-${i}`}
+                file={file}
+                preview={showPreviews}
+                locale={locale}
+                removeLabel={labels?.remove?.(file) ?? `Remove ${file.name}`}
+                onRemove={disabled ? undefined : () => removeFile(file)}
+                className={classNames?.file}
+              />
+            ))}
+          </ul>
+        )}
       </div>
-
-      {rejections.length > 0 && (
-        <ul role="alert" data-slot="file-dropzone-errors" className={cn('flex flex-col gap-1 text-sm text-destructive', classNames?.errors)}>
-          {rejections.map((r, i) => (
-            <li key={`${r.file.name}-${i}`}>{rejectionText(r)}</li>
-          ))}
-        </ul>
-      )}
-
-      {showFileList && files.length > 0 && (
-        <ul data-slot="file-dropzone-list" className={cn('flex flex-col gap-2', classNames?.list)}>
-          {files.map((file, i) => (
-            <FileRow
-              key={`${file.name}-${file.size}-${file.lastModified}-${i}`}
-              file={file}
-              preview={showPreviews}
-              locale={locale}
-              removeLabel={labels?.remove?.(file) ?? `Remove ${file.name}`}
-              onRemove={disabled ? undefined : () => removeFile(file)}
-              className={classNames?.file}
-            />
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-});
+    );
+  },
+);
 
 function FileRow({
   file,
@@ -318,17 +358,32 @@ function FileRow({
   return (
     <li
       data-slot="file-dropzone-file"
-      className={cn('flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2', className)}
+      className={cn(
+        'flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2',
+        className,
+      )}
     >
       <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-muted text-muted-foreground">
-        {url ? <img src={url} alt="" className="size-full object-cover" /> : <FileIcon className="size-4" />}
+        {url ? (
+          <img src={url} alt="" className="size-full object-cover" />
+        ) : (
+          <FileIcon className="size-4" />
+        )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium">{file.name}</span>
-        <span className="text-xs text-muted-foreground">{formatBytes(file.size, locale)}</span>
+        <span className="text-xs text-muted-foreground">
+          {formatBytes(file.size, locale)}
+        </span>
       </span>
       {onRemove && (
-        <Button variant="ghost" size="sm" iconOnly aria-label={removeLabel} onClick={onRemove}>
+        <Button
+          variant="ghost"
+          size="sm"
+          iconOnly
+          aria-label={removeLabel}
+          onClick={onRemove}
+        >
           <XIcon />
         </Button>
       )}

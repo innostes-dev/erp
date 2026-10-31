@@ -37,18 +37,32 @@ interface BenchmarkRow {
 
 const benchmarkColumns: DataTableColumn<BenchmarkRow>[] = [
   { id: 'sku', header: 'SKU', accessor: (r) => r.sku, sortable: true },
-  { id: 'name', header: 'Product Name', accessor: (r) => r.name, sortable: true },
-  { id: 'quantity', header: 'Quantity', accessor: (r) => r.quantity, sortable: true, align: 'end' },
+  {
+    id: 'name',
+    header: 'Product Name',
+    accessor: (r) => r.name,
+    sortable: true,
+  },
+  {
+    id: 'quantity',
+    header: 'Quantity',
+    accessor: (r) => r.quantity,
+    sortable: true,
+    align: 'end',
+  },
 ];
 
 describe('DataTable enterprise benchmarks and accessibility', () => {
   it('renders 1,000 rows within 150ms budget', () => {
-    const thousandRows: BenchmarkRow[] = Array.from({ length: 1000 }, (_, i) => ({
-      id: `row-${i}`,
-      sku: `SKU-${1000 + i}`,
-      name: `Inventory Item #${i}`,
-      quantity: (i * 7) % 500,
-    }));
+    const thousandRows: BenchmarkRow[] = Array.from(
+      { length: 1000 },
+      (_, i) => ({
+        id: `row-${i}`,
+        sku: `SKU-${1000 + i}`,
+        name: `Inventory Item #${i}`,
+        quantity: (i * 7) % 500,
+      }),
+    );
 
     const start = performance.now();
     render(
@@ -90,8 +104,12 @@ describe('DataTable enterprise benchmarks and accessibility', () => {
       />,
     );
 
-    expect(screen.getByRole('checkbox', { name: 'Choose all items' })).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'Select Widget A' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: 'Choose all items' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: 'Select Widget A' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Range: 1 to 1 of 2')).toBeInTheDocument();
 
     const row = screen.getByText('Widget A').closest('tr');
@@ -202,7 +220,9 @@ describe('Card, Table, Kbd, IconTile subcomponents and AvatarGroup RTL', () => {
     );
 
     expect(screen.getByText('Security Overview')).toBeInTheDocument();
-    expect(screen.getByText('2-factor authentication status')).toBeInTheDocument();
+    expect(
+      screen.getByText('2-factor authentication status'),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Manage' })).toBeInTheDocument();
     expect(screen.getByText('Body content')).toBeInTheDocument();
     expect(screen.getByText('Footer info')).toBeInTheDocument();
@@ -248,7 +268,9 @@ describe('Card, Table, Kbd, IconTile subcomponents and AvatarGroup RTL', () => {
 
     expect(screen.getByText('Ctrl')).toBeInTheDocument();
     expect(document.querySelector('[data-tone="chart-1"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-tone="destructive"]')).toBeInTheDocument();
+    expect(
+      document.querySelector('[data-tone="destructive"]'),
+    ).toBeInTheDocument();
   });
 
   it('supports AvatarGroup moreLabel customization', () => {
@@ -263,6 +285,8 @@ describe('Card, Table, Kbd, IconTile subcomponents and AvatarGroup RTL', () => {
       </AvatarGroup>,
     );
 
-    expect(screen.getByLabelText('Plus 1 extra team members')).toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Plus 1 extra team members'),
+    ).toBeInTheDocument();
   });
 });

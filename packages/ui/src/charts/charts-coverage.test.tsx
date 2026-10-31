@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import {
-  AreaChart,
-  BarChart,
-  LineChart,
-} from './cartesian-charts';
+import { AreaChart, BarChart, LineChart } from './cartesian-charts';
 import { DonutChart } from './donut-chart';
 import {
   ChartTooltipContent,
@@ -23,7 +19,9 @@ describe('Charts edge cases and coverage', () => {
           series={[{ key: 'sales', label: 'Sales' }]}
         />,
       );
-      expect(screen.getByRole('figure', { name: 'Empty chart' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: 'Empty chart' }),
+      ).toBeInTheDocument();
       expect(screen.getByRole('table', { hidden: true })).toBeInTheDocument();
     });
 
@@ -41,7 +39,9 @@ describe('Charts edge cases and coverage', () => {
           maxBarSize={32}
         />,
       );
-      expect(screen.getByRole('figure', { name: 'Quarterly profit' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: 'Quarterly profit' }),
+      ).toBeInTheDocument();
       const cell = screen.getByRole('cell', { hidden: true });
       expect(cell).toHaveTextContent('-5,000');
     });
@@ -63,8 +63,12 @@ describe('Charts edge cases and coverage', () => {
           categoryFormatter={(v) => `Day: ${v}`}
         />,
       );
-      expect(screen.getByRole('figure', { name: 'Daily metrics' })).toBeInTheDocument();
-      expect(screen.getByRole('rowheader', { name: 'Day: Mon', hidden: true })).toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: 'Daily metrics' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('rowheader', { name: 'Day: Mon', hidden: true }),
+      ).toBeInTheDocument();
     });
 
     it('renders AreaChart with linear curve and custom height', () => {
@@ -83,35 +87,47 @@ describe('Charts edge cases and coverage', () => {
           stacked
         />,
       );
-      expect(screen.getByRole('figure', { name: 'Quarterly totals' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: 'Quarterly totals' }),
+      ).toBeInTheDocument();
     });
   });
 
   describe('DonutChart edge cases', () => {
     it('handles empty slices and zero total', () => {
       render(<DonutChart aria-label="Empty donut" data={[]} />);
-      expect(screen.getByRole('figure', { name: 'Empty donut' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: 'Empty donut' }),
+      ).toBeInTheDocument();
     });
 
     it('handles single slice with custom thickness, size, and side legend', () => {
       render(
         <DonutChart
           aria-label="Single slice distribution"
-          data={[{ key: 'north', label: 'Northwind', value: 100, color: '#3b82f6' }]}
+          data={[
+            { key: 'north', label: 'Northwind', value: 100, color: '#3b82f6' },
+          ]}
           size={180}
           thickness={0.3}
           legendPosition="side"
         />,
       );
-      expect(screen.getByRole('figure', { name: 'Single slice distribution' })).toBeInTheDocument();
-      expect(screen.getByRole('rowheader', { name: 'Northwind', hidden: true })).toBeInTheDocument();
+      expect(
+        screen.getByRole('figure', { name: 'Single slice distribution' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('rowheader', { name: 'Northwind', hidden: true }),
+      ).toBeInTheDocument();
     });
   });
 
   describe('chart-utils helpers', () => {
     it('resolves standard theme tones and custom CSS colours', () => {
       expect(resolveChartColor('primary', 0)).toBe('var(--color-primary)');
-      expect(resolveChartColor('neutral', 1)).toBe('var(--color-muted-foreground)');
+      expect(resolveChartColor('neutral', 1)).toBe(
+        'var(--color-muted-foreground)',
+      );
       expect(resolveChartColor('chart-4', 3)).toBe('var(--color-chart-4)');
       expect(resolveChartColor('#10b981', 0)).toBe('#10b981');
       expect(resolveChartColor(undefined, 2)).toBe('var(--color-chart-3)');
@@ -140,7 +156,9 @@ describe('Charts edge cases and coverage', () => {
           valueFormatter={(v) => `£${v}`}
         />,
       );
-      expect(container.querySelector('[data-slot="chart-tooltip"]')).toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="chart-tooltip"]'),
+      ).toBeInTheDocument();
       expect(screen.getByText('Period: Jan 2026')).toBeInTheDocument();
       expect(screen.getByText('Revenue (Sales)')).toBeInTheDocument();
       expect(screen.getByText('£4500')).toBeInTheDocument();

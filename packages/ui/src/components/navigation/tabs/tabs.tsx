@@ -60,8 +60,8 @@ export const TabsList = forwardRef<HTMLDivElement, BaseTabs.List.Props>(
         className={mergeClassName(
           cn(
             'relative z-0 flex max-w-full shrink-0 items-center',
-          // Scroll sideways instead of overflowing when tabs don't fit (no visible scrollbar).
-          'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden data-[orientation=vertical]:overflow-visible',
+            // Scroll sideways instead of overflowing when tabs don't fit (no visible scrollbar).
+            'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden data-[orientation=vertical]:overflow-visible',
             variant === 'underline'
               ? 'gap-1 border-b border-border data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-stretch data-[orientation=vertical]:border-e data-[orientation=vertical]:border-b-0'
               : 'w-fit gap-1 rounded-lg bg-muted p-1',

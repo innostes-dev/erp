@@ -21,39 +21,39 @@ export type CheckboxProps = BaseCheckbox.Root.Props;
  * <Checkbox indeterminate aria-label="Select all rows" />
  */
 export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(
-  function Checkbox({ className, ...props }, ref) {
-    return (
-      <BaseCheckbox.Root
-        ref={ref}
-        data-slot="checkbox"
-        className={mergeClassName(
-          [
-            'peer inline-flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-input bg-background shadow-xs',
-            'cursor-pointer transition-colors outline-none',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-            'data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground',
-            'data-indeterminate:border-primary data-indeterminate:bg-primary data-indeterminate:text-primary-foreground',
-            'data-invalid:border-destructive',
-            'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-          ].join(' '),
-          className,
-        )}
-        {...props}
-      >
-        <BaseCheckbox.Indicator
-          data-slot="checkbox-indicator"
-          className="group flex items-center justify-center data-unchecked:hidden"
-        >
-          <CheckIcon
-            className="size-3.5 group-data-indeterminate:hidden"
-            strokeWidth={3}
-          />
-          <MinusIcon
-            className="hidden size-3.5 group-data-indeterminate:block"
-            strokeWidth={3}
-          />
-        </BaseCheckbox.Indicator>
-      </BaseCheckbox.Root>
-    );
-  },
+    function Checkbox({ className, ...props }, ref) {
+        return (
+            <BaseCheckbox.Root
+                ref={ref}
+                data-slot="checkbox"
+                className={mergeClassName(
+                    [
+                        'peer inline-flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-input bg-background shadow-xs',
+                        'cursor-pointer transition-colors outline-none',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                        'data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground',
+                        'data-indeterminate:border-primary data-indeterminate:bg-primary data-indeterminate:text-primary-foreground',
+                        'data-invalid:border-destructive',
+                        'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+                    ].join(' '),
+                    className,
+                )}
+                {...props}
+            >
+                <BaseCheckbox.Indicator
+                    data-slot="checkbox-indicator"
+                    className="group flex items-center justify-center data-unchecked:hidden"
+                >
+                    <CheckIcon
+                        className="size-3.5 group-data-indeterminate:hidden"
+                        strokeWidth={3}
+                    />
+                    <MinusIcon
+                        className="hidden size-3.5 group-data-indeterminate:block"
+                        strokeWidth={3}
+                    />
+                </BaseCheckbox.Indicator>
+            </BaseCheckbox.Root>
+        );
+    },
 );

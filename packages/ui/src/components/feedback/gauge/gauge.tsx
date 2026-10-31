@@ -6,9 +6,11 @@ import { cn } from '../../../lib/cn';
 import { mergeClassName } from '../../../lib/merge-class-name';
 import type { SlotClassNames } from '../../../lib/slots';
 
-export type GaugeTone = 'primary' | 'success' | 'warning' | 'destructive' | 'info';
+export type GaugeTone =
+  'primary' | 'success' | 'warning' | 'destructive' | 'info';
 
-export type GaugeSlot = 'arc' | 'track' | 'indicator' | 'value' | 'label' | 'description';
+export type GaugeSlot =
+  'arc' | 'track' | 'indicator' | 'value' | 'label' | 'description';
 
 export interface GaugeProps extends Omit<BaseMeter.Root.Props, 'children'> {
   /** Visible label under the gauge, e.g. "Budget used". Also its accessible name. */
@@ -75,19 +77,27 @@ export const Gauge = forwardRef<HTMLDivElement, GaugeProps>(function Gauge(
   ref,
 ) {
   const span = max - min;
-  const fraction = span > 0 ? Math.min(1, Math.max(0, (value - min) / span)) : 0;
+  const fraction =
+    span > 0 ? Math.min(1, Math.max(0, (value - min) / span)) : 0;
   const resolvedTone = typeof tone === 'function' ? tone(value) : tone;
   // Base UI applies `format` to the raw value, so 82 with `style: 'percent'` would read
   // "8,200%". Percent styles format the share of the range instead.
   const formatted =
     format && format.style !== 'percent'
       ? new Intl.NumberFormat(locale, format).format(value)
-      : new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0, ...format }).format(fraction);
+      : new Intl.NumberFormat(locale, {
+          style: 'percent',
+          maximumFractionDigits: 0,
+          ...format,
+        }).format(fraction);
 
   return (
     <BaseMeter.Root
       ref={ref}
-      aria-label={props['aria-label'] ?? (typeof label === 'string' ? label : 'Gauge meter')}
+      aria-label={
+        props['aria-label'] ??
+        (typeof label === 'string' ? label : 'Gauge meter')
+      }
       data-slot="gauge"
       data-tone={resolvedTone}
       value={value}
@@ -95,7 +105,10 @@ export const Gauge = forwardRef<HTMLDivElement, GaugeProps>(function Gauge(
       max={max}
       locale={locale}
       getAriaValueText={() => formatted}
-      className={mergeClassName('inline-flex flex-col items-center gap-1 text-center', className)}
+      className={mergeClassName(
+        'inline-flex flex-col items-center gap-1 text-center',
+        className,
+      )}
       style={{ width: size }}
       {...props}
     >
@@ -123,7 +136,11 @@ export const Gauge = forwardRef<HTMLDivElement, GaugeProps>(function Gauge(
               pathLength={100}
               strokeDasharray={`${fraction * 100} 100`}
               data-slot="gauge-indicator"
-              className={cn('transition-[stroke-dasharray] duration-500', toneClass[resolvedTone], classNames?.indicator)}
+              className={cn(
+                'transition-[stroke-dasharray] duration-500',
+                toneClass[resolvedTone],
+                classNames?.indicator,
+              )}
             />
           )}
         </svg>
@@ -140,12 +157,24 @@ export const Gauge = forwardRef<HTMLDivElement, GaugeProps>(function Gauge(
         )}
       </div>
       {label && (
-        <BaseMeter.Label data-slot="gauge-label" className={cn('text-sm font-medium text-foreground', classNames?.label)}>
+        <BaseMeter.Label
+          data-slot="gauge-label"
+          className={cn(
+            'text-sm font-medium text-foreground',
+            classNames?.label,
+          )}
+        >
           {label}
         </BaseMeter.Label>
       )}
       {description && (
-        <span data-slot="gauge-description" className={cn('text-xs text-muted-foreground', classNames?.description)}>
+        <span
+          data-slot="gauge-description"
+          className={cn(
+            'text-xs text-muted-foreground',
+            classNames?.description,
+          )}
+        >
           {description}
         </span>
       )}

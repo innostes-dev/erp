@@ -24,7 +24,8 @@ export interface DonutChartSlice {
   color?: ChartColor;
 }
 
-export type DonutChartSlot = 'root' | 'plot' | 'center' | 'centerValue' | 'centerLabel' | 'legend';
+export type DonutChartSlot =
+  'root' | 'plot' | 'center' | 'centerValue' | 'centerLabel' | 'legend';
 
 export interface DonutChartProps {
   /** Accessible name, e.g. "Attendance today". */
@@ -76,117 +77,164 @@ export interface DonutChartProps {
  *   ]}
  * />
  */
-export const DonutChart = forwardRef<HTMLElement, DonutChartProps>(function DonutChart(
-  {
-    data,
-    centerValue,
-    centerLabel,
-    size = 'clamp(10rem, 28vw, 13rem)',
-    thickness = 0.22,
-    valueFormatter,
-    locale,
-    showLegend = true,
-    legendPosition = 'auto',
-    showTooltip = true,
-    className,
-    classNames,
-    ...props
-  },
-  ref,
-) {
-  const fmt = useMemo(() => valueFormatter ?? defaultValueFormatter(locale), [valueFormatter, locale]);
-  const slices = data.map((d, i) => ({ ...d, fill: resolveChartColor(d.color, i) }));
-  const total = slices.reduce((sum, s) => sum + s.value, 0);
-  const inner = `${Math.round((1 - thickness) * 100)}%`;
+export const DonutChart = forwardRef<HTMLElement, DonutChartProps>(
+  function DonutChart(
+    {
+      data,
+      centerValue,
+      centerLabel,
+      size = 'clamp(10rem, 28vw, 13rem)',
+      thickness = 0.22,
+      valueFormatter,
+      locale,
+      showLegend = true,
+      legendPosition = 'auto',
+      showTooltip = true,
+      className,
+      classNames,
+      ...props
+    },
+    ref,
+  ) {
+    const fmt = useMemo(
+      () => valueFormatter ?? defaultValueFormatter(locale),
+      [valueFormatter, locale],
+    );
+    const slices = data.map((d, i) => ({
+      ...d,
+      fill: resolveChartColor(d.color, i),
+    }));
+    const total = slices.reduce((sum, s) => sum + s.value, 0);
+    const inner = `${Math.round((1 - thickness) * 100)}%`;
 
-  return (
-    <figure
-      ref={ref}
-      data-slot="donut-chart"
-      aria-label={props['aria-label']}
-      className={cn('@container m-0 w-full min-w-0', classNames?.root, className)}
-    >
-      <div
+    return (
+      <figure
+        ref={ref}
+        data-slot="donut-chart"
+        aria-label={props['aria-label']}
         className={cn(
-          'flex flex-col items-center gap-5',
-          legendPosition === 'side' && 'flex-row',
-          legendPosition === 'auto' && '@md:flex-row @md:justify-center @md:gap-8',
+          '@container m-0 w-full min-w-0',
+          classNames?.root,
+          className,
         )}
       >
         <div
-          data-slot="donut-chart-plot"
-          className={cn('relative aspect-square shrink-0', classNames?.plot)}
-          style={{ width: size }}
+          className={cn(
+            'flex flex-col items-center gap-5',
+            legendPosition === 'side' && 'flex-row',
+            legendPosition === 'auto' &&
+              '@md:flex-row @md:justify-center @md:gap-8',
+          )}
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              {showTooltip && (
-                <Tooltip content={<ChartTooltipContent valueFormatter={fmt} hideLabel />} />
-              )}
-              <Pie
-                data={slices}
-                dataKey="value"
-                nameKey="label"
-                innerRadius={inner}
-                outerRadius="100%"
-                paddingAngle={slices.length > 1 ? 2 : 0}
-                cornerRadius={4}
-                stroke="none"
-                startAngle={90}
-                endAngle={-270}
-                isAnimationActive={false}
+          <div
+            data-slot="donut-chart-plot"
+            className={cn('relative aspect-square shrink-0', classNames?.plot)}
+            style={{ width: size }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                {showTooltip && (
+                  <Tooltip
+                    content={
+                      <ChartTooltipContent valueFormatter={fmt} hideLabel />
+                    }
+                  />
+                )}
+                <Pie
+                  data={slices}
+                  dataKey="value"
+                  nameKey="label"
+                  innerRadius={inner}
+                  outerRadius="100%"
+                  paddingAngle={slices.length > 1 ? 2 : 0}
+                  cornerRadius={4}
+                  stroke="none"
+                  startAngle={90}
+                  endAngle={-270}
+                  isAnimationActive={false}
+                >
+                  {slices.map((s) => (
+                    <Cell key={s.key} fill={s.fill} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            {(centerValue || centerLabel) && (
+              <div
+                data-slot="donut-chart-center"
+                className={cn(
+                  'pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center',
+                  classNames?.center,
+                )}
               >
-                {slices.map((s) => (
-                  <Cell key={s.key} fill={s.fill} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-          {(centerValue || centerLabel) && (
-            <div
-              data-slot="donut-chart-center"
-              className={cn('pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center', classNames?.center)}
-            >
-              {centerValue && (
-                <span data-slot="donut-chart-center-value" className={cn('text-metric font-bold tracking-tight tabular-nums', classNames?.centerValue)}>
-                  {centerValue}
-                </span>
+                {centerValue && (
+                  <span
+                    data-slot="donut-chart-center-value"
+                    className={cn(
+                      'text-metric font-bold tracking-tight tabular-nums',
+                      classNames?.centerValue,
+                    )}
+                  >
+                    {centerValue}
+                  </span>
+                )}
+                {centerLabel && (
+                  <span
+                    data-slot="donut-chart-center-label"
+                    className={cn(
+                      'text-xs text-muted-foreground',
+                      classNames?.centerLabel,
+                    )}
+                  >
+                    {centerLabel}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          {showLegend && (
+            <ChartLegend
+              orientation="column"
+              className={cn(
+                'w-full max-w-64 gap-y-3 text-sm',
+                classNames?.legend,
               )}
-              {centerLabel && (
-                <span data-slot="donut-chart-center-label" className={cn('text-xs text-muted-foreground', classNames?.centerLabel)}>
-                  {centerLabel}
-                </span>
-              )}
-            </div>
+              series={slices.map((s) => ({
+                key: s.key,
+                label: s.label,
+                color: s.fill,
+                value: fmt(s.value),
+              }))}
+            />
           )}
         </div>
-        {showLegend && (
-          <ChartLegend
-            orientation="column"
-            className={cn('w-full max-w-64 gap-y-3 text-sm', classNames?.legend)}
-            series={slices.map((s) => ({ key: s.key, label: s.label, color: s.fill, value: fmt(s.value) }))}
-          />
-        )}
-      </div>
-      <table className="sr-only">
-        <caption>{props['aria-label']}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Category</th>
-            <th scope="col">Value</th>
-            <th scope="col">Share</th>
-          </tr>
-        </thead>
-        <tbody>
-          {slices.map((s) => (
-            <tr key={s.key}>
-              <th scope="row">{s.label}</th>
-              <td>{fmt(s.value)}</td>
-              <td>{total ? new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }).format(s.value / total) : '—'}</td>
+        <table className="sr-only">
+          <caption>{props['aria-label']}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Category</th>
+              <th scope="col">Value</th>
+              <th scope="col">Share</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </figure>
-  );
-});
+          </thead>
+          <tbody>
+            {slices.map((s) => (
+              <tr key={s.key}>
+                <th scope="row">{s.label}</th>
+                <td>{fmt(s.value)}</td>
+                <td>
+                  {total
+                    ? new Intl.NumberFormat(locale, {
+                        style: 'percent',
+                        maximumFractionDigits: 1,
+                      }).format(s.value / total)
+                    : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </figure>
+    );
+  },
+);

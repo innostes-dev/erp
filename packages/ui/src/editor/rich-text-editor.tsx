@@ -10,7 +10,12 @@ import {
   type ReactNode,
 } from 'react';
 import { Toolbar } from '@base-ui/react/toolbar';
-import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
+import {
+  EditorContent,
+  useEditor,
+  useEditorState,
+  type Editor,
+} from '@tiptap/react';
 import type { AnyExtension } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import { Placeholder } from '@tiptap/extensions';
@@ -64,10 +69,13 @@ export type RichTextEditorLabels = Partial<Record<RichTextTool, string>> & {
   cancel?: string;
 };
 
-export type RichTextEditorSlot = 'root' | 'toolbar' | 'button' | 'content' | 'linkForm';
+export type RichTextEditorSlot =
+  'root' | 'toolbar' | 'button' | 'content' | 'linkForm';
 
-export interface RichTextEditorProps
-  extends Omit<ComponentProps<'div'>, 'defaultValue' | 'onChange' | 'children'> {
+export interface RichTextEditorProps extends Omit<
+  ComponentProps<'div'>,
+  'defaultValue' | 'onChange' | 'children'
+> {
   /** The content as HTML (controlled). An empty editor is `''`. */
   value?: string;
   /** The initial content as HTML (uncontrolled). @default '' */
@@ -118,14 +126,29 @@ const defaultToolbar: readonly (RichTextTool | '|')[] = [
   'redo',
 ];
 
-const tools: Record<RichTextTool, { label: string; icon: ReactNode; shortcut?: string }> = {
+const tools: Record<
+  RichTextTool,
+  { label: string; icon: ReactNode; shortcut?: string }
+> = {
   bold: { label: 'Bold', icon: <BoldIcon />, shortcut: 'Mod+B' },
   italic: { label: 'Italic', icon: <ItalicIcon />, shortcut: 'Mod+I' },
   underline: { label: 'Underline', icon: <UnderlineIcon />, shortcut: 'Mod+U' },
-  strike: { label: 'Strikethrough', icon: <StrikethroughIcon />, shortcut: 'Mod+Shift+S' },
+  strike: {
+    label: 'Strikethrough',
+    icon: <StrikethroughIcon />,
+    shortcut: 'Mod+Shift+S',
+  },
   heading: { label: 'Heading', icon: <HeadingIcon /> },
-  bulletList: { label: 'Bulleted list', icon: <ListIcon />, shortcut: 'Mod+Shift+8' },
-  orderedList: { label: 'Numbered list', icon: <ListOrderedIcon />, shortcut: 'Mod+Shift+7' },
+  bulletList: {
+    label: 'Bulleted list',
+    icon: <ListIcon />,
+    shortcut: 'Mod+Shift+8',
+  },
+  orderedList: {
+    label: 'Numbered list',
+    icon: <ListOrderedIcon />,
+    shortcut: 'Mod+Shift+7',
+  },
   blockquote: { label: 'Quote', icon: <QuoteIcon />, shortcut: 'Mod+Shift+B' },
   code: { label: 'Inline code', icon: <CodeIcon />, shortcut: 'Mod+E' },
   link: { label: 'Link', icon: <LinkIcon /> },
@@ -163,242 +186,251 @@ const contentClass = [
  *   onValueChange={setNotes}
  * />
  */
-export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(function RichTextEditor(
-  {
-    value,
-    defaultValue = '',
-    onValueChange,
-    placeholder,
-    name,
-    disabled = false,
-    readOnly = false,
-    invalid = false,
-    toolbar = defaultToolbar,
-    extensions = [],
-    onReady,
-    labels,
-    className,
-    classNames,
-    id,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ariaDescribedBy,
-    ...props
-  },
-  ref,
-) {
-  const [html, setHtml] = useControllableState({ value, defaultValue, onChange: onValueChange });
-  const setHtmlRef = useRef(setHtml);
-  setHtmlRef.current = setHtml;
-  const htmlRef = useRef(html);
-  htmlRef.current = html;
-  const onReadyRef = useRef(onReady);
-  onReadyRef.current = onReady;
-  const baseId = useId(id);
-  const editable = !disabled && !readOnly;
+export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(
+  function RichTextEditor(
+    {
+      value,
+      defaultValue = '',
+      onValueChange,
+      placeholder,
+      name,
+      disabled = false,
+      readOnly = false,
+      invalid = false,
+      toolbar = defaultToolbar,
+      extensions = [],
+      onReady,
+      labels,
+      className,
+      classNames,
+      id,
+      'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
+      'aria-describedby': ariaDescribedBy,
+      ...props
+    },
+    ref,
+  ) {
+    const [html, setHtml] = useControllableState({
+      value,
+      defaultValue,
+      onChange: onValueChange,
+    });
+    const setHtmlRef = useRef(setHtml);
+    setHtmlRef.current = setHtml;
+    const htmlRef = useRef(html);
+    htmlRef.current = html;
+    const onReadyRef = useRef(onReady);
+    onReadyRef.current = onReady;
+    const baseId = useId(id);
+    const editable = !disabled && !readOnly;
 
-  const editor = useEditor({
-    // Render on the client only, so server-rendered pages don't mismatch.
-    immediatelyRender: false,
-    editable,
-    content: html,
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [2, 3] },
-        link: { openOnClick: false, autolink: true, defaultProtocol: 'https' },
-      }),
-      Placeholder.configure({ placeholder: placeholder ?? '' }),
-      ...extensions,
-    ],
-    editorProps: {
-      attributes: {
-        id: baseId,
-        role: 'textbox',
-        'aria-multiline': 'true',
-        ...(invalid ? { 'aria-invalid': 'true' } : {}),
-        ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
-        ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
-        ...(ariaDescribedBy ? { 'aria-describedby': ariaDescribedBy } : {}),
-        'data-slot': 'rich-text-editor-content',
-        class: cn(contentClass, classNames?.content),
+    const editor = useEditor({
+      // Render on the client only, so server-rendered pages don't mismatch.
+      immediatelyRender: false,
+      editable,
+      content: html,
+      extensions: [
+        StarterKit.configure({
+          heading: { levels: [2, 3] },
+          link: {
+            openOnClick: false,
+            autolink: true,
+            defaultProtocol: 'https',
+          },
+        }),
+        Placeholder.configure({ placeholder: placeholder ?? '' }),
+        ...extensions,
+      ],
+      editorProps: {
+        attributes: {
+          id: baseId,
+          role: 'textbox',
+          'aria-multiline': 'true',
+          ...(invalid ? { 'aria-invalid': 'true' } : {}),
+          ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+          ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
+          ...(ariaDescribedBy ? { 'aria-describedby': ariaDescribedBy } : {}),
+          'data-slot': 'rich-text-editor-content',
+          class: cn(contentClass, classNames?.content),
+        },
       },
-    },
-    onCreate: ({ editor: e }) => onReadyRef.current?.(e),
-    // Commands that change nothing (e.g. a refused link) still fire updates; skip those.
-    onUpdate: ({ editor: e }) => {
-      const next = htmlOf(e);
-      if (next !== htmlRef.current) setHtmlRef.current(next);
-    },
-  });
+      onCreate: ({ editor: e }) => onReadyRef.current?.(e),
+      // Commands that change nothing (e.g. a refused link) still fire updates; skip those.
+      onUpdate: ({ editor: e }) => {
+        const next = htmlOf(e);
+        if (next !== htmlRef.current) setHtmlRef.current(next);
+      },
+    });
 
-  useEffect(() => {
-    if (!editor || editor.isDestroyed) return;
-    if (html !== htmlOf(editor)) editor.commands.setContent(html, { emitUpdate: false });
-  }, [editor, html]);
+    useEffect(() => {
+      if (!editor || editor.isDestroyed) return;
+      if (html !== htmlOf(editor))
+        editor.commands.setContent(html, { emitUpdate: false });
+    }, [editor, html]);
 
-  useEffect(() => {
-    if (editor && !editor.isDestroyed) editor.setEditable(editable);
-  }, [editor, editable]);
+    useEffect(() => {
+      if (editor && !editor.isDestroyed) editor.setEditable(editable);
+    }, [editor, editable]);
 
-  const state = useEditorState({
-    editor,
-    selector: ({ editor: e }) => {
-      if (!e) return null;
-      return {
-        bold: e.isActive('bold'),
-        italic: e.isActive('italic'),
-        underline: e.isActive('underline'),
-        strike: e.isActive('strike'),
-        heading: e.isActive('heading'),
-        bulletList: e.isActive('bulletList'),
-        orderedList: e.isActive('orderedList'),
-        blockquote: e.isActive('blockquote'),
-        code: e.isActive('code'),
-        link: e.isActive('link'),
-        undo: e.can().undo(),
-        redo: e.can().redo(),
-      };
-    },
-  });
+    const state = useEditorState({
+      editor,
+      selector: ({ editor: e }) => {
+        if (!e) return null;
+        return {
+          bold: e.isActive('bold'),
+          italic: e.isActive('italic'),
+          underline: e.isActive('underline'),
+          strike: e.isActive('strike'),
+          heading: e.isActive('heading'),
+          bulletList: e.isActive('bulletList'),
+          orderedList: e.isActive('orderedList'),
+          blockquote: e.isActive('blockquote'),
+          code: e.isActive('code'),
+          link: e.isActive('link'),
+          undo: e.can().undo(),
+          redo: e.can().redo(),
+        };
+      },
+    });
 
-  const [linkOpen, setLinkOpen] = useState(false);
-  const [linkUrl, setLinkUrl] = useState('');
-  const linkInput = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (linkOpen) linkInput.current?.focus();
-  }, [linkOpen]);
+    const [linkOpen, setLinkOpen] = useState(false);
+    const [linkUrl, setLinkUrl] = useState('');
+    const linkInput = useRef<HTMLElement>(null);
+    useEffect(() => {
+      if (linkOpen) linkInput.current?.focus();
+    }, [linkOpen]);
 
-  const run = (tool: RichTextTool) => {
-    if (!editor) return;
-    const chain = editor.chain().focus();
-    switch (tool) {
-      case 'bold':
-        return chain.toggleBold().run();
-      case 'italic':
-        return chain.toggleItalic().run();
-      case 'underline':
-        return chain.toggleUnderline().run();
-      case 'strike':
-        return chain.toggleStrike().run();
-      case 'heading':
-        return chain.toggleHeading({ level: 2 }).run();
-      case 'bulletList':
-        return chain.toggleBulletList().run();
-      case 'orderedList':
-        return chain.toggleOrderedList().run();
-      case 'blockquote':
-        return chain.toggleBlockquote().run();
-      case 'code':
-        return chain.toggleCode().run();
-      case 'undo':
-        return chain.undo().run();
-      case 'redo':
-        return chain.redo().run();
-      case 'link':
-        setLinkUrl((editor.getAttributes('link').href as string | undefined) ?? '');
-        setLinkOpen(true);
-        return;
-    }
-  };
+    const run = (tool: RichTextTool) => {
+      if (!editor) return;
+      const chain = editor.chain().focus();
+      switch (tool) {
+        case 'bold':
+          return chain.toggleBold().run();
+        case 'italic':
+          return chain.toggleItalic().run();
+        case 'underline':
+          return chain.toggleUnderline().run();
+        case 'strike':
+          return chain.toggleStrike().run();
+        case 'heading':
+          return chain.toggleHeading({ level: 2 }).run();
+        case 'bulletList':
+          return chain.toggleBulletList().run();
+        case 'orderedList':
+          return chain.toggleOrderedList().run();
+        case 'blockquote':
+          return chain.toggleBlockquote().run();
+        case 'code':
+          return chain.toggleCode().run();
+        case 'undo':
+          return chain.undo().run();
+        case 'redo':
+          return chain.redo().run();
+        case 'link':
+          setLinkUrl(
+            (editor.getAttributes('link').href as string | undefined) ?? '',
+          );
+          setLinkOpen(true);
+          return;
+      }
+    };
 
-  const closeLink = () => {
-    setLinkOpen(false);
-    editor?.commands.focus();
-  };
+    const closeLink = () => {
+      setLinkOpen(false);
+      editor?.commands.focus();
+    };
 
-  const applyLink = (event: FormEvent) => {
-    event.preventDefault();
-    if (!editor) return;
-    const url = linkUrl.trim();
-    const chain = editor.chain().focus().extendMarkRange('link');
-    if (url) chain.setLink({ href: url }).run();
-    else chain.unsetLink().run();
-    setLinkOpen(false);
-  };
+    const applyLink = (event: FormEvent) => {
+      event.preventDefault();
+      if (!editor) return;
+      const url = linkUrl.trim();
+      const chain = editor.chain().focus().extendMarkRange('link');
+      if (url) chain.setLink({ href: url }).run();
+      else chain.unsetLink().run();
+      setLinkOpen(false);
+    };
 
-  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
-  const t = (tool: RichTextTool) => labels?.[tool] ?? tools[tool].label;
-  const showToolbar = toolbar !== false && !readOnly;
+    const isMac =
+      typeof navigator !== 'undefined' &&
+      /Mac|iPhone|iPad/.test(navigator.platform);
+    const t = (tool: RichTextTool) => labels?.[tool] ?? tools[tool].label;
+    const showToolbar = toolbar !== false && !readOnly;
 
-  return (
-    <div
-      ref={ref}
-      data-slot="rich-text-editor"
-      data-disabled={disabled ? '' : undefined}
-      data-readonly={readOnly ? '' : undefined}
-      data-invalid={invalid ? '' : undefined}
-      className={cn(
-        'flex w-full flex-col overflow-hidden rounded-md border border-input bg-background shadow-xs transition-[color,box-shadow,border-color]',
-        'focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25',
-        'data-disabled:cursor-not-allowed data-disabled:opacity-50',
-        'data-readonly:border-transparent data-readonly:bg-transparent data-readonly:shadow-none data-readonly:focus-within:ring-0',
-        'data-invalid:border-destructive data-invalid:focus-within:ring-destructive/25',
-        classNames?.root,
-        className,
-      )}
-      {...props}
-    >
-      {showToolbar && (
-        <Toolbar.Root
-          aria-label={labels?.toolbar ?? 'Formatting'}
-          aria-controls={baseId}
-          data-slot="rich-text-editor-toolbar"
-          className={cn('flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/40 p-1', classNames?.toolbar)}
-        >
-          {toolbar.map((tool, i) =>
-            tool === '|' ? (
-              <Toolbar.Separator key={`sep-${i}`} className="mx-1 h-5 w-px bg-border" />
-            ) : (
-              <Toolbar.Button
-                key={tool}
-                data-slot="rich-text-editor-button"
-                aria-label={t(tool)}
-                title={
-                  tools[tool].shortcut
-                    ? `${t(tool)} (${tools[tool].shortcut!.replace('Mod', isMac ? '⌘' : 'Ctrl')})`
-                    : t(tool)
-                }
-                aria-pressed={tool === 'undo' || tool === 'redo' ? undefined : !!state?.[tool]}
-                disabled={!editor || disabled || ((tool === 'undo' || tool === 'redo') && !state?.[tool])}
-                onClick={() => run(tool)}
-                className={cn(
-                  'flex size-8 cursor-pointer items-center justify-center rounded-sm text-muted-foreground outline-none',
-                  'hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring',
-                  'aria-pressed:bg-accent aria-pressed:text-foreground',
-                  'data-disabled:cursor-not-allowed data-disabled:opacity-40',
-                  "[&_svg:not([class*='size-'])]:size-4",
-                  classNames?.button,
-                )}
-              >
-                {tools[tool].icon}
-              </Toolbar.Button>
-            ),
-          )}
-        </Toolbar.Root>
-      )}
+    return (
+      <div
+        ref={ref}
+        data-slot="rich-text-editor"
+        data-disabled={disabled ? '' : undefined}
+        data-readonly={readOnly ? '' : undefined}
+        data-invalid={invalid ? '' : undefined}
+        className={cn(
+          'flex w-full flex-col overflow-hidden rounded-md border border-input bg-background shadow-xs transition-[color,box-shadow,border-color]',
+          'focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/25',
+          'data-disabled:cursor-not-allowed data-disabled:opacity-50',
+          'data-readonly:border-transparent data-readonly:bg-transparent data-readonly:shadow-none data-readonly:focus-within:ring-0',
+          'data-invalid:border-destructive data-invalid:focus-within:ring-destructive/25',
+          classNames?.root,
+          className,
+        )}
+        {...props}
+      >
+        {showToolbar && (
+          <Toolbar.Root
+            aria-label={labels?.toolbar ?? 'Formatting'}
+            aria-controls={baseId}
+            data-slot="rich-text-editor-toolbar"
+            className={cn(
+              'flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/40 p-1',
+              classNames?.toolbar,
+            )}
+          >
+            {toolbar.map((tool, i) =>
+              tool === '|' ? (
+                <Toolbar.Separator
+                  key={`sep-${i}`}
+                  className="mx-1 h-5 w-px bg-border"
+                />
+              ) : (
+                <Toolbar.Button
+                  key={tool}
+                  data-slot="rich-text-editor-button"
+                  aria-label={t(tool)}
+                  title={
+                    tools[tool].shortcut
+                      ? `${t(tool)} (${tools[tool].shortcut!.replace('Mod', isMac ? '⌘' : 'Ctrl')})`
+                      : t(tool)
+                  }
+                  aria-pressed={
+                    tool === 'undo' || tool === 'redo'
+                      ? undefined
+                      : !!state?.[tool]
+                  }
+                  disabled={
+                    !editor ||
+                    disabled ||
+                    ((tool === 'undo' || tool === 'redo') && !state?.[tool])
+                  }
+                  onClick={() => run(tool)}
+                  className={cn(
+                    'flex size-8 cursor-pointer items-center justify-center rounded-sm text-muted-foreground outline-none',
+                    'hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring',
+                    'aria-pressed:bg-accent aria-pressed:text-foreground',
+                    'data-disabled:cursor-not-allowed data-disabled:opacity-40',
+                    "[&_svg:not([class*='size-'])]:size-4",
+                    classNames?.button,
+                  )}
+                >
+                  {tools[tool].icon}
+                </Toolbar.Button>
+              ),
+            )}
+          </Toolbar.Root>
+        )}
 
-      {linkOpen && (
-        <form
-          onSubmit={applyLink}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              e.preventDefault();
-              e.stopPropagation();
-              closeLink();
-            }
-          }}
-          data-slot="rich-text-editor-link-form"
-          className={cn('flex flex-wrap items-center gap-2 border-b border-border px-2 py-2', classNames?.linkForm)}
-        >
-          <Input
-            ref={linkInput}
-            size="sm"
-            type="url"
-            inputMode="url"
-            placeholder="https://"
-            aria-label={labels?.linkUrl ?? 'Link URL'}
-            value={linkUrl}
-            onChange={(e) => setLinkUrl((e.target as HTMLInputElement).value)}
+        {linkOpen && (
+          <form
+            onSubmit={applyLink}
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
                 e.preventDefault();
@@ -406,36 +438,69 @@ export const RichTextEditor = forwardRef<HTMLDivElement, RichTextEditorProps>(fu
                 closeLink();
               }
             }}
-            className="min-w-48 flex-1"
-          />
-          <Button type="submit" size="sm">
-            {labels?.applyLink ?? 'Apply'}
-          </Button>
-          {state?.link && (
-            <Button
-              type="button"
+            data-slot="rich-text-editor-link-form"
+            className={cn(
+              'flex flex-wrap items-center gap-2 border-b border-border px-2 py-2',
+              classNames?.linkForm,
+            )}
+          >
+            <Input
+              ref={linkInput}
               size="sm"
-              variant="ghost"
-              onClick={() => {
-                editor?.chain().focus().extendMarkRange('link').unsetLink().run();
-                setLinkOpen(false);
+              type="url"
+              inputMode="url"
+              placeholder="https://"
+              aria-label={labels?.linkUrl ?? 'Link URL'}
+              value={linkUrl}
+              onChange={(e) => setLinkUrl((e.target as HTMLInputElement).value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  closeLink();
+                }
               }}
-            >
-              {labels?.removeLink ?? 'Remove link'}
+              className="min-w-48 flex-1"
+            />
+            <Button type="submit" size="sm">
+              {labels?.applyLink ?? 'Apply'}
             </Button>
-          )}
-          <Button type="button" size="sm" variant="ghost" onClick={closeLink}>
-            {labels?.cancel ?? 'Cancel'}
-          </Button>
-        </form>
-      )}
+            {state?.link && (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  editor
+                    ?.chain()
+                    .focus()
+                    .extendMarkRange('link')
+                    .unsetLink()
+                    .run();
+                  setLinkOpen(false);
+                }}
+              >
+                {labels?.removeLink ?? 'Remove link'}
+              </Button>
+            )}
+            <Button type="button" size="sm" variant="ghost" onClick={closeLink}>
+              {labels?.cancel ?? 'Cancel'}
+            </Button>
+          </form>
+        )}
 
-      {editor ? (
-        <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
-      ) : (
-        <div aria-hidden="true" className={cn(contentClass, classNames?.content)} />
-      )}
-      {name && <input type="hidden" name={name} value={html} disabled={disabled} />}
-    </div>
-  );
-});
+        {editor ? (
+          <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
+        ) : (
+          <div
+            aria-hidden="true"
+            className={cn(contentClass, classNames?.content)}
+          />
+        )}
+        {name && (
+          <input type="hidden" name={name} value={html} disabled={disabled} />
+        )}
+      </div>
+    );
+  },
+);

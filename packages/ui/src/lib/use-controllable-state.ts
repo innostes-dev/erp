@@ -9,28 +9,28 @@ import { useCallback, useRef, useState } from 'react';
  * @internal
  */
 export function useControllableState<T>({
-  value,
-  defaultValue,
-  onChange,
+    value,
+    defaultValue,
+    onChange,
 }: {
-  value?: T;
-  defaultValue: T;
-  onChange?: (value: T) => void;
+    value?: T;
+    defaultValue: T;
+    onChange?: (value: T) => void;
 }): [T, (next: T) => void] {
-  const [internal, setInternal] = useState(defaultValue);
-  const isControlled = value !== undefined;
-  const current = isControlled ? value : internal;
+    const [internal, setInternal] = useState(defaultValue);
+    const isControlled = value !== undefined;
+    const current = isControlled ? value : internal;
 
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
 
-  const setValue = useCallback(
-    (next: T) => {
-      if (!isControlled) setInternal(next);
-      onChangeRef.current?.(next);
-    },
-    [isControlled],
-  );
+    const setValue = useCallback(
+        (next: T) => {
+            if (!isControlled) setInternal(next);
+            onChangeRef.current?.(next);
+        },
+        [isControlled],
+    );
 
-  return [current, setValue];
+    return [current, setValue];
 }

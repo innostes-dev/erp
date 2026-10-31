@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AreaChart, BarChart, DonutChart, LineChart } from '@innostes/ui/charts';
+import {
+  AreaChart,
+  BarChart,
+  DonutChart,
+  LineChart,
+} from '@innostes/ui/charts';
 
 const data = [
   { month: 'Jan', total: 240, male: 140 },
@@ -18,12 +23,28 @@ describe('cartesian charts', () => {
     ['LineChart', LineChart],
     ['AreaChart', AreaChart],
   ] as const)('%s exposes its data as an accessible table', (_, Chart) => {
-    render(<Chart aria-label="Headcount by month" data={data} categoryKey="month" series={series} locale="en" />);
+    render(
+      <Chart
+        aria-label="Headcount by month"
+        data={data}
+        categoryKey="month"
+        series={series}
+        locale="en"
+      />,
+    );
     const figure = screen.getByRole('figure', { name: 'Headcount by month' });
-    const table = within(figure).getByRole('table', { name: 'Headcount by month' });
-    expect(within(table).getByRole('columnheader', { name: 'Male' })).toBeInTheDocument();
-    expect(within(table).getByRole('rowheader', { name: 'Feb' })).toBeInTheDocument();
-    expect(within(table).getByRole('cell', { name: '248' })).toBeInTheDocument();
+    const table = within(figure).getByRole('table', {
+      name: 'Headcount by month',
+    });
+    expect(
+      within(table).getByRole('columnheader', { name: 'Male' }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole('rowheader', { name: 'Feb' }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole('cell', { name: '248' }),
+    ).toBeInTheDocument();
   });
 
   it('formats values and toggles series from the legend', async () => {
@@ -44,13 +65,25 @@ describe('cartesian charts', () => {
   });
 
   it('hides the legend for a single series', () => {
-    render(<LineChart aria-label="Revenue" data={data} categoryKey="month" series={[series[0]!]} />);
+    render(
+      <LineChart
+        aria-label="Revenue"
+        data={data}
+        categoryKey="month"
+        series={[series[0]!]}
+      />,
+    );
     expect(screen.queryByRole('button', { name: 'Total' })).toBeNull();
   });
 
   it('does not mark the chart plot container aria-hidden to permit focusable accessibility layers', () => {
     const { container } = render(
-      <BarChart aria-label="Headcount" data={data} categoryKey="month" series={series} />
+      <BarChart
+        aria-label="Headcount"
+        data={data}
+        categoryKey="month"
+        series={series}
+      />,
     );
     const figure = container.querySelector('figure[data-slot="chart"]');
     expect(figure?.querySelector('[aria-hidden="true"]')).toBeNull();
@@ -73,7 +106,9 @@ describe('DonutChart', () => {
     );
     expect(screen.getByText('92%')).toBeInTheDocument();
     const table = screen.getByRole('table', { name: 'Attendance today' });
-    expect(within(table).getByRole('cell', { name: '91.9%' })).toBeInTheDocument();
+    expect(
+      within(table).getByRole('cell', { name: '91.9%' }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText('228').length).toBeGreaterThan(0);
   });
 
@@ -81,9 +116,7 @@ describe('DonutChart', () => {
     const { container } = render(
       <DonutChart
         aria-label="Attendance today"
-        data={[
-          { key: 'present', label: 'Present', value: 10 },
-        ]}
+        data={[{ key: 'present', label: 'Present', value: 10 }]}
       />,
     );
     const figure = container.querySelector('figure[data-slot="donut-chart"]');

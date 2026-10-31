@@ -5,7 +5,10 @@ import { cn } from '../../lib/cn';
 import { ArrowRightIcon } from '../../lib/icons';
 import type { SlotClassNames } from '../../lib/slots';
 import type { IconTileTone } from '../../components/data-display/icon-tile/icon-tile';
-import { ActivityFeed, type ActivityFeedProps } from '../activity-feed/activity-feed';
+import {
+  ActivityFeed,
+  type ActivityFeedProps,
+} from '../activity-feed/activity-feed';
 
 /** One changed field in a `ChangeLogEntry`. */
 export interface FieldChange {
@@ -41,7 +44,10 @@ export interface ChangeLogEntry {
 
 export type ChangeLogSlot = 'changes' | 'field' | 'from' | 'to' | 'note';
 
-export interface ChangeLogProps extends Omit<ActivityFeedProps, 'items' | 'variant' | 'classNames'> {
+export interface ChangeLogProps extends Omit<
+  ActivityFeedProps,
+  'items' | 'variant' | 'classNames'
+> {
   /** The revisions, newest first. */
   entries: readonly ChangeLogEntry[];
   /** Shown for an empty old or new value. @default '—' */
@@ -72,79 +78,113 @@ export interface ChangeLogProps extends Omit<ActivityFeedProps, 'items' | 'varia
  *   }]}
  * />
  */
-export const ChangeLog = forwardRef<HTMLDivElement, ChangeLogProps>(function ChangeLog(
-  { entries, emptyValue = '—', diffLabels, classNames, emptyText = 'No changes yet.', ...props },
-  ref,
-) {
-  const show = (v: ReactNode) => (v === undefined || v === null || v === '' ? emptyValue : v);
+export const ChangeLog = forwardRef<HTMLDivElement, ChangeLogProps>(
+  function ChangeLog(
+    {
+      entries,
+      emptyValue = '—',
+      diffLabels,
+      classNames,
+      emptyText = 'No changes yet.',
+      ...props
+    },
+    ref,
+  ) {
+    const show = (v: ReactNode) =>
+      v === undefined || v === null || v === '' ? emptyValue : v;
 
-  return (
-    <ActivityFeed
-      ref={ref as any}
-      variant="timeline"
-      emptyText={emptyText}
-      data-slot="change-log"
-      {...props}
-      items={entries.map((entry) => ({
-        id: entry.id,
-        time: entry.time,
-        icon: entry.icon,
-        tone: entry.tone ?? 'neutral',
-        leading: entry.avatar,
-        title: (
-          <span className="font-normal">
-            {entry.actor && <span className="font-semibold">{entry.actor} </span>}
-            {entry.action}
-          </span>
-        ),
-        extra:
-          entry.changes?.length || entry.note ? (
-            <div className="flex flex-col gap-2">
-              {entry.changes && entry.changes.length > 0 && (
-                <dl
-                  data-slot="change-log-changes"
-                  className={cn(
-                    'grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs',
-                    classNames?.changes,
-                  )}
-                >
-                  {entry.changes.map((change, i) => (
-                    <div key={i} className="col-span-2 grid grid-cols-subgrid items-baseline">
-                      <dt data-slot="change-log-field" className={cn('font-medium text-muted-foreground', classNames?.field)}>
-                        {change.field}
-                      </dt>
-                      <dd className="m-0 flex min-w-0 flex-wrap items-center gap-1.5">
-                        <del
-                          data-slot="change-log-from"
-                          className={cn('text-muted-foreground line-through decoration-destructive/60 break-words', classNames?.from)}
-                        >
-                          <span className="sr-only">{diffLabels?.from ?? 'from'} </span>
-                          {show(change.from)}
-                        </del>
-                        <ArrowRightIcon className="size-3 shrink-0 text-muted-foreground rtl:rotate-180" />
-                        <ins
-                          data-slot="change-log-to"
-                          className={cn('font-medium text-foreground no-underline break-words', classNames?.to)}
-                        >
-                          <span className="sr-only">{diffLabels?.to ?? 'to'} </span>
-                          {show(change.to)}
-                        </ins>
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
+    return (
+      <ActivityFeed
+        ref={ref as any}
+        variant="timeline"
+        emptyText={emptyText}
+        data-slot="change-log"
+        {...props}
+        items={entries.map((entry) => ({
+          id: entry.id,
+          time: entry.time,
+          icon: entry.icon,
+          tone: entry.tone ?? 'neutral',
+          leading: entry.avatar,
+          title: (
+            <span className="font-normal">
+              {entry.actor && (
+                <span className="font-semibold">{entry.actor} </span>
               )}
-              {entry.note && (
-                <blockquote
-                  data-slot="change-log-note"
-                  className={cn('m-0 border-s-2 border-border ps-3 text-xs text-muted-foreground italic', classNames?.note)}
-                >
-                  {entry.note}
-                </blockquote>
-              )}
-            </div>
-          ) : undefined,
-      }))}
-    />
-  );
-});
+              {entry.action}
+            </span>
+          ),
+          extra:
+            entry.changes?.length || entry.note ? (
+              <div className="flex flex-col gap-2">
+                {entry.changes && entry.changes.length > 0 && (
+                  <dl
+                    data-slot="change-log-changes"
+                    className={cn(
+                      'grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs',
+                      classNames?.changes,
+                    )}
+                  >
+                    {entry.changes.map((change, i) => (
+                      <div
+                        key={i}
+                        className="col-span-2 grid grid-cols-subgrid items-baseline"
+                      >
+                        <dt
+                          data-slot="change-log-field"
+                          className={cn(
+                            'font-medium text-muted-foreground',
+                            classNames?.field,
+                          )}
+                        >
+                          {change.field}
+                        </dt>
+                        <dd className="m-0 flex min-w-0 flex-wrap items-center gap-1.5">
+                          <del
+                            data-slot="change-log-from"
+                            className={cn(
+                              'text-muted-foreground line-through decoration-destructive/60 break-words',
+                              classNames?.from,
+                            )}
+                          >
+                            <span className="sr-only">
+                              {diffLabels?.from ?? 'from'}{' '}
+                            </span>
+                            {show(change.from)}
+                          </del>
+                          <ArrowRightIcon className="size-3 shrink-0 text-muted-foreground rtl:rotate-180" />
+                          <ins
+                            data-slot="change-log-to"
+                            className={cn(
+                              'font-medium text-foreground no-underline break-words',
+                              classNames?.to,
+                            )}
+                          >
+                            <span className="sr-only">
+                              {diffLabels?.to ?? 'to'}{' '}
+                            </span>
+                            {show(change.to)}
+                          </ins>
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {entry.note && (
+                  <blockquote
+                    data-slot="change-log-note"
+                    className={cn(
+                      'm-0 border-s-2 border-border ps-3 text-xs text-muted-foreground italic',
+                      classNames?.note,
+                    )}
+                  >
+                    {entry.note}
+                  </blockquote>
+                )}
+              </div>
+            ) : undefined,
+        }))}
+      />
+    );
+  },
+);

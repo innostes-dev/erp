@@ -6,12 +6,12 @@ let counter = 0;
 
 // Read `useId` dynamically so bundlers don't fail on React 17, where it doesn't exist.
 const reactUseId: (() => string) | undefined = (
-  React as unknown as Record<string, unknown>
+    React as unknown as Record<string, unknown>
 )['useId'.toString()] as (() => string) | undefined;
 
 function useFallbackId(): string {
-  const [id] = React.useState(() => `in-${++counter}`);
-  return id;
+    const [id] = React.useState(() => `in-${++counter}`);
+    return id;
 }
 
 /**
@@ -23,7 +23,7 @@ function useFallbackId(): string {
  * @internal
  */
 export function useId(override?: string): string {
-  // The branch is stable for the lifetime of the app, so hook order never changes.
-  const generated = reactUseId ? reactUseId() : useFallbackId();
-  return override ?? generated;
+    // The branch is stable for the lifetime of the app, so hook order never changes.
+    const generated = reactUseId ? reactUseId() : useFallbackId();
+    return override ?? generated;
 }

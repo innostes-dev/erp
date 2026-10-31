@@ -63,8 +63,12 @@ describe('Combobox full anatomy', () => {
 
     const input = screen.getByLabelText('Fruit input');
     expect(input).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Remove fruit' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Expand fruit' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Remove fruit' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Expand fruit' }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -115,7 +119,11 @@ describe('Fieldset and CheckboxGroup', () => {
   it('handles CheckboxGroup with multiple values', async () => {
     const onValueChange = vi.fn();
     render(
-      <CheckboxGroup defaultValue={['opt1']} onValueChange={onValueChange} aria-label="Options">
+      <CheckboxGroup
+        defaultValue={['opt1']}
+        onValueChange={onValueChange}
+        aria-label="Options"
+      >
         <label>
           <Checkbox value="opt1" /> Option 1
         </label>
@@ -131,7 +139,10 @@ describe('Fieldset and CheckboxGroup', () => {
     expect(check2).not.toBeChecked();
 
     await userEvent.click(check2);
-    expect(onValueChange).toHaveBeenCalledWith(['opt1', 'opt2'], expect.anything());
+    expect(onValueChange).toHaveBeenCalledWith(
+      ['opt1', 'opt2'],
+      expect.anything(),
+    );
   });
 });
 
@@ -143,10 +154,14 @@ describe('NumberField configurable labels', () => {
         aria-label="Quantity"
         decrementLabel="Minus one"
         incrementLabel="Plus one"
-      />
+      />,
     );
-    expect(screen.getByRole('button', { name: 'Minus one' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Plus one' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Minus one' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Plus one' }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -157,7 +172,7 @@ describe('FileDropzone Field integration', () => {
         aria-label="Upload invoice"
         invalid
         aria-describedby="invoice-error"
-      />
+      />,
     );
     const dropzone = screen.getByRole('button', { name: 'Browse files' });
     expect(dropzone).toHaveAttribute('aria-invalid', 'true');

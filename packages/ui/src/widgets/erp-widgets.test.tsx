@@ -21,19 +21,47 @@ describe('Gauge', () => {
 
   it.each([
     [{ value: 82, format: { style: 'percent' } as const }, '82%'],
-    [{ value: 96.4, format: { style: 'percent', maximumFractionDigits: 1 } as const }, '96.4%'],
+    [
+      {
+        value: 96.4,
+        format: { style: 'percent', maximumFractionDigits: 1 } as const,
+      },
+      '96.4%',
+    ],
     [{ value: 312, max: 400 }, '78%'],
-    [{ value: 4800, max: 6000, format: { style: 'currency', currency: 'USD', maximumFractionDigits: 0 } as const }, '$4,800'],
+    [
+      {
+        value: 4800,
+        max: 6000,
+        format: {
+          style: 'currency',
+          currency: 'USD',
+          maximumFractionDigits: 0,
+        } as const,
+      },
+      '$4,800',
+    ],
   ])('shows and speaks the formatted value %#', (props, text) => {
     render(<Gauge aria-label="KPI" locale="en-US" {...props} />);
     const meter = screen.getByRole('meter', { name: 'KPI' });
     expect(meter).toHaveAttribute('aria-valuetext', text);
-    expect(meter.querySelector('[data-slot=gauge-value]')).toHaveTextContent(text);
+    expect(meter.querySelector('[data-slot=gauge-value]')).toHaveTextContent(
+      text,
+    );
   });
 
   it('picks the tone from a function of the value', () => {
-    render(<Gauge value={95} aria-label="Load" tone={(v) => (v > 90 ? 'destructive' : 'success')} />);
-    expect(screen.getByRole('meter', { name: 'Load' })).toHaveAttribute('data-tone', 'destructive');
+    render(
+      <Gauge
+        value={95}
+        aria-label="Load"
+        tone={(v) => (v > 90 ? 'destructive' : 'success')}
+      />,
+    );
+    expect(screen.getByRole('meter', { name: 'Load' })).toHaveAttribute(
+      'data-tone',
+      'destructive',
+    );
   });
 });
 
@@ -57,9 +85,15 @@ describe('ChangeLog', () => {
       />,
     );
     expect(screen.getByText('Priya Shah')).toBeInTheDocument();
-    expect(screen.getByText('Status').nextElementSibling).toHaveTextContent('from Draft');
-    expect(screen.getByText('Status').nextElementSibling).toHaveTextContent('to Sent');
-    expect(screen.getByText('PO number').nextElementSibling).toHaveTextContent('from —');
+    expect(screen.getByText('Status').nextElementSibling).toHaveTextContent(
+      'from Draft',
+    );
+    expect(screen.getByText('Status').nextElementSibling).toHaveTextContent(
+      'to Sent',
+    );
+    expect(screen.getByText('PO number').nextElementSibling).toHaveTextContent(
+      'from —',
+    );
     expect(screen.getByText('Customer confirmed')).toBeInTheDocument();
   });
 
@@ -80,11 +114,23 @@ describe('PermissionMatrix', () => {
   ];
 
   it('renders a table with grouped rows and n/a cells', () => {
-    render(<PermissionMatrix aria-label="Accountant" actions={actions} resources={resources} />);
+    render(
+      <PermissionMatrix
+        aria-label="Accountant"
+        actions={actions}
+        resources={resources}
+      />,
+    );
     const table = screen.getByRole('table', { name: 'Accountant' });
-    expect(within(table).getByRole('columnheader', { name: 'Finance' })).toBeInTheDocument();
-    expect(within(table).getByRole('rowheader', { name: /Payroll/ })).toBeInTheDocument();
-    expect(screen.queryByRole('checkbox', { name: 'Edit Payroll' })).not.toBeInTheDocument();
+    expect(
+      within(table).getByRole('columnheader', { name: 'Finance' }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole('rowheader', { name: /Payroll/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('checkbox', { name: 'Edit Payroll' }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText('Not applicable')).toBeInTheDocument();
   });
 
@@ -92,19 +138,33 @@ describe('PermissionMatrix', () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
     render(
-      <PermissionMatrix aria-label="Accountant" actions={actions} resources={resources} onValueChange={onValueChange} />,
+      <PermissionMatrix
+        aria-label="Accountant"
+        actions={actions}
+        resources={resources}
+        onValueChange={onValueChange}
+      />,
     );
     await user.click(screen.getByRole('checkbox', { name: 'View Invoices' }));
     expect(onValueChange).toHaveBeenLastCalledWith(['invoices:view']);
-    const row = screen.getByRole('checkbox', { name: 'All permissions for Invoices' });
+    const row = screen.getByRole('checkbox', {
+      name: 'All permissions for Invoices',
+    });
     expect(row).toHaveAttribute('aria-checked', 'mixed');
 
     await user.click(row);
-    expect(onValueChange).toHaveBeenLastCalledWith(['invoices:view', 'invoices:edit']);
+    expect(onValueChange).toHaveBeenLastCalledWith([
+      'invoices:view',
+      'invoices:edit',
+    ]);
     expect(row).toHaveAttribute('aria-checked', 'true');
 
     await user.click(screen.getByRole('checkbox', { name: 'View for all' }));
-    expect(onValueChange).toHaveBeenLastCalledWith(['invoices:view', 'invoices:edit', 'payroll:view']);
+    expect(onValueChange).toHaveBeenLastCalledWith([
+      'invoices:view',
+      'invoices:edit',
+      'payroll:view',
+    ]);
 
     await user.click(row);
     expect(onValueChange).toHaveBeenLastCalledWith(['payroll:view']);
@@ -120,20 +180,38 @@ describe('PermissionMatrix', () => {
         value={[permissionKey('invoices', 'view')]}
       />,
     );
-    expect(screen.queryByRole('checkbox', { name: /for all|All permissions/ })).not.toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'View Invoices' })).toHaveAttribute('aria-checked', 'true');
+    expect(
+      screen.queryByRole('checkbox', { name: /for all|All permissions/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: 'View Invoices' }),
+    ).toHaveAttribute('aria-checked', 'true');
   });
 });
 
 describe('KanbanBoard', () => {
   type Card = { id: string; name: string };
   const columns: KanbanColumn<Card>[] = [
-    { id: 'todo', title: 'To do', items: [{ id: 'a', name: 'Alpha' }, { id: 'b', name: 'Beta' }] },
-    { id: 'doing', title: 'Doing', items: [{ id: 'c', name: 'Gamma' }], limit: 1 },
+    {
+      id: 'todo',
+      title: 'To do',
+      items: [
+        { id: 'a', name: 'Alpha' },
+        { id: 'b', name: 'Beta' },
+      ],
+    },
+    {
+      id: 'doing',
+      title: 'Doing',
+      items: [{ id: 'c', name: 'Gamma' }],
+      limit: 1,
+    },
     { id: 'done', title: 'Done', items: [] },
   ];
 
-  const setup = (props: Partial<Parameters<typeof KanbanBoard<Card>>[0]> = {}) =>
+  const setup = (
+    props: Partial<Parameters<typeof KanbanBoard<Card>>[0]> = {},
+  ) =>
     render(
       <KanbanBoard<Card>
         aria-label="Board"
@@ -173,7 +251,9 @@ describe('KanbanBoard', () => {
     await user.keyboard(' ');
     expect(screen.getByText(/Picked up Alpha/)).toBeInTheDocument();
     await user.keyboard('{ArrowRight}');
-    expect(screen.getByText('Alpha moved to Doing, position 1 of 2.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Alpha moved to Doing, position 1 of 2.'),
+    ).toBeInTheDocument();
     await user.keyboard('{ArrowDown}');
     expect(onValueChange).not.toHaveBeenCalled();
     await user.keyboard(' ');
@@ -189,7 +269,9 @@ describe('KanbanBoard', () => {
     expect(cardsIn('Doing')).toEqual(['Gamma', 'Alpha']);
     expect(cardsIn('To do')).toEqual(['Beta']);
     expect(screen.getByText('Alpha').closest('li')).toHaveFocus();
-    expect(screen.getByText('Alpha dropped in Doing, position 2.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Alpha dropped in Doing, position 2.'),
+    ).toBeInTheDocument();
   });
 
   it('cancels a keyboard move with Escape', async () => {

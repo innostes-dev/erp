@@ -27,7 +27,8 @@ export interface WidgetCardViewAll {
 }
 
 /** Inner parts of a `WidgetCard`, for `classNames`. */
-export type WidgetCardSlot = 'header' | 'title' | 'description' | 'count' | 'actions' | 'body' | 'footer';
+export type WidgetCardSlot =
+  'header' | 'title' | 'description' | 'count' | 'actions' | 'body' | 'footer';
 
 export interface WidgetCardProps extends Omit<
   ComponentProps<'section'>,
@@ -187,7 +188,10 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
       >
         <header
           data-slot="widget-card-header"
-          className={cn('flex flex-wrap items-start gap-x-3 gap-y-2 px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4', classNames?.header)}
+          className={cn(
+            'flex flex-wrap items-start gap-x-3 gap-y-2 px-4 pt-4 pb-3 sm:px-5 sm:pt-5 sm:pb-4',
+            classNames?.header,
+          )}
         >
           {icon && <span className="flex shrink-0">{icon}</span>}
           <div className="flex min-w-[min(12rem,100%)] flex-1 flex-col gap-0.5">
@@ -195,7 +199,10 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
               <Heading
                 id={titleId}
                 data-slot="widget-card-title"
-                className={cn('truncate text-subheading font-semibold', classNames?.title)}
+                className={cn(
+                  'truncate text-subheading font-semibold',
+                  classNames?.title,
+                )}
               >
                 {title}
               </Heading>
@@ -219,7 +226,10 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
             {description && (
               <p
                 data-slot="widget-card-description"
-                className={cn('text-sm text-muted-foreground', classNames?.description)}
+                className={cn(
+                  'text-sm text-muted-foreground',
+                  classNames?.description,
+                )}
               >
                 {description}
               </p>
@@ -228,7 +238,10 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
           {(actions || viewAll) && (
             <div
               data-slot="widget-card-actions"
-              className={cn('flex shrink-0 flex-wrap items-center gap-2', classNames?.actions)}
+              className={cn(
+                'flex shrink-0 flex-wrap items-center gap-2',
+                classNames?.actions,
+              )}
             >
               {actions}
               {viewAll &&
@@ -271,7 +284,10 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
         {footer && (
           <footer
             data-slot="widget-card-footer"
-            className={cn('border-t border-border px-4 py-3 text-sm text-muted-foreground sm:px-5', classNames?.footer)}
+            className={cn(
+              'border-t border-border px-4 py-3 text-sm text-muted-foreground sm:px-5',
+              classNames?.footer,
+            )}
           >
             {footer}
           </footer>

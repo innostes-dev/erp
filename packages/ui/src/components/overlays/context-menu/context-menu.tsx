@@ -27,53 +27,53 @@ export type ContextMenuProps = BaseContextMenu.Root.Props;
 
 /** The area that opens the menu on right-click. */
 export const ContextMenuTrigger = forwardRef<
-  HTMLDivElement,
-  BaseContextMenu.Trigger.Props
+    HTMLDivElement,
+    BaseContextMenu.Trigger.Props
 >(function ContextMenuTrigger(props, ref) {
-  return (
-    <BaseContextMenu.Trigger
-      ref={ref}
-      data-slot="context-menu-trigger"
-      {...props}
-    />
-  );
+    return (
+        <BaseContextMenu.Trigger
+            ref={ref}
+            data-slot="context-menu-trigger"
+            {...props}
+        />
+    );
 });
 
 /** The floating list of items, placed at the pointer. Rendered in a portal. */
 export const ContextMenuContent = forwardRef<
-  HTMLDivElement,
-  BaseContextMenu.Popup.Props
+    HTMLDivElement,
+    BaseContextMenu.Popup.Props
 >(function ContextMenuContent({ className, ...props }, ref) {
-  return (
-    <BaseContextMenu.Portal>
-      <BaseContextMenu.Positioner className="z-50 outline-none">
-        <BaseContextMenu.Popup
-          ref={ref}
-          data-slot="context-menu-content"
-          className={mergeClassName(
-            cn(
-              popupSurface,
-              'max-h-(--available-height) min-w-44 overflow-y-auto p-1',
-            ),
-            className,
-          )}
-          {...props}
-        />
-      </BaseContextMenu.Positioner>
-    </BaseContextMenu.Portal>
-  );
+    return (
+        <BaseContextMenu.Portal>
+            <BaseContextMenu.Positioner className="z-50 outline-none">
+                <BaseContextMenu.Popup
+                    ref={ref}
+                    data-slot="context-menu-content"
+                    className={mergeClassName(
+                        cn(
+                            popupSurface,
+                            'max-h-(--available-height) min-w-44 overflow-y-auto p-1',
+                        ),
+                        className,
+                    )}
+                    {...props}
+                />
+            </BaseContextMenu.Positioner>
+        </BaseContextMenu.Portal>
+    );
 });
 
 export {
-  DropdownMenuItem as ContextMenuItem,
-  DropdownMenuLinkItem as ContextMenuLinkItem,
-  DropdownMenuCheckboxItem as ContextMenuCheckboxItem,
-  DropdownMenuRadioGroup as ContextMenuRadioGroup,
-  DropdownMenuRadioItem as ContextMenuRadioItem,
-  DropdownMenuGroup as ContextMenuGroup,
-  DropdownMenuGroupLabel as ContextMenuGroupLabel,
-  DropdownMenuSeparator as ContextMenuSeparator,
-  DropdownMenuShortcut as ContextMenuShortcut,
-  DropdownMenuSub as ContextMenuSub,
-  DropdownMenuSubTrigger as ContextMenuSubTrigger,
+    DropdownMenuItem as ContextMenuItem,
+    DropdownMenuLinkItem as ContextMenuLinkItem,
+    DropdownMenuCheckboxItem as ContextMenuCheckboxItem,
+    DropdownMenuRadioGroup as ContextMenuRadioGroup,
+    DropdownMenuRadioItem as ContextMenuRadioItem,
+    DropdownMenuGroup as ContextMenuGroup,
+    DropdownMenuGroupLabel as ContextMenuGroupLabel,
+    DropdownMenuSeparator as ContextMenuSeparator,
+    DropdownMenuShortcut as ContextMenuShortcut,
+    DropdownMenuSub as ContextMenuSub,
+    DropdownMenuSubTrigger as ContextMenuSubTrigger,
 } from '../dropdown-menu/dropdown-menu';

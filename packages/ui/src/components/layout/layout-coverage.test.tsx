@@ -36,9 +36,15 @@ describe('Layout: SkipLink, PageHeader, TopBar, FormLayout, ScrollArea', () => {
       />,
     );
 
-    expect(screen.getByRole('heading', { name: 'Invoices Management' })).toBeInTheDocument();
-    expect(screen.getByText('Track incoming and outgoing payments')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'New Invoice' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Invoices Management' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Track incoming and outgoing payments'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'New Invoice' }),
+    ).toBeInTheDocument();
   });
 
   it('renders TopBar with start, center, and end sections', () => {
@@ -57,7 +63,9 @@ describe('Layout: SkipLink, PageHeader, TopBar, FormLayout, ScrollArea', () => {
     );
 
     expect(screen.getByText('Northwind ERP')).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Search items' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('textbox', { name: 'Search items' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('User Profile')).toBeInTheDocument();
   });
 
@@ -78,10 +86,14 @@ describe('Layout: SkipLink, PageHeader, TopBar, FormLayout, ScrollArea', () => {
     );
 
     expect(screen.getByText('Tax Configuration')).toBeInTheDocument();
-    expect(screen.getByText('Set region-specific tax numbers')).toBeInTheDocument();
+    expect(
+      screen.getByText('Set region-specific tax numbers'),
+    ).toBeInTheDocument();
     expect(screen.getByText('Field A')).toBeInTheDocument();
     expect(screen.getByText('Field B')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Save settings' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Save settings' }),
+    ).toBeInTheDocument();
   });
 
   it('renders ScrollArea content', () => {
@@ -118,7 +130,9 @@ describe('Navigation: Stepper custom status labels', () => {
 
     expect(screen.getByText('(revenir en arrière)')).toBeInTheDocument();
 
-    const completedButton = screen.getByRole('button', { name: /Billing Info/ });
+    const completedButton = screen.getByRole('button', {
+      name: /Billing Info/,
+    });
     await userEvent.click(completedButton);
     expect(handleStepClick).toHaveBeenCalledWith(0);
   });

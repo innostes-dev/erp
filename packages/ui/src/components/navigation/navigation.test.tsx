@@ -39,7 +39,9 @@ describe('Tabs', () => {
       'aria-selected',
       'true',
     );
-    expect(screen.getByRole('tabpanel', { name: 'Overview' })).toHaveTextContent('Overview panel');
+    expect(
+      screen.getByRole('tabpanel', { name: 'Overview' }),
+    ).toHaveTextContent('Overview panel');
 
     await userEvent.click(screen.getByRole('tab', { name: 'Activity' }));
     expect(screen.getByRole('tab', { name: 'Activity' })).toHaveAttribute(
@@ -47,7 +49,9 @@ describe('Tabs', () => {
       'true',
     );
     // Base UI may keep the previous panel mounted briefly while it animates out.
-    expect(await screen.findByRole('tabpanel', { name: 'Activity' })).toHaveTextContent('Activity panel');
+    expect(
+      await screen.findByRole('tabpanel', { name: 'Activity' }),
+    ).toHaveTextContent('Activity panel');
   });
 });
 

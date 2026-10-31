@@ -18,14 +18,22 @@ describe('SplitPane', () => {
     expect(handle).toHaveAttribute('aria-valuemin', '20');
     expect(handle).toHaveAttribute('aria-valuemax', '70');
     expect(handle).toHaveAttribute('aria-orientation', 'vertical');
-    expect(document.getElementById(handle.getAttribute('aria-controls')!)).toHaveTextContent('List');
+    expect(
+      document.getElementById(handle.getAttribute('aria-controls')!),
+    ).toHaveTextContent('List');
   });
 
   it('resizes with the keyboard within the limits', async () => {
     const user = userEvent.setup();
     const onSizeChange = vi.fn();
     render(
-      <SplitPane defaultSize={50} step={5} minSize={20} maxSize={80} onSizeChange={onSizeChange}>
+      <SplitPane
+        defaultSize={50}
+        step={5}
+        minSize={20}
+        maxSize={80}
+        onSizeChange={onSizeChange}
+      >
         <div>A</div>
         <div>B</div>
       </SplitPane>,

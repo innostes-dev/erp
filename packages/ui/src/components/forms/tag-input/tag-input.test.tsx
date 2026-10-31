@@ -15,8 +15,12 @@ describe('TagInput', () => {
     await user.type(input, 'react{Enter}');
 
     expect(onValueChange).toHaveBeenLastCalledWith(['React', 'Go']);
-    expect(screen.getByRole('button', { name: 'Remove React' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Remove Go' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Remove React' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Remove Go' }),
+    ).toBeInTheDocument();
     expect(input).toHaveValue('');
   });
 
@@ -24,8 +28,12 @@ describe('TagInput', () => {
     const user = userEvent.setup();
     render(<TagInput aria-label="Skills" defaultValue={['React', 'Go']} />);
     await user.click(screen.getByRole('button', { name: 'Remove React' }));
-    expect(screen.queryByRole('button', { name: 'Remove React' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Remove Go' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Remove React' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Remove Go' }),
+    ).toBeInTheDocument();
   });
 
   it('splits pasted text on delimiters and new lines', async () => {
@@ -34,7 +42,11 @@ describe('TagInput', () => {
     render(<TagInput aria-label="Emails" onValueChange={onValueChange} />);
     await user.click(screen.getByRole('combobox', { name: 'Emails' }));
     await user.paste('a@x.com, b@x.com\nc@x.com');
-    expect(onValueChange).toHaveBeenLastCalledWith(['a@x.com', 'b@x.com', 'c@x.com']);
+    expect(onValueChange).toHaveBeenLastCalledWith([
+      'a@x.com',
+      'b@x.com',
+      'c@x.com',
+    ]);
   });
 
   it('respects max, validate and allowCustom', async () => {
@@ -74,7 +86,13 @@ describe('TagInput', () => {
   it('picks a suggestion from the list', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
-    render(<TagInput aria-label="Skills" suggestions={['TypeScript', 'Go']} onValueChange={onValueChange} />);
+    render(
+      <TagInput
+        aria-label="Skills"
+        suggestions={['TypeScript', 'Go']}
+        onValueChange={onValueChange}
+      />,
+    );
     await user.type(screen.getByRole('combobox', { name: 'Skills' }), 'Typ');
     await user.click(await screen.findByRole('option', { name: 'TypeScript' }));
     expect(onValueChange).toHaveBeenLastCalledWith(['TypeScript']);

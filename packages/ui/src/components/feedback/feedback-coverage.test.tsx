@@ -1,13 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  Gauge,
-  Meter,
-  Progress,
-  Toaster,
-  toast,
-} from '@innostes/ui';
+import { Gauge, Meter, Progress, Toaster, toast } from '@innostes/ui';
 
 describe('Meter and Progress percent format normalization', () => {
   it('formats Meter value 72 with style: percent as 72%, not 7,200%', () => {
@@ -50,7 +44,10 @@ describe('Meter and Progress percent format normalization', () => {
         format={{ style: 'percent', minimumFractionDigits: 1 }}
       />,
     );
-    expect(screen.getByRole('meter')).toHaveAttribute('aria-valuetext', '50.0%');
+    expect(screen.getByRole('meter')).toHaveAttribute(
+      'aria-valuetext',
+      '50.0%',
+    );
     expect(screen.getByText('50.0%')).toBeInTheDocument();
   });
 
@@ -105,7 +102,9 @@ describe('Toast advanced lifecycle and accessibility', () => {
       });
     });
 
-    const actionBtn = await screen.findByRole('button', { name: 'Undo action' });
+    const actionBtn = await screen.findByRole('button', {
+      name: 'Undo action',
+    });
     expect(actionBtn).toBeInTheDocument();
     await userEvent.click(actionBtn);
     expect(handleAction).toHaveBeenCalledTimes(1);
