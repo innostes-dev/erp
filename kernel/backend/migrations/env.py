@@ -80,8 +80,17 @@ def do_run_migrations(connection: Connection) -> None:
     with context.begin_transaction():
         # Only one process migrates at a time (other API workers, replicas, the setup
         # CLI). Others wait here, then find nothing left to do. Released at commit.
-        connection.execute(text("SELECT pg_advisory_xact_lock(:id)"), {"id": MIGRATION_LOCK_ID})
-        connection.execute(text("ALTER TABLE IF EXISTS alembic_version ALTER COLUMN version_num TYPE character varying(128)"))
+        if connection.dialect.name == "postgresql":
+            connection.execute(text("SELECT pg_advisory_xact_lock(:id)"), {"id": MIGRATION_LOCK_ID})
+            connection.execute(text("ALTER TABLE IF EXISTS alembic_version ALTER COLUMN version_num TYPE character varying(128)"))
+            connection.execute(text("""
+                DO $$
+                BEGIN
+                    IF EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'alembic_version') THEN
+                        UPDATE alembic_version SET version_num = '0006_create_tracura_tables' WHERE version_num = '0006_create_api_logger_tables';
+                    END IF;
+                END $$;
+            """))
         context.run_migrations()
 
 
