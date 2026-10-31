@@ -50,34 +50,43 @@ class TracuraCaptureMiddleware(BaseHTTPMiddleware):
             )):
                 duration_ms = round((time.perf_counter() - start_time) * 1000.0, 2)
                 tenant_id = getattr(request.state, "tenant_id", None)
-                # If request has an active tenant, buffer the telemetry
-                if tenant_id:
-                    client_ip = request.client.host if request.client else None
-                    log_item = {
-                        "id": uuid.uuid4(),
-                        "tenant_id": tenant_id,
-                        "project_id": getattr(request.state, "project_id", tenant_id),
-                        "environment_id": getattr(request.state, "environment_id", tenant_id),
-                        "api_key_id": getattr(getattr(request.state, "api_key", None), "id", None),
-                        "correlation_id": correlation_id,
-                        "user_id": str(getattr(request.state, "user_id", "")) or None,
-                        "client_ip": client_ip,
-                        "user_agent": request.headers.get("user-agent"),
-                        "http_method": request.method.upper(),
-                        "url": str(request.url),
-                        "path": path,
-                        "status_code": status_code,
-                        "duration_ms": duration_ms,
-                        "request_headers": dict(request.headers),
-                        "query_params": dict(request.query_params),
-                        "request_body": None,
-                        "response_headers": None,
-                        "response_body": None,
-                        "error": error_payload,
-                        "meta": {"source": "asgi_auto_capture"},
-                        "created_at": datetime.now(timezone.utc),
-                    }
-                    await log_buffer.enqueue(log_item)
+                if not tenant_id:
+                    header_tid = request.headers.get("x-tenant-id")
+                    if header_tid:
+                        try:
+                            tenant_id = uuid.UUID(header_tid)
+                        except Exception:
+                            pass
+                if not tenant_id:
+                    # System tenant fallback for global platform & kernel endpoints
+                    tenant_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
+
+                client_ip = request.client.host if request.client else None
+                log_item = {
+                    "id": uuid.uuid4(),
+                    "tenant_id": tenant_id,
+                    "project_id": getattr(request.state, "project_id", tenant_id),
+                    "environment_id": getattr(request.state, "environment_id", tenant_id),
+                    "api_key_id": getattr(getattr(request.state, "api_key", None), "id", None),
+                    "correlation_id": correlation_id,
+                    "user_id": str(getattr(request.state, "user_id", "")) or None,
+                    "client_ip": client_ip,
+                    "user_agent": request.headers.get("user-agent"),
+                    "http_method": request.method.upper(),
+                    "url": str(request.url),
+                    "path": path,
+                    "status_code": status_code,
+                    "duration_ms": duration_ms,
+                    "request_headers": dict(request.headers),
+                    "query_params": dict(request.query_params),
+                    "request_body": None,
+                    "response_headers": None,
+                    "response_body": None,
+                    "error": error_payload,
+                    "meta": {"source": "asgi_auto_capture"},
+                    "created_at": datetime.now(timezone.utc),
+                }
+                await log_buffer.enqueue(log_item)
 
 
 # Backwards compatibility alias

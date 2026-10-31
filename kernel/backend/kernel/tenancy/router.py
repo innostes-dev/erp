@@ -113,6 +113,7 @@ async def _get_or_404(
 )
 async def create_tenant(
     body: TenantCreate,
+    request: Request,
     service: TenantService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
 ) -> Tenant:
@@ -123,6 +124,7 @@ async def create_tenant(
     \f
     Args:
         body: Tenant fields.
+        request: FastAPI HTTP request.
         service: Injected tenant service.
         actor_id: Injected id of the calling user, or None.
 
@@ -132,7 +134,34 @@ async def create_tenant(
     Raises:
         SlugTakenError: The slug is taken (409).
     """
-    return await service.create(body, actor_id)
+    tenant = await service.create(body, actor_id)
+
+    try:
+        from kernel.audit import audit_service
+        client_ip = request.client.host if request.client else None
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=service.session,
+            action="CREATE",
+            entity_type="tenant",
+            entity_id=str(tenant.id),
+            entity_name=tenant.name,
+            changes={"name": {"old": None, "new": tenant.name}, "slug": {"old": None, "new": tenant.slug}},
+            tenant_id=tenant.id,
+            actor_id=actor_id,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason=f"Created tenant organisation '{tenant.name}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
+    return tenant
 
 
 @router.get(
@@ -224,6 +253,7 @@ async def get_tenant(
 )
 async def update_tenant(
     body: TenantUpdate,
+    request: Request,
     tenant_id: uuid.UUID = TenantId,
     service: TenantService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
@@ -235,6 +265,7 @@ async def update_tenant(
     \f
     Args:
         body: Fields to change.
+        request: FastAPI HTTP request.
         tenant_id: Tenant id from the URL.
         service: Injected tenant service.
         actor_id: Injected id of the calling user, or None.
@@ -247,7 +278,37 @@ async def update_tenant(
         SlugTakenError: The slug is taken (409).
     """
     tenant = await _get_or_404(service, tenant_id)
-    return await service.update(tenant, body, actor_id)
+    old_state = {"name": tenant.name, "slug": tenant.slug, "country": tenant.country, "timezone": tenant.timezone}
+    updated = await service.update(tenant, body, actor_id)
+
+    try:
+        from kernel.audit import audit_service
+        new_state = {"name": updated.name, "slug": updated.slug, "country": updated.country, "timezone": updated.timezone}
+        client_ip = request.client.host if request.client else None
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=service.session,
+            action="UPDATE",
+            entity_type="tenant",
+            entity_id=str(updated.id),
+            entity_name=updated.name,
+            old_state=old_state,
+            new_state=new_state,
+            tenant_id=updated.id,
+            actor_id=actor_id,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason=f"Updated tenant organisation '{updated.name}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
+    return updated
 
 
 @router.delete(
@@ -263,6 +324,7 @@ async def update_tenant(
     ),
 )
 async def delete_tenant(
+    request: Request,
     tenant_id: uuid.UUID = TenantId,
     service: TenantService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
@@ -274,6 +336,7 @@ async def delete_tenant(
     `POST /tenants/{tenant_id}/restore`.
     \f
     Args:
+        request: FastAPI HTTP request.
         tenant_id: Tenant id from the URL.
         service: Injected tenant service.
         actor_id: Injected id of the calling user, or None.
@@ -285,7 +348,34 @@ async def delete_tenant(
         TenantNotFoundError: Not found or already deleted (404).
     """
     tenant = await _get_or_404(service, tenant_id)
-    return await service.soft_delete(tenant, actor_id)
+    deleted = await service.soft_delete(tenant, actor_id)
+
+    try:
+        from kernel.audit import audit_service
+        client_ip = request.client.host if request.client else None
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=service.session,
+            action="DELETE",
+            entity_type="tenant",
+            entity_id=str(deleted.id),
+            entity_name=deleted.name,
+            changes={"deleted": {"old": False, "new": True}},
+            tenant_id=deleted.id,
+            actor_id=actor_id,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason=f"Soft-deleted tenant organisation '{deleted.name}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
+    return deleted
 
 
 @router.post(
@@ -301,6 +391,7 @@ async def delete_tenant(
     ),
 )
 async def restore_tenant(
+    request: Request,
     tenant_id: uuid.UUID = TenantId,
     service: TenantService = Depends(get_service),
     actor_id: uuid.UUID | None = Depends(get_actor_id),
@@ -311,6 +402,7 @@ async def restore_tenant(
     Calling on an active tenant is harmless and idempotent.
     \f
     Args:
+        request: FastAPI HTTP request.
         tenant_id: Tenant id from the URL.
         service: Injected tenant service.
         actor_id: Injected id of the calling user, or None.
@@ -322,7 +414,34 @@ async def restore_tenant(
         TenantNotFoundError: The tenant never existed (404).
     """
     tenant = await _get_or_404(service, tenant_id, include_deleted=True)
-    return await service.restore(tenant, actor_id)
+    restored = await service.restore(tenant, actor_id)
+
+    try:
+        from kernel.audit import audit_service
+        client_ip = request.client.host if request.client else None
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=service.session,
+            action="RESTORE",
+            entity_type="tenant",
+            entity_id=str(restored.id),
+            entity_name=restored.name,
+            changes={"deleted": {"old": True, "new": False}},
+            tenant_id=restored.id,
+            actor_id=actor_id,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason=f"Restored tenant organisation '{restored.name}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
+    return restored
 
 
 # ---------------------------------------------------------------------------
@@ -460,6 +579,7 @@ async def list_current_modules(
 )
 async def activate_module(
     module_id: str = Path(description="Package identifier of business module to activate.", examples=["hrms"]),
+    request: Request = None,
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
@@ -471,6 +591,7 @@ async def activate_module(
     \f
     Args:
         module_id: Identifier of target module.
+        request: FastAPI HTTP request.
         session: Active async database session.
         admin_user: Authenticated administrator.
         tenant_id: Active tenant UUID context.
@@ -496,6 +617,36 @@ async def activate_module(
             activated_by=admin_user.id,
         )
         session.add(rec)
+
+    try:
+        from kernel.audit import audit_service
+        actor_name = f"{admin_user.first_name} {admin_user.last_name}".strip()
+        actor_email = getattr(admin_user, "email", None)
+        client_ip = request.client.host if (request and request.client) else None
+        forwarded = request.headers.get("X-Forwarded-For") if request else None
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=session,
+            action="RBAC_CHANGE",
+            entity_type="tenant_module",
+            entity_id=module_id,
+            entity_name=f"Module {module_id}",
+            changes={"is_active": {"old": False, "new": True}},
+            tenant_id=tenant_id,
+            actor_id=admin_user.id,
+            actor_email=actor_email,
+            actor_name=actor_name or actor_email,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent") if request else None,
+            correlation_id=(request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None)) if request else None,
+            reason=f"Activated module '{module_id}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
     await session.commit()
     return ActivationResponse(
         item_id=module_id,
@@ -518,6 +669,7 @@ async def activate_module(
 )
 async def deactivate_module(
     module_id: str = Path(description="Package identifier of business module to deactivate.", examples=["hrms"]),
+    request: Request = None,
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
@@ -529,6 +681,7 @@ async def deactivate_module(
     \f
     Args:
         module_id: Identifier of target module.
+        request: FastAPI HTTP request.
         session: Active async database session.
         admin_user: Authenticated administrator.
         tenant_id: Active tenant UUID context.
@@ -544,7 +697,37 @@ async def deactivate_module(
         rec.is_active = False
         rec.activated_at = None
         rec.activated_by = None
-        await session.commit()
+
+    try:
+        from kernel.audit import audit_service
+        actor_name = f"{admin_user.first_name} {admin_user.last_name}".strip()
+        actor_email = getattr(admin_user, "email", None)
+        client_ip = request.client.host if (request and request.client) else None
+        forwarded = request.headers.get("X-Forwarded-For") if request else None
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=session,
+            action="RBAC_CHANGE",
+            entity_type="tenant_module",
+            entity_id=module_id,
+            entity_name=f"Module {module_id}",
+            changes={"is_active": {"old": True, "new": False}},
+            tenant_id=tenant_id,
+            actor_id=admin_user.id,
+            actor_email=actor_email,
+            actor_name=actor_name or actor_email,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent") if request else None,
+            correlation_id=(request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None)) if request else None,
+            reason=f"Deactivated module '{module_id}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
+    await session.commit()
     return ActivationResponse(
         item_id=module_id,
         is_active=False,
@@ -648,6 +831,7 @@ async def list_current_plugins(
 )
 async def activate_plugin(
     plugin_id: str = Path(description="Package identifier of extensible plugin to activate.", examples=["tracura"]),
+    request: Request = None,
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
@@ -659,6 +843,7 @@ async def activate_plugin(
     \f
     Args:
         plugin_id: Identifier of target plugin.
+        request: FastAPI HTTP request.
         session: Active async database session.
         admin_user: Authenticated administrator.
         tenant_id: Active tenant UUID context.
@@ -684,6 +869,36 @@ async def activate_plugin(
             activated_by=admin_user.id,
         )
         session.add(rec)
+
+    try:
+        from kernel.audit import audit_service
+        actor_name = f"{admin_user.first_name} {admin_user.last_name}".strip()
+        actor_email = getattr(admin_user, "email", None)
+        client_ip = request.client.host if (request and request.client) else None
+        forwarded = request.headers.get("X-Forwarded-For") if request else None
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=session,
+            action="RBAC_CHANGE",
+            entity_type="tenant_plugin",
+            entity_id=plugin_id,
+            entity_name=f"Plugin {plugin_id}",
+            changes={"is_active": {"old": False, "new": True}},
+            tenant_id=tenant_id,
+            actor_id=admin_user.id,
+            actor_email=actor_email,
+            actor_name=actor_name or actor_email,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent") if request else None,
+            correlation_id=(request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None)) if request else None,
+            reason=f"Activated plugin '{plugin_id}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
     await session.commit()
     return ActivationResponse(
         item_id=plugin_id,
@@ -706,6 +921,7 @@ async def activate_plugin(
 )
 async def deactivate_plugin(
     plugin_id: str = Path(description="Package identifier of extensible plugin to deactivate.", examples=["tracura"]),
+    request: Request = None,
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
@@ -717,6 +933,7 @@ async def deactivate_plugin(
     \f
     Args:
         plugin_id: Identifier of target plugin.
+        request: FastAPI HTTP request.
         session: Active async database session.
         admin_user: Authenticated administrator.
         tenant_id: Active tenant UUID context.
@@ -732,7 +949,37 @@ async def deactivate_plugin(
         rec.is_active = False
         rec.activated_at = None
         rec.activated_by = None
-        await session.commit()
+
+    try:
+        from kernel.audit import audit_service
+        actor_name = f"{admin_user.first_name} {admin_user.last_name}".strip()
+        actor_email = getattr(admin_user, "email", None)
+        client_ip = request.client.host if (request and request.client) else None
+        forwarded = request.headers.get("X-Forwarded-For") if request else None
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=session,
+            action="RBAC_CHANGE",
+            entity_type="tenant_plugin",
+            entity_id=plugin_id,
+            entity_name=f"Plugin {plugin_id}",
+            changes={"is_active": {"old": True, "new": False}},
+            tenant_id=tenant_id,
+            actor_id=admin_user.id,
+            actor_email=actor_email,
+            actor_name=actor_name or actor_email,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent") if request else None,
+            correlation_id=(request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None)) if request else None,
+            reason=f"Deactivated plugin '{plugin_id}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
+    await session.commit()
     return ActivationResponse(
         item_id=plugin_id,
         is_active=False,

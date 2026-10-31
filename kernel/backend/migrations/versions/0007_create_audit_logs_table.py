@@ -53,6 +53,11 @@ def upgrade() -> None:
         sa.Column("reason", sa.Text(), nullable=True),
         sa.Column("status", sa.String(20), nullable=False, server_default="SUCCESS", index=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False, index=True),
+        sa.Column("created_by", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column("updated_by", postgresql.UUID(as_uuid=True), nullable=True),
+        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True, index=True),
+        sa.Column("deleted_by", postgresql.UUID(as_uuid=True), nullable=True),
     )
     # Composite index for entity history queries
     op.create_index(

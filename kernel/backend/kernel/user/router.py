@@ -54,6 +54,7 @@ async def get_current_user_dep(
 )
 async def create_user(
     body: UserCreate,
+    request: Request,
     current_user: User = Depends(get_current_user_dep),
     session: AsyncSession = Depends(get_db),
     service: UserService = Depends(get_service),
@@ -65,6 +66,7 @@ async def create_user(
     \f
     Args:
         body: User registration fields.
+        request: FastAPI HTTP request.
         current_user: Authenticated actor.
         session: Active async database session.
         service: Injected user domain service.
@@ -73,6 +75,41 @@ async def create_user(
         UserRead record with decrypted identifiers.
     """
     user = await service.create_user(session, body)
+
+    try:
+        from kernel.audit import audit_service
+        actor_name = f"{current_user.first_name} {current_user.last_name}".strip()
+        actor_email = getattr(current_user, "email", None)
+        target_name = f"{user.first_name} {user.last_name}".strip()
+        client_ip = request.client.host if request.client else None
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            client_ip = forwarded.split(",")[0].strip()
+
+        await audit_service.record(
+            session=session,
+            action="CREATE",
+            entity_type="user",
+            entity_id=str(user.id),
+            entity_name=target_name or body.email,
+            changes={
+                "first_name": {"old": None, "new": user.first_name},
+                "last_name": {"old": None, "new": user.last_name},
+                "email": {"old": None, "new": body.email},
+            },
+            tenant_id=getattr(current_user, "tenant_id", None) or getattr(user, "tenant_id", None),
+            actor_id=current_user.id,
+            actor_email=actor_email,
+            actor_name=actor_name or actor_email,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason=f"Registered user account '{body.email}'",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
     await session.commit()
     return service.to_user_read(user)
 

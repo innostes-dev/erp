@@ -102,6 +102,27 @@ async def login(
     ip = get_client_ip(request)
     ua = request.headers.get("User-Agent")
     result = await auth_service.login(session, body, ip_address=ip, user_agent=ua)
+
+    try:
+        from kernel.audit import audit_service
+        await audit_service.record(
+            session=session,
+            action="LOGIN",
+            entity_type="user",
+            entity_id=str(result.user.id),
+            entity_name=f"{result.user.first_name} {result.user.last_name}".strip() or result.user.email,
+            actor_id=result.user.id,
+            actor_email=result.user.email,
+            actor_name=f"{result.user.first_name} {result.user.last_name}".strip() or result.user.email,
+            ip_address=ip,
+            user_agent=ua,
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason="User authenticated via password credentials",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
     await session.commit()
 
     # Set secure HttpOnly cookies for web browsers (XSS & CSRF protection)
@@ -276,6 +297,7 @@ async def reset_password(
 )
 async def change_password(
     body: ChangePasswordRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
     auth_service: AuthService = Depends(get_auth_service),
@@ -287,6 +309,7 @@ async def change_password(
     \f
     Args:
         body: Current credentials and new password.
+        request: FastAPI HTTP request.
         current_user: Authenticated actor.
         session: Active async database session.
         auth_service: Injected authentication domain service.
@@ -295,6 +318,30 @@ async def change_password(
         MessageResponse confirming credential update.
     """
     result = await auth_service.change_password(session, current_user.id, body)
+
+    try:
+        from kernel.audit import audit_service
+        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
+        user_email = getattr(current_user, "email", None)
+        await audit_service.record(
+            session=session,
+            action="PASSWORD_RESET",
+            entity_type="user",
+            entity_id=str(current_user.id),
+            entity_name=user_name or user_email or "User",
+            tenant_id=getattr(current_user, "tenant_id", None),
+            actor_id=current_user.id,
+            actor_email=user_email,
+            actor_name=user_name or user_email,
+            ip_address=get_client_ip(request),
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason="User changed account password",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
     await session.commit()
     return result
 
@@ -310,6 +357,7 @@ async def change_password(
 )
 async def logout(
     body: LogoutRequest,
+    request: Request,
     response: Response,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
@@ -322,6 +370,7 @@ async def logout(
     \f
     Args:
         body: Revocation scope options.
+        request: FastAPI HTTP request.
         response: FastAPI HTTP response.
         current_user: Authenticated actor.
         session: Active async database session.
@@ -331,6 +380,30 @@ async def logout(
         MessageResponse confirming session termination.
     """
     result = await auth_service.logout(session, current_user.id, body)
+
+    try:
+        from kernel.audit import audit_service
+        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
+        user_email = getattr(current_user, "email", None)
+        await audit_service.record(
+            session=session,
+            action="LOGOUT",
+            entity_type="user",
+            entity_id=str(current_user.id),
+            entity_name=user_name or user_email or "User",
+            tenant_id=getattr(current_user, "tenant_id", None),
+            actor_id=current_user.id,
+            actor_email=user_email,
+            actor_name=user_name or user_email,
+            ip_address=get_client_ip(request),
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason="User logged out of all active sessions" if body.logout_all else "User logged out of active session",
+            status="SUCCESS",
+        )
+    except Exception:
+        pass
+
     await session.commit()
 
     # Clear HttpOnly cookies
@@ -416,6 +489,7 @@ async def list_api_keys(
 )
 async def create_api_key(
     body: CreateApiKeyRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db),
     api_key_service: ApiKeyService = Depends(get_api_key_service),
@@ -427,6 +501,7 @@ async def create_api_key(
     \f
     Args:
         body: Key label, expiration duration, and permission scopes.
+        request: FastAPI HTTP request.
         current_user: Authenticated actor.
         session: Active async database session.
         api_key_service: Injected API key domain service.
@@ -443,6 +518,32 @@ async def create_api_key(
         scopes=body.scopes,
         expires_in_days=body.expires_in_days,
     )
+
+    try:
+        from kernel.audit import audit_service
+        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
+        user_email = getattr(current_user, "email", None)
+        await audit_service.record(
+            session=session,
+            action="CREATE",
+            entity_type="api_key",
+            entity_id=str(key.id),
+            entity_name=key.name,
+            changes={"name": {"old": None, "new": key.name}, "scopes": {"old": None, "new": key.scopes}},
+            tenant_id=tenant_id,
+            actor_id=current_user.id,
+            actor_email=user_email,
+            actor_name=user_name or user_email,
+            ip_address=get_client_ip(request),
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason=f"Generated API key '{key.name}'",
+            status="SUCCESS",
+        )
+        await session.commit()
+    except Exception:
+        pass
+
     read_data = ApiKeyRead.model_validate(key).model_dump()
     return ApiKeyCreatedResponse(**read_data, raw_key=raw_key)
 
@@ -457,6 +558,7 @@ async def create_api_key(
     responses=error_responses(UnauthorizedError, NotFoundError),
 )
 async def revoke_api_key(
+    request: Request,
     key_id: uuid.UUID = Path(
         description="Unique identifier of the API key to revoke.",
         examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
@@ -472,6 +574,7 @@ async def revoke_api_key(
     \f
     Args:
         key_id: Unique UUID of target API key.
+        request: FastAPI HTTP request.
         current_user: Authenticated actor.
         session: Active async database session.
         api_key_service: Injected API key domain service.
@@ -481,4 +584,30 @@ async def revoke_api_key(
     """
     tenant_id = getattr(current_user, "tenant_id", None) or current_user.id
     revoked = await api_key_service.revoke_api_key(session, key_id, tenant_id)
+
+    try:
+        from kernel.audit import audit_service
+        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
+        user_email = getattr(current_user, "email", None)
+        await audit_service.record(
+            session=session,
+            action="DELETE",
+            entity_type="api_key",
+            entity_id=str(key_id),
+            entity_name=revoked.name,
+            changes={"is_active": {"old": True, "new": False}},
+            tenant_id=tenant_id,
+            actor_id=current_user.id,
+            actor_email=user_email,
+            actor_name=user_name or user_email,
+            ip_address=get_client_ip(request),
+            user_agent=request.headers.get("User-Agent"),
+            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
+            reason=f"Revoked API key '{revoked.name}'",
+            status="SUCCESS",
+        )
+        await session.commit()
+    except Exception:
+        pass
+
     return ApiKeyRead.model_validate(revoked)
