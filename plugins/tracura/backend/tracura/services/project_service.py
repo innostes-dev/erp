@@ -1,6 +1,7 @@
 """API Logger Project & Environment Management Service."""
 
 from datetime import datetime, timezone
+import os
 import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,7 +50,21 @@ class ProjectService:
             .options(selectinload(ApiLogProject.environments))
         )
         existing = (await session.execute(stmt)).scalar_one_or_none()
+        current_env = (os.environ.get("APP_ENV") or "development").strip().lower() or "development"
         if existing:
+            existing_slugs = {e.slug for e in (existing.environments or [])}
+            if current_env not in existing_slugs:
+                custom_env = ApiLogEnvironment(
+                    id=get_default_env_id(default_pid, current_env),
+                    project_id=existing.id,
+                    tenant_id=tenant_id,
+                    name=current_env.capitalize(),
+                    slug=current_env,
+                    color_badge="purple",
+                )
+                session.add(custom_env)
+                await session.flush()
+                return await self.get_project(session, tenant_id, default_pid) or existing
             return existing
 
         project = ApiLogProject(
@@ -86,7 +101,20 @@ class ProjectService:
             slug="development",
             color_badge="blue",
         )
-        session.add_all([prod_env, staging_env, dev_env])
+        envs_to_add = [prod_env, staging_env, dev_env]
+
+        if current_env not in {"production", "staging", "development"}:
+            custom_env = ApiLogEnvironment(
+                id=get_default_env_id(default_pid, current_env),
+                project_id=project.id,
+                tenant_id=tenant_id,
+                name=current_env.capitalize(),
+                slug=current_env,
+                color_badge="purple",
+            )
+            envs_to_add.append(custom_env)
+
+        session.add_all(envs_to_add)
         await session.flush()
 
         return (
