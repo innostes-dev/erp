@@ -1,7 +1,8 @@
 -e ../../kernel/backend
 -e ../../modules/hrms/backend
 -e ../../modules/crm/backend
--e ../../plugins/api-logger/backend
+-e ../../plugins/tracura/backend
 fastapi[standard]>=0.158
 jsonschema>=4.20.0
 import-linter>=2.15
+redis>=5.0.0

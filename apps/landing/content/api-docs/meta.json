@@ -13,7 +13,7 @@
     "...user-management",
     "...crm",
     "...hrms",
-    "...api-logger",
+    "...tracura",
     "---Data Models---",
     "...schemas",
     "---Policies & Reference---",

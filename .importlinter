@@ -5,6 +5,7 @@ root_packages =
     hrms
     crm
     api_logger
+    tracura
 
 [importlinter:contract:rule-1-engine-does-not-import-plugins]
 name = RULE-1: Engine does not import specific plugins (docs/architecture/overview#dependency-rules)
@@ -19,6 +20,7 @@ forbidden_modules =
     hrms
     crm
     api_logger
+    tracura
 
 [importlinter:contract:rule-2-plugins-never-import-engine]
 name = RULE-2: Plugins never import engine (docs/architecture/overview#dependency-rules)
@@ -28,6 +30,7 @@ source_modules =
     hrms
     crm
     api_logger
+    tracura
 forbidden_modules =
     app
 
@@ -40,6 +43,7 @@ forbidden_modules =
     hrms
     crm
     api_logger
+    tracura
 
 [importlinter:contract:rule-4-kernel-core-isolation]
 name = RULE-4: Kernel core imports no feature modules (docs/architecture/kernel#backend-layout)
@@ -54,6 +58,7 @@ forbidden_modules =
     hrms
     crm
     api_logger
+    tracura
 
 [importlinter:contract:rule-5-kernel-layering]
 name = RULE-5: Kernel features follow layered order core <- setup <- tenancy <- user <- auth (docs/architecture/overview#dependency-rules)

@@ -14,3 +14,4 @@ export * from './sparkline/sparkline';
 export * from './user-menu/user-menu';
 export * from './welcome-banner/welcome-banner';
 export * from './widget-card/widget-card';
+export * from './charts';

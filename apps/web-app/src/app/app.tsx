@@ -23,7 +23,7 @@ function AppRouter() {
     }
   }
 
-  // 2. Dedicated Plugin Shell (e.g. /plugins/api-logger)
+  // 2. Dedicated Plugin Shell (e.g. /plugins/tracura)
   if (path.startsWith('/plugins/')) {
     const pluginId = path.replace('/plugins/', '').split('/')[0];
     if (pluginId) {

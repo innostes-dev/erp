@@ -5,7 +5,7 @@
     "${workspaceFolder}/kernel/backend",
     "${workspaceFolder}/modules/crm/backend",
     "${workspaceFolder}/modules/hrms/backend",
-    "${workspaceFolder}/plugins/api-logger/backend"
+    "${workspaceFolder}/plugins/tracura/backend"
   ],
   "python-envs.pythonProjects": [
     {

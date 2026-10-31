@@ -65,6 +65,7 @@ function getItemIcon(id: string) {
       return <Users className="size-5" />;
     case 'crm':
       return <Building2 className="size-5" />;
+    case 'tracura':
     case 'api-logger':
       return <Activity className="size-5" />;
     default:

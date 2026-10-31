@@ -35,7 +35,7 @@
       "python": "${workspaceFolder}/apps/api-server/.venv/bin/python",
       "envFile": "${workspaceFolder}/.env",
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/apps/api-server:${workspaceFolder}/kernel/backend:${workspaceFolder}/modules/hrms/backend:${workspaceFolder}/modules/crm/backend:${workspaceFolder}/plugins/api-logger/backend",
+        "PYTHONPATH": "${workspaceFolder}/apps/api-server:${workspaceFolder}/kernel/backend:${workspaceFolder}/modules/hrms/backend:${workspaceFolder}/modules/crm/backend:${workspaceFolder}/plugins/tracura/backend",
         "PYTHONUNBUFFERED": "1"
       },
       "justMyCode": false

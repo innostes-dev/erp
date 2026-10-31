@@ -19,7 +19,7 @@ import {
   EmptyState,
 } from '@innostes/ui';
 import { useAuth } from '@innostes/kernel';
-import { ApiLoggerPage } from '@innostes/api-logger';
+import { TracuraPage } from '@innostes/tracura';
 import {
   ArrowLeft,
   Puzzle,
@@ -37,6 +37,7 @@ interface PluginShellLayoutProps {
 
 function getPluginIcon(id: string) {
   switch (id) {
+    case 'tracura':
     case 'api-logger':
       return <Activity className="size-4" />;
     default:
@@ -170,8 +171,8 @@ export function PluginShellLayout({ pluginId }: PluginShellLayoutProps) {
               </div>
             }
           />
-        ) : pluginId === 'api-logger' ? (
-          <ApiLoggerPage />
+        ) : pluginId === 'tracura' || pluginId === 'api-logger' ? (
+          <TracuraPage />
         ) : (
           <div className="p-8 text-center text-muted-foreground">
             Unknown Plugin: {pluginId}

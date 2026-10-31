@@ -62,7 +62,7 @@ class ServiceInfoRead(BaseModel):
     status: str = Field(description="High-level operational status of the service.", examples=["online"])
     modules: list[str] = Field(
         description="List of discovered and registered ERP plug-in modules.",
-        examples=[["auth", "setup", "tenancy", "user", "crm", "hrms", "api-logger"]],
+        examples=[["auth", "setup", "tenancy", "user", "crm", "hrms", "tracura"]],
     )
 
     model_config = {
@@ -72,7 +72,7 @@ class ServiceInfoRead(BaseModel):
                     "service": "Innostes ERP API Server",
                     "environment": "development",
                     "status": "online",
-                    "modules": ["auth", "setup", "tenancy", "user", "crm", "hrms", "api-logger"],
+                    "modules": ["auth", "setup", "tenancy", "user", "crm", "hrms", "tracura"],
                 }
             ]
         }

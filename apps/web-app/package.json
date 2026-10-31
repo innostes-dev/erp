@@ -6,7 +6,7 @@
     "name": "web-app"
   },
   "dependencies": {
-    "@innostes/api-logger": "workspace:*",
+    "@innostes/tracura": "workspace:*",
     "@innostes/crm": "workspace:*",
     "@innostes/hrms": "workspace:*",
     "@innostes/kernel": "workspace:*",

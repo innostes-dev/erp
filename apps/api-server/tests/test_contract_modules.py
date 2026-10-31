@@ -51,11 +51,11 @@ class TestContractModules(unittest.TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         validate_response_contract(res.json(), "/hrms/info", "get", res.status_code)
 
-    def test_api_logger_info__200_returns_plugin_info(self) -> None:
-        """GET /plugins/api-logger/info returns 200 with plugin metadata."""
-        res = self.client.get("/plugins/api-logger/info")
+    def test_tracura_info__200_returns_plugin_info(self) -> None:
+        """GET /plugins/tracura/info returns 200 with plugin metadata."""
+        res = self.client.get("/plugins/tracura/info")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        validate_response_contract(res.json(), "/plugins/api-logger/info", "get", res.status_code)
+        validate_response_contract(res.json(), "/plugins/tracura/info", "get", res.status_code)
 
 
 if __name__ == "__main__":

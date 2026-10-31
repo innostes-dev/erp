@@ -1,4 +1,4 @@
-import { apiLoggerManifest } from '@innostes/api-logger';
+import { tracuraManifest } from '@innostes/tracura';
 import { crmManifest } from '@innostes/crm';
 import { hrmsManifest } from '@innostes/hrms';
 
@@ -20,5 +20,5 @@ export const BUSINESS_MODULES_CATALOG: CatalogItem[] = [
 ];
 
 export const PLUGINS_CATALOG: CatalogItem[] = [
-  apiLoggerManifest,
+  tracuraManifest,
 ];

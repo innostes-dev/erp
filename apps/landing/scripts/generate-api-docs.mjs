@@ -21,11 +21,15 @@ const spec = JSON.parse(readFileSync(openapiPath, 'utf8'));
 mkdirSync(publicDir, { recursive: true });
 copyFileSync(openapiPath, join(publicDir, 'openapi.json'));
 
-const toKebab = (str) =>
-  str
+const toKebab = (str) => {
+  const result = str
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
     .replace(/[_\s]+/g, '-')
     .toLowerCase();
+  if (result === 'api-logger-get-info') return 'tracura-get-info';
+  if (result === 'api-logger-info-response') return 'tracura-info-response';
+  return result;
+};
 
 const tagSlugs = {
   General: 'general',
@@ -36,7 +40,8 @@ const tagSlugs = {
   'User management': 'user-management',
   CRM: 'crm',
   HRMS: 'hrms',
-  'API logger': 'api-logger',
+  'API logger': 'tracura',
+  Tracura: 'tracura',
 };
 
 const tagOrder = [
@@ -60,7 +65,8 @@ const tagDescriptions = {
   'User management': 'User account provisioning, role queries, and profile management.',
   CRM: 'Customer Relationship Management module operations.',
   HRMS: 'Human Resource Management System module operations.',
-  'API logger': 'Request audit logging and inspection module.',
+  'API logger': 'Tracura open-source API telemetry, tracing, and request inspection engine.',
+  Tracura: 'Tracura open-source API telemetry, tracing, and request inspection engine.',
 };
 
 // Ensure content/api-docs/ exists; do not delete guides folder
@@ -613,7 +619,7 @@ Explore endpoints organized by functional subsystem:
 | [User Management](/api-reference/user-management/create-user) | Account provisioning, role assignments, and authenticated caller profile. | 2 endpoints |
 | [CRM](/api-reference/crm/crm-info) | Customer Relationship Management subsystem info and records. | 1 endpoint |
 | [HRMS](/api-reference/hrms/hrms-info) | Human Resource Management System employee and organizational directory. | 1 endpoint |
-| [API Logger](/api-reference/api-logger/api-logger-info) | HTTP request audit logging and inspection service metadata. | 1 endpoint |
+| [Tracura](/api-reference/tracura/tracura-get-info) | Open-source API telemetry, tracing, and request inspection engine. | 1 endpoint |
 | [Data Models](/api-reference/schemas) | Complete catalogue of all 41 request and response schemas. | 41 schemas |
 | [Error Codes](/api-reference/policies/error-codes) | Complete catalogue of machine-readable error codes and HTTP statuses. | Reference |
 | [Policies](/api-reference/policies/versioning) | Versioning, deprecation, limits, security, and changelog policies. | Policies |

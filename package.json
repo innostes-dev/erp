@@ -10,7 +10,7 @@
     "dev:backend": "nx serve api-server",
     "dev:web-app": "nx serve web-app",
     "dev:landing": "nx dev landing",
-    "arch-check": "node scripts/checks/check-ts-boundaries.mjs && PYTHONPATH=\"apps/api-server:kernel/backend:modules/hrms/backend:modules/crm/backend:plugins/api-logger/backend\" apps/api-server/.venv/bin/lint-imports --config=.importlinter && PYTHONPATH=\"kernel/backend\" apps/api-server/.venv/bin/python -m unittest discover -s kernel/backend/tests -p \"test_architecture_fitness.py\"",
+    "arch-check": "node scripts/checks/check-ts-boundaries.mjs && PYTHONPATH=\"apps/api-server:kernel/backend:modules/hrms/backend:modules/crm/backend:plugins/tracura/backend\" apps/api-server/.venv/bin/lint-imports --config=.importlinter && PYTHONPATH=\"kernel/backend\" apps/api-server/.venv/bin/python -m unittest discover -s kernel/backend/tests -p \"test_architecture_fitness.py\"",
     "arch-docs-check": "pnpm nx run landing:arch-docs-check"
   },
   "private": true,

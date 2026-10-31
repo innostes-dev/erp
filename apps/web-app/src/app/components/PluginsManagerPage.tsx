@@ -28,6 +28,7 @@ import type { CatalogItem } from '../catalog';
 
 function getPluginIcon(id: string) {
   switch (id) {
+    case 'tracura':
     case 'api-logger':
       return <Activity className="size-5" />;
     default:

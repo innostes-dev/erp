@@ -13,7 +13,7 @@ class ItemCatalogRead(BaseSchema):
     """Metadata describing an installed module or plugin package in the catalog."""
 
     id: str = Field(
-        description="Unique package identifier string (e.g. 'hrms', 'crm', 'api-logger').",
+        description="Unique package identifier string (e.g. 'hrms', 'crm', 'tracura').",
         examples=["hrms"],
     )
     name: str = Field(
@@ -130,12 +130,12 @@ class PluginListResponse(BaseSchema):
         examples=[
             [
                 {
-                    "id": "api-logger",
-                    "name": "API Logger",
+                    "id": "tracura",
+                    "name": "Tracura",
                     "version": "0.1.0",
                     "type": "plugin",
-                    "description": "API request logging, webhook inspection, and debugging",
-                    "tags": ["Logs", "Webhooks", "Analytics"],
+                    "description": "Enterprise API observability and telemetry",
+                    "tags": ["Logs", "Telemetry", "Analytics"],
                     "tone": "chart-5",
                     "is_active": True,
                     "activated_at": "2026-10-29T10:00:00Z",
@@ -145,7 +145,7 @@ class PluginListResponse(BaseSchema):
     )
     active_ids: list[str] = Field(
         description="List of plugin IDs currently enabled for the tenant.",
-        examples=[["api-logger"]],
+        examples=[["tracura"]],
     )
 
     model_config = ConfigDict(
@@ -154,18 +154,18 @@ class PluginListResponse(BaseSchema):
                 {
                     "installed": [
                         {
-                            "id": "api-logger",
-                            "name": "API Logger",
+                            "id": "tracura",
+                            "name": "Tracura",
                             "version": "0.1.0",
                             "type": "plugin",
-                            "description": "API request logging, webhook inspection, and debugging",
-                            "tags": ["Logs", "Webhooks", "Analytics"],
+                            "description": "Enterprise API observability and telemetry",
+                            "tags": ["Logs", "Telemetry", "Analytics"],
                             "tone": "chart-5",
                             "is_active": True,
                             "activated_at": "2026-10-29T10:00:00Z",
                         }
                     ],
-                    "active_ids": ["api-logger"],
+                    "active_ids": ["tracura"],
                 }
             ]
         }

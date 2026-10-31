@@ -1,6 +1,6 @@
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { Button } from '@innostes/ui';
-import { BookOpen, Layers, Server } from 'lucide-react';
+import { Activity, BookOpen, Layers, Server } from 'lucide-react';
 import { baseOptions } from '@/lib/layout.shared';
 
 export default function Layout({ children }: LayoutProps<'/'>) {
@@ -9,6 +9,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
       {...baseOptions()}
       links={[
         { text: 'Home', url: '/', active: 'url' },
+        { text: 'Tracura', url: '/plugins/tracura', active: 'nested-url' },
         {
           type: 'menu',
           text: 'Docs',
@@ -18,6 +19,13 @@ export default function Layout({ children }: LayoutProps<'/'>) {
               description: 'Set up, run and build the innostes platform.',
               url: '/docs',
               icon: <BookOpen />,
+            },
+            {
+              text: 'Tracura Observability Docs',
+              description:
+                'Universal telemetry ingestion, scoped keys & API reference.',
+              url: '/plugins/tracura/docs',
+              icon: <Activity />,
             },
             {
               text: 'innostes UI Docs',

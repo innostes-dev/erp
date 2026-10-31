@@ -42,6 +42,7 @@ export function runTsBoundaryCheck() {
         imp.startsWith('@innostes/web-app') ||
         imp.startsWith('@innostes/hrms') ||
         imp.startsWith('@innostes/crm') ||
+        imp.startsWith('@innostes/tracura') ||
         imp.startsWith('@innostes/api-logger') ||
         imp.includes('../../kernel') ||
         imp.includes('../../modules') ||
@@ -69,6 +70,7 @@ export function runTsBoundaryCheck() {
         imp.startsWith('@innostes/web-app') ||
         imp.startsWith('@innostes/hrms') ||
         imp.startsWith('@innostes/crm') ||
+        imp.startsWith('@innostes/tracura') ||
         imp.startsWith('@innostes/api-logger') ||
         imp.includes('../../modules') ||
         imp.includes('../../plugins') ||

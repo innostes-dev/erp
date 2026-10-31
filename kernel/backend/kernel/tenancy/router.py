@@ -586,13 +586,20 @@ async def list_current_plugins(
     installed: list[ItemCatalogRead] = []
 
     PLUGIN_METADATA = {
-        "api-logger": {
-            "name": "API Logger",
+        "tracura": {
+            "name": "Tracura",
             "version": "0.1.0",
-            "description": "API request logging, webhook inspection, and debugging",
-            "tags": ["Logs", "Webhooks", "Analytics"],
+            "description": "Enterprise API observability, universal telemetry ingestion, and analytics",
+            "tags": ["Logs", "Telemetry", "Analytics"],
             "tone": "chart-5",
-        }
+        },
+        "api-logger": {
+            "name": "Tracura",
+            "version": "0.1.0",
+            "description": "Enterprise API observability, universal telemetry ingestion, and analytics",
+            "tags": ["Logs", "Telemetry", "Analytics"],
+            "tone": "chart-5",
+        },
     }
 
     try:
@@ -640,7 +647,7 @@ async def list_current_plugins(
     ),
 )
 async def activate_plugin(
-    plugin_id: str = Path(description="Package identifier of extensible plugin to activate.", examples=["api-logger"]),
+    plugin_id: str = Path(description="Package identifier of extensible plugin to activate.", examples=["tracura"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
@@ -698,7 +705,7 @@ async def activate_plugin(
     ),
 )
 async def deactivate_plugin(
-    plugin_id: str = Path(description="Package identifier of extensible plugin to deactivate.", examples=["api-logger"]),
+    plugin_id: str = Path(description="Package identifier of extensible plugin to deactivate.", examples=["tracura"]),
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
     tenant_id: uuid.UUID = Depends(get_current_tenant_id),
