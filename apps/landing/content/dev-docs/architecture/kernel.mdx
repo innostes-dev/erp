@@ -15,6 +15,7 @@ The kernel is the platform foundation plug-in for innostes ERP. It provides two 
    - **`tenancy`**: Tenant lifecycle management, isolation context, and tenant settings.
    - **`user`**: Identity administration, user management, and role-based access control (RBAC).
    - **`auth`**: Authentication, rotating refresh token families, password reset, and API key management.
+   - **`audit`**: Immutable compliance audit trail, before/after entity change diffs, and regulatory reporting.
 
 For comprehensive architectural specifications, consult the canonical arc42 documentation:
 - [Building Blocks](/docs/architecture/building-blocks#4-kernel-architecture-layering-c4-level-3) — C4 component diagrams and subpackage layering.
@@ -40,6 +41,7 @@ For comprehensive architectural specifications, consult the canonical arc42 docu
       <Folder name="tenancy" />
       <Folder name="user" />
       <Folder name="auth" />
+      <Folder name="audit" />
       <File name="models.py" />
     </Folder>
     <Folder name="migrations" />

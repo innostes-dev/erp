@@ -26,6 +26,7 @@ setup = "kernel.setup:module"
 tenancy = "kernel.tenancy:module"
 user = "kernel.user:module"
 auth = "kernel.auth:module"
+audit = "kernel.audit:module"
 
 [tool.setuptools.packages.find]
 where = ["."]

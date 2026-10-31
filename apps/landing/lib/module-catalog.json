@@ -103,6 +103,27 @@
     ]
   },
   {
+    "name": "kernel.audit",
+    "type": "kernel",
+    "package": "kernel",
+    "frontendPackage": "@innostes/kernel",
+    "entryPoint": "kernel.audit:module",
+    "description": "Immutable compliance audit trail, field-level before/after diffs, and regulatory reporting",
+    "routes": [
+      "/audit/logs",
+      "/audit/summary",
+      "/audit/entities/{type}/{id}"
+    ],
+    "tables": [
+      "audit_logs"
+    ],
+    "migrationsPath": "kernel/backend/migrations",
+    "tags": [
+      "Audit",
+      "Compliance"
+    ]
+  },
+  {
     "name": "hrms",
     "type": "business-module",
     "package": "innostes-hrms",

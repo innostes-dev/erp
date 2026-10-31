@@ -17,6 +17,7 @@ import {
   Clock,
   Settings,
   ChevronDown,
+  ShieldCheck,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';
@@ -30,7 +31,8 @@ export function SidebarNav() {
   const isHome = path === '/';
   const isModules = path.startsWith('/modules');
   const isPlugins = path.startsWith('/plugins');
-  const isAdmin = path.startsWith('/administration');
+  const isAudit = path === '/audit' || path.startsWith('/administration/audit');
+  const isAdmin = path.startsWith('/administration') && !isAudit;
 
   return (
     <Sidebar className="border-r border-border bg-sidebar select-none">
@@ -100,6 +102,16 @@ export function SidebarNav() {
               ) : undefined}
             >
               Plugins
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isAudit}
+              icon={<ShieldCheck className="size-4" />}
+              onClick={() => navigate('/audit')}
+            >
+              Audit Trail
             </SidebarMenuButton>
           </SidebarMenuItem>
 

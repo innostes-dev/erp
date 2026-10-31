@@ -11,6 +11,7 @@ import { PluginsManagerPage } from './components/PluginsManagerPage';
 import { ModuleShellLayout } from './components/ModuleShellLayout';
 import { PluginShellLayout } from './components/PluginShellLayout';
 import { ApiKeysManager } from './components/ApiKeysManager';
+import { AuditTrailPage } from './components/AuditTrailPage';
 
 function AppRouter() {
   const { path } = useNavigation();
@@ -43,6 +44,8 @@ function AppRouter() {
               <ModulesManagerPage />
             ) : path === '/plugins' ? (
               <PluginsManagerPage />
+            ) : path === '/audit' || path === '/administration/audit' ? (
+              <AuditTrailPage />
             ) : path.startsWith('/administration') || path === '/api-keys' ? (
               <ApiKeysManager />
             ) : (

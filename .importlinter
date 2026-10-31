@@ -67,6 +67,7 @@ layers =
     kernel.auth
     kernel.user
     kernel.tenancy
+    kernel.audit
     kernel.setup
     kernel.core
 ignore_imports =
@@ -74,6 +75,7 @@ ignore_imports =
     kernel.tenancy.router -> kernel.auth.dependencies
     kernel.tenancy.router -> kernel.user.models.user
     kernel.user.router -> kernel.auth.dependencies
+    kernel.audit.router -> kernel.auth.dependencies
     kernel.user.services.seeding -> kernel.tenancy.models.settings
     kernel.setup.services.setup_service -> kernel.tenancy
     kernel.setup.services.setup_service -> kernel.tenancy.models.tenant_member
