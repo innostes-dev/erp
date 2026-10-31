@@ -1,6 +1,7 @@
 """Universal ASGI Auto-Capture Middleware."""
 
 from datetime import datetime, timezone
+import os
 import time
 from typing import Any
 import uuid
@@ -9,6 +10,18 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from tracura.middleware.buffer import log_buffer
+
+ERP_PROJECT_SLUG = "innostes-erp"
+
+
+def get_default_erp_project_id(tenant_id: uuid.UUID) -> uuid.UUID:
+    """Return deterministic UUID for the host Innostes ERP project under a tenant."""
+    return uuid.uuid5(tenant_id, f"project:{ERP_PROJECT_SLUG}")
+
+
+def get_default_erp_env_id(project_id: uuid.UUID, env_name: str) -> uuid.UUID:
+    """Return deterministic UUID for an environment under a project."""
+    return uuid.uuid5(project_id, f"env:{env_name.lower()}")
 
 
 class TracuraCaptureMiddleware(BaseHTTPMiddleware):
@@ -61,12 +74,43 @@ class TracuraCaptureMiddleware(BaseHTTPMiddleware):
                     # System tenant fallback for global platform & kernel endpoints
                     tenant_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
 
+                # Resolve Project ID: state -> header -> deterministic host ERP project UUID
+                project_id = getattr(request.state, "project_id", None)
+                if not project_id:
+                    header_pid = request.headers.get("x-project-id")
+                    if header_pid:
+                        try:
+                            project_id = uuid.UUID(header_pid)
+                        except Exception:
+                            pass
+                if not project_id:
+                    project_id = get_default_erp_project_id(tenant_id)
+
+                # Resolve Environment: state -> header UUID -> header name / APP_ENV
+                env_name = (
+                    request.headers.get("x-environment")
+                    or getattr(request.state, "environment", None)
+                    or os.environ.get("APP_ENV")
+                    or "development"
+                ).strip().lower()
+
+                environment_id = getattr(request.state, "environment_id", None)
+                if not environment_id:
+                    header_eid = request.headers.get("x-environment-id")
+                    if header_eid:
+                        try:
+                            environment_id = uuid.UUID(header_eid)
+                        except Exception:
+                            pass
+                if not environment_id:
+                    environment_id = get_default_erp_env_id(project_id, env_name)
+
                 client_ip = request.client.host if request.client else None
                 log_item = {
                     "id": uuid.uuid4(),
                     "tenant_id": tenant_id,
-                    "project_id": getattr(request.state, "project_id", tenant_id),
-                    "environment_id": getattr(request.state, "environment_id", tenant_id),
+                    "project_id": project_id,
+                    "environment_id": environment_id,
                     "api_key_id": getattr(getattr(request.state, "api_key", None), "id", None),
                     "correlation_id": correlation_id,
                     "user_id": str(getattr(request.state, "user_id", "")) or None,
@@ -83,7 +127,11 @@ class TracuraCaptureMiddleware(BaseHTTPMiddleware):
                     "response_headers": None,
                     "response_body": None,
                     "error": error_payload,
-                    "meta": {"source": "asgi_auto_capture"},
+                    "meta": {
+                        "source": "asgi_auto_capture",
+                        "service": "innostes-erp",
+                        "environment": env_name,
+                    },
                     "created_at": datetime.now(timezone.utc),
                 }
                 await log_buffer.enqueue(log_item)

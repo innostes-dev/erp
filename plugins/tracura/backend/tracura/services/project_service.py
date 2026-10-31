@@ -16,8 +16,83 @@ from tracura.schemas.project import (
 )
 
 
+ERP_PROJECT_SLUG = "innostes-erp"
+
+
+def get_default_project_id(tenant_id: uuid.UUID) -> uuid.UUID:
+    """Return deterministic UUID for the host Innostes ERP project under a tenant."""
+    return uuid.uuid5(tenant_id, f"project:{ERP_PROJECT_SLUG}")
+
+
+def get_default_env_id(project_id: uuid.UUID, env_name: str) -> uuid.UUID:
+    """Return deterministic UUID for an environment under a project."""
+    return uuid.uuid5(project_id, f"env:{env_name.lower()}")
+
+
 class ProjectService:
     """Handles Project and Environment CRUD scoped to the current tenant."""
+
+    async def ensure_default_erp_project(
+        self,
+        session: AsyncSession,
+        tenant_id: uuid.UUID,
+    ) -> ApiLogProject:
+        """Provision the default 'Innostes ERP' project and standard environments for a tenant."""
+        default_pid = get_default_project_id(tenant_id)
+        stmt = (
+            select(ApiLogProject)
+            .where(
+                ApiLogProject.tenant_id == tenant_id,
+                ApiLogProject.slug == ERP_PROJECT_SLUG,
+                ApiLogProject.deleted_at.is_(None),
+            )
+            .options(selectinload(ApiLogProject.environments))
+        )
+        existing = (await session.execute(stmt)).scalar_one_or_none()
+        if existing:
+            return existing
+
+        project = ApiLogProject(
+            id=default_pid,
+            tenant_id=tenant_id,
+            name="Innostes ERP",
+            slug=ERP_PROJECT_SLUG,
+            description="Core Innostes ERP platform and kernel business services",
+        )
+        session.add(project)
+        await session.flush()
+
+        prod_env = ApiLogEnvironment(
+            id=get_default_env_id(default_pid, "production"),
+            project_id=project.id,
+            tenant_id=tenant_id,
+            name="Production",
+            slug="production",
+            color_badge="emerald",
+        )
+        staging_env = ApiLogEnvironment(
+            id=get_default_env_id(default_pid, "staging"),
+            project_id=project.id,
+            tenant_id=tenant_id,
+            name="Staging",
+            slug="staging",
+            color_badge="amber",
+        )
+        dev_env = ApiLogEnvironment(
+            id=get_default_env_id(default_pid, "development"),
+            project_id=project.id,
+            tenant_id=tenant_id,
+            name="Development",
+            slug="development",
+            color_badge="blue",
+        )
+        session.add_all([prod_env, staging_env, dev_env])
+        await session.flush()
+
+        return (
+            await self.get_project(session, tenant_id, default_pid)
+            or project
+        )
 
     async def list_projects(
         self,
@@ -34,7 +109,12 @@ class ProjectService:
             .options(selectinload(ApiLogProject.environments))
             .order_by(ApiLogProject.name.asc())
         )
-        return list((await session.execute(stmt)).scalars().all())
+        projects = list((await session.execute(stmt)).scalars().all())
+        if not projects:
+            default_proj = await self.ensure_default_erp_project(session, tenant_id)
+            if default_proj:
+                projects = [default_proj]
+        return projects
 
     async def get_project(
         self,

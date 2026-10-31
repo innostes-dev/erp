@@ -762,6 +762,19 @@ class TestHttpEndpoints(unittest.TestCase):
         self.assertEqual(data["kpi"]["status_breakdown"]["2xx"], 12238)
         self.assertEqual(len(data["timeseries"]), 1)
 
+    def test_default_erp_project_deterministic_id(self) -> None:
+        from tracura.middleware.capture import get_default_erp_env_id, get_default_erp_project_id
+        from tracura.services.project_service import get_default_env_id, get_default_project_id
+
+        pid = get_default_erp_project_id(self.tenant_id)
+        self.assertEqual(pid, get_default_project_id(self.tenant_id))
+
+        eid_prod = get_default_erp_env_id(pid, "production")
+        self.assertEqual(eid_prod, get_default_env_id(pid, "production"))
+
+        eid_dev = get_default_erp_env_id(pid, "development")
+        self.assertNotEqual(eid_prod, eid_dev)
+
 
 if __name__ == "__main__":
     unittest.main()
