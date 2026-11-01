@@ -42,8 +42,23 @@ class TracuraPlugin(BaseModule):
         app.add_middleware(TracuraCaptureMiddleware)
 
     async def on_startup(self, app: FastAPI) -> None:
-        """Start the background async log batch buffer worker."""
+        """Start the background async log batch buffer worker and sync active tenants."""
         log_buffer.start()
+        from tracura.middleware.capture import sync_active_tenants_from_db
+        await sync_active_tenants_from_db()
+
+    async def on_tenant_activate(self, session: Any, tenant_id: Any, actor_id: Any = None) -> None:
+        """Lifecycle hook executed when a tenant activates Tracura."""
+        from tracura.services.project_service import ProjectService
+        from tracura.middleware.capture import mark_plugin_active
+        project_service = ProjectService()
+        await project_service.ensure_default_erp_project(session=session, tenant_id=tenant_id, actor_id=actor_id)
+        mark_plugin_active(tenant_id, True)
+
+    async def on_tenant_deactivate(self, session: Any, tenant_id: Any, actor_id: Any = None) -> None:
+        """Lifecycle hook executed when a tenant deactivates Tracura."""
+        from tracura.middleware.capture import mark_plugin_active
+        mark_plugin_active(tenant_id, False)
 
     async def on_shutdown(self, app: FastAPI) -> None:
         """Gracefully drain the memory queue and flush pending logs to PostgreSQL."""

@@ -44,7 +44,6 @@ class LogQueryService:
         offset: int = 0,
         limit: int = 50,
     ) -> tuple[list[ApiLog], int]:
-        """Query telemetry logs with multi-attribute filtering and pagination."""
         base_filter = [ApiLog.tenant_id == tenant_id]
 
         if project_id:

@@ -30,7 +30,6 @@ class AnalyticsService:
     ) -> AnalyticsDashboard:
         """Calculate KPI summary, environment health, top endpoints, top errors, and timeseries."""
         cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
-
         filters = [
             ApiLog.tenant_id == tenant_id,
             ApiLog.created_at >= cutoff,

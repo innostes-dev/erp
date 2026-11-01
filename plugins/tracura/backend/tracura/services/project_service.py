@@ -17,12 +17,64 @@ from tracura.schemas.project import (
 )
 
 
-ERP_PROJECT_SLUG = "innostes-erp"
+import os
+import re
+import uuid
+from datetime import datetime, timezone
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from tracura.models.environment import ApiLogEnvironment
+from tracura.models.project import ApiLogProject
+from tracura.schemas.project import (
+    EnvironmentCreate,
+    EnvironmentUpdate,
+    ProjectCreate,
+    ProjectUpdate,
+)
+
+DEFAULT_FALLBACK_PROJECT_NAME = "Innostes ERP"
+DEFAULT_FALLBACK_PROJECT_SLUG = "innostes-erp"
+DEFAULT_FALLBACK_ENV_SLUG = "dev"
+
+
+def get_configured_project_name() -> str:
+    """Resolve project name from environment variable, falling back to default."""
+    return (
+        os.environ.get("TRACURA_PROJECT_NAME")
+        or os.environ.get("APP_NAME")
+        or DEFAULT_FALLBACK_PROJECT_NAME
+    ).strip()
+
+
+def get_configured_project_slug() -> str:
+    """Resolve project slug from environment variable or derived from project name."""
+    custom_slug = os.environ.get("TRACURA_PROJECT_SLUG")
+    if custom_slug and custom_slug.strip():
+        return re.sub(r"[^a-z0-9]+", "-", custom_slug.strip().lower()).strip("-")
+    name = get_configured_project_name()
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    return slug or DEFAULT_FALLBACK_PROJECT_SLUG
+
+
+def get_configured_env_slug() -> str:
+    """Resolve active environment slug from environment variable, falling back to 'dev'."""
+    raw_env = (
+        os.environ.get("TRACURA_ENVIRONMENT")
+        or os.environ.get("APP_ENV")
+        or DEFAULT_FALLBACK_ENV_SLUG
+    ).strip().lower()
+    return raw_env or DEFAULT_FALLBACK_ENV_SLUG
+
+
+ERP_PROJECT_SLUG = DEFAULT_FALLBACK_PROJECT_SLUG
 
 
 def get_default_project_id(tenant_id: uuid.UUID) -> uuid.UUID:
     """Return deterministic UUID for the host Innostes ERP project under a tenant."""
-    return uuid.uuid5(tenant_id, f"project:{ERP_PROJECT_SLUG}")
+    slug = get_configured_project_slug()
+    return uuid.uuid5(tenant_id, f"project:{slug}")
 
 
 def get_default_env_id(project_id: uuid.UUID, env_name: str) -> uuid.UUID:
@@ -37,82 +89,73 @@ class ProjectService:
         self,
         session: AsyncSession,
         tenant_id: uuid.UUID,
-    ) -> ApiLogProject:
-        """Provision the default 'Innostes ERP' project and standard environments for a tenant."""
-        default_pid = get_default_project_id(tenant_id)
-        stmt = (
-            select(ApiLogProject)
-            .where(
-                ApiLogProject.tenant_id == tenant_id,
-                ApiLogProject.slug == ERP_PROJECT_SLUG,
-                ApiLogProject.deleted_at.is_(None),
-            )
-            .options(selectinload(ApiLogProject.environments))
+        actor_id: uuid.UUID | None = None,
+    ) -> ApiLogProject | None:
+        """Provision the default project and standard environments for a tenant only if no project exists."""
+        # 1. Check if ANY project already exists for this tenant
+        count_stmt = select(func.count(ApiLogProject.id)).where(
+            ApiLogProject.tenant_id == tenant_id,
+            ApiLogProject.deleted_at.is_(None),
         )
-        existing = (await session.execute(stmt)).scalar_one_or_none()
-        current_env = (os.environ.get("APP_ENV") or "development").strip().lower() or "development"
-        if existing:
-            existing_slugs = {e.slug for e in (existing.environments or [])}
-            if current_env not in existing_slugs:
-                custom_env = ApiLogEnvironment(
-                    id=get_default_env_id(default_pid, current_env),
-                    project_id=existing.id,
-                    tenant_id=tenant_id,
-                    name=current_env.capitalize(),
-                    slug=current_env,
-                    color_badge="purple",
+        existing_count = (await session.execute(count_stmt)).scalar() or 0
+        if existing_count > 0:
+            # Table is not empty; return primary existing project
+            stmt = (
+                select(ApiLogProject)
+                .where(
+                    ApiLogProject.tenant_id == tenant_id,
+                    ApiLogProject.deleted_at.is_(None),
                 )
-                session.add(custom_env)
-                await session.flush()
-                return await self.get_project(session, tenant_id, default_pid) or existing
-            return existing
+                .options(selectinload(ApiLogProject.environments))
+                .order_by(ApiLogProject.created_at.asc())
+            )
+            return (await session.execute(stmt)).scalars().first()
+
+        # 2. Table is empty: Auto-provision default project & environments
+        project_name = get_configured_project_name()
+        project_slug = get_configured_project_slug()
+        default_pid = get_default_project_id(tenant_id)
 
         project = ApiLogProject(
             id=default_pid,
             tenant_id=tenant_id,
-            name="Innostes ERP",
-            slug=ERP_PROJECT_SLUG,
-            description="Core Innostes ERP platform and kernel business services",
+            name=project_name,
+            slug=project_slug,
+            description=f"Core {project_name} service and API telemetry",
+            created_by=actor_id,
         )
         session.add(project)
         await session.flush()
 
-        prod_env = ApiLogEnvironment(
-            id=get_default_env_id(default_pid, "production"),
-            project_id=project.id,
-            tenant_id=tenant_id,
-            name="Production",
-            slug="production",
-            color_badge="emerald",
-        )
-        staging_env = ApiLogEnvironment(
-            id=get_default_env_id(default_pid, "staging"),
-            project_id=project.id,
-            tenant_id=tenant_id,
-            name="Staging",
-            slug="staging",
-            color_badge="amber",
-        )
-        dev_env = ApiLogEnvironment(
-            id=get_default_env_id(default_pid, "development"),
-            project_id=project.id,
-            tenant_id=tenant_id,
-            name="Development",
-            slug="development",
-            color_badge="blue",
-        )
-        envs_to_add = [prod_env, staging_env, dev_env]
+        active_env_slug = get_configured_env_slug()
 
-        if current_env not in {"production", "staging", "development"}:
-            custom_env = ApiLogEnvironment(
-                id=get_default_env_id(default_pid, current_env),
+        # Standard environment stages
+        standard_envs = [
+            ("production", "Production", "emerald"),
+            ("staging", "Staging", "amber"),
+            ("dev", "Dev", "blue"),
+        ]
+
+        env_map: dict[str, tuple[str, str]] = {}
+        for s_slug, s_name, s_badge in standard_envs:
+            env_map[s_slug] = (s_name, s_badge)
+
+        if active_env_slug not in env_map:
+            # Custom deployment stage e.g. "development", "qa", "sandbox"
+            env_map[active_env_slug] = (active_env_slug.capitalize(), "purple")
+
+        envs_to_add: list[ApiLogEnvironment] = []
+        for slug, (name, badge) in env_map.items():
+            env = ApiLogEnvironment(
+                id=get_default_env_id(default_pid, slug),
                 project_id=project.id,
                 tenant_id=tenant_id,
-                name=current_env.capitalize(),
-                slug=current_env,
-                color_badge="purple",
+                name=name,
+                slug=slug,
+                color_badge=badge,
+                created_by=actor_id,
             )
-            envs_to_add.append(custom_env)
+            envs_to_add.append(env)
 
         project.environments = envs_to_add
         session.add_all(envs_to_add)

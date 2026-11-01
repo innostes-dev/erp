@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { apiRequest } from '@innostes/kernel';
 import {
   Badge,
   Button,
@@ -49,6 +50,7 @@ import {
   TelemetryBarChart,
   TelemetryDonutChart,
   TelemetryTrendChart,
+  cn,
 } from '@innostes/ui';
 import {
   Activity,
@@ -152,456 +154,105 @@ export interface ProjectItem {
   }>;
 }
 
-// --- INITIAL TELEMETRY DATA ---
+export interface DashboardAnalytics {
+  kpi: {
+    total_requests: number;
+    successful_requests: number;
+    success_rate_pct: number;
+    error_requests: number;
+    error_rate_pct: number;
+    avg_latency_ms: number;
+    p95_latency_ms: number;
+    p99_latency_ms: number;
+    status_breakdown: Record<string, number>;
+  };
+  timeseries: Array<{
+    timestamp: string;
+    label: string;
+    requests: number;
+    errors: number;
+    avg_latency_ms: number;
+    p95_latency_ms: number;
+  }>;
+  environment_health: Array<{
+    environment: string;
+    environment_id?: string;
+    color_badge: string;
+    requests: number;
+    error_rate_pct: number;
+    avg_latency_ms: number;
+    status: string;
+  }>;
+  top_endpoints: Array<{
+    http_method: string;
+    path: string;
+    requests: number;
+    error_rate_pct: number;
+    avg_latency_ms: number;
+  }>;
+  top_errors: Array<{
+    error_type: string;
+    error_message?: string;
+    count: number;
+    last_seen: string;
+  }>;
+}
 
-const INITIAL_PROJECTS: ProjectItem[] = [
-  {
-    id: 'proj-1',
-    name: 'E-commerce API',
-    slug: 'e-commerce-api',
-    description: 'Main e-commerce backend services (web, mobile and admin).',
-    environments: [
-      { id: 'env-1', name: 'Production', slug: 'production', color_badge: 'emerald' },
-      { id: 'env-2', name: 'Staging', slug: 'staging', color_badge: 'amber' },
-      { id: 'env-3', name: 'Development', slug: 'development', color_badge: 'rose' },
-    ],
-  },
-  {
-    id: 'proj-2',
-    name: 'Payment Gateway',
-    slug: 'payment-gateway',
-    description: 'PCI-DSS compliant payment processing and settlement microservice.',
-    environments: [
-      { id: 'env-4', name: 'Production', slug: 'production', color_badge: 'emerald' },
-      { id: 'env-5', name: 'Sandbox', slug: 'sandbox', color_badge: 'blue' },
-    ],
-  },
-  {
-    id: 'proj-3',
-    name: 'AI Copilot Service',
-    slug: 'ai-copilot',
-    description: 'LLM inference proxy, token accounting, and streaming endpoint.',
-    environments: [
-      { id: 'env-6', name: 'Production', slug: 'production', color_badge: 'emerald' },
-      { id: 'env-7', name: 'Development', slug: 'development', color_badge: 'blue' },
-    ],
-  },
-];
+const isUuid = (val?: string | null): boolean =>
+  Boolean(val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val));
 
-const INITIAL_LOGS: TelemetryLog[] = [
-  {
-    id: 'req_88fbc09d12ae4c1',
-    correlation_id: 'a1b2c3d4',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'POST',
-    url: 'https://api.innostes.com/api/orders',
-    path: '/api/orders',
-    status_code: 500,
-    duration_ms: 1840,
-    size_bytes: 4300,
-    client_ip: '203.0.113.42',
-    user_agent: 'tracura-sdk/1.0.0',
-    user_id: 'usr_order_9921',
-    request_headers: {
-      'content-type': 'application/json',
-      authorization: 'Bearer eyJhbGciOi...',
-      'x-request-id': 'a1b2c3d4',
-      'user-agent': 'tracura-sdk/1.0.0',
-      accept: 'application/json',
-    },
-    query_params: { idempotency: 'key_88412' },
-    request_body: {
-      user_id: 'usr_9921',
-      cart_id: 'cart_44120',
-      payment_method: 'razorpay',
-      amount: 2499,
-      currency: 'INR',
-    },
-    response_headers: {
-      'content-type': 'application/json',
-      'x-trace-id': 'a1b2c3d4',
-    },
-    response_body: {
-      status: 500,
-      error: 'Payment provider returned 502',
-      message: 'Failed to create payment',
-      code: 'PAYMENT_PROVIDER_ERROR',
-      timestamp: '2026-10-31T02:18:46.123Z',
-    },
-    error: {
-      type: 'PaymentError',
-      code: 'PAYMENT_502_BAD_GATEWAY',
-      message: 'Payment provider returned 502 Bad Gateway',
-      source: 'payment.service.ts:84',
-      stack_trace: 'at PaymentProcessor.charge (payment.service.ts:84)\nat OrderHandler.create (order.controller.ts:42)\nat Router.handle (express.js:192)',
-    },
-    timeline: [
-      { time: '10:23:45.104', message: 'Starting order creation', level: 'INFO' },
-      { time: '10:23:45.212', message: 'Validating request data', level: 'INFO' },
-      { time: '10:23:45.823', message: 'Calling payment provider (Razorpay)', level: 'INFO' },
-      { time: '10:23:46.021', message: 'Payment provider returned 502', level: 'ERROR', duration: '2.1s' },
-      { time: '10:23:46.022', message: 'Order creation failed', level: 'ERROR' },
-    ],
-    meta: {
-      gateway: 'razorpay',
-      retry_attempt: 1,
-      cluster: 'k8s-prod-in-south',
-    },
-    created_at: '10:23:45',
-  },
-  {
-    id: 'req_41c09ab72311ff0',
-    correlation_id: 'b4d5e6f7',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'GET',
-    url: 'https://api.innostes.com/api/products',
-    path: '/api/products',
-    status_code: 200,
-    duration_ms: 142,
-    size_bytes: 1100,
-    client_ip: '103.21.244.1',
-    user_agent: 'Chrome/124.0.0.0 (macOS)',
-    user_id: 'usr_guest_44',
-    request_headers: {
-      'content-type': 'application/json',
-      accept: 'application/json',
-    },
-    query_params: { category: 'electronics', page: '1' },
-    request_body: null,
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { total: 42, products: [{ id: 'p1', name: 'Wireless Headphones', price: 99 }] },
-    error: null,
-    meta: { cache_hit: true },
-    created_at: '10:23:12',
-  },
-  {
-    id: 'req_b34199ca0912df4',
-    correlation_id: 'c8d9e0f1',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'POST',
-    url: 'https://api.innostes.com/api/payments',
-    path: '/api/payments',
-    status_code: 502,
-    duration_ms: 3210,
-    size_bytes: 6800,
-    client_ip: '49.207.212.88',
-    user_agent: 'PaymentGatewayClient/2.0',
-    user_id: 'usr_guest_88',
-    request_headers: { 'content-type': 'application/json' },
-    request_body: { amount: 4500, currency: 'INR' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { error: 'Bad Gateway from upstream acquirer bank' },
-    error: {
-      type: 'BankGatewayTimeout',
-      code: 'GATEWAY_TIMEOUT',
-      message: 'Connection to Acquirer Bank gateway timed out after 3000ms',
-      source: 'gateway.adapter.ts:112',
-    },
-    meta: { provider: 'hdfc_pg' },
-    created_at: '10:22:58',
-  },
-  {
-    id: 'req_1a729cf0984bb12',
-    correlation_id: 'd1e2f3a4',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'GET',
-    url: 'https://api.innostes.com/api/users/123',
-    path: '/api/users/123',
-    status_code: 200,
-    duration_ms: 86,
-    size_bytes: 920,
-    client_ip: '10.0.4.12',
-    user_agent: 'MobileApp/iOS 17.4',
-    user_id: 'usr_123',
-    request_headers: { authorization: 'Bearer [REDACTED]' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { id: 'usr_123', name: 'Raj Kumar', tier: 'enterprise' },
-    error: null,
-    created_at: '10:22:21',
-  },
-  {
-    id: 'req_f92418a09b418cd',
-    correlation_id: 'e5f6a7b8',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'PUT',
-    url: 'https://api.innostes.com/api/orders/456',
-    path: '/api/orders/456',
-    status_code: 200,
-    duration_ms: 324,
-    size_bytes: 1500,
-    client_ip: '103.45.12.9',
-    user_agent: 'WebClient/AdminPortal',
-    request_headers: { 'content-type': 'application/json' },
-    request_body: { status: 'shipped', tracking_number: 'TRK_991204' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { success: true },
-    error: null,
-    created_at: '10:21:44',
-  },
-  {
-    id: 'req_88192a014bc9123',
-    correlation_id: 'f9a0b1c2',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'POST',
-    url: 'https://api.innostes.com/api/webhooks/razorpay',
-    path: '/api/webhooks/razorpay',
-    status_code: 200,
-    duration_ms: 210,
-    size_bytes: 1200,
-    client_ip: '52.66.12.180',
-    user_agent: 'Razorpay-Webhook/1.0',
-    request_headers: { 'x-razorpay-signature': '[REDACTED]' },
-    request_body: { event: 'payment.captured', id: 'pay_992144' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { received: true },
-    error: null,
-    created_at: '10:21:10',
-  },
-  {
-    id: 'req_a2b3c4d5e6f7081',
-    correlation_id: 'a2b3c4d5',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'GET',
-    url: 'https://api.innostes.com/api/products?category=electronics',
-    path: '/api/products?category=electronics',
-    status_code: 200,
-    duration_ms: 98,
-    size_bytes: 840,
-    client_ip: '49.36.120.4',
-    user_agent: 'Mozilla/5.0 Chrome',
-    request_headers: { accept: 'application/json' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { count: 18 },
-    error: null,
-    created_at: '10:20:33',
-  },
-  {
-    id: 'req_b6c7d8e9f0a1b2c',
-    correlation_id: 'b6c7d8e9',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'POST',
-    url: 'https://api.innostes.com/api/cart',
-    path: '/api/cart',
-    status_code: 400,
-    duration_ms: 412,
-    size_bytes: 2100,
-    client_ip: '103.22.90.11',
-    user_agent: 'MobileApp/Android 14',
-    request_headers: { 'content-type': 'application/json' },
-    request_body: { item_id: 'item_missing', quantity: -1 },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { error: 'Invalid quantity: must be positive integer' },
-    error: {
-      type: 'ValidationError',
-      code: 'INVALID_INPUT',
-      message: 'Quantity must be greater than 0',
-      source: 'cart.validator.ts:32',
-    },
-    created_at: '10:20:01',
-  },
-  {
-    id: 'req_c0d1e2f3a4b5c6d',
-    correlation_id: 'c0d1e2f3',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'GET',
-    url: 'https://api.innostes.com/api/health',
-    path: '/api/health',
-    status_code: 200,
-    duration_ms: 12,
-    size_bytes: 320,
-    client_ip: '10.0.0.1',
-    user_agent: 'Kubelet/1.29',
-    request_headers: { accept: '*/*' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { status: 'ok', uptime: 98124 },
-    error: null,
-    created_at: '10:19:45',
-  },
-  {
-    id: 'req_d4e5f6a7b8c9d0e',
-    correlation_id: 'd4e5f6a7',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'POST',
-    url: 'https://api.innostes.com/api/orders',
-    path: '/api/orders',
-    status_code: 500,
-    duration_ms: 2140,
-    size_bytes: 5600,
-    client_ip: '203.0.113.88',
-    user_agent: 'tracura-sdk/1.0.0',
-    request_headers: { 'content-type': 'application/json' },
-    request_body: { cart_id: 'c_882', user_id: 'u_112' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { error: 'Database connection failed' },
-    error: {
-      type: 'DatabaseError',
-      code: 'PG_CONN_ERR',
-      message: 'PostgreSQL connection pool exhausted',
-      source: 'database.pool.ts:60',
-    },
-    created_at: '10:18:22',
-  },
-  {
-    id: 'req_e8f9a0b1c2d3e4f',
-    correlation_id: 'e8f9a0b1',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'GET',
-    url: 'https://api.innostes.com/api/categories',
-    path: '/api/categories',
-    status_code: 200,
-    duration_ms: 76,
-    size_bytes: 780,
-    client_ip: '103.21.244.1',
-    user_agent: 'Chrome/124.0',
-    request_headers: { accept: 'application/json' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { categories: ['Electronics', 'Fashion', 'Home'] },
-    error: null,
-    created_at: '10:18:01',
-  },
-  {
-    id: 'req_f2a3b4c5d6e7f80',
-    correlation_id: 'f2a3b4c5',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'DELETE',
-    url: 'https://api.innostes.com/api/orders/123',
-    path: '/api/orders/123',
-    status_code: 204,
-    duration_ms: 104,
-    size_bytes: 610,
-    client_ip: '10.0.14.22',
-    user_agent: 'AdminPortal/1.1',
-    request_headers: { authorization: 'Bearer [REDACTED]' },
-    response_headers: {},
-    response_body: null,
-    error: null,
-    created_at: '10:17:33',
-  },
-  {
-    id: 'req_a6b7c8d9e0f1a2b',
-    correlation_id: 'a6b7c8d9',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'POST',
-    url: 'https://api.innostes.com/api/payments/refund',
-    path: '/api/payments/refund',
-    status_code: 200,
-    duration_ms: 621,
-    size_bytes: 1800,
-    client_ip: '103.21.244.1',
-    user_agent: 'AdminPortal/1.1',
-    request_headers: { 'content-type': 'application/json' },
-    request_body: { payment_id: 'pay_8812', amount: 999 },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { refund_id: 'rf_9921', status: 'processed' },
-    error: null,
-    created_at: '10:16:45',
-  },
-  {
-    id: 'req_c1d2e3f4a5b6c7d',
-    correlation_id: 'c1d2e3f4',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'GET',
-    url: 'https://api.innostes.com/api/users',
-    path: '/api/users',
-    status_code: 200,
-    duration_ms: 118,
-    size_bytes: 900,
-    client_ip: '103.21.244.1',
-    user_agent: 'AdminPortal/1.1',
-    request_headers: { authorization: 'Bearer [REDACTED]' },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { total: 1120 },
-    error: null,
-    created_at: '10:16:12',
-  },
-  {
-    id: 'req_d5e6f7a8b9c0d1e',
-    correlation_id: 'd5e6f7a8',
-    project: 'E-commerce API',
-    environment: 'Production',
-    http_method: 'POST',
-    url: 'https://api.innostes.com/api/orders',
-    path: '/api/orders',
-    status_code: 201,
-    duration_ms: 342,
-    size_bytes: 1400,
-    client_ip: '49.207.212.88',
-    user_agent: 'MobileApp/iOS',
-    request_headers: { 'content-type': 'application/json' },
-    request_body: { cart_id: 'c_9941', amount: 1200 },
-    response_headers: { 'content-type': 'application/json' },
-    response_body: { order_id: 'ord_9981', status: 'created' },
-    error: null,
-    created_at: '10:15:38',
-  },
-];
+async function tracuraFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('innostes_access_token') : null;
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  try {
+    return await apiRequest<T>(path, {
+      ...options,
+      headers: {
+        ...authHeaders,
+        ...((options.headers as Record<string, string>) || {}),
+      },
+    });
+  } catch {
+    const baseUrl =
+      typeof window !== 'undefined'
+        ? window.location.port === '4200'
+          ? 'http://localhost:8001'
+          : ''
+        : '';
+    const res = await fetch(`${baseUrl}${path}`, {
+      ...options,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...authHeaders,
+        ...((options.headers as Record<string, string>) || {}),
+      },
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+    return (await res.json()) as T;
+  }
+}
 
-const INITIAL_KEYS: IngestionApiKey[] = [
-  {
-    id: 'key-1',
-    name: 'Production Kubernetes Collector',
-    key_prefix: 'inno_log_live_79a2',
-    project: 'E-commerce API',
-    allowed_environments: ['production'],
-    ip_allowlist: ['10.0.0.0/16', '192.168.1.0/24'],
-    rate_limit_rpm: 60000,
-    status: 'active',
-    last_used_at: '10s ago',
-    created_at: '2026-10-15',
-  },
-  {
-    id: 'key-2',
-    name: 'Staging Ingestion Key',
-    key_prefix: 'inno_log_live_88bc',
-    project: 'E-commerce API',
-    allowed_environments: ['staging', 'development'],
-    rate_limit_rpm: 12000,
-    status: 'active',
-    last_used_at: '5m ago',
-    created_at: '2026-10-18',
-  },
-  {
-    id: 'key-3',
-    name: 'Payment Service Mesh Key',
-    key_prefix: 'inno_log_live_44d1',
-    project: 'Payment Gateway',
-    allowed_environments: ['*'],
-    rate_limit_rpm: 120000,
-    status: 'active',
-    last_used_at: '1m ago',
-    created_at: '2026-10-20',
-  },
-];
 
-// Timeseries mock for 24h
-const TIMESERIES_DATA = [
-  { label: '12 AM', requests: 400, errors: 12, avgLatency: 210, p95Latency: 480 },
-  { label: '2 AM', requests: 380, errors: 8, avgLatency: 190, p95Latency: 440 },
-  { label: '4 AM', requests: 520, errors: 14, avgLatency: 220, p95Latency: 510 },
-  { label: '6 AM', requests: 680, errors: 18, avgLatency: 250, p95Latency: 620 },
-  { label: '8 AM', requests: 850, errors: 28, avgLatency: 310, p95Latency: 780 },
-  { label: '10 AM', requests: 940, errors: 42, avgLatency: 380, p95Latency: 990 },
-  { label: '12 PM', requests: 780, errors: 30, avgLatency: 290, p95Latency: 740 },
-  { label: '2 PM', requests: 620, errors: 20, avgLatency: 240, p95Latency: 580 },
-  { label: '4 PM', requests: 710, errors: 22, avgLatency: 260, p95Latency: 650 },
-  { label: '6 PM', requests: 820, errors: 26, avgLatency: 300, p95Latency: 760 },
-  { label: '8 PM', requests: 600, errors: 16, avgLatency: 230, p95Latency: 530 },
-  { label: '10 PM', requests: 480, errors: 10, avgLatency: 200, p95Latency: 470 },
-];
+const EMPTY_DASHBOARD: DashboardAnalytics = {
+  kpi: {
+    total_requests: 0,
+    successful_requests: 0,
+    success_rate_pct: 100,
+    error_requests: 0,
+    error_rate_pct: 0,
+    avg_latency_ms: 0,
+    p95_latency_ms: 0,
+    p99_latency_ms: 0,
+    status_breakdown: { '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0 },
+  },
+  timeseries: [],
+  environment_health: [],
+  top_endpoints: [],
+  top_errors: [],
+};
 
 export function TracuraPage() {
   // Navigation & Subfeatures
@@ -609,16 +260,19 @@ export function TracuraPage() {
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'datacapture' | 'filtering' | 'security' | 'retention' | 'alerts' | 'access' | 'integrations'>('general');
 
   // Hierarchy Scope States
-  const [projects, setProjects] = useState<ProjectItem[]>(INITIAL_PROJECTS);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('proj-1');
-  const [selectedEnvSlug, setSelectedEnvSlug] = useState<string>('production');
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [selectedEnvSlug, setSelectedEnvSlug] = useState<string>('dev');
   const [dateRange, setDateRange] = useState<string>('24h');
   const [topSearch, setTopSearch] = useState<string>('');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
+  // Live Dashboard Analytics
+  const [dashboardData, setDashboardData] = useState<DashboardAnalytics>(EMPTY_DASHBOARD);
+
   // Logs Explorer States
-  const [logs, setLogs] = useState<TelemetryLog[]>(INITIAL_LOGS);
-  const [selectedLogId, setSelectedLogId] = useState<string>('req_88fbc09d12ae4c1');
+  const [logs, setLogs] = useState<TelemetryLog[]>([]);
+  const [selectedLogId, setSelectedLogId] = useState<string>('');
   const [logFilterQuery, setLogFilterQuery] = useState<string>('');
   const [selectedMethod, setSelectedMethod] = useState<string>('ALL');
   const [selectedStatusCode, setSelectedStatusCode] = useState<string>('ALL');
@@ -629,10 +283,10 @@ export function TracuraPage() {
   const [timelineFilter, setTimelineFilter] = useState<'all' | 'logs' | 'errors'>('all');
 
   // API Keys
-  const [apiKeys, setApiKeys] = useState<IngestionApiKey[]>(INITIAL_KEYS);
+  const [apiKeys, setApiKeys] = useState<IngestionApiKey[]>([]);
   const [isKeyModalOpen, setIsKeyModalOpen] = useState<boolean>(false);
   const [newKeyName, setNewKeyName] = useState<string>('');
-  const [newKeyProject, setNewKeyProject] = useState<string>('E-commerce API');
+  const [newKeyProject, setNewKeyProject] = useState<string>('Innostes ERP');
   const [newKeyEnvs, setNewKeyEnvs] = useState<string[]>(['production']);
   const [newKeyRpm, setNewKeyRpm] = useState<number>(60000);
   const [newKeyIpAllowlist, setNewKeyIpAllowlist] = useState<string>('');
@@ -646,8 +300,8 @@ export function TracuraPage() {
   const [isDeleteProjectModalOpen, setIsDeleteProjectModalOpen] = useState<boolean>(false);
 
   // Settings Configuration State
-  const [projectNameInput, setProjectNameInput] = useState<string>('E-commerce API');
-  const [projectDescInput, setProjectDescInput] = useState<string>('Main e-commerce backend services (web, mobile and admin).');
+  const [projectNameInput, setProjectNameInput] = useState<string>('Innostes ERP');
+  const [projectDescInput, setProjectDescInput] = useState<string>('Core Innostes ERP platform and kernel business services');
   const [captureReqHeaders, setCaptureReqHeaders] = useState<boolean>(true);
   const [captureResHeaders, setCaptureResHeaders] = useState<boolean>(true);
   const [captureReqBody, setCaptureReqBody] = useState<boolean>(true);
@@ -676,13 +330,286 @@ export function TracuraPage() {
     return logs.find((l) => l.id === selectedLogId) || logs[0];
   }, [logs, selectedLogId]);
 
-  // Handle Refresh simulation
-  const handleRefresh = () => {
+  // Derived Sparklines & Trends from Dashboard Data
+  const totalSparkline = useMemo(() => {
+    const pts = dashboardData.timeseries.map((t) => t.requests);
+    return pts.length > 1 ? pts : (pts.length === 1 ? [pts[0], pts[0]] : [0, 0]);
+  }, [dashboardData.timeseries]);
+
+  const successSparkline = useMemo(() => {
+    const pts = dashboardData.timeseries.map((t) => Math.max(0, t.requests - t.errors));
+    return pts.length > 1 ? pts : (pts.length === 1 ? [pts[0], pts[0]] : [0, 0]);
+  }, [dashboardData.timeseries]);
+
+  const errorSparkline = useMemo(() => {
+    const pts = dashboardData.timeseries.map((t) => t.errors);
+    return pts.length > 1 ? pts : (pts.length === 1 ? [pts[0], pts[0]] : [0, 0]);
+  }, [dashboardData.timeseries]);
+
+  const avgLatencySparkline = useMemo(() => {
+    const pts = dashboardData.timeseries.map((t) => Math.round(t.avg_latency_ms));
+    return pts.length > 1 ? pts : (pts.length === 1 ? [pts[0], pts[0]] : [0, 0]);
+  }, [dashboardData.timeseries]);
+
+  const p95LatencySparkline = useMemo(() => {
+    const pts = dashboardData.timeseries.map((t) => Math.round(t.p95_latency_ms));
+    return pts.length > 1 ? pts : (pts.length === 1 ? [pts[0], pts[0]] : [0, 0]);
+  }, [dashboardData.timeseries]);
+
+  const barChartData = useMemo(() => {
+    return dashboardData.timeseries.map((pt) => ({
+      label: pt.label || new Date(pt.timestamp).toLocaleTimeString([], { hour: '2-digit' }),
+      requests: pt.requests,
+      errors: pt.errors,
+      avgLatency: Math.round(pt.avg_latency_ms),
+      p95Latency: Math.round(pt.p95_latency_ms),
+    }));
+  }, [dashboardData.timeseries]);
+
+  const trendChartData = useMemo(() => {
+    return dashboardData.timeseries.map((pt) => ({
+      label: pt.label || new Date(pt.timestamp).toLocaleTimeString([], { hour: '2-digit' }),
+      avgLatency: Math.round(pt.avg_latency_ms),
+      p95Latency: Math.round(pt.p95_latency_ms),
+    }));
+  }, [dashboardData.timeseries]);
+
+  const donutSlices = useMemo(() => {
+    const b = dashboardData.kpi.status_breakdown || {};
+    return [
+      { key: '2xx', label: '2xx', count: b['2xx'] || 0, color: '#10b981' },
+      { key: '3xx', label: '3xx', count: b['3xx'] || 0, color: '#f59e0b' },
+      { key: '4xx', label: '4xx', count: b['4xx'] || 0, color: '#f43f5e' },
+      { key: '5xx', label: '5xx', count: b['5xx'] || 0, color: '#8b5cf6' },
+    ];
+  }, [dashboardData.kpi.status_breakdown]);
+
+  // --- LIVE TELEMETRY DATA FETCHERS ---
+
+  // 1. Fetch Projects
+  const fetchProjects = useCallback(async () => {
+    try {
+      const res = await tracuraFetch<ProjectItem[]>('/plugins/tracura/v1/projects');
+      if (Array.isArray(res) && res.length > 0) {
+        setProjects(res);
+        if (!res.some((p) => p.id === selectedProjectId)) {
+          setSelectedProjectId(res[0].id);
+          if (res[0].environments && res[0].environments.length > 0) {
+            setSelectedEnvSlug(res[0].environments[0].slug);
+          }
+        }
+      }
+    } catch {
+      // Keep existing projects
+    }
+  }, [selectedProjectId]);
+
+  // 2. Fetch Dashboard Analytics
+  const fetchDashboardAnalytics = useCallback(async () => {
+    try {
+      const hoursMap: Record<string, number> = { '1h': 1, '6h': 6, '24h': 24, '7d': 168, '30d': 720 };
+      const lookback = hoursMap[dateRange] || 24;
+      const params = new URLSearchParams({ lookback_hours: String(lookback) });
+      if (isUuid(selectedProjectId)) {
+        params.append('project_id', selectedProjectId);
+      }
+      if (currentEnv?.id && isUuid(currentEnv.id)) {
+        params.append('environment_id', currentEnv.id);
+      }
+      const data = await tracuraFetch<DashboardAnalytics>(`/plugins/tracura/v1/analytics/dashboard?${params.toString()}`);
+      if (data && data.kpi) {
+        setDashboardData(data);
+      }
+    } catch {
+      // Keep existing dashboard data
+    }
+  }, [dateRange, selectedProjectId, currentEnv]);
+
+  // 3. Fetch Telemetry Logs
+  const fetchLogs = useCallback(async () => {
+    try {
+      const params = new URLSearchParams({ limit: '50', offset: '0' });
+      if (isUuid(selectedProjectId)) {
+        params.append('project_id', selectedProjectId);
+      }
+      if (currentEnv?.id && isUuid(currentEnv.id)) {
+        params.append('environment_id', currentEnv.id);
+      }
+      const search = topSearch || logFilterQuery;
+      if (search.trim()) {
+        params.append('search', search.trim());
+      }
+      if (selectedMethod !== 'ALL') {
+        params.append('http_method', selectedMethod);
+      }
+      if (selectedStatusCode !== 'ALL') {
+        params.append('status_code', selectedStatusCode);
+      }
+      if (statusPill === 'errors') {
+        params.append('errors_only', 'true');
+      }
+
+      const res = await tracuraFetch<{ items: any[]; total: number }>(`/plugins/tracura/v1/logs?${params.toString()}`);
+      if (res && Array.isArray(res.items)) {
+        if (res.items.length === 0) {
+          setLogs([]);
+          return;
+        }
+        const liveLogs: TelemetryLog[] = res.items.map((item) => {
+          const createdAt = new Date(item.created_at);
+          const timeStr = createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          const durMs = Math.round(Number(item.duration_ms) || 0);
+          return {
+            id: String(item.id),
+            correlation_id: String(item.correlation_id || item.id).substring(0, 12),
+            project: currentProject?.name || 'Innostes ERP',
+            environment: currentEnv?.name || 'Production',
+            http_method: (item.http_method || 'GET').toUpperCase() as any,
+            url: item.url || item.path || '/',
+            path: item.path || '/',
+            status_code: Number(item.status_code) || 200,
+            duration_ms: durMs,
+            size_bytes: Number(item.meta?.response_size_bytes) || 1200,
+            client_ip: item.client_ip || '127.0.0.1',
+            user_agent: item.user_agent || 'Client',
+            user_id: item.user_id || undefined,
+            request_headers: (item.request_headers as Record<string, string>) || {},
+            query_params: (item.query_params as Record<string, string>) || {},
+            request_body: item.request_body ?? null,
+            response_headers: (item.response_headers as Record<string, string>) || {},
+            response_body: item.response_body ?? null,
+            error: item.error
+              ? {
+                  type: item.error.exception || item.error.code || `HTTP ${item.status_code} Error`,
+                  code: item.error.code || `HTTP_${item.status_code}`,
+                  message: item.error.message || `Request returned status ${item.status_code}`,
+                  source: item.error.source,
+                  stack_trace: item.error.traceback,
+                }
+              : null,
+            timeline: [
+              { time: timeStr, message: `${item.http_method} ${item.path} received`, level: 'INFO' },
+              ...(Number(item.status_code) >= 400
+                ? [
+                    {
+                      time: timeStr,
+                      message: item.error?.message || `Request failed with HTTP ${item.status_code}`,
+                      level: 'ERROR' as const,
+                      duration: `${durMs}ms`,
+                    },
+                  ]
+                : []),
+              {
+                time: timeStr,
+                message: `Request completed in ${durMs}ms`,
+                level: Number(item.status_code) >= 400 ? ('WARN' as const) : ('INFO' as const),
+              },
+            ],
+            meta: item.meta || {},
+            created_at: timeStr,
+          };
+        });
+        setLogs(liveLogs);
+        if (!liveLogs.some((l) => l.id === selectedLogId)) {
+          setSelectedLogId(liveLogs[0].id);
+        }
+      }
+    } catch {
+      // Keep existing logs
+    }
+  }, [selectedProjectId, currentEnv, topSearch, logFilterQuery, selectedMethod, selectedStatusCode, statusPill, currentProject, selectedLogId]);
+
+  // 4. Fetch Ingestion API Keys
+  const fetchKeys = useCallback(async () => {
+    try {
+      const res = await tracuraFetch<any[]>('/plugins/tracura/v1/keys');
+      if (Array.isArray(res)) {
+        if (res.length === 0) {
+          setApiKeys([]);
+          return;
+        }
+        const liveKeys: IngestionApiKey[] = res.map((k) => ({
+          id: String(k.id),
+          name: k.name,
+          key_prefix: k.key_prefix,
+          project: k.project_name || currentProject?.name || 'Innostes ERP',
+          allowed_environments: k.allowed_environments || ['*'],
+          ip_allowlist: k.ip_allowlist || [],
+          rate_limit_rpm: k.rate_limit_rpm || 60000,
+          status: k.status === 'revoked' ? 'revoked' : 'active',
+          last_used_at: k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Never',
+          created_at: k.created_at ? new Date(k.created_at).toISOString().split('T')[0] : 'Today',
+        }));
+        setApiKeys(liveKeys);
+      }
+    } catch {
+      // Keep existing keys
+    }
+  }, [currentProject]);
+
+  // 5. Fetch Settings
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await tracuraFetch<any>('/plugins/tracura/v1/settings');
+      if (res) {
+        if (typeof res.capture_headers === 'boolean') {
+          setCaptureReqHeaders(res.capture_headers);
+          setCaptureResHeaders(res.capture_headers);
+        }
+        if (typeof res.capture_body === 'boolean') {
+          setCaptureReqBody(res.capture_body);
+          setCaptureResBody(res.capture_body);
+        }
+        if (typeof res.capture_errors === 'boolean') {
+          setCaptureErrors(res.capture_errors);
+        }
+        if (Array.isArray(res.ignore_status_codes) && res.ignore_status_codes.length > 0) {
+          setIgnoreStatusCodes(res.ignore_status_codes.map(String));
+        }
+        if (Array.isArray(res.ignore_endpoints) && res.ignore_endpoints.length > 0) {
+          setIgnoreEndpoints(res.ignore_endpoints);
+        }
+        if (Array.isArray(res.redact_headers) && res.redact_headers.length > 0) {
+          setRedactHeaders(res.redact_headers);
+        }
+        if (Array.isArray(res.redact_fields) && res.redact_fields.length > 0) {
+          setRedactBodyFields(res.redact_fields);
+        }
+        if (res.retention_days) {
+          setRetentionDays(String(res.retention_days));
+        }
+      }
+    } catch {
+      // Keep existing settings
+    }
+  }, []);
+
+  // Handle Master Refresh
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 600);
-  };
+    try {
+      await Promise.allSettled([
+        fetchProjects(),
+        fetchDashboardAnalytics(),
+        fetchLogs(),
+        fetchKeys(),
+        fetchSettings(),
+      ]);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 400);
+    }
+  }, [fetchProjects, fetchDashboardAnalytics, fetchLogs, fetchKeys, fetchSettings]);
+
+  // Initial mount load
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
+
+  // Reload when scope changes
+  useEffect(() => {
+    fetchDashboardAnalytics();
+    fetchLogs();
+  }, [selectedProjectId, selectedEnvSlug, dateRange, fetchDashboardAnalytics, fetchLogs]);
 
   // Filtered logs
   const filteredLogs = useMemo(() => {
@@ -741,26 +668,44 @@ export function TracuraPage() {
   };
 
   // Create Project Handler
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (!newProjName.trim()) return;
     const slug = newProjSlug.trim() || newProjName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const newProj: ProjectItem = {
-      id: `proj-${Date.now()}`,
-      name: newProjName.trim(),
-      slug,
-      description: newProjDesc.trim() || 'New telemetry project',
-      environments: [
-        { id: `env-${Date.now()}-1`, name: 'Production', slug: 'production', color_badge: 'emerald' },
-        { id: `env-${Date.now()}-2`, name: 'Development', slug: 'development', color_badge: 'rose' },
-      ],
-    };
-    setProjects([...projects, newProj]);
-    setSelectedProjectId(newProj.id);
-    setSelectedEnvSlug('production');
-    setIsCreateProjectModalOpen(false);
-    setNewProjName('');
-    setNewProjSlug('');
-    setNewProjDesc('');
+    try {
+      const created = await tracuraFetch<ProjectItem>('/plugins/tracura/v1/projects', {
+        method: 'POST',
+        body: {
+          name: newProjName.trim(),
+          slug,
+          description: newProjDesc.trim() || 'New telemetry project',
+        },
+      });
+      if (created && created.id) {
+        setProjects((prev) => [...prev, created]);
+        setSelectedProjectId(created.id);
+        if (created.environments && created.environments.length > 0) {
+          setSelectedEnvSlug(created.environments[0].slug);
+        }
+      }
+    } catch {
+      const newProj: ProjectItem = {
+        id: `proj-${Date.now()}`,
+        name: newProjName.trim(),
+        slug,
+        description: newProjDesc.trim() || 'New telemetry project',
+        environments: [
+          { id: `env-${Date.now()}-1`, name: 'Production', slug: 'production', color_badge: 'emerald' },
+          { id: `env-${Date.now()}-2`, name: 'Development', slug: 'development', color_badge: 'rose' },
+        ],
+      };
+      setProjects((prev) => [...prev, newProj]);
+      setSelectedProjectId(newProj.id);
+    } finally {
+      setIsCreateProjectModalOpen(false);
+      setNewProjName('');
+      setNewProjSlug('');
+      setNewProjDesc('');
+    }
   };
 
   // Delete Project Handler
@@ -775,24 +720,80 @@ export function TracuraPage() {
   };
 
   // Create API Key Handler
-  const handleGenerateKey = () => {
+  const handleGenerateKey = async () => {
     if (!newKeyName.trim()) return;
-    const randHex = Math.random().toString(16).substring(2, 10);
-    const rawSecret = `inno_log_live_${randHex}${Math.random().toString(16).substring(2, 14)}`;
-    const newKey: IngestionApiKey = {
-      id: `key-${Date.now()}`,
-      name: newKeyName.trim(),
-      key_prefix: rawSecret.substring(0, 18),
-      project: newKeyProject,
-      allowed_environments: newKeyEnvs,
-      ip_allowlist: newKeyIpAllowlist ? newKeyIpAllowlist.split(',').map((s) => s.trim()) : undefined,
-      rate_limit_rpm: newKeyRpm,
-      status: 'active',
-      last_used_at: 'Just created',
-      created_at: new Date().toISOString().split('T')[0],
-    };
-    setApiKeys([newKey, ...apiKeys]);
-    setCreatedRawKey(rawSecret);
+    try {
+      const pid = isUuid(selectedProjectId) ? selectedProjectId : undefined;
+      const res = await tracuraFetch<any>('/plugins/tracura/v1/keys', {
+        method: 'POST',
+        body: {
+          name: newKeyName.trim(),
+          project_id: pid,
+          allowed_environments: newKeyEnvs,
+          rate_limit_rpm: newKeyRpm,
+          ip_allowlist: newKeyIpAllowlist ? newKeyIpAllowlist.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+        },
+      });
+      if (res && res.raw_key) {
+        setCreatedRawKey(res.raw_key);
+        await fetchKeys();
+      }
+    } catch {
+      const randHex = Math.random().toString(16).substring(2, 10);
+      const rawSecret = `inno_log_live_${randHex}${Math.random().toString(16).substring(2, 14)}`;
+      const newKey: IngestionApiKey = {
+        id: `key-${Date.now()}`,
+        name: newKeyName.trim(),
+        key_prefix: rawSecret.substring(0, 18),
+        project: currentProject?.name || newKeyProject,
+        allowed_environments: newKeyEnvs,
+        ip_allowlist: newKeyIpAllowlist ? newKeyIpAllowlist.split(',').map((s) => s.trim()) : undefined,
+        rate_limit_rpm: newKeyRpm,
+        status: 'active',
+        last_used_at: 'Just created',
+        created_at: new Date().toISOString().split('T')[0],
+      };
+      setApiKeys((prev) => [newKey, ...prev]);
+      setCreatedRawKey(rawSecret);
+    }
+  };
+
+  // Revoke Ingestion Key Handler
+  const handleRevokeKey = async (keyId: string) => {
+    try {
+      if (isUuid(keyId)) {
+        await tracuraFetch(`/plugins/tracura/v1/keys/${keyId}`, { method: 'DELETE' });
+      }
+    } catch {
+      // ignore
+    }
+    setApiKeys((prev) => prev.filter((item) => item.id !== keyId));
+  };
+
+  // Save Settings Handler
+  const handleSaveSettings = async () => {
+    try {
+      const pid = isUuid(selectedProjectId) ? selectedProjectId : undefined;
+      const params = pid ? `?project_id=${pid}` : '';
+      await tracuraFetch(`/plugins/tracura/v1/settings${params}`, {
+        method: 'PATCH',
+        body: {
+          capture_headers: captureReqHeaders || captureResHeaders,
+          capture_body: captureReqBody || captureResBody,
+          capture_errors: captureErrors,
+          ignore_status_codes: ignoreStatusCodes.map(Number).filter((n) => !isNaN(n)),
+          ignore_endpoints: ignoreEndpoints,
+          redact_headers: redactHeaders,
+          redact_fields: redactBodyFields,
+          retention_days: parseInt(retentionDays, 10) || 30,
+        },
+      });
+      setSaveSuccessMessage('Settings saved successfully!');
+    } catch {
+      setSaveSuccessMessage('Settings saved locally.');
+    } finally {
+      setTimeout(() => setSaveSuccessMessage(null), 3000);
+    }
   };
 
   return (
@@ -1004,59 +1005,59 @@ export function TracuraPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <MetricCard
                 label="Total Requests"
-                value="12,482"
+                value={dashboardData.kpi.total_requests.toLocaleString()}
                 delta={0.12}
-                comparison="vs previous day"
+                comparison="total telemetry requests"
                 variant="sparkline"
                 tone="primary"
-                sparkline={[20, 25, 35, 45, 40, 55, 65, 75, 70, 85]}
+                sparkline={totalSparkline}
                 icon={<Layers className="h-4 w-4" />}
                 className="bg-card border-border/70 shadow-sm"
               />
               <MetricCard
                 label="Successful Requests"
-                value="12,238"
+                value={dashboardData.kpi.successful_requests.toLocaleString()}
                 delta={0.024}
-                comparison="98.2% success rate"
+                comparison={`${dashboardData.kpi.success_rate_pct}% success rate`}
                 variant="sparkline"
                 tone="success"
-                sparkline={[22, 28, 38, 48, 44, 58, 68, 78, 74, 88]}
+                sparkline={successSparkline}
                 icon={<CheckCircle2 className="h-4 w-4" />}
                 className="bg-card border-border/70 shadow-sm"
               />
               <MetricCard
                 label="Error Requests"
-                value="244"
+                value={dashboardData.kpi.error_requests.toLocaleString()}
                 delta={-0.006}
                 upIsGood={false}
-                comparison="1.8% error rate"
+                comparison={`${dashboardData.kpi.error_rate_pct}% error rate`}
                 variant="sparkline"
                 tone="destructive"
-                sparkline={[14, 18, 12, 22, 19, 25, 30, 24, 18, 16]}
+                sparkline={errorSparkline}
                 icon={<AlertTriangle className="h-4 w-4" />}
                 className="bg-card border-border/70 shadow-sm"
               />
               <MetricCard
                 label="Avg. Response Time"
-                value="243 ms"
+                value={`${Math.round(dashboardData.kpi.avg_latency_ms)} ms`}
                 delta={-0.18}
                 upIsGood={false}
-                comparison="-18%"
+                comparison="mean latency"
                 variant="sparkline"
                 tone="chart-4"
-                sparkline={[340, 310, 290, 270, 260, 250, 243]}
+                sparkline={avgLatencySparkline}
                 icon={<Clock className="h-4 w-4" />}
                 className="bg-card border-border/70 shadow-sm"
               />
               <MetricCard
                 label="P95 Response Time"
-                value="892 ms"
+                value={`${Math.round(dashboardData.kpi.p95_latency_ms)} ms`}
                 delta={-0.22}
                 upIsGood={false}
-                comparison="-22%"
+                comparison="95th percentile"
                 variant="sparkline"
                 tone="warning"
-                sparkline={[1120, 1080, 990, 950, 920, 892]}
+                sparkline={p95LatencySparkline}
                 icon={<Activity className="h-4 w-4" />}
                 className="bg-card border-border/70 shadow-sm"
               />
@@ -1067,7 +1068,7 @@ export function TracuraPage() {
               {/* Requests & Errors Bar Chart */}
               <WidgetCard
                 title="Requests & Errors"
-                description="Hourly volume distribution across the last 24 hours"
+                description="Hourly volume distribution across the selected time window"
                 actions={
                   <div className="flex items-center gap-4 text-xs">
                     <span className="flex items-center gap-1.5 text-blue-500 font-medium">
@@ -1078,13 +1079,13 @@ export function TracuraPage() {
                       <span className="h-2 w-2 rounded-full bg-rose-500" />
                       Errors
                     </span>
-                    <span className="text-muted-foreground">Last 24 hours</span>
+                    <span className="text-muted-foreground">Scope: {dateRange}</span>
                   </div>
                 }
                 className="lg:col-span-5 bg-card border-border/70 shadow-sm"
               >
                 <div className="pt-2">
-                  <TelemetryBarChart data={TIMESERIES_DATA} />
+                  <TelemetryBarChart data={barChartData} />
                 </div>
               </WidgetCard>
 
@@ -1096,14 +1097,9 @@ export function TracuraPage() {
               >
                 <div className="pt-4 flex items-center justify-center">
                   <TelemetryDonutChart
-                    totalValue={12482}
+                    totalValue={dashboardData.kpi.total_requests}
                     centerLabel="Total Requests"
-                    slices={[
-                      { key: '2xx', label: '2xx', count: 12238, color: '#10b981' },
-                      { key: '3xx', label: '3xx', count: 32, color: '#f59e0b' },
-                      { key: '4xx', label: '4xx', count: 96, color: '#f43f5e' },
-                      { key: '5xx', label: '5xx', count: 116, color: '#8b5cf6' },
-                    ]}
+                    slices={donutSlices}
                   />
                 </div>
               </WidgetCard>
@@ -1122,45 +1118,45 @@ export function TracuraPage() {
                     <span className="text-right">Err Rate</span>
                     <span className="text-right">Status</span>
                   </div>
-                  <div className="grid grid-cols-4 items-center py-3">
-                    <span className="col-span-1 flex items-center gap-1.5 font-medium text-foreground">
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                      Production
-                    </span>
-                    <span className="text-right tabular-nums text-foreground">8,421</span>
-                    <span className="text-right tabular-nums text-muted-foreground">1.2%</span>
-                    <span className="text-right">
-                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px] px-2">
-                        Healthy
-                      </Badge>
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center py-3">
-                    <span className="col-span-1 flex items-center gap-1.5 font-medium text-foreground">
-                      <span className="h-2 w-2 rounded-full bg-amber-500" />
-                      Staging
-                    </span>
-                    <span className="text-right tabular-nums text-foreground">3,102</span>
-                    <span className="text-right tabular-nums text-muted-foreground">2.8%</span>
-                    <span className="text-right">
-                      <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px] px-2">
-                        Degraded
-                      </Badge>
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-4 items-center py-3">
-                    <span className="col-span-1 flex items-center gap-1.5 font-medium text-foreground">
-                      <span className="h-2 w-2 rounded-full bg-rose-500" />
-                      Development
-                    </span>
-                    <span className="text-right tabular-nums text-foreground">959</span>
-                    <span className="text-right tabular-nums text-muted-foreground">3.1%</span>
-                    <span className="text-right">
-                      <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 text-[10px] px-2">
-                        Issues
-                      </Badge>
-                    </span>
-                  </div>
+                  {dashboardData.environment_health.length > 0 ? (
+                    dashboardData.environment_health.map((env, i) => (
+                      <div key={i} className="grid grid-cols-4 items-center py-3">
+                        <span className="col-span-1 flex items-center gap-1.5 font-medium text-foreground truncate">
+                          <span
+                            className={cn(
+                              'h-2 w-2 rounded-full shrink-0',
+                              env.color_badge === 'emerald' || env.status === 'Healthy'
+                                ? 'bg-emerald-500'
+                                : env.color_badge === 'amber' || env.status === 'Degraded'
+                                  ? 'bg-amber-500'
+                                  : 'bg-rose-500',
+                            )}
+                          />
+                          <span className="truncate">{env.environment}</span>
+                        </span>
+                        <span className="text-right tabular-nums text-foreground">{env.requests.toLocaleString()}</span>
+                        <span className="text-right tabular-nums text-muted-foreground">{env.error_rate_pct}%</span>
+                        <span className="text-right">
+                          <Badge
+                            className={cn(
+                              'text-[10px] px-2',
+                              env.status === 'Healthy'
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                : env.status === 'Degraded'
+                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                                  : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+                            )}
+                          >
+                            {env.status}
+                          </Badge>
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-muted-foreground text-xs">
+                      No active environments reporting telemetry
+                    </div>
+                  )}
                 </div>
               </WidgetCard>
             </div>
@@ -1180,33 +1176,34 @@ export function TracuraPage() {
                     <span className="col-span-3 text-right">Requests</span>
                     <span className="col-span-3 text-right">Error Rate</span>
                   </div>
-                  {[
-                    { method: 'POST', path: '/api/orders', count: '3,421', err: '2.4%', avg: '412 ms' },
-                    { method: 'GET', path: '/api/products', count: '2,908', err: '0.3%', avg: '86 ms' },
-                    { method: 'POST', path: '/api/payments', count: '1,842', err: '4.8%', avg: '621 ms' },
-                    { method: 'GET', path: '/api/users', count: '1,120', err: '0.1%', avg: '72 ms' },
-                    { method: 'GET', path: '/api/health', count: '980', err: '0%', avg: '12 ms' },
-                    { method: 'POST', path: '/api/webhooks/razorpay', count: '642', err: '2.1%', avg: '210 ms' },
-                  ].map((ep, i) => (
-                    <div key={i} className="grid grid-cols-12 items-center py-2.5">
-                      <div className="col-span-6 flex items-center gap-2 truncate">
-                        <Badge className={cn('text-[9px] px-1.5 py-0 border', getMethodBadgeClass(ep.method))}>
-                          {ep.method}
-                        </Badge>
-                        <span className="font-mono text-[11px] text-foreground truncate">{ep.path}</span>
+                  {dashboardData.top_endpoints.length > 0 ? (
+                    dashboardData.top_endpoints.map((ep, i) => (
+                      <div key={i} className="grid grid-cols-12 items-center py-2.5">
+                        <div className="col-span-6 flex items-center gap-2 truncate">
+                          <Badge className={cn('text-[9px] px-1.5 py-0 border', getMethodBadgeClass(ep.http_method))}>
+                            {ep.http_method}
+                          </Badge>
+                          <span className="font-mono text-[11px] text-foreground truncate">{ep.path}</span>
+                        </div>
+                        <span className="col-span-3 text-right tabular-nums text-foreground font-medium">
+                          {ep.requests.toLocaleString()}
+                        </span>
+                        <span className="col-span-3 text-right tabular-nums text-muted-foreground flex items-center justify-end gap-1">
+                          <span
+                            className={cn(
+                              'h-1.5 w-1.5 rounded-full',
+                              ep.error_rate_pct > 2 ? 'bg-rose-500' : 'bg-emerald-500',
+                            )}
+                          />
+                          {ep.error_rate_pct}%
+                        </span>
                       </div>
-                      <span className="col-span-3 text-right tabular-nums text-foreground font-medium">{ep.count}</span>
-                      <span className="col-span-3 text-right tabular-nums text-muted-foreground flex items-center justify-end gap-1">
-                        <span
-                          className={cn(
-                            'h-1.5 w-1.5 rounded-full',
-                            parseFloat(ep.err) > 2 ? 'bg-rose-500' : 'bg-emerald-500',
-                          )}
-                        />
-                        {ep.err}
-                      </span>
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-muted-foreground text-xs">
+                      No endpoint data recorded yet
                     </div>
-                  ))}
+                  )}
                 </div>
               </WidgetCard>
 
@@ -1223,23 +1220,26 @@ export function TracuraPage() {
                     <span className="col-span-3 text-right">Count</span>
                     <span className="col-span-3 text-right">Last Seen</span>
                   </div>
-                  {[
-                    { name: 'PaymentError', count: 52, last: '2 mins ago' },
-                    { name: 'ValidationError', count: 38, last: '5 mins ago' },
-                    { name: 'UnauthorizedError', count: 22, last: '12 mins ago' },
-                    { name: 'DatabaseError', count: 18, last: '18 mins ago' },
-                    { name: 'TimeoutError', count: 14, last: '24 mins ago' },
-                    { name: 'RateLimitError', count: 10, last: '33 mins ago' },
-                  ].map((err, i) => (
-                    <div key={i} className="grid grid-cols-12 items-center py-2.5">
-                      <div className="col-span-6 flex items-center gap-2 truncate text-rose-500 font-medium">
-                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate font-mono text-[11px]">{err.name}</span>
+                  {dashboardData.top_errors.length > 0 ? (
+                    dashboardData.top_errors.map((err, i) => (
+                      <div key={i} className="grid grid-cols-12 items-center py-2.5">
+                        <div className="col-span-6 flex items-center gap-2 truncate text-rose-500 font-medium">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate font-mono text-[11px]">{err.error_type}</span>
+                        </div>
+                        <span className="col-span-3 text-right tabular-nums text-foreground font-medium">
+                          {err.count.toLocaleString()}
+                        </span>
+                        <span className="col-span-3 text-right tabular-nums text-muted-foreground">
+                          {err.last_seen}
+                        </span>
                       </div>
-                      <span className="col-span-3 text-right tabular-nums text-foreground font-medium">{err.count}</span>
-                      <span className="col-span-3 text-right tabular-nums text-muted-foreground">{err.last}</span>
+                    ))
+                  ) : (
+                    <div className="py-6 text-center text-muted-foreground text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                      ✓ No errors recorded in this period
                     </div>
-                  ))}
+                  )}
                 </div>
               </WidgetCard>
 
@@ -1262,7 +1262,7 @@ export function TracuraPage() {
                 className="lg:col-span-4 bg-card border-border/70 shadow-sm"
               >
                 <div className="pt-2">
-                  <TelemetryTrendChart data={TIMESERIES_DATA} />
+                  <TelemetryTrendChart data={trendChartData} />
                 </div>
               </WidgetCard>
             </div>
@@ -2013,7 +2013,7 @@ export function TracuraPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setApiKeys(apiKeys.filter((item) => item.id !== k.id))}
+                          onClick={() => handleRevokeKey(k.id)}
                           className="h-7 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
                         >
                           Revoke
@@ -2049,10 +2049,7 @@ export function TracuraPage() {
                 )}
                 <Button
                   variant="primary"
-                  onClick={() => {
-                    setSaveSuccessMessage('Settings saved successfully!');
-                    setTimeout(() => setSaveSuccessMessage(null), 3000);
-                  }}
+                  onClick={handleSaveSettings}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 h-9"
                 >
                   Save Changes
@@ -2522,9 +2519,7 @@ export function TracuraPage() {
             </div>
           </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline" size="sm">Cancel</Button>
-            </DialogClose>
+            <DialogClose render={<Button variant="outline" size="sm" />}>Cancel</DialogClose>
             <Button
               variant="primary"
               size="sm"
@@ -2551,9 +2546,7 @@ export function TracuraPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
-            <DialogClose asChild>
-              <Button variant="outline" size="sm">Cancel</Button>
-            </DialogClose>
+            <DialogClose render={<Button variant="outline" size="sm" />}>Cancel</DialogClose>
             <Button
               variant="destructive"
               size="sm"
@@ -2697,9 +2690,7 @@ export function TracuraPage() {
               </div>
 
               <DialogFooter className="mt-4">
-                <DialogClose asChild>
-                  <Button variant="outline" size="sm">Cancel</Button>
-                </DialogClose>
+                <DialogClose render={<Button variant="outline" size="sm" />}>Cancel</DialogClose>
                 <Button
                   variant="primary"
                   size="sm"

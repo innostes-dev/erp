@@ -13,6 +13,7 @@ Tests cover:
 """
 
 from datetime import datetime, timezone
+import os
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 import uuid
@@ -774,6 +775,680 @@ class TestHttpEndpoints(unittest.TestCase):
 
         eid_dev = get_default_erp_env_id(pid, "development")
         self.assertNotEqual(eid_prod, eid_dev)
+
+    def test_configured_project_and_env_from_env_vars_with_fallbacks(self) -> None:
+        import os
+        from tracura.services.project_service import (
+            get_configured_env_slug,
+            get_configured_project_name,
+            get_configured_project_slug,
+        )
+
+        # 1. Fallback when unset
+        old_app_name = os.environ.pop("APP_NAME", None)
+        old_tracura_proj = os.environ.pop("TRACURA_PROJECT_NAME", None)
+        old_app_env = os.environ.pop("APP_ENV", None)
+        old_tracura_env = os.environ.pop("TRACURA_ENVIRONMENT", None)
+        try:
+            self.assertEqual(get_configured_project_name(), "Innostes ERP")
+            self.assertEqual(get_configured_project_slug(), "innostes-erp")
+            self.assertEqual(get_configured_env_slug(), "dev")
+
+            # 2. Pick from APP_NAME & APP_ENV
+            os.environ["APP_NAME"] = "Fintech Gateway"
+            os.environ["APP_ENV"] = "staging"
+            self.assertEqual(get_configured_project_name(), "Fintech Gateway")
+            self.assertEqual(get_configured_project_slug(), "fintech-gateway")
+            self.assertEqual(get_configured_env_slug(), "staging")
+
+            # 3. Dedicated TRACURA overrides take precedence
+            os.environ["TRACURA_PROJECT_NAME"] = "Custom Telemetry"
+            os.environ["TRACURA_ENVIRONMENT"] = "sandbox"
+            self.assertEqual(get_configured_project_name(), "Custom Telemetry")
+            self.assertEqual(get_configured_project_slug(), "custom-telemetry")
+            self.assertEqual(get_configured_env_slug(), "sandbox")
+        finally:
+            if old_app_name:
+                os.environ["APP_NAME"] = old_app_name
+            else:
+                os.environ.pop("APP_NAME", None)
+            if old_tracura_proj:
+                os.environ["TRACURA_PROJECT_NAME"] = old_tracura_proj
+            else:
+                os.environ.pop("TRACURA_PROJECT_NAME", None)
+            if old_app_env:
+                os.environ["APP_ENV"] = old_app_env
+            else:
+                os.environ.pop("APP_ENV", None)
+            if old_tracura_env:
+                os.environ["TRACURA_ENVIRONMENT"] = old_tracura_env
+            else:
+                os.environ.pop("TRACURA_ENVIRONMENT", None)
+
+    def test_plugin_active_cache_and_lifecycle_hooks(self) -> None:
+        from tracura import plugin as tracura_plugin
+        from tracura.middleware.capture import is_plugin_active_for_tenant, mark_plugin_active
+
+        test_tid = uuid.uuid4()
+        self.assertFalse(is_plugin_active_for_tenant(test_tid))
+
+        mark_plugin_active(test_tid, True)
+        self.assertTrue(is_plugin_active_for_tenant(test_tid))
+
+        mark_plugin_active(test_tid, False)
+        self.assertFalse(is_plugin_active_for_tenant(test_tid))
+
+
+# ==============================================================================
+# 7. REAL PROJECT SERVICE & CONDITIONAL SEEDING TESTS
+# ==============================================================================
+
+class TestProjectServiceRealCases(unittest.IsolatedAsyncioTestCase):
+    """Real business logic tests for ProjectService and default seeding."""
+
+    async def test_ensure_default_erp_project_seeds_only_when_table_empty(self) -> None:
+        from tracura.services.project_service import ProjectService, get_default_project_id
+
+        tenant_id = uuid.uuid4()
+        service = ProjectService()
+
+        # Simulate empty table (count == 0)
+        session = MagicMock()
+        count_result = MagicMock()
+        count_result.scalar.return_value = 0
+
+        # After insert, get_project returns the created project
+        created_proj = None
+
+        def mock_add(proj):
+            nonlocal created_proj
+            if isinstance(proj, ApiLogProject):
+                created_proj = proj
+
+        session.add = MagicMock(side_effect=mock_add)
+        session.add_all = MagicMock()
+        session.flush = AsyncMock()
+
+        select_result = MagicMock()
+        select_result.scalar_one_or_none.return_value = None
+
+        session.execute = AsyncMock(side_effect=[count_result, select_result])
+
+        res = await service.ensure_default_erp_project(session, tenant_id)
+
+        # 1. Project is added
+        session.add.assert_called_once()
+        added_project = session.add.call_args[0][0]
+        self.assertIsInstance(added_project, ApiLogProject)
+        self.assertEqual(added_project.tenant_id, tenant_id)
+        self.assertEqual(added_project.id, get_default_project_id(tenant_id))
+
+        # 2. Standard environments are added
+        session.add_all.assert_called_once()
+        added_envs = session.add_all.call_args[0][0]
+        env_slugs = {e.slug for e in added_envs}
+        self.assertIn("dev", env_slugs)
+        self.assertIn("production", env_slugs)
+        self.assertIn("staging", env_slugs)
+
+    async def test_ensure_default_erp_project_preserves_existing_when_not_empty(self) -> None:
+        from tracura.services.project_service import ProjectService
+
+        tenant_id = uuid.uuid4()
+        service = ProjectService()
+
+        # Simulate table NOT empty (count == 1)
+        existing_proj = ApiLogProject(
+            id=uuid.uuid4(),
+            tenant_id=tenant_id,
+            name="Existing Custom Project",
+            slug="existing-custom",
+        )
+
+        session = MagicMock()
+        count_result = MagicMock()
+        count_result.scalar.return_value = 1
+
+        query_result = MagicMock()
+        query_result.scalars.return_value.first.return_value = existing_proj
+
+        session.execute = AsyncMock(side_effect=[count_result, query_result])
+        session.add = MagicMock()
+        session.add_all = MagicMock()
+
+        res = await service.ensure_default_erp_project(session, tenant_id)
+
+        # Must return existing project without creating duplicates
+        self.assertEqual(res, existing_proj)
+        session.add.assert_not_called()
+        session.add_all.assert_not_called()
+
+    async def test_list_projects_strictly_isolated_by_tenant(self) -> None:
+        from tracura.services.project_service import ProjectService
+
+        tenant_id = uuid.uuid4()
+        service = ProjectService()
+
+        session = MagicMock()
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = []
+        session.execute = AsyncMock(return_value=mock_result)
+
+        # Service will query and call ensure_default_erp_project if empty
+        service.ensure_default_erp_project = AsyncMock(return_value=None)
+        projects = await service.list_projects(session, tenant_id)
+
+        # Verify the execute query contained the tenant_id in its where clause
+        called_stmt = session.execute.call_args[0][0]
+        compiled_query = str(called_stmt)
+        self.assertIn("api_log_projects.tenant_id =", compiled_query)
+        self.assertNotIn("00000000-0000-0000-0000-000000000001", compiled_query)
+
+
+# ==============================================================================
+# 8. REAL CAPTURE MIDDLEWARE ACTIVATION GATE TESTS
+# ==============================================================================
+
+class TestCaptureMiddlewareRealCases(unittest.IsolatedAsyncioTestCase):
+    """Test ASGI request capture gated strictly by tenant plugin activation."""
+
+    async def test_capture_skips_when_plugin_inactive_for_tenant(self) -> None:
+        from tracura.middleware.capture import TracuraCaptureMiddleware, mark_plugin_active
+        import tracura.middleware.capture as capture_mod
+
+        tenant_id = uuid.uuid4()
+        capture_mod._ACTIVE_TENANTS_LOADED = True
+        mark_plugin_active(tenant_id, False)
+
+        # Mock app that returns 200
+        app = MagicMock()
+        middleware = TracuraCaptureMiddleware(app)
+
+        mock_request = MagicMock()
+        mock_request.url.path = "/api/v1/orders"
+        mock_request.method = "GET"
+        mock_request.state.tenant_id = tenant_id
+        mock_request.headers = {}
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.headers = {}
+
+        call_next = AsyncMock(return_value=mock_response)
+
+        with unittest.mock.patch("tracura.middleware.capture.log_buffer.enqueue", new_callable=AsyncMock) as mock_enqueue:
+            res = await middleware.dispatch(mock_request, call_next)
+            self.assertEqual(res.status_code, 200)
+            # Enqueue must NOT be called for inactive tenant
+            mock_enqueue.assert_not_called()
+
+    async def test_capture_enqueues_when_plugin_active_for_tenant(self) -> None:
+        from tracura.middleware.capture import (
+            TracuraCaptureMiddleware,
+            get_default_erp_project_id,
+            mark_plugin_active,
+        )
+        import tracura.middleware.capture as capture_mod
+
+        tenant_id = uuid.uuid4()
+        capture_mod._ACTIVE_TENANTS_LOADED = True
+        mark_plugin_active(tenant_id, True)
+
+        try:
+            app = MagicMock()
+            middleware = TracuraCaptureMiddleware(app)
+
+            mock_request = MagicMock()
+            mock_request.url.path = "/api/v1/payments/charges"
+            mock_request.url.__str__ = MagicMock(return_value="https://api.erp.com/api/v1/payments/charges")
+            mock_request.method = "POST"
+            mock_request.state.tenant_id = tenant_id
+            mock_request.state.project_id = None
+            mock_request.state.environment_id = None
+            mock_request.state.api_key = None
+            mock_request.state.user_id = "user_123"
+            mock_request.client.host = "127.0.0.1"
+            mock_request.headers = {"user-agent": "test-agent"}
+            mock_request.query_params = {}
+
+            mock_response = MagicMock()
+            mock_response.status_code = 201
+            mock_response.headers = {}
+
+            call_next = AsyncMock(return_value=mock_response)
+
+            with unittest.mock.patch("tracura.middleware.capture.log_buffer.enqueue", new_callable=AsyncMock) as mock_enqueue:
+                res = await middleware.dispatch(mock_request, call_next)
+                self.assertEqual(res.status_code, 201)
+
+                # Enqueue MUST be called for active tenant
+                mock_enqueue.assert_called_once()
+                enqueued_log = mock_enqueue.call_args[0][0]
+
+                self.assertEqual(enqueued_log["tenant_id"], tenant_id)
+                self.assertEqual(enqueued_log["project_id"], get_default_erp_project_id(tenant_id))
+                self.assertIsNotNone(enqueued_log["environment_id"])
+                self.assertEqual(enqueued_log["http_method"], "POST")
+                self.assertEqual(enqueued_log["path"], "/api/v1/payments/charges")
+                self.assertEqual(enqueued_log["status_code"], 201)
+                self.assertEqual(enqueued_log["user_id"], "user_123")
+        finally:
+            mark_plugin_active(tenant_id, False)
+
+
+# ==============================================================================
+# 9. REAL LOG QUERY SERVICE FILTERING TESTS
+# ==============================================================================
+
+class TestLogQueryServiceRealCases(unittest.IsolatedAsyncioTestCase):
+    """Real business logic & filter predicate tests for LogQueryService."""
+
+    async def test_query_logs_strict_tenant_isolation(self) -> None:
+        from tracura.services.log_query_service import LogQueryService
+
+        tenant_id = uuid.uuid4()
+        service = LogQueryService()
+
+        session = MagicMock()
+        count_res = MagicMock()
+        count_res.scalar.return_value = 0
+        data_res = MagicMock()
+        data_res.scalars.return_value.all.return_value = []
+
+        session.execute = AsyncMock(side_effect=[count_res, data_res])
+
+        logs, total = await service.query_logs(session, tenant_id)
+
+        # Verify compiled SQL has tenant_id = :tenant_id
+        count_stmt = session.execute.call_args_list[0][0][0]
+        data_stmt = session.execute.call_args_list[1][0][0]
+
+        self.assertIn("api_logs.tenant_id =", str(count_stmt))
+        self.assertIn("api_logs.tenant_id =", str(data_stmt))
+        self.assertNotIn("00000000-0000-0000-0000-000000000001", str(count_stmt))
+        self.assertNotIn("00000000-0000-0000-0000-000000000001", str(data_stmt))
+
+    async def test_query_logs_applies_all_filter_predicates(self) -> None:
+        from tracura.services.log_query_service import LogQueryService
+
+        tenant_id = uuid.uuid4()
+        project_id = uuid.uuid4()
+        env_id = uuid.uuid4()
+        service = LogQueryService()
+
+        session = MagicMock()
+        count_res = MagicMock()
+        count_res.scalar.return_value = 1
+        data_res = MagicMock()
+        data_res.scalars.return_value.all.return_value = []
+
+        session.execute = AsyncMock(side_effect=[count_res, data_res])
+
+        logs, total = await service.query_logs(
+            session=session,
+            tenant_id=tenant_id,
+            project_id=project_id,
+            environment_id=env_id,
+            correlation_id="req_trace_99",
+            user_id="usr_88",
+            http_method="POST",
+            status_code=500,
+            errors_only=True,
+            slow_requests_ms=1500.0,
+            search="checkout",
+        )
+
+        data_stmt_str = str(session.execute.call_args_list[1][0][0])
+        self.assertIn("api_logs.project_id =", data_stmt_str)
+        self.assertIn("api_logs.environment_id =", data_stmt_str)
+        self.assertIn("api_logs.correlation_id =", data_stmt_str)
+        self.assertIn("api_logs.user_id =", data_stmt_str)
+        self.assertIn("api_logs.http_method =", data_stmt_str)
+        self.assertIn("api_logs.status_code =", data_stmt_str)
+        self.assertIn("api_logs.status_code >=", data_stmt_str)
+        self.assertIn("api_logs.duration_ms >=", data_stmt_str)
+        self.assertIn("lower(api_logs.path) LIKE lower(", data_stmt_str)
+
+    async def test_get_log_enforces_tenant_boundary(self) -> None:
+        from tracura.services.log_query_service import LogQueryService
+
+        tenant_id = uuid.uuid4()
+        log_id = uuid.uuid4()
+        service = LogQueryService()
+
+        session = MagicMock()
+        get_res = MagicMock()
+        get_res.scalar_one_or_none.return_value = None
+        session.execute = AsyncMock(return_value=get_res)
+
+        await service.get_log(session, tenant_id, log_id)
+
+        stmt_str = str(session.execute.call_args[0][0])
+        self.assertIn("api_logs.id =", stmt_str)
+        self.assertIn("api_logs.tenant_id =", stmt_str)
+
+
+# ==============================================================================
+# 10. REAL PLUGIN LIFECYCLE ACTIVATION / DEACTIVATION HOOK TESTS
+# ==============================================================================
+
+class TestPluginLifecycleRealCases(unittest.IsolatedAsyncioTestCase):
+    """Test plugin on_tenant_activate and on_tenant_deactivate lifecycle hooks."""
+
+    async def test_on_tenant_activate_seeds_project_and_marks_active(self) -> None:
+        from tracura import plugin as tracura_plugin
+        from tracura.middleware.capture import is_plugin_active_for_tenant, mark_plugin_active
+
+        tenant_id = uuid.uuid4()
+        actor_id = uuid.uuid4()
+        mark_plugin_active(tenant_id, False)
+
+        session = MagicMock()
+        with unittest.mock.patch("tracura.services.project_service.ProjectService.ensure_default_erp_project", new_callable=AsyncMock) as mock_ensure:
+            await tracura_plugin.on_tenant_activate(session, tenant_id, actor_id)
+
+            # 1. ProjectService.ensure_default_erp_project was called
+            mock_ensure.assert_called_once_with(session=session, tenant_id=tenant_id, actor_id=actor_id)
+
+            # 2. Tenant is marked active in memory
+            self.assertTrue(is_plugin_active_for_tenant(tenant_id))
+
+    async def test_on_tenant_deactivate_marks_inactive(self) -> None:
+        from tracura import plugin as tracura_plugin
+        from tracura.middleware.capture import is_plugin_active_for_tenant, mark_plugin_active
+
+        tenant_id = uuid.uuid4()
+        mark_plugin_active(tenant_id, True)
+        self.assertTrue(is_plugin_active_for_tenant(tenant_id))
+
+        session = MagicMock()
+        await tracura_plugin.on_tenant_deactivate(session, tenant_id)
+
+        # Tenant is marked inactive in memory
+        self.assertFalse(is_plugin_active_for_tenant(tenant_id))
+
+
+# ==============================================================================
+# 11. END-TO-END ASGI CAPTURE WITH FASTAPI TESTCLIENT
+# ==============================================================================
+
+class TestCaptureMiddlewareEndToEnd(unittest.TestCase):
+    """End-to-end HTTP request capture integration tests using TestClient."""
+
+    def setUp(self) -> None:
+        from tracura.middleware.capture import TracuraCaptureMiddleware
+
+        self.app = FastAPI()
+        self.app.add_middleware(TracuraCaptureMiddleware)
+
+        @self.app.get("/api/v1/orders")
+        async def list_orders():
+            return [{"id": "ord_1", "total": 100.0}]
+
+        @self.app.get("/health")
+        async def health():
+            return {"status": "ok"}
+
+        @self.app.post("/tracura/v1/ingest")
+        async def ingest():
+            return {"accepted": 1}
+
+        self.client = TestClient(self.app)
+
+    def test_end_to_end_capture_active_tenant(self) -> None:
+        from tracura.middleware.capture import mark_plugin_active, get_default_erp_project_id
+        from tracura.middleware.buffer import log_buffer
+
+        active_tenant = uuid.uuid4()
+        mark_plugin_active(active_tenant, True)
+
+        try:
+            with unittest.mock.patch.object(log_buffer, "enqueue", new_callable=AsyncMock) as mock_enqueue:
+                res = self.client.get(
+                    "/api/v1/orders",
+                    headers={"X-Tenant-ID": str(active_tenant), "User-Agent": "real-test-agent"},
+                )
+                self.assertEqual(res.status_code, 200)
+                self.assertEqual(res.json(), [{"id": "ord_1", "total": 100.0}])
+
+                mock_enqueue.assert_called_once()
+                enqueued = mock_enqueue.call_args[0][0]
+                self.assertEqual(enqueued["tenant_id"], active_tenant)
+                self.assertEqual(enqueued["project_id"], get_default_erp_project_id(active_tenant))
+                self.assertEqual(enqueued["path"], "/api/v1/orders")
+                self.assertEqual(enqueued["http_method"], "GET")
+                self.assertEqual(enqueued["status_code"], 200)
+                self.assertGreaterEqual(enqueued["duration_ms"], 0.0)
+                self.assertEqual(enqueued["user_agent"], "real-test-agent")
+        finally:
+            mark_plugin_active(active_tenant, False)
+
+    def test_end_to_end_capture_inactive_tenant_ignored(self) -> None:
+        from tracura.middleware.capture import mark_plugin_active
+        from tracura.middleware.buffer import log_buffer
+
+        inactive_tenant = uuid.uuid4()
+        mark_plugin_active(inactive_tenant, False)
+
+        with unittest.mock.patch.object(log_buffer, "enqueue", new_callable=AsyncMock) as mock_enqueue:
+            res = self.client.get(
+                "/api/v1/orders",
+                headers={"X-Tenant-ID": str(inactive_tenant)},
+            )
+            self.assertEqual(res.status_code, 200)
+            mock_enqueue.assert_not_called()
+
+    def test_end_to_end_capture_ignores_excluded_routes(self) -> None:
+        from tracura.middleware.capture import mark_plugin_active
+        from tracura.middleware.buffer import log_buffer
+
+        active_tenant = uuid.uuid4()
+        mark_plugin_active(active_tenant, True)
+
+        try:
+            with unittest.mock.patch.object(log_buffer, "enqueue", new_callable=AsyncMock) as mock_enqueue:
+                res = self.client.get("/health", headers={"X-Tenant-ID": str(active_tenant)})
+                self.assertEqual(res.status_code, 200)
+                mock_enqueue.assert_not_called()
+
+                res2 = self.client.post("/tracura/v1/ingest", headers={"X-Tenant-ID": str(active_tenant)})
+                self.assertEqual(res2.status_code, 200)
+                mock_enqueue.assert_not_called()
+        finally:
+            mark_plugin_active(active_tenant, False)
+
+
+# ==============================================================================
+# 12. REAL STARTUP DB SYNC AND DYNAMIC SEEDING TESTS
+# ==============================================================================
+
+class TestSyncAndDynamicConfig(unittest.IsolatedAsyncioTestCase):
+    """Test background DB sync and dynamic config resolution."""
+
+    async def test_sync_active_tenants_from_db(self) -> None:
+        from tracura.middleware.capture import (
+            sync_active_tenants_from_db,
+            is_plugin_active_for_tenant,
+            mark_plugin_active,
+        )
+
+        tid1 = uuid.uuid4()
+        tid2 = uuid.uuid4()
+        unregistered_tid = uuid.uuid4()
+
+        mock_session = MagicMock()
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = [tid1, tid2]
+        mock_session.execute = AsyncMock(return_value=mock_result)
+
+        class MockSessionContext:
+            async def __aenter__(self):
+                return mock_session
+            async def __aexit__(self, *args):
+                pass
+
+        with unittest.mock.patch("kernel.core.database.session.get_sessionmaker", return_value=lambda: MockSessionContext()):
+            await sync_active_tenants_from_db()
+
+            self.assertTrue(is_plugin_active_for_tenant(tid1))
+            self.assertTrue(is_plugin_active_for_tenant(tid2))
+            self.assertFalse(is_plugin_active_for_tenant(unregistered_tid))
+
+            # Cleanup
+            mark_plugin_active(tid1, False)
+            mark_plugin_active(tid2, False)
+
+    async def test_ensure_default_erp_project_uses_environment_variables(self) -> None:
+        from tracura.services.project_service import ProjectService
+
+        tenant_id = uuid.uuid4()
+        service = ProjectService()
+
+        old_proj = os.environ.get("TRACURA_PROJECT_NAME")
+        old_env = os.environ.get("TRACURA_ENVIRONMENT")
+        os.environ["TRACURA_PROJECT_NAME"] = "Enterprise Telemetry Hub"
+        os.environ["TRACURA_ENVIRONMENT"] = "staging"
+
+        try:
+            session = MagicMock()
+            count_result = MagicMock()
+            count_result.scalar.return_value = 0
+
+            added_project = None
+            added_envs = []
+            def mock_add(proj):
+                nonlocal added_project
+                if isinstance(proj, ApiLogProject):
+                    added_project = proj
+
+            def mock_add_all(envs):
+                nonlocal added_envs
+                added_envs = list(envs)
+
+            session.add = MagicMock(side_effect=mock_add)
+            session.add_all = MagicMock(side_effect=mock_add_all)
+            session.flush = AsyncMock()
+
+            select_result = MagicMock()
+            select_result.scalar_one_or_none.return_value = None
+            session.execute = AsyncMock(side_effect=[count_result, select_result])
+
+            res = await service.ensure_default_erp_project(session, tenant_id)
+
+            self.assertIsNotNone(added_project)
+            self.assertEqual(added_project.name, "Enterprise Telemetry Hub")
+            self.assertEqual(added_project.slug, "enterprise-telemetry-hub")
+            self.assertEqual(added_project.tenant_id, tenant_id)
+
+            env_slugs = {e.slug for e in added_envs}
+            self.assertIn("staging", env_slugs)
+            self.assertIn("dev", env_slugs)
+            self.assertIn("production", env_slugs)
+        finally:
+            if old_proj:
+                os.environ["TRACURA_PROJECT_NAME"] = old_proj
+            else:
+                os.environ.pop("TRACURA_PROJECT_NAME", None)
+            if old_env:
+                os.environ["TRACURA_ENVIRONMENT"] = old_env
+            else:
+                os.environ.pop("TRACURA_ENVIRONMENT", None)
+
+
+# ==============================================================================
+# 13. TENANCY ROUTER END-TO-END PLUGIN ACTIVATION / DEACTIVATION TESTS
+# ==============================================================================
+
+class TestTenancyRouterPluginEndpoints(unittest.IsolatedAsyncioTestCase):
+    """Test calling the tenancy router activate/deactivate endpoints."""
+
+    async def test_tenancy_router_activate_and_deactivate_tracura(self) -> None:
+        from kernel.tenancy.router import activate_plugin, deactivate_plugin
+        from kernel.tenancy.models.tenant_plugin import TenantPlugin
+        from tracura.middleware.capture import is_plugin_active_for_tenant, mark_plugin_active
+
+        tenant_id = uuid.uuid4()
+        admin_id = uuid.uuid4()
+        admin_user = MagicMock()
+        admin_user.id = admin_id
+        admin_user.first_name = "Admin"
+        admin_user.last_name = "User"
+        admin_user.email = "admin@erp.com"
+
+        mark_plugin_active(tenant_id, False)
+
+        # 1. Activate plugin
+        session = MagicMock()
+        existing_plugin_query = MagicMock()
+        existing_plugin_query.scalar_one_or_none.return_value = None
+        session.execute = AsyncMock(return_value=existing_plugin_query)
+        session.add = MagicMock()
+        session.commit = AsyncMock()
+
+        with unittest.mock.patch("tracura.plugin.on_tenant_activate", new_callable=AsyncMock) as mock_on_activate, \
+             unittest.mock.patch("kernel.audit.audit_service.record", new_callable=AsyncMock) as mock_audit:
+
+            res = await activate_plugin(
+                plugin_id="tracura",
+                request=None,
+                session=session,
+                admin_user=admin_user,
+                tenant_id=tenant_id,
+            )
+
+            self.assertTrue(res.is_active)
+            self.assertEqual(res.item_id, "tracura")
+            self.assertIn("activated successfully", res.message)
+
+            session.add.assert_called_once()
+            added_tp = session.add.call_args[0][0]
+            self.assertIsInstance(added_tp, TenantPlugin)
+            self.assertEqual(added_tp.tenant_id, tenant_id)
+            self.assertEqual(added_tp.plugin_id, "tracura")
+            self.assertTrue(added_tp.is_active)
+
+            mock_on_activate.assert_called_once_with(
+                session=session,
+                tenant_id=tenant_id,
+                actor_id=admin_id,
+            )
+            mock_audit.assert_called_once()
+
+        # 2. Deactivate plugin
+        deact_session = MagicMock()
+        active_tp = TenantPlugin(
+            tenant_id=tenant_id,
+            plugin_id="tracura",
+            is_active=True,
+            activated_by=admin_id,
+        )
+        deact_query = MagicMock()
+        deact_query.scalar_one_or_none.return_value = active_tp
+        deact_session.execute = AsyncMock(return_value=deact_query)
+        deact_session.commit = AsyncMock()
+
+        with unittest.mock.patch("tracura.plugin.on_tenant_deactivate", new_callable=AsyncMock) as mock_on_deactivate, \
+             unittest.mock.patch("kernel.audit.audit_service.record", new_callable=AsyncMock) as mock_audit:
+
+            deact_res = await deactivate_plugin(
+                plugin_id="tracura",
+                request=None,
+                session=deact_session,
+                admin_user=admin_user,
+                tenant_id=tenant_id,
+            )
+
+            self.assertFalse(deact_res.is_active)
+            self.assertEqual(deact_res.item_id, "tracura")
+            self.assertFalse(active_tp.is_active)
+            self.assertIsNone(active_tp.activated_at)
+
+            mock_on_deactivate.assert_called_once_with(
+                session=deact_session,
+                tenant_id=tenant_id,
+                actor_id=admin_id,
+            )
+            mock_audit.assert_called_once()
 
 
 if __name__ == "__main__":

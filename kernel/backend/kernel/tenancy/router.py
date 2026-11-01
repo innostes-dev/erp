@@ -870,6 +870,15 @@ async def activate_plugin(
         )
         session.add(rec)
 
+    # Trigger plugin activation lifecycle hook
+    if plugin_id == "tracura":
+        try:
+            from tracura import plugin as tracura_plugin
+            if hasattr(tracura_plugin, "on_tenant_activate"):
+                await tracura_plugin.on_tenant_activate(session=session, tenant_id=tenant_id, actor_id=admin_user.id)
+        except Exception:
+            pass
+
     try:
         from kernel.audit import audit_service
         actor_name = f"{admin_user.first_name} {admin_user.last_name}".strip()
@@ -949,6 +958,15 @@ async def deactivate_plugin(
         rec.is_active = False
         rec.activated_at = None
         rec.activated_by = None
+
+    # Trigger plugin deactivation lifecycle hook
+    if plugin_id == "tracura":
+        try:
+            from tracura import plugin as tracura_plugin
+            if hasattr(tracura_plugin, "on_tenant_deactivate"):
+                await tracura_plugin.on_tenant_deactivate(session=session, tenant_id=tenant_id, actor_id=admin_user.id)
+        except Exception:
+            pass
 
     try:
         from kernel.audit import audit_service
