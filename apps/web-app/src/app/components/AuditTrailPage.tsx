@@ -75,7 +75,7 @@ export interface AuditLogItem {
 const INITIAL_MOCK_AUDIT_LOGS: AuditLogItem[] = [
   {
     id: 'aud_90f2b1a8-1240-4bc2-8921-99201481b01a',
-    actor_email: 'sarah.connor@acme-corp.com',
+    actor_email: 'sarah.connor@company.com',
     actor_name: 'Sarah Connor',
     action: 'UPDATE',
     entity_type: 'employee',
@@ -95,7 +95,7 @@ const INITIAL_MOCK_AUDIT_LOGS: AuditLogItem[] = [
   },
   {
     id: 'aud_8812c40e-3312-4aa1-9011-881240182bc2',
-    actor_email: 'marcus.vance@acme-corp.com',
+    actor_email: 'marcus.vance@company.com',
     actor_name: 'Marcus Vance',
     action: 'RBAC_CHANGE',
     entity_type: 'role',
@@ -117,7 +117,7 @@ const INITIAL_MOCK_AUDIT_LOGS: AuditLogItem[] = [
   },
   {
     id: 'aud_77b3109a-4491-4992-bf10-7719203810ad',
-    actor_email: 'elena.rostova@acme-corp.com',
+    actor_email: 'elena.rostova@company.com',
     actor_name: 'Elena Rostova',
     action: 'CREATE',
     entity_type: 'deal',
@@ -127,7 +127,7 @@ const INITIAL_MOCK_AUDIT_LOGS: AuditLogItem[] = [
       amount: { old: null, new: 450000 },
       stage: { old: null, new: 'Proposal/Quote' },
       close_date: { old: null, new: '2026-12-15' },
-      assigned_rep: { old: null, new: 'elena.rostova@acme-corp.com' },
+      assigned_rep: { old: null, new: 'elena.rostova@company.com' },
     },
     ip_address: '198.51.100.88',
     user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15',
@@ -138,7 +138,7 @@ const INITIAL_MOCK_AUDIT_LOGS: AuditLogItem[] = [
   },
   {
     id: 'aud_66c29188-5510-4112-9901-6610293810be',
-    actor_email: 'david.kim@acme-corp.com',
+    actor_email: 'david.kim@company.com',
     actor_name: 'David Kim',
     action: 'LOGIN',
     entity_type: 'user',
@@ -176,7 +176,7 @@ const INITIAL_MOCK_AUDIT_LOGS: AuditLogItem[] = [
   },
   {
     id: 'aud_44a99182-7712-4221-bb11-4410293810df',
-    actor_email: 'sarah.connor@acme-corp.com',
+    actor_email: 'sarah.connor@company.com',
     actor_name: 'Sarah Connor',
     action: 'DELETE',
     entity_type: 'api_key',

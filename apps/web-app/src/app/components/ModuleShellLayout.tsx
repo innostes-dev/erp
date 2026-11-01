@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';
+import { useCurrentTenant } from '../context/TenantContext';
 import { BUSINESS_MODULES_CATALOG } from '../catalog';
 
 interface ModuleShellLayoutProps {
@@ -53,6 +54,7 @@ export function ModuleShellLayout({ moduleId }: ModuleShellLayoutProps) {
   const { user, logout } = useAuth();
   const { navigate } = useNavigation();
   const { activeModules, isModuleActive, activateModule } = useModules();
+  const { tenantName } = useCurrentTenant();
 
   const currentModule = BUSINESS_MODULES_CATALOG.find((m) => m.id === moduleId);
   const isActive = isModuleActive(moduleId);
@@ -128,8 +130,8 @@ export function ModuleShellLayout({ moduleId }: ModuleShellLayoutProps) {
         <TopBarEnd className="gap-2">
           <UserMenu
             name={fullName}
-            subtitle="Acme Corp"
-            email={user?.email || 'arun@acme.com'}
+            subtitle={tenantName}
+            email={user?.email || ''}
             align="end"
           >
             <DropdownMenuItem onClick={() => navigate('/')}>

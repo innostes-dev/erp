@@ -1,6 +1,7 @@
 import React from 'react';
 import { SidebarProvider, SidebarInset } from '@innostes/ui';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
+import { TenantProvider } from './context/TenantContext';
 import { ModulesProvider } from './context/ModulesContext';
 import { PluginsProvider } from './context/PluginsContext';
 import { SidebarNav } from './components/SidebarNav';
@@ -61,11 +62,13 @@ function AppRouter() {
 export function App() {
   return (
     <NavigationProvider>
-      <ModulesProvider>
-        <PluginsProvider>
-          <AppRouter />
-        </PluginsProvider>
-      </ModulesProvider>
+      <TenantProvider>
+        <ModulesProvider>
+          <PluginsProvider>
+            <AppRouter />
+          </PluginsProvider>
+        </ModulesProvider>
+      </TenantProvider>
     </NavigationProvider>
   );
 }

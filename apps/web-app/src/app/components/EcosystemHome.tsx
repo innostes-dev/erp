@@ -91,7 +91,7 @@ export function EcosystemHome() {
   const recentActivityItems = [
     {
       id: '1',
-      title: 'CRM: Opened Acme Corporation',
+      title: 'CRM: Opened Enterprise Account',
       time: '2 min ago',
       icon: <Building2 className="size-3.5" />,
       tone: 'chart-2' as const,

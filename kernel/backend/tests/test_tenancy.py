@@ -154,6 +154,28 @@ class TestTenantRouter(unittest.TestCase):
         self.assertEqual(self.client.post("/tenants", json={"name": "", "slug": "a"}).status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
         self.assertEqual(self.client.post("/tenants", json={"name": "A", "slug": "Bad Slug"}).status_code, status.HTTP_422_UNPROCESSABLE_CONTENT)
 
+    def test_get_current_tenant_success(self) -> None:
+        user_id = uuid.uuid4()
+        tenant_id = uuid.uuid4()
+        now = datetime.now(timezone.utc)
+        self.service.get = AsyncMock(return_value=Tenant(
+            id=tenant_id, name="Northwind Traders", slug="northwind",
+            created_at=now, updated_at=now,
+        ))
+        from kernel.tenancy.router import get_current_user_dep
+        from kernel.user.models.user import User, UserStatus
+        mock_user = User(id=user_id, first_name="Admin", status=UserStatus.ACTIVE)
+        self.client.app.dependency_overrides[get_current_user_dep] = lambda: mock_user
+        token = create_access_token({"sub": str(user_id)})
+        res = self.client.get(
+            "/tenants/current",
+            headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": str(tenant_id)},
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        body = res.json()
+        self.assertEqual(body["name"], "Northwind Traders")
+        self.assertEqual(body["slug"], "northwind")
+
 
 class TestTenantApiDocs(unittest.TestCase):
     """The generated OpenAPI spec documents every tenant endpoint."""

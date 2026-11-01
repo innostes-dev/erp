@@ -203,6 +203,67 @@ async def list_tenants(
     )
 
 
+async def get_current_tenant_id(
+    session: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user_dep),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant UUID context.",
+        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
+    ),
+) -> uuid.UUID:
+    """Resolve active tenant ID for calling user, respecting explicit header or membership."""
+    if x_tenant_id:
+        return x_tenant_id
+
+    res = await session.execute(
+        select(TenantMember.tenant_id)
+        .where(TenantMember.user_id == user.id, TenantMember.status == TenantMemberStatus.ACTIVE)
+        .limit(1)
+    )
+    tid = res.scalar_one_or_none()
+    if tid:
+        return tid
+
+    res = await session.execute(
+        select(Tenant.id).where(Tenant.deleted_at.is_(None)).order_by(Tenant.created_at.asc()).limit(1)
+    )
+    tid = res.scalar_one_or_none()
+    if tid:
+        return tid
+    raise TenantNotFoundError("No active tenant found for user.")
+
+
+@router.get(
+    "/current",
+    response_model=TenantRead,
+    summary="Get current tenant organisation details",
+    operation_id="tenants_get_current",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, TenantNotFoundError),
+)
+async def get_current_tenant(
+    session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_dep),
+    tenant_id: uuid.UUID = Depends(get_current_tenant_id),
+    service: TenantService = Depends(get_service),
+) -> TenantRead:
+    """Return active tenant organisation details for the authenticated user/request.
+    \f
+    Args:
+        session: Active async database session.
+        current_user: Authenticated actor.
+        tenant_id: Active tenant UUID resolved by get_current_tenant_id.
+        service: Injected TenantService.
+
+    Returns:
+        TenantRead model representing the active tenant organisation.
+    """
+    tenant = await _get_or_404(service, tenant_id)
+    return TenantRead.model_validate(tenant)
+
+
 @router.get(
     "/{tenant_id}",
     response_model=TenantRead,
@@ -447,38 +508,6 @@ async def restore_tenant(
 # ---------------------------------------------------------------------------
 # Business Modules & Extensible Plugins Activation Management
 # ---------------------------------------------------------------------------
-
-
-async def get_current_tenant_id(
-    session: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user_dep),
-    x_tenant_id: uuid.UUID | None = Header(
-        default=None,
-        alias="X-Tenant-ID",
-        description="Active tenant UUID context.",
-        examples=["3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"],
-    ),
-) -> uuid.UUID:
-    """Resolve active tenant ID for calling user, respecting explicit header or membership."""
-    if x_tenant_id:
-        return x_tenant_id
-
-    res = await session.execute(
-        select(TenantMember.tenant_id)
-        .where(TenantMember.user_id == user.id, TenantMember.status == TenantMemberStatus.ACTIVE)
-        .limit(1)
-    )
-    tid = res.scalar_one_or_none()
-    if tid:
-        return tid
-
-    res = await session.execute(
-        select(Tenant.id).where(Tenant.deleted_at.is_(None)).limit(1)
-    )
-    tid = res.scalar_one_or_none()
-    if tid:
-        return tid
-    raise TenantNotFoundError("No active tenant found for user.")
 
 
 @router.get(

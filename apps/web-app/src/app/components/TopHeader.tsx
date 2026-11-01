@@ -16,10 +16,12 @@ import {
 import { useAuth } from '@innostes/kernel';
 import { HelpCircle, Moon, Sun } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
+import { useCurrentTenant } from '../context/TenantContext';
 
 export function TopHeader() {
   const { user, logout } = useAuth();
   const { navigate } = useNavigation();
+  const { tenantName } = useCurrentTenant();
   const [searchQuery, setSearchQuery] = useState('');
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -112,8 +114,8 @@ export function TopHeader() {
         {/* User Menu */}
         <UserMenu
           name={fullName}
-          subtitle="Acme Corp"
-          email={user?.email || 'arun@acme.com'}
+          subtitle={tenantName}
+          email={user?.email || ''}
           align="end"
         >
           <DropdownMenuItem onClick={() => navigate('/modules')}>

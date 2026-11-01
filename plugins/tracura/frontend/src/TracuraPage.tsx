@@ -254,9 +254,20 @@ const EMPTY_DASHBOARD: DashboardAnalytics = {
   top_errors: [],
 };
 
+export type TracuraTab =
+  | 'overview'
+  | 'logs'
+  | 'keys'
+  | 'settings'
+  | 'settings-general'
+  | 'settings-datacapture'
+  | 'settings-security'
+  | 'settings-retention'
+  | 'settings-integrations';
+
 export function TracuraPage() {
   // Navigation & Subfeatures
-  const [activeTab, setActiveTab] = useState<'overview' | 'logs' | 'keys' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<TracuraTab>('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'datacapture' | 'filtering' | 'security' | 'retention' | 'alerts' | 'access' | 'integrations'>('general');
 
   // Hierarchy Scope States
@@ -317,6 +328,36 @@ export function TracuraPage() {
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<boolean>(false);
 
+  // Organization / Tenant State
+  const [tenantOrgName, setTenantOrgName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('innostes_current_tenant');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.name) return parsed.name;
+        }
+      } catch {
+        // ignore
+      }
+    }
+    return 'Innostes ERP';
+  });
+
+  useEffect(() => {
+    async function loadCurrentTenant() {
+      try {
+        const res = await tracuraFetch<{ id: string; name: string }>('/tenants/current');
+        if (res && res.name) {
+          setTenantOrgName(res.name);
+        }
+      } catch {
+        // Fallback to innostes_current_tenant from localStorage or default
+      }
+    }
+    void loadCurrentTenant();
+  }, []);
+
   // Current project & env objects
   const currentProject = useMemo(() => {
     return projects.find((p) => p.id === selectedProjectId) || projects[0];
@@ -329,6 +370,15 @@ export function TracuraPage() {
   const selectedLog = useMemo(() => {
     return logs.find((l) => l.id === selectedLogId) || logs[0];
   }, [logs, selectedLogId]);
+
+  useEffect(() => {
+    if (currentProject) {
+      setProjectNameInput(currentProject.name);
+      if (currentProject.description) {
+        setProjectDescInput(currentProject.description);
+      }
+    }
+  }, [currentProject]);
 
   // Derived Sparklines & Trends from Dashboard Data
   const totalSparkline = useMemo(() => {
@@ -797,29 +847,24 @@ export function TracuraPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground antialiased font-sans">
-      {/* 1. TOP GLOBAL TRACURA HEADER / CONTEXT BAR */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/80 bg-background/95 px-5 py-3 backdrop-blur-md">
-        <div className="flex items-center gap-4 flex-wrap">
-          {/* Tracura Branding */}
-          <div className="flex items-center gap-2.5 pr-3 border-r border-border/60">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/20">
-              <Sparkles className="h-5 w-5" />
+    <div className="flex h-full w-full bg-background text-foreground antialiased font-sans overflow-hidden">
+      {/* 1. LEFT VERTICAL SIDEMENU */}
+      <aside className="w-64 shrink-0 border-r border-border bg-sidebar flex flex-col justify-between select-none h-full overflow-hidden">
+        {/* Brand & Project Scope Section */}
+        <div className="p-4 border-b border-sidebar-border space-y-3 bg-sidebar/50">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/20">
+              <Sparkles className="size-5" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-sm font-bold tracking-tight text-foreground">Tracura</span>
-              <span className="text-[11px] font-medium text-muted-foreground">API Logger</span>
+              <span className="text-sm font-bold tracking-tight text-foreground">TRACURA</span>
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">API Telemetry</span>
             </div>
           </div>
 
-          {/* Organization Selector */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/40 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/60 transition-colors">
-            <span>Acme Technologies</span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-          </div>
-
-          {/* Project Selector with CRUD Option */}
-          <div className="flex items-center gap-2">
+          {/* Project Selector */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Project</label>
             <div className="relative">
               <select
                 value={selectedProjectId}
@@ -830,24 +875,27 @@ export function TracuraPage() {
                     setSelectedProjectId(e.target.value);
                   }
                 }}
-                className="h-8 appearance-none rounded-lg border border-border/60 bg-muted/40 pl-3 pr-8 text-xs font-semibold text-foreground hover:bg-muted/60 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="h-8 w-full appearance-none rounded-lg border border-border/80 bg-background pl-2.5 pr-7 text-xs font-semibold text-foreground hover:bg-muted/50 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
               >
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
                 ))}
-                <option value="__NEW__">+ Create New Project...</option>
+                <option value="__NEW__">+ New Project...</option>
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <ChevronDown className="pointer-events-none absolute right-2 top-2.5 size-3.5 text-muted-foreground" />
             </div>
+          </div>
 
-            {/* Environment Selector with colored status dot */}
+          {/* Environment Selector */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Environment</label>
             <div className="relative">
               <select
                 value={selectedEnvSlug}
                 onChange={(e) => setSelectedEnvSlug(e.target.value)}
-                className="h-8 appearance-none rounded-lg border border-border/60 bg-muted/40 pl-7 pr-8 text-xs font-semibold text-foreground hover:bg-muted/60 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="h-8 w-full appearance-none rounded-lg border border-border/80 bg-background pl-6 pr-7 text-xs font-semibold text-foreground hover:bg-muted/50 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
               >
                 {currentProject?.environments.map((env) => (
                   <option key={env.id} value={env.slug}>
@@ -855,139 +903,258 @@ export function TracuraPage() {
                   </option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute left-2.5 top-3 h-2 w-2 rounded-full bg-emerald-500" />
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <span className="pointer-events-none absolute left-2 top-3 size-2 rounded-full bg-emerald-500" />
+              <ChevronDown className="pointer-events-none absolute right-2 top-2.5 size-3.5 text-muted-foreground" />
             </div>
           </div>
         </div>
 
-        {/* Right Search, Time range & User actions */}
-        <div className="flex items-center gap-3">
-          {/* Time range selector */}
-          <div className="relative hidden md:block">
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="h-8 appearance-none rounded-lg border border-border/60 bg-muted/40 pl-7 pr-8 text-xs font-medium text-foreground hover:bg-muted/60 focus:outline-none cursor-pointer"
+        {/* Navigation Links */}
+        <div className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+          {/* Telemetry Group */}
+          <div className="space-y-1">
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Telemetry & Logs</p>
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={cn(
+                "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                activeTab === 'overview'
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
             >
-              <option value="1h">Last 1 hour</option>
-              <option value="6h">Last 6 hours</option>
-              <option value="24h">Last 24 hours</option>
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-            </select>
-            <Clock className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-            <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <div className="flex items-center gap-2.5">
+                <Activity className="size-4" />
+                <span>Dashboard</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('logs')}
+              className={cn(
+                "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                activeTab === 'logs'
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                <Terminal className="size-4" />
+                <span>API Requests</span>
+              </div>
+              {logs.length > 0 && (
+                <Badge className="bg-muted text-muted-foreground px-1.5 py-0 text-[10px]">
+                  {logs.length.toLocaleString()}
+                </Badge>
+              )}
+            </button>
           </div>
 
-          {/* Quick Search */}
-          <div className="relative hidden lg:block w-56">
-            <Search className="pointer-events-none absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search endpoints, errors..."
-              value={topSearch}
-              onChange={(e) => {
-                setTopSearch(e.target.value);
-                setLogFilterQuery(e.target.value);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') setActiveTab('logs');
-              }}
-              className="h-8 w-full rounded-lg border border-border/60 bg-muted/40 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
+          {/* Access Control Group */}
+          <div className="space-y-1">
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Access & Security</p>
+            <button
+              onClick={() => setActiveTab('keys')}
+              className={cn(
+                "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                activeTab === 'keys'
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
+            >
+              <div className="flex items-center gap-2.5">
+                <Key className="size-4" />
+                <span>Ingestion Keys</span>
+              </div>
+              {apiKeys.length > 0 && (
+                <Badge className="bg-muted text-muted-foreground px-1.5 py-0 text-[10px]">{apiKeys.length}</Badge>
+              )}
+            </button>
           </div>
 
-          {/* Live indicator badge */}
-          <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          {/* Configuration Group */}
+          <div className="space-y-1">
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Settings & Policies</p>
+            <button
+              onClick={() => setActiveTab('settings-general')}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                (activeTab === 'settings-general' || activeTab === 'settings')
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
+            >
+              <Sliders className="size-4" />
+              <span>Project Info</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('settings-datacapture')}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                activeTab === 'settings-datacapture'
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
+            >
+              <Server className="size-4" />
+              <span>Data Capture</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('settings-security')}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                activeTab === 'settings-security'
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
+            >
+              <Shield className="size-4" />
+              <span>PII & Redaction</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('settings-retention')}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                activeTab === 'settings-retention'
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
+            >
+              <Clock className="size-4" />
+              <span>Log Retention</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('settings-integrations')}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                activeTab === 'settings-integrations'
+                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+              )}
+            >
+              <Code2 className="size-4" />
+              <span>Integrations & SDK</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="p-3 border-t border-sidebar-border bg-muted/20 text-[11px] text-muted-foreground flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span>Live</span>
+            <span className="font-medium text-foreground">Live Telemetry</span>
           </div>
-
-          {/* Refresh Button */}
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={handleRefresh}
-            className="h-8 w-8 p-0"
-            title="Refresh telemetry"
+            className="size-7 p-0 text-muted-foreground hover:text-foreground"
+            title="Refresh data"
           >
-            <RefreshCw className={cn('h-3.5 w-3.5', isRefreshing && 'animate-spin')} />
-          </Button>
-
-          {/* View API Logs CTA button */}
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setActiveTab('logs')}
-            className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3"
-          >
-            <span>View API Logs</span>
-            <ArrowRight className="h-3.5 w-3.5" />
+            <RefreshCw className={cn("size-3.5", isRefreshing && "animate-spin")} />
           </Button>
         </div>
-      </header>
+      </aside>
 
-      {/* 2. SUBFEATURE NAVIGATION TABS */}
-      <div className="border-b border-border/60 bg-muted/20 px-6">
-        <nav className="flex space-x-6 text-sm font-medium">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={cn(
-              'flex items-center gap-2 py-3 border-b-2 text-xs font-semibold transition-colors cursor-pointer',
-              activeTab === 'overview'
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <Activity className="h-4 w-4" />
-            <span>Dashboard</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('logs')}
-            className={cn(
-              'flex items-center gap-2 py-3 border-b-2 text-xs font-semibold transition-colors cursor-pointer',
-              activeTab === 'logs'
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <Terminal className="h-4 w-4" />
-            <span>API Requests</span>
-            <Badge className="bg-muted text-muted-foreground px-1.5 py-0 text-[10px]">12,482</Badge>
-          </button>
-          <button
-            onClick={() => setActiveTab('keys')}
-            className={cn(
-              'flex items-center gap-2 py-3 border-b-2 text-xs font-semibold transition-colors cursor-pointer',
-              activeTab === 'keys'
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <Key className="h-4 w-4" />
-            <span>Ingestion Keys</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('settings')}
-            className={cn(
-              'flex items-center gap-2 py-3 border-b-2 text-xs font-semibold transition-colors cursor-pointer',
-              activeTab === 'settings'
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <Settings className="h-4 w-4" />
-            <span>Settings & Policies</span>
-          </button>
-        </nav>
-      </div>
+      {/* 2. RIGHT MAIN CONTENT AREA */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Top Context & Action Bar */}
+        <header className="h-14 shrink-0 flex items-center justify-between border-b border-border/80 bg-background/95 px-6 backdrop-blur z-20">
+          <div className="flex items-center gap-3">
+            <h2 className="text-sm font-semibold text-foreground">
+              {activeTab === 'overview' && 'Telemetry Dashboard'}
+              {activeTab === 'logs' && 'API Requests Explorer'}
+              {activeTab === 'keys' && 'Ingestion API Keys'}
+              {(activeTab === 'settings-general' || activeTab === 'settings') && 'Project Settings'}
+              {activeTab === 'settings-datacapture' && 'Data Capture Policies'}
+              {activeTab === 'settings-security' && 'Security & PII Redaction'}
+              {activeTab === 'settings-retention' && 'Log Retention Policy'}
+              {activeTab === 'settings-integrations' && 'Integration & SDK Setup'}
+            </h2>
+            <span className="text-muted-foreground/40">•</span>
+            <span className="text-xs text-muted-foreground font-medium">
+              {currentProject?.name} ({currentEnv?.name || selectedEnvSlug})
+            </span>
+          </div>
 
-      {/* 3. SUBFEATURE CONTENT BODIES */}
-      <main className="flex-1 p-6 max-w-[1600px] w-full mx-auto space-y-6">
+          <div className="flex items-center gap-3">
+            {/* Quick Search */}
+            <div className="relative w-56 hidden md:block">
+              <Search className="pointer-events-none absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search endpoints, trace..."
+                value={topSearch}
+                onChange={(e) => {
+                  setTopSearch(e.target.value);
+                  setLogFilterQuery(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') setActiveTab('logs');
+                }}
+                className="h-8 w-full rounded-lg border border-border/70 bg-muted/40 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+
+            {/* Time range selector */}
+            <div className="relative">
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value)}
+                className="h-8 appearance-none rounded-lg border border-border/70 bg-muted/40 pl-7 pr-7 text-xs font-medium text-foreground hover:bg-muted/60 focus:outline-none cursor-pointer"
+              >
+                <option value="1h">Last 1 hour</option>
+                <option value="6h">Last 6 hours</option>
+                <option value="24h">Last 24 hours</option>
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+              </select>
+              <Clock className="pointer-events-none absolute left-2 top-2.5 size-3.5 text-muted-foreground" />
+              <ChevronDown className="pointer-events-none absolute right-2 top-2.5 size-3 text-muted-foreground" />
+            </div>
+
+            {activeTab === 'overview' && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setActiveTab('logs')}
+                className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3"
+              >
+                <span>View Logs</span>
+                <ArrowRight className="size-3.5" />
+              </Button>
+            )}
+
+            {activeTab === 'keys' && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsKeyModalOpen(true)}
+                className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3"
+              >
+                <Plus className="size-3.5" />
+                <span>Generate Key</span>
+              </Button>
+            )}
+
+            {activeTab.startsWith('settings') && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSaveSettings}
+                className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3"
+              >
+                <Check className="size-3.5" />
+                <span>Save Settings</span>
+              </Button>
+            )}
+          </div>
+        </header>
+
+        {/* 3. SUBFEATURE CONTENT BODIES */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
         {/* ========================================================================= */}
         {/* TAB 1: DASHBOARD (Overview KPIs, Charts & Top Stats - Image 0)             */}
         {/* ========================================================================= */}
@@ -2030,14 +2197,20 @@ export function TracuraPage() {
         {/* ========================================================================= */}
         {/* TAB 4: SETTINGS & POLICIES (Config, Scrubbers, Preview - Image 1)          */}
         {/* ========================================================================= */}
-        {activeTab === 'settings' && (
+        {(activeTab === 'settings' || activeTab.startsWith('settings-')) && (
           <div className="space-y-6 animate-in fade-in-50 duration-300">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border/60 pb-4">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">Settings</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                  {activeTab === 'settings-datacapture' && 'Data Capture Policies'}
+                  {activeTab === 'settings-security' && 'Filtering & PII Redaction'}
+                  {activeTab === 'settings-retention' && 'Data Retention & Storage'}
+                  {activeTab === 'settings-integrations' && 'Integration Guide & Client SDK'}
+                  {(activeTab === 'settings-general' || activeTab === 'settings') && 'Project Information & Scope'}
+                </h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Configure how Tracura captures, stores and processes your API data.
+                  Configure how Tracura captures, scrubs, and manages telemetry for {currentProject?.name}.
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -2057,89 +2230,11 @@ export function TracuraPage() {
               </div>
             </div>
 
-            {/* Sub-Navigation Tabs */}
-            <div className="border-b border-border/60">
-              <nav className="flex space-x-6 text-xs font-semibold">
-                <button
-                  onClick={() => setSettingsSubTab('general')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'general' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  General
-                </button>
-                <button
-                  onClick={() => setSettingsSubTab('datacapture')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'datacapture' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  Data Capture
-                </button>
-                <button
-                  onClick={() => setSettingsSubTab('filtering')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'filtering' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  Filtering
-                </button>
-                <button
-                  onClick={() => setSettingsSubTab('security')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'security' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  Security & Redaction
-                </button>
-                <button
-                  onClick={() => setSettingsSubTab('retention')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'retention' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  Retention
-                </button>
-                <button
-                  onClick={() => setSettingsSubTab('alerts')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'alerts' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  Alerts
-                </button>
-                <button
-                  onClick={() => setSettingsSubTab('access')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'access' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  Team & Access
-                </button>
-                <button
-                  onClick={() => setSettingsSubTab('integrations')}
-                  className={cn(
-                    'py-2.5 border-b-2 transition-colors cursor-pointer',
-                    settingsSubTab === 'integrations' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  Integrations
-                </button>
-              </nav>
-            </div>
-
             {/* Two-Column Settings Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Left Column: Form Controls */}
               <div className="lg:col-span-7 space-y-6">
-                {/* 1. Project Information */}
+                {(activeTab === 'settings-general' || activeTab === 'settings') && (
                 <Card className="p-5 border-border/80 space-y-4">
                   <div className="flex items-center gap-2">
                     <Database className="h-4 w-4 text-blue-600" />
@@ -2163,7 +2258,7 @@ export function TracuraPage() {
                       <label className="font-medium text-muted-foreground block mb-1">Organization</label>
                       <input
                         type="text"
-                        value="Acme Technologies"
+                        value={tenantOrgName || currentProject?.name || 'Innostes ERP'}
                         disabled
                         className="h-9 w-full rounded-lg border border-border/50 bg-muted/30 px-3 text-xs text-muted-foreground cursor-not-allowed"
                       />
@@ -2181,13 +2276,14 @@ export function TracuraPage() {
                       <label className="font-medium text-foreground block mb-1">Environment</label>
                       <div className="flex items-center gap-2 h-9 rounded-lg border border-border/80 bg-background px-3 text-xs text-foreground">
                         <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                        <span>Production</span>
+                        <span>{currentEnv?.name || 'Production'}</span>
                       </div>
                     </div>
                   </div>
                 </Card>
+                )}
 
-                {/* 2. Data Capture */}
+                {(activeTab === 'settings-datacapture' || activeTab === 'settings') && (
                 <Card className="p-5 border-border/80 space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -2252,8 +2348,10 @@ export function TracuraPage() {
                     </div>
                   </div>
                 </Card>
+                )}
 
-                {/* 3. Filtering */}
+                {(activeTab === 'settings-security' || activeTab === 'settings') && (
+                <>
                 <Card className="p-5 border-border/80 space-y-4">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-blue-600" />
@@ -2326,8 +2424,10 @@ export function TracuraPage() {
                     </div>
                   </div>
                 </Card>
+                </>
+                )}
 
-                {/* 5. Retention */}
+                {(activeTab === 'settings-retention' || activeTab === 'settings') && (
                 <Card className="p-5 border-border/80 space-y-4">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-blue-600" />
@@ -2354,8 +2454,10 @@ export function TracuraPage() {
                     ))}
                   </div>
                 </Card>
+                )}
 
                 {/* 6. Delete Project (Destructive) */}
+                {(activeTab === 'settings-general' || activeTab === 'settings') && (
                 <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-5 flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-rose-600 font-bold text-sm">
@@ -2374,6 +2476,80 @@ export function TracuraPage() {
                     Delete Project
                   </Button>
                 </div>
+                )}
+
+                {/* 7. Integrations & Client SDK */}
+                {(activeTab === 'settings-integrations' || activeTab === 'settings') && (
+                  <Card className="p-5 border-border/80 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Code2 className="h-4 w-4 text-blue-600" />
+                      <div>
+                        <h3 className="font-semibold text-sm text-foreground">Integrations & Client SDK</h3>
+                        <p className="text-xs text-muted-foreground">Connect external services, microservices, and client applications.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 text-xs">
+                      <div>
+                        <label className="font-semibold text-foreground block mb-1">Universal Ingestion Endpoint</label>
+                        <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border/80 bg-muted/30 font-mono text-xs">
+                          <span className="text-blue-600 font-bold">POST</span>
+                          <span className="text-foreground">/tracura/v1/ingest</span>
+                          <span className="ml-auto text-muted-foreground text-[11px]">Header: X-API-Key</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="font-semibold text-foreground block mb-1">Sample cURL Command</label>
+                        <pre className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-blue-400 overflow-x-auto leading-relaxed">
+{`curl -X POST "http://localhost:8000/tracura/v1/ingest" \
+  -H "X-API-Key: inno_log_live_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "project": "${currentProject?.slug || 'innostes-erp'}",
+    "environment": "${selectedEnvSlug}",
+    "http_method": "GET",
+    "path": "/api/v1/checkout",
+    "status_code": 200,
+    "duration_ms": 32.5
+  }'`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <label className="font-semibold text-foreground block mb-1">FastAPI / Python Drop-In Middleware</label>
+                        <pre className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-emerald-400 overflow-x-auto leading-relaxed">
+{`# Add this lightweight hook to any external Python service:
+import httpx, time
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class TracuraClientMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        start = time.perf_counter()
+        response = await call_next(request)
+        duration = round((time.perf_counter() - start) * 1000.0, 2)
+        try:
+            async with httpx.AsyncClient(timeout=0.5) as client:
+                await client.post(
+                    "http://localhost:8000/tracura/v1/ingest",
+                    headers={"X-API-Key": "YOUR_KEY"},
+                    json={
+                        "project": "${currentProject?.slug || 'my-service'}",
+                        "environment": "${selectedEnvSlug}",
+                        "http_method": request.method,
+                        "path": request.url.path,
+                        "status_code": response.status_code,
+                        "duration_ms": duration,
+                    }
+                )
+        except Exception:
+            pass
+        return response`}
+                        </pre>
+                      </div>
+                    </div>
+                  </Card>
+                )}
               </div>
 
               {/* Right Column: Settings Preview & Storage Impact */}
@@ -2469,7 +2645,8 @@ export function TracuraPage() {
             </div>
           </div>
         )}
-      </main>
+        </main>
+      </div>
 
       {/* MODAL 1: Create Project Dialog */}
       <Dialog open={isCreateProjectModalOpen} onOpenChange={setIsCreateProjectModalOpen}>
@@ -2601,7 +2778,7 @@ export function TracuraPage() {
               <div>
                 <label className="text-xs font-semibold text-foreground block mb-1">Sample Ingestion cURL Command</label>
                 <pre className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-blue-400 overflow-x-auto">
-                  {`curl -X POST "https://api.company.com/api-logger/v1/ingest" \\
+                  {`curl -X POST "http://localhost:8000/tracura/v1/ingest" \\
   -H "X-API-Key: ${createdRawKey}" \\
   -H "Content-Type: application/json" \\
   -d '{"project":"${newKeyProject}","environment":"production","http_method":"GET","path":"/health","status_code":200,"duration_ms":12}'`}

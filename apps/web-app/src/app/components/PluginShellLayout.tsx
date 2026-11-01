@@ -17,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   EmptyState,
+  cn,
 } from '@innostes/ui';
 import { useAuth } from '@innostes/kernel';
 import { TracuraPage } from '@innostes/tracura';
@@ -29,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { usePlugins } from '../context/PluginsContext';
+import { useCurrentTenant } from '../context/TenantContext';
 import { PLUGINS_CATALOG } from '../catalog';
 
 interface PluginShellLayoutProps {
@@ -49,6 +51,7 @@ export function PluginShellLayout({ pluginId }: PluginShellLayoutProps) {
   const { user, logout } = useAuth();
   const { navigate } = useNavigation();
   const { activePlugins, isPluginActive, activatePlugin } = usePlugins();
+  const { tenantName } = useCurrentTenant();
 
   const currentPlugin = PLUGINS_CATALOG.find((p) => p.id === pluginId);
   const isActive = isPluginActive(pluginId);
@@ -124,8 +127,8 @@ export function PluginShellLayout({ pluginId }: PluginShellLayoutProps) {
         <TopBarEnd className="gap-2">
           <UserMenu
             name={fullName}
-            subtitle="Acme Corp"
-            email={user?.email || 'arun@acme.com'}
+            subtitle={tenantName}
+            email={user?.email || ''}
             align="end"
           >
             <DropdownMenuItem onClick={() => navigate('/')}>
@@ -146,7 +149,12 @@ export function PluginShellLayout({ pluginId }: PluginShellLayoutProps) {
       </TopBar>
 
       {/* Plugin Content */}
-      <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full">
+      <main
+        className={cn(
+          'flex-1 flex flex-col min-h-0 w-full overflow-hidden',
+          (!isActive || (pluginId !== 'tracura' && pluginId !== 'api-logger')) && 'p-6 md:p-8 max-w-7xl mx-auto',
+        )}
+      >
         {!isActive ? (
           <EmptyState
             icon={

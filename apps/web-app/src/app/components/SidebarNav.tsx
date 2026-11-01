@@ -22,11 +22,14 @@ import {
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';
 import { usePlugins } from '../context/PluginsContext';
+import { useCurrentTenant } from '../context/TenantContext';
 
 export function SidebarNav() {
   const { path, navigate } = useNavigation();
   const { activeModuleIds } = useModules();
   const { activePluginIds } = usePlugins();
+  const { tenantName } = useCurrentTenant();
+  const tenantInitial = (tenantName.charAt(0) || 'E').toUpperCase();
 
   const isHome = path === '/';
   const isModules = path.startsWith('/modules');
@@ -150,11 +153,11 @@ export function SidebarNav() {
         <div className="flex items-center justify-between rounded-xl p-2.5 hover:bg-sidebar-accent/50 transition-colors cursor-pointer">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm shadow-xs">
-              A
+              {tenantInitial}
             </div>
             <div className="truncate">
-              <p className="text-sm font-semibold text-foreground truncate">Acme Corporation</p>
-              <p className="text-xs text-muted-foreground truncate">Enterprise Plan</p>
+              <p className="text-sm font-semibold text-foreground truncate">{tenantName}</p>
+              <p className="text-xs text-muted-foreground truncate">Organization</p>
             </div>
           </div>
           <ChevronDown className="size-4 shrink-0 text-muted-foreground" />

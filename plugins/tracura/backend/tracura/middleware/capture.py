@@ -12,8 +12,6 @@ from starlette.responses import Response
 from tracura.middleware.buffer import log_buffer
 from tracura.services.project_service import (
     get_configured_env_slug,
-    get_configured_project_name,
-    get_configured_project_slug,
     get_default_env_id,
     get_default_project_id,
 )
@@ -89,7 +87,7 @@ class TracuraCaptureMiddleware(BaseHTTPMiddleware):
             raise
         finally:
             path = request.url.path
-            # Prevent recursive loop by ignoring ingestion, health, docs, and metrics routes
+            # Prevent recursive loop by ignoring ingestion, health, docs, metrics, and static assets
             if not path.startswith((
                 "/plugins/tracura/v1/ingest",
                 "/tracura/v1/ingest",
@@ -101,7 +99,11 @@ class TracuraCaptureMiddleware(BaseHTTPMiddleware):
                 "/redoc",
                 "/openapi.json",
                 "/favicon.ico",
-            )):
+                "/assets/",
+                "/static/",
+                "/@vite/",
+                "/@fs/",
+            )) and not path.endswith((".js", ".css", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".map")):
                 duration_ms = round((time.perf_counter() - start_time) * 1000.0, 2)
                 tenant_id = getattr(request.state, "tenant_id", None)
                 if not tenant_id:
@@ -147,8 +149,12 @@ class TracuraCaptureMiddleware(BaseHTTPMiddleware):
                         environment_id = get_default_erp_env_id(project_id, env_name)
 
                     client_ip = request.client.host if request.client else None
-                    project_slug = get_configured_project_slug()
-                    project_name = get_configured_project_name()
+
+                    # Sanitize headers and query parameters to protect secrets
+                    from tracura.services.sanitizer import SanitizerService
+                    _sanitizer = SanitizerService()
+                    sanitized_headers = _sanitizer.sanitize_headers(dict(request.headers))
+                    sanitized_query = _sanitizer.sanitize_query_params(dict(request.query_params))
 
                     log_item = {
                         "id": uuid.uuid4(),
@@ -165,16 +171,15 @@ class TracuraCaptureMiddleware(BaseHTTPMiddleware):
                         "path": path,
                         "status_code": status_code,
                         "duration_ms": duration_ms,
-                        "request_headers": dict(request.headers),
-                        "query_params": dict(request.query_params),
+                        "request_headers": sanitized_headers,
+                        "query_params": sanitized_query,
                         "request_body": None,
                         "response_headers": None,
                         "response_body": None,
                         "error": error_payload,
                         "meta": {
                             "source": "asgi_auto_capture",
-                            "service": project_slug,
-                            "project": project_name,
+                            "service": getattr(request.state, "service_name", "api-server"),
                             "environment": env_name,
                         },
                         "created_at": datetime.now(timezone.utc),

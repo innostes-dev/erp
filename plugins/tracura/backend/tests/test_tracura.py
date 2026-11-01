@@ -785,8 +785,6 @@ class TestHttpEndpoints(unittest.TestCase):
         )
 
         # 1. Fallback when unset
-        old_app_name = os.environ.pop("APP_NAME", None)
-        old_tracura_proj = os.environ.pop("TRACURA_PROJECT_NAME", None)
         old_app_env = os.environ.pop("APP_ENV", None)
         old_tracura_env = os.environ.pop("TRACURA_ENVIRONMENT", None)
         try:
@@ -794,28 +792,14 @@ class TestHttpEndpoints(unittest.TestCase):
             self.assertEqual(get_configured_project_slug(), "innostes-erp")
             self.assertEqual(get_configured_env_slug(), "dev")
 
-            # 2. Pick from APP_NAME & APP_ENV
-            os.environ["APP_NAME"] = "Fintech Gateway"
+            # 2. Pick from APP_ENV
             os.environ["APP_ENV"] = "staging"
-            self.assertEqual(get_configured_project_name(), "Fintech Gateway")
-            self.assertEqual(get_configured_project_slug(), "fintech-gateway")
             self.assertEqual(get_configured_env_slug(), "staging")
 
-            # 3. Dedicated TRACURA overrides take precedence
-            os.environ["TRACURA_PROJECT_NAME"] = "Custom Telemetry"
+            # 3. Dedicated TRACURA overrides take precedence for environment
             os.environ["TRACURA_ENVIRONMENT"] = "sandbox"
-            self.assertEqual(get_configured_project_name(), "Custom Telemetry")
-            self.assertEqual(get_configured_project_slug(), "custom-telemetry")
             self.assertEqual(get_configured_env_slug(), "sandbox")
         finally:
-            if old_app_name:
-                os.environ["APP_NAME"] = old_app_name
-            else:
-                os.environ.pop("APP_NAME", None)
-            if old_tracura_proj:
-                os.environ["TRACURA_PROJECT_NAME"] = old_tracura_proj
-            else:
-                os.environ.pop("TRACURA_PROJECT_NAME", None)
             if old_app_env:
                 os.environ["APP_ENV"] = old_app_env
             else:
@@ -857,6 +841,13 @@ class TestProjectServiceRealCases(unittest.IsolatedAsyncioTestCase):
         count_result = MagicMock()
         count_result.scalar.return_value = 0
 
+        # Tenant query result (mocking Tenant row from DB)
+        tenant_mock = MagicMock()
+        tenant_mock.name = "Stark Components"
+        tenant_mock.slug = "stark-components"
+        tenant_result = MagicMock()
+        tenant_result.scalar_one_or_none.return_value = tenant_mock
+
         # After insert, get_project returns the created project
         created_proj = None
 
@@ -872,16 +863,18 @@ class TestProjectServiceRealCases(unittest.IsolatedAsyncioTestCase):
         select_result = MagicMock()
         select_result.scalar_one_or_none.return_value = None
 
-        session.execute = AsyncMock(side_effect=[count_result, select_result])
+        session.execute = AsyncMock(side_effect=[count_result, tenant_result, select_result])
 
         res = await service.ensure_default_erp_project(session, tenant_id)
 
-        # 1. Project is added
+        # 1. Project is added with tenant's DB name and slug
         session.add.assert_called_once()
         added_project = session.add.call_args[0][0]
         self.assertIsInstance(added_project, ApiLogProject)
         self.assertEqual(added_project.tenant_id, tenant_id)
         self.assertEqual(added_project.id, get_default_project_id(tenant_id))
+        self.assertEqual(added_project.name, "Stark Components")
+        self.assertEqual(added_project.slug, "stark-components")
 
         # 2. Standard environments are added
         session.add_all.assert_called_once()
@@ -1298,21 +1291,25 @@ class TestSyncAndDynamicConfig(unittest.IsolatedAsyncioTestCase):
             mark_plugin_active(tid1, False)
             mark_plugin_active(tid2, False)
 
-    async def test_ensure_default_erp_project_uses_environment_variables(self) -> None:
+    async def test_ensure_default_erp_project_uses_tenant_db_record(self) -> None:
         from tracura.services.project_service import ProjectService
 
         tenant_id = uuid.uuid4()
         service = ProjectService()
 
-        old_proj = os.environ.get("TRACURA_PROJECT_NAME")
         old_env = os.environ.get("TRACURA_ENVIRONMENT")
-        os.environ["TRACURA_PROJECT_NAME"] = "Enterprise Telemetry Hub"
         os.environ["TRACURA_ENVIRONMENT"] = "staging"
 
         try:
             session = MagicMock()
             count_result = MagicMock()
             count_result.scalar.return_value = 0
+
+            tenant_mock = MagicMock()
+            tenant_mock.name = "Global Logistics Ltd"
+            tenant_mock.slug = "global-logistics"
+            tenant_result = MagicMock()
+            tenant_result.scalar_one_or_none.return_value = tenant_mock
 
             added_project = None
             added_envs = []
@@ -1331,13 +1328,13 @@ class TestSyncAndDynamicConfig(unittest.IsolatedAsyncioTestCase):
 
             select_result = MagicMock()
             select_result.scalar_one_or_none.return_value = None
-            session.execute = AsyncMock(side_effect=[count_result, select_result])
+            session.execute = AsyncMock(side_effect=[count_result, tenant_result, select_result])
 
             res = await service.ensure_default_erp_project(session, tenant_id)
 
             self.assertIsNotNone(added_project)
-            self.assertEqual(added_project.name, "Enterprise Telemetry Hub")
-            self.assertEqual(added_project.slug, "enterprise-telemetry-hub")
+            self.assertEqual(added_project.name, "Global Logistics Ltd")
+            self.assertEqual(added_project.slug, "global-logistics")
             self.assertEqual(added_project.tenant_id, tenant_id)
 
             env_slugs = {e.slug for e in added_envs}
@@ -1345,10 +1342,6 @@ class TestSyncAndDynamicConfig(unittest.IsolatedAsyncioTestCase):
             self.assertIn("dev", env_slugs)
             self.assertIn("production", env_slugs)
         finally:
-            if old_proj:
-                os.environ["TRACURA_PROJECT_NAME"] = old_proj
-            else:
-                os.environ.pop("TRACURA_PROJECT_NAME", None)
             if old_env:
                 os.environ["TRACURA_ENVIRONMENT"] = old_env
             else:

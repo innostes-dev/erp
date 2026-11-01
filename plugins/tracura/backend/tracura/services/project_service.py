@@ -2,25 +2,8 @@
 
 from datetime import datetime, timezone
 import os
-import uuid
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
-from tracura.models.environment import ApiLogEnvironment
-from tracura.models.project import ApiLogProject
-from tracura.schemas.project import (
-    EnvironmentCreate,
-    EnvironmentUpdate,
-    ProjectCreate,
-    ProjectUpdate,
-)
-
-
-import os
 import re
 import uuid
-from datetime import datetime, timezone
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -39,23 +22,46 @@ DEFAULT_FALLBACK_PROJECT_SLUG = "innostes-erp"
 DEFAULT_FALLBACK_ENV_SLUG = "dev"
 
 
+async def get_tenant_organization_details(
+    session: AsyncSession, tenant_id: uuid.UUID
+) -> tuple[str, str]:
+    """Retrieve the active tenant organization name and slug directly from the database.
+
+    Prioritizes the active tenant record, falling back to the 1st created tenant,
+    and finally to ('Innostes ERP', 'innostes-erp'). Does not read project name from .env.
+    """
+    try:
+        from kernel.tenancy.models import Tenant
+        stmt = select(Tenant).where(Tenant.id == tenant_id, Tenant.deleted_at.is_(None))
+        tenant = (await session.execute(stmt)).scalar_one_or_none()
+        if not tenant:
+            first_stmt = (
+                select(Tenant)
+                .where(Tenant.deleted_at.is_(None))
+                .order_by(Tenant.created_at.asc())
+                .limit(1)
+            )
+            tenant = (await session.execute(first_stmt)).scalar_one_or_none()
+        if tenant and tenant.name and tenant.name.strip():
+            name = tenant.name.strip()
+            slug = (tenant.slug or "").strip().lower()
+            if not slug:
+                slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+            return name, slug or DEFAULT_FALLBACK_PROJECT_SLUG
+    except Exception:
+        pass
+
+    return DEFAULT_FALLBACK_PROJECT_NAME, DEFAULT_FALLBACK_PROJECT_SLUG
+
+
 def get_configured_project_name() -> str:
-    """Resolve project name from environment variable, falling back to default."""
-    return (
-        os.environ.get("TRACURA_PROJECT_NAME")
-        or os.environ.get("APP_NAME")
-        or DEFAULT_FALLBACK_PROJECT_NAME
-    ).strip()
+    """Fallback project name when tenant database lookup is not available."""
+    return DEFAULT_FALLBACK_PROJECT_NAME
 
 
 def get_configured_project_slug() -> str:
-    """Resolve project slug from environment variable or derived from project name."""
-    custom_slug = os.environ.get("TRACURA_PROJECT_SLUG")
-    if custom_slug and custom_slug.strip():
-        return re.sub(r"[^a-z0-9]+", "-", custom_slug.strip().lower()).strip("-")
-    name = get_configured_project_name()
-    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
-    return slug or DEFAULT_FALLBACK_PROJECT_SLUG
+    """Fallback project slug when tenant database lookup is not available."""
+    return DEFAULT_FALLBACK_PROJECT_SLUG
 
 
 def get_configured_env_slug() -> str:
@@ -73,8 +79,7 @@ ERP_PROJECT_SLUG = DEFAULT_FALLBACK_PROJECT_SLUG
 
 def get_default_project_id(tenant_id: uuid.UUID) -> uuid.UUID:
     """Return deterministic UUID for the host Innostes ERP project under a tenant."""
-    slug = get_configured_project_slug()
-    return uuid.uuid5(tenant_id, f"project:{slug}")
+    return uuid.uuid5(tenant_id, "project:default")
 
 
 def get_default_env_id(project_id: uuid.UUID, env_name: str) -> uuid.UUID:
@@ -112,8 +117,8 @@ class ProjectService:
             return (await session.execute(stmt)).scalars().first()
 
         # 2. Table is empty: Auto-provision default project & environments
-        project_name = get_configured_project_name()
-        project_slug = get_configured_project_slug()
+        # Dynamically resolved from the 1st added tenant in the database, never from .env
+        project_name, project_slug = await get_tenant_organization_details(session, tenant_id)
         default_pid = get_default_project_id(tenant_id)
 
         project = ApiLogProject(
