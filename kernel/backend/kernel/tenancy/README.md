@@ -1,80 +1,77 @@
-# Tenancy
+# Innostes Business OS: Tenancy Subsystem
 
-Tenants are the customer organisations using the ERP. Every business record will belong to a tenant.
+The **Tenancy Subsystem** (`kernel/tenancy`) manages multi-tenant isolation, customer organization profiles, and localized workspace settings for the **Innostes Business Operating System (Business OS)**.
 
-## Files
+Every operational business record across all suites (SalesFlow, PeopleOps, etc.) is scoped to a specific tenant.
 
-| Path | Contents |
-|---|---|
-| `models/tenant.py` | `Tenant` table (`tenants`). Only `name` is tenant-specific; common columns come from `BaseModel`. |
-| `schemas/tenant.py` | `TenantCreate`, `TenantUpdate`, `TenantRead` |
-| `services/tenant_service.py` | `TenantService`: CRUD inherited from `BaseService`; put tenant rules here |
-| `router.py` | HTTP endpoints under `/tenants` |
-| `__init__.py` | Public exports and `TenancyModule` (registered by the API server) |
+---
 
-## Table: `tenants`
+## 1. Subsystem Architecture
 
-| Column | Type | Notes |
-|---|---|---|
-| `id` | UUID | Primary key |
-| `name` | varchar(255) | Required |
-| `slug` | varchar(63), unique | Required. Lowercase letters, digits and dashes. Stays reserved after soft delete. |
-| `country` | varchar(2) | ISO country code |
-| `timezone` | varchar(64) | IANA time zone |
-| `language` | varchar(16) | BCP 47 tag |
-| `date_format` | varchar(20) | e.g. `DD/MM/YYYY` |
-| `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by` | | Common columns, see [kernel README](../README.md#common-columns) |
+| File | Purpose |
+| :--- | :--- |
+| `models/tenant.py` | `Tenant` database model (`tenants` table). Inherits all common columns from `BaseModel`. |
+| `schemas/tenant.py` | Pydantic validation schemas: `TenantCreate`, `TenantUpdate`, `TenantRead`. |
+| `services/tenant_service.py` | `TenantService`: Inherits generic CRUD and soft-deletion logic from `BaseService`. |
+| `router.py` | FastAPI HTTP endpoints mounted under `/tenants`. |
+| `__init__.py` | Public exports and `TenancyModule(BaseModule)` registration. |
 
-Migrations: `0001_create_tenants.py`, `0002_setup_and_tenant_profile.py` (profile columns) in `kernel/backend/migrations/versions/`.
+---
 
-## API
+## 2. Database Schema: `tenants`
 
-Full interactive docs: run the API server and open `http://localhost:8001/docs` (or `/redoc`).
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `UUID` (PK) | Globally unique tenant identifier |
+| `name` | `varchar(255)` | Human-readable organization or company name (required) |
+| `slug` | `varchar(63)` (unique) | URL-safe slug (letters, numbers, dashes). Preserved after soft-delete. |
+| `country` | `varchar(2)` | ISO 3166-1 alpha-2 country code (e.g. `IN`, `US`, `GB`) |
+| `timezone` | `varchar(64)` | IANA time zone identifier (e.g. `Asia/Kolkata`, `UTC`) |
+| `language` | `varchar(16)` | BCP 47 language tag (e.g. `en-US`) |
+| `date_format` | `varchar(20)` | Date formatting preference (e.g. `DD/MM/YYYY`) |
+| *common audit columns* | `timestamptz` / `UUID` | `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by` |
 
-| Method | Path | Description | Success | Errors |
-|---|---|---|---|---|
-| `POST` | `/tenants` | Create a tenant | 201 | 409 (slug taken), 422 |
-| `GET` | `/tenants?offset=&limit=&include_deleted=` | List tenants, newest first | 200 | 422 |
-| `GET` | `/tenants/{tenant_id}` | Get one tenant | 200 | 404, 422 |
-| `PATCH` | `/tenants/{tenant_id}` | Update fields that are sent | 200 | 404, 409, 422 |
-| `DELETE` | `/tenants/{tenant_id}` | Soft delete | 200 | 404, 422 |
-| `POST` | `/tenants/{tenant_id}/restore` | Undo soft delete | 200 | 404, 422 |
+Migrations: `0001_create_tenants.py` and `0002_setup_and_tenant_profile.py` in `kernel/backend/migrations/versions/`.
 
-Example:
+---
 
-```http
-POST /tenants
-Authorization: Bearer <access token>
-Content-Type: application/json
+## 3. REST API Endpoints
 
-{ "name": "Innostes Corporation", "slug": "innostes", "country": "IN" }
-```
+Interactive documentation is available at `http://localhost:8001/docs`:
 
-```json
-{
-  "id": "3f6c1a52-8d5e-4b8e-9c1a-2f6d3e7b9a10",
-  "name": "Innostes Corporation",
-  "slug": "innostes",
-  "country": "IN",
-  "timezone": null,
-  "language": null,
-  "date_format": null,
-  "created_at": "2026-10-26T10:15:00Z",
-  "created_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c",
-  "updated_at": "2026-10-26T10:15:00Z",
-  "updated_by": "9b2e4c71-0a3d-4f5e-8b6c-1d2e3f4a5b6c",
-  "deleted_at": null,
-  "deleted_by": null
-}
-```
+| Method | Path | Summary | Success | Errors |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/tenants` | Create a new tenant organization | 201 | 409 (slug conflict), 422 |
+| `GET` | `/tenants` | List tenant organizations (paginated, newest first) | 200 | 422 |
+| `GET` | `/tenants/{tenant_id}` | Retrieve a tenant record by UUID | 200 | 404, 422 |
+| `PATCH` | `/tenants/{tenant_id}` | Partially update tenant profile fields | 200 | 404, 409, 422 |
+| `DELETE` | `/tenants/{tenant_id}` | Soft-delete tenant organization | 200 | 404, 422 |
+| `POST` | `/tenants/{tenant_id}/restore` | Restore soft-deleted tenant | 200 | 404, 422 |
 
-The bearer token is optional for now. When present, its user id (`sub`) is stored in `created_by` / `updated_by` / `deleted_by`. These endpoints are **not access-controlled yet**.
+---
 
-## Usage from code
+## 4. Programmatic Usage
 
 ```python
 from kernel.tenancy import TenantCreate, TenantService
 
-service = TenantService(session)
-tenant = await service.create(TenantCreate(name="Innostes", slug="innostes"), actor_id=user_id)
+# Instantiate service within database session
+service = TenantService(db_session)
+
+# Create organization
+tenant = await service.create(
+    TenantCreate(
+        name="Northwind Traders Pvt Ltd",
+        slug="northwind-traders",
+        country="IN",
+        timezone="Asia/Kolkata"
+    ),
+    actor_id=current_user_id
+)
 ```
+
+---
+
+## 5. License
+
+Open-source software licensed under the **[MIT License](../../../LICENSE)**.
