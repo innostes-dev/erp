@@ -133,42 +133,132 @@ The primary employee dashboard (`/hrms`) utilizes a 12-column responsive CSS gri
 
 ---
 
-## 5. Employee Directory & Profile Drawer
+## 5. Employee Directory, 9-Step Onboarding Wizard & Employee 360
 
 ### 5.1 Directory Layout (`/hrms/employees`)
 
 The employee directory supports two presentation modes switched via a persistent user preference:
-1. **Interactive Data Table:** High-density enterprise grid with column sorting, fuzzy search (Name, Email, Role, Department), status filters (`ACTIVE`, `ON_NOTICE`, `PROBATION`), and bulk action operations.
+1. **Interactive Data Table:** High-density enterprise grid with column sorting, fuzzy search (Name, Email, Role, Department, Employee Code), status filters (`ACTIVE`, `ONBOARDING`, `PROBATION`, `NOTICE_PERIOD`), and bulk action operations.
 2. **Card Grid View:** Photo cards featuring designation, reporting manager, direct email/phone buttons, and current presence status.
 
-### 5.2 Slide-Over Employee 360 Drawer (`EmployeeDetailDrawer`)
+---
 
-Selecting an employee row or card opens a non-modal slide-over drawer from the right edge (width: 640px on desktop, full width on mobile), preserving the underlying list context.
+### 5.2 The 9-Step Candidate Onboarding Stepper (`/hrms/onboarding/[token]`)
+
+Candidate onboarding is structured into an interactive 9-step wizard with real-time client-side validation, auto-saving drafts, and clear progress milestones:
 
 ```
-+-------------------------------------------------------------+
-| [X] Close        Employee Profile: EMP-00104         [Edit] |
-+-------------------------------------------------------------+
-| Jane Doe                                                    |
-| Senior Backend Engineer - Infrastructure & Core Ops        |
-| Email: jane.doe@innostes.com | Phone: +91 98765 43210       |
-| Status: [ ACTIVE ]  Work Mode: [ REMOTE ]                   |
-+-------------------------------------------------------------+
-| [ Overview ]  [ Attendance ]  [ Leaves ]  [ Payroll ]  [ Docs ] |
-+-------------------------------------------------------------+
-| TAB: OVERVIEW                                               |
-| Reporting Manager: John Doe (VP Engineering)                |
-| Department: Engineering      Location: Bengaluru HQ        |
-| Date of Joining: 15 Jan 2024 (2 yrs 10 mos)                |
-| Employment Type: Full-time Permanent                        |
-| Legal Entity: Innostes Technologies Pvt Ltd                 |
-|                                                             |
-| Emergency Contact: Mary Doe (Spouse) - +91 98765 00000      |
-| Statutory Identifiers (Masked):                             |
-| Permanent Account Number: XXXXX1234F                        |
-| Universal Account Number: XXXXXXXXX987                      |
-+-------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------+
+| INNOSTES ONBOARDING PORTAL | Candidate: Alex Rivera | Progress: [██████████░░░░░░░░░░] 55% Complete |
++---------------------------------------------------------------------------------------------------+
+| 1. Personal | 2. Addresses | 3. Statutory | 4. Banking | 5. Role | 6. Edu | 7. Exp | 8. Nominees | 9. Sign |
+|   (Done)    |    (Done)    |    (Done)    |  (ACTIVE)  | (Wait)  | (Wait) | (Wait) |   (Wait)    |  (Wait) |
++---------------------------------------------------------------------------------------------------+
+| STEP 4 OF 9: BANKING & DIRECT DISBURSEMENT INFORMATION                                            |
+|                                                                                                   |
+| Bank IFSC Code *                                    Bank Name (Auto-resolved via RBI directory)   |
+| [ HDFC0000240                   ] [ Lookup ]        [ HDFC Bank Ltd                             ] |
+|                                                                                                   |
+| Branch Name (Auto-resolved)                         Account Type *                                |
+| [ Richmond Road, Bengaluru      ]                   (•) Corporate Salary  ( ) Savings  ( ) Current| |
+|                                                                                                   |
+| Bank Account Number *                               Re-enter Bank Account Number *                |
+| [ •••••••••••••••••             ]                   [ •••••••••••••••••                         ] |
+|                                                                                                   |
+| Account Holder Name (as per Bank Passbook) *                                                      |
+| [ Alex Rivera                   ] (Matches legal name 100%)                                       |
+|                                                                                                   |
+| Cancelled Cheque / Passbook Copy *                                                                |
+| +-----------------------------------------------------------------------------------------------+ |
+| | [Drag & Drop or Click to Upload PDF/PNG] - Uploaded: cheque_leaf.pdf (Verified)               | |
+| +-----------------------------------------------------------------------------------------------+ |
+|                                                                                                   |
+| [ Save Draft ]                                                   [ Back: Step 3 ]  [ Continue: Step 5 ] |
++---------------------------------------------------------------------------------------------------+
 ```
+
+#### Step-by-Step Functional & Ergonomic Highlights:
+* **Step 1: Personal & Demographics**: First, middle, and last names, date of birth (validates age $\ge 18$), gender, blood group pills, marital status, and statutory father's/mother's/spouse's names.
+* **Step 2: Addresses & Emergency Contacts**: Present address with auto-complete, "Same as Present" toggle for permanent address (copies in 0ms), and primary + secondary emergency contacts with relationship badges.
+* **Step 3: Statutory ID Vault**:
+  * **Aadhaar Input**: Instant Verhoeff algorithm validation. As digits are entered, the system validates the checksum and automatically masks the first 8 digits (`XXXX-XXXX-1234`).
+  * **PAN Card**: Format validation (`[A-Z]{5}[0-9]{4}[A-Z]{1}`) with instant check that the 4th character is `'P'`.
+  * **UAN Number**: 12-digit numeric input with tooltip guide for prior EPFO account transfer.
+* **Step 4: Banking & Direct Deposit**:
+  * Real-time IFSC lookup: entering `HDFC0000240` instantly populates Bank Name (*HDFC Bank Ltd*), Branch (*Richmond Road*), and MICR code without server reload.
+  * Double-entry account number confirmation with copy-paste disabled.
+* **Step 5: Employment & Taxonomy (HR Pre-filled)**: Displays assigned Business Unit, Department, Job Title, Grade/Band (`L3`), Reporting Manager, Work Mode (`Office` / `Remote`), and Probation terms.
+* **Step 6: Educational Qualifications**: Stepper list for degrees (Doctorate, PG, UG, 10th/12th) with field of study, passing year, score, and certificate attachment dropzone.
+* **Step 7: Prior Experience**: Chronological company history, start/end dates, last drawn CTC, previous PF member ID, and relieving letter upload.
+* **Step 8: Statutory Nominees (Form 2 & Form F)**:
+  * Interactive allocation sliders for PF, Pension (EPS), and Gratuity.
+  * Real-time validation warning if the total sum does not equal exactly 100.00%.
+  * Medical insurance (GMC) dependent checkboxes with pre-existing illness notes.
+* **Step 9: Document Vault & E-Sign**:
+  * Embedded PDF viewer for the Offer Letter, Employment Contract, and Non-Disclosure Agreement (NDA).
+  * 1-Click Aadhaar eSign or Digital Signature canvas.
+  * Final Submission button: Transitions candidate state to `SUBMITTED` and alerts the assigned HR reviewer.
+
+---
+
+### 5.3 HR Onboarding Review & Compliance Cockpit (`/hrms/onboarding/review`)
+
+HR administrators review candidate onboarding packages through a dedicated side-by-side verification interface:
+
+```
++---------------------------------------------------------------------------------------------------+
+| HR Verification Cockpit: Alex Rivera (EMP-00104) | Status: PENDING REVIEW | [ Approve ] [ Changes ]|
++---------------------------------------------------------------------------------------------------+
+| APPLICANT SUBMISSION DATA (50% Screen)          | UPLOADED DOCUMENT PREVIEW (50% Screen)          |
+|                                                 |                                                 |
+| Step 3: Statutory Identification                | +---------------------------------------------+ |
+| Aadhaar (Masked): XXXX-XXXX-4819                | | [ Aadhaar Card Scanned Image ]              | |
+| Name on Card: Alex Rivera                       | | Name: Alex Rivera                           | |
+| Verhoeff Validation: [ PASSED ]                 | | DOB: 14/08/1994                             | |
+|                                                 | | Gender: Male                                | |
+| PAN: ABCPR1234F                                 | | Aadhaar: XXXX XXXX 4819                     | |
+| Name on PAN: Alex Rivera                        | +---------------------------------------------+ |
+| 4th Char Persona Check: [ PASSED ('P') ]        |                                                 |
+|                                                 | Inline Review Actions:                          |
+| UAN: 101234567890                               | [ ✓ Verify Aadhaar ]  [ ✕ Reject Document ]   |
+| Status: Validated against EPFO database         | Rejection Note: [ Blur scan, please re-upload ] |
++---------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 5.4 Slide-Over Employee 360 Drawer (`EmployeeDetailDrawer`)
+
+Selecting an employee row or card opens a non-modal slide-over drawer from the right edge (width: 720px on desktop, full width on mobile), preserving the underlying list context.
+
+```
++-----------------------------------------------------------------------------------+
+| [X] Close             Employee Profile: INN-00104                          [Edit] |
++-----------------------------------------------------------------------------------+
+| Jane Doe                                                                          |
+| Senior Backend Engineer - Infrastructure & Core Ops                               |
+| Email: jane.doe@innostes.com | Phone: +91 98765 43210                             |
+| Status: [ ACTIVE ]  Band: [ L4 Senior ]  Work Mode: [ REMOTE ]                    |
++-----------------------------------------------------------------------------------+
+| [ Overview ] [ Statutory ] [ Bank ] [ Leaves ] [ Attendance ] [ Payroll ] [ Docs ] |
++-----------------------------------------------------------------------------------+
+| TAB: OVERVIEW & DEMOGRAPHICS                                                      |
+| Legal Full Name: Jane Marie Doe             Date of Birth: 12 May 1992 (34 yrs)   |
+| Gender: Female      Blood Group: O+ Positive   Marital Status: Married            |
+| Father's Name: Robert Doe                   Spouse Name: Michael Doe              |
+|                                                                                   |
+| Current Address: Flat 402, Palm Heights, Indiranagar, Bengaluru, KA - 560038      |
+| Emergency Contact: Michael Doe (Spouse) - +91 98765 00000                         |
+| Reporting Manager: John Doe (VP Engineering)                                      |
+| Business Unit: Cloud Platforms   Department: Core Kernel   Cost Center: CC-ENG-104|
+| Date of Joining: 15 Jan 2024 (2 yrs 10 mos) | Notice Period: 60 Days              |
+|                                                                                   |
+| TAB: STATUTORY VAULT (MASKED & ENCRYPTED)                                         |
+| Aadhaar: XXXX-XXXX-3821 (Verified via Verhoeff)                                   |
+| PAN: ABCPD1234M (Verified Individual 'P')                                         |
+| UAN: 100987654321 | ESIC: Exempt (> INR 21k) | PT State: Karnataka (Circle 04)  |
+| Gratuity Nominee: Michael Doe (100% share)                                        |
++-----------------------------------------------------------------------------------+
 
 ---
 
