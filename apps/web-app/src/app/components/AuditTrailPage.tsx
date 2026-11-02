@@ -504,7 +504,7 @@ export function AuditTrailPage() {
                 <SelectItem value="all">All Entities</SelectItem>
                 <SelectItem value="employee">Employee</SelectItem>
                 <SelectItem value="role">Role / RBAC</SelectItem>
-                <SelectItem value="deal">RevOps Deal</SelectItem>
+                <SelectItem value="deal">SalesFlow Deal</SelectItem>
                 <SelectItem value="user">User Account</SelectItem>
                 <SelectItem value="api_key">API Key</SelectItem>
                 <SelectItem value="payroll">Payroll</SelectItem>

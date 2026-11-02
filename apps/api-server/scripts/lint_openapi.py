@@ -74,7 +74,7 @@ def main() -> None:
                 if w[0].isupper() and not w.isupper():
                     add_violation("T3", f"tag:{tname}", f"Tag name '{tname}' is not in sentence case", f"Change to '{words[0]} {words[1].lower()}'")
 
-    # T2: Tag order check (General, Observability, Authentication, Setup, Tenancy, User management, RevOps, PeopleOps, API logger)
+    # T2: Tag order check (General, Observability, Authentication, Setup, Tenancy, User management, SalesFlow, PeopleOps, API logger)
     expected_prefix = ["General", "Observability", "Authentication"]
     actual_prefix = tag_list[:3]
     if actual_prefix != expected_prefix:

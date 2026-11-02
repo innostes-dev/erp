@@ -31,8 +31,8 @@ export default function AppSwitcherDemo() {
       label: 'Add-ons',
       apps: [
         {
-          id: 'revops',
-          name: 'RevOps',
+          id: 'salesflow',
+          name: 'SalesFlow',
           description: 'Revenue & pipeline',
           icon: <Briefcase />,
           tone: 'chart-2' as const

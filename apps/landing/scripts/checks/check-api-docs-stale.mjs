@@ -22,7 +22,7 @@ const tagSlugs = {
   Setup: 'setup',
   Tenancy: 'tenancy',
   'User management': 'user-management',
-  RevOps: 'revops',
+  SalesFlow: 'salesflow',
   PeopleOps: 'peopleops',
   'API logger': 'api-logger',
 };

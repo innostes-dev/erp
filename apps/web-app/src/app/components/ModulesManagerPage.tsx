@@ -35,7 +35,7 @@ function getModuleIcon(id: string) {
   switch (id) {
     case 'peopleops':
       return <Users className="size-5" />;
-    case 'revops':
+    case 'salesflow':
       return <Building2 className="size-5" />;
     case 'hireflow':
       return <UserCheck className="size-5" />;

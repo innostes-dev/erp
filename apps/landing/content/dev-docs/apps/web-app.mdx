@@ -46,12 +46,12 @@ The UI engine loads business modules and platform plugins via the dynamic manife
 
 ```ts title="src/app/catalog.ts"
 import { peopleopsManifest } from '@innostes/peopleops';
-import { revopsManifest } from '@innostes/revops';
+import { salesflowManifest } from '@innostes/salesflow';
 import { tracuraManifest } from '@innostes/tracura';
 
 export const BUSINESS_MODULES_CATALOG: CatalogItem[] = [
   peopleopsManifest,
-  revopsManifest,
+  salesflowManifest,
 ];
 
 export const PLUGINS_CATALOG: CatalogItem[] = [

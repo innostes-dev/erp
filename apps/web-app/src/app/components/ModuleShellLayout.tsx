@@ -73,7 +73,7 @@ import { useModules } from '../context/ModulesContext';
 import { useCurrentTenant } from '../context/TenantContext';
 import { BUSINESS_MODULES_CATALOG } from '../catalog';
 import { PeopleOpsDashboard } from '../modules/peopleops/PeopleOpsDashboard';
-import { RevOpsDashboard } from '../modules/revops/RevOpsDashboard';
+import { SalesFlowDashboard } from '../modules/salesflow/SalesFlowDashboard';
 import { HireFlowDashboard } from '../modules/hireflow/HireFlowDashboard';
 import { LedgerFlowDashboard } from '../modules/ledgerflow/LedgerFlowDashboard';
 import { StockFlowDashboard } from '../modules/stockflow/StockFlowDashboard';
@@ -88,7 +88,7 @@ export function getModuleIcon(id: string) {
   switch (id) {
     case 'peopleops':
       return <Users className="size-4" />;
-    case 'revops':
+    case 'salesflow':
       return <Building2 className="size-4" />;
     case 'hireflow':
       return <UserCheck className="size-4" />;
@@ -250,8 +250,8 @@ export function ModuleShellLayout({ moduleId }: ModuleShellLayoutProps) {
     switch (moduleId) {
       case 'peopleops':
         return <PeopleOpsDashboard />;
-      case 'revops':
-        return <RevOpsDashboard />;
+      case 'salesflow':
+        return <SalesFlowDashboard />;
       case 'hireflow':
         return <HireFlowDashboard />;
       case 'ledgerflow':

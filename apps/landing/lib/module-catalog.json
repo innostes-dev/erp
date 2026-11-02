@@ -143,21 +143,21 @@
     ]
   },
   {
-    "name": "revops",
+    "name": "salesflow",
     "type": "business-module",
-    "package": "innostes-revops",
-    "frontendPackage": "@innostes/revops",
-    "entryPoint": "revops:module",
-    "description": "Revenue Operations: sales pipeline, deals, quotes, and customer accounts",
+    "package": "innostes-salesflow",
+    "frontendPackage": "@innostes/salesflow",
+    "entryPoint": "salesflow:module",
+    "description": "SalesFlow: sales pipeline, leads, deals, quotes, and customer accounts",
     "routes": [
-      "/revops/leads",
-      "/revops/deals",
-      "/revops/contacts"
+      "/salesflow/leads",
+      "/salesflow/deals",
+      "/salesflow/contacts"
     ],
     "tables": [],
-    "migrationsPath": "modules/revops/backend/migrations",
+    "migrationsPath": "modules/salesflow/backend/migrations",
     "tags": [
-      "RevOps",
+      "SalesFlow",
       "Pipeline"
     ]
   },

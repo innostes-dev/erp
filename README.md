@@ -5,7 +5,7 @@ A modern, modular enterprise ERP platform built with a decoupled two-engine arch
 - **UI Engine (`apps/web-app`)**: Accessible React 19 single-page app shell dynamically mounting module manifests and navigation.
 - **Design System (`packages/ui` / `@innostes/ui`)**: Enterprise UI component library built on Base UI and Tailwind CSS v4.
 - **Platform Kernel (`kernel/`)**: Foundational multi-tenancy, authentication, security primitives, and base abstractions.
-- **Domain Business Modules (`modules/`)**: Self-contained business domains (`peopleops`, `revops`, `hireflow`, etc.).
+- **Domain Business Modules (`modules/`)**: Self-contained business domains (`peopleops`, `salesflow`, `hireflow`, etc.).
 - **Platform Plug-ins (`plugins/`)**: Extensible developer, telemetry, and logging plugins (`tracura`).
 
 ---

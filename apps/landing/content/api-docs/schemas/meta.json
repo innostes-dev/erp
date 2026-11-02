@@ -40,7 +40,7 @@
     "refresh-token-request",
     "refresh-token-response",
     "reset-password-request",
-    "rev-ops-info-response",
+    "sales-flow-info-response",
     "service-info-read",
     "settings-read",
     "settings-update",

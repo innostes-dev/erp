@@ -7,7 +7,7 @@ import {
   Plus,
 } from 'lucide-react';
 
-export function RevOpsDashboard() {
+export function SalesFlowDashboard() {
   const [tasks, setTasks] = useState([
     { id: 't1', time: '09:30 AM', title: 'Call Rajesh Kumar (CloudMatrix)', subtitle: 'Post-demo pricing review', done: false },
     { id: 't2', time: '11:00 AM', title: 'Send revised quote to Titan Labs', subtitle: 'Include 10% volume discount', done: false },
@@ -27,9 +27,9 @@ export function RevOpsDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">RevOps Cockpit 🚀</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">SalesFlow Cockpit 🚀</h1>
             <Badge variant="outline" className="border-amber-500/30 text-amber-600 bg-amber-500/5">
-              Revenue Operations
+              Sales & Pipeline
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">

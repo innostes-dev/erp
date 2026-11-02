@@ -1,11 +1,11 @@
 ---
-title: "Get RevOps module metadata and scaffold status"
-description: "Return RevOps module metadata and scaffold status."
+title: "Get SalesFlow module metadata and scaffold status"
+description: "Return SalesFlow module metadata and scaffold status."
 ---
 
-<ApiEndpoint method="GET" path="/revops/info" auth="None" />
+<ApiEndpoint method="GET" path="/salesflow/info" auth="None" />
 
-Return RevOps module metadata and scaffold status.
+Return SalesFlow module metadata and scaffold status.
 
 Public endpoint. Returns scaffold readiness status and available features.
 
@@ -19,13 +19,13 @@ This endpoint is public and does not require an authentication header.
 
 Successful Response
 
-Response model: [RevOpsInfoResponse](/api-reference/schemas/rev-ops-info-response)
+Response model: [SalesFlowInfoResponse](/api-reference/schemas/sales-flow-info-response)
 
 ```json
 {
-  "description": "Revenue operations, customer pipeline, deals, and accounts",
-  "id": "revops",
-  "name": "RevOps",
+  "description": "SalesFlow sales pipeline, customer leads, deals, and accounts",
+  "id": "salesflow",
+  "name": "SalesFlow",
   "status": "scaffold_ready",
   "sub_features": [
     "leads",
@@ -43,14 +43,14 @@ Response model: [RevOpsInfoResponse](/api-reference/schemas/rev-ops-info-respons
   <Tab value="cURL">
 
 ```bash
-curl -X GET "http://localhost:8001/revops/info"
+curl -X GET "http://localhost:8001/salesflow/info"
 ```
 
   </Tab>
   <Tab value="TypeScript (fetch)">
 
 ```ts
-const response = await fetch('http://localhost:8001/revops/info', {
+const response = await fetch('http://localhost:8001/salesflow/info', {
   method: 'GET',
   headers: {
   },
@@ -70,7 +70,7 @@ headers = {
 }
 
 response = httpx.get(
-    "http://localhost:8001/revops/info",
+    "http://localhost:8001/salesflow/info",
     headers=headers,
 )
 
@@ -83,4 +83,4 @@ print(data)
 
 ## Try it
 
-<ApiPlayground method="GET" path="/revops/info" authType="None" hasBody={false} initialBody={""} />
+<ApiPlayground method="GET" path="/salesflow/info" authType="None" hasBody={false} initialBody={""} />

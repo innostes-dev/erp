@@ -78,7 +78,7 @@ export interface AppSwitcherProps {
 }
 
 /**
- * A launcher for moving between the modules and tools of a suite (ERP, RevOps, PeopleOps…), usually in
+ * A launcher for moving between the modules and tools of a suite (ERP, SalesFlow, PeopleOps…), usually in
  * the top bar. Shows the current app, with search and sections in a popover.
  *
  * @example

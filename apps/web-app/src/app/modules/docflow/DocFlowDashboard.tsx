@@ -72,7 +72,7 @@ export function DocFlowDashboard() {
               <p className="text-[11px] text-muted-foreground">Playbooks & Battlecards</p>
             </div>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-3">34 Pages • Live RevOps block</p>
+          <p className="text-[11px] text-muted-foreground mt-3">34 Pages • Live SalesFlow block</p>
         </Card>
 
         <Card className="p-4 border-border bg-card shadow-xs hover:border-primary/50 transition-colors cursor-pointer">

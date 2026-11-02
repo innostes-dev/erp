@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@innostes/tracura": "workspace:*",
-    "@innostes/revops": "workspace:*",
+    "@innostes/salesflow": "workspace:*",
     "@innostes/peopleops": "workspace:*",
     "@innostes/kernel": "workspace:*",
     "@innostes/ui": "workspace:*",

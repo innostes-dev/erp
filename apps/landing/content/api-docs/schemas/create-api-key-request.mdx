@@ -11,16 +11,16 @@ Payload to generate a new API key.
 | --- | --- | --- | --- | --- |
 | `name` | string | Yes | — | Descriptive identifier for the API key. |
 | `expires_in_days` | integer \| null | No | — | Lifespan in days. Null for perpetual key. |
-| `scopes` | string[] | No | `["*"]` | Authorized permission scopes, e.g. ['peopleops:read', 'revops:write'] or ['*']. |
+| `scopes` | string[] | No | `["*"]` | Authorized permission scopes, e.g. ['peopleops:read', 'salesflow:write'] or ['*']. |
 
 ## Example payload
 
 ```json
 {
-  "name": "Zapier RevOps Sync",
+  "name": "Zapier SalesFlow Sync",
   "expires_in_days": 30,
   "scopes": [
-    "revops:read",
+    "salesflow:read",
     "peopleops:read"
   ]
 }

@@ -18,7 +18,7 @@ innostes ERP implements a modular, plug-in architecture where both the backend e
  ┌───────────────────────────┴────────────────────────────┐
  │                   innostes.modules                     │
  │   ┌───────────────┬───────────────┬────────────────┐   │
- │   │ kernel (core) │ peopleops     │ revops         │   │
+ │   │ kernel (core) │ peopleops     │ salesflow         │   │
  │   │               │ (domain)      │ (domain)       │   │
  │   └───────────────┴───────────────┴────────────────┘   │
  └────────────────────────────────────────────────────────┘
@@ -49,10 +49,10 @@ Frontend plug-ins are pnpm workspace packages consumed directly from source. Eac
 
 ```ts title="apps/web-app/src/app/catalog.ts"
 import { peopleopsManifest } from '@innostes/peopleops';
-import { revopsManifest } from '@innostes/revops';
+import { salesflowManifest } from '@innostes/salesflow';
 import { tracuraManifest } from '@innostes/tracura';
 
-export const BUSINESS_MODULES_CATALOG = [peopleopsManifest, revopsManifest];
+export const BUSINESS_MODULES_CATALOG = [peopleopsManifest, salesflowManifest];
 export const PLUGINS_CATALOG = [tracuraManifest];
 ```
 
@@ -66,5 +66,5 @@ For manifest interfaces, route definitions, and packaging standards, see [Fronte
 
 - [Building Blocks](/docs/architecture/building-blocks) — C4 container and component diagrams.
 - [Plug-in Contract](/docs/architecture/plugin-contract) — Formal architectural contract and invariants.
-- [Creating a Business Module](/docs/guides/creating-a-module) — Step-by-step guide for scaffolding business modules (`modules/peopleops`, `modules/revops`).
+- [Creating a Business Module](/docs/guides/creating-a-module) — Step-by-step guide for scaffolding business modules (`modules/peopleops`, `modules/salesflow`).
 - [Creating an Extensible Plugin](/docs/guides/creating-a-plugin) — Step-by-step guide for platform and telemetry extensions (`plugins/tracura`).

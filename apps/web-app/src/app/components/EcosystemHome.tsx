@@ -67,7 +67,7 @@ function getItemIcon(id: string) {
   switch (id) {
     case 'peopleops':
       return <Users className="size-5" />;
-    case 'revops':
+    case 'salesflow':
       return <Building2 className="size-5" />;
     case 'hireflow':
       return <UserCheck className="size-5" />;
@@ -104,7 +104,7 @@ export function EcosystemHome() {
   const recentActivityItems = [
     {
       id: '1',
-      title: 'RevOps: Closed Enterprise Account',
+      title: 'SalesFlow: Closed Enterprise Account',
       time: '2 min ago',
       icon: <Building2 className="size-3.5" />,
       tone: 'chart-2' as const,
@@ -142,9 +142,9 @@ export function EcosystemHome() {
       action: <Star className="size-4 fill-amber-400 text-amber-400" />,
     },
     {
-      id: 'revops',
-      title: 'RevOps',
-      description: 'Revenue operations & pipeline',
+      id: 'salesflow',
+      title: 'SalesFlow',
+      description: 'Sales pipeline & deals',
       icon: <Building2 className="size-4" />,
       tone: 'chart-2' as const,
       action: <Star className="size-4 fill-amber-400 text-amber-400" />,
@@ -201,7 +201,7 @@ export function EcosystemHome() {
               </IconTile>
             }
             title="No business modules activated yet"
-            description="At initial setup, business modules are 0. Activate modules like PeopleOps, RevOps, and LedgerFlow from the Modules catalog to unlock business capabilities."
+            description="At initial setup, business modules are 0. Activate modules like PeopleOps, SalesFlow, and LedgerFlow from the Modules catalog to unlock business capabilities."
             actions={
               <Button
                 variant="primary"

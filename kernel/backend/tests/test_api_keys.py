@@ -66,13 +66,13 @@ class ApiKeyServiceTestCase(unittest.IsolatedAsyncioTestCase):
             session=session,
             tenant_id=self.tenant_id,
             user_id=self.user_id,
-            name="Zapier RevOps Sync",
-            scopes=["revops:read", "revops:write"],
+            name="Zapier SalesFlow Sync",
+            scopes=["salesflow:read", "salesflow:write"],
             expires_in_days=30,
         )
 
         self.assertTrue(raw_key.startswith("inno_live_"))
-        self.assertEqual(api_key.name, "Zapier RevOps Sync")
+        self.assertEqual(api_key.name, "Zapier SalesFlow Sync")
         self.assertFalse(api_key.is_revoked)
         self.assertIsNotNone(api_key.expires_at)
         self.assertEqual(api_key.key_prefix[:10], raw_key[:10])

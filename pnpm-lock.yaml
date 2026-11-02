@@ -190,9 +190,9 @@ importers:
       '@innostes/peopleops':
         specifier: workspace:*
         version: link:../../modules/peopleops/frontend
-      '@innostes/revops':
+      '@innostes/salesflow':
         specifier: workspace:*
-        version: link:../../modules/revops/frontend
+        version: link:../../modules/salesflow/frontend
       '@innostes/tracura':
         specifier: workspace:*
         version: link:../../plugins/tracura/frontend
@@ -234,7 +234,7 @@ importers:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.3.1
 
-  modules/revops/frontend:
+  modules/salesflow/frontend:
     dependencies:
       '@innostes/kernel':
         specifier: workspace:*

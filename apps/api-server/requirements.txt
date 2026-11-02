@@ -1,6 +1,6 @@
 -e ../../kernel/backend
 -e ../../modules/peopleops/backend
--e ../../modules/revops/backend
+-e ../../modules/salesflow/backend
 -e ../../plugins/tracura/backend
 fastapi[standard]>=0.158
 jsonschema>=4.20.0

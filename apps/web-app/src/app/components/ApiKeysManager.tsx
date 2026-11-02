@@ -303,7 +303,7 @@ export function ApiKeysManager() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">Key Name / Description</label>
                   <Input
-                    placeholder="e.g. Zapier RevOps Sync, CI/CD Pipeline"
+                    placeholder="e.g. Zapier SalesFlow Sync, CI/CD Pipeline"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -340,7 +340,7 @@ export function ApiKeysManager() {
                       <SelectItem value="*">Full Platform Access (*)</SelectItem>
                       <SelectItem value="*:read">Read-Only Access (*:read)</SelectItem>
                       <SelectItem value="peopleops:read">PeopleOps Read Only</SelectItem>
-                      <SelectItem value="revops:write">RevOps Read & Write</SelectItem>
+                      <SelectItem value="salesflow:write">SalesFlow Read & Write</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

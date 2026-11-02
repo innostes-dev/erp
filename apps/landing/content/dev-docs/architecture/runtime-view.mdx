@@ -104,7 +104,7 @@ sequenceDiagram
   participant DB as AsyncSession (PostgreSQL 16)
   participant ErrorHandler as register_error_handlers
 
-  Client ->> CORS: HTTP GET /revops/leads (Headers: Bearer JWT, X-Tenant-ID)
+  Client ->> CORS: HTTP GET /salesflow/leads (Headers: Bearer JWT, X-Tenant-ID)
   CORS ->> SetupMid: Pass through CORS checks
   
   alt Platform uninitialised (is_installed == false)
@@ -122,7 +122,7 @@ sequenceDiagram
   Security -->> Router: Tenant context validated (tenant_id)
   
   Router ->> Service: service.list_leads(tenant_id, offset=0, limit=20)
-  Service ->> DB: SELECT * FROM revops_leads WHERE tenant_id = :t AND deleted_at IS NULL
+  Service ->> DB: SELECT * FROM salesflow_leads WHERE tenant_id = :t AND deleted_at IS NULL
   DB -->> Service: Result rows
   Service -->> Router: Page[LeadRead] (items, total, offset, limit)
   
@@ -188,7 +188,7 @@ sequenceDiagram
     SetupSvc ->> DB: INSERT INTO tenants (name, slug)
     SetupSvc ->> DB: INSERT INTO users (email, password_hash, role='admin')
     SetupSvc ->> DB: INSERT INTO tenant_members (tenant_id, user_id, role='owner')
-    SetupSvc ->> DB: INSERT INTO tenant_modules (tenant_id, module='revops', is_active=true)
+    SetupSvc ->> DB: INSERT INTO tenant_modules (tenant_id, module='salesflow', is_active=true)
     SetupSvc ->> DB: INSERT INTO tenant_modules (tenant_id, module='peopleops', is_active=true)
     SetupSvc ->> DB: INSERT INTO installation (installed_at, version)
   end
@@ -355,7 +355,7 @@ sequenceDiagram
   participant ApiClient as @innostes/kernel: apiRequest
   participant ApiServer as apps/api-server
   participant AppRouter as src/app/app.tsx: AppRouter
-  participant ModuleShell as ModuleShellLayout (RevOps / PeopleOps)
+  participant ModuleShell as ModuleShellLayout (SalesFlow / PeopleOps)
 
   Browser ->> Main: Load React bundle
   Main ->> ApiClient: configureApi({ baseUrl: VITE_API_URL })
@@ -378,13 +378,13 @@ sequenceDiagram
     
     alt URL path: /
       AppRouter -->> Browser: Render <EcosystemHome /> in Standard Shell
-    else URL path: /modules/revops
-      AppRouter ->> ModuleShell: Mount <ModuleShellLayout moduleId="revops">
-      ModuleShell ->> ApiClient: GET /revops/leads (with automatic token injection)
-      ApiClient ->> ApiServer: GET /revops/leads
+    else URL path: /modules/salesflow
+      AppRouter ->> ModuleShell: Mount <ModuleShellLayout moduleId="salesflow">
+      ModuleShell ->> ApiClient: GET /salesflow/leads (with automatic token injection)
+      ApiClient ->> ApiServer: GET /salesflow/leads
       ApiServer -->> ApiClient: HTTP 200 {items: [...]}
       ApiClient -->> ModuleShell: Lead data
-      ModuleShell -->> Browser: Render RevOps Workspace UI
+      ModuleShell -->> Browser: Render SalesFlow Workspace UI
     end
   end
 ```
@@ -397,7 +397,7 @@ sequenceDiagram
 3. **Authentication Check**: `<AuthGate>` evaluates current session cookies or local storage. If unauthenticated, `<AuthPage>` renders.
 4. **Workspace Routing**: `<AppRouter>` evaluates the URL:
    - Root `/`: Renders standard shell with navigation and tenant overview.
-   - Module path `/modules/revops`: Loads the `@innostes/revops` manifest and renders `<ModuleShellLayout />`.
+   - Module path `/modules/salesflow`: Loads the `@innostes/salesflow` manifest and renders `<ModuleShellLayout />`.
 5. **Transparent Refresh**: If any background API call returns HTTP 401, `apiRequest()` intercepts the failure, requests a new access token via `POST /auth/refresh`, and replays the original request without user interruption.
 
 ---

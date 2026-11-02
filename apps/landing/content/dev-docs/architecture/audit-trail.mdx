@@ -28,7 +28,7 @@ flowchart TD
   end
 
   subgraph KernelEngine["Innostes Kernel Layer"]
-    DomainAction["Domain Mutation\n(PeopleOps, RevOps, User, IAM)"]
+    DomainAction["Domain Mutation\n(PeopleOps, SalesFlow, User, IAM)"]
     AuditService["AuditService.record()\n[Field Diff Calculation]"]
     AuditLedger[("PostgreSQL: audit_logs\n[Append-Only, Indexed, Tenant Scoped]")]
   end

@@ -137,7 +137,7 @@ export function SprintFlowDashboard() {
                     <span className="text-xs font-mono font-bold text-primary">[REV-109]</span>
                     <span className="text-xs font-bold text-foreground">1-Click lead conversion to account, contact, and deal</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Epic: RevOps Sales Pipeline</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Epic: SalesFlow Sales Pipeline</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 self-end sm:self-center">
@@ -181,7 +181,7 @@ export function SprintFlowDashboard() {
 
               <div className="p-3 rounded-xl bg-muted/20 border border-border">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-foreground">RevOps Quotations Engine</span>
+                  <span className="font-bold text-foreground">SalesFlow Quotations Engine</span>
                   <span className="font-semibold text-amber-600">55% Done</span>
                 </div>
                 <div className="w-full bg-muted/60 h-1.5 rounded-full mt-2 overflow-hidden">

@@ -34,8 +34,8 @@ The abstract Python contract that every backend plug-in must subclass. A `BaseMo
 *Related ADR*: [ADR-0001](/docs/architecture/decisions/0001-engine-plugin-inversion)
 
 ### Business Module
-A domain-specific feature package providing commercial enterprise capabilities (such as PeopleOps or RevOps). Business modules are authored as independent Python packages in `modules/<name>/backend` and pnpm workspace packages in `modules/<name>/frontend`.  
-*Code Reference*: `modules/peopleops`, `modules/revops`
+A domain-specific feature package providing commercial enterprise capabilities (such as PeopleOps or SalesFlow). Business modules are authored as independent Python packages in `modules/<name>/backend` and pnpm workspace packages in `modules/<name>/frontend`.  
+*Code Reference*: `modules/peopleops`, `modules/salesflow`
 
 ### Engine
 A plumbing runtime application (`apps/api-server` or `apps/web-app`) responsible purely for infrastructure, hosting, routing, and lifecycle orchestration. Engines contain zero business capabilities.

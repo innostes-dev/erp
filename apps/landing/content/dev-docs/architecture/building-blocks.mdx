@@ -95,7 +95,7 @@ flowchart TD
 
   subgraph DiscoveredModules["Discovered BaseModule Plug-ins"]
     KernelModules["Kernel Modules\n[kernel.setup, kernel.tenancy, kernel.user, kernel.auth]"]
-    BusinessModules["Business Modules\n[peopleops, revops]"]
+    BusinessModules["Business Modules\n[peopleops, salesflow]"]
   end
 
   ServerMain --> ServerEngine
@@ -172,7 +172,7 @@ flowchart TD
     end
 
     subgraph ModuleShells["Specialised Feature Shells"]
-      ModShellLayout["ModuleShellLayout\n[Dynamically mounts @innostes/peopleops or @innostes/revops]"]
+      ModShellLayout["ModuleShellLayout\n[Dynamically mounts @innostes/peopleops or @innostes/salesflow]"]
       PlugShellLayout["PluginShellLayout\n[Dynamically mounts @innostes/api-logger]"]
     end
   end
@@ -210,7 +210,7 @@ flowchart TD
    Verifies that a valid JWT access token or session exists. If unauthenticated, it presents `<AuthPage />`. Upon successful login, the session state is broadcast and child components render.
 4. **App Router & Navigation (`apps/web-app/src/app/app.tsx`)**:
    Subscribes to `NavigationContext`. Evaluates the URL path:
-   - `/modules/:moduleId`: Mounts `<ModuleShellLayout />`, rendering the respective module workspace (`@innostes/peopleops` or `@innostes/revops`).
+   - `/modules/:moduleId`: Mounts `<ModuleShellLayout />`, rendering the respective module workspace (`@innostes/peopleops` or `@innostes/salesflow`).
    - `/plugins/:pluginId`: Mounts `<PluginShellLayout />`, rendering plugin interfaces (`@innostes/api-logger`).
    - Standard paths (`/`, `/modules`, `/plugins`, `/api-keys`): Renders the primary administrative shell with `<SidebarNav />` and `<TopHeader />`.
 

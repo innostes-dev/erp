@@ -1,28 +1,28 @@
 ---
-title: "RevOpsInfoResponse"
-description: "Information schema for RevOps scaffold module."
+title: "SalesFlowInfoResponse"
+description: "Information schema for SalesFlow scaffold module."
 ---
 
-Information schema for RevOps scaffold module.
+Information schema for SalesFlow scaffold module.
 
 ## Properties
 
 | Property | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `id` | string | No | `"revops"` | Unique package identifier string. |
-| `name` | string | No | `"RevOps"` | Human-readable module title. |
+| `id` | string | No | `"salesflow"` | Unique package identifier string. |
+| `name` | string | No | `"SalesFlow"` | Human-readable module title. |
 | `version` | string | No | `"0.1.0"` | Semver version string. |
 | `status` | string | No | `"scaffold_ready"` | Operational readiness status of module. |
 | `sub_features` | string[] | No | `["leads","deals","pipeline","contacts"]` | List of functional sub-features supported by module. |
-| `description` | string | No | `"Revenue operations, customer pipeline, deals, and accounts"` | Module functional overview. |
+| `description` | string | No | `"SalesFlow sales pipeline, customer leads, deals, and accounts"` | Module functional overview. |
 
 ## Example payload
 
 ```json
 {
-  "description": "Revenue operations, customer pipeline, deals, and accounts",
-  "id": "revops",
-  "name": "RevOps",
+  "description": "SalesFlow sales pipeline, customer leads, deals, and accounts",
+  "id": "salesflow",
+  "name": "SalesFlow",
   "status": "scaffold_ready",
   "sub_features": [
     "leads",

@@ -4,7 +4,7 @@
     "${workspaceFolder}/apps/api-server",
     "${workspaceFolder}/kernel/backend",
     "${workspaceFolder}/modules/peopleops/backend",
-    "${workspaceFolder}/modules/revops/backend",
+    "${workspaceFolder}/modules/salesflow/backend",
     "${workspaceFolder}/plugins/tracura/backend"
   ],
   "python-envs.pythonProjects": [

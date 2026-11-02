@@ -3,7 +3,7 @@ root_packages =
     app
     kernel
     peopleops
-    revops
+    salesflow
     api_logger
     tracura
 
@@ -18,7 +18,7 @@ forbidden_modules =
     kernel.user
     kernel.auth
     peopleops
-    revops
+    salesflow
     api_logger
     tracura
 
@@ -28,7 +28,7 @@ type = forbidden
 source_modules =
     kernel
     peopleops
-    revops
+    salesflow
     api_logger
     tracura
 forbidden_modules =
@@ -41,7 +41,7 @@ source_modules =
     kernel
 forbidden_modules =
     peopleops
-    revops
+    salesflow
     api_logger
     tracura
 
@@ -56,7 +56,7 @@ forbidden_modules =
     kernel.user
     kernel.auth
     peopleops
-    revops
+    salesflow
     api_logger
     tracura
 

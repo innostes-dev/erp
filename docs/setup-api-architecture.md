@@ -148,7 +148,7 @@ flowchart TD
     ScopeCheck -- Yes --> PathCheck{Is path in Whitelist?}
     
     PathCheck -- Yes: /, /health, /setup/*, /docs --> Passthrough
-    PathCheck -- No: /config, /users, /revops, etc --> CacheCheck[Query is_installed_cached]
+    PathCheck -- No: /config, /users, /salesflow, etc --> CacheCheck[Query is_installed_cached]
     
     CacheCheck --> DBCheck{Installed == True?}
     DBCheck -- Yes --> Passthrough
@@ -422,7 +422,7 @@ return result
 2. **In-Memory Cache Flipped**: `install_state.mark_installed()` sets `self._installed = True`. All subsequent calls to `is_installed_cached()` return `True` in $O(1)$ time without database queries.
 3. **Secret Destruction**: `discard_setup_token()` unlinks `kernel/backend/var/setup-token` from the local filesystem.
 4. **Immediate Firewall Disarm**: On the very next request:
-   - `SetupRequiredMiddleware` observes `installed = True` and permits normal traffic to all routes (`/config`, `/users`, `/revops`, etc.).
+   - `SetupRequiredMiddleware` observes `installed = True` and permits normal traffic to all routes (`/config`, `/users`, `/salesflow`, etc.).
    - `_GUARDED` dependencies on `/setup/checks` and `POST /setup` observe `installed = True` and return **HTTP 404 Not Found**.
 
 ---

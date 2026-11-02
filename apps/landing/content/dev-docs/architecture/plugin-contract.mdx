@@ -9,7 +9,7 @@ arc42: 5
 
 import { Diagram } from '@/components/docs/diagram';
 
-The **Plug-in Contract** defines the interface boundaries, lifecycle guarantees, and architectural constraints governing all extensions in Innostes ERP. Both kernel features and business modules (such as PeopleOps and RevOps) implement this contract to integrate seamlessly with the engines.
+The **Plug-in Contract** defines the interface boundaries, lifecycle guarantees, and architectural constraints governing all extensions in Innostes ERP. Both kernel features and business modules (such as PeopleOps and SalesFlow) implement this contract to integrate seamlessly with the engines.
 
 ---
 
@@ -21,18 +21,18 @@ Every backend plug-in is an independent Python package installed in the Python e
 
 A backend plug-in provides an instance of [`kernel.core.module.BaseModule`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/core/module/base.py):
 
-```python title="modules/revops/backend/revops/__init__.py"
+```python title="modules/salesflow/backend/salesflow/__init__.py"
 from kernel.core.module import BaseModule
-from revops.router import router
+from salesflow.router import router
 
-class RevOpsModule(BaseModule):
-    name: str = "revops"
+class SalesFlowModule(BaseModule):
+    name: str = "salesflow"
     version: str = "0.1.0"
     description: str = "Revenue Operations and sales pipeline business module"
     router = router
     openapi_tags = [
         {
-            "name": "RevOps",
+            "name": "SalesFlow",
             "description": "Lead tracking, sales opportunities, and customer contact pipelines."
         }
     ]
@@ -53,7 +53,7 @@ class RevOpsModule(BaseModule):
         """Return diagnostic health status."""
         return {"status": "HEALTHY", "module": self.name, "version": self.version}
 
-module = RevOpsModule()
+module = SalesFlowModule()
 ```
 
 ### Contract Attributes & Lifecycle Hooks
@@ -74,9 +74,9 @@ module = RevOpsModule()
 
 Backend plug-ins register themselves using Python package entry points in `pyproject.toml`. The backend engine never imports a plug-in by static path; it discovers modules using `importlib.metadata.entry_points`:
 
-```toml title="modules/revops/backend/pyproject.toml"
+```toml title="modules/salesflow/backend/pyproject.toml"
 [project]
-name = "innostes-revops"
+name = "innostes-salesflow"
 version = "0.1.0"
 dependencies = [
     "kernel",
@@ -85,7 +85,7 @@ dependencies = [
 
 # Business modules register under "innostes.modules"
 [project.entry-points."innostes.modules"]
-revops = "revops:module"
+salesflow = "salesflow:module"
 
 # Extensible plugins register under "innostes.plugins"
 # [project.entry-points."innostes.plugins"]
@@ -102,9 +102,9 @@ Frontend plug-ins are authored as pnpm workspace packages in `modules/<name>/fro
 
 Frontend plug-ins use modern `@innostes/source` export conditions, allowing Vite to transpile TypeScript source directly without intermediate compilation:
 
-```json title="modules/revops/frontend/package.json"
+```json title="modules/salesflow/frontend/package.json"
 {
-  "name": "@innostes/revops",
+  "name": "@innostes/salesflow",
   "version": "0.1.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -126,7 +126,7 @@ Frontend plug-ins use modern `@innostes/source` export conditions, allowing Vite
 
 Every frontend plug-in exports a typed manifest used by `apps/web-app` for shell navigation and the App Switcher:
 
-```typescript title="modules/revops/frontend/src/manifest.ts"
+```typescript title="modules/salesflow/frontend/src/manifest.ts"
 export interface ModuleManifest {
   id: string;
   name: string;
@@ -139,15 +139,15 @@ export interface ModuleManifest {
   subFeatures: { id: string; label: string; description: string }[];
 }
 
-export const revopsManifest: ModuleManifest = {
-  id: 'revops',
-  name: 'RevOps',
+export const salesflowManifest: ModuleManifest = {
+  id: 'salesflow',
+  name: 'SalesFlow',
   version: '0.1.0',
   description: 'Manage sales pipelines, customer interactions, and deal stages.',
   type: 'module',
   tags: ['Sales', 'Pipeline', 'Deals'],
   tone: 'chart-2',
-  href: '/modules/revops',
+  href: '/modules/salesflow',
   subFeatures: [
     { id: 'leads', label: 'Lead Management', description: 'Track prospect conversions' },
     { id: 'deals', label: 'Deal Stages', description: 'Monitor pipeline revenue' },
@@ -174,9 +174,9 @@ erp/
 │   ├── peopleops/
 │   │   ├── backend/        # innostes-peopleops Python package
 │   │   └── frontend/       # @innostes/peopleops workspace package
-│   └── revops/
-│       ├── backend/        # innostes-revops Python package
-│       └── frontend/       # @innostes/revops workspace package
+│   └── salesflow/
+│       ├── backend/        # innostes-salesflow Python package
+│       └── frontend/       # @innostes/salesflow workspace package
 └── plugins/                # Extensible System Plugins
     └── tracura/
         ├── backend/        # innostes-tracura Python package
@@ -205,21 +205,21 @@ Automated fitness functions strictly enforce five architectural boundary rules. 
 flowchart TD
   Engine["apps/api-server\napps/web-app"]
   Kernel["kernel\n(Foundation)"]
-  RevOps["modules/revops"]
+  SalesFlow["modules/salesflow"]
   PeopleOps["modules/peopleops"]
   Plugin["plugins/tracura"]
 
   Kernel -. "Rule 2: Never imports engines" .-> Engine
-  RevOps -. "Rule 2: Never imports engines" .-> Engine
+  SalesFlow -. "Rule 2: Never imports engines" .-> Engine
   PeopleOps -. "Rule 2: Never imports engines" .-> Engine
   Plugin -. "Rule 2: Never imports engines" .-> Engine
 
-  Kernel -. "Rule 3: Kernel never imports plug-ins" .-> RevOps
+  Kernel -. "Rule 3: Kernel never imports plug-ins" .-> SalesFlow
   Kernel -. "Rule 3: Kernel never imports plug-ins" .-> PeopleOps
   Kernel -. "Rule 3: Kernel never imports plug-ins" .-> Plugin
 
-  RevOps x-.-x PeopleOps
-  note["Rule 4: Business modules never\nimport each other's internals"] --- RevOps
+  SalesFlow x-.-x PeopleOps
+  note["Rule 4: Business modules never\nimport each other's internals"] --- SalesFlow
 
   classDef forbidden stroke:#ef4444,stroke-width:2px,stroke-dasharray: 5 5;
 ```
@@ -229,7 +229,7 @@ flowchart TD
 | **Rule 1: No Circular Imports** | Modules must form a directed acyclic graph (DAG). | Prevents runtime initialisation deadlocks. | [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter) (`contracts.1`) |
 | **Rule 2: Plug-ins Never Import Engines** | Neither `kernel`, `modules/*`, nor `plugins/*` may import from `apps/*`. | Preserves engine pluggability and independent deployability. | [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter) (`contracts.2`) |
 | **Rule 3: Kernel Depends on No Plug-in** | `kernel` must never import from `modules/*` or `plugins/*`. | Guarantees that the platform foundation functions without optional modules. | [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter) (`contracts.3`) |
-| **Rule 4: Modules Never Import Each Other** | Business modules (`revops`, `peopleops`) must never import each other's internal models or services. | Decouples feature lifecycles and enables independent deployments. | [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter) (`contracts.4`) & [`scripts/checks/check-ts-boundaries.mjs`](file:///home/sai/Documents/GitHub/innostes_projects/erp/scripts/checks/check-ts-boundaries.mjs) |
+| **Rule 4: Modules Never Import Each Other** | Business modules (`salesflow`, `peopleops`) must never import each other's internal models or services. | Decouples feature lifecycles and enables independent deployments. | [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter) (`contracts.4`) & [`scripts/checks/check-ts-boundaries.mjs`](file:///home/sai/Documents/GitHub/innostes_projects/erp/scripts/checks/check-ts-boundaries.mjs) |
 | **Rule 5: Layering Inside Modules** | Routers may import services; services import models. Routers must never execute raw SQL directly. | Enforces clean separation of concerns and audit trail compliance. | [`.importlinter`](file:///home/sai/Documents/GitHub/innostes_projects/erp/.importlinter) (`contracts.5`) |
 
 ---
@@ -245,7 +245,7 @@ The platform currently hosts **7 active modules** across kernel, business domain
 | `kernel.user` | Kernel | `kernel` | `@innostes/kernel` | `kernel.user:module` | 4 | `users`, `user_profiles`, `user_identities`, `roles`, `permissions`, `role_permissions`, `user_roles` | `kernel/backend/migrations` |
 | `kernel.auth` | Kernel | `kernel` | `@innostes/kernel` | `kernel.auth:module` | 8 | `user_devices`, `user_sessions`, `user_security`, `password_histories`, `api_keys` | `kernel/backend/migrations` |
 | `peopleops` | Business | `innostes-peopleops` | `@innostes/peopleops` | `peopleops:module` | 1 | *(Domain tables pending)* | `modules/peopleops/backend/migrations` |
-| `revops` | Business | `innostes-revops` | `@innostes/revops` | `revops:module` | 1 | *(Domain tables pending)* | `modules/revops/backend/migrations` |
+| `salesflow` | Business | `innostes-salesflow` | `@innostes/salesflow` | `salesflow:module` | 1 | *(Domain tables pending)* | `modules/salesflow/backend/migrations` |
 | `tracura` | Extensible Plugin | `innostes-tracura` | `@innostes/tracura` | `tracura:module` | 2 | *(In-memory telemetry)* | `plugins/tracura/backend/migrations` |
 
 ---

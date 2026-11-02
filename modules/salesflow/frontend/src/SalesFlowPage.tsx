@@ -17,9 +17,9 @@ import {
   Sparkles,
   Target,
 } from 'lucide-react';
-import { revopsManifest } from './manifest';
+import { salesflowManifest } from './manifest';
 
-export function RevOpsPage() {
+export function SalesFlowPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
@@ -28,12 +28,12 @@ export function RevOpsPage() {
       <PageHeader
         title={
           <div className="flex items-center gap-3">
-            <span>{revopsManifest.name}</span>
+            <span>{salesflowManifest.name}</span>
             <Badge variant="outline">Module Scaffold</Badge>
             <Badge variant="success" dot>Active</Badge>
           </div>
         }
-        description={revopsManifest.description}
+        description={salesflowManifest.description}
         actions={
           <div className="flex items-center gap-2">
             <Button size="sm" startIcon={<Plus />}>
@@ -46,7 +46,7 @@ export function RevOpsPage() {
       {/* Sub-feature Tabs */}
       <Tabs value={activeTab} onValueChange={(val) => setActiveTab(String(val))}>
         <TabsList>
-          {revopsManifest.subFeatures.map((sub) => (
+          {salesflowManifest.subFeatures.map((sub) => (
             <TabsTab key={sub.id} value={sub.id}>
               {sub.label}
             </TabsTab>
@@ -57,8 +57,8 @@ export function RevOpsPage() {
         <TabsPanel value="overview" className="pt-4">
           <EmptyState
             icon={<Target />}
-            title="RevOps Module Operational"
-            description="The RevOps application is active. Manage customer relationships, track incoming leads, advance deals, and monitor your sales pipeline."
+            title="SalesFlow Module Operational"
+            description="The SalesFlow application is active. Manage customer relationships, track incoming leads, advance deals, and monitor your sales pipeline."
             actions={
               <div className="flex gap-2">
                 <Button size="sm" onClick={() => setActiveTab('leads')}>
@@ -132,4 +132,4 @@ export function RevOpsPage() {
   );
 }
 
-export default RevOpsPage;
+export default SalesFlowPage;

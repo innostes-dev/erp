@@ -39,11 +39,11 @@ class TestContractModules(unittest.TestCase):
     def tearDown(self) -> None:
         app.dependency_overrides.clear()
 
-    def test_revops_info__200_returns_module_info(self) -> None:
-        """GET /revops/info returns 200 with module metadata."""
-        res = self.client.get("/revops/info")
+    def test_salesflow_info__200_returns_module_info(self) -> None:
+        """GET /salesflow/info returns 200 with module metadata."""
+        res = self.client.get("/salesflow/info")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        validate_response_contract(res.json(), "/revops/info", "get", res.status_code)
+        validate_response_contract(res.json(), "/salesflow/info", "get", res.status_code)
 
     def test_peopleops_info__200_returns_module_info(self) -> None:
         """GET /peopleops/info returns 200 with module metadata."""

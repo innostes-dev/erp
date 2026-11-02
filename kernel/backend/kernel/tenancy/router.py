@@ -553,10 +553,10 @@ async def list_current_modules(
             "tags": ["Employees", "Attendance", "Leave", "Payroll"],
             "tone": "chart-3",
         },
-        "revops": {
-            "name": "RevOps",
+        "salesflow": {
+            "name": "SalesFlow",
             "version": "0.1.0",
-            "description": "Revenue operations, customer pipeline, deals, and quotes",
+            "description": "Sales pipeline, customer leads, deals, and quotes",
             "tags": ["Leads", "Deals", "Pipeline", "Quotes"],
             "tone": "chart-2",
         },

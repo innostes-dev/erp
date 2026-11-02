@@ -839,21 +839,21 @@
         "security": []
       }
     },
-    "/revops/info": {
+    "/salesflow/info": {
       "get": {
         "tags": [
-          "RevOps"
+          "SalesFlow"
         ],
-        "summary": "Get RevOps module metadata and scaffold status",
-        "description": "Return RevOps module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
-        "operationId": "revops_get_info",
+        "summary": "Get SalesFlow module metadata and scaffold status",
+        "description": "Return SalesFlow module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
+        "operationId": "salesflow_get_info",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RevOpsInfoResponse"
+                  "$ref": "#/components/schemas/SalesFlowInfoResponse"
                 }
               }
             }
@@ -4724,9 +4724,9 @@
                   "is_revoked": false,
                   "key_prefix": "inno_live_xK9p",
                   "last_used_at": "2026-10-29T10:15:00Z",
-                  "name": "Zapier RevOps Sync",
+                  "name": "Zapier SalesFlow Sync",
                   "scopes": [
-                    "revops:read",
+                    "salesflow:read",
                     "peopleops:read"
                   ]
                 }
@@ -4750,9 +4750,9 @@
                 "is_revoked": false,
                 "key_prefix": "inno_live_xK9p",
                 "last_used_at": "2026-10-29T10:15:00Z",
-                "name": "Zapier RevOps Sync",
+                "name": "Zapier SalesFlow Sync",
                 "scopes": [
-                  "revops:read",
+                  "salesflow:read",
                   "peopleops:read"
                 ]
               }
@@ -4841,7 +4841,7 @@
             "title": "Name",
             "description": "Descriptive identifier for the API key.",
             "examples": [
-              "Zapier RevOps Sync"
+              "Zapier SalesFlow Sync"
             ]
           },
           "expires_in_days": {
@@ -4867,13 +4867,13 @@
             },
             "type": "array",
             "title": "Scopes",
-            "description": "Authorized permission scopes, e.g. ['peopleops:read', 'revops:write'] or ['*'].",
+            "description": "Authorized permission scopes, e.g. ['peopleops:read', 'salesflow:write'] or ['*'].",
             "default": [
               "*"
             ],
             "examples": [
               [
-                "revops:read",
+                "salesflow:read",
                 "peopleops:read"
               ]
             ]
@@ -5633,7 +5633,7 @@
           "id": {
             "type": "string",
             "title": "Id",
-            "description": "Unique package identifier string (e.g. 'peopleops', 'revops', 'tracura').",
+            "description": "Unique package identifier string (e.g. 'peopleops', 'salesflow', 'tracura').",
             "examples": [
               "peopleops"
             ]
@@ -6193,7 +6193,7 @@
             "examples": [
               [
                 "peopleops",
-                "revops"
+                "salesflow"
               ]
             ]
           }
@@ -6774,24 +6774,24 @@
         "title": "ResetPasswordRequest",
         "description": "Payload to reset account password using single-use signed reset token."
       },
-      "RevOpsInfoResponse": {
+      "SalesFlowInfoResponse": {
         "properties": {
           "id": {
             "type": "string",
             "title": "Id",
             "description": "Unique package identifier string.",
-            "default": "revops",
+            "default": "salesflow",
             "examples": [
-              "revops"
+              "salesflow"
             ]
           },
           "name": {
             "type": "string",
             "title": "Name",
             "description": "Human-readable module title.",
-            "default": "RevOps",
+            "default": "SalesFlow",
             "examples": [
-              "RevOps"
+              "SalesFlow"
             ]
           },
           "version": {
@@ -6838,20 +6838,20 @@
             "type": "string",
             "title": "Description",
             "description": "Module functional overview.",
-            "default": "Revenue operations, customer pipeline, deals, and accounts",
+            "default": "SalesFlow sales pipeline, customer leads, deals, and accounts",
             "examples": [
-              "Revenue operations, customer pipeline, deals, and accounts"
+              "SalesFlow sales pipeline, customer leads, deals, and accounts"
             ]
           }
         },
         "type": "object",
-        "title": "RevOpsInfoResponse",
-        "description": "Information schema for RevOps scaffold module.",
+        "title": "SalesFlowInfoResponse",
+        "description": "Information schema for SalesFlow scaffold module.",
         "examples": [
           {
-            "description": "Revenue operations, customer pipeline, deals, and accounts",
-            "id": "revops",
-            "name": "RevOps",
+            "description": "SalesFlow sales pipeline, customer leads, deals, and accounts",
+            "id": "salesflow",
+            "name": "SalesFlow",
             "status": "scaffold_ready",
             "sub_features": [
               "leads",
@@ -6903,7 +6903,7 @@
                 "tenancy",
                 "user",
                 "audit",
-                "revops",
+                "salesflow",
                 "peopleops",
                 "tracura"
               ]
@@ -6928,7 +6928,7 @@
               "tenancy",
               "user",
               "audit",
-              "revops",
+              "salesflow",
               "peopleops",
               "tracura"
             ],
@@ -8576,7 +8576,7 @@
             "title": "Name",
             "description": "Human-readable label for the API key.",
             "examples": [
-              "Zapier RevOps Sync"
+              "Zapier SalesFlow Sync"
             ]
           },
           "key_prefix": {
@@ -8596,7 +8596,7 @@
             "description": "Authorized permission scopes granted to this key.",
             "examples": [
               [
-                "revops:read",
+                "salesflow:read",
                 "peopleops:read"
               ]
             ]
@@ -8678,10 +8678,10 @@
             "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
             "is_revoked": false,
             "key_prefix": "inno_live_xK9p",
-            "name": "Zapier RevOps Sync",
+            "name": "Zapier SalesFlow Sync",
             "raw_key": "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH",
             "scopes": [
-              "revops:read",
+              "salesflow:read",
               "peopleops:read"
             ]
           }
@@ -8703,7 +8703,7 @@
             "title": "Name",
             "description": "Human-readable label for the API key.",
             "examples": [
-              "Zapier RevOps Sync"
+              "Zapier SalesFlow Sync"
             ]
           },
           "key_prefix": {
@@ -8723,7 +8723,7 @@
             "description": "Authorized permission scopes granted to this key.",
             "examples": [
               [
-                "revops:read",
+                "salesflow:read",
                 "peopleops:read"
               ]
             ]
@@ -8797,9 +8797,9 @@
             "is_revoked": false,
             "key_prefix": "inno_live_xK9p",
             "last_used_at": "2026-10-29T10:15:00Z",
-            "name": "Zapier RevOps Sync",
+            "name": "Zapier SalesFlow Sync",
             "scopes": [
-              "revops:read",
+              "salesflow:read",
               "peopleops:read"
             ]
           }
@@ -9076,8 +9076,8 @@
       "description": "Enterprise identity management, staff credentials, RBAC roles, and permission assignments."
     },
     {
-      "name": "RevOps",
-      "description": "Revenue Operations endpoints."
+      "name": "SalesFlow",
+      "description": "SalesFlow sales pipeline endpoints."
     },
     {
       "name": "PeopleOps",

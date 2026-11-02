@@ -13,7 +13,7 @@ class ItemCatalogRead(BaseSchema):
     """Metadata describing an installed module or plugin package in the catalog."""
 
     id: str = Field(
-        description="Unique package identifier string (e.g. 'peopleops', 'revops', 'tracura').",
+        description="Unique package identifier string (e.g. 'peopleops', 'salesflow', 'tracura').",
         examples=["peopleops"],
     )
     name: str = Field(
@@ -95,7 +95,7 @@ class ModuleListResponse(BaseSchema):
     )
     active_ids: list[str] = Field(
         description="List of module IDs currently enabled for the tenant.",
-        examples=[["peopleops", "revops"]],
+        examples=[["peopleops", "salesflow"]],
     )
 
     model_config = ConfigDict(

@@ -41,7 +41,7 @@ flowchart TD
     subgraph ApiServerEngine["apps/api-server ASGI Engine"]
       AuthEndpoint["Authentication Service\n[POST /auth/*]"]
       SetupEndpoint["Setup Controller\n[POST /setup (Boundary 5)]"]
-      ModuleRouters["Business Module Routers\n[RevOps, PeopleOps, Tenancy]"]
+      ModuleRouters["Business Module Routers\n[SalesFlow, PeopleOps, Tenancy]"]
     end
   end
 

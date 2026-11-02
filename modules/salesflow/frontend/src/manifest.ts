@@ -16,15 +16,15 @@ export interface ModuleManifest {
   subFeatures: SubFeature[];
 }
 
-export const revopsManifest: ModuleManifest = {
-  id: 'revops',
-  name: 'RevOps',
+export const salesflowManifest: ModuleManifest = {
+  id: 'salesflow',
+  name: 'SalesFlow',
   version: '0.1.0',
-  description: 'Revenue operations, customer pipeline, deals, accounts, and quotes',
+  description: 'Sales pipeline, customer leads, deals, accounts, and quotes',
   type: 'module',
   tags: ['Leads', 'Deals', 'Pipeline', 'Quotes'],
   tone: 'chart-2',
-  href: '/modules/revops',
+  href: '/modules/salesflow',
   subFeatures: [
     { id: 'dashboard', label: 'Dashboard', description: 'Sales cockpit, quota attainment, today tasks, and hot deals.' },
     { id: 'leads', label: 'Leads', description: 'Inbound leads, qualification stepper, and 1-click deal convert.' },

@@ -16,7 +16,7 @@ import { AuditTrailPage } from './components/AuditTrailPage';
 function AppRouter() {
   const { path } = useNavigation();
 
-  // 1. Dedicated Business Module Shell (e.g. /modules/peopleops, /modules/revops)
+  // 1. Dedicated Business Module Shell (e.g. /modules/peopleops, /modules/salesflow)
   if (path.startsWith('/modules/')) {
     const moduleId = path.replace('/modules/', '').split('/')[0];
     if (moduleId) {

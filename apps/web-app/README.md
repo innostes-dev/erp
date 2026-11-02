@@ -7,7 +7,7 @@ The UI engine for the innostes ERP platform.
 `web-app` is a single-page application built with React 19 and Vite 8. It functions as a lightweight UI engine providing:
 - App shell layout (collapsible sidebar, navigation header, app switcher).
 - First-run setup gate (`<SetupGate>`) and authentication gate (`<AuthGate>`).
-- Dynamic manifest catalog loading from `@innostes/peopleops`, `@innostes/revops`, and `@innostes/tracura`.
+- Dynamic manifest catalog loading from `@innostes/peopleops`, `@innostes/salesflow`, and `@innostes/tracura`.
 - Dynamic client-side routing via `AppRouter`.
 
 ## Commands
