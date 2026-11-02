@@ -42,10 +42,10 @@ flowchart TD
 
 ## 3. The 9-Step Master Employee Data Catalog
 
-Enterprise-grade HRMS requires a comprehensive, multi-step data model. Innostes PeopleOps implements an exhaustive 9-step schema:
+Enterprise-grade HRMS requires a comprehensive, multi-step data model. Innostes PeopleOps implements an 8-step Phase 1 onboarding schema (with electronic document signing deferred to Phase 2):
 
 ```
-EMPLOYEE DATA INTAKE PIPELINE (9 STEPS)
+EMPLOYEE DATA INTAKE PIPELINE (PHASE 1: 8 STEPS + SUBMISSION)
 ├── Step 1: Core Personal & Demographic Identity
 ├── Step 2: Contact Details, Addresses & Emergency Contacts
 ├── Step 3: Statutory & National Identity Vault (India & Global)
@@ -54,7 +54,9 @@ EMPLOYEE DATA INTAKE PIPELINE (9 STEPS)
 ├── Step 6: Educational Qualifications & Professional Certifications
 ├── Step 7: Prior Employment & Experience Verification
 ├── Step 8: Family Dependents & Statutory Nominees (Form 2 / Form F)
-└── Step 9: Digital Document Vault & Electronic Signatures (eSign)
+└── Review & Submit: Candidate Review & Formal Submission to HR
+
+[NOTE: Contractual Electronic Document Signing (Aadhaar eSign / DocuSign) is deferred to Phase 2]
 ```
 
 ---
@@ -305,45 +307,12 @@ pie title Statutory Nomination Split (Example Gratuity / PF)
 
 ---
 
-### Step 9: Digital Document Vault & Electronic Signatures (eSign)
+### Document Uploads & Phase 2 Electronic Signing
 
-A secure repository holding verified compliance artifacts:
+In Phase 1, supporting compliance documents (Aadhaar card copy, PAN copy, cancelled bank cheque, educational certificates, and relieving letters) are uploaded contextually within their respective steps (Steps 2, 3, 4, 6, and 7) and stored securely in `hrms_document_vault`.
 
-```
-+-------------------------------------------------------------------------------------------------------+
-| DIGITAL DOCUMENT REPOSITORY & AUDIT ENGINE                                                            |
-+-------------------------------------------------------------------------------------------------------+
-| Categories:                                                                                           |
-| 1. Identity & Statutory Proof:                                                                        |
-|    - Aadhaar Card / Virtual ID document                                                               |
-|    - PAN Card copy                                                                                    |
-|    - Passport (Front & Back pages)                                                                    |
-|    - Voter ID / Driving License                                                                       |
-|                                                                                                       |
-| 2. Academic Records:                                                                                  |
-|    - 10th & 12th Marksheets / Passing Certificates                                                    |
-|    - Graduation Degree & Consolidated Semester Transcripts                                            |
-|    - Post-Graduation / Doctorate Certificates                                                         |
-|                                                                                                       |
-| 3. Employment & Experience Records:                                                                   |
-|    - Relieving Letter & Experience Certificate from prior employers                                   |
-|    - Last 3 Months' Payslips from previous company                                                    |
-|    - Form 16 / Tax Deducted at Source certificate                                                     |
-|                                                                                                       |
-| 4. Contractual Legal Agreements (e-Signed):                                                           |
-|    - Formally Executed Employment Agreement                                                           |
-|    - Non-Disclosure Agreement (NDA) & Intellectual Property Assignment (IPAA)                         |
-|    - Employee Code of Conduct & Information Security Policy sign-off                                  |
-|    - Conflict of Interest & Anti-Corruption Declaration                                               |
-|                                                                                                       |
-| Verification Workflow:                                                                                |
-| [ PENDING_UPLOAD ] -> [ SUBMITTED ] -> [ HR_REVIEW ] -> [ VERIFIED ] or [ REJECTED_WITH_REASON ]     |
-|                                                                                                       |
-| Audit Properties:                                                                                     |
-| SHA-256 Checksum, Encrypted Storage Path (S3/MinIO), Upload Timestamp, Verified By User ID,           |
-| Verification Timestamp, Rejection Audit Reason History.                                               |
-+-------------------------------------------------------------------------------------------------------+
-```
+> [!NOTE] Phase 2 Scope: Electronic Document Signatures (eSign)
+> Automated digital signing workflows (such as Aadhaar eSign, DocuSign / HelloSign integrations, and legal contract signature tracking for Employment Agreements and NDAs) are deferred to Phase 2. In Phase 1, executed physical offer letters or signed agreement scans can be attached directly to the employee profile.
 
 ---
 
@@ -412,7 +381,8 @@ stateDiagram-v2
 | **Step 6** | Academic Qualifications| Highest Degree, Passing Year, Degree Certificate | HR Document Verification |
 | **Step 7** | Prior Employment | Relieving Letter, Last 3 Payslips, Prior PF ID | Background Verification (BGV) |
 | **Step 8** | Statutory Nominees | PF, EPS, and Gratuity Nominees (100% split) | Statutory Compliance Audit |
-| **Step 9** | Legal Agreements & Docs | Signed Employment Offer, Signed NDA/IPAA | E-Sign Signature Verification |
+| **Final Review** | Candidate Submission | Review summary across all 8 steps before submission | Final Self-Verification |
+| **Phase 2** | Contract eSign (Deferred) | Electronic signature workflows (Aadhaar eSign/DocuSign) | Deferred to Phase 2 |
 
 ---
 

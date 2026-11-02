@@ -382,7 +382,7 @@ CREATE TABLE hrms_onboarding_steppers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
-    current_step INT NOT NULL DEFAULT 1, -- 1 through 9
+    current_step INT NOT NULL DEFAULT 1, -- 1 through 8
     step_1_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Core Personal
     step_2_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Addresses & Emergency
     step_3_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Statutory Vault
@@ -391,7 +391,6 @@ CREATE TABLE hrms_onboarding_steppers (
     step_6_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Education
     step_7_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Prior Experience
     step_8_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Statutory Nominees
-    step_9_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Signed Documents
     is_submitted BOOLEAN NOT NULL DEFAULT FALSE,
     is_hr_approved BOOLEAN NOT NULL DEFAULT FALSE,
     reviewed_by UUID REFERENCES hrms_employees(id),
@@ -405,7 +404,7 @@ CREATE TABLE hrms_onboarding_drafts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
-    step_number INT NOT NULL CHECK (step_number BETWEEN 1 AND 9),
+    step_number INT NOT NULL CHECK (step_number BETWEEN 1 AND 8),
     draft_payload JSONB NOT NULL DEFAULT '{}'::jsonb, -- Relaxed schema allowing incomplete partial inputs
     client_version INT NOT NULL DEFAULT 1,
     last_saved_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

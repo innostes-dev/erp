@@ -149,12 +149,12 @@ Candidate onboarding is structured into an interactive 9-step wizard with real-t
 
 ```
 +---------------------------------------------------------------------------------------------------+
-| INNOSTES ONBOARDING PORTAL | Candidate: Alex Rivera | [ ✓ Saved 3s ago ] [████████░░░░] 55% Done   |
+| INNOSTES ONBOARDING PORTAL | Candidate: Alex Rivera | [ ✓ Saved 3s ago ] [████████░░░░] 50% Done   |
 +---------------------------------------------------------------------------------------------------+
-| 1. Personal | 2. Addresses | 3. Statutory | 4. Banking | 5. Role | 6. Edu | 7. Exp | 8. Nominees | 9. Sign |
-|   (Done)    |    (Done)    |    (Done)    |  (ACTIVE)  | (Wait)  | (Wait) | (Wait) |   (Wait)    |  (Wait) |
+| 1. Personal | 2. Addresses | 3. Statutory | 4. Banking | 5. Role | 6. Edu | 7. Exp | 8. Nominees | Submit |
+|   (Done)    |    (Done)    |    (Done)    |  (ACTIVE)  | (Wait)  | (Wait) | (Wait) |   (Wait)    | (Wait) |
 +---------------------------------------------------------------------------------------------------+
-| STEP 4 OF 9: BANKING & DIRECT DISBURSEMENT INFORMATION                                            |
+| STEP 4 OF 8: BANKING & DIRECT DISBURSEMENT INFORMATION                                            |
 |                                                                                                   |
 | Bank IFSC Code *                                    Bank Name (Auto-resolved via RBI directory)   |
 | [ HDFC0000240                   ] [ Lookup ]        [ HDFC Bank Ltd                             ] |
@@ -191,14 +191,15 @@ Candidate onboarding is structured into an interactive 9-step wizard with real-t
 
 #### Step-by-Step Functional & Ergonomic Highlights:
 * **Step 1: Personal & Demographics**: First, middle, and last names, date of birth (validates age $\ge 18$), gender, blood group pills, marital status, and statutory father's/mother's/spouse's names.
-* **Step 2: Addresses & Emergency Contacts**: Present address with auto-complete, "Same as Present" toggle for permanent address (copies in 0ms), and primary + secondary emergency contacts with relationship badges.
+* **Step 2: Addresses & Emergency Contacts**: Present address with auto-complete, "Same as Present" toggle for permanent address (copies in 0ms), and primary + secondary emergency contacts with relationship badges. Contextual address proof upload.
 * **Step 3: Statutory ID Vault**:
-  * **Aadhaar Input**: Instant Verhoeff algorithm validation. As digits are entered, the system validates the checksum and automatically masks the first 8 digits (`XXXX-XXXX-1234`).
-  * **PAN Card**: Format validation (`[A-Z]{5}[0-9]{4}[A-Z]{1}`) with instant check that the 4th character is `'P'`.
+  * **Aadhaar Input**: Instant Verhoeff algorithm validation. As digits are entered, the system validates the checksum and automatically masks the first 8 digits (`XXXX-XXXX-1234`). Contextual Aadhaar card scan upload.
+  * **PAN Card**: Format validation (`[A-Z]{5}[0-9]{4}[A-Z]{1}`) with instant check that the 4th character is `'P'`. Contextual PAN scan upload.
   * **UAN Number**: 12-digit numeric input with tooltip guide for prior EPFO account transfer.
 * **Step 4: Banking & Direct Deposit**:
   * Real-time IFSC lookup: entering `HDFC0000240` instantly populates Bank Name (*HDFC Bank Ltd*), Branch (*Richmond Road*), and MICR code without server reload.
   * Double-entry account number confirmation with copy-paste disabled.
+  * Contextual cancelled cheque / passbook copy upload.
 * **Step 5: Employment & Taxonomy (HR Pre-filled)**: Displays assigned Business Unit, Department, Job Title, Grade/Band (`L3`), Reporting Manager, Work Mode (`Office` / `Remote`), and Probation terms.
 * **Step 6: Educational Qualifications**: Stepper list for degrees (Doctorate, PG, UG, 10th/12th) with field of study, passing year, score, and certificate attachment dropzone.
 * **Step 7: Prior Experience**: Chronological company history, start/end dates, last drawn CTC, previous PF member ID, and relieving letter upload.
@@ -206,10 +207,10 @@ Candidate onboarding is structured into an interactive 9-step wizard with real-t
   * Interactive allocation sliders for PF, Pension (EPS), and Gratuity.
   * Real-time validation warning if the total sum does not equal exactly 100.00%.
   * Medical insurance (GMC) dependent checkboxes with pre-existing illness notes.
-* **Step 9: Document Vault & E-Sign**:
-  * Embedded PDF viewer for the Offer Letter, Employment Contract, and Non-Disclosure Agreement (NDA).
-  * 1-Click Aadhaar eSign or Digital Signature canvas.
-  * Final Submission button: Transitions candidate state to `SUBMITTED` and alerts the assigned HR reviewer.
+* **Review & Submit Screen**:
+  * Clean, read-only accordion summary of all 8 steps allowing candidate to review information before final submission.
+  * 1-Click final submission button transitioning status to `SUBMITTED` for HR compliance audit.
+* **Phase 2 Scope Note**: Contractual electronic document signing (Aadhaar eSign, DocuSign integrations, digital signature canvas) is deferred to Phase 2. Executed paper contracts can be uploaded as profile attachments.
 
 ---
 
