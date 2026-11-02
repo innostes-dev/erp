@@ -44,6 +44,7 @@ export function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastMouseEnterRef = useRef<number>(0);
   const headerRef = useRef<HTMLElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -85,6 +86,7 @@ export function LandingHeader() {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    lastMouseEnterRef.current = Date.now();
     setModulesOpen(true);
   };
 
@@ -131,8 +133,18 @@ export function LandingHeader() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                setModulesOpen((prev) => !prev);
+                if (timeoutRef.current) {
+                  clearTimeout(timeoutRef.current);
+                  timeoutRef.current = null;
+                }
+                const timeSinceHover = Date.now() - lastMouseEnterRef.current;
+                if (!modulesOpen) {
+                  setModulesOpen(true);
+                } else if (timeSinceHover > 400) {
+                  setModulesOpen(false);
+                } else {
+                  setModulesOpen(true);
+                }
               }}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 modulesOpen
