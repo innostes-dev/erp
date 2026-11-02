@@ -8,8 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://erp.innostes.com'),
-  title: { default: 'innostes', template: '%s – innostes UI' },
-  description: 'innostes — and the innostes UI design system.',
+  title: { default: 'Innostes — The Modular Business Operating System', template: '%s | Innostes' },
+  description:
+    'Innostes is an extensible, modular business operating system uniting operations, revenue, workforce, and developer infrastructure. 100% free to self-host with zero seat fees.',
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {
