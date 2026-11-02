@@ -121,17 +121,34 @@ CREATE UNIQUE INDEX uq_party_tenant_email ON hrms_parties(tenant_id, personal_em
 -- 2. ENCRYPTED STATUTORY IDENTITY VAULT (STEP 3: STATUTORY & NATIONAL IDS)
 -- ============================================================================
 
+-- Isolated Aadhaar Data Vault (ADV) - UIDAI Section 29 Compliant
+CREATE TABLE kernel_aadhaar_vault (
+    reference_key UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    party_id UUID NOT NULL,
+    aadhaar_ciphertext BYTEA NOT NULL, -- AES-256-GCM envelope-encrypted with KMS
+    dek_wrapped BYTEA NOT NULL,        -- Data Encryption Key wrapped by KMS Master KEK
+    kek_version VARCHAR(32) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+-- Restricted Vault Permissions: General app user cannot query the ADV directly
+REVOKE ALL ON kernel_aadhaar_vault FROM PUBLIC;
+
 CREATE TABLE hrms_statutory_identities (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
     
-    -- Indian Statutory Identification
-    aadhaar_number_enc BYTEA NOT NULL, -- AES-256 encrypted via pgcrypto
-    aadhaar_masked VARCHAR(20) NOT NULL, -- XXXX-XXXX-1234
+    -- Indian Statutory Identification (Aadhaar Data Vault Reference Scheme)
+    aadhaar_reference_key UUID NOT NULL REFERENCES kernel_aadhaar_vault(reference_key),
+    aadhaar_masked VARCHAR(20) NOT NULL, -- XXXX-XXXX-1234 (Only masked format stored in app tables)
     aadhaar_virtual_id VARCHAR(20),
-    pan_number_enc BYTEA NOT NULL, -- AES-256 encrypted
+    
+    -- Envelope Encrypted Permanent Account Number (PAN)
+    pan_number_enc BYTEA NOT NULL, -- AES-256-GCM encrypted
     pan_number_masked VARCHAR(15) NOT NULL, -- ABCDE****F
+    pan_search_hash VARCHAR(64) NOT NULL, -- HMAC-SHA256 blind index for O(1) duplicate checks
+    
     uan_number VARCHAR(12), -- 12-digit EPFO Universal Account Number
     previous_pf_member_id VARCHAR(64), -- Previous PF member ID for online Form 13 transfer
     esic_number VARCHAR(17), -- 17-digit ESIC insurance registration
@@ -155,8 +172,10 @@ CREATE TABLE hrms_statutory_identities (
     
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_party_statutory UNIQUE (tenant_id, party_id)
+    CONSTRAINT uq_party_statutory UNIQUE (tenant_id, party_id),
+    CONSTRAINT uq_pan_search_hash UNIQUE (tenant_id, pan_search_hash)
 );
+CREATE INDEX idx_hrms_statutory_pan_hash ON hrms_statutory_identities(tenant_id, pan_search_hash);
 
 -- ============================================================================
 -- 3. ADDRESSES & EMERGENCY CONTACTS (STEP 2: RESIDENCY & ESCALATIONS)
@@ -205,8 +224,9 @@ CREATE TABLE hrms_bank_accounts (
     bank_name VARCHAR(150) NOT NULL,
     branch_name VARCHAR(150) NOT NULL,
     branch_address TEXT,
-    account_number_enc BYTEA NOT NULL,
+    account_number_enc BYTEA NOT NULL, -- AES-256-GCM envelope encrypted
     account_number_masked VARCHAR(30) NOT NULL,
+    account_number_search_hash VARCHAR(64) NOT NULL, -- HMAC-SHA256 blind index
     account_type bank_account_type NOT NULL DEFAULT 'SALARY_CORPORATE',
     ifsc_code VARCHAR(11) NOT NULL, -- Regex: ^[A-Z]{4}0[A-Z0-9]{6}$
     micr_code VARCHAR(9),
@@ -217,6 +237,7 @@ CREATE TABLE hrms_bank_accounts (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_ifsc_format CHECK (ifsc_code ~ '^[A-Z]{4}0[A-Z0-9]{6}$')
 );
+CREATE INDEX idx_hrms_bank_hash ON hrms_bank_accounts(tenant_id, account_number_search_hash);
 
 -- ============================================================================
 -- 5. EMPLOYEE MASTER & HIERARCHY (STEP 5: ORGANIZATIONAL TAXONOMY)
@@ -576,6 +597,31 @@ CREATE TABLE hrms_separations (
     settlement_paid_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================================================
+-- 14. ROW-LEVEL SECURITY (RLS) POLICIES FOR PII & MULTI-TENANCY
+-- ============================================================================
+
+ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_bank_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_onboarding_drafts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_employees ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_parties_isolation ON hrms_parties
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_statutory_isolation ON hrms_statutory_identities
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_bank_isolation ON hrms_bank_accounts
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_drafts_isolation ON hrms_onboarding_drafts
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_employees_isolation ON hrms_employees
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 ```
 
 ---
