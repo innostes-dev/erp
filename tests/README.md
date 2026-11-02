@@ -1,17 +1,34 @@
-# React compatibility tests
+# Innostes Business OS: Compatibility Test Suites
 
-`@innostes/ui` supports React 17, 18 and 19. The main test suite (`pnpm nx test ui`) runs on
-React 19. These projects run the **same tests** against the **built** package on older React
-versions, installed the way a consumer app would:
+This directory contains standalone, isolated runtime compatibility test suites for **@innostes/ui** and the **Innostes Business Operating System (Business OS)**.
 
-| Project | React | Command |
-| --- | --- | --- |
-| `tests/ui-react17` | 17.0.2 | `pnpm nx run-many -t test typecheck -p ui-react17-tests` |
-| `tests/ui-react18` | 18.3.1 | `pnpm nx run-many -t test typecheck -p ui-react18-tests` |
+`@innostes/ui` supports **React 17, 18, and 19**. While the monorepo dev runtime runs React 19 (`pnpm nx test ui`), these standalone test workspaces execute the exact same component unit tests against pre-compiled production distributions (`packages/ui/dist`) using isolated React versions installed exactly as a consumer application would.
 
-- `test` runs `packages/ui/src/components/**/*.test.tsx` against `packages/ui/dist`, with every
-  `react` / `react-dom` / Base UI import resolved to this project's copies.
-- `typecheck` checks the same test files, and the published `.d.ts` files, against that React
-  version's types.
+---
 
-Both build `ui` first. Run everything with `pnpm nx run-many -t test typecheck`.
+## 1. Test Matrix
+
+| Project Workspace | React Target | Execution Command |
+| :--- | :--- | :--- |
+| `tests/ui-react17` | React 17.0.2 | `pnpm nx run-many -t test typecheck -p ui-react17-tests` |
+| `tests/ui-react18` | React 18.3.1 | `pnpm nx run-many -t test typecheck -p ui-react18-tests` |
+
+---
+
+## 2. Test Execution Details
+
+- **`test`**: Executes all `packages/ui/src/components/**/*.test.tsx` tests against the built `packages/ui/dist` bundle, with all `react`, `react-dom`, and Base UI imports resolved to the specific workspace's target React version.
+- **`typecheck`**: Verifies both the test sources and published `.d.ts` declaration maps against the target React version's type definitions.
+
+### Running Monorepo Compatibility Checks
+
+```bash
+# Build UI bundle and run tests across all React versions
+pnpm nx run-many -t test typecheck
+```
+
+---
+
+## 3. License
+
+Open-source software licensed under the **[MIT License](../LICENSE)**.

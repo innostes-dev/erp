@@ -1,20 +1,20 @@
-# Innostes ERP: Agent Prompts & Documentation System
+# Innostes Business OS: Agent Prompts & Documentation System
 
-This directory houses the standardized prompts, instructions, and quality checklists for autonomous AI coding agents (Antigravity, Gemini, Claude, Jules, Cursor) and human contributors working across the Innostes ERP monorepo.
+This directory houses standardized prompts, instructions, and quality checklists for autonomous AI coding agents (Antigravity, Gemini, Claude, Jules, Cursor) and human open-source contributors working across the **Innostes Business Operating System (Business OS)** monorepo.
 
 ---
 
-## Authoritative Documentation Contract
+## 1. Authoritative Documentation Contract
 
-* [`LLM-DOCUMENTATION-CHECKLIST.md`](./LLM-DOCUMENTATION-CHECKLIST.md): The **universal, generic documentation checklist and prompt specification**.
+* [`LLM-DOCUMENTATION-CHECKLIST.md`](./LLM-DOCUMENTATION-CHECKLIST.md): The **universal documentation checklist and prompt specification**.
   * Use this file as a system prompt, task context, or pre-commit verification checklist whenever introducing new features, UI components, REST API endpoints, business modules, or architecture specifications.
-  * Enforces the 5 architectural invariants, Diátaxis framework, British English editorial standards, OpenAPI standards (E1–E17, S1–S8), and all automated quality gates.
+  * Enforces the 5 monorepo architectural invariants, Diátaxis documentation framework, British English editorial standards, OpenAPI standards (E1–E17, S1–S8), and all automated quality gates.
 
 ---
 
-## How to Feed This Prompt to an LLM
+## 2. How to Feed This Prompt to an LLM / Autonomous Agent
 
-When prompting an AI assistant or scheduling a Jules session, include the following instruction:
+When prompting an AI assistant or scheduling an automated coding session, include the following instruction:
 
 ```markdown
 Read and strictly adhere to `agent-prompts/LLM-DOCUMENTATION-CHECKLIST.md`.
@@ -29,7 +29,7 @@ Before concluding your task, execute and pass all automated pre-commit verificat
 
 ---
 
-## Key Quality Gates Reference
+## 3. Key Quality Gates Reference
 
 | Gate | Command | Purpose |
 | :--- | :--- | :--- |
@@ -38,3 +38,9 @@ Before concluding your task, execute and pass all automated pre-commit verificat
 | **Documentation Gates** | `pnpm nx run landing:docs-check` | Enforces 16 documentation quality gates (link checks, British spelling, demos, MDX safety). |
 | **Static Site Generation** | `pnpm nx build landing` | Verifies static compilation across all routes. |
 | **TypeScript Compilation** | `pnpm nx run-many -t build typecheck` | Validates TypeScript type safety across the monorepo. |
+
+---
+
+## 4. License
+
+Open-source software licensed under the **[MIT License](../LICENSE)**.

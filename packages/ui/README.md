@@ -1,6 +1,6 @@
 # @innostes/ui
 
-Accessible, high-performance React component library for enterprise admin interfaces, built on [Base UI](https://base-ui.com) and styled with [Tailwind CSS](https://tailwindcss.com) design tokens.
+Accessible, high-performance React component library powering the **Innostes Business Operating System (Business OS)**, built on [Base UI](https://base-ui.com) and styled with [Tailwind CSS](https://tailwindcss.com) design tokens.
 
 [![npm version](https://img.shields.io/npm/v/@innostes/ui.svg?style=flat-square)](https://www.npmjs.com/package/@innostes/ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
@@ -159,8 +159,8 @@ Full interactive documentation, live sandboxes, token visualisers, and design pa
 
 `@innostes/ui` adheres strictly to [Semantic Versioning 2.0.0](https://semver.org/). Breaking changes are strictly isolated to major releases accompanied by detailed migration guides in our [Changelog](https://innostes.com/ui/docs/resources/changelog).
 
-- **Vulnerability Reporting**: See [SECURITY.md](./SECURITY.md) or contact `security@innostes.com`.
-- **Contributing**: See [CONTRIBUTING.md](./CONTRIBUTING.md).
+- **Vulnerability Reporting**: See [SECURITY.md](../../SECURITY.md) or contact `security@innostes.com`.
+- **Contributing**: See [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ---
 
