@@ -149,7 +149,7 @@ Candidate onboarding is structured into an interactive 9-step wizard with real-t
 
 ```
 +---------------------------------------------------------------------------------------------------+
-| INNOSTES ONBOARDING PORTAL | Candidate: Alex Rivera | Progress: [██████████░░░░░░░░░░] 55% Complete |
+| INNOSTES ONBOARDING PORTAL | Candidate: Alex Rivera | [ ✓ Saved 3s ago ] [████████░░░░] 55% Done   |
 +---------------------------------------------------------------------------------------------------+
 | 1. Personal | 2. Addresses | 3. Statutory | 4. Banking | 5. Role | 6. Edu | 7. Exp | 8. Nominees | 9. Sign |
 |   (Done)    |    (Done)    |    (Done)    |  (ACTIVE)  | (Wait)  | (Wait) | (Wait) |   (Wait)    |  (Wait) |
@@ -173,9 +173,21 @@ Candidate onboarding is structured into an interactive 9-step wizard with real-t
 | | [Drag & Drop or Click to Upload PDF/PNG] - Uploaded: cheque_leaf.pdf (Verified)               | |
 | +-----------------------------------------------------------------------------------------------+ |
 |                                                                                                   |
-| [ Save Draft ]                                                   [ Back: Step 3 ]  [ Continue: Step 5 ] |
+| Auto-Save Status: [ ✓ Draft saved to cloud ]                     [ Back: Step 3 ]  [ Continue: Step 5 ] |
 +---------------------------------------------------------------------------------------------------+
 ```
+
+#### Real-Time Auto-Save Feedback & Resilience Ergonomics:
+1. **Zero-Latency Non-Blocking Inputs:** Auto-save operations occur entirely in the background. Keystroke inputs are never locked, throttled, or interrupted by blocking modal spinners.
+2. **Dynamic Header Status Pill:**
+   * `SAVING`: `[ • Saving draft... ]` (Subtle pulsing indicator triggered 1,500ms after the last typing pause or on field blur).
+   * `SAVED_TO_CLOUD`: `[ ✓ All changes saved (3s ago) ]` (Subtle muted green/zinc badge confirming server persistence).
+   * `OFFLINE_LOCAL`: `[ ⚡ Offline — Saved to device ]` (Triggered if network connectivity drops. Informs the user that `IndexedDB` has captured all inputs safely).
+   * `NETWORK_RETRY`: `[ ⚠️ Connection unstable — Retrying sync... ]` (Automatic background retry with exponential jitter).
+3. **Emergency Unload Flush (`navigator.sendBeacon`):**
+   * If the candidate closes the browser tab, restarts their laptop, or accidentally navigates backwards, the browser triggers `navigator.sendBeacon` to dispatch the active form payload to `/peopleops/onboarding/{id}/beacon-flush`.
+4. **Cross-Device Hydration Prompt:**
+   * When logging in from another device (e.g. mobile after starting on desktop), the UI displays a clean resume banner: *"Resumed from your draft on Desktop (12 minutes ago)"*, with an instant one-click option to continue from the exact field last touched.
 
 #### Step-by-Step Functional & Ergonomic Highlights:
 * **Step 1: Personal & Demographics**: First, middle, and last names, date of birth (validates age $\ge 18$), gender, blood group pills, marital status, and statutory father's/mother's/spouse's names.

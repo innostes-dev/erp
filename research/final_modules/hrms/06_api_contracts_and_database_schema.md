@@ -401,6 +401,18 @@ CREATE TABLE hrms_onboarding_steppers (
     CONSTRAINT uq_emp_stepper UNIQUE (tenant_id, employee_id)
 );
 
+CREATE TABLE hrms_onboarding_drafts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    step_number INT NOT NULL CHECK (step_number BETWEEN 1 AND 9),
+    draft_payload JSONB NOT NULL DEFAULT '{}'::jsonb, -- Relaxed schema allowing incomplete partial inputs
+    client_version INT NOT NULL DEFAULT 1,
+    last_saved_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_emp_step_draft UNIQUE (tenant_id, employee_id, step_number)
+);
+CREATE INDEX idx_hrms_onboarding_drafts ON hrms_onboarding_drafts(tenant_id, employee_id, step_number);
+
 -- ============================================================================
 -- 10. ATTENDANCE & PUNCH NORMALIZATION
 -- ============================================================================
@@ -582,7 +594,10 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/employees/{id}` | Retrieve comprehensive 360 employee profile across all 9 sections | `peopleops:read` | 200 OK |
 | `PATCH` | `/peopleops/employees/{id}` | Update organizational taxonomy, title, department, or manager links | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/stepper` | Fetch candidate 9-step completion status and remaining requirements | `peopleops:read` | 200 OK |
-| `PUT` | `/peopleops/onboarding/{id}/step/{n}` | Save data draft or update specific onboarding step ($n \in [1..9]$) | `peopleops:write` | 200 OK |
+| `PUT` | `/peopleops/onboarding/{id}/step/{n}/draft` | Debounced auto-save payload (relaxed validation, saves to draft JSONB) | `peopleops:write` | 200 OK |
+| `GET` | `/peopleops/onboarding/{id}/step/{n}/draft` | Fetch latest draft for active step (used during cross-device hydration) | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/onboarding/{id}/step/{n}/commit` | Synchronous step validation & promotion to canonical master tables | `peopleops:write` | 200 OK |
+| `POST` | `/peopleops/onboarding/{id}/beacon-flush` | Emergency beacon flush (`sendBeacon`) executed on browser tab close | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/submit` | Candidate final submission of all steps for HR compliance review | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/verify-step`| HR auditor approves or requests changes with reason on step $n$ | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/documents/upload` | Upload compliance file to encrypted vault, generate SHA-256 hash | `peopleops:write` | 201 Created |

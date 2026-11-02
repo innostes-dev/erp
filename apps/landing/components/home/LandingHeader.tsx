@@ -44,7 +44,7 @@ export function LandingHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const headerRef = useRef<HTMLElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
 
@@ -61,7 +61,7 @@ export function LandingHeader() {
   // Click outside and escape key handling
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setModulesOpen(false);
       }
     };
@@ -80,14 +80,18 @@ export function LandingHeader() {
   }, []);
 
   const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     setModulesOpen(true);
   };
 
   const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setModulesOpen(false);
-    }, 150);
+    }, 250);
   };
 
   const toggleTheme = () => {
@@ -117,12 +121,18 @@ export function LandingHeader() {
         <nav className="hidden md:flex md:items-center md:gap-1" aria-label="Main Navigation">
           {/* Modules Dropdown */}
           <div
+            ref={dropdownRef}
             className="relative"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
             <button
-              onClick={() => setModulesOpen(!modulesOpen)}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                setModulesOpen((prev) => !prev);
+              }}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 modulesOpen
                   ? 'bg-fd-accent text-fd-accent-foreground'
@@ -138,45 +148,47 @@ export function LandingHeader() {
               />
             </button>
 
-            {/* Compact Modules Panel */}
+            {/* Compact Modules Panel with zero-gap hit bridge */}
             {modulesOpen && (
               <div
-                className="absolute left-0 top-full mt-2 w-80 rounded-2xl border border-fd-border bg-fd-popover p-2 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-150"
+                className="absolute left-0 top-full z-50 pt-1.5 w-80 animate-in fade-in-0 duration-150"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                <div className="flex flex-col gap-1">
-                  {FEATURED_MODULES.map((mod) => (
-                    <Link
-                      key={mod.href}
-                      href={mod.href}
-                      onClick={() => setModulesOpen(false)}
-                      className="group flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-fd-accent"
-                    >
-                      <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-fd-border bg-fd-background">
-                        {mod.icon}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="text-sm font-semibold text-fd-foreground group-hover:text-fd-primary">
-                          {mod.title}
-                        </span>
-                        <p className="mt-0.5 line-clamp-1 text-xs text-fd-muted-foreground">
-                          {mod.description}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                <div className="rounded-2xl border border-fd-border bg-fd-popover p-2 shadow-2xl">
+                  <div className="flex flex-col gap-1">
+                    {FEATURED_MODULES.map((mod) => (
+                      <Link
+                        key={mod.href}
+                        href={mod.href}
+                        onClick={() => setModulesOpen(false)}
+                        className="group flex items-start gap-3 rounded-xl p-2.5 transition-colors hover:bg-fd-accent"
+                      >
+                        <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-fd-border bg-fd-background">
+                          {mod.icon}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-sm font-semibold text-fd-foreground group-hover:text-fd-primary">
+                            {mod.title}
+                          </span>
+                          <p className="mt-0.5 line-clamp-1 text-xs text-fd-muted-foreground">
+                            {mod.description}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
 
-                <div className="mt-2 border-t border-fd-border/70 pt-2">
-                  <Link
-                    href="/modules"
-                    onClick={() => setModulesOpen(false)}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold text-fd-primary hover:bg-fd-accent"
-                  >
-                    <span>View All Suites & Plugins</span>
-                    <ArrowRight className="size-3.5" />
-                  </Link>
+                  <div className="mt-2 border-t border-fd-border/70 pt-2">
+                    <Link
+                      href="/modules"
+                      onClick={() => setModulesOpen(false)}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold text-fd-primary hover:bg-fd-accent"
+                    >
+                      <span>View All Suites & Plugins</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}

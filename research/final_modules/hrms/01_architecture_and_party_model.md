@@ -416,7 +416,72 @@ stateDiagram-v2
 
 ---
 
-## 6. Gapless Sequential Employee Code Invariant
+## 6. Enterprise Step-Wise Auto-Save & Draft Synchronization Strategy
+
+Ingesting extensive enterprise onboarding records (personal, statutory IDs, banking details, degrees, previous employment, and family nominees) across 9 steps introduces severe risk of user fatigue and data loss if accidental tab closure, network dropout, or device switching occurs. 
+
+Innostes PeopleOps implements a **Dual-Tier Auto-Save & Draft Synchronization Engine**:
+
+```mermaid
+flowchart TD
+    User["Candidate Typing in Onboarding Form"] --> InputEvent["Input / Change / Blur Event"]
+    
+    subgraph Client_Tier["Tier 1: Instant Local Persistence (0ms Latency)"]
+        InputEvent --> LocalStore["IndexedDB Storage (innostes_onboarding_vault)<br/>• Instant synchronous snapshot<br/>• Zero data loss on crash or tab close"]
+    end
+
+    subgraph Server_Tier["Tier 2: Debounced Server-Side Cloud Sync"]
+        InputEvent --> Debounce["1500ms Inactivity Debounce or onBlur Trigger"]
+        Debounce --> API["PUT /peopleops/onboarding/{id}/step/{n}/draft"]
+        API --> DraftTable["hrms_onboarding_drafts Table<br/>• Step-wise JSONB payload<br/>• Relaxed validation (Allows partial input)<br/>• Atomic version increment"]
+    end
+
+    subgraph Lifecycle_Guarantees["Tier 3: Guaranteed Lifecycle Flush"]
+        Nav["'Continue / Next Step' Click"] --> SyncFlush["Synchronous Validation & Promotion to Master Tables"]
+        TabClose["window.onbeforeunload Event"] --> Beacon["navigator.sendBeacon() Emergency Flush"]
+    end
+```
+
+### 6.1 Architectural Principles: Draft Mode vs. Submission Mode
+
+A major failure point in legacy forms is triggering strict validation during auto-save. For example, if a candidate has typed only 6 digits of a 12-digit Aadhaar or 7 characters of an IFSC code, a strict validation endpoint will reject the request with HTTP 400 Bad Request, failing to persist progress.
+
+Innostes cleanly separates validation into two distinct evaluation engines:
+
+| Feature Dimension | Auto-Save Draft Mode (`/step/{n}/draft`) | Formal Step Promotion Mode (`/step/{n}/commit`) |
+| :--- | :--- | :--- |
+| **Endpoint** | `PUT /peopleops/onboarding/{id}/step/{n}/draft` | `POST /peopleops/onboarding/{id}/step/{n}/commit` |
+| **Validation Rules** | **Relaxed / Non-blocking**: Accepts incomplete strings, partial forms, missing mandatory fields, and unverified files. Validates only payload structure and JSON sanitization. | **Strict / Invariant-Enforced**: Enforces all mandatory fields, 12-digit Verhoeff Aadhaar algorithm, PAN regex, 100% nominee distribution, and required document uploads. |
+| **Storage Target** | `hrms_onboarding_drafts` (`draft_payload JSONB`). | Promoted directly to canonical relational tables (`hrms_parties`, `hrms_addresses`, `hrms_statutory_identities`, etc.). |
+| **Trigger Mechanism**| Debounced keystroke timer (1500ms) or field blur (`onBlur`). | Explicit user click on `"Save & Continue"` or `"Submit for Review"`. |
+| **State Mutation** | Updates `last_saved_at` timestamp and returns HTTP 200 OK with `client_version`. | Marks `step_{n}_completed = true` in `hrms_onboarding_steppers`. |
+
+### 6.2 Guaranteed Lifecycle Flush & Tab Exit Safety
+
+To guarantee zero data loss when a candidate abruptly navigates away or closes their laptop:
+
+1. **`navigator.sendBeacon` Integration**:
+   * The client hooks into the browser `visibilitychange` and `beforeunload` events.
+   * If unsaved changes exist in memory, the browser dispatches an asynchronous `POST` via `navigator.sendBeacon` to `/peopleops/onboarding/{id}/beacon-flush`.
+   * This guarantees transmission even after the page process has been terminated by the operating system.
+2. **Step Transition Flushes**:
+   * Clicking `"Continue: Step N+1"` or `"Back: Step N-1"` cancels any pending debounce timers and synchronously validates and commits the active step before rendering the adjacent view.
+
+### 6.3 Cross-Device Cloud Hydration & Conflict Resolution
+
+Candidates frequently begin onboarding on a mobile device and complete document uploads on a laptop:
+
+* **Session Hydration**: When the candidate opens the onboarding portal on any device:
+  1. The client requests `GET /peopleops/onboarding/{id}/stepper`.
+  2. The server returns the active step index and the latest `draft_payload` for that step.
+  3. The client compares the server timestamp with local `IndexedDB` timestamps.
+  4. If server data is newer, it hydrates the form seamlessly.
+  5. If an offline conflict is detected (e.g. changes made offline on mobile while another tab was active on desktop), a non-destructive prompt asks:
+     * *"You have unsaved changes from another session (Desktop, 14 minutes ago). [ Resume from Cloud ] or [ Keep Local Draft ]"*.
+
+---
+
+## 7. Gapless Sequential Employee Code Invariant
 
 Human-readable employee codes (e.g., `INN-00104`) are legal identifiers tied to tax filings, provident fund returns, and social security. They must never contain gaps or duplicates.
 
