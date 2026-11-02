@@ -12,7 +12,7 @@ from kernel.setup.schemas import SetupResult
 from kernel.setup.services import AlreadyInstalledError, DatabaseUnavailableError
 from kernel.tenancy import SlugTakenError, TenantRead
 
-ARGS = ["install", "--name", "Acme Corporation", "--slug", "acme", "--country", "IN"]
+ARGS = ["install", "--name", "Innostes Corporation", "--slug", "innostes", "--country", "IN"]
 
 
 def run_default_env(argv):
@@ -36,7 +36,7 @@ class TestOrganizationArgs(unittest.TestCase):
         args = cli.build_parser().parse_args(ARGS)
         self.assertEqual(
             cli.organization_from_args(args, {}),
-            {"name": "Acme Corporation", "slug": "acme", "country": "IN"},
+            {"name": "Innostes Corporation", "slug": "innostes", "country": "IN"},
         )
 
     def test_from_env_with_flag_override(self) -> None:
@@ -64,7 +64,7 @@ class TestInstallCommand(unittest.TestCase):
 
     def test_success(self) -> None:
         now = datetime.now(timezone.utc)
-        tenant = TenantRead(id=uuid.uuid4(), name="Acme Corporation", slug="acme", created_at=now, updated_at=now)
+        tenant = TenantRead(id=uuid.uuid4(), name="Innostes Corporation", slug="innostes", created_at=now, updated_at=now)
         self.service.install = AsyncMock(return_value=SetupResult(tenant=tenant, installed_at=now))
         code, out, _ = run(ARGS)
         self.assertEqual(code, cli.EXIT_OK)
@@ -75,7 +75,7 @@ class TestInstallCommand(unittest.TestCase):
     def test_exit_codes(self) -> None:
         cases = [
             (AlreadyInstalledError(), cli.EXIT_ALREADY_INSTALLED),
-            (SlugTakenError("acme"), cli.EXIT_INVALID_INPUT),
+            (SlugTakenError("innostes"), cli.EXIT_INVALID_INPUT),
             (DatabaseUnavailableError(), cli.EXIT_DATABASE_UNAVAILABLE),
         ]
         for error, expected in cases:
@@ -85,7 +85,7 @@ class TestInstallCommand(unittest.TestCase):
             self.assertTrue(err)
 
     def test_invalid_input(self) -> None:
-        code, _, err = run(["install", "--name", "Acme", "--slug", "Bad Slug"])
+        code, _, err = run(["install", "--name", "Innostes", "--slug", "Bad Slug"])
         self.assertEqual(code, cli.EXIT_INVALID_INPUT)
         self.assertIn("slug", err)
         code, _, _ = run(["install"])  # nothing given

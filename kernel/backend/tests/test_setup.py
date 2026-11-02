@@ -31,8 +31,8 @@ from kernel.tenancy import SlugTakenError, Tenant, TenantRead
 from kernel.user import User
 
 ORG = {
-    "name": "Acme Corporation",
-    "slug": "acme",
+    "name": "Innostes Corporation",
+    "slug": "innostes",
     "country": "IN",
     "timezone": "Asia/Kolkata",
     "language": "en-IN",
@@ -104,7 +104,7 @@ class TestSetupInstall(unittest.IsolatedAsyncioTestCase):
         with patch("kernel.setup.services.setup_service.run_migrations", AsyncMock()) as migrate:
             result = await service.install(SetupRequest(organization=ORG))
         migrate.assert_awaited_once()
-        self.assertEqual(result.tenant.slug, "acme")
+        self.assertEqual(result.tenant.slug, "innostes")
         added = [c.args[0] for c in service.session.add.call_args_list]
         added_types = [type(o) for o in added]
         self.assertIn(Tenant, added_types)
@@ -217,7 +217,7 @@ class TestSetupRoutesBeforeInstall(SetupRouteTestCase):
         self.service.install = AsyncMock(return_value=self.result())
         res = self.client.post("/setup", json={"organization": ORG}, headers=GOOD)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(res.json()["tenant"]["slug"], "acme")
+        self.assertEqual(res.json()["tenant"]["slug"], "innostes")
         self.service.session.commit.assert_awaited_once()
         self.assertFalse(self.token_file.exists())
         # Locked from now on: the same request is a 404, token not even checked.
@@ -225,7 +225,7 @@ class TestSetupRoutesBeforeInstall(SetupRouteTestCase):
         self.assertEqual(again.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_install_conflicts_return_409(self) -> None:
-        for error in (AlreadyInstalledError(), SlugTakenError("acme")):
+        for error in (AlreadyInstalledError(), SlugTakenError("innostes")):
             self.service.install = AsyncMock(side_effect=error)
             res = self.client.post("/setup", json={"organization": ORG}, headers=GOOD)
             self.assertEqual(res.status_code, status.HTTP_409_CONFLICT)

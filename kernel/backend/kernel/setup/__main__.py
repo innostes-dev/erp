@@ -4,7 +4,7 @@ Use it for servers, Docker, Kubernetes and CI, where nobody clicks through a
 web page. It talks to the database configured in `.env`, like the API.
 
     python -m kernel.setup status
-    python -m kernel.setup install --name "Acme Corporation" --slug acme \\
+    python -m kernel.setup install --name "Innostes Corporation" --slug innostes \\
         --country IN --timezone Asia/Kolkata --language en-IN --date-format DD/MM/YYYY
     python -m kernel.setup install --from-env
     python -m kernel.setup token

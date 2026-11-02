@@ -34,18 +34,18 @@ export default function FormLayoutDemo() {
         <FormGrid>
           <Field>
             <FieldLabel required>Name</FieldLabel>
-            <Input defaultValue="Acme Corporation" required />
+            <Input defaultValue="Innostes Corporation" required />
           </Field>
           <Field>
             <FieldLabel required>Slug</FieldLabel>
-            <Input defaultValue="acme" required />
+            <Input defaultValue="innostes" required />
             <FieldDescription>
-              Used in URLs, e.g. acme.innostes.app
+              Used in URLs, e.g. innostes.app
             </FieldDescription>
           </Field>
           <Field className="col-span-full">
             <FieldLabel>Billing email</FieldLabel>
-            <Input type="email" defaultValue="billing@acme.com" />
+            <Input type="email" defaultValue="billing@example.com" />
           </Field>
         </FormGrid>
       </FormSection>

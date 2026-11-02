@@ -316,7 +316,7 @@ describe('Widgets coverage and benchmarks', () => {
               {
                 id: 'n1',
                 title: 'New PO received',
-                description: 'Order #PO-1024 from Acme Corp',
+                description: 'Order #PO-1024 from Innostes Corp',
                 time: new Date(),
                 read: false,
               },

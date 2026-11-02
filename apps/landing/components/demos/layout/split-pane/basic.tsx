@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Badge, SplitPane } from '@innostes/ui';
 
 const orders = [
-  { id: 'SO-1042', customer: 'Acme Traders', total: '₹1,24,500', status: 'Pending' },
+  { id: 'SO-1042', customer: 'Apex Traders', total: '₹1,24,500', status: 'Pending' },
   { id: 'SO-1041', customer: 'Northwind Foods', total: '₹48,200', status: 'Shipped' },
   { id: 'SO-1040', customer: 'Globex Retail', total: '₹3,10,000', status: 'Delivered' },
   { id: 'SO-1039', customer: 'Initech Pvt Ltd', total: '₹72,900', status: 'Pending' },

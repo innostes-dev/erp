@@ -47,7 +47,7 @@ class TestTenantModel(unittest.TestCase):
 
     def test_soft_delete_and_restore(self) -> None:
         actor = uuid.uuid4()
-        t = Tenant(name="Acme", slug="acme")
+        t = Tenant(name="Innostes", slug="innostes")
         self.assertFalse(t.is_deleted)
         t.mark_deleted(actor)
         self.assertTrue(t.is_deleted)
@@ -63,29 +63,29 @@ class TestTenantSchemas(unittest.TestCase):
 
     def test_create_requires_name_and_slug(self) -> None:
         with self.assertRaises(ValidationError):
-            TenantCreate(name="", slug="acme")
+            TenantCreate(name="", slug="innostes")
         with self.assertRaises(ValidationError):
-            TenantCreate(name="Acme")  # type: ignore[call-arg]
+            TenantCreate(name="Innostes")  # type: ignore[call-arg]
 
     def test_slug_format(self) -> None:
-        TenantCreate(name="Acme", slug="acme-india-2")
-        for bad in ["Acme", "acme corp", "-acme", "acme-", "acme_corp"]:
+        TenantCreate(name="Innostes", slug="innostes-india-2")
+        for bad in ["Innostes", "innostes corp", "-innostes", "innostes-", "innostes_corp"]:
             with self.assertRaises(ValidationError, msg=bad):
-                TenantCreate(name="Acme", slug=bad)
+                TenantCreate(name="Innostes", slug=bad)
 
 
 class TestTenantService(unittest.IsolatedAsyncioTestCase):
     async def test_create_sets_created_and_updated_by(self) -> None:
         actor = uuid.uuid4()
         service = TenantService(fake_session())
-        t = await service.create(TenantCreate(name="Acme", slug="acme"), actor)
-        self.assertEqual((t.name, t.slug, t.created_by, t.updated_by), ("Acme", "acme", actor, actor))
+        t = await service.create(TenantCreate(name="Innostes", slug="innostes"), actor)
+        self.assertEqual((t.name, t.slug, t.created_by, t.updated_by), ("Innostes", "innostes", actor, actor))
         service.session.add.assert_called_once_with(t)
 
     async def test_create_rejects_taken_slug(self) -> None:
-        service = TenantService(fake_session(existing=Tenant(name="Other", slug="acme")))
+        service = TenantService(fake_session(existing=Tenant(name="Other", slug="innostes")))
         with self.assertRaises(SlugTakenError):
-            await service.create(TenantCreate(name="Acme", slug="acme"))
+            await service.create(TenantCreate(name="Innostes", slug="innostes"))
 
     async def test_update_only_changes_sent_fields(self) -> None:
         actor = uuid.uuid4()
@@ -99,12 +99,12 @@ class TestTenantService(unittest.IsolatedAsyncioTestCase):
     async def test_update_rejects_slug_of_another_tenant(self) -> None:
         service = TenantService(fake_session(existing=Tenant(name="Other", slug="taken")))
         with self.assertRaises(SlugTakenError):
-            await service.update(Tenant(name="Acme", slug="acme"), TenantUpdate(slug="taken"))
+            await service.update(Tenant(name="Innostes", slug="innostes"), TenantUpdate(slug="taken"))
 
     async def test_soft_delete(self) -> None:
         actor = uuid.uuid4()
         service = TenantService(fake_session())
-        t = Tenant(name="Acme", slug="acme")
+        t = Tenant(name="Innostes", slug="innostes")
         await service.soft_delete(t, actor)
         self.assertIsNotNone(t.deleted_at)
         self.assertEqual(t.deleted_by, actor)
@@ -133,16 +133,16 @@ class TestTenantRouter(unittest.TestCase):
     def test_create_records_actor_from_token(self) -> None:
         user_id = uuid.uuid4()
         token = create_access_token({"sub": str(user_id)})
-        res = self.client.post("/tenants", json={"name": "Acme", "slug": "acme", "country": "IN"},
+        res = self.client.post("/tenants", json={"name": "Innostes", "slug": "innostes", "country": "IN"},
                                headers={"Authorization": f"Bearer {token}"})
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         body = res.json()
-        self.assertEqual((body["name"], body["slug"], body["country"]), ("Acme", "acme", "IN"))
+        self.assertEqual((body["name"], body["slug"], body["country"]), ("Innostes", "innostes", "IN"))
         self.assertEqual(body["created_by"], str(user_id))
         self.assertIsNone(body["deleted_at"])
 
     def test_create_taken_slug_returns_409(self) -> None:
-        res = self.client.post("/tenants", json={"name": "Acme", "slug": "taken"})
+        res = self.client.post("/tenants", json={"name": "Innostes", "slug": "taken"})
         self.assertEqual(res.status_code, status.HTTP_409_CONFLICT)
         self.assertIn("already in use", res.json()["detail"])
 

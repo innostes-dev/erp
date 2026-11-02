@@ -16,7 +16,7 @@ export type FieldProps = BaseField.Root.Props;
  * prop, and runs `validationMode="onSubmit"` by default.
  *
  * @example
- * <Field name="email" validate={(v) => (String(v).endsWith('@acme.com') ? null : 'Use your work email')}>
+ * <Field name="email" validate={(v) => (String(v).endsWith('@example.com') ? null : 'Use your work email')}>
  *   <FieldLabel>Work email</FieldLabel>
  *   <Input type="email" required />
  *   <FieldDescription>We'll send the invite here.</FieldDescription>

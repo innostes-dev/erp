@@ -551,7 +551,7 @@ function OrganizationStep({
             value={org.slug}
             onChange={(e) => onChange({ slug: e.target.value })}
           />
-          <FieldDescription>Used in URLs and system identifiers (e.g. acme).</FieldDescription>
+          <FieldDescription>Used in URLs and system identifiers (e.g. innostes).</FieldDescription>
           <FieldError match="patternMismatch">Use lowercase letters and numbers, separated by single dashes.</FieldError>
           <FieldError match="valueMissing" />
         </Field>

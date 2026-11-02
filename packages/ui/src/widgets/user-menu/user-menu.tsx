@@ -18,7 +18,7 @@ export type UserMenuSlot =
 export interface UserMenuProps {
   /** The user's name. */
   name: string;
-  /** Second line in the trigger, e.g. the organisation ("Acme Corp") or role. */
+  /** Second line in the trigger, e.g. the organisation ("Innostes Corp") or role. */
   subtitle?: ReactNode;
   /** Shown in the menu header, e.g. the email address. */
   email?: ReactNode;
@@ -53,7 +53,7 @@ function initialsOf(name: string) {
  * top bar or the sidebar footer. Items are regular `DropdownMenu*` components.
  *
  * @example
- * <UserMenu name="Arun Kumar" subtitle="Acme Corp" email="arun@acme.com" avatarSrc={user.photo}>
+ * <UserMenu name="Arun Kumar" subtitle="Innostes Corp" email="arun@example.com" avatarSrc={user.photo}>
  *   <DropdownMenuItem>Profile</DropdownMenuItem>
  *   <DropdownMenuItem>Settings</DropdownMenuItem>
  *   <DropdownMenuSeparator />

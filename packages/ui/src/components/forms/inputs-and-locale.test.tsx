@@ -32,8 +32,8 @@ describe('SearchInput', () => {
         const onValueChange = vi.fn();
         render(<SearchInput aria-label="Search" onValueChange={onValueChange} />);
         const input = screen.getByRole('searchbox', { name: 'Search' });
-        await userEvent.type(input, 'acme');
-        expect(onValueChange).toHaveBeenLastCalledWith('acme');
+        await userEvent.type(input, 'innostes');
+        expect(onValueChange).toHaveBeenLastCalledWith('innostes');
         await userEvent.click(screen.getByRole('button', { name: 'Clear search' }));
         expect(input).toHaveValue('');
         expect(input).toHaveFocus();

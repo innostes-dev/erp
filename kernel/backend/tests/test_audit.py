@@ -79,7 +79,7 @@ class TestAuditService(unittest.IsolatedAsyncioTestCase):
             new_state={"title": "Senior Analyst"},
             tenant_id=tenant_id,
             actor_id=actor_id,
-            actor_email="admin@acme.org",
+            actor_email="admin@example.org",
             actor_name="System Admin",
             ip_address="192.168.1.50",
             correlation_id="tr-998811",
@@ -90,7 +90,7 @@ class TestAuditService(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(record.action, "UPDATE")
         self.assertEqual(record.entity_type, "user")
         self.assertEqual(record.entity_id, "usr_12345")
-        self.assertEqual(record.actor_email, "admin@acme.org")
+        self.assertEqual(record.actor_email, "admin@example.org")
         self.assertEqual(record.correlation_id, "tr-998811")
         self.assertIn("title", record.changes)
         self.assertEqual(record.changes["title"], {"old": "Analyst", "new": "Senior Analyst"})
@@ -111,7 +111,7 @@ class TestAuditRouterEndpoints(unittest.TestCase):
             id=self.log_id,
             tenant_id=self.tenant_id,
             actor_id=self.actor_id,
-            actor_email="admin@acme.org",
+            actor_email="admin@example.org",
             actor_name="Admin User",
             action="UPDATE",
             entity_type="user",
@@ -138,7 +138,7 @@ class TestAuditRouterEndpoints(unittest.TestCase):
             unique_actors_count=8,
             actions_breakdown=[ActionCount(action="UPDATE", count=80), ActionCount(action="CREATE", count=38)],
             entity_breakdown=[EntityActivity(entity_type="user", count=60), EntityActivity(entity_type="role", count=25)],
-            top_actors=[ActorSummary(actor_id=str(self.actor_id), actor_email="admin@acme.org", actor_name="Admin User", count=45)],
+            top_actors=[ActorSummary(actor_id=str(self.actor_id), actor_email="admin@example.org", actor_name="Admin User", count=45)],
         )
         self.mock_service.get_summary = AsyncMock(return_value=self.mock_summary)
 

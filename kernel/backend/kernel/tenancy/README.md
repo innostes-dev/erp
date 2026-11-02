@@ -47,14 +47,14 @@ POST /tenants
 Authorization: Bearer <access token>
 Content-Type: application/json
 
-{ "name": "Acme Corporation", "slug": "acme", "country": "IN" }
+{ "name": "Innostes Corporation", "slug": "innostes", "country": "IN" }
 ```
 
 ```json
 {
   "id": "3f6c1a52-8d5e-4b8e-9c1a-2f6d3e7b9a10",
-  "name": "Acme Corporation",
-  "slug": "acme",
+  "name": "Innostes Corporation",
+  "slug": "innostes",
   "country": "IN",
   "timezone": null,
   "language": null,
@@ -76,5 +76,5 @@ The bearer token is optional for now. When present, its user id (`sub`) is store
 from kernel.tenancy import TenantCreate, TenantService
 
 service = TenantService(session)
-tenant = await service.create(TenantCreate(name="Acme", slug="acme"), actor_id=user_id)
+tenant = await service.create(TenantCreate(name="Innostes", slug="innostes"), actor_id=user_id)
 ```

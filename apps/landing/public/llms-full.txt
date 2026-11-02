@@ -7405,7 +7405,7 @@ import { PageHeader } from '@innostes/ui';
 
 Use `PageHeader` at the top of every internal administrative view:
 
-- **Record detail pages**: Purchase order `PO-2026-081`, Customer account `Acme Corp`, or Tax invoice `INV-2026-081`.
+- **Record detail pages**: Purchase order `PO-2026-081`, Customer account `Innostes Corp`, or Tax invoice `INV-2026-081`.
 - **List and catalogue dashboards**: Warehouses, inventory catalogues, or statutory reports.
 - **Settings subpages**: Security preferences, GST profiles, or team roles.
 
@@ -14440,7 +14440,7 @@ export function OldVendorForm() {
             <FormItem>
               <FormLabel>Vendor Name</FormLabel>
               <FormControl>
-                <Input placeholder="Acme Ltd" {...field} />
+                <Input placeholder="Innostes Ltd" {...field} />
               </FormControl>
               <FormDescription>Official legal trade entity</FormDescription>
               <FormMessage />
@@ -14463,7 +14463,7 @@ export function NewVendorForm() {
     <form onSubmit={handleSubmit(console.log)} className="space-y-4">
       <Field id="vendorName" error={errors.vendorName?.message as string}>
         <FieldLabel>Vendor Name</FieldLabel>
-        <Input placeholder="Acme Ltd" {...register('vendorName', { required: 'Name is required' })} />
+        <Input placeholder="Innostes Ltd" {...register('vendorName', { required: 'Name is required' })} />
         <FieldDescription>Official legal trade entity</FieldDescription>
         <FieldError />
       </Field>
@@ -16963,7 +16963,7 @@ Set `density="sm"` when placing the list inside narrow navigation drawers or sec
 <DoDont
   do={{
     description: 'Provide meaningful subtitles (such as GSTIN or depot location) to help operators distinguish similar vendor entities.',
-    code: `<EntityListItem title="Acme India" subtitle="GSTIN: 27AABCA1234F1Z1" />`,
+    code: `<EntityListItem title="Innostes India" subtitle="GSTIN: 27AABCA1234F1Z1" />`,
   }}
   dont={{
     description: 'Do not crowd entity rows with dozens of dense data columns (use DataTable for wide tabular data).',

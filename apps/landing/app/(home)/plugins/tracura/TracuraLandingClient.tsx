@@ -395,7 +395,7 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
                         Live Streaming
                       </span>
                     </div>
-                    <span className="text-xs text-fd-muted-foreground">Org: Acme Technologies · Project: E-commerce API</span>
+                    <span className="text-xs text-fd-muted-foreground">Org: Innostes · Project: E-commerce API</span>
                   </div>
                   <div className="relative w-full aspect-[16/10] bg-slate-950">
                     <Image

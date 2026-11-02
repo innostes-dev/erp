@@ -12,7 +12,7 @@ export default function FieldDemo() {
   return (
     <Field className="w-full max-w-sm">
       <FieldLabel required>Work email</FieldLabel>
-      <Input type="email" placeholder="ada@acme.com" required />
+      <Input type="email" placeholder="ada@example.com" required />
       <FieldDescription>We&apos;ll send the invitation here.</FieldDescription>
       <FieldError />
     </Field>

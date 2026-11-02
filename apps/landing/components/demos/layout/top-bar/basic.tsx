@@ -21,7 +21,7 @@ export default function TopBarDemo() {
             <span className="flex size-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground">
               A
             </span>
-            <span className="hidden font-bold sm:inline-block">Acme</span>
+            <span className="hidden font-bold sm:inline-block">Innostes</span>
           </div>
         </TopBarStart>
         <TopBarCenter>

@@ -26,7 +26,7 @@ export interface InputGroupProps extends ComponentProps<'div'> {
  * @example
  * <InputGroup>
  *   <InputGroupAddon>https://</InputGroupAddon>
- *   <InputGroupInput placeholder="acme" aria-label="Workspace URL" />
+ *   <InputGroupInput placeholder="innostes" aria-label="Workspace URL" />
  *   <InputGroupAddon>.innostes.app</InputGroupAddon>
  * </InputGroup>
  */

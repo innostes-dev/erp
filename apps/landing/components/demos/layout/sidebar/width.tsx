@@ -22,7 +22,7 @@ export default function SidebarWidthDemo() {
     >
       <Sidebar>
         <SidebarHeader className="h-12 flex items-center px-4 font-semibold">
-          Acme Inc.
+          Innostes Inc.
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>

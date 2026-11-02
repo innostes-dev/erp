@@ -13,7 +13,7 @@ Example:
         model = Tenant
 
     service = TenantService(session)
-    tenant = await service.create(TenantCreate(name="Acme"), actor_id=user_id)
+    tenant = await service.create(TenantCreate(name="Innostes"), actor_id=user_id)
     ```
 
 Transactions: methods only `flush()`; committing is done by the caller

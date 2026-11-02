@@ -73,7 +73,7 @@ class TestFieldCipherAndBlindIndex(unittest.TestCase):
         self.blind_index = BlindIndex(pepper="test-pepper-secret")
 
     def test_envelope_encryption_roundtrip(self) -> None:
-        email = "enterprise-admin@acme.com"
+        email = "enterprise-admin@example.com"
         envelope = self.cipher.encrypt(email)
         self.assertIsNotNone(envelope)
         self.assertTrue(envelope.startswith("v1:"))
@@ -225,7 +225,7 @@ class TestSetupSeedingAndBranding(unittest.IsolatedAsyncioTestCase):
         await seed_default_tenant_settings(
             session=session,
             tenant_id=tenant_id,
-            organization_name="Acme Corp",
+            organization_name="Innostes Corp",
             branding_input=None,
         )
 
@@ -248,7 +248,7 @@ class TestSetupSeedingAndBranding(unittest.IsolatedAsyncioTestCase):
         await seed_default_tenant_settings(
             session=session,
             tenant_id=tenant_id,
-            organization_name="Acme Corp",
+            organization_name="Innostes Corp",
             branding_input=custom_branding,
         )
 

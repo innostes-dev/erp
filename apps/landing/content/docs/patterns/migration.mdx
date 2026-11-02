@@ -59,7 +59,7 @@ export function OldVendorForm() {
             <FormItem>
               <FormLabel>Vendor Name</FormLabel>
               <FormControl>
-                <Input placeholder="Acme Ltd" {...field} />
+                <Input placeholder="Innostes Ltd" {...field} />
               </FormControl>
               <FormDescription>Official legal trade entity</FormDescription>
               <FormMessage />
@@ -82,7 +82,7 @@ export function NewVendorForm() {
     <form onSubmit={handleSubmit(console.log)} className="space-y-4">
       <Field id="vendorName" error={errors.vendorName?.message as string}>
         <FieldLabel>Vendor Name</FieldLabel>
-        <Input placeholder="Acme Ltd" {...register('vendorName', { required: 'Name is required' })} />
+        <Input placeholder="Innostes Ltd" {...register('vendorName', { required: 'Name is required' })} />
         <FieldDescription>Official legal trade entity</FieldDescription>
         <FieldError />
       </Field>

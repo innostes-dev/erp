@@ -4,7 +4,7 @@ import { Sparkline } from '@innostes/ui';
 
 const rows = [
   {
-    name: 'Acme Corp',
+    name: 'Innostes Corp',
     data: [12, 14, 13, 18, 21, 24, 28],
     tone: 'success' as const,
     total: '€28,400',

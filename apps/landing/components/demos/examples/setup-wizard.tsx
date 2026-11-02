@@ -77,7 +77,7 @@ function slugify(text: string) {
 
 export default function SetupWizardExample() {
   const [step, setStep] = useState(0);
-  const [name, setName] = useState('Acme Corporation');
+  const [name, setName] = useState('Innostes Corporation');
 
   return (
     <div className="@container w-full">
@@ -166,7 +166,7 @@ export default function SetupWizardExample() {
                   pattern="[a-z0-9-]+"
                 />
                 <FieldDescription>
-                  Used in system URLs and identifiers (e.g. acme).
+                  Used in system URLs and identifiers (e.g. innostes).
                 </FieldDescription>
                 <FieldError match="patternMismatch">
                   Use lowercase letters, numbers and dashes.

@@ -260,7 +260,7 @@ describe('NotificationBell', () => {
 describe('UserMenu', () => {
   it('shows initials and the menu items', async () => {
     render(
-      <UserMenu name="Arun Kumar" subtitle="Acme Corp" email="arun@acme.com">
+      <UserMenu name="Arun Kumar" subtitle="Innostes Corp" email="arun@example.com">
         <DropdownMenuItem>Profile</DropdownMenuItem>
       </UserMenu>,
     );
@@ -270,6 +270,6 @@ describe('UserMenu', () => {
     expect(
       await screen.findByRole('menuitem', { name: 'Profile' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('arun@acme.com')).toBeInTheDocument();
+    expect(screen.getByText('arun@example.com')).toBeInTheDocument();
   });
 });

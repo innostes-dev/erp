@@ -27,7 +27,7 @@ export default function SidebarVariantsDemo() {
       <SidebarProvider className="min-h-0 h-[20rem] w-full overflow-hidden rounded-lg border border-border bg-background">
         <Sidebar variant={variant}>
           <SidebarHeader className="h-12 flex items-center px-4 font-semibold">
-            Acme Inc.
+            Innostes Inc.
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>

@@ -88,7 +88,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
     async def create_test_user(
         self,
         session,
-        email="employee@acme.com",
+        email="employee@example.com",
         password="InitialPassword123!",
         is_super_admin=False,
     ) -> User:
@@ -103,7 +103,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
     async def test_login_success_issues_jwt_and_session(self) -> None:
         session = mock_session_factory()
-        user = await self.create_test_user(session, email="alice@acme.com", password="SecretPassword123!")
+        user = await self.create_test_user(session, email="alice@example.com", password="SecretPassword123!")
 
         # Mock user lookup returning created user
         async def mock_exec(stmt):
@@ -115,7 +115,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         session.execute = AsyncMock(side_effect=mock_exec)
 
         login_req = LoginRequest(
-            email="alice@acme.com",
+            email="alice@example.com",
             password="SecretPassword123!",
             device_fingerprint="fp-macbook-pro-1",
             device_name="Work Laptop",
@@ -126,7 +126,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         self.assertIsNotNone(response.refresh_token)
         self.assertEqual(response.token_type, "bearer")
         self.assertFalse(response.must_change_password)
-        self.assertEqual(response.user.email, "alice@acme.com")
+        self.assertEqual(response.user.email, "alice@example.com")
 
         # Session was persisted
         sessions = [o for o in session._items if isinstance(o, UserSession)]
@@ -135,7 +135,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
     async def test_login_invalid_password_tracks_failures(self) -> None:
         session = mock_session_factory()
-        user = await self.create_test_user(session, email="bob@acme.com", password="CorrectPassword123!")
+        user = await self.create_test_user(session, email="bob@example.com", password="CorrectPassword123!")
 
         async def mock_exec(stmt):
             res = MagicMock()
@@ -145,7 +145,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         session.execute = AsyncMock(side_effect=mock_exec)
 
         login_req = LoginRequest(
-            email="bob@acme.com",
+            email="bob@example.com",
             password="WrongPassword!",
         )
 
@@ -156,7 +156,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
     async def test_login_account_lockout_after_max_failed_attempts(self) -> None:
         session = mock_session_factory()
-        user = await self.create_test_user(session, email="charlie@acme.com", password="RealPassword123!")
+        user = await self.create_test_user(session, email="charlie@example.com", password="RealPassword123!")
         user.failed_login_attempts = 4
 
         async def mock_exec(stmt):
@@ -166,7 +166,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
         session.execute = AsyncMock(side_effect=mock_exec)
 
-        login_req = LoginRequest(email="charlie@acme.com", password="WrongPassword!")
+        login_req = LoginRequest(email="charlie@example.com", password="WrongPassword!")
 
         # 5th failed attempt causes lockout
         with self.assertRaises(InvalidCredentialsError):
@@ -181,7 +181,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
     async def test_login_temporary_password_expired(self) -> None:
         session = mock_session_factory()
-        user = await self.create_test_user(session, email="david@acme.com", password="TempPass123!")
+        user = await self.create_test_user(session, email="david@example.com", password="TempPass123!")
         user.must_change_password = True
         user.temp_password_expires_at = datetime.now(timezone.utc) - timedelta(hours=1)
 
@@ -192,7 +192,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
         session.execute = AsyncMock(side_effect=mock_exec)
 
-        login_req = LoginRequest(email="david@acme.com", password="TempPass123!")
+        login_req = LoginRequest(email="david@example.com", password="TempPass123!")
 
         with self.assertRaises(TemporaryPasswordExpiredError):
             await self.auth_service.login(session, login_req)
@@ -208,7 +208,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
     async def test_forgot_password_dispatches_email_with_temp_password_and_link(self) -> None:
         session = mock_session_factory()
-        user = await self.create_test_user(session, email="elena@acme.com", password="OldPassword123!")
+        user = await self.create_test_user(session, email="elena@example.com", password="OldPassword123!")
 
         async def mock_exec(stmt):
             res = MagicMock()
@@ -217,14 +217,14 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
         session.execute = AsyncMock(side_effect=mock_exec)
 
-        req = ForgotPasswordRequest(email="elena@acme.com")
+        req = ForgotPasswordRequest(email="elena@example.com")
         res = await self.auth_service.forgot_password(session, req)
 
         self.assertIn("If an account exists", res.message)
         self.assertEqual(len(self.email_service.sent_emails), 1)
 
         email = self.email_service.sent_emails[0]
-        self.assertEqual(email.recipient, "elena@acme.com")
+        self.assertEqual(email.recipient, "elena@example.com")
         self.assertIn("TEMPORARY PASSWORD", email.text_body)
         self.assertIn("reset-password?token=", email.text_body)
 
@@ -234,7 +234,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
     async def test_reset_password_with_token_and_soc2_history(self) -> None:
         session = mock_session_factory()
-        user = await self.create_test_user(session, email="frank@acme.com", password="InitialPassword123!")
+        user = await self.create_test_user(session, email="frank@example.com", password="InitialPassword123!")
 
         # Generate reset token for frank
         token = self.auth_service.create_password_reset_token(user)
@@ -268,7 +268,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
 
     async def test_refresh_token_rotation(self) -> None:
         session = mock_session_factory()
-        user = await self.create_test_user(session, email="grace@acme.com", password="MyPassword123!")
+        user = await self.create_test_user(session, email="grace@example.com", password="MyPassword123!")
 
         # Create active session
         raw_refresh = "test-raw-refresh-token-12345"

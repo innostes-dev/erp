@@ -20,7 +20,7 @@ export default function InputGroupDemo() {
         <FieldLabel>Workspace URL</FieldLabel>
         <InputGroup>
           <InputGroupAddon>https://</InputGroupAddon>
-          <InputGroupInput placeholder="acme" />
+          <InputGroupInput placeholder="innostes" />
           <InputGroupAddon>.innostes.app</InputGroupAddon>
         </InputGroup>
       </Field>
@@ -40,7 +40,7 @@ export default function InputGroupDemo() {
           <InputGroupAddon variant="icon">
             <AtSign />
           </InputGroupAddon>
-          <InputGroupInput type="email" placeholder="ada@acme.com" />
+          <InputGroupInput type="email" placeholder="ada@example.com" />
           <InputGroupAddon variant="icon" className="pe-1">
             <Button
               size="sm"

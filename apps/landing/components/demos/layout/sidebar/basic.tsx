@@ -72,7 +72,7 @@ export default function SidebarDemo() {
             <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
               A
             </span>
-            <span className="truncate text-sm font-semibold">Acme Inc.</span>
+            <span className="truncate text-sm font-semibold">Innostes Inc.</span>
           </div>
         </SidebarHeader>
         <SidebarContent>
