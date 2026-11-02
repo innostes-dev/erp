@@ -107,5 +107,6 @@ playwright/.cache/
 # Runtime files of the kernel backend (e.g. the generated first-run setup token)
 kernel/backend/var/
 
-research/
+research/*
+!research/final_modules/
 *.tsbuildinfo
