@@ -114,11 +114,11 @@ router.include_router(logs_router)
 router.include_router(analytics_router)
 
 # External canonical router for `/tracura/v1/ingest`
-external_ingest_router = APIRouter(prefix="/tracura", tags=["Tracura - Ingestion"])
+external_ingest_router = APIRouter(prefix="/tracura", tags=["Tracura"])
 external_ingest_router.include_router(ingest_router)
 
 # External alias router for `/api-logger/v1/ingest` (legacy fallback)
-external_ingest_alias_router = APIRouter(prefix="/api-logger", tags=["Tracura - Ingestion"], include_in_schema=False)
+external_ingest_alias_router = APIRouter(prefix="/api-logger", tags=["Tracura"], include_in_schema=False)
 external_ingest_alias_router.include_router(ingest_router)
 
 # Legacy alias router for `/plugins/api-logger`

@@ -36,7 +36,7 @@ flowchart TD
     end
 
     Admin -->|Configures tenants, IAM, modules via HTTPS/JSON| System
-    User -->|Accesses HRMS, CRM, and daily tasks via HTTPS/JSON| System
+    User -->|Accesses PeopleOps, RevOps, and daily tasks via HTTPS/JSON| System
     Operator -->|Runs migrations, CLI setup, and monitoring| System
     Integrator -->|Invokes M2M REST APIs with API keys| System
 
@@ -63,7 +63,7 @@ The table below describes the business responsibilities, inputs, and outputs for
 | Persona / System | Role & Responsibility | Business Inputs | Business Outputs |
 |:---|:---|:---|:---|
 | **Tenant Administrator** | Manages organisation settings, invites staff, assigns roles, and activates modules. | Tenant configuration, user invitations, role definitions, module activation flags. | Active organization workspace, RBAC assignments, audit records. |
-| **Business Staff** | Executes day-to-day business operations in commercial modules (HRMS, CRM). | Leave requests, attendance entries, customer leads, sales opportunities. | Updated sales pipelines, approved leave records, customer correspondence. |
+| **Business Staff** | Executes day-to-day business operations in commercial modules (PeopleOps, RevOps). | Leave requests, attendance entries, customer leads, sales opportunities. | Updated sales pipelines, approved leave records, customer correspondence. |
 | **Platform Operator** | Deploys containers, monitors health probes, and manages database migrations. | Environment variables, release bundles, migration commands, backup schedules. | Operational service uptime, migrated schema revisions, health telemetry. |
 | **External Integrator** | Connects third-party software (logistics, e-commerce, banking) via REST APIs. | HTTP REST requests with Bearer tokens or `X-API-Key` headers. | JSON data payloads, webhooks, paginated resource records. |
 | **PostgreSQL Database** | Guarantees durable relational data persistence and transaction atomicity. | SQL DML/DDL queries, advisory lock acquire/release statements. | ACID query results, relational constraints, foreign key enforcement. |

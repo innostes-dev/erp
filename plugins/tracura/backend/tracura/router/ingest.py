@@ -9,7 +9,7 @@ from tracura.models.api_key import ApiLogApiKey
 from tracura.schemas.ingest import IngestBatchRequest, IngestLogItem, IngestResponse
 from tracura.services.ingest_service import IngestService
 
-router = APIRouter(prefix="/v1/ingest", tags=["API logger - Ingestion"])
+router = APIRouter(prefix="/v1/ingest", tags=["Tracura"])
 
 
 def get_ingest_service() -> IngestService:

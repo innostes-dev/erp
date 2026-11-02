@@ -282,12 +282,12 @@ export default function DashboardExample() {
                   {
                     label: 'Modules',
                     apps: [
-                      { id: 'hr', name: 'HRMS', icon: <UsersRound /> },
+                      { id: 'peopleops', name: 'PeopleOps', icon: <UsersRound /> },
                       { id: 'finance', name: 'Finance', icon: <Banknote /> },
                     ],
                   },
                 ]}
-                defaultValue="hr"
+                defaultValue="peopleops"
               />
               <NotificationBell items={[]} />
               <UserMenu name="Ada Lovelace" subtitle="Admin" />

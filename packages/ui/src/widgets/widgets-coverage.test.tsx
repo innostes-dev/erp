@@ -415,10 +415,10 @@ describe('Widgets coverage and benchmarks', () => {
                     icon: <span data-testid="erp-icon" />,
                   },
                   {
-                    id: 'hrms',
-                    name: 'HRMS People',
+                    id: 'peopleops',
+                    name: 'PeopleOps Suite',
                     description: 'Payroll and recruitment',
-                    icon: <span data-testid="hrms-icon" />,
+                    icon: <span data-testid="peopleops-icon" />,
                   },
                 ],
               },
@@ -440,7 +440,7 @@ describe('Widgets coverage and benchmarks', () => {
       await user.click(appTrigger);
       const searchInput = screen.getByRole('searchbox');
       await user.type(searchInput, 'payroll');
-      expect(screen.getByText('HRMS People')).toBeInTheDocument();
+      expect(screen.getByText('PeopleOps Suite')).toBeInTheDocument();
       expect(
         screen.queryByText('General ledger and AP/AR'),
       ).not.toBeInTheDocument();

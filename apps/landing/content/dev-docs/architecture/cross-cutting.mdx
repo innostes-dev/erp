@@ -48,7 +48,7 @@ User ────(UserRole)────► Role ────(RolePermission)─�
 ```
 
 ### Relational Hierarchy
-1. **Permissions (`permissions`)**: Atomic system privileges identified by dot/colon codes (e.g. `crm:leads:create`, `crm:leads:read`, `hrms:leaves:approve`).
+1. **Permissions (`permissions`)**: Atomic system privileges identified by dot/colon codes (e.g. `revops:leads:create`, `revops:leads:read`, `peopleops:leaves:approve`).
 2. **Roles (`roles`)**: Named bundles of permissions. Scoped to a specific tenant via `tenant_id`, or marked global via `is_system=true`. Built-in system roles include `Owner`, `Administrator`, `Member`, and `Auditor`.
 3. **Role Assignments (`user_roles`)**: Maps users to roles within the boundary of a specific tenant (`tenant_id`). A user may hold the `Owner` role in Tenant A while holding only `Member` in Tenant B.
 
@@ -59,7 +59,7 @@ User ────(UserRole)────► Role ────(RolePermission)─�
 
 <Callout type="info" title="Status: Granular Permission Gating">
   **Current Implementation**: Administrative endpoints enforce super-admin status, and domain routes verify tenant membership and module enablement.
-  **Planned Evolution**: Granular per-route permission dependencies (e.g. `Depends(require_permission("crm:leads:delete"))`) are implemented in IAM services and will be rolled out across all business module routes in an upcoming release.
+  **Planned Evolution**: Granular per-route permission dependencies (e.g. `Depends(require_permission("revops:leads:delete"))`) are implemented in IAM services and will be rolled out across all business module routes in an upcoming release.
 </Callout>
 
 ---

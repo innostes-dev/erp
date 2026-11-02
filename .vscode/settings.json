@@ -3,8 +3,8 @@
   "python.analysis.extraPaths": [
     "${workspaceFolder}/apps/api-server",
     "${workspaceFolder}/kernel/backend",
-    "${workspaceFolder}/modules/crm/backend",
-    "${workspaceFolder}/modules/hrms/backend",
+    "${workspaceFolder}/modules/peopleops/backend",
+    "${workspaceFolder}/modules/revops/backend",
     "${workspaceFolder}/plugins/tracura/backend"
   ],
   "python-envs.pythonProjects": [

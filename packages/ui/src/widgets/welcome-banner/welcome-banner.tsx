@@ -42,7 +42,7 @@ export interface WelcomeBannerProps extends Omit<
  * <WelcomeBanner
  *   eyebrow="April 2025"
  *   title="Welcome back, Arun"
- *   description="Here's what's happening in HRMS today."
+ *   description="Here's what's happening in PeopleOps today."
  *   illustration={<img src="/team.svg" alt="" />}
  *   quote="Great people build great companies."
  * />

@@ -1,0 +1,35 @@
+---
+title: "PeopleOpsInfoResponse"
+description: "Information schema for PeopleOps scaffold module."
+---
+
+Information schema for PeopleOps scaffold module.
+
+## Properties
+
+| Property | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `id` | string | No | `"peopleops"` | Unique package identifier string. |
+| `name` | string | No | `"PeopleOps"` | Human-readable module title. |
+| `version` | string | No | `"0.1.0"` | Semver version string. |
+| `status` | string | No | `"scaffold_ready"` | Operational readiness status of module. |
+| `sub_features` | string[] | No | `["employees","leave","payroll","attendance"]` | List of functional sub-features supported by module. |
+| `description` | string | No | `"People operations, employee directory, leaves, and payroll"` | Module functional overview. |
+
+## Example payload
+
+```json
+{
+  "description": "People operations, employee directory, leaves, and payroll",
+  "id": "peopleops",
+  "name": "PeopleOps",
+  "status": "scaffold_ready",
+  "sub_features": [
+    "employees",
+    "leave",
+    "payroll",
+    "attendance"
+  ],
+  "version": "0.1.0"
+}
+```

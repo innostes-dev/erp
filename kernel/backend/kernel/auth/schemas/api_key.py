@@ -15,7 +15,7 @@ class CreateApiKeyRequest(BaseSchema):
         min_length=1,
         max_length=128,
         description="Descriptive identifier for the API key.",
-        examples=["Zapier CRM Sync"],
+        examples=["Zapier RevOps Sync"],
     )
     expires_in_days: int | None = Field(
         default=None,
@@ -26,8 +26,8 @@ class CreateApiKeyRequest(BaseSchema):
     )
     scopes: list[str] = Field(
         default=["*"],
-        description="Authorized permission scopes, e.g. ['hrms:read', 'crm:write'] or ['*'].",
-        examples=[["crm:read", "hrms:read"]],
+        description="Authorized permission scopes, e.g. ['peopleops:read', 'revops:write'] or ['*'].",
+        examples=[["revops:read", "peopleops:read"]],
     )
 
 
@@ -40,7 +40,7 @@ class ApiKeyRead(BaseSchema):
     )
     name: str = Field(
         description="Human-readable label for the API key.",
-        examples=["Zapier CRM Sync"],
+        examples=["Zapier RevOps Sync"],
     )
     key_prefix: str = Field(
         description="Public prefix used to identify the token key (e.g. inno_live_...).",
@@ -48,7 +48,7 @@ class ApiKeyRead(BaseSchema):
     )
     scopes: list[str] = Field(
         description="Authorized permission scopes granted to this key.",
-        examples=[["crm:read", "hrms:read"]],
+        examples=[["revops:read", "peopleops:read"]],
     )
     expires_at: datetime | None = Field(
         default=None,
@@ -74,9 +74,9 @@ class ApiKeyRead(BaseSchema):
             "examples": [
                 {
                     "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
-                    "name": "Zapier CRM Sync",
+                    "name": "Zapier RevOps Sync",
                     "key_prefix": "inno_live_xK9p",
-                    "scopes": ["crm:read", "hrms:read"],
+                    "scopes": ["revops:read", "peopleops:read"],
                     "expires_at": "2026-11-28T10:00:00Z",
                     "last_used_at": "2026-10-29T10:15:00Z",
                     "is_revoked": False,
@@ -100,9 +100,9 @@ class ApiKeyCreatedResponse(ApiKeyRead):
             "examples": [
                 {
                     "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
-                    "name": "Zapier CRM Sync",
+                    "name": "Zapier RevOps Sync",
                     "key_prefix": "inno_live_xK9p",
-                    "scopes": ["crm:read", "hrms:read"],
+                    "scopes": ["revops:read", "peopleops:read"],
                     "expires_at": "2026-11-28T10:00:00Z",
                     "last_used_at": None,
                     "is_revoked": False,
@@ -123,9 +123,9 @@ class ApiKeyListResponse(BaseSchema):
             [
                 {
                     "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
-                    "name": "Zapier CRM Sync",
+                    "name": "Zapier RevOps Sync",
                     "key_prefix": "inno_live_xK9p",
-                    "scopes": ["crm:read", "hrms:read"],
+                    "scopes": ["revops:read", "peopleops:read"],
                     "expires_at": "2026-11-28T10:00:00Z",
                     "last_used_at": "2026-10-29T10:15:00Z",
                     "is_revoked": False,
@@ -142,9 +142,9 @@ class ApiKeyListResponse(BaseSchema):
                     "items": [
                         {
                             "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
-                            "name": "Zapier CRM Sync",
+                            "name": "Zapier RevOps Sync",
                             "key_prefix": "inno_live_xK9p",
-                            "scopes": ["crm:read", "hrms:read"],
+                            "scopes": ["revops:read", "peopleops:read"],
                             "expires_at": "2026-11-28T10:00:00Z",
                             "last_used_at": "2026-10-29T10:15:00Z",
                             "is_revoked": False,

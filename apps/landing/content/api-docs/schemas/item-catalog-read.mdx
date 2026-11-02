@@ -9,7 +9,7 @@ Metadata describing an installed module or plugin package in the catalog.
 
 | Property | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `id` | string | Yes | — | Unique package identifier string (e.g. 'hrms', 'crm', 'tracura'). |
+| `id` | string | Yes | — | Unique package identifier string (e.g. 'peopleops', 'revops', 'tracura'). |
 | `name` | string | Yes | — | Human-readable title of the module or plugin. |
 | `version` | string | Yes | — | Semver version string of the package. |
 | `type` | string | Yes | — | Package classification: 'module' for business modules or 'plugin' for extensible plugins. |
@@ -24,10 +24,10 @@ Metadata describing an installed module or plugin package in the catalog.
 ```json
 {
   "activated_at": "2026-10-29T10:00:00Z",
-  "description": "People and human resources management",
-  "id": "hrms",
+  "description": "People and human resources operations",
+  "id": "peopleops",
   "is_active": true,
-  "name": "HRMS",
+  "name": "PeopleOps",
   "tags": [
     "Employees",
     "Leave",

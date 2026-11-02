@@ -40,8 +40,8 @@ export function runTsBoundaryCheck() {
       if (
         imp.startsWith('@innostes/kernel') ||
         imp.startsWith('@innostes/web-app') ||
-        imp.startsWith('@innostes/hrms') ||
-        imp.startsWith('@innostes/crm') ||
+        imp.startsWith('@innostes/peopleops') ||
+        imp.startsWith('@innostes/revops') ||
         imp.startsWith('@innostes/tracura') ||
         imp.startsWith('@innostes/api-logger') ||
         imp.includes('../../kernel') ||
@@ -68,8 +68,8 @@ export function runTsBoundaryCheck() {
       const imp = match[1];
       if (
         imp.startsWith('@innostes/web-app') ||
-        imp.startsWith('@innostes/hrms') ||
-        imp.startsWith('@innostes/crm') ||
+        imp.startsWith('@innostes/peopleops') ||
+        imp.startsWith('@innostes/revops') ||
         imp.startsWith('@innostes/tracura') ||
         imp.startsWith('@innostes/api-logger') ||
         imp.includes('../../modules') ||

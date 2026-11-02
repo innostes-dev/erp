@@ -1,0 +1,205 @@
+---
+title: "Update retention, sampling, or scrubbing settings"
+description: "Update retention, sampling, or scrubbing settings"
+---
+
+<ApiEndpoint method="PATCH" path="/plugins/tracura/v1/settings" auth="BearerAuth" />
+
+
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Query parameters
+
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `project_id` | string \| null | No | — | Project scope override |
+| `environment_id` | string \| null | No | — | Environment scope override |
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant context UUID |
+| `X-API-Key` | string \| null | No | Scoped Ingestion / Management API Key (inno_log_live_...) |
+
+## Request body
+
+Payload model: [SettingsUpdate](/api-reference/schemas/settings-update)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `retention_days` | integer \| null | No | Log retention period in days |
+| `max_body_size_bytes` | integer \| null | No | Max body capture bytes before truncation |
+| `sampling_rate` | number \| null | No | Sampling rate from 0.01 (1%) to 1.00 (100%) |
+| `capture_headers` | boolean \| null | No | — |
+| `capture_body` | boolean \| null | No | — |
+| `log_errors_only` | boolean \| null | No | — |
+| `excluded_paths` | string[] \| null | No | — |
+| `sensitive_headers` | string[] \| null | No | — |
+| `sensitive_body_fields` | string[] \| null | No | — |
+| `mask_client_ip` | boolean \| null | No | — |
+
+### Request example
+
+```json
+{
+  "retention_days": {},
+  "max_body_size_bytes": {},
+  "sampling_rate": {},
+  "capture_headers": {},
+  "capture_body": {},
+  "log_errors_only": {},
+  "excluded_paths": {},
+  "sensitive_headers": {},
+  "sensitive_body_fields": {},
+  "mask_client_ip": {}
+}
+```
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [SettingsRead](/api-reference/schemas/settings-read)
+
+```json
+{
+  "id": "string",
+  "tenant_id": "string",
+  "project_id": {},
+  "environment_id": {},
+  "retention_days": 1,
+  "max_body_size_bytes": 1,
+  "sampling_rate": 1,
+  "capture_headers": true,
+  "capture_body": true,
+  "log_errors_only": true,
+  "excluded_paths": [
+    "string"
+  ],
+  "sensitive_headers": [
+    "string"
+  ],
+  "sensitive_body_fields": [
+    "string"
+  ],
+  "mask_client_ip": true,
+  "created_at": {},
+  "updated_at": {}
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X PATCH "http://localhost:8001/plugins/tracura/v1/settings" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "retention_days": {},
+    "max_body_size_bytes": {},
+    "sampling_rate": {},
+    "capture_headers": {},
+    "capture_body": {},
+    "log_errors_only": {},
+    "excluded_paths": {},
+    "sensitive_headers": {},
+    "sensitive_body_fields": {},
+    "mask_client_ip": {}
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/plugins/tracura/v1/settings', {
+  method: 'PATCH',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "retention_days": {},
+    "max_body_size_bytes": {},
+    "sampling_rate": {},
+    "capture_headers": {},
+    "capture_body": {},
+    "log_errors_only": {},
+    "excluded_paths": {},
+    "sensitive_headers": {},
+    "sensitive_body_fields": {},
+    "mask_client_ip": {}
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+    "Content-Type": "application/json",
+}
+
+response = httpx.patch(
+    "http://localhost:8001/plugins/tracura/v1/settings",
+    headers=headers,
+    json={
+      "retention_days": {},
+      "max_body_size_bytes": {},
+      "sampling_rate": {},
+      "capture_headers": {},
+      "capture_body": {},
+      "log_errors_only": {},
+      "excluded_paths": {},
+      "sensitive_headers": {},
+      "sensitive_body_fields": {},
+      "mask_client_ip": {}
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="PATCH" path="/plugins/tracura/v1/settings" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"retention_days\": {},\n  \"max_body_size_bytes\": {},\n  \"sampling_rate\": {},\n  \"capture_headers\": {},\n  \"capture_body\": {},\n  \"log_errors_only\": {},\n  \"excluded_paths\": {},\n  \"sensitive_headers\": {},\n  \"sensitive_body_fields\": {},\n  \"mask_client_ip\": {}\n}"} />

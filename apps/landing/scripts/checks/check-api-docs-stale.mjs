@@ -22,8 +22,8 @@ const tagSlugs = {
   Setup: 'setup',
   Tenancy: 'tenancy',
   'User management': 'user-management',
-  CRM: 'crm',
-  HRMS: 'hrms',
+  RevOps: 'revops',
+  PeopleOps: 'peopleops',
   'API logger': 'api-logger',
 };
 

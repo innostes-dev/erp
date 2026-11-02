@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,11 +18,14 @@ import {
   LayoutGrid,
   Users,
   Building2,
-  CheckCircle2,
   ArrowRight,
   Power,
   PowerOff,
-  Filter,
+  UserCheck,
+  Landmark,
+  Package,
+  CheckSquare,
+  BookOpen,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';
@@ -30,10 +33,20 @@ import type { CatalogItem } from '../catalog';
 
 function getModuleIcon(id: string) {
   switch (id) {
-    case 'hrms':
+    case 'peopleops':
       return <Users className="size-5" />;
-    case 'crm':
+    case 'revops':
       return <Building2 className="size-5" />;
+    case 'hireflow':
+      return <UserCheck className="size-5" />;
+    case 'ledgerflow':
+      return <Landmark className="size-5" />;
+    case 'stockflow':
+      return <Package className="size-5" />;
+    case 'sprintflow':
+      return <CheckSquare className="size-5" />;
+    case 'docflow':
+      return <BookOpen className="size-5" />;
     default:
       return <LayoutGrid className="size-5" />;
   }

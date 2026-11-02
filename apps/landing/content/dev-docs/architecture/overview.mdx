@@ -19,7 +19,8 @@ innostes ERP is built from **two engines** and **plug-ins** that add features to
         ┌───────────────┴───────────────┬───────────────┴───────────────┐
         │                               │                               │
  ┌──────┴────────┐               ┌──────┴────────┐               ┌──────┴────────┐
- │ kernel        │               │ module: hrms  │               │ module: crm   │  ...
+ │ kernel        │               │ module:       │               │ module:       │  ...
+ │               │               │ peopleops     │               │ revops        │
  │ backend/      │               │ backend/      │               │ backend/      │
  │ frontend/     │               │ frontend/     │               │ frontend/     │
  └───────────────┘               └───────────────┘               └───────────────┘
@@ -56,12 +57,12 @@ A plug-in is a self-contained feature package with a backend part and a frontend
 - The **backend** part is a Python package. The backend engine installs it and discovers it automatically via `innostes.modules` entry points.
 - The **frontend** part is a pnpm workspace package. The UI engine depends on it and renders its routes and navigation items from its exported manifest.
 
-The **kernel** is the platform foundation plug-in. It provides shared infrastructure (`core`), identity and access management (`auth`, `user`), and multi-tenancy (`tenancy`, `setup`). Domain business modules (`modules/hrms`, `modules/crm`) and platform plugins (`plugins/api-logger`) follow the identical two-part packaging convention.
+The **kernel** is the platform foundation plug-in. It provides shared infrastructure (`core`), identity and access management (`auth`, `user`), and multi-tenancy (`tenancy`, `setup`). Domain business modules (`modules/peopleops`, `modules/revops`) and platform plugins (`plugins/tracura`) follow the identical two-part packaging convention.
 
 See [Building Blocks](/docs/architecture/building-blocks) for comprehensive container and engine designs, and [Plug-in Contract](/docs/architecture/plugin-contract) for the strict module integration contract.
 
 <Callout type="info" title="Status">
-  The kernel, HRMS, CRM, and API Logger plug-ins are active on both sides. `kernel/backend` is loaded dynamically by `api-server`. `kernel/frontend` and domain module manifests (`@innostes/hrms`, `@innostes/crm`, `@innostes/api-logger`) are registered in `apps/web-app/src/app/catalog.ts` and routed via `AppRouter`.
+  The kernel, PeopleOps, RevOps, and Tracura plug-ins are active on both sides. `kernel/backend` is loaded dynamically by `api-server`. `kernel/frontend` and domain module manifests (`@innostes/peopleops`, `@innostes/revops`, `@innostes/tracura`) are registered in `apps/web-app/src/app/catalog.ts` and routed via `AppRouter`.
 </Callout>
 
 ## Invariant rules
@@ -101,11 +102,11 @@ See [Runtime View](/docs/architecture/runtime-view#2-inbound-request-lifecycle-t
     <Folder name="frontend" />
   </Folder>
   <Folder name="modules" defaultOpen>
-    <Folder name="hrms" />
-    <Folder name="crm" />
+    <Folder name="peopleops" />
+    <Folder name="revops" />
   </Folder>
   <Folder name="plugins" defaultOpen>
-    <Folder name="api-logger" />
+    <Folder name="tracura" />
   </Folder>
   <Folder name="packages" defaultOpen>
     <Folder name="ui" />

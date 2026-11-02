@@ -24,7 +24,7 @@ import { Building, Users, Home, Settings, Briefcase, Calendar } from 'lucide-rea
 import { useState } from 'react';
 
 export default function AppRailDemo() {
-  const [activeRail, setActiveRail] = useState('hrms');
+  const [activeRail, setActiveRail] = useState('peopleops');
 
   return (
     <SidebarProvider className="min-h-0 h-[28rem] w-full overflow-hidden rounded-lg border border-border">
@@ -49,13 +49,13 @@ export default function AppRailDemo() {
         />
         <AppRailItem
           icon={<Users />}
-          label="HRMS"
-          isActive={activeRail === 'hrms'}
-          onClick={() => setActiveRail('hrms')}
+          label="PeopleOps"
+          isActive={activeRail === 'peopleops'}
+          onClick={() => setActiveRail('peopleops')}
         />
         <AppRailItem
           icon={<Briefcase />}
-          label="Recruitment"
+          label="HireFlow"
           isActive={activeRail === 'recruitment'}
           onClick={() => setActiveRail('recruitment')}
           badge={3}
@@ -79,7 +79,7 @@ export default function AppRailDemo() {
           <SidebarGroup>
             <SidebarGroupLabel>Menu</SidebarGroupLabel>
             <SidebarMenu>
-              {activeRail === 'hrms' && (
+              {activeRail === 'peopleops' && (
                 <>
                   <SidebarMenuItem>
                     <SidebarMenuButton icon={<Users />} isActive>Directory</SidebarMenuButton>

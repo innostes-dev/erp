@@ -1,0 +1,156 @@
+---
+title: "Create a new telemetry project"
+description: "Create a new telemetry project"
+---
+
+<ApiEndpoint method="POST" path="/plugins/tracura/v1/projects" auth="BearerAuth" />
+
+
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant context UUID |
+| `X-API-Key` | string \| null | No | Scoped Ingestion / Management API Key (inno_log_live_...) |
+
+## Request body
+
+Payload model: [ProjectCreate](/api-reference/schemas/project-create)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | Yes | Project display name |
+| `slug` | string | Yes | URL/slug identifier |
+| `description` | string \| null | No | Optional description of the project |
+
+### Request example
+
+```json
+{
+  "name": "Payment Gateway",
+  "slug": "payment-gateway",
+  "description": {}
+}
+```
+
+## Responses
+
+### HTTP 201
+
+Successful Response
+
+Response model: [ProjectRead](/api-reference/schemas/project-read)
+
+```json
+{
+  "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+  "created_at": "2026-10-29T10:00:00Z",
+  "created_by": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+  "updated_at": "2026-10-29T10:30:00Z",
+  "updated_by": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+  "deleted_at": null,
+  "deleted_by": null,
+  "tenant_id": "string",
+  "name": "string",
+  "slug": "string",
+  "description": {},
+  "is_active": true,
+  "environments": [
+    null
+  ]
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/plugins/tracura/v1/projects" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Payment Gateway",
+    "slug": "payment-gateway",
+    "description": {}
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/plugins/tracura/v1/projects', {
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "name": "Payment Gateway",
+    "slug": "payment-gateway",
+    "description": {}
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+    "Content-Type": "application/json",
+}
+
+response = httpx.post(
+    "http://localhost:8001/plugins/tracura/v1/projects",
+    headers=headers,
+    json={
+      "name": "Payment Gateway",
+      "slug": "payment-gateway",
+      "description": {}
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="POST" path="/plugins/tracura/v1/projects" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"name\": \"Payment Gateway\",\n  \"slug\": \"payment-gateway\",\n  \"description\": {}\n}"} />

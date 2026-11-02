@@ -1,0 +1,131 @@
+---
+title: "Get single log entry details for Inspector drawer"
+description: "Get single log entry details for Inspector drawer"
+---
+
+<ApiEndpoint method="GET" path="/plugins/tracura/v1/logs/{log_id}" auth="BearerAuth" />
+
+
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Path parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `log_id` | string | Yes | — |
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant context UUID |
+| `X-API-Key` | string \| null | No | Scoped Ingestion / Management API Key (inno_log_live_...) |
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [LogRead](/api-reference/schemas/log-read)
+
+```json
+{
+  "id": "string",
+  "tenant_id": "string",
+  "project_id": "string",
+  "environment_id": "string",
+  "api_key_id": {},
+  "correlation_id": "string",
+  "user_id": {},
+  "client_ip": {},
+  "user_agent": {},
+  "http_method": "string",
+  "url": "string",
+  "path": "string",
+  "status_code": 1,
+  "duration_ms": 1,
+  "request_headers": {},
+  "query_params": {},
+  "request_body": {},
+  "response_headers": {},
+  "response_body": {},
+  "error": {},
+  "meta": {},
+  "created_at": "2026-10-29T10:00:00Z"
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/plugins/tracura/v1/logs/{log_id}" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/plugins/tracura/v1/logs/{log_id}', {
+  method: 'GET',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/plugins/tracura/v1/logs/{log_id}",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/plugins/tracura/v1/logs/{log_id}" authType="BearerAuth" hasBody={false} initialBody={""} />

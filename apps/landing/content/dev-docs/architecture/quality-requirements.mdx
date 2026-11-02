@@ -85,7 +85,7 @@ Each scenario follows the standard six-part SEI/arc42 specification:
 
 #### Scenario SC-SEC-01: Cross-Tenant Data Tampering Prevention
 - **Source**: Authenticated user belonging to Tenant A.
-- **Stimulus**: Issues `GET /crm/leads` supplying `X-Tenant-ID: <Tenant-B-UUID>` in headers.
+- **Stimulus**: Issues `GET /revops/leads` supplying `X-Tenant-ID: <Tenant-B-UUID>` in headers.
 - **Artefact**: Tenancy dependency (`get_current_tenant_id`) and `BaseService`.
 - **Environment**: Production API ingress.
 - **Response**: Dependency validates membership in `tenant_members`, detects non-membership, and halts execution before reaching domain services.
@@ -107,7 +107,7 @@ Each scenario follows the standard six-part SEI/arc42 specification:
 
 #### Scenario SC-MAIN-01: Preventing Module Boundary Violations
 - **Source**: Core engineer introducing a feature.
-- **Stimulus**: Accidental import of business module code (`modules.crm`) inside `kernel/backend`.
+- **Stimulus**: Accidental import of business module code (`modules.revops`) inside `kernel/backend`.
 - **Artefact**: Monorepo codebase.
 - **Environment**: CI pull request validation.
 - **Response**: Python import-linter contracts flag Rule 3 violation and halt the CI pipeline.

@@ -303,7 +303,7 @@ erDiagram
 | `user_profiles` | `kernel.user` | Extended profile metadata, preferences, and avatars. | `user_id`, `timezone`, `locale` | Shared |
 | `user_identities` | `kernel.user` | Encrypted identities (email, mobile) with blind index hashes. | `identifier_hash` (UNIQUE), `identifier_encrypted` | Shared |
 | `roles` | `kernel.user` | Role-Based Access Control (RBAC) definition records. | `tenant_id`, `name`, `is_system` | **Yes** |
-| `permissions` | `kernel.user` | Atomic platform permission codes (e.g. `crm:leads:read`). | `code` (UNIQUE), `module` | Global |
+| `permissions` | `kernel.user` | Atomic platform permission codes (e.g. `revops:leads:read`). | `code` (UNIQUE), `module` | Global |
 | `role_permissions` | `kernel.user` | Join table binding permissions to roles. | `role_id`, `permission_id` | **Yes** |
 | `user_roles` | `kernel.user` | Active role assignments scoped by tenant. | `user_id`, `role_id`, `tenant_id` | **Yes** |
 | `api_keys` | `kernel.auth` | Permanent Personal API Keys (`inno_live_...`). | `key_prefix`, `key_hash`, `tenant_id`, `scopes` | **Yes** |

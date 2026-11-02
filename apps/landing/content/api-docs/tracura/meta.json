@@ -1,6 +1,27 @@
 {
-  "title": "API logger",
+  "title": "Tracura",
   "pages": [
-    "tracura-get-info"
+    "ingest-single-log-tracura-v1-ingest-post",
+    "ingest-batch-logs-tracura-v1-ingest-batch-post",
+    "tracura-get-info",
+    "ingest-single-log-plugins-tracura-v1-ingest-post",
+    "ingest-batch-logs-plugins-tracura-v1-ingest-batch-post",
+    "list-projects-plugins-tracura-v1-projects-get",
+    "create-project-plugins-tracura-v1-projects-post",
+    "get-project-plugins-tracura-v1-projects-project-id-get",
+    "update-project-plugins-tracura-v1-projects-project-id-patch",
+    "delete-project-plugins-tracura-v1-projects-project-id-delete",
+    "list-environments-plugins-tracura-v1-projects-project-id-environments-get",
+    "create-environment-plugins-tracura-v1-projects-project-id-environments-post",
+    "update-environment-plugins-tracura-v1-projects-project-id-environments-environment-id-patch",
+    "delete-environment-plugins-tracura-v1-projects-project-id-environments-environment-id-delete",
+    "list-api-keys-plugins-tracura-v1-keys-get",
+    "create-api-key-plugins-tracura-v1-keys-post",
+    "revoke-api-key-plugins-tracura-v1-keys-key-id-delete",
+    "get-settings-plugins-tracura-v1-settings-get",
+    "update-settings-plugins-tracura-v1-settings-patch",
+    "query-logs-plugins-tracura-v1-logs-get",
+    "get-log-plugins-tracura-v1-logs-log-id-get",
+    "get-dashboard-metrics-plugins-tracura-v1-analytics-dashboard-get"
   ]
 }

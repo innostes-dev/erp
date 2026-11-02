@@ -1,10 +1,10 @@
 ---
 title: Creating a Business Module
-description: Step-by-step guide for scaffolding a fresh business module (e.g. HRMS, CRM, Finance) across backend and frontend.
+description: Step-by-step guide for scaffolding a fresh business module (e.g. PeopleOps, RevOps, HireFlow) across backend and frontend.
 icon: LayoutGrid
 ---
 
-A **Business Module** is a first-class business domain application in the Innostes ERP platform (e.g., `hrms`, `crm`, `finance`).
+A **Business Module** is a first-class business domain application in the Innostes ERP platform (e.g., `peopleops`, `revops`, `hireflow`).
 Modules are isolated, tenant-aware, discoverable via Python entry points, and rendered in dedicated responsive application shells with the top-level **App Switcher**.
 
 Super Admins can activate or deactivate modules per tenant via `/modules`. On initial deployment, 0 modules are active, providing an empty-state activation prompt.
@@ -16,23 +16,23 @@ Super Admins can activate or deactivate modules per tenant via `/modules`. On in
 Every business module lives under `modules/<name>/` with decoupled backend and frontend packages:
 
 ```text
-modules/hrms/
+modules/peopleops/
 ├── backend/
 │   ├── pyproject.toml
-│   ├── hrms/
-│   │   ├── __init__.py          # Exports HrmsModule(BaseModule)
+│   ├── peopleops/
+│   │   ├── __init__.py          # Exports PeopleOpsModule(BaseModule)
 │   │   ├── router.py            # FastAPI APIRouter
 │   │   ├── models/              # SQLAlchemy domain models
 │   │   ├── schemas/             # Pydantic schemas
 │   │   └── services/            # Domain business logic
 │   └── tests/
-│       └── test_hrms.py         # Pytest test suite
+│       └── test_peopleops.py    # Pytest test suite
 └── frontend/
-    ├── package.json             # @innostes/hrms
+    ├── package.json             # @innostes/peopleops
     ├── tsconfig.json
     └── src/
         ├── manifest.ts          # Catalog manifest & metadata
-        ├── HrmsPage.tsx         # Page component with @innostes/ui
+        ├── PeopleOpsPage.tsx    # Page component with @innostes/ui
         └── index.ts             # Public exports
 ```
 
@@ -67,13 +67,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "innostes-hrms"
+name = "innostes-peopleops"
 version = "0.1.0"
-description = "HRMS business module for Innostes ERP"
+description = "PeopleOps business module for Innostes ERP"
 dependencies = ["fastapi", "kernel"]
 
 [project.entry-points."innostes.modules"]
-hrms = "hrms:module"
+peopleops = "peopleops:module"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -81,32 +81,32 @@ where = ["."]
 
 Create the module class implementing `BaseModule`:
 
-```python title="modules/<name>/backend/hrms/__init__.py"
+```python title="modules/<name>/backend/peopleops/__init__.py"
 from kernel.core.module import BaseModule
 from .router import router
 
-class HrmsModule(BaseModule):
-    name = "hrms"
+class PeopleOpsModule(BaseModule):
+    name = "peopleops"
     version = "0.1.0"
-    description = "Human Resources & Payroll management module"
+    description = "People Operations & Workforce management module"
     router = router
-    openapi_tags = [{"name": "HRMS", "description": "Human Resources & Payroll operations"}]
+    openapi_tags = [{"name": "PeopleOps", "description": "People Operations & Workforce operations"}]
 
-module = HrmsModule()
+module = PeopleOpsModule()
 ```
 
 Define the initial router skeleton:
 
-```python title="modules/<name>/backend/hrms/router.py"
+```python title="modules/<name>/backend/peopleops/router.py"
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/hrms", tags=["HRMS"])
+router = APIRouter(prefix="/peopleops", tags=["PeopleOps"])
 
 @router.get("/info")
 def get_info():
     return {
-        "module": "hrms",
-        "name": "Human Resource Management System",
+        "module": "peopleops",
+        "name": "People Operations",
         "status": "ready",
         "features": ["employees", "leave", "payroll", "attendance"],
     }
@@ -115,7 +115,7 @@ def get_info():
 Add the backend package to `apps/api-server/requirements.txt`:
 
 ```text title="apps/api-server/requirements.txt"
--e ../../modules/hrms/backend
+-e ../../modules/peopleops/backend
 ```
 
 Install into the virtualenv:
@@ -133,7 +133,7 @@ Create `modules/<name>/frontend/package.json`:
 
 ```json title="modules/<name>/frontend/package.json"
 {
-  "name": "@innostes/hrms",
+  "name": "@innostes/peopleops",
   "version": "0.1.0",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -161,15 +161,15 @@ export interface ModuleManifest {
   subFeatures: { id: string; label: string; description: string }[];
 }
 
-export const hrmsManifest: ModuleManifest = {
-  id: 'hrms',
-  name: 'HRMS',
+export const peopleopsManifest: ModuleManifest = {
+  id: 'peopleops',
+  name: 'PeopleOps',
   version: '0.1.0',
   description: 'Manage employees, leave balances, attendance tracking, and payroll runs.',
   type: 'module',
   tags: ['hr', 'employees', 'payroll', 'attendance'],
   tone: 'chart-3',
-  href: '/modules/hrms',
+  href: '/modules/peopleops',
   subFeatures: [
     { id: 'overview', label: 'Overview', description: 'Headcount metrics and upcoming leaves' },
     { id: 'employees', label: 'Employees', description: 'Staff directory and records' },
@@ -181,17 +181,17 @@ export const hrmsManifest: ModuleManifest = {
 
 Build the page component using `@innostes/ui` primitives:
 
-```tsx title="modules/<name>/frontend/src/HrmsPage.tsx"
+```tsx title="modules/<name>/frontend/src/PeopleOpsPage.tsx"
 import React, { useState } from 'react';
 import { PageHeader, Tabs, TabsList, TabsTab, TabsPanel, Card, CardHeader, CardTitle } from '@innostes/ui';
 
-export function HrmsPage() {
+export function PeopleOpsPage() {
   const [tab, setTab] = useState('overview');
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Human Resources (HRMS)"
+        title="People Operations (PeopleOps)"
         description="Employee lifecycle, attendance, and payroll processing."
       />
       <Tabs value={tab} onValueChange={setTab}>
@@ -213,8 +213,8 @@ export function HrmsPage() {
 Export everything in `src/index.ts`:
 
 ```typescript title="modules/<name>/frontend/src/index.ts"
-export { HrmsPage } from './HrmsPage';
-export { hrmsManifest } from './manifest';
+export { PeopleOpsPage } from './PeopleOpsPage';
+export { peopleopsManifest } from './manifest';
 ```
 
 </Step>
@@ -222,24 +222,24 @@ export { hrmsManifest } from './manifest';
 
 ### Connect to Web App
 
-1. Add `@innostes/hrms` to `apps/web-app/package.json`:
+1. Add `@innostes/peopleops` to `apps/web-app/package.json`:
    ```bash
-   pnpm --filter @innostes/web-app add @innostes/hrms@workspace:*
+   pnpm --filter @innostes/web-app add @innostes/peopleops@workspace:*
    ```
 
 2. Register the manifest in `apps/web-app/src/app/catalog.ts`:
    ```typescript
-   import { hrmsManifest } from '@innostes/hrms';
+   import { peopleopsManifest } from '@innostes/peopleops';
 
    export const BUSINESS_MODULES_CATALOG = [
-     hrmsManifest,
+     peopleopsManifest,
      // ...
    ];
    ```
 
 3. Mount in `apps/web-app/src/app/components/ModuleShellLayout.tsx`:
    ```tsx
-   {moduleId === 'hrms' ? <HrmsPage /> : ...}
+   {moduleId === 'peopleops' ? <PeopleOpsPage /> : ...}
    ```
 
 </Step>
@@ -251,7 +251,7 @@ Run the verification suite:
 
 ```bash
 # Test backend module
-pytest modules/hrms/backend/tests
+pytest modules/peopleops/backend/tests
 
 # Build web application
 pnpm nx build web-app

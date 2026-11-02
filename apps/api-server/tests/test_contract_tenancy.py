@@ -323,7 +323,7 @@ class TestContractTenancy(unittest.TestCase):
     def test_tenants_activate_module__200_activates_module(self) -> None:
         """POST /tenants/current/modules/{module_id}/activate returns 200."""
         headers = {**self.auth_headers, "X-Tenant-ID": str(self.tenant_id)}
-        res = self.client.post("/tenants/current/modules/hrms/activate", headers=headers)
+        res = self.client.post("/tenants/current/modules/peopleops/activate", headers=headers)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/activate", "post", res.status_code)
 
@@ -332,7 +332,7 @@ class TestContractTenancy(unittest.TestCase):
         async def fake_unauth():
             raise UnauthorizedError()
         app.dependency_overrides[require_super_admin_dep] = fake_unauth
-        res = self.client.post("/tenants/current/modules/hrms/activate")
+        res = self.client.post("/tenants/current/modules/peopleops/activate")
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/activate", "post", res.status_code)
 
@@ -341,7 +341,7 @@ class TestContractTenancy(unittest.TestCase):
         async def fake_forbid():
             raise ForbiddenError("Super administrator privilege required.")
         app.dependency_overrides[require_super_admin_dep] = fake_forbid
-        res = self.client.post("/tenants/current/modules/hrms/activate", headers=self.auth_headers)
+        res = self.client.post("/tenants/current/modules/peopleops/activate", headers=self.auth_headers)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/activate", "post", res.status_code)
 
@@ -350,7 +350,7 @@ class TestContractTenancy(unittest.TestCase):
         async def fake_no_tenant():
             raise TenantNotFoundError()
         app.dependency_overrides[get_current_tenant_id] = fake_no_tenant
-        res = self.client.post("/tenants/current/modules/hrms/activate", headers=self.auth_headers)
+        res = self.client.post("/tenants/current/modules/peopleops/activate", headers=self.auth_headers)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/activate", "post", res.status_code)
 
@@ -359,7 +359,7 @@ class TestContractTenancy(unittest.TestCase):
     def test_tenants_deactivate_module__200_deactivates_module(self) -> None:
         """POST /tenants/current/modules/{module_id}/deactivate returns 200."""
         headers = {**self.auth_headers, "X-Tenant-ID": str(self.tenant_id)}
-        res = self.client.post("/tenants/current/modules/hrms/deactivate", headers=headers)
+        res = self.client.post("/tenants/current/modules/peopleops/deactivate", headers=headers)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/deactivate", "post", res.status_code)
 
@@ -368,7 +368,7 @@ class TestContractTenancy(unittest.TestCase):
         async def fake_unauth():
             raise UnauthorizedError()
         app.dependency_overrides[require_super_admin_dep] = fake_unauth
-        res = self.client.post("/tenants/current/modules/hrms/deactivate")
+        res = self.client.post("/tenants/current/modules/peopleops/deactivate")
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/deactivate", "post", res.status_code)
 
@@ -377,7 +377,7 @@ class TestContractTenancy(unittest.TestCase):
         async def fake_forbid():
             raise ForbiddenError("Super administrator privilege required.")
         app.dependency_overrides[require_super_admin_dep] = fake_forbid
-        res = self.client.post("/tenants/current/modules/hrms/deactivate", headers=self.auth_headers)
+        res = self.client.post("/tenants/current/modules/peopleops/deactivate", headers=self.auth_headers)
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/deactivate", "post", res.status_code)
 
@@ -386,7 +386,7 @@ class TestContractTenancy(unittest.TestCase):
         async def fake_no_tenant():
             raise TenantNotFoundError()
         app.dependency_overrides[get_current_tenant_id] = fake_no_tenant
-        res = self.client.post("/tenants/current/modules/hrms/deactivate", headers=self.auth_headers)
+        res = self.client.post("/tenants/current/modules/peopleops/deactivate", headers=self.auth_headers)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         validate_response_contract(res.json(), "/tenants/current/modules/{module_id}/deactivate", "post", res.status_code)
 

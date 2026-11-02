@@ -53,16 +53,25 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await apiRequest<{ tenant_id: string; items: Array<{ id: string; is_active: boolean }> }>(
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await apiRequest<{ installed?: Array<{ id: string; is_active: boolean }>; active_ids?: string[]; items?: Array<{ id: string; is_active: boolean }> }>(
         '/tenants/current/modules',
         { headers }
       );
-      if (res && Array.isArray(res.items)) {
-        const activeIds = new Set<string>(
-          res.items.filter((item) => item.is_active).map((item) => item.id)
-        );
-        syncActiveModules(activeIds);
+      if (res) {
+        if (Array.isArray(res.active_ids)) {
+          syncActiveModules(new Set<string>(res.active_ids));
+        } else if (Array.isArray(res.installed)) {
+          const activeIds = new Set<string>(
+            res.installed.filter((item) => item.is_active).map((item) => item.id)
+          );
+          syncActiveModules(activeIds);
+        } else if (Array.isArray(res.items)) {
+          const activeIds = new Set<string>(
+            res.items.filter((item) => item.is_active).map((item) => item.id)
+          );
+          syncActiveModules(activeIds);
+        }
       }
     } catch {
       // If backend is unconfigured or not yet answering, keep existing local state
@@ -82,7 +91,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       await apiRequest(`/tenants/current/modules/${id}/activate`, {
         method: 'POST',
         headers,
@@ -99,7 +108,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       await apiRequest(`/tenants/current/modules/${id}/deactivate`, {
         method: 'POST',
         headers,

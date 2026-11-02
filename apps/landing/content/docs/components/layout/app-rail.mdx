@@ -24,7 +24,7 @@ import {
 
 Use `AppRail` when building two-tier enterprise navigation suites:
 
-- **Multi-module ERP platforms**: Fast switching between Procurement, Inventory, Finance, and HRMS.
+- **Multi-module ERP platforms**: Fast switching between LedgerFlow, StockFlow, HireFlow, and PeopleOps.
 - **Persistent workspace switcher**: Keeping global shortcuts reachable regardless of current deep view.
 - **High-density desktop apps**: Minimising horizontal space loss while retaining full-screen module switching.
 
@@ -84,7 +84,7 @@ export function ErpShell({ children }) {
           <AppRailItem
             icon={<Users />}
             label="Employees"
-            render={<Link href="/hrms" />}
+            render={<Link href="/peopleops" />}
           />
         </AppRailFooter>
       </AppRail>

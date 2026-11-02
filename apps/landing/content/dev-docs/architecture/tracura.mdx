@@ -26,7 +26,7 @@ flowchart TD
   end
 
   subgraph InProcessHost["In-Process ERP Monolith"]
-    FastAPIApp["Incoming ERP HTTP Request\n(/auth, /users, /tenants, /hrms, /crm)"]
+    FastAPIApp["Incoming ERP HTTP Request\n(/auth, /users, /tenants, /peopleops, /revops)"]
     CaptureMiddleware["TracuraCaptureMiddleware\n[Deterministic Scoping & Correlation ID]"]
   end
 

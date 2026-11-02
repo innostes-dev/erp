@@ -284,7 +284,7 @@ class TestContractAuth(unittest.TestCase):
         now = datetime.now(timezone.utc)
         mock_read = ApiKeyRead(
             id=key_id,
-            name="Zapier CRM Sync",
+            name="Zapier RevOps Sync",
             key_prefix="inno_live_xK9p",
             scopes=["*"],
             expires_at=None,
@@ -293,14 +293,14 @@ class TestContractAuth(unittest.TestCase):
             created_at=now,
         )
         self.mock_api_key.create_api_key = AsyncMock(return_value=(mock_read, "inno_live_secret12345"))
-        payload = {"name": "Zapier CRM Sync", "scopes": ["*"]}
+        payload = {"name": "Zapier RevOps Sync", "scopes": ["*"]}
         res = self.client.post("/auth/api-keys", json=payload, headers=self.auth_headers)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         validate_response_contract(res.json(), "/auth/api-keys", "post", res.status_code)
 
     def test_auth_create_api_key__401_unauthorized_without_token(self) -> None:
         """POST /auth/api-keys returns 401 when calling without bearer token."""
-        payload = {"name": "Zapier CRM Sync"}
+        payload = {"name": "Zapier RevOps Sync"}
         res = self.client.post("/auth/api-keys", json=payload)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
         validate_response_contract(res.json(), "/auth/api-keys", "post", res.status_code)
@@ -320,7 +320,7 @@ class TestContractAuth(unittest.TestCase):
         now = datetime.now(timezone.utc)
         mock_read = ApiKeyRead(
             id=key_id,
-            name="Zapier CRM Sync",
+            name="Zapier RevOps Sync",
             key_prefix="inno_live_xK9p",
             scopes=["*"],
             expires_at=None,

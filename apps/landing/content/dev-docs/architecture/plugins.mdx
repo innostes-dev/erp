@@ -18,7 +18,8 @@ innostes ERP implements a modular, plug-in architecture where both the backend e
  ┌───────────────────────────┴────────────────────────────┐
  │                   innostes.modules                     │
  │   ┌───────────────┬───────────────┬────────────────┐   │
- │   │ kernel (core) │ hrms (domain) │ crm (domain)   │   │
+ │   │ kernel (core) │ peopleops     │ revops         │   │
+ │   │               │ (domain)      │ (domain)       │   │
  │   └───────────────┴───────────────┴────────────────┘   │
  └────────────────────────────────────────────────────────┘
 ```
@@ -27,9 +28,9 @@ innostes ERP implements a modular, plug-in architecture where both the backend e
 
 Backend plug-ins are standard Python packages that publish their `BaseModule` instance in the `innostes.modules` entry-point group in `pyproject.toml`:
 
-```toml title="modules/hrms/backend/pyproject.toml"
+```toml title="modules/peopleops/backend/pyproject.toml"
 [project.entry-points."innostes.modules"]
-hrms = "hrms:module"
+peopleops = "peopleops:module"
 ```
 
 During startup lifespan initialization, `ModuleLoader` inspects installed entry points, mounts route collections, injects custom OpenAPI tags, and configures startup/shutdown lifecycle hooks:
@@ -47,12 +48,12 @@ For the complete technical specification of module registration, lifecycle metho
 Frontend plug-ins are pnpm workspace packages consumed directly from source. Each package exports a declarative module or plugin manifest declaring routes, navigation links, and sub-features:
 
 ```ts title="apps/web-app/src/app/catalog.ts"
-import { hrmsManifest } from '@innostes/hrms';
-import { crmManifest } from '@innostes/crm';
-import { apiLoggerManifest } from '@innostes/api-logger';
+import { peopleopsManifest } from '@innostes/peopleops';
+import { revopsManifest } from '@innostes/revops';
+import { tracuraManifest } from '@innostes/tracura';
 
-export const BUSINESS_MODULES_CATALOG = [hrmsManifest, crmManifest];
-export const PLUGINS_CATALOG = [apiLoggerManifest];
+export const BUSINESS_MODULES_CATALOG = [peopleopsManifest, revopsManifest];
+export const PLUGINS_CATALOG = [tracuraManifest];
 ```
 
 The UI engine mounts navigation and route trees dynamically from this catalog, gating module visibility based on active tenant subscriptions.
@@ -65,5 +66,5 @@ For manifest interfaces, route definitions, and packaging standards, see [Fronte
 
 - [Building Blocks](/docs/architecture/building-blocks) — C4 container and component diagrams.
 - [Plug-in Contract](/docs/architecture/plugin-contract) — Formal architectural contract and invariants.
-- [Creating a Business Module](/docs/guides/creating-a-module) — Step-by-step guide for scaffolding business modules (`modules/hrms`, `modules/crm`).
-- [Creating an Extensible Plugin](/docs/guides/creating-a-plugin) — Step-by-step guide for platform and telemetry extensions (`plugins/api-logger`).
+- [Creating a Business Module](/docs/guides/creating-a-module) — Step-by-step guide for scaffolding business modules (`modules/peopleops`, `modules/revops`).
+- [Creating an Extensible Plugin](/docs/guides/creating-a-plugin) — Step-by-step guide for platform and telemetry extensions (`plugins/tracura`).

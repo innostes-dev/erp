@@ -1,6 +1,6 @@
 # innostes UI
 
-> A production-grade design system and React component library engineered for enterprise ERP, HRMS, and CRM platforms. Accessible, WCAG 2.2 AA compliant, and localized.
+> A production-grade design system and React component library engineered for enterprise ERP, PeopleOps, and RevOps platforms. Accessible, WCAG 2.2 AA compliant, and localized.
 
 ## Core Documentation
 - [Accessibility Statement](https://innostes.com/ui/docs/accessibility): WCAG 2.2 Level AA conformance, component guarantees, developer responsibilities, and assistive technology testing.

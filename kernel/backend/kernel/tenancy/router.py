@@ -546,19 +546,54 @@ async def list_current_modules(
     installed: list[ItemCatalogRead] = []
 
     MODULE_METADATA = {
-        "hrms": {
-            "name": "HRMS",
+        "peopleops": {
+            "name": "PeopleOps",
             "version": "0.1.0",
-            "description": "People and human resources",
-            "tags": ["Employees", "Leave", "Payroll"],
+            "description": "People operations, attendance, leave, and payroll",
+            "tags": ["Employees", "Attendance", "Leave", "Payroll"],
             "tone": "chart-3",
         },
-        "crm": {
-            "name": "CRM",
+        "revops": {
+            "name": "RevOps",
             "version": "0.1.0",
-            "description": "Customers and relationships",
-            "tags": ["Leads", "Deals", "Pipeline"],
+            "description": "Revenue operations, customer pipeline, deals, and quotes",
+            "tags": ["Leads", "Deals", "Pipeline", "Quotes"],
             "tone": "chart-2",
+        },
+        "hireflow": {
+            "name": "HireFlow",
+            "version": "0.1.0",
+            "description": "Frictionless hiring pipeline, candidate tracking, and interview scheduling",
+            "tags": ["Recruiting", "Jobs", "Candidates", "Interviews"],
+            "tone": "chart-4",
+        },
+        "ledgerflow": {
+            "name": "LedgerFlow",
+            "version": "0.1.0",
+            "description": "General ledger, double-entry vouchers, AP/AR, cash flow, and tax compliance",
+            "tags": ["Ledger", "AP", "AR", "Tax", "Banking"],
+            "tone": "chart-1",
+        },
+        "stockflow": {
+            "name": "StockFlow",
+            "version": "0.1.0",
+            "description": "Multi-warehouse stock flow, item bins, procurement POs, and reorder alerts",
+            "tags": ["Stock", "Procurement", "Warehouse", "Valuation"],
+            "tone": "chart-5",
+        },
+        "sprintflow": {
+            "name": "SprintFlow",
+            "version": "0.1.0",
+            "description": "Agile sprint execution, burndown velocity, epics, and issue tracking",
+            "tags": ["Agile", "Scrum", "Kanban", "Sprints", "Bugs"],
+            "tone": "chart-2",
+        },
+        "docflow": {
+            "name": "DocFlow",
+            "version": "0.1.0",
+            "description": "Living team documentation, company SOPs, blueprints, and architecture wiki",
+            "tags": ["Knowledge", "Wiki", "SOPs", "PRDs", "Handbook"],
+            "tone": "chart-3",
         },
     }
 
@@ -607,7 +642,7 @@ async def list_current_modules(
     ),
 )
 async def activate_module(
-    module_id: str = Path(description="Package identifier of business module to activate.", examples=["hrms"]),
+    module_id: str = Path(description="Package identifier of business module to activate.", examples=["peopleops"]),
     request: Request = None,
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
@@ -697,7 +732,7 @@ async def activate_module(
     ),
 )
 async def deactivate_module(
-    module_id: str = Path(description="Package identifier of business module to deactivate.", examples=["hrms"]),
+    module_id: str = Path(description="Package identifier of business module to deactivate.", examples=["peopleops"]),
     request: Request = None,
     session: AsyncSession = Depends(get_db),
     admin_user: User = Depends(require_super_admin_dep),
@@ -899,14 +934,16 @@ async def activate_plugin(
         )
         session.add(rec)
 
-    # Trigger plugin activation lifecycle hook
-    if plugin_id == "tracura":
-        try:
-            from tracura import plugin as tracura_plugin
-            if hasattr(tracura_plugin, "on_tenant_activate"):
-                await tracura_plugin.on_tenant_activate(session=session, tenant_id=tenant_id, actor_id=admin_user.id)
-        except Exception:
-            pass
+    # Trigger plugin activation lifecycle hook dynamically via entry points
+    try:
+        from importlib.metadata import entry_points
+        eps = [ep for ep in entry_points(group="innostes.plugins") if ep.name == plugin_id]
+        if eps:
+            loaded_plugin = eps[0].load()
+            if hasattr(loaded_plugin, "on_tenant_activate"):
+                await loaded_plugin.on_tenant_activate(session=session, tenant_id=tenant_id, actor_id=admin_user.id)
+    except Exception:
+        pass
 
     try:
         from kernel.audit import audit_service
@@ -988,14 +1025,16 @@ async def deactivate_plugin(
         rec.activated_at = None
         rec.activated_by = None
 
-    # Trigger plugin deactivation lifecycle hook
-    if plugin_id == "tracura":
-        try:
-            from tracura import plugin as tracura_plugin
-            if hasattr(tracura_plugin, "on_tenant_deactivate"):
-                await tracura_plugin.on_tenant_deactivate(session=session, tenant_id=tenant_id, actor_id=admin_user.id)
-        except Exception:
-            pass
+    # Trigger plugin deactivation lifecycle hook dynamically via entry points
+    try:
+        from importlib.metadata import entry_points
+        eps = [ep for ep in entry_points(group="innostes.plugins") if ep.name == plugin_id]
+        if eps:
+            loaded_plugin = eps[0].load()
+            if hasattr(loaded_plugin, "on_tenant_deactivate"):
+                await loaded_plugin.on_tenant_deactivate(session=session, tenant_id=tenant_id, actor_id=admin_user.id)
+    except Exception:
+        pass
 
     try:
         from kernel.audit import audit_service

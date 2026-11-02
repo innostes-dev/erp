@@ -245,7 +245,7 @@ class TestContractGuard(unittest.TestCase):
                     .replace("{tenant_id}", str(self.tenant_id))
                     .replace("{user_id}", str(self.user_id))
                     .replace("{key_id}", str(uuid.uuid4()))
-                    .replace("{module_id}", "hrms")
+                    .replace("{module_id}", "peopleops")
                     .replace("{plugin_id}", "api-logger")
                 )
 
@@ -289,7 +289,7 @@ class TestContractGuard(unittest.TestCase):
                         .replace("{tenant_id}", str(self.tenant_id))
                         .replace("{user_id}", str(self.user_id))
                         .replace("{key_id}", str(uuid.uuid4()))
-                        .replace("{module_id}", "hrms")
+                        .replace("{module_id}", "peopleops")
                         .replace("{plugin_id}", "api-logger")
                     )
 

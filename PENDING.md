@@ -21,7 +21,7 @@ and a "Definition of done" checklist, so nothing gets missed or hand-waved. Star
 | 5 | [05-docs-dashboard-widgets.md](prompts/05-docs-dashboard-widgets.md) | Docs: EntityList, ActivityFeed, ActionList, WelcomeBanner, QuickActions |
 | 6 | [06-docs-charts.md](prompts/06-docs-charts.md) | Docs: `@innostes/ui/charts` |
 | 7 | [07-docs-customization-conventions.md](prompts/07-docs-customization-conventions.md) | Update the Conventions page with all 5+ customization mechanisms |
-| 8 | [08-docs-full-dashboard-example.md](prompts/08-docs-full-dashboard-example.md) | Rebuild the full HRMS-style dashboard example |
+| 8 | [08-docs-full-dashboard-example.md](prompts/08-docs-full-dashboard-example.md) | Rebuild the full PeopleOps-style dashboard example |
 | 9 | [09-npm-packaging-readiness.md](prompts/09-npm-packaging-readiness.md) | publint, attw, size-limit, LICENSE, CHANGELOG, package.json audit |
 | 10 | [10-ci-pnpm-migration.md](prompts/10-ci-pnpm-migration.md) | CI: npm → pnpm |
 | 11 | [11-rough-edges-fixups.md](prompts/11-rough-edges-fixups.md) | The 4 known rough edges below |
@@ -69,7 +69,7 @@ and a "Definition of done" checklist, so nothing gets missed or hand-waved. Star
   `SidebarMenuSub` / `SidebarMenuSubItem` / `SidebarMenuSubButton` (nested nav), `SidebarRail`
   (drag-style edge toggle).
 - New `AppRail` + `AppRailItem` + `AppRailHeader`/`AppRailFooter`/`AppRailSeparator` — the icon
-  rail from the HRMS reference screenshot, for two-level (rail + sidebar) navigation.
+  rail from the PeopleOps reference screenshot, for two-level (rail + sidebar) navigation.
 - New `TopBar` / `TopBarStart` / `TopBarCenter` / `TopBarEnd`.
 - New `CommandPalette` (⌘K), `AppSwitcher` (the "ECOSYSTEM" module launcher from the reference
   image), `NotificationBell` + `NotificationList`, `UserMenu`.
@@ -116,8 +116,8 @@ Nothing has been written yet for:
   Recharts 2 vs 3 peer requirement split by React version, or theming via `chart-1..8` tokens.
 - A general "Customization" conventions page covering the five mechanisms (tokens, CSS vars,
   `className`, `classNames`, `render`) — mentioned as a goal but not written.
-- Updated full HRMS-style dashboard example wiring AppRail + Sidebar + TopBar + AppSwitcher +
-  NotificationBell + UserMenu + WelcomeBanner + MetricCard + charts together (the "full HRMS
+- Updated full PeopleOps-style dashboard example wiring AppRail + Sidebar + TopBar + AppSwitcher +
+  NotificationBell + UserMenu + WelcomeBanner + MetricCard + charts together (the "full PeopleOps
   dashboard example" mentioned as an npm-readiness deliverable).
 
 ### npm packaging readiness (requested: "make sure we have full ui npm package ready")
@@ -136,7 +136,7 @@ Not yet done:
 
 ### Known rough edges to revisit
 - `AppSwitcher` test had to be scoped to `within(list)` because the trigger and the popup list
-  item both render accessible names starting with the app name (e.g. "HRMS" vs "HRMS People &
+  item both render accessible names starting with the app name (e.g. "PeopleOps" vs "PeopleOps People &
   HR") — worth a UX pass on whether the list item's accessible name should be shortened.
 - `CommandPalette` keyboard model (arrow keys + Enter) has not been checked against the rest of
   the component set's conventions doc (e.g. Home/End behaviour, Escape handling symmetry with

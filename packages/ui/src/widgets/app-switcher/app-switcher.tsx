@@ -25,7 +25,7 @@ import { SearchInput } from '../../components/forms/input-group/input-group';
 export interface AppSwitcherApp {
   /** Unique id; matched against `value`. */
   id: string;
-  /** Name, e.g. "HRMS". */
+  /** Name, e.g. "PeopleOps". */
   name: string;
   /** One line about it, e.g. "People & HR". */
   description?: string;
@@ -35,7 +35,7 @@ export interface AppSwitcherApp {
   tone?: IconTileTone;
   /** Link to the app. */
   href?: string;
-  /** Your router's link, e.g. `<Link href="/hrms" />`. Our props and content are merged in. */
+  /** Your router's link, e.g. `<Link href="/peopleops" />`. Our props and content are merged in. */
   render?: ReactElement<Record<string, unknown>>;
   /** Show but don't allow switching to it. */
   disabled?: boolean;
@@ -78,16 +78,16 @@ export interface AppSwitcherProps {
 }
 
 /**
- * A launcher for moving between the modules and tools of a suite (ERP, CRM, HRMS…), usually in
+ * A launcher for moving between the modules and tools of a suite (ERP, RevOps, PeopleOps…), usually in
  * the top bar. Shows the current app, with search and sections in a popover.
  *
  * @example
  * <AppSwitcher
- *   value="hrms"
+ *   value="peopleops"
  *   sections={[
  *     { label: 'Modules', apps: [
  *       { id: 'erp', name: 'ERP', description: 'Business operations', icon: <BuildingIcon />, tone: 'chart-1', href: '/erp' },
- *       { id: 'hrms', name: 'HRMS', description: 'People & HR', icon: <UsersIcon />, tone: 'chart-3', href: '/hrms' },
+ *       { id: 'peopleops', name: 'PeopleOps', description: 'People & HR', icon: <UsersIcon />, tone: 'chart-3', href: '/peopleops' },
  *     ] },
  *   ]}
  * />

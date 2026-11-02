@@ -124,56 +124,56 @@
     ]
   },
   {
-    "name": "hrms",
+    "name": "peopleops",
     "type": "business-module",
-    "package": "innostes-hrms",
-    "frontendPackage": "@innostes/hrms",
-    "entryPoint": "hrms:module",
-    "description": "Human Resource Management: employee directory, department hierarchy, and leave requests",
+    "package": "innostes-peopleops",
+    "frontendPackage": "@innostes/peopleops",
+    "entryPoint": "peopleops:module",
+    "description": "People Operations: attendance check-in, leaves, employee directory, and payroll",
     "routes": [
-      "/hrms/employees",
-      "/hrms/departments",
-      "/hrms/leaves"
+      "/peopleops/employees",
+      "/peopleops/leaves",
+      "/peopleops/attendance"
     ],
     "tables": [],
-    "migrationsPath": "modules/hrms/backend/migrations",
+    "migrationsPath": "modules/peopleops/backend/migrations",
     "tags": [
-      "HRMS",
+      "PeopleOps",
       "Employees"
     ]
   },
   {
-    "name": "crm",
+    "name": "revops",
     "type": "business-module",
-    "package": "innostes-crm",
-    "frontendPackage": "@innostes/crm",
-    "entryPoint": "crm:module",
-    "description": "Customer Relationship Management: lead pipelines, opportunities, and contact directory",
+    "package": "innostes-revops",
+    "frontendPackage": "@innostes/revops",
+    "entryPoint": "revops:module",
+    "description": "Revenue Operations: sales pipeline, deals, quotes, and customer accounts",
     "routes": [
-      "/crm/leads",
-      "/crm/deals",
-      "/crm/contacts"
+      "/revops/leads",
+      "/revops/deals",
+      "/revops/contacts"
     ],
     "tables": [],
-    "migrationsPath": "modules/crm/backend/migrations",
+    "migrationsPath": "modules/revops/backend/migrations",
     "tags": [
-      "CRM",
+      "RevOps",
       "Pipeline"
     ]
   },
   {
-    "name": "api_logger",
+    "name": "tracura",
     "type": "plugin",
-    "package": "innostes-api-logger",
-    "frontendPackage": "@innostes/api-logger",
-    "entryPoint": "api_logger:module",
+    "package": "innostes-tracura",
+    "frontendPackage": "@innostes/tracura",
+    "entryPoint": "tracura:plugin",
     "description": "Extensible HTTP request/response observability, telemetry, and audit middleware",
     "routes": [
-      "/api-logger/logs",
-      "/api-logger/stats"
+      "/plugins/tracura/v1/logs",
+      "/plugins/tracura/v1/projects"
     ],
     "tables": [],
-    "migrationsPath": "plugins/api-logger/backend/migrations",
+    "migrationsPath": "plugins/tracura/backend/migrations",
     "tags": [
       "Telemetry",
       "Audit"

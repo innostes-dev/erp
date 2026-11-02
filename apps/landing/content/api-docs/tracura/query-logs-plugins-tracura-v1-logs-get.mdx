@@ -1,0 +1,127 @@
+---
+title: "Query telemetry logs with multi-attribute filtering"
+description: "Query telemetry logs with multi-attribute filtering"
+---
+
+<ApiEndpoint method="GET" path="/plugins/tracura/v1/logs" auth="BearerAuth" />
+
+
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Query parameters
+
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `project_id` | string \| null | No | — | Filter by project UUID |
+| `environment_id` | string \| null | No | — | Filter by environment UUID |
+| `correlation_id` | string \| null | No | — | Filter by trace/correlation ID |
+| `user_id` | string \| null | No | — | Filter by user ID |
+| `http_method` | string \| null | No | — | Filter by HTTP method (GET, POST, etc.) |
+| `status_code` | integer \| null | No | — | Filter by exact HTTP status code |
+| `errors_only` | boolean | No | `false` | Filter error responses only (status >= 400) |
+| `slow_requests_ms` | number \| null | No | — | Filter slow requests exceeding latency ms |
+| `search` | string \| null | No | — | Substring search in URL, path, or trace ID |
+| `start_time` | string \| null | No | — | Start time UTC |
+| `end_time` | string \| null | No | — | End time UTC |
+| `offset` | integer | No | `0` | Offset for pagination |
+| `limit` | integer | No | `50` | Page limit |
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant context UUID |
+| `X-API-Key` | string \| null | No | Scoped Ingestion / Management API Key (inno_log_live_...) |
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [LogListResponse](/api-reference/schemas/log-list-response)
+
+```json
+{
+  "items": [
+    null
+  ],
+  "total": 1,
+  "offset": 1,
+  "limit": 1
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/plugins/tracura/v1/logs" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/plugins/tracura/v1/logs', {
+  method: 'GET',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/plugins/tracura/v1/logs",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/plugins/tracura/v1/logs" authType="BearerAuth" hasBody={false} initialBody={""} />

@@ -48,9 +48,9 @@ TAG_ORDER = [
     "Setup",
     "Tenancy",
     "User management",
-    "CRM",
-    "HRMS",
-    "API logger",
+    "RevOps",
+    "PeopleOps",
+    "Tracura",
 ]
 
 
@@ -62,7 +62,7 @@ class ServiceInfoRead(BaseModel):
     status: str = Field(description="High-level operational status of the service.", examples=["online"])
     modules: list[str] = Field(
         description="List of discovered and registered ERP plug-in modules.",
-        examples=[["auth", "setup", "tenancy", "user", "audit", "crm", "hrms", "tracura"]],
+        examples=[["auth", "setup", "tenancy", "user", "audit", "revops", "peopleops", "tracura"]],
     )
 
     model_config = {
@@ -72,7 +72,7 @@ class ServiceInfoRead(BaseModel):
                     "service": "Innostes ERP API Server",
                     "environment": "development",
                     "status": "online",
-                    "modules": ["auth", "setup", "tenancy", "user", "audit", "crm", "hrms", "tracura"],
+                    "modules": ["auth", "setup", "tenancy", "user", "audit", "revops", "peopleops", "tracura"],
                 }
             ]
         }

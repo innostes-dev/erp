@@ -26,17 +26,17 @@ Payload model: [CreateApiKeyRequest](/api-reference/schemas/create-api-key-reque
 | --- | --- | --- | --- |
 | `name` | string | Yes | Descriptive identifier for the API key. |
 | `expires_in_days` | integer \| null | No | Lifespan in days. Null for perpetual key. |
-| `scopes` | string[] | No | Authorized permission scopes, e.g. ['hrms:read', 'crm:write'] or ['*']. |
+| `scopes` | string[] | No | Authorized permission scopes, e.g. ['peopleops:read', 'revops:write'] or ['*']. |
 
 ### Request example
 
 ```json
 {
-  "name": "Zapier CRM Sync",
+  "name": "Zapier RevOps Sync",
   "expires_in_days": 30,
   "scopes": [
-    "crm:read",
-    "hrms:read"
+    "revops:read",
+    "peopleops:read"
   ]
 }
 ```
@@ -56,11 +56,11 @@ Response model: [kernel__auth__schemas__api_key__ApiKeyCreatedResponse](/api-ref
   "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
   "is_revoked": false,
   "key_prefix": "inno_live_xK9p",
-  "name": "Zapier CRM Sync",
+  "name": "Zapier RevOps Sync",
   "raw_key": "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH",
   "scopes": [
-    "crm:read",
-    "hrms:read"
+    "revops:read",
+    "peopleops:read"
   ]
 }
 ```
@@ -102,11 +102,11 @@ curl -X POST "http://localhost:8001/auth/api-keys" \
   -H "Authorization: Bearer <your-access-token>" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Zapier CRM Sync",
+    "name": "Zapier RevOps Sync",
     "expires_in_days": 30,
     "scopes": [
-      "crm:read",
-      "hrms:read"
+      "revops:read",
+      "peopleops:read"
     ]
   }'
 ```
@@ -122,11 +122,11 @@ const response = await fetch('http://localhost:8001/auth/api-keys', {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    "name": "Zapier CRM Sync",
+    "name": "Zapier RevOps Sync",
     "expires_in_days": 30,
     "scopes": [
-      "crm:read",
-      "hrms:read"
+      "revops:read",
+      "peopleops:read"
     ]
   }),
 });
@@ -150,11 +150,11 @@ response = httpx.post(
     "http://localhost:8001/auth/api-keys",
     headers=headers,
     json={
-      "name": "Zapier CRM Sync",
+      "name": "Zapier RevOps Sync",
       "expires_in_days": 30,
       "scopes": [
-        "crm:read",
-        "hrms:read"
+        "revops:read",
+        "peopleops:read"
       ]
     },
 )
@@ -168,4 +168,4 @@ print(data)
 
 ## Try it
 
-<ApiPlayground method="POST" path="/auth/api-keys" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"name\": \"Zapier CRM Sync\",\n  \"expires_in_days\": 30,\n  \"scopes\": [\n    \"crm:read\",\n    \"hrms:read\"\n  ]\n}"} />
+<ApiPlayground method="POST" path="/auth/api-keys" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"name\": \"Zapier RevOps Sync\",\n  \"expires_in_days\": 30,\n  \"scopes\": [\n    \"revops:read\",\n    \"peopleops:read\"\n  ]\n}"} />

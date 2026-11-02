@@ -5,7 +5,7 @@ import { Building, Users, Briefcase, FileText } from 'lucide-react';
 import { useState } from 'react';
 
 export default function AppSwitcherDemo() {
-  const [activeApp, setActiveApp] = useState('hrms');
+  const [activeApp, setActiveApp] = useState('peopleops');
 
   const sections = [
     {
@@ -19,8 +19,8 @@ export default function AppSwitcherDemo() {
           tone: 'chart-1' as const
         },
         {
-          id: 'hrms',
-          name: 'HRMS',
+          id: 'peopleops',
+          name: 'PeopleOps',
           description: 'People & HR',
           icon: <Users />,
           tone: 'chart-3' as const
@@ -31,9 +31,9 @@ export default function AppSwitcherDemo() {
       label: 'Add-ons',
       apps: [
         {
-          id: 'crm',
-          name: 'CRM',
-          description: 'Customer relationships',
+          id: 'revops',
+          name: 'RevOps',
+          description: 'Revenue & pipeline',
           icon: <Briefcase />,
           tone: 'chart-2' as const
         },

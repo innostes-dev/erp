@@ -16,7 +16,7 @@ All code and documentation in this repository strictly adhere to a **decoupled t
 | **UI Engine** | `apps/web-app` | React 19 + Vite 8 | Single-page app shell, setup/auth gates, layout | **Plumbing only**: Must NEVER contain domain business views. Mounts modules dynamically from `apps/web-app/src/app/catalog.ts`. |
 | **Documentation Site** | `apps/landing` | Next.js 16 + Fumadocs | Developer docs (`/docs`), UI docs (`/ui/docs`), API docs (`/api-reference`) | Unified documentation platform. Statically prerenders all pages. |
 | **Platform Kernel** | `kernel/` | Python + React | Foundation: database, tenancy, IAM, security | "The first plug-in". Shared by all modules; imports NO external plug-ins. |
-| **Domain Business Modules** | `modules/` | Python + React | Self-contained domains (`hrms`, `crm`) | Independent packages implementing the two-engine plug-in contract. |
+| **Domain Business Modules** | `modules/` | Python + React | Self-contained domains (`peopleops`, `revops`, `hireflow`, etc.) | Independent packages implementing the two-engine plug-in contract. |
 | **Platform Plug-ins** | `plugins/` | Python + React | Extensible telemetry & tooling (`api-logger`) | Optional extensions mounting via standard engine contracts. |
 | **Design System** | `packages/ui` | React 19 + Tailwind CSS v4 | `@innostes/ui` reusable enterprise primitives | Headless Base UI foundation, multi-runtime compatible (React 17, 18, 19). |
 
@@ -169,7 +169,7 @@ When documenting deployment, maintenance, or operations:
 
 ### 3.5 Business Modules & Plug-ins (`modules/*`, `plugins/*`)
 
-When scaffolding or documenting a new module (e.g. HRMS, CRM, Invoicing):
+When scaffolding or documenting a new module (e.g. PeopleOps, RevOps, HireFlow):
 
 - [ ] **Directory Layout**:
   ```text

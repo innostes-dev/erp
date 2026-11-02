@@ -7,8 +7,8 @@
   },
   "dependencies": {
     "@innostes/tracura": "workspace:*",
-    "@innostes/crm": "workspace:*",
-    "@innostes/hrms": "workspace:*",
+    "@innostes/revops": "workspace:*",
+    "@innostes/peopleops": "workspace:*",
     "@innostes/kernel": "workspace:*",
     "@innostes/ui": "workspace:*",
     "lucide-react": "^1.60.0"

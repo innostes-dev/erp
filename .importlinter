@@ -2,8 +2,8 @@
 root_packages =
     app
     kernel
-    hrms
-    crm
+    peopleops
+    revops
     api_logger
     tracura
 
@@ -17,8 +17,8 @@ forbidden_modules =
     kernel.setup
     kernel.user
     kernel.auth
-    hrms
-    crm
+    peopleops
+    revops
     api_logger
     tracura
 
@@ -27,8 +27,8 @@ name = RULE-2: Plugins never import engine (docs/architecture/overview#dependenc
 type = forbidden
 source_modules =
     kernel
-    hrms
-    crm
+    peopleops
+    revops
     api_logger
     tracura
 forbidden_modules =
@@ -40,8 +40,8 @@ type = forbidden
 source_modules =
     kernel
 forbidden_modules =
-    hrms
-    crm
+    peopleops
+    revops
     api_logger
     tracura
 
@@ -55,8 +55,8 @@ forbidden_modules =
     kernel.tenancy
     kernel.user
     kernel.auth
-    hrms
-    crm
+    peopleops
+    revops
     api_logger
     tracura
 

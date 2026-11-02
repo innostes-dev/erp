@@ -46,7 +46,7 @@ const features = [
     icon: <Plug />,
     tone: 'chart-1',
     title: 'Modular applications',
-    text: 'ERP, CRM, HRMS and more',
+    text: 'RevOps, PeopleOps and more',
   },
   {
     icon: <Code2 />,

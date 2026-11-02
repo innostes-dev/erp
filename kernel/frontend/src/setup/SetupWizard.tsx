@@ -79,7 +79,7 @@ const COLOR_PRESETS = [
 ] as const;
 
 const FEATURES = [
-  { icon: <Plug />, tone: 'chart-1', title: 'Modular applications', text: 'ERP, CRM, HRMS and more' },
+  { icon: <Plug />, tone: 'chart-1', title: 'Modular applications', text: 'RevOps, PeopleOps, and more' },
   { icon: <Code2 />, tone: 'chart-2', title: 'Developer tools', text: 'API logger, tester, analytics' },
   { icon: <ShieldCheck />, tone: 'chart-3', title: 'Self-hosted & secure', text: 'Your data, your infrastructure' },
   { icon: <Settings2 />, tone: 'chart-7', title: 'Quick setup', text: 'Up and running in minutes' },

@@ -303,7 +303,7 @@ export function ApiKeysManager() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">Key Name / Description</label>
                   <Input
-                    placeholder="e.g. Zapier CRM Sync, CI/CD Pipeline"
+                    placeholder="e.g. Zapier RevOps Sync, CI/CD Pipeline"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
@@ -339,8 +339,8 @@ export function ApiKeysManager() {
                     <SelectContent>
                       <SelectItem value="*">Full Platform Access (*)</SelectItem>
                       <SelectItem value="*:read">Read-Only Access (*:read)</SelectItem>
-                      <SelectItem value="hrms:read">HRMS Read Only</SelectItem>
-                      <SelectItem value="crm:write">CRM Read & Write</SelectItem>
+                      <SelectItem value="peopleops:read">PeopleOps Read Only</SelectItem>
+                      <SelectItem value="revops:write">RevOps Read & Write</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -401,7 +401,7 @@ export function ApiKeysManager() {
                   </span>
                   <pre className="rounded-lg bg-zinc-950 p-3 text-[11px] text-zinc-100 overflow-x-auto font-mono">
 {`curl -H "Authorization: Bearer ${createdKeyData.raw_key}" \\
-     http://localhost:8001/api/v1/hrms/info`}
+     http://localhost:8001/api/v1/peopleops/info`}
                   </pre>
                 </div>
               </div>

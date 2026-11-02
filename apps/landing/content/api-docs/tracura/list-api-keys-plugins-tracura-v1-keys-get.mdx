@@ -1,0 +1,125 @@
+---
+title: "List ingestion keys for tenant"
+description: "List ingestion keys for tenant"
+---
+
+<ApiEndpoint method="GET" path="/plugins/tracura/v1/keys" auth="BearerAuth" />
+
+
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Query parameters
+
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `project_id` | string \| null | No | — | Filter by project UUID |
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant context UUID |
+| `X-API-Key` | string \| null | No | Scoped Ingestion / Management API Key (inno_log_live_...) |
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+```json
+[
+  {
+    "id": "string",
+    "tenant_id": "string",
+    "name": "string",
+    "key_prefix": "string",
+    "status": "string",
+    "project_id": {},
+    "project_name": {},
+    "allowed_environments": [
+      null
+    ],
+    "ip_allowlist": {},
+    "allowed_origins": {},
+    "rate_limit_rpm": 1,
+    "expires_at": {},
+    "last_used_at": {},
+    "created_at": "2026-10-29T10:00:00Z"
+  }
+]
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/plugins/tracura/v1/keys" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/plugins/tracura/v1/keys', {
+  method: 'GET',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/plugins/tracura/v1/keys",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/plugins/tracura/v1/keys" authType="BearerAuth" hasBody={false} initialBody={""} />

@@ -1,0 +1,145 @@
+---
+title: "Ingest a batch of request/response telemetry logs"
+description: "High-throughput batch ingestion endpoint (up to 250 items)."
+---
+
+<ApiEndpoint method="POST" path="/tracura/v1/ingest/batch" auth="BearerAuth" />
+
+High-throughput batch ingestion endpoint (up to 250 items). Authenticates via X-API-Key.
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-API-Key` | string \| null | No | Scoped Ingestion API Key (inno_log_live_...) |
+
+## Request body
+
+Payload model: [IngestBatchRequest](/api-reference/schemas/ingest-batch-request)
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `items` | [IngestLogItem](/api-reference/schemas/ingest-log-item)[] | Yes | List of telemetry logs to ingest in a single batch (max 250). |
+
+### Request example
+
+```json
+{
+  "items": [
+    null
+  ]
+}
+```
+
+## Responses
+
+### HTTP 202
+
+Successful Response
+
+Response model: [IngestResponse](/api-reference/schemas/ingest-response)
+
+```json
+{
+  "accepted": 1,
+  "dropped": 1,
+  "status": "string"
+}
+```
+
+### HTTP 401
+
+Invalid or missing API key
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X POST "http://localhost:8001/tracura/v1/ingest/batch" \
+  -H "Authorization: Bearer <your-access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      null
+    ]
+  }'
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/tracura/v1/ingest/batch', {
+  method: 'POST',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    "items": [
+      null
+    ]
+  }),
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+    "Content-Type": "application/json",
+}
+
+response = httpx.post(
+    "http://localhost:8001/tracura/v1/ingest/batch",
+    headers=headers,
+    json={
+      "items": [
+        null
+      ]
+    },
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="POST" path="/tracura/v1/ingest/batch" authType="BearerAuth" hasBody={true} initialBody={"{\n  \"items\": [\n    null\n  ]\n}"} />

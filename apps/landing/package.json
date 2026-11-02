@@ -4,15 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/generate-demo-registry.mjs && node scripts/generate-tokens-data.mjs && node scripts/generate-api-docs.mjs && next dev --port 3000",
-    "build": "node scripts/generate-demo-registry.mjs && node scripts/generate-tokens-data.mjs && node scripts/generate-llms.mjs && node scripts/generate-api-docs.mjs && next build",
+    "dev": "next dev --port 3000",
+    "build": "next build",
     "start": "next start --port 3000",
-    "typecheck": "node scripts/generate-demo-registry.mjs && node scripts/generate-tokens-data.mjs && node scripts/generate-api-docs.mjs && next typegen && tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "docs-check": "node scripts/checks/run-all.mjs",
-    "api-docs": "node scripts/generate-api-docs.mjs",
-    "llms": "node scripts/generate-llms.mjs",
-    "demos": "node scripts/generate-demo-registry.mjs",
-    "tokens": "node scripts/generate-tokens-data.mjs",
     "api-docs-samples": "node scripts/checks/check-api-samples.mjs",
     "arch-docs-check": "node scripts/checks/run-arch-checks.mjs",
     "test:e2e": "playwright test"

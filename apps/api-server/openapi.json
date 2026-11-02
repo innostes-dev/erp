@@ -28,8 +28,8 @@
     "/tracura/v1/ingest": {
       "post": {
         "tags": [
-          "Tracura - Ingestion",
-          "API logger - Ingestion"
+          "Tracura",
+          "Tracura"
         ],
         "summary": "Ingest a single request/response telemetry log",
         "description": "High-throughput asynchronous ingestion endpoint. Accepts an inno_log_live_* key via X-API-Key header.",
@@ -99,8 +99,8 @@
     "/tracura/v1/ingest/batch": {
       "post": {
         "tags": [
-          "Tracura - Ingestion",
-          "API logger - Ingestion"
+          "Tracura",
+          "Tracura"
         ],
         "summary": "Ingest a batch of request/response telemetry logs",
         "description": "High-throughput batch ingestion endpoint (up to 250 items). Authenticates via X-API-Key.",
@@ -816,21 +816,21 @@
         }
       }
     },
-    "/crm/info": {
+    "/peopleops/info": {
       "get": {
         "tags": [
-          "CRM"
+          "PeopleOps"
         ],
-        "summary": "Get CRM module metadata and scaffold status",
-        "description": "Return CRM module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
-        "operationId": "crm_get_info",
+        "summary": "Get PeopleOps module metadata and scaffold status",
+        "description": "Return PeopleOps module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
+        "operationId": "peopleops_get_info",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CrmInfoResponse"
+                  "$ref": "#/components/schemas/PeopleOpsInfoResponse"
                 }
               }
             }
@@ -839,21 +839,21 @@
         "security": []
       }
     },
-    "/hrms/info": {
+    "/revops/info": {
       "get": {
         "tags": [
-          "HRMS"
+          "RevOps"
         ],
-        "summary": "Get HRMS module metadata and scaffold status",
-        "description": "Return HRMS module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
-        "operationId": "hrms_get_info",
+        "summary": "Get RevOps module metadata and scaffold status",
+        "description": "Return RevOps module metadata and scaffold status.\n\nPublic endpoint. Returns scaffold readiness status and available features.",
+        "operationId": "revops_get_info",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HrmsInfoResponse"
+                  "$ref": "#/components/schemas/RevOpsInfoResponse"
                 }
               }
             }
@@ -1271,6 +1271,90 @@
           },
           "401": {
             "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tenants/current": {
+      "get": {
+        "tags": [
+          "Tenancy"
+        ],
+        "summary": "Get current tenant organisation details",
+        "description": "Return active tenant organisation details for the authenticated user/request.",
+        "operationId": "tenants_get_current",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant UUID context.",
+              "examples": [
+                "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+              ],
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant UUID context."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantRead"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1725,7 +1809,7 @@
               "type": "string",
               "description": "Package identifier of business module to activate.",
               "examples": [
-                "hrms"
+                "peopleops"
               ],
               "title": "Module Id"
             },
@@ -1833,7 +1917,7 @@
               "type": "string",
               "description": "Package identifier of business module to deactivate.",
               "examples": [
-                "hrms"
+                "peopleops"
               ],
               "title": "Module Id"
             },
@@ -2390,7 +2474,7 @@
       "post": {
         "tags": [
           "Tracura",
-          "API logger - Ingestion"
+          "Tracura"
         ],
         "summary": "Ingest a single request/response telemetry log",
         "description": "High-throughput asynchronous ingestion endpoint. Accepts an inno_log_live_* key via X-API-Key header.",
@@ -2461,7 +2545,7 @@
       "post": {
         "tags": [
           "Tracura",
-          "API logger - Ingestion"
+          "Tracura"
         ],
         "summary": "Ingest a batch of request/response telemetry logs",
         "description": "High-throughput batch ingestion endpoint (up to 250 items). Authenticates via X-API-Key.",
@@ -4372,7 +4456,7 @@
             "title": "Item Id",
             "description": "Identifier of the module or plugin whose status changed.",
             "examples": [
-              "hrms"
+              "peopleops"
             ]
           },
           "is_active": {
@@ -4388,7 +4472,7 @@
             "title": "Message",
             "description": "Human-readable operational status message.",
             "examples": [
-              "Module 'hrms' activated successfully."
+              "Module 'peopleops' activated successfully."
             ]
           }
         },
@@ -4403,8 +4487,8 @@
         "examples": [
           {
             "is_active": true,
-            "item_id": "hrms",
-            "message": "Module 'hrms' activated successfully."
+            "item_id": "peopleops",
+            "message": "Module 'peopleops' activated successfully."
           }
         ]
       },
@@ -4640,10 +4724,10 @@
                   "is_revoked": false,
                   "key_prefix": "inno_live_xK9p",
                   "last_used_at": "2026-10-29T10:15:00Z",
-                  "name": "Zapier CRM Sync",
+                  "name": "Zapier RevOps Sync",
                   "scopes": [
-                    "crm:read",
-                    "hrms:read"
+                    "revops:read",
+                    "peopleops:read"
                   ]
                 }
               ]
@@ -4666,10 +4750,10 @@
                 "is_revoked": false,
                 "key_prefix": "inno_live_xK9p",
                 "last_used_at": "2026-10-29T10:15:00Z",
-                "name": "Zapier CRM Sync",
+                "name": "Zapier RevOps Sync",
                 "scopes": [
-                  "crm:read",
-                  "hrms:read"
+                  "revops:read",
+                  "peopleops:read"
                 ]
               }
             ]
@@ -4757,7 +4841,7 @@
             "title": "Name",
             "description": "Descriptive identifier for the API key.",
             "examples": [
-              "Zapier CRM Sync"
+              "Zapier RevOps Sync"
             ]
           },
           "expires_in_days": {
@@ -4783,14 +4867,14 @@
             },
             "type": "array",
             "title": "Scopes",
-            "description": "Authorized permission scopes, e.g. ['hrms:read', 'crm:write'] or ['*'].",
+            "description": "Authorized permission scopes, e.g. ['peopleops:read', 'revops:write'] or ['*'].",
             "default": [
               "*"
             ],
             "examples": [
               [
-                "crm:read",
-                "hrms:read"
+                "revops:read",
+                "peopleops:read"
               ]
             ]
           }
@@ -4801,95 +4885,6 @@
         ],
         "title": "CreateApiKeyRequest",
         "description": "Payload to generate a new API key."
-      },
-      "CrmInfoResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "Unique package identifier string.",
-            "default": "crm",
-            "examples": [
-              "crm"
-            ]
-          },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Human-readable module title.",
-            "default": "CRM",
-            "examples": [
-              "CRM"
-            ]
-          },
-          "version": {
-            "type": "string",
-            "title": "Version",
-            "description": "Semver version string.",
-            "default": "0.1.0",
-            "examples": [
-              "0.1.0"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Operational readiness status of module.",
-            "default": "scaffold_ready",
-            "examples": [
-              "scaffold_ready"
-            ]
-          },
-          "sub_features": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Sub Features",
-            "description": "List of functional sub-features supported by module.",
-            "default": [
-              "leads",
-              "deals",
-              "pipeline",
-              "contacts"
-            ],
-            "examples": [
-              [
-                "leads",
-                "deals",
-                "pipeline",
-                "contacts"
-              ]
-            ]
-          },
-          "description": {
-            "type": "string",
-            "title": "Description",
-            "description": "Module functional overview.",
-            "default": "Customer relationship management and sales pipeline",
-            "examples": [
-              "Customer relationship management and sales pipeline"
-            ]
-          }
-        },
-        "type": "object",
-        "title": "CrmInfoResponse",
-        "description": "Information schema for CRM scaffold module.",
-        "examples": [
-          {
-            "description": "Customer relationship management and sales pipeline",
-            "id": "crm",
-            "name": "CRM",
-            "status": "scaffold_ready",
-            "sub_features": [
-              "leads",
-              "deals",
-              "pipeline",
-              "contacts"
-            ],
-            "version": "0.1.0"
-          }
-        ]
       },
       "DeviceType": {
         "type": "string",
@@ -5340,95 +5335,6 @@
           }
         ]
       },
-      "HrmsInfoResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "Unique package identifier string.",
-            "default": "hrms",
-            "examples": [
-              "hrms"
-            ]
-          },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "Human-readable module title.",
-            "default": "HRMS",
-            "examples": [
-              "HRMS"
-            ]
-          },
-          "version": {
-            "type": "string",
-            "title": "Version",
-            "description": "Semver version string.",
-            "default": "0.1.0",
-            "examples": [
-              "0.1.0"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "title": "Status",
-            "description": "Operational readiness status of module.",
-            "default": "scaffold_ready",
-            "examples": [
-              "scaffold_ready"
-            ]
-          },
-          "sub_features": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Sub Features",
-            "description": "List of functional sub-features supported by module.",
-            "default": [
-              "employees",
-              "leave",
-              "payroll",
-              "attendance"
-            ],
-            "examples": [
-              [
-                "employees",
-                "leave",
-                "payroll",
-                "attendance"
-              ]
-            ]
-          },
-          "description": {
-            "type": "string",
-            "title": "Description",
-            "description": "Module functional overview.",
-            "default": "People and human resources management",
-            "examples": [
-              "People and human resources management"
-            ]
-          }
-        },
-        "type": "object",
-        "title": "HrmsInfoResponse",
-        "description": "Information schema for HRMS scaffold module.",
-        "examples": [
-          {
-            "description": "People and human resources management",
-            "id": "hrms",
-            "name": "HRMS",
-            "status": "scaffold_ready",
-            "sub_features": [
-              "employees",
-              "leave",
-              "payroll",
-              "attendance"
-            ],
-            "version": "0.1.0"
-          }
-        ]
-      },
       "IngestBatchRequest": {
         "properties": {
           "items": {
@@ -5727,9 +5633,9 @@
           "id": {
             "type": "string",
             "title": "Id",
-            "description": "Unique package identifier string (e.g. 'hrms', 'crm', 'tracura').",
+            "description": "Unique package identifier string (e.g. 'peopleops', 'revops', 'tracura').",
             "examples": [
-              "hrms"
+              "peopleops"
             ]
           },
           "name": {
@@ -5737,7 +5643,7 @@
             "title": "Name",
             "description": "Human-readable title of the module or plugin.",
             "examples": [
-              "HRMS"
+              "PeopleOps"
             ]
           },
           "version": {
@@ -5761,7 +5667,7 @@
             "title": "Description",
             "description": "Brief functional overview of package capabilities.",
             "examples": [
-              "People and human resources management"
+              "People and human resources operations"
             ]
           },
           "tags": {
@@ -5827,10 +5733,10 @@
         "examples": [
           {
             "activated_at": "2026-10-29T10:00:00Z",
-            "description": "People and human resources management",
-            "id": "hrms",
+            "description": "People and human resources operations",
+            "id": "peopleops",
             "is_active": true,
-            "name": "HRMS",
+            "name": "PeopleOps",
             "tags": [
               "Employees",
               "Leave",
@@ -6261,10 +6167,10 @@
               [
                 {
                   "activated_at": "2026-10-29T10:00:00Z",
-                  "description": "People and human resources management",
-                  "id": "hrms",
+                  "description": "People and human resources operations",
+                  "id": "peopleops",
                   "is_active": true,
-                  "name": "HRMS",
+                  "name": "PeopleOps",
                   "tags": [
                     "Employees",
                     "Leave",
@@ -6286,8 +6192,8 @@
             "description": "List of module IDs currently enabled for the tenant.",
             "examples": [
               [
-                "hrms",
-                "crm"
+                "peopleops",
+                "revops"
               ]
             ]
           }
@@ -6302,15 +6208,15 @@
         "examples": [
           {
             "active_ids": [
-              "hrms"
+              "peopleops"
             ],
             "installed": [
               {
                 "activated_at": "2026-10-29T10:00:00Z",
-                "description": "People and human resources management",
-                "id": "hrms",
+                "description": "People and human resources operations",
+                "id": "peopleops",
                 "is_active": true,
-                "name": "HRMS",
+                "name": "PeopleOps",
                 "tags": [
                   "Employees",
                   "Leave",
@@ -6374,6 +6280,95 @@
           "limit"
         ],
         "title": "Page[TenantRead]"
+      },
+      "PeopleOpsInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique package identifier string.",
+            "default": "peopleops",
+            "examples": [
+              "peopleops"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable module title.",
+            "default": "PeopleOps",
+            "examples": [
+              "PeopleOps"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string.",
+            "default": "0.1.0",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Operational readiness status of module.",
+            "default": "scaffold_ready",
+            "examples": [
+              "scaffold_ready"
+            ]
+          },
+          "sub_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sub Features",
+            "description": "List of functional sub-features supported by module.",
+            "default": [
+              "employees",
+              "leave",
+              "payroll",
+              "attendance"
+            ],
+            "examples": [
+              [
+                "employees",
+                "leave",
+                "payroll",
+                "attendance"
+              ]
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Module functional overview.",
+            "default": "People operations, employee directory, leaves, and payroll",
+            "examples": [
+              "People operations, employee directory, leaves, and payroll"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "PeopleOpsInfoResponse",
+        "description": "Information schema for PeopleOps scaffold module.",
+        "examples": [
+          {
+            "description": "People operations, employee directory, leaves, and payroll",
+            "id": "peopleops",
+            "name": "PeopleOps",
+            "status": "scaffold_ready",
+            "sub_features": [
+              "employees",
+              "leave",
+              "payroll",
+              "attendance"
+            ],
+            "version": "0.1.0"
+          }
+        ]
       },
       "PluginListResponse": {
         "properties": {
@@ -6779,6 +6774,95 @@
         "title": "ResetPasswordRequest",
         "description": "Payload to reset account password using single-use signed reset token."
       },
+      "RevOpsInfoResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique package identifier string.",
+            "default": "revops",
+            "examples": [
+              "revops"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable module title.",
+            "default": "RevOps",
+            "examples": [
+              "RevOps"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Semver version string.",
+            "default": "0.1.0",
+            "examples": [
+              "0.1.0"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Operational readiness status of module.",
+            "default": "scaffold_ready",
+            "examples": [
+              "scaffold_ready"
+            ]
+          },
+          "sub_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sub Features",
+            "description": "List of functional sub-features supported by module.",
+            "default": [
+              "leads",
+              "deals",
+              "pipeline",
+              "contacts"
+            ],
+            "examples": [
+              [
+                "leads",
+                "deals",
+                "pipeline",
+                "contacts"
+              ]
+            ]
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Module functional overview.",
+            "default": "Revenue operations, customer pipeline, deals, and accounts",
+            "examples": [
+              "Revenue operations, customer pipeline, deals, and accounts"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "RevOpsInfoResponse",
+        "description": "Information schema for RevOps scaffold module.",
+        "examples": [
+          {
+            "description": "Revenue operations, customer pipeline, deals, and accounts",
+            "id": "revops",
+            "name": "RevOps",
+            "status": "scaffold_ready",
+            "sub_features": [
+              "leads",
+              "deals",
+              "pipeline",
+              "contacts"
+            ],
+            "version": "0.1.0"
+          }
+        ]
+      },
       "ServiceInfoRead": {
         "properties": {
           "service": {
@@ -6819,8 +6903,8 @@
                 "tenancy",
                 "user",
                 "audit",
-                "crm",
-                "hrms",
+                "revops",
+                "peopleops",
                 "tracura"
               ]
             ]
@@ -6844,8 +6928,8 @@
               "tenancy",
               "user",
               "audit",
-              "crm",
-              "hrms",
+              "revops",
+              "peopleops",
               "tracura"
             ],
             "service": "Innostes ERP API Server",
@@ -8492,7 +8576,7 @@
             "title": "Name",
             "description": "Human-readable label for the API key.",
             "examples": [
-              "Zapier CRM Sync"
+              "Zapier RevOps Sync"
             ]
           },
           "key_prefix": {
@@ -8512,8 +8596,8 @@
             "description": "Authorized permission scopes granted to this key.",
             "examples": [
               [
-                "crm:read",
-                "hrms:read"
+                "revops:read",
+                "peopleops:read"
               ]
             ]
           },
@@ -8594,11 +8678,11 @@
             "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
             "is_revoked": false,
             "key_prefix": "inno_live_xK9p",
-            "name": "Zapier CRM Sync",
+            "name": "Zapier RevOps Sync",
             "raw_key": "inno_live_xK9pL2mQ7vR1wE5tY8uI0oP3aS6dF4gH",
             "scopes": [
-              "crm:read",
-              "hrms:read"
+              "revops:read",
+              "peopleops:read"
             ]
           }
         ]
@@ -8619,7 +8703,7 @@
             "title": "Name",
             "description": "Human-readable label for the API key.",
             "examples": [
-              "Zapier CRM Sync"
+              "Zapier RevOps Sync"
             ]
           },
           "key_prefix": {
@@ -8639,8 +8723,8 @@
             "description": "Authorized permission scopes granted to this key.",
             "examples": [
               [
-                "crm:read",
-                "hrms:read"
+                "revops:read",
+                "peopleops:read"
               ]
             ]
           },
@@ -8713,10 +8797,10 @@
             "is_revoked": false,
             "key_prefix": "inno_live_xK9p",
             "last_used_at": "2026-10-29T10:15:00Z",
-            "name": "Zapier CRM Sync",
+            "name": "Zapier RevOps Sync",
             "scopes": [
-              "crm:read",
-              "hrms:read"
+              "revops:read",
+              "peopleops:read"
             ]
           }
         ]
@@ -8992,12 +9076,12 @@
       "description": "Enterprise identity management, staff credentials, RBAC roles, and permission assignments."
     },
     {
-      "name": "CRM",
-      "description": "Customer Relationship Management endpoints."
+      "name": "RevOps",
+      "description": "Revenue Operations endpoints."
     },
     {
-      "name": "HRMS",
-      "description": "Human Resource Management System endpoints."
+      "name": "PeopleOps",
+      "description": "People Operations endpoints."
     },
     {
       "name": "Tracura",

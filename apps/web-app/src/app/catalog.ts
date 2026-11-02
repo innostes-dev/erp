@@ -1,6 +1,5 @@
 import { tracuraManifest } from '@innostes/tracura';
-import { crmManifest } from '@innostes/crm';
-import { hrmsManifest } from '@innostes/hrms';
+import { ALL_BUSINESS_MODULES } from './modules/catalog-data';
 
 export interface CatalogItem {
   id: string;
@@ -14,10 +13,7 @@ export interface CatalogItem {
   subFeatures: { id: string; label: string; description: string }[];
 }
 
-export const BUSINESS_MODULES_CATALOG: CatalogItem[] = [
-  hrmsManifest,
-  crmManifest,
-];
+export const BUSINESS_MODULES_CATALOG: CatalogItem[] = ALL_BUSINESS_MODULES;
 
 export const PLUGINS_CATALOG: CatalogItem[] = [
   tracuraManifest,

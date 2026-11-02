@@ -1,0 +1,132 @@
+---
+title: "Get effective settings and policies"
+description: "Get effective settings and policies"
+---
+
+<ApiEndpoint method="GET" path="/plugins/tracura/v1/settings" auth="BearerAuth" />
+
+
+
+## Authentication
+
+Requires a valid JSON Web Token (JWT) issued by `/auth/login`. Pass the token in the `Authorization` HTTP header using the `Bearer` scheme:
+
+```http
+Authorization: Bearer <your-access-token>
+```
+
+## Parameters
+
+### Query parameters
+
+| Parameter | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `project_id` | string \| null | No | — | Project scope override |
+| `environment_id` | string \| null | No | — | Environment scope override |
+
+### Header parameters
+
+| Header | Type | Required | Description |
+| --- | --- | --- | --- |
+| `X-Tenant-ID` | string \| null | No | Active tenant context UUID |
+| `X-API-Key` | string \| null | No | Scoped Ingestion / Management API Key (inno_log_live_...) |
+
+## Responses
+
+### HTTP 200
+
+Successful Response
+
+Response model: [SettingsRead](/api-reference/schemas/settings-read)
+
+```json
+{
+  "id": "string",
+  "tenant_id": "string",
+  "project_id": {},
+  "environment_id": {},
+  "retention_days": 1,
+  "max_body_size_bytes": 1,
+  "sampling_rate": 1,
+  "capture_headers": true,
+  "capture_body": true,
+  "log_errors_only": true,
+  "excluded_paths": [
+    "string"
+  ],
+  "sensitive_headers": [
+    "string"
+  ],
+  "sensitive_body_fields": [
+    "string"
+  ],
+  "mask_client_ip": true,
+  "created_at": {},
+  "updated_at": {}
+}
+```
+
+### HTTP 422
+
+Validation Error
+
+Response model: [HTTPValidationError](/api-reference/schemas/httpvalidation-error)
+
+```json
+{
+  "detail": [
+    null
+  ]
+}
+```
+
+## Code samples
+
+<Tabs items={["cURL", "TypeScript (fetch)", "Python (httpx)"]}>
+  <Tab value="cURL">
+
+```bash
+curl -X GET "http://localhost:8001/plugins/tracura/v1/settings" \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+  </Tab>
+  <Tab value="TypeScript (fetch)">
+
+```ts
+const response = await fetch('http://localhost:8001/plugins/tracura/v1/settings', {
+  method: 'GET',
+  headers: {
+    Authorization: 'Bearer <your-access-token>',
+  },
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+  </Tab>
+  <Tab value="Python (httpx)">
+
+```python
+import httpx
+
+headers = {
+    "Authorization": "Bearer <your-access-token>",
+}
+
+response = httpx.get(
+    "http://localhost:8001/plugins/tracura/v1/settings",
+    headers=headers,
+)
+
+data = response.json()
+print(data)
+```
+
+  </Tab>
+</Tabs>
+
+## Try it
+
+<ApiPlayground method="GET" path="/plugins/tracura/v1/settings" authType="BearerAuth" hasBody={false} initialBody={""} />

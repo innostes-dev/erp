@@ -3,6 +3,7 @@
   "pages": [
     "tenants-create",
     "tenants-list",
+    "tenants-get-current",
     "tenants-get",
     "tenants-update",
     "tenants-delete",

@@ -192,7 +192,7 @@ describe('AppSwitcher', () => {
     const onValueChange = vi.fn();
     render(
       <AppSwitcher
-        defaultValue="hrms"
+        defaultValue="peopleops"
         onValueChange={onValueChange}
         sections={[
           {
@@ -205,8 +205,8 @@ describe('AppSwitcher', () => {
                 icon: <span />,
               },
               {
-                id: 'hrms',
-                name: 'HRMS',
+                id: 'peopleops',
+                name: 'PeopleOps',
                 description: 'People & HR',
                 icon: <span />,
               },
@@ -216,10 +216,10 @@ describe('AppSwitcher', () => {
       />,
     );
     await userEvent.click(
-      screen.getByRole('button', { name: 'Switch application, current: HRMS' }),
+      screen.getByRole('button', { name: 'Switch application, current: PeopleOps' }),
     );
     const list = await screen.findByRole('list');
-    expect(within(list).getByRole('button', { name: /^HRMS/ })).toHaveAttribute(
+    expect(within(list).getByRole('button', { name: /^PeopleOps/ })).toHaveAttribute(
       'aria-current',
       'true',
     );

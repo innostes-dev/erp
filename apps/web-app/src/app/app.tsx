@@ -1,4 +1,3 @@
-import React from 'react';
 import { SidebarProvider, SidebarInset } from '@innostes/ui';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { TenantProvider } from './context/TenantContext';
@@ -17,7 +16,7 @@ import { AuditTrailPage } from './components/AuditTrailPage';
 function AppRouter() {
   const { path } = useNavigation();
 
-  // 1. Dedicated Business Module Shell (e.g. /modules/hrms, /modules/crm)
+  // 1. Dedicated Business Module Shell (e.g. /modules/peopleops, /modules/revops)
   if (path.startsWith('/modules/')) {
     const moduleId = path.replace('/modules/', '').split('/')[0];
     if (moduleId) {

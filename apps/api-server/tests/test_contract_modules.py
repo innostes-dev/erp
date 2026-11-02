@@ -39,17 +39,17 @@ class TestContractModules(unittest.TestCase):
     def tearDown(self) -> None:
         app.dependency_overrides.clear()
 
-    def test_crm_info__200_returns_module_info(self) -> None:
-        """GET /crm/info returns 200 with module metadata."""
-        res = self.client.get("/crm/info")
+    def test_revops_info__200_returns_module_info(self) -> None:
+        """GET /revops/info returns 200 with module metadata."""
+        res = self.client.get("/revops/info")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        validate_response_contract(res.json(), "/crm/info", "get", res.status_code)
+        validate_response_contract(res.json(), "/revops/info", "get", res.status_code)
 
-    def test_hrms_info__200_returns_module_info(self) -> None:
-        """GET /hrms/info returns 200 with module metadata."""
-        res = self.client.get("/hrms/info")
+    def test_peopleops_info__200_returns_module_info(self) -> None:
+        """GET /peopleops/info returns 200 with module metadata."""
+        res = self.client.get("/peopleops/info")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        validate_response_contract(res.json(), "/hrms/info", "get", res.status_code)
+        validate_response_contract(res.json(), "/peopleops/info", "get", res.status_code)
 
     def test_tracura_info__200_returns_plugin_info(self) -> None:
         """GET /plugins/tracura/info returns 200 with plugin metadata."""

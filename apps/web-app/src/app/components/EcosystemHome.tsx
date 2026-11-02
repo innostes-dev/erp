@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   WelcomeBanner,
   EmptyState,
@@ -22,6 +21,11 @@ import {
   CheckCircle2,
   AlertTriangle,
   FileCode2,
+  UserCheck,
+  Landmark,
+  Package,
+  CheckSquare,
+  BookOpen,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';
@@ -61,12 +65,21 @@ const MountainIllustration = (
 
 function getItemIcon(id: string) {
   switch (id) {
-    case 'hrms':
+    case 'peopleops':
       return <Users className="size-5" />;
-    case 'crm':
+    case 'revops':
       return <Building2 className="size-5" />;
+    case 'hireflow':
+      return <UserCheck className="size-5" />;
+    case 'ledgerflow':
+      return <Landmark className="size-5" />;
+    case 'stockflow':
+      return <Package className="size-5" />;
+    case 'sprintflow':
+      return <CheckSquare className="size-5" />;
+    case 'docflow':
+      return <BookOpen className="size-5" />;
     case 'tracura':
-    case 'api-logger':
       return <Activity className="size-5" />;
     default:
       return <LayoutGrid className="size-5" />;
@@ -91,7 +104,7 @@ export function EcosystemHome() {
   const recentActivityItems = [
     {
       id: '1',
-      title: 'CRM: Opened Enterprise Account',
+      title: 'RevOps: Closed Enterprise Account',
       time: '2 min ago',
       icon: <Building2 className="size-3.5" />,
       tone: 'chart-2' as const,
@@ -112,7 +125,7 @@ export function EcosystemHome() {
     },
     {
       id: '4',
-      title: 'HRMS: Reviewed Leave Requests',
+      title: 'PeopleOps: Reviewed Leave Requests',
       time: '3 hr ago',
       icon: <Users className="size-3.5" />,
       tone: 'chart-3' as const,
@@ -129,17 +142,17 @@ export function EcosystemHome() {
       action: <Star className="size-4 fill-amber-400 text-amber-400" />,
     },
     {
-      id: 'crm',
-      title: 'CRM',
-      description: 'Customers and relationships',
+      id: 'revops',
+      title: 'RevOps',
+      description: 'Revenue operations & pipeline',
       icon: <Building2 className="size-4" />,
       tone: 'chart-2' as const,
       action: <Star className="size-4 fill-amber-400 text-amber-400" />,
     },
     {
-      id: 'hrms',
-      title: 'HRMS',
-      description: 'People and human resources',
+      id: 'peopleops',
+      title: 'PeopleOps',
+      description: 'People operations & attendance',
       icon: <Users className="size-4" />,
       tone: 'chart-3' as const,
       action: <Star className="size-4 fill-amber-400 text-amber-400" />,
@@ -188,7 +201,7 @@ export function EcosystemHome() {
               </IconTile>
             }
             title="No business modules activated yet"
-            description="At initial setup, business modules are 0. Activate modules like HRMS and CRM from the Modules catalog to unlock business capabilities."
+            description="At initial setup, business modules are 0. Activate modules like PeopleOps, RevOps, and LedgerFlow from the Modules catalog to unlock business capabilities."
             actions={
               <Button
                 variant="primary"

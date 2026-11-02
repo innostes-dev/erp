@@ -13,12 +13,12 @@ class ItemCatalogRead(BaseSchema):
     """Metadata describing an installed module or plugin package in the catalog."""
 
     id: str = Field(
-        description="Unique package identifier string (e.g. 'hrms', 'crm', 'tracura').",
-        examples=["hrms"],
+        description="Unique package identifier string (e.g. 'peopleops', 'revops', 'tracura').",
+        examples=["peopleops"],
     )
     name: str = Field(
         description="Human-readable title of the module or plugin.",
-        examples=["HRMS"],
+        examples=["PeopleOps"],
     )
     version: str = Field(
         description="Semver version string of the package.",
@@ -30,7 +30,7 @@ class ItemCatalogRead(BaseSchema):
     )
     description: str = Field(
         description="Brief functional overview of package capabilities.",
-        examples=["People and human resources management"],
+        examples=["People and human resources operations"],
     )
     tags: list[str] = Field(
         default_factory=list,
@@ -57,11 +57,11 @@ class ItemCatalogRead(BaseSchema):
         json_schema_extra={
             "examples": [
                 {
-                    "id": "hrms",
-                    "name": "HRMS",
+                    "id": "peopleops",
+                    "name": "PeopleOps",
                     "version": "0.1.0",
                     "type": "module",
-                    "description": "People and human resources management",
+                    "description": "People and human resources operations",
                     "tags": ["Employees", "Leave", "Payroll"],
                     "tone": "chart-3",
                     "is_active": True,
@@ -80,11 +80,11 @@ class ModuleListResponse(BaseSchema):
         examples=[
             [
                 {
-                    "id": "hrms",
-                    "name": "HRMS",
+                    "id": "peopleops",
+                    "name": "PeopleOps",
                     "version": "0.1.0",
                     "type": "module",
-                    "description": "People and human resources management",
+                    "description": "People and human resources operations",
                     "tags": ["Employees", "Leave", "Payroll"],
                     "tone": "chart-3",
                     "is_active": True,
@@ -95,7 +95,7 @@ class ModuleListResponse(BaseSchema):
     )
     active_ids: list[str] = Field(
         description="List of module IDs currently enabled for the tenant.",
-        examples=[["hrms", "crm"]],
+        examples=[["peopleops", "revops"]],
     )
 
     model_config = ConfigDict(
@@ -104,18 +104,18 @@ class ModuleListResponse(BaseSchema):
                 {
                     "installed": [
                         {
-                            "id": "hrms",
-                            "name": "HRMS",
+                            "id": "peopleops",
+                            "name": "PeopleOps",
                             "version": "0.1.0",
                             "type": "module",
-                            "description": "People and human resources management",
+                            "description": "People and human resources operations",
                             "tags": ["Employees", "Leave", "Payroll"],
                             "tone": "chart-3",
                             "is_active": True,
                             "activated_at": "2026-10-29T10:00:00Z",
                         }
                     ],
-                    "active_ids": ["hrms"],
+                    "active_ids": ["peopleops"],
                 }
             ]
         }
@@ -177,7 +177,7 @@ class ActivationResponse(BaseSchema):
 
     item_id: str = Field(
         description="Identifier of the module or plugin whose status changed.",
-        examples=["hrms"],
+        examples=["peopleops"],
     )
     is_active: bool = Field(
         description="New activation state of the package.",
@@ -185,16 +185,16 @@ class ActivationResponse(BaseSchema):
     )
     message: str = Field(
         description="Human-readable operational status message.",
-        examples=["Module 'hrms' activated successfully."],
+        examples=["Module 'peopleops' activated successfully."],
     )
 
     model_config = ConfigDict(
         json_schema_extra={
             "examples": [
                 {
-                    "item_id": "hrms",
+                    "item_id": "peopleops",
                     "is_active": True,
-                    "message": "Module 'hrms' activated successfully.",
+                    "message": "Module 'peopleops' activated successfully.",
                 }
             ]
         }

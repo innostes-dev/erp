@@ -45,17 +45,17 @@ Copy `apps/web-app/.env.example` to `.env` to change the API address (`VITE_API_
 The UI engine loads business modules and platform plugins via the dynamic manifest catalogue in `src/app/catalog.ts`:
 
 ```ts title="src/app/catalog.ts"
-import { apiLoggerManifest } from '@innostes/api-logger';
-import { crmManifest } from '@innostes/crm';
-import { hrmsManifest } from '@innostes/hrms';
+import { peopleopsManifest } from '@innostes/peopleops';
+import { revopsManifest } from '@innostes/revops';
+import { tracuraManifest } from '@innostes/tracura';
 
 export const BUSINESS_MODULES_CATALOG: CatalogItem[] = [
-  hrmsManifest,
-  crmManifest,
+  peopleopsManifest,
+  revopsManifest,
 ];
 
 export const PLUGINS_CATALOG: CatalogItem[] = [
-  apiLoggerManifest,
+  tracuraManifest,
 ];
 ```
 

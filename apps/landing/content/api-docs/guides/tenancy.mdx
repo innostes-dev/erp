@@ -19,7 +19,7 @@ X-Tenant-ID: 1
 | --- | --- | --- |
 | **Global Operations** (e.g. `GET /tenants`, `POST /tenants`, `GET /auth/me`) | **Optional** | Operates at the platform administration tier. |
 | **Tenant Operations** (e.g. `GET /tenants/current/modules`) | **Context Header** | The `X-Tenant-ID` header scopes module and plugin queries to the active tenant. |
-| **Domain Operations** (e.g. CRM contacts, HRMS employee rosters) | **Required** | Scopes all database queries to the given tenant ID. |
+| **Domain Operations** (e.g. RevOps deals, PeopleOps employee rosters) | **Required** | Scopes all database queries to the given tenant ID. |
 
 ---
 
