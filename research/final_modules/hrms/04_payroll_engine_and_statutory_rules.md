@@ -69,7 +69,25 @@ $$\text{Net Pay} \equiv \text{Gross Pay} - \sum \text{Pre-Tax Deductions} - \sum
 
 ## 3. Statutory Localization Engines: India vs. United States
 
-### 3.1 India (IN) Statutory Engine
+### 3.0 Startup-First Modular Statutory Toggles
+
+In early-stage companies (1 to 20 employees), statutory compliance obligations differ radically from large corporations:
+* **Indian EPF Exemption:** Under Section 1(3) of the *EPF & MP Act 1952*, Provident Fund registration is **not legally mandatory until an organization reaches 20 employees**.
+* **Indian ESIC Exemption:** ESIC is not mandatory until 10 employees (and only covers workers earning gross wages $\le \text{INR } 21,000/\text{month}$, which knowledge-worker tech startups rarely employ).
+
+**The Innostes Startup-First Principle:**
+All statutory deduction modules are **strictly modular toggles, disabled by default until configured**:
+* `enable_epf = FALSE` (Default)
+* `enable_esic = FALSE` (Default)
+* `enable_pt = FALSE` (Default)
+
+A 5-person startup can run monthly payroll on Day 1 with zero administrative friction:
+$$\text{Net Pay} = \text{Gross Base Salary} - \text{TDS Withholding (if taxable)}$$
+The system never halts or blocks payroll with errors demanding unobtained EPFO establishment codes or ESIC registration numbers. When the company scales past 20 employees, the admin flips `enable_epf = TRUE`, and the mathematical 12% deduction activates automatically.
+
+---
+
+### 3.1 India (IN) Statutory Engine (When Enabled)
 
 ```mermaid
 flowchart LR

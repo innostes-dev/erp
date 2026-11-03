@@ -64,26 +64,30 @@ Punches are processed in temporal order to generate discrete `attendance_blocks`
 
 ---
 
-## 4. Grace Periods, Punctuality Penalties & Loss of Pay (LOP)
+## 4. Grace Periods, Punctuality Tracking & Loss of Pay (LOP)
 
-### 4.1 Grace Periods & Late Arrival
-Organizations define a grace window (e.g., 15 minutes). If shift starts at 09:00:
-* Punch between 09:01 and 09:15: Marked `ON_TIME (Grace Period Consumed)`.
-* Punch after 09:15: Marked `LATE` with calculated tardiness minutes:
-  $$\text{Late Minutes} = t_{\text{IN}} - t_{\text{Shift Start}}$$
+### 4.1 Startup-First Default: Trust-First Presence (Zero Automatic Penalties)
 
-### 4.2 Progressive Late Penalty Rule
-A progressive escalation engine converts habitual tardiness into payroll deductions:
-* **1st & 2nd Late Mark in Calendar Month**: Warning notification emitted.
-* **3rd Late Mark in Calendar Month**: Automatically incurs a **0.5 Day Loss of Pay (LOP)** deduction.
+In modern knowledge startups, software teams, and creative agencies, strict clock-watching destroys morale and fails to reflect output. 
+
+* **Default Mode: `enable_tardiness_lop_penalties = FALSE`**:
+  * Attendance check-ins serve strictly as **Presence Awareness** (*"Jane is online from Home"*, *"Sarah is in the Office"*).
+  * Arriving after 09:15 records an informational timestamp for team visibility, but **incurs zero salary deductions or financial penalties**.
+* **Enterprise Strict Mode (Optional Opt-In)**:
+  * For manufacturing plants, customer support desks, and physical retail stores with fixed shift staffing requirements, administrators can explicitly enable progressive tardiness penalties.
+
+### 4.2 Progressive Late Penalty Rule (Enterprise Mode Only)
+When explicitly enabled by an enterprise administrator (`enable_tardiness_lop_penalties = TRUE`):
+* **1st & 2nd Late Mark in Calendar Month**: Soft notification emitted.
+* **3rd Late Mark in Calendar Month**: Incurs a **0.5 Day Loss of Pay (LOP)** deduction.
 * **4th+ Late Mark**: Incurs full **1.0 Day LOP** deduction per occurrence.
 
 ### 4.3 Loss of Pay (LOP) Deduction Formulation
-When an employee incurs unexcused absence or accumulated late penalties, the deduction is computed against their base compensation:
+When an employee incurs approved unpaid leave or unexcused full-day absence, the deduction is computed against their base compensation:
 
 $$\text{Per-Day Base Rate} = \frac{\text{Monthly Base Salary}}{\text{Total Calendar Days in Month (or Standard Working Days)}}$$
 
-$$\text{Total LOP Deduction} = (\text{Unexcused Absent Days} + \text{Late Penalty Days}) \times \text{Per-Day Base Rate}$$
+$$\text{Total LOP Deduction} = \text{Unexcused Absent Days} \times \text{Per-Day Base Rate}$$
 
 ---
 

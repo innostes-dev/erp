@@ -133,19 +133,46 @@ The primary employee dashboard (`/hrms`) utilizes a 12-column responsive CSS gri
 
 ---
 
-## 5. Employee Directory, 9-Step Onboarding Wizard & Employee 360
+## 5. Employee Directory, 60-Second Quick-Add & 8-Step Onboarding Stepper
 
-### 5.1 Directory Layout (`/hrms/employees`)
+### 5.1 Directory Layout & 60-Second Quick-Add (`/hrms/employees`)
 
-The employee directory supports two presentation modes switched via a persistent user preference:
+The employee directory supports two presentation modes with a prominent **`[ + Quick Add Employee ]`** button:
 1. **Interactive Data Table:** High-density enterprise grid with column sorting, fuzzy search (Name, Email, Role, Department, Employee Code), status filters (`ACTIVE`, `ONBOARDING`, `PROBATION`, `NOTICE_PERIOD`), and bulk action operations.
 2. **Card Grid View:** Photo cards featuring designation, reporting manager, direct email/phone buttons, and current presence status.
 
+#### The 60-Second Founder Quick-Add Modal
+Startups do not have time to fill 50 fields before hiring someone. A clean modal captures essential details in 30 seconds:
+
+```
++-----------------------------------------------------------------------------------+
+| QUICK ADD EMPLOYEE (60-SECOND ONBOARDING)                                     [X] |
++-----------------------------------------------------------------------------------+
+| Legal First Name *                            Legal Last Name *                   |
+| [ Sarah                             ]         [ Chen                            ] |
+|                                                                                   |
+| Work Email *                                  Mobile Phone *                      |
+| [ sarah.chen@innostes.com           ]         [ +91 98765 43210                 ] |
+|                                                                                   |
+| Designation / Job Title *                     Department *                        |
+| [ Senior Backend Engineer           ]         [ Engineering                     ] |
+|                                                                                   |
+| Monthly Compensation / CTC (INR) *            Date of Joining *                   |
+| [ 180000                            ]         [ 15 Nov 2026                     ] |
+|                                                                                   |
+| [✓] Send self-onboarding magic link to candidate email                            |
+| [✓] Allow immediate Day 1 web check-in & dashboard access                         |
+|                                                                                   |
+| [ Cancel ]                                         [ Create Employee & Invite ]   |
++-----------------------------------------------------------------------------------+
+```
+* **Outcome**: Clicking `[ Create Employee & Invite ]` immediately creates the employee record, assigns the next sequential employee code (`INN-00105`), and dispatches the self-service onboarding link. The employee appears on the directory with badge `[ ONBOARDING ]`.
+
 ---
 
-### 5.2 The 9-Step Candidate Onboarding Stepper (`/hrms/onboarding/[token]`)
+### 5.2 The 8-Step Candidate Self-Service Stepper (`/hrms/onboarding/[token]`)
 
-Candidate onboarding is structured into an interactive 9-step wizard with real-time client-side validation, auto-saving drafts, and clear progress milestones:
+The candidate completes their detailed bank, tax, and address profile on their own time via an interactive 8-step wizard with real-time auto-saving drafts:
 
 ```
 +---------------------------------------------------------------------------------------------------+

@@ -63,7 +63,7 @@ EMPLOYEE DATA INTAKE PIPELINE (PHASE 1: 8 STEPS + SUBMISSION)
 
 ### Step 1: Core Personal & Demographic Identity
 
-Captures immutable personal details required for corporate directories, medical insurance, and statutory filings:
+Captures personal details required for corporate directories, medical insurance, and statutory filings:
 
 | Attribute | Data Type | Constraint | Description & Validation Rules |
 | :--- | :--- | :--- | :--- |
@@ -72,17 +72,32 @@ Captures immutable personal details required for corporate directories, medical 
 | `middle_name` | `VARCHAR(100)` | Nullable | Legal middle name. |
 | `last_name` | `VARCHAR(100)` | NOT NULL | Legal surname/last name. |
 | `display_name` | `VARCHAR(150)` | NOT NULL | Preferred name for Slack, email, and directory. |
-| `date_of_birth` | `DATE` | NOT NULL | Validated: Must be $\ge 18$ years old on hire date. |
+| `date_of_birth` | `DATE` | NOT NULL | Validated at service layer based on jurisdiction labor laws. |
 | `gender` | `ENUM` | NOT NULL | `MALE`, `FEMALE`, `NON_BINARY`, `PREFER_NOT_TO_SAY`. |
-| `marital_status`| `ENUM` | NOT NULL | `SINGLE`, `MARRIED`, `DIVORCED`, `WIDOWED`. |
-| `marriage_date` | `DATE` | Nullable | Required if `marital_status == 'MARRIED'`. |
-| `blood_group` | `ENUM` | NOT NULL | `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-`, `O+`, `O-`. |
+| `marital_status`| `ENUM` | Nullable | Optional: `SINGLE`, `MARRIED`, `DIVORCED`, `WIDOWED`. |
+| `marriage_date` | `DATE` | Nullable | Optional: Required only if claiming spouse benefits. |
+| `blood_group` | `ENUM` | Nullable | Optional: `A+`, `A-`, `B+`, `B-`, `AB+`, `AB-`, `O+`, `O-` (never blocks Day 1 hire). |
 | `nationality` | `VARCHAR(50)` | NOT NULL | ISO 3166-1 alpha-2 code (e.g., `IN`, `US`, `GB`). |
-| `father_name` | `VARCHAR(150)` | NOT NULL | Mandatory for Indian statutory forms (EPF Form 11, Form 2). |
-| `mother_name` | `VARCHAR(150)` | NOT NULL | Legal mother's name. |
-| `spouse_name` | `VARCHAR(150)` | Nullable | Mandatory if married for gratuity and insurance. |
+| `father_name` | `VARCHAR(150)` | Nullable | Optional in master record; conditionally verified only for Indian EPF Form 2/11. |
+| `mother_name` | `VARCHAR(150)` | Nullable | Optional. |
+| `spouse_name` | `VARCHAR(150)` | Nullable | Optional: Required only for married gratuity/insurance nomination. |
 | `is_differently_abled` | `BOOLEAN` | DEFAULT FALSE | Person with Disabilities (PwD) classification. |
 | `disability_details` | `TEXT` | Nullable | Nature of disability, certificate number, and % impairment. |
+
+---
+
+### Startup-First Ergonomics: 60-Second Quick-Add vs. Self-Service Intake
+
+Startups cannot afford multi-step administrative gridlock when bringing on new teammates. Innostes implements a **Dual-Mode Intake Architecture**:
+
+1. **The 60-Second Founder Quick-Add (`POST /peopleops/employees/quick-add`)**:
+   * Admin enters only 4 essential fields: `Legal Name`, `Work Email`, `Designation`, and `Monthly Compensation`.
+   * An active employee profile is generated immediately with status `INVITED / ONBOARDING`.
+   * An onboarding magic link is dispatched to the candidate's personal email/SMS.
+   * **Instant Day 1 Access:** The employee can immediately log in, access internal announcements, and record daily attendance even while their background document uploads are in progress.
+2. **Progressive Self-Service Completion**:
+   * The candidate completes their bank details, addresses, and statutory IDs on their own time via mobile web.
+   * If a candidate takes 3 days to find their graduation degree certificate, their profile and check-in access are **never blocked**.
 
 ---
 

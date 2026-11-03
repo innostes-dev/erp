@@ -77,7 +77,9 @@ For sensitive fields (PAN, Bank Account Numbers, Passports), Innostes uses **Env
 | ENVELOPE ENCRYPTION ANATOMY (AES-256-GCM)                                                             |
 +-------------------------------------------------------------------------------------------------------+
 | 1. Master Key (Key Encryption Key - KEK):                                                             |
-|    - Stored externally in AWS KMS, GCP KMS, HashiCorp Vault, or local environment HSM.               |
+|    - Cloud Mode: AWS KMS, GCP KMS, or HashiCorp Vault.                                               |
+|    - Self-Hosted / 0 Rs Startup Mode: Local environment master key via `INNOSTES_MASTER_KEY` (AES-256)|
+|    - Zero external cloud dependencies required for self-hosted deployment.                            |
 |    - Rotated every 90 days automatically.                                                             |
 |                                                                                                       |
 | 2. Data Encryption Key (DEK):                                                                         |

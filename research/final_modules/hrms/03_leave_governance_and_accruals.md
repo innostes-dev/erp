@@ -73,32 +73,30 @@ $$\text{Encashment Financial Payout} = \text{Encashed Days} \times \text{Per-Day
 
 ---
 
-## 4. The Regional Sandwich Rule Engine
+## 4. The Regional Sandwich Rule Engine (Disabled by Default)
 
-In several legal jurisdictions (notably India and the Middle East), companies enforce the **Sandwich Rule** to prevent weekend absenteeism abuse:
+The **Sandwich Rule** (converting weekend days into deducted leave when an employee takes both Friday and Monday off) is an aggressive legacy rule that modern tech startups strongly reject.
 
-### 4.1 Sandwich Trigger Rule
-If an employee applies for leave on the immediate working day preceding a declared weekly off/holiday AND on the immediate working day succeeding that weekly off/holiday:
-$$\text{IF } (\text{Leave on Friday} \land \text{Leave on Monday}) \implies (\text{Saturday} + \text{Sunday}) \text{ are converted to Leave}$$
-
-### 4.2 Mathematical Evaluation
-* Standard Leave Deducted: 2 days (Friday + Monday).
-* Sandwich Leave Deducted: $2 + 2 = 4$ days (Friday, Saturday, Sunday, Monday deducted from PTO balance).
-* System Transparency: The UI clearly flags the sandwich penalty during leave submission so the employee is informed prior to confirming.
+* **Startup-First Default: `is_sandwich_rule_active = FALSE`**:
+  * Taking Friday and Monday off deducts exactly **2 days** of PTO. Saturday and Sunday remain paid weekly rest days.
+* **Legacy Enterprise Mode (Optional Opt-In)**:
+  * Companies operating under specific factory standing orders or legacy agreements can explicitly enable `is_sandwich_rule_active = TRUE` on specific leave types. When active:
+    $$\text{IF } (\text{Leave on Friday} \land \text{Leave on Monday}) \implies (\text{Saturday} + \text{Sunday}) \text{ are converted to Leave}$$
 
 ---
 
-## 5. Multi-Tier Approval Workflows
+## 5. Approval Workflows: 1-Step Startup Simplicity vs. Multi-Tier Enterprise
 
-Leave requests pass through an automated approval state machine:
+### 5.1 Startup-First Default: 1-Step Direct Approval
+In a 5 to 50-person organization, there are no complex corporate hierarchies:
+* **The Route**: Employee submits leave $\implies$ Line Manager (or Founder) approves in 1 click directly from their Dashboard.
+* **Auto-Resolution**: If an employee has no assigned manager, the request routes directly to the Organization Administrator. Zero stuck requests.
 
-1. **Standard Request ($\le 3$ Days)**:
-   * Route: Employee $\implies$ Direct Line Manager.
-   * Auto-approval SLA: If manager does not act within 48 hours, reminder notification emitted.
-2. **Extended Request ($> 3$ Days)**:
-   * Route: Employee $\implies$ Direct Line Manager $\implies$ Department Head / Skip-Level.
-3. **Statutory Long-Term Request (Maternity / Medical Sabbatical)**:
-   * Route: Employee $\implies$ Direct Manager $\implies$ HR Compliance Specialist (requires medical certificate attachment upload).
+### 5.2 Enterprise Multi-Tier Mode (Optional Opt-In)
+When `enable_multi_tier_approvals = TRUE` is toggled on:
+1. **Standard Request ($\le 3$ Days)**: Employee $\implies$ Direct Line Manager.
+2. **Extended Request ($> 3$ Days)**: Employee $\implies$ Direct Line Manager $\implies$ Department Head / Skip-Level.
+3. **Statutory Long-Term Request (Maternity / Medical Sabbatical)**: Employee $\implies$ Direct Manager $\implies$ HR Compliance Specialist.
 
 ---
 

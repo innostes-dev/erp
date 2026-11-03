@@ -67,9 +67,19 @@ $$\text{Gratuity Payout} = \frac{15 \times \text{Last Drawn Basic Salary} \times
 
 ---
 
-## 4. Dependent Departmental Clearance DAG
+## 4. Exit Clearances: 60-Second Startup Clearance vs. Enterprise Multi-Department DAG
 
-A Full and Final payout cannot be released until all department heads complete their sign-off tasks:
+### 4.1 Startup-First Default: 1-Click Admin Quick Clearance
+In a startup, the founder or operations lead handles offboarding directly:
+* **The Interface:** A single consolidated modal checklist:
+  * `[✓] Company laptop & hardware returned`
+  * `[✓] Corporate email & SaaS accounts revoked`
+  * `[✓] Corporate cards & expense claims settled`
+* **Single Action:** The founder clicks **`[ ✓ Complete All Clearances & Proceed to F&F ]`**. 
+* The entire clearance process finishes in **30 seconds** with zero bureaucratic delays or blocked workflows.
+
+### 4.2 Enterprise Multi-Department Clearance DAG (Optional Mode)
+In enterprises with dedicated functional departments, toggling `enable_departmental_clearances = TRUE` activates independent departmental sign-offs:
 
 ```mermaid
 flowchart TD
