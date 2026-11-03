@@ -131,30 +131,82 @@ The primary employee dashboard (`/hrms`) utilizes a 12-column responsive CSS gri
     * **On Leave:** Solid amber ring with return date subtitle.
     * **Holiday:** Flag indicator.
 
-### 4.5 The Monthly Attendance Calendar & Regularization (`/hrms/attendance`)
+### 4.5 The Multi-Horizon & Dual-Mode Attendance Cockpit (`/hrms/attendance`)
 
-Daily check-in / check-out is performed **exclusively on the Dashboard widget** (`AttendanceCockpitWidget`). When an employee clicks on the Attendance navigation item (or clicks *"View Full Timesheet"* on their dashboard widget), they land on the **Monthly Attendance Calendar**:
+Daily check-in / check-out is performed **exclusively on the Dashboard widget** (`AttendanceCockpitWidget`). When an employee clicks on the Attendance navigation item (or clicks *"View Full Timesheet"* on their dashboard widget), they land on the **Attendance Cockpit** equipped with a **Dual-Axis View Switcher**:
+
+1. **Time Horizon**: `(•) Month` (30-day aggregate) | `( ) Day` (Single-day granular punch timeline)
+2. **Presentation Mode**: `(•) 📅 Calendar View` (Visual cards with clear badges) | `( ) ☰ List Mode` (Sortable, high-density table)
 
 ```
-+---------------------------------------------------------------------------------------------------+
-| TIME & ATTENDANCE                                                   [ < November 2026 > ] [ Today]|
-| Monthly Summary: 168h Logged / 160h Target | 20 Days Present | 1 Missing Punch | 1 Approved Leave |
-| View Toggle: [• My Attendance Calendar]  [ Team Requests (1) ]                                    |
-+---------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------------------------------------+
+| TIME & ATTENDANCE                                                 [ < November 2026 > ] [ Today ]                     |
+| Horizon: (•) Month   ( ) Day                   | Mode: (•) 📅 Calendar View   ( ) ☰ List Mode                         |
+| View Toggle: [• My Attendance]  [ Team Requests (1) ]                                                                 |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 1. Month Horizon: Calendar View with Clear Status Labels
+Visual day cards with color-coded, human-readable labels:
+
+```
++--------------------+--------------------+--------------------+--------------------+---------------+
 | MON 02 NOV         | TUE 03 NOV         | WED 04 NOV         | THU 05 NOV         | FRI 06 NOV    |
 | 09:14 AM - 06:18 PM| 09:30 AM - 06:30 PM| 09:10 AM - [MISSING| 09:15 AM - 06:20 PM| 09:00 - 05:00 |
-| Total: 09h 04m     | Total: 09h 00m     | ⚠️ Missing OUT     | Total: 09h 05m     | Total: 08h 00m|
+| Net: 08h 19m (45m B| Net: 08h 30m (30m B| ⚠️ Missing OUT     | Net: 08h 20m (45m B| Net: 07h 30m  |
+| Mode: [ Office ]   | Mode: [ Home/WFH ] | Mode: [ Office ]   | Mode: [ Office ]   | Mode: [ Office|
 | [ ✓ Present ]      | [ ✓ Present ]      | [⚡Regularize]     | [ ✓ Present ]      | [ ✓ Present ] |
 +--------------------+--------------------+--------------------+--------------------+---------------+
-| MON 09 NOV         | TUE 10 NOV         | WED 11 NOV         | THU 12 NOV         | FRI 13 NOV    |
-| 09:20 AM - 06:15 PM| 09:15 AM - 06:10 PM| DIWALI HOLIDAY     | CASUAL LEAVE       | 09:10 - 06:05 |
-| Total: 08h 55m     | Total: 08h 55m     | Declared Holiday   | Full Day Approved  | Total: 08h 55m|
-| [ ✓ Present ]      | [ ✓ Present ]      | [ Gazetted Off ]   | [ Approved Leave ] | [ ✓ Present ] |
-+---------------------------------------------------------------------------------------------------+
+| SAT 07 NOV         | SUN 08 NOV         | MON 09 NOV         | TUE 10 NOV         | WED 11 NOV    |
+| WEEKLY OFF         | WEEKLY OFF         | 09:20 AM - 06:15 PM| 09:15 AM - 06:10 PM| DIWALI        |
+| Saturday           | Sunday             | Net: 08h 15m       | Net: 08h 15m       | Gazetted      |
+| [ ☕ Weekend Off ] | [ ☕ Weekend Off ] | [ ✓ Present ]      | [ ✓ Present ]      | [ 🪔 Holiday ]|
++--------------------+--------------------+--------------------+--------------------+---------------+
 ```
 
-#### The 1-Click Missed-Punch Regularization Modal
-When an employee clicks `[ ⚡ Regularize ]` on any day flagged with `MISSING_OUT` (e.g. forgot to punch out):
+#### 2. Month Horizon: List Mode (Dense Sortable Table)
+For users who prefer high-density tabular scanning, filtering by missing punches, and inline regularizations:
+
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| TIME & ATTENDANCE: LIST MODE (NOVEMBER 2026)                       Quick Filters: [ All (30) ] [ Missing (1) ] [ Export v]
++-----------------------------------------------------------------------------------------------------------------------+
+| DATE       | DAY | STATUS LABEL       | FIRST IN | LAST OUT | GROSS HRS | BREAKS  | NET HRS | WORK MODE| ACTIONS          |
++------------+-----+--------------------+----------+----------+-----------+---------+---------+----------+------------------+
+| 06 Nov 2026| Fri | [ ✓ Present ]      | 09:00 AM | 05:00 PM | 08h 00m   | 30 mins | 07h 30m | Office   | [ View Details ] |
+| 05 Nov 2026| Thu | [ ✓ Present ]      | 09:15 AM | 06:20 PM | 09h 05m   | 45 mins | 08h 20m | Office   | [ View Details ] |
+| 04 Nov 2026| Wed | [ ⚠️ Missing OUT ]  | 09:10 AM | --:-- -- | --h --m   | 0 mins  | --h --m | Office   | [⚡Regularize]   |
+| 03 Nov 2026| Tue | [ ✓ Present ]      | 09:30 AM | 06:30 PM | 09h 00m   | 30 mins | 08h 30m | Home/WFH | [ View Details ] |
+| 02 Nov 2026| Mon | [ ✓ Present ]      | 09:14 AM | 06:18 PM | 09h 04m   | 45 mins | 08h 19m | Office   | [ View Details ] |
+| 01 Nov 2026| Sun | [ ☕ Weekend Off ]  | --:-- -- | --:-- -- | --        | --      | --      | --       | --               |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 3. Day Horizon: Detailed Punch Timeline & Break Intervals
+Selecting `[ Day ]` or clicking on any date opens the granular intraday breakdown:
+
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| ATTENDANCE BREAKDOWN: WEDNESDAY, 04 NOVEMBER 2026                                      [ < Previous Day ] [ Next Day > ]|
+| Summary: Recorded Clock-In at 09:10 AM | Status: [ ⚠️ Incomplete Session — Missing OUT Punch ]                          |
++-----------------------------------------------------------------------------------------------------------------------+
+| VISUAL TIMELINE:                                                                                                      |
+| [████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]                 |
+| 09:10 AM (IN)                                01:00 PM (LUNCH) 01:45 PM           06:00 PM (Expected OUT)               |
+|                                                                                                                       |
+| RAW PUNCH CHRONOLOGY:                                                                                                 |
+| • 09:10:24 AM — CLOCK IN    | Source: Web Portal      | IP: 192.168.1.45 (Office Corporate Wi-Fi)                     |
+| • 01:00:15 PM — BREAK START | Type: Lunch Break       | Source: Mobile App (GPS: 12.9716° N, 77.5946° E)              |
+| • 01:45:30 PM — BREAK END   | Duration: 45 minutes    | Source: Mobile App                                            |
+| • [ MISSING OUT PUNCH ]     | Expected Out: ~06:30 PM | Status: No exit punch recorded before shift window closed     |
+|                                                                                                                       |
+| RESOLUTION ACTION:                                                                                                    |
+| [ ⚡ Raise Regularization for this Day ]                                                                               |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 4. The 1-Click Missed-Punch Regularization Modal
+When an employee clicks `[ ⚡ Regularize ]` on any day flagged with `MISSING_OUT`:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -173,7 +225,7 @@ When an employee clicks `[ ⚡ Regularize ]` on any day flagged with `MISSING_OU
 +-----------------------------------------------------------------------------------+
 ```
 
-#### Manager Approvals Tab (`[ Team Requests ]`)
+#### 5. Manager Approvals Tab (`[ Team Requests ]`)
 Line managers have a top tab on the same calendar page to review and sign off on direct reports' regularizations in 1 click:
 
 ```

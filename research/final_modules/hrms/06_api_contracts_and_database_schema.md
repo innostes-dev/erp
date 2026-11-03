@@ -884,7 +884,7 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `DELETE` | `/peopleops/masters/{id}` | Delete custom master (blocked if referenced by active employees) | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/masters/reseed-defaults` | Re-seed missing system default masters for the tenant | `peopleops:admin` | 200 OK |
 
-### 2.3 Statutory Verification & Lookup Tools
+### 2.4 Statutory Verification & Lookup Tools
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
@@ -892,17 +892,19 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/tools/validate-pan` | Validates 10-char regex and verifies 4th character is 'P' (Person) | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/tools/lookup-ifsc/{code}`| Resolves RBI directory to return Bank Name, Branch, and MICR code | `peopleops:read` | 200 OK |
 
-### 2.3 Attendance, Timesheets & Normalization
+### 2.5 Time, Attendance & Timesheets
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/peopleops/attendance/punch` | 1-Click web/biometric punch clock ingestion (IN / OUT / BREAK) | `peopleops:read` (self) | 200 OK |
 | `GET` | `/peopleops/attendance/active-session`| Return current day active timer, first punch, and elapsed minutes | `peopleops:read` (self) | 200 OK |
-| `GET` | `/peopleops/attendance/summary` | Query monthly working hours, late arrivals, and LOP deductions | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/attendance/timesheet` | Query monthly timesheet for Calendar or List view (`?month=2026-11&mode=calendar\|list`) | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/attendance/day` | Detailed single-day chronological punch pairs and break intervals (`?date=2026-11-04`) | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/attendance/summary` | Query monthly aggregate working hours, present days, and absent days | `peopleops:read` | 200 OK |
 | `POST` | `/peopleops/attendance/regularize` | Submit punch regularization request with reason for manager sign-off | `peopleops:read` (self) | 201 Created |
 | `PATCH` | `/peopleops/attendance/regularize/{id}`| Line manager approves or rejects punch regularization | `peopleops:manager` | 200 OK |
 
-### 2.4 Leave Governance & Ledgers
+### 2.6 Leave Governance & Ledgers
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
@@ -912,7 +914,7 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/leaves/team-presence` | Get real-time departmental presence radar ("Who's out today") | `peopleops:read` | 200 OK |
 | `GET` | `/peopleops/leaves/ledger/{employee_id}`| Audit trail of all accruals, debits, carry-forwards, and encashments | `peopleops:read` | 200 OK |
 
-### 2.5 Payroll Engine & Disbursals
+### 2.7 Payroll Engine & Disbursals
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
@@ -923,7 +925,7 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/payslips/my-payslips` | List historical monthly payslips for logged-in employee | `peopleops:read` (self) | 200 OK |
 | `GET` | `/peopleops/payslips/{id}/pdf` | Download signed, password-protected PDF payslip | `peopleops:read` (self) | 200 OK |
 
-### 2.6 Offboarding & Final Settlement (F&F)
+### 2.8 Offboarding & Final Settlement (F&F)
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
