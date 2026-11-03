@@ -255,28 +255,163 @@ STATUTORY COMPLIANCE TOGGLES (SETTINGS > PAYROLL > STATUTORY)
 
 ---
 
-### Section 6: Income Tax Regimes & TDS Projection Engine
+### Section 6: Indian Income Tax Engine, Form 12BB Declarations, Verification & Form 16 Lifecycle
 
-Innostes implements an automated, annualized tax projection engine for Indian Income Tax under Section 192:
+Innostes implements an end-to-end, statutory-grade Indian Income Tax calculation engine under Section 192 of the Income Tax Act, 1961, bridging the two-way lifecycle between employee input declarations and employer statutory filings.
 
 ```mermaid
 flowchart TD
-    GrossYear["Projected Annual Gross Earnings<br/>(Historical Actuals + Remaining Months Forecast)"] --> RegimeCheck{"Employee Chosen Regime"}
-    
-    RegimeCheck -->|Section 115BAC New Regime| NewRegime["Apply Standard Deduction: INR 75,000<br/>(Zero Chapter VI-A investment declarations needed)"]
-    
-    RegimeCheck -->|Old Tax Regime| OldRegime["Apply Chapter VI-A Deductions:<br/>• 80C: Up to 1.5 Lakhs (PF, ELSS, PPF)<br/>• 80D: Medical Insurance (25k/50k)<br/>• Section 10(13A): HRA Exemption Calculation"]
-    
-    NewRegime --> SlabCompute["Compute Total Annual Tax on Slabs + 4% Health & Education Cess"]
-    OldRegime --> SlabCompute
-    
-    SlabCompute --> MonthlyTDS["Monthly TDS Withholding =<br/>(Total Annual Tax - Tax Deducted in Prior Months) / Remaining Months"]
+    subgraph P1["Phase 1: Intake (April / Onboarding)"]
+        F12BB["Employee Form 12BB Declaration<br/>(Regime, 80C, 80D, HRA, Home Loan)"]
+        F12B["Previous Employment Form 12B<br/>(Prior Salary, TDS, PF for mid-year joiners)"]
+    end
+
+    subgraph P2["Phase 2: Monthly TDS & Mid-Year Verification (Dec - Feb)"]
+        TDS["Monthly Section 192 TDS Withholding<br/>(Projected Annual Tax - Paid) / Remaining Months"]
+        Cockpit["HR Tax Proof Verification Cockpit<br/>(Approve, Partial Approve, or Reject Proofs)"]
+        Recompute["Auto-Fallback Tax Recompute<br/>(Unverified amounts taxed in Feb & March runs)"]
+    end
+
+    subgraph P3["Phase 3: Year-End Reporting & Disbursals (April - June)"]
+        F24Q["Quarterly Form 24Q e-TDS Return<br/>(Generates .fvu Text File with Annexure II)"]
+        PartA["TRACES Form 16 Part A<br/>(Challan CIN, BSR, Tax Deposited)"]
+        PartB["Innostes Form 16 Part B<br/>(Salary Breakup, Sec 10, 80C, Net Tax)"]
+        Merged["Digitally Signed Form 16 PDF (DSC Class 3)<br/>Published to Employee ESS Vault"]
+    end
+
+    F12BB --> TDS
+    F12B --> TDS
+    TDS --> Cockpit
+    Cockpit --> Recompute
+    Recompute --> F24Q
+    F24Q --> PartA
+    Recompute --> PartB
+    PartA --> Merged
+    PartB --> Merged
 ```
 
-#### Tax Declaration Submission & Verification Workflow:
-1. **Declaration Window (April / Onboarding)**: Employees submit proposed investment declarations in ESS.
-2. **Monthly Projections**: Payroll engine calculates monthly TDS based on active declarations.
-3. **Proof Verification Window (January – February)**: Employees upload actual investment receipts (ELSS statements, rent receipts, medical insurance policies). HR reviews in a dedicated verification cockpit. If proofs are missing, remaining tax is recalculated across the final two payroll cycles (February and March) to prevent statutory tax shortfalls.
+---
+
+#### 1. Tax Regime Selection & Mathematical Slab Engine
+
+Employees select between two statutory regimes:
+
+##### A. Section 115BAC New Tax Regime (Default)
+* **Standard Deduction**: Increased to **INR 75,000** (Finance Act 2024 / FY 2024-25 onwards).
+* **Section 87A Rebate**: Full tax rebate up to INR 25,000 for taxable income $\le \text{INR } 7,00,000$ (Zero tax liability up to INR 7.75 Lakhs including standard deduction).
+* **Marginal Relief**: Automatically applied if taxable income marginally exceeds INR 7,00,000.
+* **Annual Tax Slabs**:
+  * Up to INR 3,00,000: **0% (Nil)**
+  * INR 3,00,001 to INR 7,00,000: **5%**
+  * INR 7,00,001 to INR 10,00,000: **10%**
+  * INR 10,00,001 to INR 12,00,000: **15%**
+  * INR 12,00,001 to INR 15,00,000: **20%**
+  * Above INR 15,00,000: **30%**
+* **Deductions Disallowed**: Chapter VI-A deductions (80C, 80D, 80E) and Section 10 exemptions (HRA, LTA) are disabled, except Employer NPS contribution u/s 80CCD(2) up to 14% of (Basic + DA).
+
+##### B. Old Tax Regime (Optional Choice)
+* **Standard Deduction**: **INR 50,000**.
+* **Section 87A Rebate**: Up to INR 12,500 for taxable income $\le \text{INR } 5,00,000$ (Zero tax liability up to INR 5.5 Lakhs).
+* **Annual Tax Slabs**:
+  * Up to INR 2,50,000: **0% (Nil)**
+  * INR 2,50,001 to INR 5,00,000: **5%**
+  * INR 5,00,001 to INR 10,00,000: **20%**
+  * Above INR 10,00,000: **30%**
+* **Universal Health & Education Cess**: **4%** levied on aggregate income tax liability across both regimes.
+* **Surcharge Slabs on High Earners**: 10% (> 50L), 15% (> 1 Cr), 25% (> 2 Cr) with marginal relief calculations.
+
+---
+
+#### 2. Information Required FROM the Employee (Self-Service Intake)
+
+##### A. Statutory Form 12BB (Rule 26C Declaration)
+Employees submit their deduction claims in ESS across 5 statutory categories:
+
+1. **House Rent Allowance (HRA) Exemption u/s 10(13A)**:
+   * **Required Inputs**: Monthly rent paid, rental property address, landlord legal name, and landlord address.
+   * **Statutory Guard (Landlord PAN)**: If annual rent paid exceeds **INR 1,00,000**, the system mandates entry of the Landlord's valid PAN (CBDT Circular) or Form 60 declaration before exemption is factored into monthly TDS.
+   * **Exemption Math**: The engine dynamically calculates the exact statutory exemption:
+     $$\text{HRA Exemption} = \min \begin{cases} \text{Actual HRA Received} \\ \text{Rent Paid} - 10\% \text{ of (Basic + DA)} \\ 50\% \text{ of (Basic + DA) [Metro: Delhi, Mumbai, Kolkata, Chennai]} \text{ or } 40\% \text{ [Non-Metro]} \end{cases}$$
+2. **Deduction of Interest on Borrowing for House Property u/s 24(b)**:
+   * Self-occupied property: Maximum deduction of **INR 2,00,000** for interest paid.
+   * Let-out property: Actual interest with net loss capped at INR 2,00,000 per financial year.
+   * **Required Inputs**: Lender Name, Lender PAN/TAN, Loan Account Number, and Provisional Interest Certificate issued by the bank/NBFC.
+3. **Chapter VI-A Deductions (Old Regime)**:
+   * **Section 80C (Maximum Cap: INR 1,50,000)**:
+     * *System-Auto Ingested*: Employee Provident Fund (EPF) contributions made through payroll are automatically populated into 80C without requiring manual employee entry.
+     * *Employee Declared*: Equity Linked Savings Schemes (ELSS), Life Insurance Premiums (LIC), Public Provident Fund (PPF), 5-Year Tax Saver Bank FDs, Children Tuition Fees (up to 2 children), Sukanya Samriddhi Yojana, National Savings Certificates (NSC), and Stamp Duty / Registration charges for house purchase.
+   * **Section 80CCD(1B)**: Additional voluntary contribution to National Pension System (NPS) up to **INR 50,000** over and above the Section 80C cap.
+   * **Section 80D (Health Insurance Premium & Preventive Health Checkup)**:
+     * Self, Spouse & Children: Up to **INR 25,000** (INR 50,000 if self/spouse is senior citizen $\ge 60$).
+     * Parents: Additional **INR 25,000** (INR 50,000 if parents are senior citizens $\ge 60$).
+     * Preventive Health Checkup: Up to **INR 5,000** within the overall 80D ceiling.
+   * **Section 80E**: Full deduction for interest paid on higher education loans (zero upper monetary cap for up to 8 consecutive assessment years).
+   * **Section 80G**: Donations to approved charitable relief funds (50% or 100% deduction with mandatory 80G Donee Registration Number / Form 10BE certificate).
+   * **Section 80TTA / 80TTB**: Interest on savings bank accounts (up to INR 10,000 u/s 80TTA; up to INR 50,000 on savings and FDs for senior citizens u/s 80TTB).
+4. **Income from Other Sources (Declared by Employee)**:
+   * Employees declare external income (Bank savings interest, fixed deposit interest, rental income, freelance gains) with optional TDS already deducted at source. FACTORING THIS PREVENTS EMPLOYEES FROM FACING TAX SHORTFALL PENALTIES (Section 234B/234C) WHEN FILING ITR.
+5. **Previous Employment Details (Statutory Form 12B)**:
+   * When an employee joins mid-financial year, they furnish Form 12B details from their previous organization:
+     * Previous Gross Salary Paid
+     * Total TDS Deducted by Previous Employer
+     * Employee PF Deducted by Previous Employer
+   * **Critical System Guard**: If Form 12B is not factored, both employers apply the standard deduction (INR 75k / 50k) and lower initial tax brackets independently, causing massive statutory tax shortfalls in the final payroll cycle. Innostes consolidates previous income seamlessly into the annual forecast.
+
+---
+
+#### 3. HR Tax Proof Verification Cockpit & Auto-Recalculation Fallback
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| TAX VERIFICATION COCKPIT: FY 2026-27                                                  [ Status: 38 Verified / 4 Pending Review ]  |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| EMPLOYEE: EMP-1042 — Sarah Chen (Tech Lead) | Regime: OLD TAX REGIME | Declared: INR 3,85,000 | Verified: INR 3,25,000            |
++-----------------------+---------------------+---------------------+---------------------------------------------------------------+
+| SECTION & CATEGORY    | PROPOSED DECLARED   | SUBMITTED PROOF     | VERIFICATION ACTION & STATUS                                  |
++-----------------------+---------------------+---------------------+---------------------------------------------------------------+
+| Section 80C: ELSS     | INR 50,000.00       | elss_statement.pdf  | [✓ Approve Full]  [ Partial ]  [ Reject ]                     |
+| Mutual Fund Invest    |                     | (CAMS Statement)    | Status: VERIFIED & ACCEPTED (INR 50,000.00)                   |
+|                       |                     |                     |                                                               |
+| Section 80D: Health   | INR 35,000.00       | hdfc_ergo_med.pdf   | [✓ Approve Full]  [ Partial ]  [ Reject ]                     |
+| Insurance (Self+Par)  |                     | (HDFC Ergo Premium) | Status: VERIFIED & ACCEPTED (INR 35,000.00)                   |
+|                       |                     |                     |                                                               |
+| Sec 10(13A): House    | INR 2,40,000.00     | rent_receipts.zip   | [ Approve Full ]  [• Partial ] [ Reject ]                     |
+| Rent Allowance (HRA)  | (20,000 / month)    | (Landlord: R. Rao)  | Approved Amount: [ INR 1,80,000.00 ]                          |
+|                       |                     |                     | Note: Landlord PAN valid for only 9 months receipts.          |
++-----------------------+---------------------+---------------------+---------------------------------------------------------------+
+| SPLIT-SCREEN DOCUMENT PREVIEW: [ rent_receipts.zip / page_3.pdf ]                          | LIVE TAX IMPACT PREVIEW:         |
+| [ Zoom - / + ] [ Rotate ] [ Download PDF ]                                                  | Tax Under Proposed: INR  9,450/mo|
+| Verified Landlord PAN: ABCPR1234K (Active on Income Tax Portal Database)                    | Tax Under Verified: INR 12,820/mo|
++---------------------------------------------------------------------------------------------+----------------------------------+
+```
+
+* **Line-Item Audit Trail**: HR reviewers can accept, partially accept (with an adjusted verified amount), or reject items with statutory rejection codes (`INVALID_PAN`, `DATE_OUTSIDE_FY`, `NAME_MISMATCH`, `MISSING_SIGNATURE`).
+* **Automated Penalty Recalculation Fallback**:
+  * On the proof submission deadline (typically February 15th), unverified declarations automatically revert to zero or the accepted verified amount.
+  * The system recalculates remaining tax across the **February and March payroll runs**, preventing the company from incurring statutory employer default penalties under Section 201(1A).
+
+---
+
+#### 4. Year-End Form 24Q e-TDS Returns & Automated Form 16 Generation
+
+The payroll engine closes the financial year with automated government filings and digitally signed Form 16 delivery:
+
+1. **Quarterly Form 24Q e-TDS Filing Engine**:
+   * Generates clean, pre-validated `.fvu` ASCII text files ready for submission via the NSDL File Validation Utility.
+   * **Q1, Q2, Q3**: Compiles Annexure I (Challan deductor details, BSR codes, Challan serial numbers, tax deposited, and employee deductee mapping).
+   * **Q4 (Year-End)**: Compiles Annexure I plus comprehensive **Annexure II**, detailing gross salary paid, Section 10 exemptions, standard deduction, Chapter VI-A itemized deductions, net taxable salary, and total tax deducted across all employees for the entire 12-month period.
+2. **Form 16 Part A & Part B Generation & Merge Engine**:
+   * **Form 16 Part A (TRACES Certificate)**:
+     * Generated from the Income Tax TRACES government portal after quarterly 24Q processing.
+     * Contains TAN of Deductor, PAN of Employee, Challan CIN numbers, and quarterly deposited amounts.
+     * Innostes provides a **TRACES Bulk Ingestion Utility**: Administrators drop the TRACES `.zip` or text export; the system automatically unzips and maps each employee's Part A to their employee master.
+   * **Form 16 Part B (Natively Generated by Innostes)**:
+     * Computed natively by the Innostes Payroll Engine strictly adhering to the CBDT statutory Annexure layout.
+     * Contains complete itemized salary components, Section 10 exemptions (HRA, Conveyance, Gratuity), Section 16 deductions (Standard deduction INR 75,000 / 50,000 + Professional Tax), Chapter VI-A deductions (80C, 80D, 80CCD, 80E, 80G), Total Taxable Income, Tax on Total Income, Section 87A rebate, 4% Health & Education cess, and Net Tax Payable.
+   * **Unified Digitally Signed Form 16 PDF (Class 3 DSC)**:
+     * Innostes automatically concatenates Part A and Part B into a unified document.
+     * Integrated with **e-Pass 2003 / mToken / PFX Digital Signature Certificates (DSC)**: Signs all Form 16 PDFs in bulk using the authorized signatory's Class 3 cryptographic certificate.
+     * Publishes signed PDFs directly to the employee's **My Tax Documents** ESS portal vault and sends an encrypted email notification.
 
 ---
 

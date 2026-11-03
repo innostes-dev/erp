@@ -1096,6 +1096,123 @@ flowchart LR
 
 ---
 
+### 6.5 Employee ESS Form 12BB Tax Declaration & Proof Submission Cockpit (`/hrms/ess/tax-declarations`)
+
+Employees manage their statutory income tax declarations with real-time tax liability forecasting and automated proof ingestion:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| MY TAX DECLARATIONS & STATUTORY FORM 12BB: FINANCIAL YEAR 2026-27                        [ Save Draft ] [ Submit Declaration ]    |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| REGIME SELECTION:                                                                                                                 |
+| (•) Section 115BAC New Tax Regime (Recommended)                 ( ) Old Tax Regime                                                |
+|     Standard Deduction: INR 75,000                                  Standard Deduction: INR 50,000                                |
+|     Zero tax liability on income up to INR 7.75 Lakhs               Requires Chapter VI-A investment proofs & rent receipts       |
+|                                                                                                                                   |
+| TAX COMPARATOR RADAR:                                                                                                             |
+| Total Estimated Tax Under New Regime: INR  42,500.00 | Total Tax Under Old Regime: INR  68,200.00 | Net Annual Savings: INR 25,700|
++-----------------------------------------------------------------------------------------------------------------------------------+
+| DECLARATION CATEGORIES & PROOF SUBMISSION (RULE 26C)                                                                              |
+|                                                                                                                                   |
+| [▼] SECTION 10(13A): HOUSE RENT ALLOWANCE (HRA) EXEMPTION                                                  [ Total: INR 2,40,000 ]|
+|     Monthly Rent Paid:       [ INR 20,000.00 / month      ]   Rental City Type: (•) Metro (50%)  ( ) Non-Metro (40%)              |
+|     Rental Property Address: [ Flat 302, Green Glen Layout, Bellandur, Bengaluru 560103                                         ] |
+|     Landlord Legal Name:     [ Ramesh Rao                 ]   Landlord PAN:     [ ABCPR1234K        ] (Mandatory: rent > 1L/yr)   |
+|     Attached Proofs:         [ Uploaded: rent_agreement_2026.pdf (1.4MB), rent_receipts_q1_q3.pdf (3.1MB)       ] [ View ] [ + ] |
+|                                                                                                                                   |
+| [▼] SECTION 24(B): LOSS FROM HOUSE PROPERTY (HOME LOAN INTEREST)                                           [ Total: INR 1,80,000 ]|
+|     Annual Interest Payable: [ INR 1,80,000.00 (Max 2 Lakhs)] Property Occupancy: (•) Self-Occupied  ( ) Let-Out                  |
+|     Lender Institution Name: [ HDFC Bank Limited          ]   Lender PAN:       [ HDFCB1234F        ]                             |
+|     Attached Proofs:         [ Uploaded: hdfc_provisional_interest_cert_fy2627.pdf (480KB)                      ] [ View ] [ + ] |
+|                                                                                                                                   |
+| [▼] CHAPTER VI-A: SECTION 80C DEDUCTIONS                                                        [ Cap: 1.5L | Declared: 1.5L Max ]|
+|     • Employee Provident Fund (EPF):  INR  72,000.00 (System auto-calculated from payroll contributions)                          |
+|     • ELSS Mutual Fund Investments:   INR  50,000.00 [ Uploaded: cams_elss_statement.pdf                 ] [ View / Replace ]     |
+|     • Life Insurance Premium (LIC):   INR  28,000.00 [ Uploaded: lic_premium_receipt.pdf                 ] [ View / Replace ]     |
+|                                                                                                                                   |
+| [▼] CHAPTER VI-A: OTHER STATUTORY DEDUCTIONS                                                                                      |
+|     • Section 80CCD(1B) NPS Tier 1:   INR  50,000.00 [ Uploaded: nps_transaction_statement.pdf           ] [ View / Replace ]     |
+|     • Section 80D Health Insurance:   INR  35,000.00 [ Uploaded: star_health_policy.pdf                  ] [ View / Replace ]     |
+|       (Self + Family: 25,000 | Senior Citizen Parents: 10,000)                                                                    |
+|                                                                                                                                   |
+| [▼] FORM 12B: PREVIOUS EMPLOYMENT INCOME (MID-YEAR JOINERS)                                                [ Status: SUBMITTED ]  |
+|     Previous Employer:       [ Infosys Limited            ]   Previous Employer TAN: [ BLRI01234E       ]                         |
+|     Previous Gross Salary:   [ INR 4,50,000.00            ]   Previous TDS Deducted: [ INR 18,400.00    ]                         |
+|     Previous PF Deducted:    [ INR  21,600.00             ]   Previous PT Deducted:  [ INR  1,200.00     ]                         |
+|     Attached Form 12B / Payslip: [ Uploaded: infosys_relieving_form12b.pdf (2.2MB)                       ] [ View / Replace ]     |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| [ Save Draft as Working Copy ]                                              [ Submit Final Declaration with Statutory E-Sign -> ] |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.6 HR Admin Tax Proof Verification Cockpit (`/hrms/payroll/tax-verification`)
+
+HR reviewers inspect employee investment proofs, validate Landlord/Lender PANs, and approve or reject deductions with automated tax shortfall recalculation:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| HR TAX PROOF VERIFICATION COCKPIT: FY 2026-27                                       [ Filter: All Departments v] [ Export Summary]|
++------------------------------------+----------------------------------------------------------------------------------------------+
+| EMPLOYEE QUEUE (42 TOTAL)          | VERIFICATION CANVAS: Sarah Chen (EMP-1042) — Tech Lead (Old Tax Regime)                      |
+|                                    | Declared: INR 3,85,000.00  | Verified: INR 3,25,000.00  | Pending: 1 Item                 |
+| [•] EMP-1042: Sarah Chen   [Review]| +------------------------------------------------------------------------------------------+ |
+| [ ] EMP-1043: Rahul Verma  [Apprvd]| | SECTION 10(13A): HOUSE RENT ALLOWANCE (HRA)                                              | |
+| [ ] EMP-1044: Ananya Sen   [Apprvd]| | Rent Claimed: INR 20,000/month (INR 2,40,000 Annual) | Landlord: Ramesh Rao (PAN: ABCPR1234K)| |
+| [ ] EMP-1045: David Miller [Reject]| | Landlord PAN Status: Active on CBDT Database (Name Matches Rental Agreement)             | |
+|                                    | | Proof Document: rent_receipts_all.pdf (12 Months Submitted)                               | |
+| Queue Filters:                     | |                                                                                          | |
+| ( ) Pending Review (4)             | | Action: [✓ Approve Full (2.4L)]   [ Partial Approval ]   [ Reject with Reason ]          | |
+| (•) All Employees (42)             | | Decision Note: Verified 12 months receipts with valid bank transaction reference numbers.  | |
+| ( ) Rejected Proofs (2)            | +------------------------------------------------------------------------------------------+ |
+|                                    | | SPLIT-SCREEN INLINE DOCUMENT INSPECTOR: [ rent_receipts_all.pdf - Page 1 of 12 ]          | |
+| Quick Stats:                       | | [ Zoom In ] [ Zoom Out ] [ Rotate ] [ Download Original File ]                           | |
+| Total Declared:  INR 1.42 Cr       | | +--------------------------------------------------------------------------------------+ | |
+| Total Verified:  INR 1.28 Cr       | | | RENT RECEIPT - OCTOBER 2026                                                          | | |
+| Auto-Fallback Recalculation Date:  | | | Received from Ms. Sarah Chen the sum of INR 20,000 via IMPS Ref: 629104819201 for   | | |
+| 15 Feb 2027 (Shortfalls to Feb/Mar)| | | rent of Flat 302 Green Glen Layout, Bengaluru. Landlord PAN: ABCPR1234K.             | | |
+|                                    | | +--------------------------------------------------------------------------------------+ | |
+| [ Recalculate TDS on Verified ]    | +------------------------------------------------------------------------------------------+ |
++------------------------------------+----------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.7 Form 16 Bulk Generation, TRACES Part A Import & Class 3 DSC Signing Vault (`/hrms/payroll/form16-vault`)
+
+Administrators complete the annual Indian statutory tax cycle through a guided 4-step Form 16 execution pipeline:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| ANNUAL FORM 16 ISSUANCE VAULT: FINANCIAL YEAR 2026-27 (ASSESSMENT YEAR 2027-28)                                                   |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| [ STEP 1: GENERATE PART B ] ──> [ STEP 2: IMPORT TRACES PART A ] ──> [ STEP 3: CLASS 3 DSC SIGN ] ──> [ STEP 4: BULK DISPATCH ]    |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| STEP 3: CRYPTOGRAPHIC DIGITAL SIGNATURE SIGNING ENGINE                                                                            |
+|                                                                                                                                   |
+| Total Employee Certificates: 42 Form 16 Documents (Part A + Part B Merged)                                                        |
+| Target Financial Year:        FY 2026-27 (1 Apr 2026 to 31 Mar 2027)                                                               |
+| Signing Method:               (•) USB e-Pass 2003 / mToken Hardware Token     ( ) Cloud PFX / PKCS#12 Certificate File            |
+| Detected Cryptographic Token: [ e-Pass2003 FIPS 140-2 Level 3 (Connected: USB Port 2)                                           v]|
+| Certificate Common Name (CN): [ KESHAV IYER (Chief Financial Officer & Authorized Signatory)                                    v]|
+| Certificate Issuer:           [ Capricorn CA Class 3 Individual / Valid until 18 Oct 2028                                         ]|
+| Token Security PIN:           [ ••••••••••                     ]                                                                  |
+|                                                                                                                                   |
+| [ Sign All 42 Form 16 PDFs (Bulk) ]                                                    [ Run Cryptographic Validation Audit ]     |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| STEP 4: DISTRIBUTION & EMPLOYEE ESS PUBLISHING                                                                                    |
+|                                                                                                                                   |
+| [✓] Publish digitally signed Form 16 PDFs instantly to Employee Self-Service "My Tax Documents" Vault                             |
+| [✓] Send automated email with password-protected PDF attachment (Password Formula: NAME4_DOB_DDMM)                                |
+| [✓] Generate TRACES Form 16 delivery audit log for corporate compliance records                                                   |
+|                                                                                                                                   |
+| [ Start Automated Bulk Dispatch (42 Employees) -> ]                                                                               |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
 ## 7. Design System & Component Library Tokens
 
 The PeopleOps UI relies on `@innostes/ui` primitives with strict theme variables supporting both Dark and Light themes without style bleeding.

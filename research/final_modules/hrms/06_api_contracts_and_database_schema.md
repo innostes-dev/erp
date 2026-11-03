@@ -942,6 +942,73 @@ CREATE TABLE hrms_payslip_components (
 CREATE INDEX idx_payslip_components_lookup ON hrms_payslip_components(payslip_id, component_type);
 
 -- ============================================================================
+-- 12.1 INDIAN TAX DECLARATIONS, PROOFS & FORM 16 ENGINE
+-- ============================================================================
+
+CREATE TABLE hrms_tax_declarations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    financial_year VARCHAR(16) NOT NULL, -- e.g. '2026-2027'
+    regime VARCHAR(32) NOT NULL DEFAULT 'SECTION_115BAC_NEW', -- 'SECTION_115BAC_NEW', 'OLD_REGIME'
+    status VARCHAR(32) NOT NULL DEFAULT 'SUBMITTED', -- 'DRAFT', 'SUBMITTED', 'VERIFICATION_IN_PROGRESS', 'LOCKED'
+    total_declared_deductions NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    total_verified_deductions NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    submitted_at TIMESTAMPTZ,
+    verified_at TIMESTAMPTZ,
+    verified_by UUID,
+    CONSTRAINT uq_emp_fy_declaration UNIQUE(tenant_id, employee_id, financial_year)
+);
+
+CREATE TABLE hrms_tax_declaration_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    declaration_id UUID NOT NULL REFERENCES hrms_tax_declarations(id) ON DELETE CASCADE,
+    section_code VARCHAR(32) NOT NULL, -- '80C', '80D', 'SEC_10_13A_HRA', 'SEC_24_B_HOME_LOAN', '80CCD_1B', '80E', '80G'
+    sub_category VARCHAR(64) NOT NULL, -- 'ELSS', 'LIC', 'PPF', 'RENT_METRO', 'RENT_NON_METRO', 'HEALTH_INSURANCE_PARENTS'
+    declared_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    verified_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    landlord_or_lender_name VARCHAR(128),
+    landlord_or_lender_pan VARCHAR(32),
+    landlord_or_lender_address TEXT,
+    proof_document_url TEXT,
+    verification_status VARCHAR(32) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'APPROVED', 'PARTIALLY_APPROVED', 'REJECTED'
+    rejection_reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_tax_items_lookup ON hrms_tax_declaration_items(declaration_id, section_code);
+
+CREATE TABLE hrms_previous_employments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    financial_year VARCHAR(16) NOT NULL,
+    previous_employer_name VARCHAR(128) NOT NULL,
+    previous_employer_tan VARCHAR(32),
+    gross_salary_paid NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    tds_deducted NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    epf_deducted NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    professional_tax_deducted NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    proof_form12b_url TEXT,
+    verified BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE hrms_form16_records (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    financial_year VARCHAR(16) NOT NULL,
+    part_a_traces_file_url TEXT,
+    part_b_data JSONB NOT NULL,
+    merged_signed_pdf_url TEXT,
+    digital_signature_cert_serial VARCHAR(128),
+    traces_token_number VARCHAR(64),
+    generated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    dispatched_to_employee_at TIMESTAMPTZ,
+    CONSTRAINT uq_emp_fy_form16 UNIQUE(tenant_id, employee_id, financial_year)
+);
+
+-- ============================================================================
 -- 13. OFFBOARDING & EXIT CLEARANCES
 -- ============================================================================
 
@@ -979,6 +1046,9 @@ ALTER TABLE hrms_employee_salary_assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_payslip_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_payroll_runs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_payslips ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_tax_declarations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_previous_employments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_form16_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_picklists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
@@ -1020,6 +1090,15 @@ CREATE POLICY tenant_payroll_runs_isolation ON hrms_payroll_runs
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_payslips_isolation ON hrms_payslips
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_tax_decl_isolation ON hrms_tax_declarations
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_prev_emp_isolation ON hrms_previous_employments
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_form16_isolation ON hrms_form16_records
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_picklists_isolation ON hrms_picklists
@@ -1179,8 +1258,17 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/payroll/runs/{id}/bank-csv`| Export bank payout format (HDFC/ICICI/Axis/SBI CMS or US NACHA ACH) for corporate batch upload | `peopleops:admin` | 200 OK |
 | `GET` | `/peopleops/payslips/my-payslips` | List historical monthly payslips for logged-in employee | `peopleops:read` (self) | 200 OK |
 | `GET` | `/peopleops/payslips/{id}/pdf` | Download signed, password-protected PDF payslip | `peopleops:read` (self) | 200 OK |
-| `POST` | `/peopleops/payroll/tax-declarations` | Employee submits proposed tax investment declarations (80C, 80D, HRA) | `peopleops:read` (self) | 201 Created |
-| `GET` | `/peopleops/payroll/tax-declarations/me` | Retrieve active tax regime projection (Section 115BAC New vs Old Regime comparison) | `peopleops:read` (self) | 200 OK |
+| `POST` | `/peopleops/payroll/tax-declarations` | Employee submits statutory Form 12BB declaration (Regime choice, 80C, 80D, HRA with landlord PAN, Home loan u/s 24) | `peopleops:read` (self) | 201 Created |
+| `GET` | `/peopleops/payroll/tax-declarations/me` | Retrieve active tax regime projection (Section 115BAC New vs Old comparison with monthly TDS breakdown) | `peopleops:read` (self) | 200 OK |
+| `POST` | `/peopleops/payroll/tax-declarations/proofs` | Employee uploads actual receipts/certificates during proof verification window | `peopleops:read` (self) | 201 Created |
+| `POST` | `/peopleops/payroll/tax-declarations/previous-employment` | Mid-year joiner submits statutory Form 12B details (previous gross salary, TDS, and PF) | `peopleops:read` (self) | 201 Created |
+| `GET` | `/peopleops/payroll/tax-declarations/admin/review` | HR retrieves employee tax proofs for verification cockpit review | `peopleops:admin` | 200 OK |
+| `PATCH` | `/peopleops/payroll/tax-declarations/items/{id}/verify` | HR approves, partially approves, or rejects proof with statutory rejection code | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/payroll/returns/24q/generate` | Generates official quarterly Form 24Q e-TDS text file (.fvu) with Annexure I & Annexure II | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/payroll/form16/import-traces-part-a` | Bulk uploads TRACES Part A archive for automated employee PAN mapping | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/payroll/form16/generate-part-b` | System natively generates statutory Form 16 Part B annexures for all employees | `peopleops:admin` | 201 Created |
+| `POST` | `/peopleops/payroll/form16/merge-and-sign` | Merges Part A + Part B and applies Class 3 DSC digital signature to all Form 16 PDFs | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/payroll/form16/my-form16` | Employee downloads signed, merged Form 16 PDF from personal ESS vault | `peopleops:read` (self) | 200 OK |
 
 ### 2.8 Offboarding & Final Settlement (F&F)
 
