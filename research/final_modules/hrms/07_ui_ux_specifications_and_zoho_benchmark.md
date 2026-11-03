@@ -873,63 +873,109 @@ Administrators configure branch-specific holiday calendars, import statutory gaz
 
 ### 6.1 Dedicated Payroll Setup Cockpit (`/hrms/payroll/setup`)
 
-Innostes separates operational presence tracking from financial compensation configuration. Administrators configure company-wide payroll rules across 8 modular tabs:
+Innostes strictly isolates operational presence tracking from financial compensation configuration. Rather than cramming 8 horizontal tabs into a single top bar (which causes severe horizontal overflow, label truncation, and awkward wrapping on laptop and tablet viewports), Innostes adopts the **Two-Column Vertical Settings Architecture** (the standard of Stripe, Linear, and GitHub Settings):
+
+* **Desktop Viewport (`>= 1024px`)**: A dedicated `w-64` vertical sub-navigation sidebar on the left, organized into 4 logical domains with real-time status badges, paired with a focused `flex-1` form canvas on the right.
+* **Tablet & Mobile Viewport (`< 1024px`)**: The left sub-nav collapses seamlessly into a sticky top section combobox selector (`[ Group: Section ▾ ]`), giving the form canvas 100% viewport width with zero horizontal clipping.
+
+#### Desktop Two-Column Layout Wireframe (`lg:flex`)
 
 ```
-+-----------------------------------------------------------------------------------------------------------------------+
-| COMPANY SETTINGS: PAYROLL SETUP & FINANCIAL LOCALIZATION                                                              |
-+-----------------------------------------------------------------------------------------------------------------------+
-| [• 1. Pay Schedule] [ 2. Components ] [ 3. LOP Math ] [ 4. Statutory ] [ 5. Taxes ] [ 6. Bank ] [ 7. GL ] [ 8. Slips ]|
-+-----------------------------------------------------------------------------------------------------------------------+
-| TAB 1: PAY SCHEDULE & CUTOFF CYCLE                                                                                    |
-|                                                                                                                       |
-| Pay Frequency *                               Attendance Cutoff Cycle *                                               |
-| [ Monthly (Standard India / EU)             v][ 1st to Last Day of Month (Standard)                                 v]|
-|                                                                                                                       |
-| Payout Day *                                  Attendance Locking Buffer *                                             |
-| [ Last Working Day of Month                 v][ 3 Days before Payday                                                v]|
-+-----------------------------------------------------------------------------------------------------------------------+
-| TAB 3: LOSS OF PAY (LOP) & PRORATION MATH ENGINE                                                                      |
-|                                                                                                                       |
-| Deduction Denominator Method (Single Day Salary Rate Formula):                                                        |
-| (•) Method A: Actual Calendar Days in Month (Monthly Base / 28, 29, 30, or 31) — Recommended for tech startups        |
-| ( ) Method B: Fixed 26 Working Days (Monthly Base / 26.0) — Standard factory / manufacturing compliance               |
-| ( ) Method C: Actual Scheduled Work Days (Monthly Base / Working Days excluding weekends and holidays)                |
-|                                                                                                                       |
-| Mid-Month Joiner Proration:                                                                                           |
-| (•) Prorate by Exact Active Calendar Days remaining in month                                                          |
-| ( ) Full month salary if joined on or before 15th; half month if after 15th                                           |
-+-----------------------------------------------------------------------------------------------------------------------+
-| TAB 4: MODULAR STATUTORY COMPLIANCE TOGGLES                                                                           |
-|                                                                                                                       |
-| [ ] Enable Employee Provident Fund (EPF & EPS)                                                                        |
-|     (Statutory threshold: Mandatory in India once headcount reaches 20 employees. Disabled by default for startups.)  |
-|     EPF Calculation Rule: (•) 12% on Basic (Capped at INR 15,000 ceiling)  ( ) 12% on Actual Full Basic                |
-|                                                                                                                       |
-| [ ] Enable Employee State Insurance (ESIC)                                                                            |
-|     (Mandatory only if gross wages <= INR 21,000/month. Disabled by default for knowledge-worker startups.)            |
-|                                                                                                                       |
-| [ ] Enable State Professional Tax (PT)                                                                                |
-|     (Auto-deducts state slab amounts: Karnataka INR 200, Maharashtra INR 200/300, Telangana INR 200.)                |
-|                                                                                                                       |
-| [ ] Enable Statutory Gratuity Provisioning (Accrues 15/26 of last basic per completed year)                           |
-+-----------------------------------------------------------------------------------------------------------------------+
-| TAB 6: BANK DISBURSEMENT RAILS & CMS FORMATS                                                                          |
-|                                                                                                                       |
-| Primary Corporate Disbursement Bank:                                                                                  |
-| [ HDFC Bank Corporate NetBanking (CMS Template Format)                                                              v]|
-| Corporate Debit Account Number: [ 50200048192031             ] Corporate IFSC: [ HDFC0000240                         ]|
-| Export Format: CSV Batch with Beneficiary Account, IFSC, Beneficiary Legal Name, Net Amount, Transaction Narration.    |
-+-----------------------------------------------------------------------------------------------------------------------+
-| TAB 7: GENERAL LEDGER MAPPING (LEDGERFLOW DOUBLE-ENTRY SYNC)                                                          |
-|                                                                                                                       |
-| Salary Expense Account (Debit):       [ 50100 - Salaries & Wages Expense                                            v]|
-| Net Salaries Payable (Credit):        [ 20100 - Net Payroll Payable                                                 v]|
-| Statutory Tax Liabilities (Credit):   [ 20300 - TDS & Statutory Withholdings Payable                                v]|
-| [✓] Automatically generate and commit balanced journal in LedgerFlow upon payroll run approval                         |
-+-----------------------------------------------------------------------------------------------------------------------+
-| [ Cancel ]                                                                             [ Save Payroll Setup Changes ] |
-+-----------------------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------------------------------------------------+
+| COMPANY SETTINGS: PAYROLL & FINANCIAL LOCALIZATION                                                      [ Cancel ] [ Save Changes ]|
++-----------------------------------------------------+-----------------------------------------------------------------------------+
+| SETTINGS NAVIGATION (w-64)                          | ACTIVE CANVAS: PAY SCHEDULE & CUTOFF CYCLE                                  |
+|                                                     |                                                                             |
+| -- TIMING & DEDUCTIONS --                           | Pay Frequency *                               Attendance Cutoff Cycle *     |
+| [•] 1. Pay Schedule & Cutoffs      [Monthly]        | [ Monthly (Standard India / EU)             v][ 1st to Last Day of Month  v]|
+| [ ] 2. LOP & Proration Math        [Calendar]       |                                                                             |
+|                                                     | Payout Day *                                  Attendance Locking Buffer *   |
+| -- COMPENSATION --                                  | [ Last Working Day of Month                 v][ 3 Days before Payday      v]|
+| [ ] 3. Salary Components & DAG     [4 Active]       |                                                                             |
+|                                                     | --------------------------------------------------------------------------- |
+| -- COMPLIANCE & TAXES --                            | ATTENDANCE LOCKING BEHAVIOR                                                 |
+| [ ] 4. Statutory Toggles           [2 Active]       | [✓] Automatically freeze timesheets on cutoff date                          |
+| [ ] 5. Tax Regimes & TDS           [115BAC]         | [✓] Roll forward unapproved regularizations to following month cycle         |
+|                                                     |                                                                             |
+| -- DISBURSEMENTS & BOOKS --                         |                                                                             |
+| [ ] 6. Bank CMS Rails              [HDFC]           |                                                                             |
+| [ ] 7. LedgerFlow GL Mapping       [Linked]         |                                                                             |
+| [ ] 8. Payslips & Security         [Encrypted]      |                                                                             |
++-----------------------------------------------------+-----------------------------------------------------------------------------+
+```
+
+#### Tablet & Mobile Responsive Layout Wireframe (`< 1024px`)
+
+```
++---------------------------------------------------------------------------------------------------+
+| SETTINGS: PAYROLL                                                                  [ Save Changes]|
++---------------------------------------------------------------------------------------------------+
+| Active Section:                                                                                   |
+| [ Group 1: Pay Schedule & Cutoffs (Monthly)                                                    v]|
+| (Tapping opens clean bottom sheet drawer with all 8 sections and live status badges)              |
++---------------------------------------------------------------------------------------------------+
+| Pay Frequency *                                                                                   |
+| [ Monthly (Standard India / EU)                                                                 v]|
+|                                                                                                   |
+| Attendance Cutoff Cycle *                                                                         |
+| [ 1st to Last Day of Month (Standard)                                                           v]|
+|                                                                                                   |
+| Payout Day *                                                                                      |
+| [ Last Working Day of Month                                                                     v]|
+|                                                                                                   |
+| Attendance Locking Buffer *                                                                       |
+| [ 3 Days before Payday                                                                          v]|
+|                                                                                                   |
+| [✓] Automatically freeze timesheets on cutoff date                                                |
+| [✓] Roll forward unapproved regularizations to following month cycle                              |
++---------------------------------------------------------------------------------------------------+
+```
+
+#### Detailed Section Canvases (When Selected in Sub-Nav):
+
+```
++---------------------------------------------------------------------------------------------------+
+| SECTION 2: LOSS OF PAY (LOP) & PRORATION MATH ENGINE                                              |
+|                                                                                                   |
+| Deduction Denominator Method (Single Day Salary Rate Formula):                                    |
+| (•) Method A: Actual Calendar Days in Month (Monthly Base / 28, 29, 30, or 31) — Recommended       |
+| ( ) Method B: Fixed 26 Working Days (Monthly Base / 26.0) — Standard factory / industrial         |
+| ( ) Method C: Actual Scheduled Work Days (Monthly Base / Working Days excluding off & holidays)   |
+|                                                                                                   |
+| Mid-Month Joiner Proration:                                                                       |
+| (•) Prorate by Exact Active Calendar Days remaining in month                                      |
+| ( ) Full month salary if joined on or before 15th; half month if after 15th                       |
++---------------------------------------------------------------------------------------------------+
+| SECTION 4: MODULAR STATUTORY COMPLIANCE TOGGLES                                                   |
+|                                                                                                   |
+| [ ] Enable Employee Provident Fund (EPF & EPS)                                                    |
+|     (Statutory threshold: Mandatory in India once headcount reaches 20 employees. Disabled default)|
+|     EPF Calculation Rule: (•) 12% on Basic (Capped at INR 15,000 ceiling)  ( ) Actual Full Basic    |
+|                                                                                                   |
+| [ ] Enable Employee State Insurance (ESIC)                                                        |
+|     (Mandatory only if gross wages <= INR 21,000/month. Disabled by default for startups.)         |
+|                                                                                                   |
+| [ ] Enable State Professional Tax (PT)                                                            |
+|     (Auto-deducts state slab amounts: Karnataka INR 200, Maharashtra INR 200/300, Telangana 200.) |
+|                                                                                                   |
+| [ ] Enable Statutory Gratuity Provisioning (Accrues 15/26 of last basic per completed year)       |
++---------------------------------------------------------------------------------------------------+
+| SECTION 6: BANK DISBURSEMENT RAILS & CMS FORMATS                                                  |
+|                                                                                                   |
+| Primary Corporate Disbursement Bank:                                                              |
+| [ HDFC Bank Corporate NetBanking (CMS Template Format)                                          v]|
+| Corporate Debit Account Number: [ 50200048192031             ] Corporate IFSC: [ HDFC0000240     ]|
+| Export Format: CSV Batch with Beneficiary Account, IFSC, Beneficiary Legal Name, Net Amount.       |
++---------------------------------------------------------------------------------------------------+
+| SECTION 7: GENERAL LEDGER MAPPING (LEDGERFLOW DOUBLE-ENTRY SYNC)                                  |
+|                                                                                                   |
+| Salary Expense Account (Debit):       [ 50100 - Salaries & Wages Expense                        v]|
+| Net Salaries Payable (Credit):        [ 20100 - Net Payroll Payable                             v]|
+| Statutory Tax Liabilities (Credit):   [ 20300 - TDS & Statutory Withholdings Payable            v]|
+| [✓] Automatically generate and commit balanced journal in LedgerFlow upon payroll run approval     |
++---------------------------------------------------------------------------------------------------+
+| [ Cancel Changes ]                                                     [ Save Payroll Setup ]     |
++---------------------------------------------------------------------------------------------------+
 ```
 
 ---

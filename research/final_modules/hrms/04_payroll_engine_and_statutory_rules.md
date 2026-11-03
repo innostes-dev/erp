@@ -25,25 +25,44 @@ Innostes Business OS resolves this duality with a **Modular, Two-Tier Payroll Ar
 
 ## 2. Dedicated Payroll Setup Page Architecture (`/hrms/payroll/setup`)
 
-Innostes strictly isolates operational time-tracking from financial payroll configuration. The dedicated **Payroll Setup Cockpit** (`/hrms/payroll/setup`) organizes all organization-wide compensation rules into 8 modular configuration tabs:
+Innostes strictly isolates operational time-tracking from financial payroll configuration. To prevent the severe responsive failure of cramming 8 horizontal tabs across small desktop, laptop, or tablet screens (which causes horizontal overflow, awkward wrapping, and hidden off-screen tabs), the **Payroll Setup Cockpit** (`/hrms/payroll/setup`) implements a **Two-Column Vertical Settings Architecture** (modeled after Stripe, Linear, and GitHub Settings):
+
+* **Desktop Viewport (`>= 1024px`)**: A `w-64` vertical sub-navigation sidebar on the left, organized into 4 logical configuration domains with real-time status badges, paired with the active section form canvas on the right.
+* **Tablet & Mobile Viewport (`< 1024px`)**: The sidebar collapses into a clean sticky top section selector dropdown (`[ Domain: Section ▾ ]`), granting the form canvas 100% viewport width without clipping or layout shifts.
 
 ```mermaid
 flowchart TD
     Setup["Dedicated Payroll Setup Cockpit (/hrms/payroll/setup)"]
     
-    Setup --> T1["1. Pay Schedule & Cutoff Cycle<br/>(Monthly/Bi-Weekly, Cutoff Dates, Payday)"]
-    Setup --> T2["2. Salary Components & Formula DAG<br/>(Earnings, Pre-Tax, Post-Tax, Deductions)"]
-    Setup --> T3["3. LOP & Proration Math Engine<br/>(Calendar Days vs 26 Working Days vs Actual)"]
-    Setup --> T4["4. Statutory Compliance Toggles<br/>(EPF, ESIC, Professional Tax, Gratuity)"]
-    Setup --> T5["5. Tax Regimes & TDS Projection<br/>(Section 115BAC New vs Old, Deductions)"]
-    Setup --> T6["6. Bank Disbursement Rails<br/>(HDFC, ICICI, Axis, SBI CMS, US NACHA)"]
-    Setup --> T7["7. General Ledger Mapping<br/>(LedgerFlow COA Accounts, Auto-Journal)"]
-    Setup --> T8["8. Payslip Delivery & Security<br/>(Password rules, Branding, Auto-Dispatch)"]
+    subgraph D1["Domain 1: Timing & Deductions"]
+        T1["1. Pay Schedule & Cutoff Cycle<br/>(Frequency, Cutoff Dates, Payday)"]
+        T2["2. LOP & Proration Math Engine<br/>(Calendar Days vs 26 Working Days vs Actual)"]
+    end
+
+    subgraph D2["Domain 2: Compensation"]
+        T3["3. Salary Components & Formula DAG<br/>(Earnings, Pre-Tax, Post-Tax, Deductions)"]
+    end
+
+    subgraph D3["Domain 3: Compliance & Taxes"]
+        T4["4. Statutory Compliance Toggles<br/>(EPF, ESIC, Professional Tax, Gratuity)"]
+        T5["5. Tax Regimes & TDS Projection<br/>(Section 115BAC New vs Old, Deductions)"]
+    end
+
+    subgraph D4["Domain 4: Disbursements & Books"]
+        T6["6. Bank Disbursement Rails<br/>(HDFC, ICICI, Axis, SBI CMS, US NACHA)"]
+        T7["7. General Ledger Mapping<br/>(LedgerFlow COA Accounts, Auto-Journal)"]
+        T8["8. Payslip Delivery & Security<br/>(Password rules, Branding, Auto-Dispatch)"]
+    end
+
+    Setup --> D1
+    Setup --> D2
+    Setup --> D3
+    Setup --> D4
 ```
 
 ---
 
-### Tab 1: Pay Schedule & Cutoff Cycle Configuration
+### Section 1: Pay Schedule & Cutoff Cycle Configuration
 Defines when and how frequently employees are paid, and the exact cutoffs for attendance and expense ingestion:
 
 | Setting Key | Startup Default | Enterprise Options | Purpose & Impact |
@@ -55,7 +74,7 @@ Defines when and how frequently employees are paid, and the exact cutoffs for at
 
 ---
 
-### Tab 2: Salary Components & Formula DAG Evaluator
+### Section 2: Salary Components & Formula DAG Evaluator
 Components are organized into a strict mathematical hierarchy. Administrators can create unlimited custom components or use pre-configured templates:
 
 #### 1. The 4 Component Tiers
@@ -113,7 +132,7 @@ flowchart TD
 
 ---
 
-### Tab 3: Loss of Pay (LOP) & Proration Mathematical Engine
+### Section 3: Loss of Pay (LOP) & Proration Mathematical Engine
 When an employee takes unpaid leave, has unregularized missing punches, or joins mid-month, how is a single day's salary deducted?
 
 Administrators configure the exact calculation denominator:
@@ -133,7 +152,7 @@ $$\text{Prorated Earnings} = \text{Monthly Base Salary} \times \left( \frac{\tex
 
 ---
 
-### Tab 4: Modular Statutory Compliance Toggles (India & Global)
+### Section 4: Modular Statutory Compliance Toggles (India & Global)
 
 Statutory deductions are strictly modular. Startups toggle ON compliance features only when they reach the statutory employee count thresholds:
 
@@ -180,7 +199,7 @@ STATUTORY COMPLIANCE TOGGLES (SETTINGS > PAYROLL > STATUTORY)
 
 ---
 
-### Tab 5: Income Tax Regimes & TDS Projection Engine
+### Section 5: Income Tax Regimes & TDS Projection Engine
 
 Innostes implements an automated, annualized tax projection engine for Indian Income Tax under Section 192:
 
@@ -205,7 +224,7 @@ flowchart TD
 
 ---
 
-### Tab 6: Bank Disbursement Rails & Export Templates
+### Section 6: Bank Disbursement Rails & Export Templates
 
 When payroll is finalized, Innostes generates corporate bank upload files formatted for direct corporate net banking batch processing:
 
@@ -217,7 +236,7 @@ When payroll is finalized, Innostes generates corporate bank upload files format
 
 ---
 
-### Tab 7: General Ledger Mapping (LedgerFlow Double-Entry Integration)
+### Section 7: General Ledger Mapping (LedgerFlow Double-Entry Integration)
 
 Payroll is not an isolated silo; every payroll run posts an atomic, balanced double-entry journal entry to the corporate Chart of Accounts in **LedgerFlow**:
 
@@ -235,7 +254,7 @@ flowchart LR
 
 ---
 
-### Tab 8: Payslip Delivery, Customization & Security
+### Section 8: Payslip Delivery, Customization & Security
 
 Administrators configure the visual layout and security encryption of employee payslips:
 
