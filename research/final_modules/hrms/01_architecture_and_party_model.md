@@ -768,3 +768,76 @@ $$ LANGUAGE plpgsql;
 ```
 
 This ensures that even during high-concurrency batch onboarding (such as university campus hire cohorts), codes are generated sequentially without deadlocks or skipped integers.
+
+---
+
+## 8. Post-Onboarding Employee Self-Service (ESS) Governance: Field Mutability & Two-Tier Approval Matrix
+
+Once onboarding is completed and an employee transitions to `ACTIVE`, they will need to update certain aspects of their profile over time (e.g. adding new technical skills, uploading certifications, updating emergency contacts, or reporting a changed residential address or bank account).
+
+However, **the platform never hardcodes what an employee can or cannot edit**. Instead, Innostes implements a tenant-configurable **Field-Level Mutability & Approval Matrix** managed directly by HR.
+
+```mermaid
+flowchart TD
+    subgraph ESS_Edit["Employee Self-Service (ESS) Action"]
+        Emp["Active Employee Navigates to Profile"] --> SelectField["Selects Field to Update<br/>(e.g., Skills, Bio, or Bank Account)"]
+        SelectField --> CheckPolicy{"Check Tenant Field Policy"}
+    end
+
+    subgraph Policy_Gate["HR Governance Evaluation"]
+        CheckPolicy -->|is_employee_editable == FALSE| Deny["Read-Only:<br/>'This field is managed exclusively by HR'"]
+        CheckPolicy -->|is_employee_editable == TRUE| CheckApproval{"approval_mode"}
+    end
+
+    subgraph Auto_Mode["Tier 1: Auto-Approve (Low Risk)"]
+        CheckApproval -->|AUTO_APPROVE| CommitDirect["Instant Master Commit:<br/>• Writes immediately to live table (e.g., hrms_employee_skills)<br/>• Audit log entry generated<br/>• Zero HR bottleneck"]
+    end
+
+    subgraph Manual_Mode["Tier 2: Manual Approve (Staging Queue)"]
+        CheckApproval -->|MANUAL_APPROVE| StageRequest["Save to hrms_profile_change_requests:<br/>• Status: PENDING<br/>• Captures old_value and new_value JSONB<br/>• Stores supporting proof (e.g., new cheque leaf)"]
+        StageRequest --> LiveUntouched["Live Profile Completely UNTOUCHED:<br/>• Existing verified data remains active<br/>• Profile displays badge: '⏳ Pending HR Review'"]
+        LiveUntouched --> HRQueue["HR Approvals Cockpit Queue"]
+        HRQueue --> HRDecision{"HR Verification"}
+        HRDecision -->|Approve| PromoteMaster["Atomic Promotion to Master Table<br/>Status -> APPROVED<br/>Live profile updated"]
+        HRDecision -->|Reject| RejectReq["Status -> REJECTED<br/>Reason note sent to employee<br/>Live profile stays unchanged"]
+    end
+```
+
+### 8.1 The Tenant Field Governance Matrix
+
+HR administrators configure field mutability and approval workflows in **HR Settings (`/hrms/settings/profile-governance`)**. For each section and attribute, HR ticks whether employees can edit it and whether changes require manual HR verification:
+
+| Section Code | Typical Attributes | Default Employee Editable? | Default Approval Mode | Mandatory Document Proof? |
+| :--- | :--- | :--- | :--- | :--- |
+| `SKILLS` | Primary Skills, Tools, Frameworks, Proficiency | **Yes (Ticked)** | `AUTO_APPROVE` | No |
+| `CERTIFICATIONS` | Industry Certifications, License IDs, Credentials | **Yes (Ticked)** | `AUTO_APPROVE` | Optional (Cert PDF) |
+| `EQUIPMENT_PREFS`| T-Shirt Size, Dietary Preferences, Ergonomic Notes | **Yes (Ticked)** | `AUTO_APPROVE` | No |
+| `EMERGENCY_CONTACTS`| Contact Name, Relationship, Phone, Address | **Yes (Ticked)** | `AUTO_APPROVE` | No |
+| `ADDRESS_CURRENT`| Current Residential Address | **Yes (Ticked)** | `AUTO_APPROVE` | Optional |
+| `ADDRESS_PERMANENT`| Legal Permanent Address | **Yes (Ticked)** | `MANUAL_APPROVE` | **Yes (Address Proof)** |
+| `BANK_ACCOUNT` | Bank Account Number, IFSC Code, Account Type | **Yes (Ticked)** | `MANUAL_APPROVE` | **Yes (Cancelled Cheque)** |
+| `NOMINEES_FAMILY` | Gratuity / PF Nominee Shares, Dependents | **Yes (Ticked)** | `MANUAL_APPROVE` | No |
+| `EDUCATION` | New Post-Hire Degrees (e.g., Executive MBA) | **Yes (Ticked)** | `MANUAL_APPROVE` | **Yes (Degree Scan)** |
+| `CORE_STATUTORY` | Legal Name, PAN, Aadhaar Number, DOB | **No (Unticked)** | `HR_ONLY` | Strict Legal Order |
+| `ORGANIZATION` | Job Title, Department, Manager, Band, CTC | **No (Unticked)** | `HR_ONLY` | Admin Promotion Cycle |
+
+### 8.2 Staging Invariant: Live Data Never Mutates Until HR Approves
+
+For any field configured with `MANUAL_APPROVE`:
+1. **Zero Premature Writes**: The system strictly forbids writing unverified employee inputs directly into master tables (`hrms_bank_accounts`, `hrms_addresses`, etc.).
+2. **Staged Change Request Record**:
+   * The delta is stored in `hrms_profile_change_requests` containing:
+     * `old_value`: Exact JSONB snapshot of current verified live data.
+     * `new_value`: Proposed changes submitted by the employee.
+     * `supporting_document_id`: Reference to uploaded supporting evidence.
+     * `status`: `PENDING`.
+3. **UI Transparency**:
+   * The employee's profile view continues to display the old verified information.
+   * Adjacent to the field, an informative badge is rendered:
+     `[ ⏳ Pending HR Approval: Change to ICICI Bank ••••5678 requested on 02 Nov ]`.
+   * A link allows the employee to view their submission or cancel the pending request.
+4. **HR Verification & Promotion**:
+   * The request routes to the **HR Approvals Cockpit (`/hrms/approvals/profile-changes`)**.
+   * HR inspects the side-by-side diff (Old Value vs. Proposed New Value + Scanned Attachment).
+   * **Upon Approval**: An atomic database transaction applies the update to the canonical table, updates `reviewed_by` and `reviewed_at`, and flips `status = 'APPROVED'`.
+   * **Upon Rejection**: The request is marked `REJECTED` with an explanatory note. The live profile remains 100% intact without any rollback side-effects.

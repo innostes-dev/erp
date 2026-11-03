@@ -82,6 +82,8 @@ CREATE TYPE leave_action AS ENUM ('ACCRUED', 'CONSUMED', 'ENCASHED', 'LAPSED', '
 CREATE TYPE component_type AS ENUM ('EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX');
 CREATE TYPE payroll_stage AS ENUM ('DRAFT', 'CALCULATING', 'REVIEW', 'COMMITTED', 'PAID');
 CREATE TYPE clearance_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+CREATE TYPE profile_approval_mode AS ENUM ('AUTO_APPROVE', 'MANUAL_APPROVE');
+CREATE TYPE change_request_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
 
 -- ============================================================================
 -- 0. TIERED MASTER DATA: STRUCTURAL ENTITIES & LIGHTWEIGHT PICKLISTS
@@ -524,6 +526,43 @@ CREATE TABLE hrms_document_vault (
 CREATE INDEX idx_hrms_doc_party ON hrms_document_vault(tenant_id, party_id, category);
 
 -- ============================================================================
+-- 8B. PROFILE FIELD GOVERNANCE & CHANGE REQUESTS (TWO-TIER APPROVAL ENGINE)
+-- ============================================================================
+
+CREATE TABLE hrms_profile_field_policies (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    section_code VARCHAR(64) NOT NULL, -- e.g. 'SKILLS', 'BANK_ACCOUNT', 'ADDRESS_PERMANENT'
+    field_name VARCHAR(64) NOT NULL DEFAULT '*', -- '*' for entire section or specific field
+    is_employee_editable BOOLEAN NOT NULL DEFAULT FALSE,
+    approval_mode profile_approval_mode NOT NULL DEFAULT 'MANUAL_APPROVE',
+    requires_attachment BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_section_field UNIQUE (tenant_id, section_code, field_name)
+);
+
+CREATE TABLE hrms_profile_change_requests (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    section_code VARCHAR(64) NOT NULL,
+    field_name VARCHAR(64) NOT NULL DEFAULT '*',
+    old_value JSONB NOT NULL, -- Exact snapshot of existing verified live data
+    new_value JSONB NOT NULL, -- Proposed new data requested by employee
+    supporting_document_id UUID, -- Optional attachment (e.g. new cancelled cheque leaf)
+    status change_request_status NOT NULL DEFAULT 'PENDING',
+    requested_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reviewed_by UUID REFERENCES hrms_employees(id),
+    reviewed_at TIMESTAMPTZ,
+    rejection_reason TEXT,
+    effective_date DATE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_hrms_change_req_status ON hrms_profile_change_requests(tenant_id, status);
+CREATE INDEX idx_hrms_change_req_emp ON hrms_profile_change_requests(tenant_id, employee_id);
+
+-- ============================================================================
 -- 9. MULTI-STEP ONBOARDING TRACKER & STEPPER ENGINE
 -- ============================================================================
 
@@ -821,7 +860,20 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/documents/upload` | Upload compliance file to encrypted vault, generate SHA-256 hash | `peopleops:write` | 201 Created |
 | `GET` | `/peopleops/documents/{id}/download` | Stream authenticated presigned URL for document viewing/download | `peopleops:read` | 200 OK |
 
-### 2.2 Dynamic Tenant Master Data Management (MDM)
+### 2.2 Profile Field Governance & Change Requests (Two-Tier Approval Engine)
+
+| Method | Path | Summary & Purpose | Scopes Required | Success |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/peopleops/settings/profile-policies` | Retrieve field mutability configuration matrix (editable toggles & approval modes) | `peopleops:read` | 200 OK |
+| `PUT` | `/peopleops/settings/profile-policies` | Update field mutability matrix: configure which fields active employees can edit and toggle AUTO_APPROVE vs MANUAL_APPROVE | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/profile/change-requests` | Active employee submits profile change. If AUTO_APPROVE, commits immediately to master; if MANUAL_APPROVE, stages in PENDING queue | `peopleops:read` (self) | 201 Created |
+| `GET` | `/peopleops/profile/my-change-requests` | List current employee's pending and historical profile change requests | `peopleops:read` (self) | 200 OK |
+| `DELETE` | `/peopleops/profile/change-requests/{id}` | Employee cancels an unapproved pending change request | `peopleops:read` (self) | 200 OK |
+| `GET` | `/peopleops/approvals/profile-changes` | HR queue of pending profile change requests awaiting verification | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/approvals/profile-changes/{id}/approve` | HR approves change request: atomically commits new data to canonical master table | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/approvals/profile-changes/{id}/reject` | HR rejects change request with mandatory reason note; live profile stays untouched | `peopleops:admin` | 200 OK |
+
+### 2.3 Dynamic Tenant Master Data Management (MDM)
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |

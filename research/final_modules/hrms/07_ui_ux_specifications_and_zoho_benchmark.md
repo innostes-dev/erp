@@ -436,6 +436,78 @@ Selecting an employee row or card opens a non-modal slide-over drawer from the r
 
 ---
 
+### 5.6 HR Profile Field Governance Matrix & Employee Change Requests
+
+The platform never assumes or hardcodes what an active employee is allowed to modify. HR configures mutability and approval gates per section:
+
+#### 1. HR Governance Matrix Settings (`/hrms/settings/profile-governance`)
+HR administrators configure which attributes active employees can edit in Self-Service (ESS), and whether edits take effect immediately or require manual HR sign-off:
+
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| PROFILE FIELD GOVERNANCE & APPROVAL MATRIX                                                 [ Save Changes ]           |
+| Configure which fields active employees can edit in Self-Service (ESS), and set Auto vs. Manual approval rules.       |
++-----------------------------------------------------------------------------------------------------------------------+
+| SECTION / FIELD CATEGORY          | ALLOW EMPLOYEE EDIT? | APPROVAL WORKFLOW          | MANDATE ATTACHMENT PROOF?     |
++-----------------------------------+----------------------+----------------------------+-------------------------------+
+| Technical Skills & Competencies   | [✓] Allow Edit (ESS) | (•) Auto-Approve  ( )Manual| [ ] Optional                  |
+| Professional Certifications       | [✓] Allow Edit (ESS) | (•) Auto-Approve  ( )Manual| [✓] Mandate Certificate PDF   |
+| Emergency Contacts & Relatives    | [✓] Allow Edit (ESS) | (•) Auto-Approve  ( )Manual| [ ] Optional                  |
+| Current Residential Address       | [✓] Allow Edit (ESS) | (•) Auto-Approve  ( )Manual| [ ] Optional                  |
+| Permanent Legal Address           | [✓] Allow Edit (ESS) | ( ) Auto-Approve  (•)Manual| [✓] Mandate Address Proof     |
+| Bank Account & IFSC Code          | [✓] Allow Edit (ESS) | ( ) Auto-Approve  (•)Manual| [✓] Mandate Cancelled Cheque  |
+| Family Dependents & Nominees      | [✓] Allow Edit (ESS) | ( ) Auto-Approve  (•)Manual| [ ] Optional                  |
+| Educational Degrees (Post-Hire)   | [✓] Allow Edit (ESS) | ( ) Auto-Approve  (•)Manual| [✓] Mandate Degree / Marksheet|
+| Legal Name / PAN / Aadhaar        | [ ] Locked to HR     | Managed exclusively by HR  | Strict legal court order only |
+| Job Title / Band / Compensation   | [ ] Locked to HR     | Managed exclusively by HR  | Formal promotion/revision cycle|
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 2. Active Employee Profile with Staged Pending Change Request
+When an employee updates a field configured with `MANUAL_APPROVE`, **the live profile does not change**. The proposed data is staged in a pending state until approved by HR:
+
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| MY PROFILE | EMPLOYEE SELF-SERVICE (ESS)                                                          [ Edit Profile ]    |
++-----------------------------------------------------------------------------------------------------------------------+
+| Active Salary Bank Account:                                                                                           |
+| Current Verified Account: HDFC Bank Ltd - A/C ••••••••••••1234 (IFSC: HDFC0000240)                                   |
+|                                                                                                                       |
+| +-------------------------------------------------------------------------------------------------------------------+ |
+| | ⏳ PENDING HR APPROVAL (Submitted on 02 Nov 2026, 14:30)                                           [ Cancel Request ]| |
+| | Requested Change: Update Bank Account to ICICI Bank Ltd                                                           | |
+| | Proposed New Account Number: 50100481923014 | IFSC: ICIC0000104                                                   | |
+| | Attached Proof: new_icici_cheque.pdf                                                                              | |
+| | Note: Your salary will continue to be disbursed to HDFC until HR verifies and approves this update.               | |
+| +-------------------------------------------------------------------------------------------------------------------+ |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 3. HR Change Requests Verification Queue (`/hrms/approvals/profile-changes`)
+HR audits proposed changes via a dedicated side-by-side diff interface:
+
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| HR PROFILE CHANGE REQUESTS QUEUE                                                                   Filter: [ Pending v ]|
++-----------------------------------------------------------------------------------------------------------------------+
+| Review Profile Change Request #CR-0042: Rohan Gupta (Senior Product Designer)                                         |
+| Requested On: 02 Nov 2026, 14:30 | Section: Bank & Disbursement Information                                           |
++-----------------------------------------------------------------------------------------------------------------------+
+| CURRENT VERIFIED MASTER DATA (LIVE)             | PROPOSED EMPLOYEE UPDATE (PENDING APPROVAL)                         |
+| Bank Name: HDFC Bank Ltd                        | Bank Name: ICICI Bank Ltd (Auto-resolved)                           |
+| Branch: Richmond Road, Bengaluru                | Branch: Koramangala, Bengaluru                                      |
+| IFSC Code: HDFC0000240                          | IFSC Code: ICIC0000104                                              |
+| Account Number: ••••••••••••1234                | Account Number: 50100481923014                                      |
+| Account Holder Name: Rohan Gupta                | Account Holder Name: Rohan Gupta                                     |
++-------------------------------------------------+---------------------------------------------------------------------+
+| ATTACHED SUPPORTING PROOF                       | AUDIT DECISION ACTIONS                                              |
+| [ Preview: new_icici_cheque.pdf ]               | [ ✓ Approve & Commit to Master ]    [ ✕ Reject Change Request ]      |
+| Verified: Name matches account holder 100%      | Rejection Note: [ Explain reason if rejecting...                  ] |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
 ## 6. Monthly Payroll Admin Cockpit (`/hrms/payroll`)
 
 Payroll administrators require a fail-safe, guided execution flow that prevents unverified disbursements. The Innostes Payroll Cockpit structures execution into a 3-step sequential stepper:
