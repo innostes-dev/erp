@@ -797,6 +797,8 @@ CREATE TABLE hrms_payroll_settings (
     
     -- Tax & Withholding Configuration
     default_tax_regime VARCHAR(32) NOT NULL DEFAULT 'SECTION_115BAC_NEW', -- 'SECTION_115BAC_NEW', 'OLD_REGIME'
+    allow_midyear_regime_switch BOOLEAN NOT NULL DEFAULT FALSE,
+    tax_declaration_window_end_day INT NOT NULL DEFAULT 30, -- April 30th statutory auto-lock
     
     -- Corporate Banking Rails & CMS Formats
     bank_cms_format VARCHAR(64) NOT NULL DEFAULT 'HDFC_CMS', -- 'HDFC_CMS', 'ICICI_CIB', 'AXIS_CMS', 'SBI_CMS', 'US_NACHA'
@@ -951,6 +953,10 @@ CREATE TABLE hrms_tax_declarations (
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
     financial_year VARCHAR(16) NOT NULL, -- e.g. '2026-2027'
     regime VARCHAR(32) NOT NULL DEFAULT 'SECTION_115BAC_NEW', -- 'SECTION_115BAC_NEW', 'OLD_REGIME'
+    is_regime_locked BOOLEAN NOT NULL DEFAULT FALSE,
+    regime_locked_at TIMESTAMPTZ,
+    regime_unlocked_by UUID,
+    regime_unlock_reason TEXT,
     status VARCHAR(32) NOT NULL DEFAULT 'SUBMITTED', -- 'DRAFT', 'SUBMITTED', 'VERIFICATION_IN_PROGRESS', 'LOCKED'
     total_declared_deductions NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
     total_verified_deductions NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
@@ -1284,6 +1290,8 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/payslips/my-payslips` | List historical monthly payslips for logged-in employee | `peopleops:read` (self) | 200 OK |
 | `GET` | `/peopleops/payslips/{id}/pdf` | Download signed, password-protected PDF payslip | `peopleops:read` (self) | 200 OK |
 | `POST` | `/peopleops/payroll/tax-declarations` | Employee submits statutory Form 12BB declaration (Regime choice, 80C, 80D, HRA with landlord PAN, Home loan u/s 24) | `peopleops:read` (self) | 201 Created |
+| `POST` | `/peopleops/payroll/tax-declarations/lock-regime` | System / Employee seals tax regime choice; locks selector against daily tampering for remainder of FY | `peopleops:read` (self) | 200 OK |
+| `POST` | `/peopleops/payroll/tax-declarations/{id}/unlock-regime` | HR Admin emergency override to unlock regime for clerical error; requires mandatory audit justification | `peopleops:admin` | 200 OK |
 | `GET` | `/peopleops/payroll/tax-declarations/me` | Retrieve active tax regime projection (Section 115BAC New vs Old comparison with monthly TDS breakdown) | `peopleops:read` (self) | 200 OK |
 | `POST` | `/peopleops/payroll/tax-declarations/proofs` | Employee uploads actual receipts/certificates during proof verification window | `peopleops:read` (self) | 201 Created |
 | `POST` | `/peopleops/payroll/tax-declarations/previous-employment` | Mid-year joiner submits statutory Form 12B details (previous gross salary, TDS, and PF) | `peopleops:read` (self) | 201 Created |

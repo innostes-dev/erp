@@ -322,6 +322,65 @@ Employees select between two statutory regimes:
 
 ---
 
+#### 2. Regime Selection Governance: The Statutory Locking Window Architecture
+
+Under Section 192 of the Income Tax Act and CBDT Circular No. 04/2023, employees **cannot switch tax regimes arbitrarily on a daily or monthly basis**. Allowing erratic switching would destabilize monthly TDS withholding, corrupt quarterly Form 24Q returns, and cause wild swings in monthly net take-home pay.
+
+Innostes implements a strict **Windowed Governance & Immutability Architecture**:
+
+```mermaid
+flowchart TD
+    Start["Financial Year Begins (1 April) or New Hire Joins"] --> WindowOpen["Regime Selection Window OPEN<br/>(1 April to 30 April / First 15 Days of Joining)"]
+    
+    WindowOpen --> EmpChoice{"Did Employee Submit a Choice?"}
+    
+    EmpChoice -->|Selects New or Old Regime| CommitChoice["Choice Committed to Record<br/>Form 12BB Submitted"]
+    EmpChoice -->|No Action by 30 April| AutoDefault["Auto-Lock to Statutory Default:<br/>Section 115BAC New Tax Regime"]
+    
+    CommitChoice --> Lock["IMMUTABILITY LOCK ENGAGED<br/>• Regime Toggle is Disabled on ESS<br/>• Monthly TDS Computed Consistently"]
+    AutoDefault --> Lock
+    
+    Lock --> HROverride{"Emergency Clerical Error?<br/>(HR Admin Override Requested)"}
+    
+    HROverride -->|HR Admin Approves with Reason| Unlock["Temporary 24h Unlock<br/>(Full Audit Trail Logged)"] --> CommitChoice
+    HROverride -->|No Override| MaintainLock["Remains Locked for Remainder of FY"]
+    
+    MaintainLock --> ITRFiling["Annual ITR Filing (July 31st):<br/>Employee Can Still Freely Switch Regimes<br/>Directly on Income Tax Portal under Section 139(1)"]
+```
+
+##### 1. The 2 Primary Selection Windows
+1. **Annual Fiscal Declaration Window (1 April – 30 April)**:
+   * Open to all active employees at the start of each financial year.
+   * Employees use the interactive **Tax Comparator Radar** to evaluate projected taxes under both regimes based on their anticipated investments.
+   * **Auto-Lock on 30 April**: If an employee takes no action before April 30th, the system automatically locks their regime to the government default (**Section 115BAC New Regime**).
+2. **New Hire Onboarding Window (Within 15 Days of Joining Date)**:
+   * New employees select their regime during candidate onboarding or within 15 days of their start date.
+   * Once submitted, it locks for the remainder of that financial year.
+
+##### 2. The Mid-Year Proof Window Policy (Controlled Secondary Option)
+* Organizations can configure a tenant-level toggle: `allow_midyear_regime_switch` (Default: `FALSE`).
+* When enabled, the system allows **exactly ONE mid-year switch** during the Proof Verification Window (December 15 – January 15):
+  * *Purpose*: An employee who declared the Old Regime in April with plans to invest INR 1.5 Lakhs in 80C may realize in December that they lack liquidity. Rather than letting their taxes spike sharply in February and March due to missing proofs, they can make a single, permanent switch to the New Regime, allowing the engine to normalize remaining tax deductions evenly.
+
+##### 3. Immutability Lock & ESS UI State
+* Once locked, the regime selector on the employee portal becomes read-only and displays a lock icon:
+  `[ Active Regime: Section 115BAC (New Regime) — LOCKED FOR FY 2026-27 ]`
+* The UI explicitly informs the employee of their legal rights:
+  > *"Employer TDS deduction under Section 192 is locked for the financial year. You retain the statutory right under Section 139(1) to switch regimes when filing your final Income Tax Return (ITR) with the Income Tax Department."*
+
+##### 4. HR Admin Emergency Override Workflow
+* If an employee makes a bona fide clerical mistake (e.g. accidentally clicked Old Regime without reading):
+  * Employee clicks **`[ Request Regime Revision ]`**, specifying the reason.
+  * HR Payroll Admin reviews the request in the admin console.
+  * HR clicks **`[ Unlock Employee Tax Regime (Audit Logged) ]`** and enters a mandatory justification (e.g. *"Clerical error in April intake, corrected prior to first payroll freeze"*).
+  * The system unlocks the employee's regime toggle for a 24-hour window, automatically re-locking upon submission.
+
+##### 5. TDS Recalculation Normalization Formula
+Whenever an authorized regime change occurs mid-cycle, the engine prevents negative tax deductions or wild net pay spikes by normalizing remaining liability across remaining payroll runs:
+$$\text{Adjusted Monthly TDS} = \frac{\text{New Projected Annual Tax Liability} - \sum \text{TDS Deducted in Prior Months}}{\text{Remaining Unprocessed Months in Fiscal Year}}$$
+
+---
+
 #### 2. Information Required FROM the Employee (Self-Service Intake)
 
 ##### A. Statutory Form 12BB (Rule 26C Declaration)

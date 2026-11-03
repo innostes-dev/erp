@@ -1198,12 +1198,13 @@ Employees manage their statutory income tax declarations with real-time tax liab
 +-----------------------------------------------------------------------------------------------------------------------------------+
 | MY TAX DECLARATIONS & STATUTORY FORM 12BB: FINANCIAL YEAR 2026-27                        [ Save Draft ] [ Submit Declaration ]    |
 +-----------------------------------------------------------------------------------------------------------------------------------+
-| REGIME SELECTION:                                                                                                                 |
-| (•) Section 115BAC New Tax Regime (Recommended)                 ( ) Old Tax Regime                                                |
-|     Standard Deduction: INR 75,000                                  Standard Deduction: INR 50,000                                |
-|     Zero tax liability on income up to INR 7.75 Lakhs               Requires Chapter VI-A investment proofs & rent receipts       |
+| REGIME SELECTION & STATUTORY IMMUTABILITY STATUS:                                                                                 |
+| Status: [ LOCKED FOR FY 2026-27 (Locked on 30 Apr 2026) ]                                          [ Request HR Regime Override ] |
+| Active Regime: (•) Section 115BAC New Tax Regime (Statutory Default)                              ( ) Old Tax Regime (Locked)    |
+| Standard Deduction: INR 75,000 | Tax Rebate u/s 87A: Up to INR 25,000 | Zero Tax on Total Income up to INR 7.75 Lakhs             |
+| Note: Regime selection is locked for employer TDS under Section 192. You may switch regimes when filing annual ITR u/s 139(1).   |
 |                                                                                                                                   |
-| TAX COMPARATOR RADAR:                                                                                                             |
+| TAX COMPARATOR RADAR (SIMULATION):                                                                                                |
 | Total Estimated Tax Under New Regime: INR  42,500.00 | Total Tax Under Old Regime: INR  68,200.00 | Net Annual Savings: INR 25,700|
 +-----------------------------------------------------------------------------------------------------------------------------------+
 | DECLARATION CATEGORIES & PROOF SUBMISSION (RULE 26C)                                                                              |
