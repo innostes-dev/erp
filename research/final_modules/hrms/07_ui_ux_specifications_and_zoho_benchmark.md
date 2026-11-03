@@ -38,36 +38,130 @@ The Innostes PeopleOps design system adopts the employee-centric ergonomics pion
 
 ## 3. Desktop Dashboard Layout Wireframe
 
-The primary employee dashboard (`/hrms`) utilizes a 12-column responsive CSS grid with zero extraneous chrome.
+## 3. Desktop Dashboard Architecture: "My View" vs "Team View"
+
+The PeopleOps Home Dashboard (`/hrms`) implements a **Role-Adaptive Segmented Controller**:
+
+```
++---------------------------------------------------------------------------------------------------+
+| DASHBOARD VIEW CONTROLLER: [ (•) My View (Personal) ]  [ ( ) Team View (3 Pending Approvals) ]    |
++---------------------------------------------------------------------------------------------------+
+```
+
+* **Individual Contributor View (0 Direct Reports)**: The segmented controller is hidden; the user lands directly on **My View**. Zero administrative clutter.
+* **Lead / Manager / Admin View**: Both views are accessible. The **Team View** tab displays a live badge with the count of pending approvals.
+
+---
+
+### 3.1 Wireframe: "My View" (Personal Employee Cockpit)
+
+100% focused on personal workday management, leave balances, and compensation:
 
 ```
 +---------------------------------------------------------------------------------------------------+
 | Top Navigation: Innostes Business OS | Organization Selector | Search (Cmd+K) | Notifications | Profile |
 +---------------------------------------------------------------------------------------------------+
-| SIDEBAR         | MAIN CONTENT AREA (12 Columns)                                                  |
+| SIDEBAR         | VIEW: [ (•) My View ]  [ ( ) Team View (3) ]                                    |
 |                 |                                                                                 |
 | Dashboard       | +-----------------------------------------------+ +---------------------------+ |
 | Directory       | | ATTENDANCE COCKPIT (Col 1-8)                  | | QUICK PROFILE & PAY (Col 9-12)| |
-| Attendance      | | Status: CLOCKED IN (Since 09:15 AM)           | | Jane Doe - Lead Engineer    | |
-| Leave           | | Live Workday Timer: 04h 32m 18s               | | Emp ID: EMP-00104           | |
-| Payroll         | | Mode: [ Office | (Home) | Client ]            | |                             | |
+| Attendance      | | Status: CLOCKED IN (Since 09:15 AM)           | | Sarah Chen - Tech Lead      | |
+| Leave           | | Live Workday Timer: 04h 32m 18s               | | Emp ID: EMP-1042            | |
+| Payroll         | | Mode: [ Office | (Home) | Client ]            | | Shift: General (09:30-18:30)| |
 | Settings        | | [ Clock Out ]  [ Take Break ]                 | | Latest Payslip: Oct 2026    | |
-|                 | | Today: 09:15 - Present | Location: Remote/VPN | | [ Download PDF ]            | |
+|                 | | Today: 09:15 - Present | Location: Remote/VPN | | [ Download Encrypted PDF ]  | |
 |                 | +-----------------------------------------------+ +---------------------------+ |
 |                 |                                                                                 |
 |                 | +-----------------------------------------------------------------------------+ |
-|                 | | LEAVE BALANCES & QUICK REQUEST (Col 1-12)                                   | |
-|                 | | [ Casual: 4.5 days ]  [ Sick: 6.0 days ]  [ Privilege: 14.0 days ]  [Apply]  | |
+|                 | | MY LEAVE BALANCES (Closing as of Today)                     [ + Apply Leave ]| |
+|                 | | [ Casual: 6.5 Days ]  [ Sick: 4.0 Days ]  [ Earned: 11.0 Days ]  [Comp: 1.0]| |
 |                 | +-----------------------------------------------------------------------------+ |
 |                 |                                                                                 |
 |                 | +-----------------------------------------------+ +---------------------------+ |
-|                 | | MANAGER APPROVALS QUEUE (Col 1-7)             | | TEAM PRESENCE RADAR (8-12)  | |
-|                 | | Pending Requests (2):                         | | Core Platform Team (8 total)| |
-|                 | | 1. Alex Smith - Sick Leave (Nov 4 - Nov 5)    | | Active: 6  Remote: 2  Off: 1| |
-|                 | |    [ Approve ]  [ Reject ]  [ View Details ]  | |                             | |
-|                 | | 2. Maria Ray - Punch Regularization (Oct 31)  | | * John K. (Sick Leave)      | |
-|                 | |    [ Approve ]  [ Reject ]  [ View Details ]  | | * Sarah T. (Remote - WFH)   | |
+|                 | | MY PENDING REQUESTS TRACKER (Col 1-7)         | | UPCOMING HOLIDAYS (Col 8-12)| |
+|                 | | • Casual Leave: 14 Nov - 15 Nov (2.0 Days)    | | • 15 Nov: Guru Nanak Jayanti| |
+|                 | |   Status: [ PENDING APPROVAL - Lead: Keshav ] | | • 25 Dec: Christmas Day     | |
+|                 | | • Regularization: 28 Oct (Missing Out-Punch)  | |                             | |
+|                 | |   Status: [ APPROVED - Hours Adjusted ]       | | Floating Holiday Quota:     | |
+|                 | |                                               | | 1 of 2 Claimed [ Claim Opt ]| |
 |                 | +-----------------------------------------------+ +---------------------------+ |
++---------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 3.2 Wireframe: "Team View" (Lead & Manager Command Center)
+
+The Lead's mission control for team presence, shift coverage, and 1-click approvals:
+
+```
++---------------------------------------------------------------------------------------------------+
+| Top Navigation: Innostes Business OS | Organization Selector | Search (Cmd+K) | Notifications | Profile |
++---------------------------------------------------------------------------------------------------+
+| SIDEBAR         | VIEW: [ ( ) My View ]  [ (•) Team View (3) ]        [ + Set OOO Delegation ]   |
+|                 |                                                                                 |
+| Dashboard       | +-----------------------------------------------------------------------------+ |
+| Directory       | | ACTION ITEMS QUEUE: PENDING APPROVALS (3)                 [ Batch Approve ] | |
+| Attendance      | |                                                                             | |
+| Leave           | | 1. Rahul Verma — Sick Leave Application (2.0 Days: 04 Nov - 05 Nov)         | |
+| Payroll         | |    Reason: Viral fever. Team Coverage: 85% Active (No clash with on-call).   | |
+| Settings        | |    [✓ Approve ]  [ ✕ Reject with Note ]  [ View Details / Coverage Radar ]   | |
+|                 | |                                                                             | |
+|                 | | 2. Maria Ray — Attendance Regularization (31 Oct - Missing Clock-Out)       | |
+|                 | |    Claimed Work Hours: 09:30 AM to 06:45 PM (09h 15m). Reason: Power cut.   | |
+|                 | |    [✓ Approve & Adjust Hours ]  [ ✕ Reject ]  [ View Access Logs ]          | |
+|                 | |                                                                             | |
+|                 | | 3. David Miller — Weekend Overtime Comp-Off Credit Claim (02 Nov - 6.5 Hrs) | |
+|                 | |    [ Acting Approver: Primary Lead Sarah Chen is On Leave ]                 | |
+|                 | |    [✓ Approve 1.0 Day Credit ]  [ ✕ Reject ]                                | |
+|                 | +-----------------------------------------------------------------------------+ |
+|                 |                                                                                 |
+|                 | +-----------------------------------------------+ +---------------------------+ |
+|                 | | TEAM PRESENCE RADAR (Col 1-8)                 | | TEAM SHIFTS & ROSTER (9-12) | |
+|                 | | Core Platform Engineering Team (8 Members)    | | Active Cycle: Week 45       | |
+|                 | | • Active In-Office:  4 Members                | |                             | |
+|                 | | • Remote (WFH):      2 Members                | | On-Call Lead: Alex Smith    | |
+|                 | | • On Leave Today:    1 Member (John K. - Sick)| | Minimum Staffing: 75% MET   | |
+|                 | | • Missing Punch:     1 Member (Alex S.)       | |                             | |
+|                 | |                                               | | [ View Full Monthly Roster ]| |
+|                 | | [ Search Teammate... ] [ Filter by Shift v ]  | | [ Broadcast Team Notice ]   | |
+|                 | +-----------------------------------------------+ +---------------------------+ |
++---------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 3.3 Out of Office (OOO) Approval Delegation Modal (`ApprovalDelegationModal`)
+
+When a Lead goes on leave or schedules planned time off, they configure their backup proxy approver to prevent team bottlenecks:
+
+```
++---------------------------------------------------------------------------------------------------+
+| CONFIGURE OUT-OF-OFFICE APPROVAL DELEGATION                                                   [X] |
++---------------------------------------------------------------------------------------------------+
+| You have 8 direct reports. While you are away, who should handle team approvals?                  |
+|                                                                                                   |
+| Delegation Proxy Type *                                                                           |
+| (•) Escalate to My Direct Manager (Skip-Level Manager: Keshav Iyer — VP Engineering)              |
+| ( ) Delegate to a Peer Team Lead (Lateral Peer)                                                    |
+|                                                                                                   |
+| If Peer Lead selected:                                                                            |
+| [ Select Peer: Ananya Sen (Lead - Data Infrastructure Team)                                     v]|
+|                                                                                                   |
+| Effective Delegation Period:                                                                      |
+| From Date * [ 12 Nov 2026 ]   To Date * [ 20 Nov 2026 ] (Matches Approved Leave Window)           |
+|                                                                                                   |
+| Delegation Scope:                                                                                 |
+| [✓] Leave Applications & Cancellations                                                            |
+| [✓] Attendance Punch Regularizations & Comp-Off Grants                                            |
+| [✓] Monthly Timesheet Sign-Offs                                                                   |
+| [ ] Sensitive Salary Advance / Expense Claims (Retain for my return or escalate to Finance)       |
+|                                                                                                   |
+| Notification Settings:                                                                            |
+| [✓] Send summary email of all proxy approvals to me upon my return                                |
+| [✓] Notify direct reports that their requests are being reviewed by the designated proxy          |
+|                                                                                                   |
+| [ Cancel ]                                                    [ Activate Approval Delegation -> ] |
 +---------------------------------------------------------------------------------------------------+
 ```
 

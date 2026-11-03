@@ -212,26 +212,83 @@ Restricts leave types to appropriate employee cohorts:
 
 ---
 
-### Dimension 8: Approval Routing, SLAs & Auto-Escalation
-Multi-tier routing tailored to organizational size and request severity:
+### Dimension 8: Approval Routing, Absence Delegation & Auto-Escalation Engine
+
+A critical challenge in team management is preventing approval bottlenecks when a team lead or reporting manager is absent, without overwhelming senior executives (2nd-line managers / directors) with daily low-level notifications when the lead is present.
+
+Innostes resolves this with the **3-Tier Presence-Aware Delegation & Escalation Architecture**:
 
 ```mermaid
-flowchart LR
-    Submit["Employee Submits Leave"] --> FlowCheck{"Approval Flow Type"}
+flowchart TD
+    Submit["Team Member Submits Request<br/>(Leave / Missing Punch / Timesheet)"] --> LeadCheck{"Is Direct Lead Present at Work Today?"}
     
-    FlowCheck -->|AUTO_APPROVE| Auto["Status: APPROVED<br/>(e.g., 1-day sick leave or Unlimited PTO)"]
+    LeadCheck -->|Lead is Present / Active| LeadQueue["Routes Directly to Lead's 'Team View' Inbox<br/>(2nd-Line Manager does NOT see it — Zero Inbox Noise)"]
     
-    FlowCheck -->|SINGLE_LEVEL_MANAGER| LeadOnly["Direct Reporting Lead<br/>1-Click Dashboard Sign-Off"]
+    LeadCheck -->|Lead is On Leave / OOO| DelCheck{"Did Lead Configure an OOO Proxy Delegation?"}
     
-    FlowCheck -->|TWO_TIER_MANAGER_SKIP| TierCheck{"Duration > 3 Days?"}
-    TierCheck -->|No| LeadOnly
-    TierCheck -->|Yes| TwoTier["Lead Approves ──> Skip-Level / HOD Approves"]
+    DelCheck -->|Yes: Proxy Assigned| ProxyQueue["Routes to Designated Peer Lead / Proxy<br/>(Badge: 'Acting Approver for Lead')"]
+    DelCheck -->|No: Sudden Unplanned Sickness| AutoFallback["Presence-Aware Fallback:<br/>Routes Automatically to 2nd-Line Manager<br/>Badge: 'Acting Approver: Lead Sarah Chen is On Leave'"]
     
-    FlowCheck -->|MANAGER_PLUS_HR| SpecRoute["Direct Lead ──> HR Compliance<br/>(Maternity, Sabbatical, Extended Sick)"]
+    LeadQueue --> SLACheck{"SLA Expired? (>48h or 24h before Payroll Freeze)"}
+    SLACheck -->|Yes: Inactive Lead| AutoEscalate["Auto-Escalate to 2nd-Line Manager<br/>(Urgent ping to Lead & Director)"]
+    SLACheck -->|No| LeadQueue
 ```
 
-* **Manager SLA & Auto-Escalation**:
-  * If the direct manager takes no action within `sla_hours` (e.g. 48 hours), the system sends an urgent reminder. If unresolved after 72 hours, it escalates to their skip-level manager or organization HR.
+---
+
+#### 1. Why Naive Second-Line Routing Fails (And How Innostes Fixes It)
+
+* **The Anti-Pattern (Always Routing to 2nd-Line Manager)**:
+  * If a Director with 5 Leads and 40 engineers receives every daily leave application and missing punch regularization, they suffer **Inbox Fatigue**. They cannot discern urgent issues from routine sign-offs, and lack the sprint-level pairing context to make informed decisions.
+  * Bypassing the direct lead while they are present undermines team autonomy and operational ownership.
+* **The Innostes Principle (Presence-Gated Visibility)**:
+  * By default, the 2nd-Line Manager's queue is completely clean of direct reports' daily requests.
+  * The 2nd-Line Manager only sees requests when:
+    1. The primary lead has formally delegated authority during an approved leave, OR
+    2. The primary lead is detected by the attendance engine as `ON_LEAVE` / `ABSENT` today (automatic safety net), OR
+    3. The request exceeds the 48-hour SLA or approaches the monthly payroll lock.
+
+---
+
+#### 2. The 3 Pillars of Absence Governance
+
+##### Pillar 1: Proactive Out of Office (OOO) Approval Delegation (Planned Leave)
+* When a Lead applies for leave or activates OOO status in their **Team View**:
+* A delegation modal prompts:
+  > *"You have 6 direct reports. Who should handle approvals while you are away?"*
+  * **Option A**: **Escalate to My Direct Manager (2nd-Line Manager)** (Default).
+  * **Option B**: **Delegate to a Lateral Peer Lead** (e.g. Lead of Infrastructure Team).
+* **Strict Date Bounds**: The delegation is active strictly between `start_date` and `end_date` of the lead's leave. The moment the lead checks in or the leave expires, proxy authority instantly revokes.
+* **Granular Scope Toggles**:
+  * `[✓] Leave Applications & Cancellations`
+  * `[✓] Attendance Punch Regularizations & Comp-Off Grants`
+  * `[✓] Monthly Timesheet Sign-Offs`
+  * `[ ] Sensitive Salary Advance / Expense Claims` (Retained for lead's return or escalated directly to Finance).
+
+##### Pillar 2: Presence-Aware Automatic Fallback (Unplanned / Emergency Absence)
+* If a lead suffers a sudden medical emergency, accident, or takes unplanned sick leave without configuring a proxy:
+* The workflow engine evaluates the lead's daily attendance record:
+  * If the lead is marked `ON_LEAVE` (approved Sick Leave) or has an unexcused absence today:
+  * The pending requests automatically surface on the **2nd-Line Manager's Team View** with an actionable badge:
+    `[Acting Approver: Primary Lead Sarah Chen is On Leave (Sick)]`.
+  * The 2nd-Line Manager can approve or reject immediately, preventing sprint paralysis.
+  * The moment Sarah returns to work, unapproved items return exclusively to Sarah's queue.
+
+##### Pillar 3: Auto-Escalation SLA (Inactivity & Payroll Cutoff Triggers)
+* If a lead is present at work but fails to act on a pending request within **48 hours**:
+  * An automated notification pings the lead.
+  * If still unresolved at **72 hours**, the task auto-escalates to the 2nd-Line Manager with an `[Escalated - SLA Exceeded]` tag.
+* **Payroll Pre-Flight Lock Trigger**:
+  * Regardless of hours elapsed, **24 hours before the monthly Attendance & LOP Freeze**, all unapproved requests across the company auto-escalate to 2nd-Line Managers and HR Admins to prevent payroll calculation delays.
+
+---
+
+#### 3. Complete Cryptographic Audit Trail
+Every approval action permanently records the exact context in the database ledger:
+* `approved_by_id`: `UUID` of the actual person who clicked Approve.
+* `acting_for_id`: `UUID` of the primary lead (NULL if approved directly by lead).
+* `delegation_type`: `DIRECT_LEAD`, `OOO_PROXY`, `PRESENCE_FALLBACK`, or `SLA_ESCALATION`.
+* `audit_comment`: e.g. *"Approved by Keshav Iyer on behalf of Sarah Chen [Reason: Primary Lead on Approved Sick Leave]"*.
 
 ---
 

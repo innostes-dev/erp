@@ -1009,6 +1009,27 @@ CREATE TABLE hrms_form16_records (
 );
 
 -- ============================================================================
+-- 12.2 APPROVAL DELEGATION & ESCALATION ENGINE
+-- ============================================================================
+
+CREATE TABLE hrms_approval_delegations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    delegator_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    delegatee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    proxy_type VARCHAR(32) NOT NULL DEFAULT 'SKIP_LEVEL_MANAGER', -- 'SKIP_LEVEL_MANAGER', 'LATERAL_PEER'
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    scope VARCHAR(64) NOT NULL DEFAULT 'ALL', -- 'ALL', 'LEAVES_ONLY', 'ATTENDANCE_REGULARIZATION_ONLY', 'TIMESHEETS_ONLY'
+    notify_delegator_summary BOOLEAN NOT NULL DEFAULT TRUE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_delegation_dates CHECK (end_date >= start_date),
+    CONSTRAINT chk_no_self_delegation CHECK (delegator_id != delegatee_id)
+);
+CREATE INDEX idx_delegation_active ON hrms_approval_delegations(tenant_id, delegator_id, is_active, start_date, end_date);
+
+-- ============================================================================
 -- 13. OFFBOARDING & EXIT CLEARANCES
 -- ============================================================================
 
@@ -1049,6 +1070,7 @@ ALTER TABLE hrms_payslips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_tax_declarations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_previous_employments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_form16_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_approval_delegations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_picklists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
@@ -1099,6 +1121,9 @@ CREATE POLICY tenant_prev_emp_isolation ON hrms_previous_employments
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_form16_isolation ON hrms_form16_records
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_approval_delegations_isolation ON hrms_approval_delegations
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_picklists_isolation ON hrms_picklists
@@ -1277,3 +1302,14 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/separations/initiate` | Record employee resignation or termination and set Last Working Day | `peopleops:write` | 201 Created |
 | `PATCH` | `/peopleops/separations/{id}/clearance`| Update departmental clearance status (IT, Finance, Facilities, HR) | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/separations/{id}/calculate-fnf`| Compute Full & Final settlement including gratuity & encashment | `peopleops:admin` | 200 OK |
+
+### 2.9 Approval Routing, Delegations & Team Operations
+
+| Method | Path | Summary & Purpose | Scopes Required | Success |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/peopleops/approvals/delegations` | Lead configures Out of Office (OOO) approval proxy delegation to skip-level manager or peer | `peopleops:manager` | 201 Created |
+| `GET` | `/peopleops/approvals/delegations/my` | Retrieve active and scheduled delegations for logged-in lead | `peopleops:read` (self) | 200 OK |
+| `DELETE` | `/peopleops/approvals/delegations/{id}`| Revoke active delegation early upon early return from leave | `peopleops:manager` | 200 OK |
+| `GET` | `/peopleops/approvals/team-queue` | Retrieve manager's unified pending approval queue (leaves, regularizations, comp-offs, escalated tasks) | `peopleops:manager` | 200 OK |
+| `POST` | `/peopleops/approvals/{id}/action` | Universal approval endpoint; records approver, acting proxy status, and audit comment | `peopleops:manager` | 200 OK |
+| `GET` | `/peopleops/team/presence-radar` | Lead retrieves real-time departmental presence (in-office, remote, on-leave, missing punch) | `peopleops:manager` | 200 OK |
