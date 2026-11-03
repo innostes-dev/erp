@@ -101,6 +101,53 @@ Startups cannot afford multi-step administrative gridlock when bringing on new t
 
 ---
 
+### Employee Credential Lifecycle: Magic Invite Link vs. Temporary Password
+
+A critical question in onboarding security: **How are the employee's initial login credentials handled?**
+
+* **The Anti-Pattern to Avoid (Plaintext Static Passwords):**
+  * Admin assigning a static default password (e.g. `Welcome@123`) is a major security hazard. Anyone in the company who knows a new hire's work email can log in as them before they ever start.
+  * Admins must **never** know, store, or view an employee's permanent confidential password.
+
+Innostes implements the **Dual-Mode Zero-Knowledge Credential Architecture**:
+
+```mermaid
+flowchart TD
+    QuickAdd["Founder / HR Adds Employee<br/>(Enters Work Email)"] --> Choice{"Delivery Mode Selected"}
+    
+    Choice -->|Mode A: Magic Invite Link (Default)| Magic["Generate 72h Crypto Setup Token<br/>(One-time, unguessable URL)"]
+    Magic --> Email["Dispatched via Email / SMS<br/>OR Founder Clicks '[Copy Link]'"]
+    Email --> SetPasswordScreen["Employee Clicks Link -> /auth/set-password<br/>• Sets confidential permanent password<br/>• Zero admin visibility<br/>• Account activated immediately"]
+    
+    Choice -->|Mode B: In-Person Temp Password| TempPass["Generate High-Entropy Temp Password<br/>(e.g., 'inn-7kPx-9mRt')"]
+    TempPass --> Flags["Database Flags Set:<br/>• must_change_password = TRUE<br/>• temp_password_expires_at = 72h"]
+    Flags --> FirstLogin["Employee Logs in with Temp Password<br/>-> Token Response: must_change_password: true"]
+    FirstLogin --> ForceModal["Screen Hard-Locked with 'Set New Password'<br/>(No dashboard access permitted until changed)"]
+    ForceModal --> SetPasswordScreen
+```
+
+#### 1. Mode A (Recommended): Magic Activation Link
+* **How it works**: The system creates a user record with no active password hash, generating an unguessable 72-hour `setup_token`.
+* **Zero Friction**: The founder can either let the automated email fire, or click **`[ 📋 Copy Activation Link ]`** directly in the modal to send it over Slack or WhatsApp (essential when corporate email MX records are still propagating on Day 1).
+* **The Experience**: The candidate clicks the link, enters their confidential password once, and lands directly on their new dashboard.
+
+#### 2. Mode B: In-Person Auto-Generated Temporary Password
+* **When to use**: When an in-office employee is sitting next to the founder on Day 1 without immediate email access.
+* **How it works**: The admin clicks **`[ Generate Temporary Password ]`**. The system outputs a high-entropy string (e.g., `inn-7kPx-9mRt`).
+* **Strict Enforcement**:
+  * The database sets `must_change_password = TRUE` and `temp_password_expires_at = NOW() + INTERVAL '72 hours'`.
+  * Upon entering this temporary password, the API issues an authentication payload with `must_change_password: true`.
+  * The frontend **strictly blocks all application navigation, APIs, and data views**, forcing the employee to input and verify their new confidential password before granting access.
+
+#### 3. Ongoing Password Changes & Resets
+* **No Plaintext Admin Overrides:** An administrator can never directly view or type an employee's password.
+* **If an Employee Forgets Password:**
+  * Self-service: Clicks *"Forgot Password"* on the login page (sends OTP / 15-minute reset link to their verified email/mobile).
+  * Administrative Reset: Admin clicks **`[ 🔄 Trigger Password Reset ]`** from the Employee Directory, which invalidates active sessions and sends a fresh reset link or generates a new 1-time temporary password.
+* **Changing Password from Profile:** Requires providing `current_password` + `new_password` to prevent session hijacking if a laptop is left unlocked.
+
+---
+
 ### Step 2: Contact Details, Addresses & Emergency Contacts
 
 Tracks multi-mode communication channels and addresses:

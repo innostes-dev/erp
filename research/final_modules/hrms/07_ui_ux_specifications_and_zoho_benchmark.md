@@ -160,13 +160,44 @@ Startups do not have time to fill 50 fields before hiring someone. A clean modal
 | Monthly Compensation / CTC (INR) *            Date of Joining *                   |
 | [ 180000                            ]         [ 15 Nov 2026                     ] |
 |                                                                                   |
-| [✓] Send self-onboarding magic link to candidate email                            |
+| Credential & Access Delivery Mode:                                                |
+| (•) Magic Setup Link (Recommended: sends 72h link to set confidential password)   |
+| ( ) Auto-generate Temporary Password (for in-person Day 1 onboarding)             |
+|                                                                                   |
+| [✓] Send self-onboarding link to candidate work & personal email                  |
 | [✓] Allow immediate Day 1 web check-in & dashboard access                         |
 |                                                                                   |
 | [ Cancel ]                                         [ Create Employee & Invite ]   |
 +-----------------------------------------------------------------------------------+
 ```
-* **Outcome**: Clicking `[ Create Employee & Invite ]` immediately creates the employee record, assigns the next sequential employee code (`INN-00105`), and dispatches the self-service onboarding link. The employee appears on the directory with badge `[ ONBOARDING ]`.
+* **Outcome**: Clicking `[ Create Employee & Invite ]` immediately creates the employee record, assigns the next sequential employee code (`INN-00105`), and dispatches the self-service onboarding link.
+  * If **Magic Link** was chosen: A success banner displays `[ 📋 Copy Direct Setup Link ]` so the founder can instantly paste it into Slack or WhatsApp.
+  * If **Temporary Password** was chosen: A modal popup reveals `Temporary Password: inn-7kPx-9mRt [ 📋 Copy ]` with a notice: *"The employee will be strictly required to change this password on their very first login."*
+
+#### First Login Forced Password Change (`/auth/set-password`)
+When an employee signs in with an auto-generated temporary password or clicks their single-use magic setup link, they are greeted by a zero-knowledge password establishment screen. All application navigation, menus, and background APIs are hard-locked until this step is completed:
+
+```
++-----------------------------------------------------------------------------------+
+| INNOSTES BUSINESS OS                                                              |
++-----------------------------------------------------------------------------------+
+| Welcome to Acme Corp, Sarah!                                                      |
+| Set up your permanent, confidential account password to continue.                 |
+|                                                                                   |
+| New Password *                                                                    |
+| [ •••••••••••••••••••••••••••••••• ]  [ Show ]                                    |
+| [████████████████████░░░░] Strong (14 characters, numbers & symbols)              |
+|                                                                                   |
+| Confirm New Password *                                                            |
+| [ •••••••••••••••••••••••••••••••• ]                                              |
+|                                                                                   |
+| Security Notice:                                                                  |
+| • Your password is encrypted via Argon2id / bcrypt.                               |
+| • Company administrators and founders will never have access to this password.    |
+|                                                                                   |
+|                                          [ Set Password & Enter Workspace -> ]    |
++-----------------------------------------------------------------------------------+
+```
 
 ---
 
