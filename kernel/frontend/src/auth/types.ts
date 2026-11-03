@@ -88,3 +88,33 @@ export interface ApiKeyListResponse {
   items: ApiKeyItem[];
 }
 
+export interface ModuleRoleSummary {
+  code: string;
+  name: string;
+  hierarchy_level: number;
+}
+
+export interface AccessibleModuleSummary {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  role: ModuleRoleSummary;
+  data_scope: string;
+  permissions: string[];
+}
+
+export interface TenantSummary {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface UserProfileResponse extends UserSummary {
+  created_at?: string;
+  updated_at?: string;
+  active_tenant: TenantSummary | null;
+  accessible_tenants: TenantSummary[];
+  accessible_modules: AccessibleModuleSummary[];
+}
+

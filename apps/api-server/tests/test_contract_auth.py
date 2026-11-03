@@ -88,6 +88,8 @@ class TestContractAuth(unittest.TestCase):
         app.dependency_overrides[get_api_key_service] = lambda: self.mock_api_key
         app.dependency_overrides[dep_get_api_key_svc] = lambda: self.mock_api_key
         app.dependency_overrides[get_user_service] = lambda: self.mock_user_svc
+        from kernel.setup.services import install_state
+        install_state._installed = True
 
         # Bearer token for authenticated tests
         self.valid_token = create_access_token({"sub": str(self.user_id), "type": "access", "token_version": 1})

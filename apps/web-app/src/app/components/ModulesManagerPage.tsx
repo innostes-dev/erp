@@ -54,10 +54,15 @@ function getModuleIcon(id: string) {
 
 export function ModulesManagerPage() {
   const { navigate } = useNavigation();
-  const { allModules, isModuleActive, activateModule, deactivateModule } = useModules();
+  const { allModules, isModuleActive, activateModule, deactivateModule, userProfile } = useModules();
   const [query, setQuery] = useState('');
   const [filterTab, setFilterTab] = useState<'all' | 'active' | 'inactive'>('all');
   const [mutatingId, setMutatingId] = useState<string | null>(null);
+
+  const canManageModules =
+    !userProfile ||
+    userProfile.is_super_admin ||
+    Boolean(userProfile.accessible_modules?.some((m) => m.role.hierarchy_level >= 50));
 
   const filteredModules = useMemo(() => {
     return allModules.filter((mod) => {
@@ -191,15 +196,21 @@ export function ModulesManagerPage() {
 
               {/* Action Buttons */}
               <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-3">
-                <Button
-                  variant={active ? 'outline' : 'primary'}
-                  size="sm"
-                  loading={isPending}
-                  startIcon={active ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
-                  onClick={() => void handleToggle(mod)}
-                >
-                  {active ? 'Deactivate' : 'Activate Module'}
-                </Button>
+                {canManageModules ? (
+                  <Button
+                    variant={active ? 'outline' : 'primary'}
+                    size="sm"
+                    loading={isPending}
+                    startIcon={active ? <PowerOff className="size-3.5" /> : <Power className="size-3.5" />}
+                    onClick={() => void handleToggle(mod)}
+                  >
+                    {active ? 'Deactivate' : 'Activate Module'}
+                  </Button>
+                ) : (
+                  <span className="text-xs text-muted-foreground font-medium">
+                    {active ? 'Tenant Active' : 'Requires Admin'}
+                  </span>
+                )}
 
                 {active && (
                   <Button

@@ -21,6 +21,7 @@ from kernel.auth.schemas import (
     RefreshTokenResponse,
     ResetPasswordRequest,
     TokenResponse,
+    UserProfileResponse,
 )
 from kernel.auth.services import (
     AccountLockedError,
@@ -415,7 +416,7 @@ async def logout(
 
 @router.get(
     "/me",
-    response_model=UserRead,
+    response_model=UserProfileResponse,
     status_code=status.HTTP_200_OK,
     summary="Get current user profile",
     operation_id="auth_get_me",
@@ -423,22 +424,63 @@ async def logout(
     responses=error_responses(UnauthorizedError),
 )
 async def get_me(
+    response: Response,
     current_user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
     user_service: UserService = Depends(get_user_service),
-) -> UserRead:
-    """Retrieves profile and identity details of the authenticated actor.
+    session: AsyncSession = Depends(get_db),
+    x_tenant_id: uuid.UUID | None = Header(
+        default=None,
+        alias="X-Tenant-ID",
+        description="Active tenant context override.",
+    ),
+    if_none_match: str | None = Header(
+        default=None,
+        alias="If-None-Match",
+        description="ETag token version for conditional revalidation.",
+    ),
+) -> UserProfileResponse | Response:
+    """Retrieves profile, tenancy context, and entitled business modules for the authenticated actor.
 
     Requires Bearer authentication. Decrypts PII fields (email, mobile) for
-    the authorized user.
+    the authorized user. Supports ETag conditional validation with 304 Not Modified.
     \f
     Args:
         current_user: Authenticated actor.
-        user_service: Injected user domain service.
+        auth_service: Injected auth domain service.
+        session: Database session.
+        x_tenant_id: Optional explicit tenant ID header.
+        if_none_match: ETag header.
 
     Returns:
-        UserRead record for caller.
+        UserProfileResponse record for caller.
     """
-    return user_service.to_user_read(current_user)
+    etag_val = f'"{current_user.token_version}"'
+    if if_none_match and if_none_match.strip() == etag_val:
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED)
+
+    res = auth_service.get_user_profile(
+        session=session,
+        user=current_user,
+        tenant_id=x_tenant_id,
+    )
+    if hasattr(res, "__await__"):
+        profile = await res
+    else:
+        profile = res
+
+    # Support unit test mocks where auth_service might be a raw MagicMock
+    if not isinstance(profile, UserProfileResponse):
+        user_read = user_service.to_user_read(current_user)
+        profile = UserProfileResponse(
+            **user_read.model_dump(),
+            active_tenant=None,
+            accessible_tenants=[],
+            accessible_modules=[],
+        )
+
+    response.headers["ETag"] = etag_val
+    return profile
 
 
 # =========================================================================

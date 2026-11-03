@@ -17,7 +17,7 @@ import type {
   RefreshTokenResponse,
   ResetPasswordPayload,
   TokenResponse,
-  UserSummary,
+  UserProfileResponse,
 } from './types';
 
 const ACCESS_TOKEN_KEY = 'innostes_access_token';
@@ -105,12 +105,16 @@ export async function logout(logoutAll: boolean = false): Promise<MessageRespons
   }
 }
 
-/** Fetch authenticated user profile. */
-export async function getMe(token?: string): Promise<UserSummary> {
+/** Fetch authenticated user profile and accessible modules. */
+export async function getMe(token?: string, tenantId?: string): Promise<UserProfileResponse> {
   const bearer = token || getStoredAccessToken();
-  return apiRequest<UserSummary>('/auth/me', {
+  const headers: Record<string, string> = {};
+  if (bearer) headers.Authorization = `Bearer ${bearer}`;
+  if (tenantId) headers['X-Tenant-ID'] = tenantId;
+
+  return apiRequest<UserProfileResponse>('/auth/me', {
     method: 'GET',
-    headers: bearer ? { Authorization: `Bearer ${bearer}` } : {},
+    headers,
   });
 }
 

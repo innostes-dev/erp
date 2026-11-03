@@ -1,8 +1,11 @@
 """Enterprise Authentication & Session Management Module."""
 
 from kernel.auth.dependencies import (
+    SecurityContext,
     get_current_user,
+    require_module,
     require_permission,
+    require_security_context,
     require_super_admin,
 )
 from kernel.auth.router import TAG, router

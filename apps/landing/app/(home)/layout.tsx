@@ -6,7 +6,7 @@ import { QuoteModalProvider } from '@/components/home/QuoteModalContext';
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <QuoteModalProvider>
-      <div className="flex min-h-screen flex-col bg-fd-background text-fd-foreground">
+      <div className="site-canvas flex min-h-screen flex-col text-fd-foreground transition-colors duration-300">
         <LandingHeader />
         <div className="flex-1">{children}</div>
         <CompanyFooter />

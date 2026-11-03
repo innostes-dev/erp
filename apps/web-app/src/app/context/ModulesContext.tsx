@@ -1,13 +1,19 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { apiRequest } from '@innostes/kernel';
-import { getStoredAccessToken } from '../../../../../kernel/frontend/src/auth/api';
+import {
+  apiRequest,
+  getMe,
+  getStoredAccessToken,
+  type UserProfileResponse,
+} from '@innostes/kernel';
 import { BUSINESS_MODULES_CATALOG, type CatalogItem } from '../catalog';
 
 export interface ModulesContextType {
   activeModuleIds: Set<string>;
   activeModules: CatalogItem[];
   allModules: CatalogItem[];
+  userProfile: UserProfileResponse | null;
   isModuleActive: (id: string) => boolean;
+  hasPermission: (permissionCode: string) => boolean;
   activateModule: (id: string) => Promise<void>;
   deactivateModule: (id: string) => Promise<void>;
   isLoading: boolean;
@@ -38,6 +44,7 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
     return new Set<string>();
   });
 
+  const [userProfile, setUserProfile] = useState<UserProfileResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +60,29 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const token = getStoredAccessToken();
-      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      // 1. Single Source of Truth: Fetch authenticated profile and entitled modules from /auth/me
+      try {
+        const profile = await getMe(token);
+        if (profile) {
+          setUserProfile(profile);
+          if (Array.isArray(profile.accessible_modules)) {
+            const modIds = new Set<string>(profile.accessible_modules.map((m) => m.id));
+            syncActiveModules(modIds);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // Fall back to tenant modules if /auth/me is temporarily unreachable
+      }
+
+      // 2. Fallback: Query tenant modules endpoint
+      const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
       const res = await apiRequest<{ installed?: Array<{ id: string; is_active: boolean }>; active_ids?: string[]; items?: Array<{ id: string; is_active: boolean }> }>(
         '/tenants/current/modules',
         { headers }
@@ -120,6 +149,17 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
 
   const isModuleActive = (id: string) => activeModuleIds.has(id);
 
+  const hasPermission = useCallback(
+    (permissionCode: string) => {
+      if (userProfile?.is_super_admin) return true;
+      if (!userProfile?.accessible_modules) return false;
+      return userProfile.accessible_modules.some((m) =>
+        m.permissions.includes(permissionCode) || m.permissions.includes('*')
+      );
+    },
+    [userProfile]
+  );
+
   const activeModules = BUSINESS_MODULES_CATALOG.filter((mod) => activeModuleIds.has(mod.id));
 
   return (
@@ -128,7 +168,9 @@ export function ModulesProvider({ children }: { children: React.ReactNode }) {
         activeModuleIds,
         activeModules,
         allModules: BUSINESS_MODULES_CATALOG,
+        userProfile,
         isModuleActive,
+        hasPermission,
         activateModule,
         deactivateModule,
         isLoading,

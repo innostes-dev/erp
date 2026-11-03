@@ -1,5 +1,7 @@
 """Authentication request and response schemas."""
 
+import uuid
+
 from pydantic import EmailStr, Field
 
 from kernel.core.schemas import BaseSchema
@@ -232,3 +234,52 @@ class MessageResponse(BaseSchema):
             ]
         }
     }
+
+
+class ModuleRoleSummary(BaseSchema):
+    """Summary of user's role within a module."""
+
+    code: str = Field(description="Role system code, e.g. 'sales_manager'.")
+    name: str = Field(description="Display role title, e.g. 'Sales Manager'.")
+    hierarchy_level: int = Field(default=0, description="Hierarchy rank level.")
+
+
+class AccessibleModuleSummary(BaseSchema):
+    """Descriptor of a business module the authenticated actor is entitled to access."""
+
+    id: str = Field(description="Module identifier, e.g. 'salesflow'.")
+    code: str = Field(description="System code, e.g. 'salesflow'.")
+    name: str = Field(description="Human-readable module title, e.g. 'SalesFlow CRM'.")
+    description: str | None = Field(default=None, description="Module operational summary.")
+    role: ModuleRoleSummary = Field(description="Primary security role held in this module.")
+    data_scope: str = Field(
+        default="OWN",
+        description="Effective data scope: 'OWN', 'TEAM', 'DEPARTMENT', or 'ORGANIZATION'.",
+    )
+    permissions: list[str] = Field(
+        default_factory=list,
+        description="Atomic permission codes granted in this module, e.g. ['salesflow.deals.view'].",
+    )
+
+
+class TenantSummary(BaseSchema):
+    """Brief organization profile summary."""
+
+    id: uuid.UUID = Field(description="Tenant unique UUID.")
+    name: str = Field(description="Tenant company name.")
+    slug: str = Field(description="Tenant URL slug.")
+
+
+class UserProfileResponse(UserRead):
+    """Canonical session payload returned by GET /auth/me for single-pass hydration."""
+
+    active_tenant: TenantSummary | None = Field(default=None, description="Currently active organization context.")
+    accessible_tenants: list[TenantSummary] = Field(
+        default_factory=list,
+        description="All organizations this user belongs to for tenant switching.",
+    )
+    accessible_modules: list[AccessibleModuleSummary] = Field(
+        default_factory=list,
+        description="All modules user is entitled to access within the active tenant.",
+    )
+

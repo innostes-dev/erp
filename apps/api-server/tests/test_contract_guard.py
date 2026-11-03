@@ -150,8 +150,11 @@ class TestContractGuard(unittest.TestCase):
         app.dependency_overrides[get_setup_service] = lambda: mock_setup
         app.dependency_overrides[require_setup_available] = lambda: None
         app.dependency_overrides[require_setup_token] = lambda: "inno_setup_secret_token_123"
+        from kernel.setup.services import install_state
+        install_state._installed = True
+
         async def fake_installed():
-            return False
+            return True
 
         app.dependency_overrides[is_installed_cached] = fake_installed
 

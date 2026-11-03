@@ -2,72 +2,121 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-/* innostes design system: components + tokens (this site uses the Tailwind setup),
-   plus its opt-in dark theme, which follows Fumadocs' `.dark` class. */
+/* Innostes design system */
 @import '@innostes/ui/tailwind.css';
 @import '@innostes/ui/dark.css';
 
 @source '../components';
 @source '../content';
 
-/* Docs chrome colours (Fumadocs), matched to the innostes look: white + blue. */
+/* ────────────────────────────────────────────
+   Design Tokens — Light
+   ──────────────────────────────────────────── */
 @theme {
-  --color-fd-background: #ffffff;
-  --color-fd-foreground: var(--color-slate-900);
-  --color-fd-muted: var(--color-slate-50);
-  --color-fd-muted-foreground: var(--color-slate-600);
+  /* Brand palette */
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+
+  /* Fumadocs chrome — tuned to Innostes */
+  --color-fd-background: #fafafa;
+  --color-fd-foreground: #0f172a;
+  --color-fd-muted: #f1f5f9;
+  --color-fd-muted-foreground: #64748b;
   --color-fd-popover: #ffffff;
-  --color-fd-popover-foreground: var(--color-slate-900);
+  --color-fd-popover-foreground: #0f172a;
   --color-fd-card: #ffffff;
-  --color-fd-card-foreground: var(--color-slate-900);
-  --color-fd-border: var(--color-slate-200);
-  --color-fd-primary: var(--color-blue-600);
+  --color-fd-card-foreground: #0f172a;
+  --color-fd-border: #e2e8f0;
+  --color-fd-primary: #2563eb;
   --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: var(--color-slate-100);
-  --color-fd-secondary-foreground: var(--color-slate-900);
-  --color-fd-accent: var(--color-blue-50);
-  --color-fd-accent-foreground: var(--color-blue-700);
-  --color-fd-ring: var(--color-blue-500);
+  --color-fd-secondary: #f1f5f9;
+  --color-fd-secondary-foreground: #0f172a;
+  --color-fd-accent: #eff6ff;
+  --color-fd-accent-foreground: #1d4ed8;
+  --color-fd-ring: #3b82f6;
+
+  /* Typography */
+  --font-sans: var(--font-sans), 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* Fluid type scale */
+  --text-xs:   0.75rem;   /* 12px */
+  --text-sm:   0.875rem;  /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg:   1.125rem;  /* 18px */
+  --text-xl:   1.25rem;   /* 20px */
+  --text-2xl:  1.5rem;    /* 24px */
+  --text-3xl:  1.875rem;  /* 30px */
+  --text-4xl:  2.25rem;   /* 36px */
+  --text-5xl:  3rem;      /* 48px */
+  --text-6xl:  3.75rem;   /* 60px */
+  --text-7xl:  4.5rem;    /* 72px */
+
+  /* Elevation */
+  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-lg:    0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-xl:    0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+  --shadow-glow:  0 0 0 1px rgba(37,99,235,0.12), 0 4px 24px rgba(37,99,235,0.18);
 }
 
+/* ────────────────────────────────────────────
+   Design Tokens — Dark
+   ──────────────────────────────────────────── */
 .dark {
-  --color-fd-background: var(--color-slate-950);
-  --color-fd-foreground: var(--color-slate-100);
-  --color-fd-muted: var(--color-slate-900);
-  --color-fd-muted-foreground: var(--color-slate-400);
-  --color-fd-popover: var(--color-slate-900);
-  --color-fd-popover-foreground: var(--color-slate-100);
-  --color-fd-card: var(--color-slate-900);
-  --color-fd-card-foreground: var(--color-slate-100);
-  --color-fd-border: var(--color-slate-800);
-  --color-fd-primary: var(--color-blue-400);
-  --color-fd-primary-foreground: var(--color-slate-950);
-  --color-fd-secondary: var(--color-slate-800);
-  --color-fd-secondary-foreground: var(--color-slate-100);
-  --color-fd-accent: color-mix(
-    in oklab,
-    var(--color-blue-500) 15%,
-    transparent
-  );
-  --color-fd-accent-foreground: var(--color-blue-300);
-  --color-fd-ring: var(--color-blue-400);
+  --color-fd-background: #020617;
+  --color-fd-foreground: #f1f5f9;
+  --color-fd-muted: #0f172a;
+  --color-fd-muted-foreground: #94a3b8;
+  --color-fd-popover: #0f172a;
+  --color-fd-popover-foreground: #f1f5f9;
+  --color-fd-card: #0f172a;
+  --color-fd-card-foreground: #f1f5f9;
+  --color-fd-border: #1e293b;
+  --color-fd-primary: #60a5fa;
+  --color-fd-primary-foreground: #020617;
+  --color-fd-secondary: #1e293b;
+  --color-fd-secondary-foreground: #f1f5f9;
+  --color-fd-accent: color-mix(in oklab, #3b82f6 12%, transparent);
+  --color-fd-accent-foreground: #93c5fd;
+  --color-fd-ring: #60a5fa;
+  --shadow-glow: 0 0 0 1px rgba(96,165,250,0.15), 0 4px 32px rgba(96,165,250,0.20);
 }
 
+/* ────────────────────────────────────────────
+   Shiki / code overrides
+   ──────────────────────────────────────────── */
 .dark span[style*="--shiki-dark:#6A737D"],
 .dark span[style*="--shiki-dark:#6a737d"],
 .dark span[style*="#6A737D"],
 .dark span[style*="#6a737d"] {
-  color: #94a3b8 !important;
+  color: #64748b !important;
 }
 
+/* ────────────────────────────────────────────
+   Base resets
+   ──────────────────────────────────────────── */
 html,
 body {
   max-width: 100vw;
   overflow-x: clip;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 html {
   scrollbar-gutter: stable;
+  scroll-behavior: smooth;
 }
 
 html > body[data-scroll-locked] {
@@ -75,6 +124,230 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
+/* ────────────────────────────────────────────
+   Landing-page utility classes
+   ──────────────────────────────────────────── */
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-hero {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 40%, #0284c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Cadence-style multi-tone warm-to-violet gradient text */
+.gradient-cadence {
+  background: linear-gradient(90deg, #f97316 0%, #fb7185 28%, #c084fc 65%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .gradient-cadence {
+  background: linear-gradient(90deg, #fb923c 0%, #f43f5e 30%, #d8b4fe 65%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(30, 41, 59, 0.8);
+}
+
+/* Cadence-style atmospheric mesh background (Light: warm apricot + soft lavender; Dark: rich obsidian nebula) */
+.hero-mesh {
+  background-color: #fafbfc;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 15% 35%, rgba(251, 146, 60, 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(192, 132, 252, 0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(254, 215, 170, 0.25) 0%, transparent 65%),
+    linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+}
+
+.dark .hero-mesh {
+  background-color: #030712;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 15% 35%, rgba(249, 115, 22, 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(139, 92, 246, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(59, 130, 246, 0.18) 0%, transparent 65%),
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 56px 56px, 56px 56px;
+}
+
+/* Site canvas with continuous subtle architectural grid */
+.site-canvas {
+  background-color: #fafbfc;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.dark .site-canvas {
+  background-color: #030712;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Cadence & Linear modern Bento Card surface */
+.bento-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card:hover {
+  border-color: rgba(203, 213, 225, 1);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.02);
+  transform: translateY(-2px);
+}
+
+.dark .bento-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.3);
+}
+
+.dark .bento-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Section divider glow */
+.section-divider {
+  border-bottom: 1px solid var(--color-fd-border);
+  position: relative;
+}
+
+.section-divider::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #2563eb, transparent);
+  border-radius: 9999px;
+}
+
+/* Animated underline on hover */
+.hover-underline {
+  position: relative;
+  text-decoration: none;
+}
+
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #2563eb;
+  border-radius: 9999px;
+  transition: width 0.25s ease;
+}
+
+.hover-underline:hover::after {
+  width: 100%;
+}
+
+/* ────────────────────────────────────────────
+   Keyframe animations
+   ──────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0   rgba(37, 99, 235, 0.35); }
+  70%  { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0   rgba(37, 99, 235, 0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-float       { animation: float 4s ease-in-out infinite; }
+.animate-pulse-ring  { animation: pulse-ring 2.2s ease infinite; }
+.animate-gradient    { animation: gradient-shift 5s ease infinite; background-size: 200% 200%; }
+.animate-fade-up     { animation: fade-up  0.5s ease both; }
+.animate-scale-in    { animation: scale-in 0.4s ease both; }
+
+/* Stagger children delay utilities */
+.stagger-1 { animation-delay: 0.10s; }
+.stagger-2 { animation-delay: 0.20s; }
+.stagger-3 { animation-delay: 0.30s; }
+.stagger-4 { animation-delay: 0.40s; }
+.stagger-5 { animation-delay: 0.50s; }
+
+/* ────────────────────────────────────────────
+   Mono font override for code blocks
+   ──────────────────────────────────────────── */
+pre, code, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+/* ────────────────────────────────────────────
+   Print resets
+   ──────────────────────────────────────────── */
 @media print {
   header,
   nav,

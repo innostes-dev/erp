@@ -1,12 +1,14 @@
 """SalesFlow HTTP Router."""
 
 from typing import Any
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 from pydantic import ConfigDict, Field
 
+from kernel.auth.dependencies import require_module
 from kernel.core.schemas import BaseSchema
 
 router = APIRouter(prefix="/salesflow", tags=["SalesFlow"])
+api_router = APIRouter(dependencies=[Depends(require_module("salesflow"))])
 
 
 class SalesFlowInfoResponse(BaseSchema):
@@ -76,3 +78,7 @@ async def get_salesflow_info() -> SalesFlowInfoResponse:
         SalesFlowInfoResponse with package status.
     """
     return SalesFlowInfoResponse()
+
+
+# Include authenticated business router
+router.include_router(api_router)

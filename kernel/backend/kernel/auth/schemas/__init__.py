@@ -17,6 +17,10 @@ from kernel.auth.schemas.auth import (
     RefreshTokenResponse,
     ResetPasswordRequest,
     TokenResponse,
+    ModuleRoleSummary,
+    AccessibleModuleSummary,
+    TenantSummary,
+    UserProfileResponse,
 )
 
 __all__ = [
@@ -34,4 +38,8 @@ __all__ = [
     "ChangePasswordRequest",
     "LogoutRequest",
     "MessageResponse",
+    "ModuleRoleSummary",
+    "AccessibleModuleSummary",
+    "TenantSummary",
+    "UserProfileResponse",
 ]

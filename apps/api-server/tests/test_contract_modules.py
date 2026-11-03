@@ -34,6 +34,9 @@ class TestContractModules(unittest.TestCase):
             session.execute = AsyncMock(return_value=lookup)
             yield session
 
+        from kernel.setup.services import install_state
+        install_state._installed = True
+
         app.dependency_overrides[get_db] = fake_db
 
     def tearDown(self) -> None:

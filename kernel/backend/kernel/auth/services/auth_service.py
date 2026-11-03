@@ -12,16 +12,20 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from kernel.auth.schemas import (
+    AccessibleModuleSummary,
     ChangePasswordRequest,
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     LoginRequest,
     LogoutRequest,
     MessageResponse,
+    ModuleRoleSummary,
     RefreshTokenRequest,
     RefreshTokenResponse,
     ResetPasswordRequest,
+    TenantSummary,
     TokenResponse,
+    UserProfileResponse,
 )
 from kernel.auth.services.email_service import EmailService, get_email_service
 from kernel.core.config import get_settings
@@ -583,3 +587,174 @@ class AuthService:
 
         await session.flush()
         return MessageResponse(message="Logged out successfully.")
+
+    async def get_user_profile(
+        self,
+        session: AsyncSession,
+        user: User,
+        tenant_id: uuid.UUID | None = None,
+    ) -> UserProfileResponse:
+        """Resolve active tenant context, accessible tenants, and entitled modules with roles & permissions."""
+        from kernel.tenancy.models import Tenant, TenantMember, TenantMemberStatus, TenantModule
+        from kernel.user.services.rbac_service import RBACService
+        from kernel.auth.schemas.auth import (
+            AccessibleModuleSummary,
+            ModuleRoleSummary,
+            TenantSummary,
+            UserProfileResponse,
+        )
+
+        rbac_service = RBACService()
+        user_read = self.user_service.to_user_read(user)
+
+        # 1. Resolve accessible tenants
+        if user.is_super_admin:
+            t_stmt = select(Tenant).where(Tenant.deleted_at.is_(None)).order_by(Tenant.created_at.asc())
+        else:
+            t_stmt = (
+                select(Tenant)
+                .join(TenantMember, TenantMember.tenant_id == Tenant.id)
+                .where(
+                    TenantMember.user_id == user.id,
+                    TenantMember.status == TenantMemberStatus.ACTIVE,
+                    Tenant.deleted_at.is_(None),
+                )
+                .order_by(Tenant.created_at.asc())
+            )
+        t_res = await session.execute(t_stmt)
+        accessible_tenants_entities = list(t_res.scalars().all())
+        accessible_tenants = [
+            TenantSummary(id=t.id, name=t.name, slug=t.slug)
+            for t in accessible_tenants_entities
+        ]
+
+        # 2. Resolve active tenant
+        active_tenant: TenantSummary | None = None
+        target_tenant_id = tenant_id
+
+        if not target_tenant_id and accessible_tenants:
+            target_tenant_id = accessible_tenants[0].id
+
+        if target_tenant_id:
+            for t in accessible_tenants:
+                if t.id == target_tenant_id:
+                    active_tenant = t
+                    break
+
+        if not active_tenant and accessible_tenants:
+            active_tenant = accessible_tenants[0]
+
+        # If no active tenant found, return basic profile
+        if not active_tenant:
+            return UserProfileResponse(
+                **user_read.model_dump(),
+                active_tenant=None,
+                accessible_tenants=[],
+                accessible_modules=[],
+            )
+
+        # 3. Resolve active tenant modules
+        tm_stmt = (
+            select(TenantModule.module_id)
+            .where(
+                TenantModule.tenant_id == active_tenant.id,
+                TenantModule.is_active.is_(True),
+                TenantModule.deleted_at.is_(None),
+            )
+        )
+        tm_res = await session.execute(tm_stmt)
+        active_module_ids = set(tm_res.scalars().all())
+
+        # Fallback catalog metadata for standard business modules
+        KNOWN_MODULES = {
+            "salesflow": ("SalesFlow CRM", "High-velocity pipelines, quote-to-cash & revenue forecasting."),
+            "peopleops": ("PeopleOps HRMS", "Workforce directory, attendance & leave approvals."),
+            "tracura": ("Tracura Telemetry", "Universal API telemetry, distributed tracing & request logging."),
+            "ledgerflow": ("LedgerFlow Finance", "General ledger, multi-currency accounts & tax filing."),
+            "docflow": ("DocFlow Documents", "Compliant document generation & e-signature pipelines."),
+            "stockflow": ("StockFlow Inventory", "Real-time inventory, purchase orders & barcode tracking."),
+            "hireflow": ("HireFlow Recruiting", "Candidate pipeline, applicant tracking & scorecards."),
+            "sprintflow": ("SprintFlow Agile", "Agile sprint boards, backlog management & issue tracking."),
+        }
+
+        # 4. Resolve user permissions and roles in active tenant
+        user_roles = await rbac_service.get_user_roles(session, user.id, active_tenant.id)
+        user_perms = await rbac_service.get_user_permissions(session, user.id, active_tenant.id)
+
+        # Check if user is Super Admin, Owner, or Tenant Admin
+        is_owner_or_admin = user.is_super_admin or any(
+            r.code in ("owner", "admin", "super_admin") for r in user_roles
+        )
+
+        if is_owner_or_admin:
+            entitled_modules = active_module_ids
+        else:
+            explicit_grants = set(await rbac_service.get_user_module_grants(session, user.id, active_tenant.id))
+            role_modules = {r.module_code for r in user_roles if r.module_code}
+            entitled_modules = explicit_grants.union(role_modules)
+
+        # Intersection rule
+        accessible_module_codes = active_module_ids.intersection(entitled_modules)
+
+        # Assemble accessible_modules
+        accessible_modules: list[AccessibleModuleSummary] = []
+
+        for mod_code in sorted(accessible_module_codes):
+            title, desc = KNOWN_MODULES.get(mod_code, (mod_code.capitalize(), f"{mod_code.capitalize()} business module."))
+
+            # Match module role
+            mod_role = None
+            for r in user_roles:
+                if r.module_code == mod_code:
+                    mod_role = r
+                    break
+            if not mod_role and user.is_super_admin:
+                mod_role_summary = ModuleRoleSummary(code="super_admin", name="Super Administrator", hierarchy_level=100)
+            elif not mod_role and any(r.code == "owner" for r in user_roles):
+                mod_role_summary = ModuleRoleSummary(code="owner", name="Organization Owner", hierarchy_level=80)
+            elif not mod_role and any(r.code == "admin" for r in user_roles):
+                mod_role_summary = ModuleRoleSummary(code="admin", name="Administrator", hierarchy_level=50)
+            elif mod_role:
+                mod_role_summary = ModuleRoleSummary(code=mod_role.code, name=mod_role.name, hierarchy_level=mod_role.hierarchy_level)
+            else:
+                mod_role_summary = ModuleRoleSummary(code="member", name="Member", hierarchy_level=10)
+
+            # Permissions for this module
+            mod_perms = [p["code"] for p in user_perms if p.get("module") == mod_code]
+            if is_owner_or_admin and not mod_perms:
+                from kernel.user.models.rbac import Permission
+                all_p_stmt = select(Permission.code).where(Permission.module == mod_code)
+                all_p_res = await session.execute(all_p_stmt)
+                mod_perms = list(all_p_res.scalars().all())
+
+            # Data scope resolution
+            scope_priority = ["ORGANIZATION", "DEPARTMENT", "TEAM", "OWN"]
+            mod_scopes = [p.get("scope", "OWN") for p in user_perms if p.get("module") == mod_code]
+            effective_scope = "OWN"
+            if is_owner_or_admin:
+                effective_scope = "ORGANIZATION"
+            else:
+                for s in scope_priority:
+                    if s in mod_scopes:
+                        effective_scope = s
+                        break
+
+            accessible_modules.append(
+                AccessibleModuleSummary(
+                    id=mod_code,
+                    code=mod_code,
+                    name=title,
+                    description=desc,
+                    role=mod_role_summary,
+                    data_scope=effective_scope,
+                    permissions=mod_perms,
+                )
+            )
+
+        return UserProfileResponse(
+            **user_read.model_dump(),
+            active_tenant=active_tenant,
+            accessible_tenants=accessible_tenants,
+            accessible_modules=accessible_modules,
+        )
+

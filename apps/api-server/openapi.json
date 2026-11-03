@@ -607,15 +607,62 @@
           "Authentication"
         ],
         "summary": "Get current user profile",
-        "description": "Retrieves profile and identity details of the authenticated actor.\n\nRequires Bearer authentication. Decrypts PII fields (email, mobile) for\nthe authorized user.",
+        "description": "Retrieves profile, tenancy context, and entitled business modules for the authenticated actor.\n\nRequires Bearer authentication. Decrypts PII fields (email, mobile) for\nthe authorized user. Supports ETag conditional validation with 304 Not Modified.",
         "operationId": "auth_get_me",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Active tenant context override.",
+              "title": "X-Tenant-Id"
+            },
+            "description": "Active tenant context override."
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ETag token version for conditional revalidation.",
+              "title": "If-None-Match"
+            },
+            "description": "ETag token version for conditional revalidation."
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRead"
+                  "$ref": "#/components/schemas/UserProfileResponse"
                 }
               }
             }
@@ -629,16 +676,18 @@
                 }
               }
             }
-          }
-        },
-        "security": [
-          {
-            "BearerAuth": []
           },
-          {
-            "BearerAuth": []
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        ]
+        }
       }
     },
     "/auth/api-keys": {
@@ -4449,6 +4498,64 @@
   },
   "components": {
     "schemas": {
+      "AccessibleModuleSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Module identifier, e.g. 'salesflow'."
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "System code, e.g. 'salesflow'."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Human-readable module title, e.g. 'SalesFlow CRM'."
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Module operational summary."
+          },
+          "role": {
+            "$ref": "#/components/schemas/ModuleRoleSummary",
+            "description": "Primary security role held in this module."
+          },
+          "data_scope": {
+            "type": "string",
+            "title": "Data Scope",
+            "description": "Effective data scope: 'OWN', 'TEAM', 'DEPARTMENT', or 'ORGANIZATION'.",
+            "default": "OWN"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Permissions",
+            "description": "Atomic permission codes granted in this module, e.g. ['salesflow.deals.view']."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "role"
+        ],
+        "title": "AccessibleModuleSummary",
+        "description": "Descriptor of a business module the authenticated actor is entitled to access."
+      },
       "ActivationResponse": {
         "properties": {
           "item_id": {
@@ -6230,6 +6337,33 @@
           }
         ]
       },
+      "ModuleRoleSummary": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Role system code, e.g. 'sales_manager'."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Display role title, e.g. 'Sales Manager'."
+          },
+          "hierarchy_level": {
+            "type": "integer",
+            "title": "Hierarchy Level",
+            "description": "Hierarchy rank level.",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "ModuleRoleSummary",
+        "description": "Summary of user's role within a module."
+      },
       "Page_TenantRead_": {
         "properties": {
           "items": {
@@ -7753,6 +7887,34 @@
           }
         ]
       },
+      "TenantSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Tenant unique UUID."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Tenant company name."
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug",
+            "description": "Tenant URL slug."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ],
+        "title": "TenantSummary",
+        "description": "Brief organization profile summary."
+      },
       "TenantUpdate": {
         "properties": {
           "name": {
@@ -8317,6 +8479,224 @@
         ],
         "title": "UserCreate",
         "description": "Payload to create a new user account."
+      },
+      "UserProfileResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id",
+            "description": "Unique identifier of the record in UUID v4 format.",
+            "examples": [
+              "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Timestamp when the record was created in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:00:00Z"
+            ]
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By",
+            "description": "Unique identifier of the user who created the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At",
+            "description": "Timestamp when the record was last modified in ISO 8601 UTC format.",
+            "examples": [
+              "2026-10-29T10:30:00Z"
+            ]
+          },
+          "updated_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated By",
+            "description": "Unique identifier of the user who last modified the record. Null for automated system actions.",
+            "examples": [
+              "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+            ]
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At",
+            "description": "Timestamp when the record was soft-deleted in ISO 8601 UTC format. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "deleted_by": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted By",
+            "description": "Unique identifier of the user who soft-deleted the record. Null while active.",
+            "examples": [
+              null
+            ]
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name",
+            "description": "User given name.",
+            "examples": [
+              "Priya"
+            ]
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name",
+            "description": "User family name.",
+            "examples": [
+              "Shah"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "Decrypted primary user email address.",
+            "examples": [
+              "priya.shah@northwind.example"
+            ]
+          },
+          "mobile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mobile",
+            "description": "Decrypted mobile telephone number.",
+            "examples": [
+              "+919876543210"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/UserStatus",
+            "description": "Account lifecycle status.",
+            "examples": [
+              "active"
+            ]
+          },
+          "is_super_admin": {
+            "type": "boolean",
+            "title": "Is Super Admin",
+            "description": "Whether the user holds platform-wide super administrator privileges.",
+            "examples": [
+              true
+            ]
+          },
+          "token_version": {
+            "type": "integer",
+            "title": "Token Version",
+            "description": "Monotonically increasing token generation counter used for instant session invalidation.",
+            "examples": [
+              1
+            ]
+          },
+          "active_tenant": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TenantSummary"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Currently active organization context."
+          },
+          "accessible_tenants": {
+            "items": {
+              "$ref": "#/components/schemas/TenantSummary"
+            },
+            "type": "array",
+            "title": "Accessible Tenants",
+            "description": "All organizations this user belongs to for tenant switching."
+          },
+          "accessible_modules": {
+            "items": {
+              "$ref": "#/components/schemas/AccessibleModuleSummary"
+            },
+            "type": "array",
+            "title": "Accessible Modules",
+            "description": "All modules user is entitled to access within the active tenant."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "updated_at",
+          "first_name",
+          "email",
+          "status",
+          "is_super_admin",
+          "token_version"
+        ],
+        "title": "UserProfileResponse",
+        "description": "Canonical session payload returned by GET /auth/me for single-pass hydration.",
+        "examples": [
+          {
+            "created_at": "2026-10-29T10:00:00Z",
+            "email": "priya.shah@northwind.example",
+            "first_name": "Priya",
+            "id": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+            "is_super_admin": true,
+            "last_name": "Shah",
+            "mobile": "+919876543210",
+            "status": "active",
+            "token_version": 1,
+            "updated_at": "2026-10-29T10:00:00Z"
+          }
+        ]
       },
       "UserRead": {
         "properties": {

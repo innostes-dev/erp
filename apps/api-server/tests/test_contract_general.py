@@ -19,6 +19,8 @@ class TestContractGeneral(unittest.TestCase):
     """Contract tests for service info, config, and health checks."""
 
     def setUp(self) -> None:
+        from kernel.setup.services import install_state
+        install_state._installed = True
         self.client = TestClient(app)
 
     def test_system_root__200_returns_service_info(self) -> None:
