@@ -802,6 +802,69 @@ Administrators have a dedicated cockpit to configure all corporate time-off poli
 
 ---
 
+### 5.9 Company Settings: Admin Holiday Calendar Setup Cockpit (`/hrms/settings/holidays`)
+
+Administrators configure branch-specific holiday calendars, import statutory gazetted packs in 1 click, and manage upcoming holidays while historical holidays remain permanently locked.
+
+#### 1. Annual Holiday Management Cockpit
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| COMPANY SETTINGS: HOLIDAY CALENDARS & STATUTORY OBSERVANCES                                     [ < 2026 > ] [ Today ]|
++-----------------------------------------------------------------------------------------------------------------------+
+| Select Location Calendar:                                                                                             |
+| [• Bengaluru HQ (14 Holidays)]  [ Mumbai Branch (13 Holidays) ]  [ US Remote (10 Holidays) ]  [ + New Branch Calendar ]|
++-----------------------------------------------------------------------------------------------------------------------+
+| Quick Setup Actions:                                                                                                  |
+| [ 1-Click Import: 2027 Karnataka Gazetted Pack ]   [ Copy from 2025 Calendar ]             [ + Add Custom Holiday ]   |
++-----------------------------------------------------------------------------------------------------------------------+
+| DATE       | DAY | HOLIDAY NAME                 | TYPE         | DURATION | STATUS / MUTABILITY   | ACTIONS             |
+| :---       | :--- | :---                        | :---         | :---     | :---                  | :---                |
+| 26 Jan 2026| Mon | Republic Day                 | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 08 Mar 2026| Sun | Maha Shivratri               | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 25 Mar 2026| Wed | Holi                         | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 09 Apr 2026| Thu | Ugadi / Gudi Padwa           | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 15 Aug 2026| Sat | Independence Day             | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 02 Oct 2026| Fri | Gandhi Jayanti               | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 31 Oct 2026| Sat | Diwali / Deepavali           | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 01 Nov 2026| Sun | Kannada Rajyotsava           | MANDATORY    | Full Day | [ Locked (Past) ]     | [ Locked ] [ Locked]|
+| 11 Nov 2026| Wed | Innostes Foundation Day      | COMPANY_SPEC | Full Day | [ Upcoming - Active ] | [ Edit ]   [ Delete ]|
+| 25 Dec 2026| Fri | Christmas                    | MANDATORY    | Full Day | [ Upcoming - Active ] | [ Edit ]   [ Delete ]|
+| 31 Dec 2026| Thu | New Year's Eve (Shutdown)    | COMPANY_SPEC | Half Day | [ Upcoming - Active ] | [ Edit ]   [ Delete ]|
++-----------------------------------------------------------------------------------------------------------------------+
+| Hard Invariant Note: Past holidays are strictly sealed to protect the integrity of closed payroll runs and approved  |
+| timesheets. Upcoming holidays can be freely added, rescheduled, or deleted at any time before their calendar date.     |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 2. Employee Floating / Optional Holiday Selection Modal (`FloatingHolidayModal`)
+
+```
++-----------------------------------------------------------------------------------+
+| SELECT FLOATING / OPTIONAL HOLIDAYS (2026)                                    [X] |
++-----------------------------------------------------------------------------------+
+| Policy: Your organization allows you to select up to 2 Floating Holidays per year.|
+| Floating holidays count as paid days off and do not consume your Casual or PL bank.|
+|                                                                                   |
+| Quota Status: [ Selected: 2 / 2 Days Allocated ]                                  |
++-----------------------------------------------------------------------------------+
+| AVAILABLE FLOATING FESTIVAL HOLIDAYS (2026):                                      |
+|                                                                                   |
+| [ ] 14 Apr 2026 (Tue) — Ambedkar Jayanti / Vishu / Baisakhi                       |
+| [✓] 27 Aug 2026 (Thu) — Raksha Bandhan                                            |
+| [✓] 15 Sep 2026 (Tue) — Onam                                                      |
+| [ ] 20 Oct 2026 (Tue) — Karwa Chauth                                              |
+| [ ] 06 Nov 2026 (Fri) — Chhath Puja                                               |
+| [ ] 25 Nov 2026 (Wed) — Guru Nanak Jayanti                                        |
+|                                                                                   |
+| Selected Days will be automatically added as paid non-working days on your        |
+| Attendance Calendar and synced with your reporting lead's team dashboard.        |
+|                                                                                   |
+| [ Cancel ]                                         [ Confirm Floating Choices -> ]|
++-----------------------------------------------------------------------------------+
+```
+
+---
+
 ## 6. Monthly Payroll Admin Cockpit (`/hrms/payroll`)
 
 Payroll administrators require a fail-safe, guided execution flow that prevents unverified disbursements. The Innostes Payroll Cockpit structures execution into a 3-step sequential stepper:

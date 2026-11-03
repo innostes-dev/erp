@@ -19,7 +19,7 @@ flowchart TD
     end
 
     subgraph Surface2["Surface 2: Attendance Calendar Page (/hrms/attendance)"]
-        Calendar["Monthly Attendance Calendar<br/>• Visual month grid showing logged hours<br/>• Status per day (Present, Weekend Off, Leave)<br/>• Missed Punch Flag: [ ⚡ Raise Regularization ]"]
+        Calendar["Monthly Attendance Calendar<br/>• Visual month grid showing logged hours<br/>• Status per day (Present, Weekend Off, Leave)<br/>• Missed Punch Flag: [ Raise Regularization ]"]
         Calendar --> MgrToggle["Manager View Toggle: [ Team Requests (2) ]<br/>• 1-Click Approve / Reject team punch corrections"]
     end
 
@@ -41,12 +41,12 @@ flowchart TD
 
 To accommodate both visual thinkers and data-dense operators, the Attendance cockpit features a **Dual-Axis Control Bar**:
 1. **Time Horizon Switcher**: `[ Month ]` (Default 30-day view) | `[ Day ]` (Single-day granular punch timeline)
-2. **Presentation Mode Switcher**: `[ 📅 Calendar View ]` (Visual cards with clear badges) | `[ ☰ List Mode ]` (Sortable, high-density table)
+2. **Presentation Mode Switcher**: `[ Calendar View ]` (Visual cards with clear badges) | `[ List Mode ]` (Sortable, high-density table)
 
 ```
 +-----------------------------------------------------------------------------------------------------------------------+
 | TIME & ATTENDANCE                                                 [ < November 2026 > ] [ Today ]                     |
-| Horizon: (•) Month   ( ) Day                   | Mode: (•) 📅 Calendar View   ( ) ☰ List Mode                         |
+| Horizon: (•) Month   ( ) Day                   | Mode: (•) Calendar View   ( ) List Mode                              |
 | View Toggle: [• My Attendance]  [ Team Requests (1) ]                                                                 |
 +-----------------------------------------------------------------------------------------------------------------------+
 ```
@@ -61,24 +61,24 @@ The calendar view displays each day of the month as a visual card with color-cod
 +--------------------+--------------------+--------------------+--------------------+---------------+
 | MON 02 NOV         | TUE 03 NOV         | WED 04 NOV         | THU 05 NOV         | FRI 06 NOV    |
 | 09:14 AM - 06:18 PM| 09:30 AM - 06:30 PM| 09:10 AM - [MISSING| 09:15 AM - 06:20 PM| 09:00 - 05:00 |
-| Net: 08h 19m (45m B| Net: 08h 30m (30m B| ⚠️ Missing OUT     | Net: 08h 20m (45m B| Net: 07h 30m  |
+| Net: 08h 19m (45m B| Net: 08h 30m (30m B| [ Missing OUT ]    | Net: 08h 20m (45m B| Net: 07h 30m  |
 | Mode: [ Office ]   | Mode: [ Home/WFH ] | Mode: [ Office ]   | Mode: [ Office ]   | Mode: [ Office|
-| [ ✓ Present ]      | [ ✓ Present ]      | [⚡Regularize]     | [ ✓ Present ]      | [ ✓ Present ] |
+| [ Present ]        | [ Present ]        | [ Regularize ]     | [ Present ]        | [ Present ]   |
 +--------------------+--------------------+--------------------+--------------------+---------------+
 | SAT 07 NOV         | SUN 08 NOV         | MON 09 NOV         | TUE 10 NOV         | WED 11 NOV    |
 | WEEKLY OFF         | WEEKLY OFF         | 09:20 AM - 06:15 PM| 09:15 AM - 06:10 PM| DIWALI        |
 | Saturday           | Sunday             | Net: 08h 15m       | Net: 08h 15m       | Gazetted      |
-| [ ☕ Weekend Off ] | [ ☕ Weekend Off ] | [ ✓ Present ]      | [ ✓ Present ]      | [ 🪔 Holiday ]|
+| [ Weekend Off ]    | [ Weekend Off ]    | [ Present ]        | [ Present ]        | [ Holiday ]   |
 +--------------------+--------------------+--------------------+--------------------+---------------+
 ```
 
 * **Clear Label System**:
-  * `[ ✓ Present ]` (Emerald badge): Normal workday with complete IN and OUT punches matching shift thresholds.
-  * `[ ⚠️ Missing OUT ]` (Amber badge): Incomplete session. Prompts the employee with an inline **`[ ⚡ Regularize ]`** trigger.
-  * `[ ⏳ Pending Manager Review ]` (Amber outline): Regularization submitted, waiting for supervisor sign-off.
-  * `[ 🌴 Approved Leave ]` (Blue badge): Casual Leave, Sick Leave, or Earned PTO.
-  * `[ 🪔 Gazetted Holiday ]` (Purple badge): Company-wide observed holiday with holiday name.
-  * `[ ☕ Weekend Off ]` (Muted Zinc badge): Saturday / Sunday weekly off.
+  * `[ Present ]` (Emerald badge): Normal workday with complete IN and OUT punches matching shift thresholds.
+  * `[ Missing OUT ]` (Amber badge): Incomplete session. Prompts the employee with an inline **`[ Regularize ]`** trigger.
+  * `[ Pending Manager Review ]` (Amber outline): Regularization submitted, waiting for supervisor sign-off.
+  * `[ Approved Leave ]` (Blue badge): Casual Leave, Sick Leave, or Earned PTO.
+  * `[ Gazetted Holiday ]` (Purple badge): Company-wide observed holiday with holiday name.
+  * `[ Weekend Off ]` (Muted Zinc badge): Saturday / Sunday weekly off.
 
 ---
 
@@ -92,16 +92,16 @@ For employees or managers who prefer scanning high-density tabular logs or filte
 +-----------------------------------------------------------------------------------------------------------------------+
 | DATE       | DAY | STATUS LABEL       | FIRST IN | LAST OUT | GROSS HRS | BREAKS  | NET HRS | WORK MODE| ACTIONS          |
 +------------+-----+--------------------+----------+----------+-----------+---------+---------+----------+------------------+
-| 06 Nov 2026| Fri | [ ✓ Present ]      | 09:00 AM | 05:00 PM | 08h 00m   | 30 mins | 07h 30m | Office   | [ View Details ] |
-| 05 Nov 2026| Thu | [ ✓ Present ]      | 09:15 AM | 06:20 PM | 09h 05m   | 45 mins | 08h 20m | Office   | [ View Details ] |
-| 04 Nov 2026| Wed | [ ⚠️ Missing OUT ]  | 09:10 AM | --:-- -- | --h --m   | 0 mins  | --h --m | Office   | [⚡Regularize]   |
-| 03 Nov 2026| Tue | [ ✓ Present ]      | 09:30 AM | 06:30 PM | 09h 00m   | 30 mins | 08h 30m | Home/WFH | [ View Details ] |
-| 02 Nov 2026| Mon | [ ✓ Present ]      | 09:14 AM | 06:18 PM | 09h 04m   | 45 mins | 08h 19m | Office   | [ View Details ] |
-| 01 Nov 2026| Sun | [ ☕ Weekend Off ]  | --:-- -- | --:-- -- | --        | --      | --      | --       | --               |
+| 06 Nov 2026| Fri | [ Present ]        | 09:00 AM | 05:00 PM | 08h 00m   | 30 mins | 07h 30m | Office   | [ View Details ] |
+| 05 Nov 2026| Thu | [ Present ]        | 09:15 AM | 06:20 PM | 09h 05m   | 45 mins | 08h 20m | Office   | [ View Details ] |
+| 04 Nov 2026| Wed | [ Missing OUT ]    | 09:10 AM | --:-- -- | --h --m   | 0 mins  | --h --m | Office   | [ Regularize ]   |
+| 03 Nov 2026| Tue | [ Present ]        | 09:30 AM | 06:30 PM | 09h 00m   | 30 mins | 08h 30m | Home/WFH | [ View Details ] |
+| 02 Nov 2026| Mon | [ Present ]        | 09:14 AM | 06:18 PM | 09h 04m   | 45 mins | 08h 19m | Office   | [ View Details ] |
+| 01 Nov 2026| Sun | [ Weekend Off ]    | --:-- -- | --:-- -- | --        | --      | --      | --       | --               |
 +-----------------------------------------------------------------------------------------------------------------------+
 ```
 * **Instant Filtering**: 1-click filter pill `[ Missing (1) ]` immediately isolates any days requiring regularization without hunting through rows.
-* **Inline Action**: Clicking `[ ⚡ Regularize ]` directly on the row opens the regularization modal in 0ms.
+* **Inline Action**: Clicking `[ Regularize ]` directly on the row opens the regularization modal in 0ms.
 
 ---
 
@@ -269,3 +269,106 @@ For teams that use attendance tracking:
 1. **60-Second De-Bounce**: If an employee double-clicks the check-in button or scans a biometric reader twice in rapid succession, duplicate events within 60 seconds are discarded automatically.
 2. **Automatic Session Pairing**: The earliest punch of the day is `IN`, and the latest is `OUT`.
 3. **Trust-First Defaults**: Arriving after 09:15 logs an informational timestamp, but never incurs automated salary penalties unless the company explicitly chooses an enterprise strict mode in Payroll Setup.
+
+---
+
+## 8. Holiday Calendar Architecture & Annual Management Strategy
+
+Holidays are an integral foundation of the attendance engine: they determine whether a non-working day is classified as a paid `Holiday` versus an unexcused `Absent` day, adjust monthly expected working hours, and trigger automated Compensatory Off (Comp-Off) workflows.
+
+```mermaid
+flowchart TD
+    Setup["Annual Holiday Calendar Setup"]
+    Setup --> Pack["1. 1-Click Statutory Pack Import<br/>(Central Gazetted + State Packs e.g. Karnataka)"]
+    Setup --> Copy["2. Copy from Previous Year<br/>(Carries fixed holidays, prompts lunar dates)"]
+    Setup --> Custom["3. Custom Company Holidays<br/>(Foundation Day, Year-end shutdown)"]
+    
+    Sub["Holiday Event Execution"]
+    Sub --> PastCheck{"Is Holiday Date < CURRENT_DATE?"}
+    PastCheck -->|Yes: Past Date| Sealed["SEALED & IMMUTABLE<br/>Locked against Edit/Delete to protect closed payroll"]
+    PastCheck -->|No: Upcoming Date| Editable["100% Editable / Deletable<br/>Reschedule, update details, or remove"]
+```
+
+### 8.1 The "Never Type 15 Holidays Every Year" Setup Strategy
+Requiring HR administrators to manually type 15 to 20 holiday names and dates every January is an operational anti-pattern. Innostes provides an intelligent 3-way setup pipeline:
+
+1. **Pre-Seeded Regional & Statutory Jurisdiction Packs**:
+   * Innostes maintains verified statutory public holiday schedules for current and upcoming years (e.g. 2026, 2027, 2028...) categorized by country and state:
+     * **India Central Gazetted**: Republic Day (Jan 26), Independence Day (Aug 15), Gandhi Jayanti (Oct 02), Christmas (Dec 25), etc.
+     * **State-Specific Gazetted**: Karnataka (Kannada Rajyotsava, Ugadi), Maharashtra (Maharashtra Day, Ganesh Chaturthi), Tamil Nadu (Pongal), Telangana (Bonalu), etc.
+     * **International Packs**: US Federal, UK Bank Holidays, UAE Public Holidays, Singapore, etc.
+   * **1-Click Import**: When setting up a new year or a new office branch, the administrator simply clicks:  
+     **`[ 1-Click Import: 2027 Karnataka Gazetted Holidays ]`** $\implies$ Instantly populates the entire annual calendar in 1 second.
+2. **"Copy from Previous Year" Engine**:
+   * For companies with custom traditions (e.g. Founder's Day, Annual Hackathon Off, Year-End Shutdown Dec 24–31), clicking **`[ Copy from Previous Year ]`**:
+     * Automatically clones all fixed-date holidays.
+     * Flags variable lunar/religious dates (Diwali, Eid, Holi, Good Friday) for 1-click date confirmation.
+3. **Custom Corporate Holidays**:
+   * Admin can click **`[ + Add Custom Holiday ]`** at any point to insert ad-hoc corporate holidays (e.g. *"Mental Health Day"* or *"Series B Celebration Day"*).
+
+---
+
+### 8.2 The Core Law: Past Holidays are Strictly Locked & Immutable
+
+A central architectural requirement of an enterprise ERP is the **Past Holiday Immutability Invariant**:
+
+$$\text{IF } \mathtt{holiday\_date} < \mathtt{CURRENT\_DATE} \implies \textbf{LOCKED (Read-Only)}$$
+
+#### Why Past Holidays Must Never Be Edited or Deleted:
+1. **Preservation of Closed Attendance Cycles**: Attendance for past months has already been recorded, verified, and paired. Deleting a past holiday would retroactively convert a legitimate holiday into an unexcused absence for every employee in the company.
+2. **Integrity of Approved Timesheets**: Past monthly timesheets have already been audited and signed off by reporting leads.
+3. **Protection of Committed Payroll & Financial Ledgers**: Past payroll runs have already executed gross-to-net calculations, deducted Loss of Pay (LOP) based on historical working days ($26$ vs $25$ days), generated bank disbursement files, and posted balancing journal entries to General Ledger (`LedgerFlow`). Mutating a past holiday would corrupt the financial audit trail.
+
+#### Two-Tier Immutability Enforcement:
+1. **Frontend UI Enforcement**:
+   * In the Holiday Calendar management table, any row where $\text{holiday\_date} < \text{CURRENT\_DATE}$ renders with a muted **`[ Locked (Past) ]`** badge. The `[ Edit ]` and `[ Delete ]` buttons are permanently disabled.
+   * Tooltip: *"Past holidays are sealed to preserve the integrity of completed attendance and payroll cycles."*
+2. **Database Trigger Hard Guard**:
+   * A PostgreSQL trigger (`trg_guard_past_holiday_mutation`) unconditionally aborts any `UPDATE` or `DELETE` statement targeting a historical holiday:
+     ```sql
+     CREATE OR REPLACE FUNCTION fn_guard_past_holidays()
+     RETURNS TRIGGER AS $$
+     BEGIN
+         IF OLD.holiday_date < CURRENT_DATE THEN
+             RAISE EXCEPTION 'PAST_HOLIDAY_LOCKED: Cannot modify or delete historical holiday on % because past attendance and payroll cycles have already closed.', OLD.holiday_date;
+         END IF;
+         RETURN NEW;
+     END;
+     $$ LANGUAGE plpgsql;
+     ```
+3. **Upcoming Holidays ($\ge \mathtt{CURRENT\_DATE}$) are 100% Dynamic**:
+   * Administrators have complete freedom to add new holidays, reschedule upcoming dates, edit holiday descriptions, or delete upcoming holidays.
+4. **Handling Past Corrections**:
+   * If a historical holiday was entered on the wrong date and caused an improper salary deduction 2 months ago, it is **never** fixed by mutating the historical calendar. Instead, it is resolved via a **Payroll Retroactive Adjustment / Arrears Credit** in the current payroll run, maintaining a complete audit trail.
+
+---
+
+### 8.3 Multi-Calendar Architecture (Locations & Distributed Teams)
+
+In distributed companies, holidays differ by branch and geography:
+* **Location-Based Inheritance**:
+  * Each physical office (`hrms_locations`) points to its applicable holiday calendar (e.g. `Bengaluru HQ Calendar`, `Mumbai Branch Calendar`, `US Remote Calendar`).
+* **Employee-Level Override**:
+  * If an employee is permanently remote in another state, their `hrms_employees.holiday_calendar_id` overrides the office default.
+* **Tenant Default Fallback**:
+  * If neither is specified, the employee inherits the tenant's primary default calendar.
+
+---
+
+### 8.4 Restricted / Floating Holidays Self-Service (ESS)
+
+To support cultural and regional diversity, companies can configure **Floating / Optional Holidays**:
+1. The company calendar lists e.g. 8 designated floating festival days (e.g. Onam, Chhath Puja, Karwa Chauth, Guru Nanak Jayanti, Easter, Eid-e-Milad).
+2. The company policy sets a cap: e.g. `floating_holidays_allowed = 2` days per year.
+3. In Employee Self-Service (ESS), the employee views the upcoming floating holidays list and checks any 2.
+4. Submitting marks those 2 days as approved paid floating holidays on their personal attendance calendar without consuming their Casual or Privilege Leave balance.
+
+---
+
+### 8.5 Automated Comp-Off Generation on Holiday Work
+
+If an employee works on a declared mandatory holiday:
+1. The punch ingestion engine recognizes that the day is a scheduled holiday for the employee's calendar.
+2. The work session is tagged as `HOLIDAY_WORK`.
+3. If verified working duration is $\ge 4.0$ hours, the system generates an automated **Comp-Off Approval Request** in the reporting lead's `[ Team Requests ]` queue.
+4. Upon manager sign-off, $+1.0$ (or $+0.5$) day is credited to the employee's `hrms_leave_ledger` under action `ACCRUED` with a 60-day expiration window.

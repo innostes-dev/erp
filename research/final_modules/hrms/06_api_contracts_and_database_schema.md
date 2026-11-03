@@ -86,6 +86,53 @@ CREATE TABLE hrms_locations (
     CONSTRAINT uq_tenant_loc_code UNIQUE (tenant_id, code)
 );
 
+-- Tier 1D: Holiday Calendars Master (Multi-Branch & Regional Schedules)
+CREATE TABLE hrms_holiday_calendars (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    code VARCHAR(64) NOT NULL, -- e.g. 'BLR_HQ_2026', 'MUMBAI_2026', 'US_REMOTE_2026'
+    name VARCHAR(255) NOT NULL, -- e.g. 'Bengaluru HQ Holiday Calendar 2026'
+    calendar_year INT NOT NULL, -- e.g. 2026
+    location_id UUID REFERENCES hrms_locations(id) ON DELETE SET NULL,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_cal_code UNIQUE (tenant_id, code)
+);
+CREATE INDEX idx_hrms_holiday_cal ON hrms_holiday_calendars(tenant_id, calendar_year, location_id);
+
+CREATE TABLE hrms_holidays (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    calendar_id UUID NOT NULL REFERENCES hrms_holiday_calendars(id) ON DELETE CASCADE,
+    name VARCHAR(150) NOT NULL, -- e.g. 'Republic Day', 'Diwali', 'Kannada Rajyotsava'
+    holiday_date DATE NOT NULL,
+    holiday_type VARCHAR(32) NOT NULL DEFAULT 'MANDATORY', -- 'MANDATORY', 'OPTIONAL_FLOATING', 'COMPANY_SPECIAL'
+    is_half_day BOOLEAN NOT NULL DEFAULT FALSE,
+    half_day_period VARCHAR(16) DEFAULT 'FULL_DAY', -- 'FIRST_HALF', 'SECOND_HALF', 'FULL_DAY'
+    description TEXT,
+    observed_substitute_date DATE, -- If holiday falls on Sunday, observed date on Monday
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_calendar_holiday_date UNIQUE (calendar_id, holiday_date)
+);
+CREATE INDEX idx_hrms_holidays_date ON hrms_holidays(tenant_id, holiday_date);
+
+-- Database Invariant Trigger: Historical Holidays (< CURRENT_DATE) are strictly immutable
+CREATE OR REPLACE FUNCTION fn_guard_past_holidays()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF OLD.holiday_date < CURRENT_DATE THEN
+        RAISE EXCEPTION 'PAST_HOLIDAY_LOCKED: Cannot modify or delete historical holiday on % because past attendance and payroll cycles have already closed.', OLD.holiday_date;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_guard_past_holidays
+BEFORE UPDATE OR DELETE ON hrms_holidays
+FOR EACH ROW EXECUTE FUNCTION fn_guard_past_holidays();
+
 -- Tier 2: Lightweight Dynamic Picklists (Document Types, Relationships, Degrees)
 CREATE TABLE hrms_picklists (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -819,6 +866,8 @@ CREATE TABLE hrms_separations (
 ALTER TABLE hrms_departments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_designations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_holiday_calendars ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_holidays ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_picklists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
@@ -833,6 +882,12 @@ CREATE POLICY tenant_designations_isolation ON hrms_designations
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_locations_isolation ON hrms_locations
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_holiday_cals_isolation ON hrms_holiday_calendars
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_holidays_isolation ON hrms_holidays
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_picklists_isolation ON hrms_picklists
@@ -932,6 +987,21 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/attendance/timesheets/pending-approvals` | Reporting lead queries pending direct-report monthly timesheets | `peopleops:manager` | 200 OK |
 | `POST` | `/peopleops/attendance/timesheets/{id}/approve` | Reporting lead signs off and locks monthly timesheet | `peopleops:manager` | 200 OK |
 | `POST` | `/peopleops/attendance/timesheets/{id}/reject` | Reporting lead returns timesheet with change request comments | `peopleops:manager` | 200 OK |
+
+### 2.5B Holiday Calendars & Annual Management
+
+| Method | Path | Summary & Purpose | Scopes Required | Success |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/peopleops/holiday-calendars` | List all holiday calendars with year, location bindings, and holiday counts | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/holiday-calendars` | Admin creates a new holiday calendar (e.g. for a branch office or remote cohort) | `peopleops:admin` | 201 Created |
+| `POST` | `/peopleops/holiday-calendars/{id}/import-pack` | 1-Click statutory import of national/state public holiday packs (e.g. 'IN_KA_2027') | `peopleops:admin` | 201 Created |
+| `POST` | `/peopleops/holiday-calendars/{id}/copy-from-year` | Clone fixed-date holidays from previous annual calendar into target year | `peopleops:admin` | 201 Created |
+| `GET` | `/peopleops/holiday-calendars/{id}/holidays` | List all holidays for calendar; flags historical past dates as locked | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/holiday-calendars/{id}/holidays` | Admin adds a new upcoming corporate or regional holiday | `peopleops:admin` | 201 Created |
+| `PUT` | `/peopleops/holiday-calendars/{id}/holidays/{holiday_id}` | Edit upcoming holiday (guarded: returns 400 PAST_HOLIDAY_LOCKED if date < CURRENT_DATE) | `peopleops:admin` | 200 OK |
+| `DELETE` | `/peopleops/holiday-calendars/{id}/holidays/{holiday_id}` | Delete upcoming holiday (guarded: returns 400 PAST_HOLIDAY_LOCKED if date < CURRENT_DATE) | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/holidays/floating-options` | Employee retrieves available floating / optional holidays for their calendar | `peopleops:read` (self) | 200 OK |
+| `POST` | `/peopleops/holidays/floating-claim` | Employee selects and claims their allocated floating holiday quota | `peopleops:read` (self) | 200 OK |
 
 ### 2.6 Leave Governance & Ledgers (Modular Policy Engine)
 
