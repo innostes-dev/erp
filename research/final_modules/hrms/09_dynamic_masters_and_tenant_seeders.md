@@ -25,28 +25,38 @@ Storing opaque UUIDs (`department_id = "f47ac10b-58cc-4372-a567-0e02b2c3d479"`) 
   * **Frontend Join Overhead:** The client cannot simply render `employee.department`. It must fetch all masters, maintain complex client-side hash maps, and resolve UUIDs on every render. If an offline cache is missing, the UI flashes blank or renders ugly UUID strings.
   * **Backend Query Bloat:** Every basic employee query requires 7 to 10 SQL `LEFT JOIN`s (`JOIN departments`, `JOIN designations`, `JOIN locations`, `JOIN contract_types`, `JOIN grade_bands`...), destroying query execution plans on large employee rosters.
 
+### Anti-Pattern C: The "Hardcoded Database / Code ENUM Trap"
+Using PostgreSQL `CREATE TYPE ... AS ENUM` or hardcoded backend/frontend enums for business dropdowns and workflow classifications (e.g. `contract_type`, `family_relationship`, `qualification_level`, `document_category`, `disbursal_mode`).
+* **Why it fails for Business & Multi-Tenancy:**
+  * **Destroys Admin Sovereignty:** Business classifications belong to the tenant administrator, not software engineers. If a hospital or manufacturing tenant needs a specific contract type ("Apprentice", "Retainer Consultant") or document proof ("Medical Fitness Certificate"), an ENUM forces them to file an engineering ticket, wait for a sprint, and require a code release.
+  * **Database Migration & Lockout Pain:** In PostgreSQL, modifying ENUM types (`ALTER TYPE ... ADD VALUE`) cannot be rolled back safely, locks schema catalogs, cannot run inside multi-statement transactions in many versions, and cannot delete or reorder values without dropping and recreating the type and rewriting table columns.
+  * **Multi-Tenant Monoculture:** PostgreSQL ENUM types are global to the database. Tenant A cannot have a custom relationship or qualification option without forcing it onto Tenant B.
+
 ---
 
-## 2. The Innostes Architectural Call: Tiered Masters + Hydrated Objects
+## 2. The Innostes Architectural Call: Zero Database ENUMs + Tiered Masters + Hydrated Objects
 
-Innostes resolves both anti-patterns through a **Two-Tier Master Architecture** paired with the **Code-First Machine Key + Hydrated Object Pattern**:
+Innostes resolves these anti-patterns through an unambiguous architectural law: **Zero Hardcoded Database ENUMs**. All dropdowns, classifications, and business categories are 100% dynamically governed by tenant administrators:
 
 ```
-MASTER DATA ARCHITECTURE
+MASTER DATA ARCHITECTURE (100% ADMIN GOVERNED — ZERO HARDCODED ENUMS)
 ├── Tier 1: Heavy Structural Domain Tables (Dedicated Relational Schemas)
-│   ├── hrms_departments (Hierarchical parent/child, Manager ID, Optional Cost Center)
+│   ├── hrms_departments (Hierarchical parent/child, Manager ID, GL Cost Center)
 │   ├── hrms_designations (Pure functional role/title - ZERO pay constraints)
 │   ├── hrms_locations (Geofence bounds, Lat/Lng, Timezone, IP subnets)
 │   ├── hrms_leave_types (Accrual rate, Carry-forward cap, Encashable flag)
 │   └── hrms_salary_components (Component type, Tax rules, Formula DAG)
 │
 ├── Tier 2: Lightweight Dynamic Picklists (hrms_picklists Table)
-│   ├── DOCUMENT_TYPE (Aadhaar, PAN, Passport, Cheque, Relieving Letter)
-│   ├── FAMILY_RELATIONSHIP (Spouse, Son, Daughter, Father, Mother)
-│   ├── QUALIFICATION_LEVEL (Doctorate, Post Graduate, Undergraduate, Diploma)
-│   ├── EMPLOYMENT_TYPE (Permanent Full-Time, Part-Time, Contractor, Intern)
+│   ├── DOCUMENT_TYPE (Aadhaar, PAN, Passport, Cheque, Relieving Letter, Form 16...)
+│   ├── FAMILY_RELATIONSHIP (Spouse, Son, Daughter, Father, Mother, Guardian...)
+│   ├── QUALIFICATION_LEVEL (Doctorate, Post Graduate, Undergraduate, Diploma...)
+│   ├── EMPLOYMENT_TYPE (Permanent Full-Time, Part-Time, Contractor, Intern, Consultant...)
 │   ├── BLOOD_GROUP (A+, B+, O+, AB+...)
-│   └── RESIDENCE_TYPE (Rented, Owned, Parental, Company-Provided)
+│   ├── RESIDENCE_TYPE (Rented, Owned, Parental, Company-Provided...)
+│   ├── BANK_ACCOUNT_TYPE (Savings, Salary Corporate, Current...)
+│   ├── DISBURSAL_MODE (NEFT, RTGS, IMPS, ACH, Wire Transfer, Cheque...)
+│   └── SALARY_COMPONENT_TYPE (Earning, Pre-Tax Deduction, Post-Tax Deduction, Tax...)
 │
 └── The API Contract Pattern: Code-First Natural Keys + Hydrated Objects
     ├── In Database: Stored as clean Machine Codes ('ENG', 'STAFF_ENG', 'BLR_HQ')
@@ -112,23 +122,42 @@ CREATE TABLE hrms_locations (
 
 ## 4. Tier 2: Lightweight Dynamic Picklists (`hrms_picklists`)
 
-For simple single-dimension lists where entities are simply code/name pairs (e.g. document types, family relationships, degree levels):
+For single-dimension dropdowns and classifications where entities are code/name pairs, Innostes uses the dynamic `hrms_picklists` table. This allows the business administrator to add, edit, reorder, or disable options from the Settings UI with zero code deployments:
 
 ```sql
 CREATE TABLE hrms_picklists (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
-    category VARCHAR(64) NOT NULL, -- 'DOCUMENT_TYPE', 'RELATIONSHIP', 'DEGREE_LEVEL', 'EMPLOYMENT_TYPE'
-    code VARCHAR(64) NOT NULL,     -- 'DOC_AADHAAR', 'REL_SPOUSE', 'EMP_PERM_FT'
-    name VARCHAR(255) NOT NULL,    -- 'Aadhaar Card Scan', 'Spouse', 'Permanent Full-Time'
+    category VARCHAR(64) NOT NULL, -- Category identifier (see catalog below)
+    code VARCHAR(64) NOT NULL,     -- Natural machine code e.g. 'DOC_AADHAAR', 'REL_SPOUSE', 'EMP_PERM_FT'
+    name VARCHAR(255) NOT NULL,    -- Human readable label e.g. 'Aadhaar Card Scan', 'Spouse', 'Permanent Full-Time'
     display_order INT NOT NULL DEFAULT 0,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    is_system BOOLEAN NOT NULL DEFAULT FALSE, -- Seed default (prevents accidental hard delete)
+    is_system BOOLEAN NOT NULL DEFAULT FALSE, -- Seed default (prevents accidental hard delete; allows rename/reorder)
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_tenant_picklist_code UNIQUE (tenant_id, category, code)
 );
 CREATE INDEX idx_hrms_picklists ON hrms_picklists(tenant_id, category, is_active, display_order);
 ```
+
+### Supported Dynamic Picklist Categories
+Administrators have complete control over the following dropdown categories in **Company Settings > Masters & Picklists**:
+
+| Category Key | Managed Purpose | Seeded Defaults |
+| :--- | :--- | :--- |
+| `DOCUMENT_CATEGORY` | Vault grouping buckets | Identity Proof, Address Proof, Academic Record, Experience Letter, Tax Form, Legal Agreement |
+| `DOCUMENT_TYPE` | Exact required compliance uploads | Aadhaar Card, PAN Card, Passport, Driving License, Degree Certificate, Relieving Letter, Payslip, Form 16 |
+| `FAMILY_RELATIONSHIP` | Nominee and emergency contact links | Spouse, Son, Daughter, Father, Mother, Brother, Sister, Guardian, Domestic Partner |
+| `QUALIFICATION_LEVEL` | Education qualification levels | Doctorate, Post Graduate, Undergraduate, Diploma, Higher Secondary, Secondary, Vocational |
+| `EMPLOYMENT_TYPE` | Contract & engagement models | Permanent Full-Time, Permanent Part-Time, Fixed-Term Contractor, Intern, Retainer Consultant, Apprentice |
+| `BLOOD_GROUP` | Medical & emergency response | A+, A-, B+, B-, AB+, AB-, O+, O- |
+| `MARITAL_STATUS` | Demographics & statutory tax profiles | Single, Married, Divorced, Widowed |
+| `RESIDENCE_TYPE` | Address tenure verification | Rented, Owned, Parental, Company-Provided |
+| `BANK_ACCOUNT_TYPE` | Banking & direct deposit types | Salary Corporate, Savings, Current |
+| `DISBURSAL_MODE` | Payment processing rails | NEFT, RTGS, IMPS, ACH, Wire Transfer, Corporate Cheque |
+| `SALARY_COMPONENT_TYPE` | Earnings & deduction classification | Earning, Pre-Tax Deduction, Post-Tax Deduction, Statutory Tax |
+| `CLEARANCE_DEPARTMENT` | Offboarding handoff owners | IT Hardware, Finance & Accounts, Facilities & Security, HR Operations |
+| `EXIT_REASON` | Separation audit categorization | Better Opportunity, Higher Education, Relocation, Health, Career Break, Performance |
 
 ---
 

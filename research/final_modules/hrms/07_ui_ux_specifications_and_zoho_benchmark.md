@@ -633,8 +633,39 @@ HR audits proposed changes via a dedicated side-by-side diff interface:
 | Account Holder Name: Rohan Gupta                | Account Holder Name: Rohan Gupta                                     |
 +-------------------------------------------------+---------------------------------------------------------------------+
 | ATTACHED SUPPORTING PROOF                       | AUDIT DECISION ACTIONS                                              |
-| [ Preview: new_icici_cheque.pdf ]               | [ ✓ Approve & Commit to Master ]    [ ✕ Reject Change Request ]      |
+| [ Preview: new_icici_cheque.pdf ]               | [ Approve & Commit to Master ]     [ Reject Change Request ]        |
 | Verified: Name matches account holder 100%      | Rejection Note: [ Explain reason if rejecting...                  ] |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 5.7 Company Settings: Admin Masters & Dynamic Picklists Cockpit (`/hrms/settings/masters`)
+
+In Innostes Business OS, hardcoded database ENUMs are completely abolished. The tenant administrator has 100% control over all business dropdowns, classifications, and custom options through a unified visual cockpit.
+
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| COMPANY SETTINGS: MASTERS & DYNAMIC PICKLISTS                                                                         |
++-----------------------------------------------------------------------------------------------------------------------+
+| Select Master Category:                                                                                               |
+| (•) Employment Types   ( ) Document Types   ( ) Family Relationships   ( ) Education Degrees   ( ) Clearance Depts    |
+| ( ) Blood Groups       ( ) Residence Types  ( ) Bank Account Types     ( ) Disbursal Modes     ( ) Exit Reasons       |
++-----------------------------------------------------------------------------------------------------------------------+
+| EMPLOYMENT TYPES & CONTRACT ENGAGEMENT MODELS                                                 [ + Add Custom Option ] |
++-----------------------------------------------------------------------------------------------------------------------+
+| Reorder | Code                  | Display Label               | Type     | Status    | Actions                        |
+| :---    | :---                  | :---                        | :---     | :---      | :---                           |
+| [::]    | PERMANENT_FULL_TIME   | Permanent Full-Time         | SYSTEM   | [ ON ]    | [ Edit ] [ Locked ]            |
+| [::]    | PERMANENT_PART_TIME   | Permanent Part-Time         | SYSTEM   | [ ON ]    | [ Edit ] [ Locked ]            |
+| [::]    | CONTRACTOR            | Fixed-Term Contractor       | SYSTEM   | [ ON ]    | [ Edit ] [ Locked ]            |
+| [::]    | INTERN                | Graduate / Summer Intern    | SYSTEM   | [ ON ]    | [ Edit ] [ Locked ]            |
+| [::]    | RETAINER_CONSULTANT   | Strategic Advisor / Retainer| CUSTOM   | [ ON ]    | [ Edit ] [ Delete ]            |
+| [::]    | APPRENTICE_GOVT       | NATS / NEEM Govt Apprentice | CUSTOM   | [ ON ]    | [ Edit ] [ Delete ]            |
+| [::]    | FREELANCE_PROJECT     | Ad-Hoc Milestone Freelancer | CUSTOM   | [ OFF ]   | [ Edit ] [ Delete ]            |
++-----------------------------------------------------------------------------------------------------------------------+
+| Note: Renaming a display label updates all active employee profiles and filter views instantly with zero code changes.|
+| Deactivating an item hides it from new hire forms while safely preserving historical employee contracts.              |
 +-----------------------------------------------------------------------------------------------------------------------+
 ```
 

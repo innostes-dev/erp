@@ -15,76 +15,22 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ============================================================================
--- ENUMERATION TYPES
+-- ARCHITECTURAL LAW: ZERO HARDCODED DATABASE ENUMS
 -- ============================================================================
-
-CREATE TYPE employment_status AS ENUM (
-    'DRAFT', 'INVITED', 'ONBOARDING', 'ACTIVE', 'PROBATION', 'NOTICE_PERIOD', 'TERMINATED', 'ALUMNI'
-);
-
-CREATE TYPE contract_type AS ENUM (
-    'PERMANENT_FULL_TIME', 'PERMANENT_PART_TIME', 'CONTRACTOR', 'INTERN', 'RETAINER_CONSULTANT'
-);
-
-CREATE TYPE gender_type AS ENUM (
-    'MALE', 'FEMALE', 'NON_BINARY', 'PREFER_NOT_TO_SAY'
-);
-
-CREATE TYPE marital_status_type AS ENUM (
-    'SINGLE', 'MARRIED', 'DIVORCED', 'WIDOWED'
-);
-
-CREATE TYPE blood_group_type AS ENUM (
-    'A_POSITIVE', 'A_NEGATIVE', 'B_POSITIVE', 'B_NEGATIVE', 
-    'AB_POSITIVE', 'AB_NEGATIVE', 'O_POSITIVE', 'O_NEGATIVE'
-);
-
-CREATE TYPE address_type AS ENUM (
-    'CURRENT', 'PERMANENT'
-);
-
-CREATE TYPE residence_type AS ENUM (
-    'OWNED', 'RENTED', 'COMPANY_PROVIDED', 'PARENTAL'
-);
-
-CREATE TYPE bank_account_type AS ENUM (
-    'SAVINGS', 'SALARY_CORPORATE', 'CURRENT'
-);
-
-CREATE TYPE penny_drop_status AS ENUM (
-    'PENDING', 'VERIFIED', 'FAILED'
-);
-
-CREATE TYPE disbursal_mode AS ENUM (
-    'NEFT', 'RTGS', 'IMPS', 'ACH', 'WIRE_TRANSFER', 'CHEQUE'
-);
-
-CREATE TYPE family_relationship AS ENUM (
-    'SPOUSE', 'SON', 'DAUGHTER', 'FATHER', 'MOTHER', 'BROTHER', 'SISTER', 'GUARDIAN'
-);
-
-CREATE TYPE qualification_level AS ENUM (
-    'DOCTORATE', 'POST_GRADUATE', 'UNDERGRADUATE', 'DIPLOMA', 'HIGHER_SECONDARY', 'SECONDARY'
-);
-
-CREATE TYPE document_category AS ENUM (
-    'IDENTITY_PROOF', 'ADDRESS_PROOF', 'ACADEMIC_RECORD', 'EXPERIENCE_LETTER', 'LEGAL_AGREEMENT', 'TAX_FORM'
-);
-
-CREATE TYPE document_verification_status AS ENUM (
-    'PENDING_UPLOAD', 'SUBMITTED', 'VERIFIED_BY_HR', 'REJECTED_WITH_REASON'
-);
-
-CREATE TYPE punch_direction AS ENUM ('IN', 'OUT');
-CREATE TYPE attendance_block_status AS ENUM ('NORMAL', 'LATE', 'HALF_DAY', 'OVERTIME', 'MISSING_OUT', 'REGULARIZED');
-CREATE TYPE leave_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
-CREATE TYPE leave_action AS ENUM ('ACCRUED', 'CONSUMED', 'ENCASHED', 'LAPSED', 'REVERSED');
-CREATE TYPE component_type AS ENUM ('EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX');
-CREATE TYPE payroll_stage AS ENUM ('DRAFT', 'CALCULATING', 'REVIEW', 'COMMITTED', 'PAID');
-CREATE TYPE clearance_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
-CREATE TYPE profile_approval_mode AS ENUM ('AUTO_APPROVE', 'MANUAL_APPROVE');
-CREATE TYPE change_request_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
-CREATE TYPE timesheet_status AS ENUM ('DRAFT', 'SUBMITTED', 'APPROVED', 'CHANGES_REQUESTED', 'LOCKED');
+-- In Innostes Business OS, hardcoded PostgreSQL ENUM types are strictly prohibited.
+-- All business dropdowns, classifications, and categories are dynamically governed
+-- by tenant admins via Tier 1 Structural Masters or Tier 2 Lightweight Picklists
+-- (hrms_picklists). System workflow states are stored as standard VARCHAR codes.
+-- 
+-- Why ENUMs are eliminated:
+-- 1. Full Admin Sovereignty: Admins can add, reorder, rename, and deactivate options
+--    from the UI in real time without engineering tickets or code deployments.
+-- 2. Zero Migration Downtime: Adding or evolving options never triggers locking
+--    ALTER TYPE DDL statements or requires production schema migrations.
+-- 3. Multi-Tenant Independence: Tenants can configure industry-specific options 
+--    without polluting or altering shared database schema types.
+-- 4. Localization & Display: Picklists support display order, active/inactive toggles,
+--    and localized display names natively.
 
 -- ============================================================================
 -- 0. TIERED MASTER DATA: STRUCTURAL ENTITIES & LIGHTWEIGHT PICKLISTS
@@ -168,10 +114,10 @@ CREATE TABLE hrms_parties (
     legal_last_name VARCHAR(100) NOT NULL,
     display_name VARCHAR(150) NOT NULL,
     date_of_birth DATE NOT NULL,
-    gender gender_type NOT NULL,
-    marital_status marital_status_type, -- Optional
+    gender VARCHAR(32) NOT NULL, -- References hrms_picklists category 'GENDER' ('MALE', 'FEMALE', etc.)
+    marital_status VARCHAR(32),  -- References hrms_picklists category 'MARITAL_STATUS' ('SINGLE', 'MARRIED', etc.)
     marriage_date DATE,
-    blood_group blood_group_type, -- Optional (never blocks candidate if unknown on Day 1)
+    blood_group VARCHAR(16),     -- References hrms_picklists category 'BLOOD_GROUP' ('A+', 'B+', etc.)
     nationality VARCHAR(2) NOT NULL DEFAULT 'IN', -- ISO-3166-1 alpha-2
     father_name VARCHAR(150), -- Optional at master level; conditionally verified for Indian EPF
     mother_name VARCHAR(150), -- Optional
@@ -256,7 +202,7 @@ CREATE TABLE hrms_addresses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
-    type address_type NOT NULL,
+    type VARCHAR(32) NOT NULL, -- References hrms_picklists category 'ADDRESS_TYPE' ('CURRENT', 'PERMANENT')
     address_line1 VARCHAR(255) NOT NULL,
     address_line2 VARCHAR(255),
     city VARCHAR(100) NOT NULL,
@@ -264,7 +210,7 @@ CREATE TABLE hrms_addresses (
     state VARCHAR(100) NOT NULL,
     postal_code VARCHAR(20) NOT NULL,
     country_code VARCHAR(2) NOT NULL DEFAULT 'IN',
-    residence_type residence_type NOT NULL DEFAULT 'RENTED',
+    residence_type VARCHAR(32) NOT NULL DEFAULT 'RENTED', -- References hrms_picklists category 'RESIDENCE_TYPE' ('OWNED', 'RENTED', etc.)
     is_same_as_current BOOLEAN NOT NULL DEFAULT FALSE,
     proof_document_id UUID,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -276,7 +222,7 @@ CREATE TABLE hrms_emergency_contacts (
     tenant_id UUID NOT NULL,
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
     contact_name VARCHAR(150) NOT NULL,
-    relationship family_relationship NOT NULL,
+    relationship VARCHAR(64) NOT NULL, -- References hrms_picklists category 'RELATIONSHIP' ('SPOUSE', 'FATHER', etc.)
     primary_phone VARCHAR(32) NOT NULL,
     alternate_phone VARCHAR(32),
     residential_address TEXT,
@@ -298,13 +244,13 @@ CREATE TABLE hrms_bank_accounts (
     account_number_enc BYTEA NOT NULL, -- AES-256-GCM envelope encrypted
     account_number_masked VARCHAR(30) NOT NULL,
     account_number_search_hash VARCHAR(64) NOT NULL, -- HMAC-SHA256 blind index
-    account_type bank_account_type NOT NULL DEFAULT 'SALARY_CORPORATE',
+    account_type VARCHAR(64) NOT NULL DEFAULT 'SALARY_CORPORATE', -- References hrms_picklists category 'BANK_ACCOUNT_TYPE'
     routing_identifier VARCHAR(64) NOT NULL, -- Holds IFSC (India), Routing/ABA (US), Sort Code (UK), IBAN (EU)
     routing_identifier_type VARCHAR(32) NOT NULL DEFAULT 'IFSC', -- IFSC, ROUTING_ABA, SORT_CODE, IBAN
     micr_code VARCHAR(9),
     account_holder_name VARCHAR(150) NOT NULL,
-    penny_drop_status penny_drop_status NOT NULL DEFAULT 'PENDING',
-    disbursal_mode disbursal_mode NOT NULL DEFAULT 'NEFT',
+    penny_drop_status VARCHAR(32) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'VERIFIED', 'FAILED'
+    disbursal_mode VARCHAR(64) NOT NULL DEFAULT 'NEFT', -- References hrms_picklists category 'DISBURSAL_MODE'
     is_primary BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -344,7 +290,7 @@ CREATE TABLE hrms_employees (
     holiday_calendar_id UUID,
     
     -- Lifecycle & Dates
-    status employment_status NOT NULL DEFAULT 'DRAFT',
+    status VARCHAR(32) NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'INVITED', 'ONBOARDING', 'ACTIVE', 'PROBATION', 'NOTICE_PERIOD', 'TERMINATED', 'ALUMNI'
     hire_date DATE NOT NULL,
     probation_period_days INT, -- Optional: NULL indicates direct confirmation on Day 1
     probation_end_date DATE,
@@ -387,7 +333,7 @@ CREATE TABLE hrms_education (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
-    qualification_level qualification_level NOT NULL,
+    qualification_level VARCHAR(64) NOT NULL, -- References hrms_picklists category 'QUALIFICATION_LEVEL' ('DOCTORATE', 'POST_GRADUATE', etc.)
     degree_name VARCHAR(150) NOT NULL,
     field_of_study VARCHAR(150) NOT NULL,
     institution_name VARCHAR(200) NOT NULL,
@@ -483,11 +429,11 @@ CREATE TABLE hrms_dependents_nominees (
     tenant_id UUID NOT NULL,
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
     full_name VARCHAR(150) NOT NULL,
-    relationship family_relationship NOT NULL,
+    relationship VARCHAR(64) NOT NULL, -- References hrms_picklists category 'RELATIONSHIP' ('SPOUSE', 'SON', etc.)
     date_of_birth DATE NOT NULL,
     is_minor BOOLEAN NOT NULL DEFAULT FALSE,
     guardian_name VARCHAR(150),
-    guardian_relationship family_relationship,
+    guardian_relationship VARCHAR(64), -- References hrms_picklists category 'RELATIONSHIP'
     residential_address TEXT,
     
     -- Statutory Nomination Allocations (Each fund must sum to 100% across nominees)
@@ -511,14 +457,14 @@ CREATE TABLE hrms_document_vault (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
-    category document_category NOT NULL,
+    category VARCHAR(64) NOT NULL, -- References hrms_picklists category 'DOCUMENT_CATEGORY' ('IDENTITY_PROOF', 'TAX_FORM', etc.)
     document_type VARCHAR(100) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     file_size_bytes BIGINT NOT NULL,
     mime_type VARCHAR(100) NOT NULL,
     sha256_checksum VARCHAR(64) NOT NULL,
     storage_uri VARCHAR(512) NOT NULL, -- Encrypted S3/MinIO bucket path
-    verification_status document_verification_status NOT NULL DEFAULT 'PENDING_UPLOAD',
+    verification_status VARCHAR(32) NOT NULL DEFAULT 'PENDING_UPLOAD', -- 'PENDING_UPLOAD', 'SUBMITTED', 'VERIFIED_BY_HR', 'REJECTED_WITH_REASON'
     verified_by UUID REFERENCES hrms_employees(id),
     verified_at TIMESTAMPTZ,
     rejection_reason TEXT,
@@ -536,7 +482,7 @@ CREATE TABLE hrms_profile_field_policies (
     section_code VARCHAR(64) NOT NULL, -- e.g. 'SKILLS', 'BANK_ACCOUNT', 'ADDRESS_PERMANENT'
     field_name VARCHAR(64) NOT NULL DEFAULT '*', -- '*' for entire section or specific field
     is_employee_editable BOOLEAN NOT NULL DEFAULT FALSE,
-    approval_mode profile_approval_mode NOT NULL DEFAULT 'MANUAL_APPROVE',
+    approval_mode VARCHAR(32) NOT NULL DEFAULT 'MANUAL_APPROVE', -- 'AUTO_APPROVE', 'MANUAL_APPROVE'
     requires_attachment BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -552,7 +498,7 @@ CREATE TABLE hrms_profile_change_requests (
     old_value JSONB NOT NULL, -- Exact snapshot of existing verified live data
     new_value JSONB NOT NULL, -- Proposed new data requested by employee
     supporting_document_id UUID, -- Optional attachment (e.g. new cancelled cheque leaf)
-    status change_request_status NOT NULL DEFAULT 'PENDING',
+    status VARCHAR(32) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'
     requested_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     reviewed_by UUID REFERENCES hrms_employees(id),
     reviewed_at TIMESTAMPTZ,
@@ -608,7 +554,7 @@ CREATE INDEX idx_hrms_onboarding_drafts ON hrms_onboarding_drafts(tenant_id, emp
 CREATE OR REPLACE FUNCTION fn_guard_onboarding_drafts()
 RETURNS TRIGGER AS $$
 DECLARE
-    v_status employment_status;
+    v_status VARCHAR(32);
 BEGIN
     SELECT status INTO v_status FROM hrms_employees WHERE id = NEW.employee_id;
     IF v_status NOT IN ('INVITED', 'ONBOARDING') THEN
@@ -631,7 +577,7 @@ CREATE TABLE hrms_attendance_punches (
     tenant_id UUID NOT NULL,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
     punch_time TIMESTAMPTZ NOT NULL,
-    direction punch_direction NOT NULL,
+    direction VARCHAR(16) NOT NULL, -- 'IN', 'OUT'
     source VARCHAR(64) NOT NULL DEFAULT 'web', -- web, mobile_gps, biometric
     location_geo JSONB DEFAULT '{}'::jsonb,
     is_manual_override BOOLEAN DEFAULT FALSE,
@@ -650,7 +596,7 @@ CREATE TABLE hrms_attendance_blocks (
     late_minutes INT NOT NULL DEFAULT 0,
     overtime_minutes INT NOT NULL DEFAULT 0,
     work_location VARCHAR(32) NOT NULL DEFAULT 'office', -- office, home, field
-    status attendance_block_status NOT NULL DEFAULT 'NORMAL',
+    status VARCHAR(32) NOT NULL DEFAULT 'NORMAL', -- 'NORMAL', 'LATE', 'HALF_DAY', 'OVERTIME', 'MISSING_OUT', 'REGULARIZED'
     CONSTRAINT uq_emp_date_in UNIQUE(tenant_id, employee_id, work_date, in_time)
 );
 CREATE INDEX idx_hrms_attendance_date ON hrms_attendance_blocks(tenant_id, work_date);
@@ -665,7 +611,7 @@ CREATE TABLE hrms_monthly_timesheets (
     total_absent_days NUMERIC(4, 1) NOT NULL DEFAULT 0.0,
     total_leave_days NUMERIC(4, 1) NOT NULL DEFAULT 0.0,
     total_worked_hours NUMERIC(6, 2) NOT NULL DEFAULT 0.0,
-    status timesheet_status NOT NULL DEFAULT 'DRAFT',
+    status VARCHAR(32) NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'SUBMITTED', 'APPROVED', 'CHANGES_REQUESTED', 'LOCKED'
     submitted_at TIMESTAMPTZ,
     approved_by UUID REFERENCES hrms_employees(id),
     approved_at TIMESTAMPTZ,
@@ -702,7 +648,7 @@ CREATE TABLE hrms_leave_applications (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     total_days NUMERIC(5, 2) NOT NULL,
-    status leave_status NOT NULL DEFAULT 'PENDING',
+    status VARCHAR(32) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'
     reason TEXT NOT NULL,
     approved_by UUID REFERENCES hrms_employees(id),
     decision_notes TEXT,
@@ -716,7 +662,7 @@ CREATE TABLE hrms_leave_ledger (
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
     leave_type_id UUID NOT NULL REFERENCES hrms_leave_types(id),
     transaction_date DATE NOT NULL,
-    action leave_action NOT NULL,
+    action VARCHAR(32) NOT NULL, -- 'ACCRUED', 'CONSUMED', 'ENCASHED', 'LAPSED', 'REVERSED'
     days NUMERIC(5, 2) NOT NULL,
     reference_id UUID,
     remarks TEXT NOT NULL,
@@ -733,7 +679,7 @@ CREATE TABLE hrms_salary_components (
     tenant_id UUID NOT NULL,
     code VARCHAR(32) NOT NULL,
     name VARCHAR(128) NOT NULL,
-    type component_type NOT NULL,
+    type VARCHAR(64) NOT NULL, -- References hrms_picklists category 'SALARY_COMPONENT_TYPE' ('EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX')
     is_taxable BOOLEAN NOT NULL DEFAULT TRUE,
     formula_expression TEXT,
     depends_on JSONB DEFAULT '[]'::jsonb,
@@ -755,7 +701,7 @@ CREATE TABLE hrms_payroll_runs (
     tenant_id UUID NOT NULL,
     period_start DATE NOT NULL,
     period_end DATE NOT NULL,
-    stage payroll_stage NOT NULL DEFAULT 'DRAFT',
+    stage VARCHAR(32) NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'CALCULATING', 'REVIEW', 'COMMITTED', 'PAID'
     total_gross_pay NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
     total_net_pay NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
     total_tax_withheld NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
@@ -783,7 +729,7 @@ CREATE TABLE hrms_payslip_components (
     payslip_id UUID NOT NULL REFERENCES hrms_payslips(id) ON DELETE CASCADE,
     component_id UUID NOT NULL REFERENCES hrms_salary_components(id),
     amount NUMERIC(18, 4) NOT NULL,
-    component_type component_type NOT NULL
+    component_type VARCHAR(64) NOT NULL -- E.g. 'EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX'
 );
 CREATE INDEX idx_payslip_components_lookup ON hrms_payslip_components(payslip_id, component_type);
 
@@ -800,10 +746,10 @@ CREATE TABLE hrms_separations (
     reason TEXT NOT NULL,
     notice_shortfall_days INT NOT NULL DEFAULT 0,
     is_gratuity_eligible BOOLEAN NOT NULL DEFAULT FALSE,
-    it_clearance clearance_status NOT NULL DEFAULT 'PENDING',
-    finance_clearance clearance_status NOT NULL DEFAULT 'PENDING',
-    facilities_clearance clearance_status NOT NULL DEFAULT 'PENDING',
-    hr_clearance clearance_status NOT NULL DEFAULT 'PENDING',
+    it_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+    finance_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+    facilities_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+    hr_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
     final_settlement_amount NUMERIC(18, 4),
     settlement_paid_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
