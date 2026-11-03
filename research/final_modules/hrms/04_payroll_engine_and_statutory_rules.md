@@ -39,19 +39,20 @@ flowchart TD
         T2["2. LOP & Proration Math Engine<br/>(Calendar Days vs 26 Working Days vs Actual)"]
     end
 
-    subgraph D2["Domain 2: Compensation"]
-        T3["3. Salary Components & Formula DAG<br/>(Earnings, Pre-Tax, Post-Tax, Deductions)"]
+    subgraph D2["Domain 2: Compensation & Structure Builder"]
+        T3["3. Salary Components Catalog<br/>(Earnings, Pre-Tax, Post-Tax, Retirals)"]
+        T4["4. Visual Salary Structure Builder<br/>(Named Templates, %/Formula Rules, Rounding)"]
     end
 
     subgraph D3["Domain 3: Compliance & Taxes"]
-        T4["4. Statutory Compliance Toggles<br/>(EPF, ESIC, Professional Tax, Gratuity)"]
-        T5["5. Tax Regimes & TDS Projection<br/>(Section 115BAC New vs Old, Deductions)"]
+        T5["5. Statutory Compliance Toggles<br/>(EPF, ESIC, Professional Tax, Gratuity)"]
+        T6["6. Tax Regimes & TDS Projection<br/>(Section 115BAC New vs Old, Deductions)"]
     end
 
     subgraph D4["Domain 4: Disbursements & Books"]
-        T6["6. Bank Disbursement Rails<br/>(HDFC, ICICI, Axis, SBI CMS, US NACHA)"]
-        T7["7. General Ledger Mapping<br/>(LedgerFlow COA Accounts, Auto-Journal)"]
-        T8["8. Payslip Delivery & Security<br/>(Password rules, Branding, Auto-Dispatch)"]
+        T7["7. Bank Disbursement Rails<br/>(HDFC, ICICI, Axis, SBI CMS, US NACHA)"]
+        T8["8. General Ledger Mapping<br/>(LedgerFlow COA Accounts, Auto-Journal)"]
+        T9["9. Payslip Generator & Designer<br/>(Modular Blocks, Branding, Leave/YTD, PDF)"]
     end
 
     Setup --> D1
@@ -61,6 +62,8 @@ flowchart TD
 ```
 
 ---
+
+## Domain 1: Timing & Deductions
 
 ### Section 1: Pay Schedule & Cutoff Cycle Configuration
 Defines when and how frequently employees are paid, and the exact cutoffs for attendance and expense ingestion:
@@ -74,65 +77,7 @@ Defines when and how frequently employees are paid, and the exact cutoffs for at
 
 ---
 
-### Section 2: Salary Components & Formula DAG Evaluator
-Components are organized into a strict mathematical hierarchy. Administrators can create unlimited custom components or use pre-configured templates:
-
-#### 1. The 4 Component Tiers
-1. **`EARNING`**: Additions to gross pay (Basic, HRA, Special Allowance, Transport, Shift Allowance, Overtime, Performance Bonus).
-2. **`DEDUCTION_PRE_TAX`**: Deductions that reduce taxable gross income prior to tax calculations (Employee Provident Fund under Sec 80C, 401(k) pre-tax, Section 125 health plans).
-3. **`STATUTORY_TAX`**: Mandatory government withholdings (TDS under Section 192, State Professional Tax, FICA Social Security & Medicare).
-4. **`DEDUCTION_POST_TAX`**: Non-tax-exempt deductions recovered from net earnings (Salary advances, loan repayments, equipment damage recoveries).
-
-#### 2. Directed Acyclic Graph (DAG) Formula Resolution
-To eliminate circular calculation errors, components are evaluated in topological order:
-
-```mermaid
-flowchart TD
-    CTC["Cost to Company (CTC Master)"]
-    Basic["Basic Pay<br/>(50% of CTC or Flat Base)"]
-    HRA["House Rent Allowance (HRA)<br/>(50% of Basic Pay)"]
-    SpecAllow["Special Allowance<br/>(CTC - Basic - HRA - Retirals)"]
-    Gross["Gross Earnings<br/>(Basic + HRA + Special Allowance - LOP)"]
-    
-    EPF["Employee PF (12% of Basic)"]
-    PT["Professional Tax (State Slab)"]
-    TDS["Income Tax TDS (Projected Annual Slabs)"]
-    
-    NetPay["Final Net Pay<br/>(Gross - PreTax - Taxes - PostTax)"]
-
-    CTC --> Basic
-    Basic --> HRA
-    CTC --> SpecAllow
-    Basic --> SpecAllow
-    HRA --> SpecAllow
-    
-    Basic --> Gross
-    HRA --> Gross
-    SpecAllow --> Gross
-    
-    Basic --> EPF
-    Gross --> PT
-    Gross --> TDS
-    EPF --> TDS
-    
-    Gross --> NetPay
-    EPF --> NetPay
-    PT --> NetPay
-    TDS --> NetPay
-```
-
-#### 3. Standard Salary Structure Presets for Startups:
-* **Preset A: Startup Flat Base (Zero Hassle)**:
-  * 100% of agreed compensation is `Base Salary`. Zero complex allowances.
-* **Preset B: Standard Indian CTC Breakdown (Tax Optimized)**:
-  * `Basic Pay` = 50% of CTC
-  * `HRA` = 50% of Basic Pay (Metro) or 40% (Non-Metro)
-  * `Special Allowance` = Residual balancing figure
-  * `Employer PF` = 12% of Basic (deducted from CTC if CTC model is used)
-
----
-
-### Section 3: Loss of Pay (LOP) & Proration Mathematical Engine
+### Section 2: Loss of Pay (LOP) & Proration Mathematical Engine
 When an employee takes unpaid leave, has unregularized missing punches, or joins mid-month, how is a single day's salary deducted?
 
 Administrators configure the exact calculation denominator:
@@ -152,7 +97,118 @@ $$\text{Prorated Earnings} = \text{Monthly Base Salary} \times \left( \frac{\tex
 
 ---
 
-### Section 4: Modular Statutory Compliance Toggles (India & Global)
+## Domain 2: Compensation & Visual Structure Builder
+
+### Section 3: Dynamic Salary Component Catalog & Calculation Modes
+
+In Innostes, no salary component is hardcoded. Administrators can create unlimited custom components with complete mathematical freedom:
+
+#### 1. The 5 Component Classifications
+1. **`EARNING`**: Additions to gross pay (Basic Pay, House Rent Allowance, Dearness Allowance, Conveyance Allowance, Special Allowance, Shift Allowance, Overtime, Performance Bonus).
+2. **`DEDUCTION_PRE_TAX`**: Deductions that reduce taxable gross income prior to tax calculations (Employee Provident Fund under Sec 80C, 401(k) pre-tax, Voluntary PF, Group Medical Insurance).
+3. **`STATUTORY_TAX`**: Mandatory government withholdings (TDS under Section 192, State Professional Tax, FICA Social Security & Medicare).
+4. **`DEDUCTION_POST_TAX`**: Non-tax-exempt deductions recovered from net earnings (Salary advances, loan repayments, asset damage recoveries, canteen fees).
+5. **`EMPLOYER_CONTRIBUTION` / `RETIRALS`**: Company costs that do not reduce employee take-home pay (Employer PF 12%, Employer ESI 3.25%, Gratuity Accrual 4.81%, Group Term Insurance). Configurable as either **Part of CTC** or **Above CTC**.
+
+#### 2. The 5 Mathematical Calculation Modes
+Each component defines how its currency amount is computed:
+
+| Calculation Mode | Description & Evaluation Logic | Example Configuration |
+| :--- | :--- | :--- |
+| **`FLAT_AMOUNT`** | Fixed currency figure per pay cycle. Does not change unless updated. | `Broadband Allowance = INR 1,500.00` |
+| **`PERCENTAGE_OF`** | Exact percentage of another component or aggregate metric. | `HRA = 50% of [BASIC]`, `EPF = 12% of [BASIC]` |
+| **`FORMULA_EXPRESSION`** | Arbitrary mathematical formula evaluated by Directed Acyclic Graph (DAG) parser. Supports variables, operators (`+`, `-`, `*`, `/`), and functions (`MAX`, `MIN`, `ROUND`). | `Special Allowance = MAX(0, CTC - (BASIC + HRA + CONVEYANCE + EMPLOYER_PF))` |
+| **`STATUTORY_SLAB`** | Dynamic lookup against official statutory tables based on employee location or income. | `Professional Tax = LOOKUP_PT_SLAB(WORK_STATE, GROSS_PAY)` |
+| **`MONTHLY_VARIABLE`** | Ingested or entered each payroll run (e.g. approved sales commissions, reimbursements, spot bonuses). | `Sales Incentive = IMPORTED_PAYROLL_VARIABLE` |
+
+#### 3. Component Behavior & Policy Flags
+* **`is_lop_prorated`**: `TRUE` (amount is reduced proportionally by unpaid leaves/missing punches) or `FALSE` (fixed amount regardless of days worked, e.g. Fixed Internet Reimbursement).
+* **`tax_exemption_rule`**: Exemption code under applicable tax laws (e.g. `SEC_10_13A_HRA`, `SEC_10_14_CONVEYANCE`, `NON_TAXABLE_REIMBURSEMENT`).
+* **`part_of_ctc`**: Controls whether this component is included in the employee's annualized Cost to Company figure.
+* **`show_on_payslip`**: Toggle whether this component appears on the employee's printed/downloaded payslip.
+* **`hide_if_zero`**: When enabled, if an employee has `0.00` for this component in a month, the row is automatically suppressed from the payslip.
+
+---
+
+### Section 4: Visual Multi-Structure Salary Template Builder & Assignment Engine
+
+Organizations do not use a single rigid compensation structure. Different departments, seniority levels, and contract types require distinct salary packages.
+
+#### 1. Multi-Structure Salary Templates
+Administrators create and manage named **Salary Structures (Templates)**:
+
+```mermaid
+flowchart TD
+    Catalog["Salary Component Catalog (Master)"]
+    
+    Catalog --> S1["Template 1: Tech Engineering Standard<br/>(CTC Model: 50% Basic, 50% HRA, PF 12%, Balancing Spec Allowance)"]
+    Catalog --> S2["Template 2: Sales Team Plan<br/>(Base Salary + Tiered Quarterly Commission + Travel Allowance)"]
+    Catalog --> S3["Template 3: Executive C-Suite Plan<br/>(Director Remuneration + Performance Bonus + Health Retirals)"]
+    Catalog --> S4["Template 4: Graduate Intern Plan<br/>(Flat Monthly Stipend, 0 Statutory Deductions, No LOP proration)"]
+    Catalog --> S5["Template 5: Factory Operations Plan<br/>(Fixed Base + Overtime at 1.5x + Night Shift Allowance + ESI + PF)"]
+```
+
+#### 2. Directed Acyclic Graph (DAG) Component Evaluator
+Within each structure, components form a mathematical graph evaluated in topological order:
+
+```mermaid
+flowchart TD
+    CTC["Cost to Company (CTC Master)"]
+    Basic["Basic Pay<br/>(e.g. 50% of CTC or Custom %)"]
+    HRA["House Rent Allowance (HRA)<br/>(e.g. 50% of Basic Pay)"]
+    Allowances["Custom Allowances<br/>(Conveyance, Medical, Transport)"]
+    SpecAllow["Special Allowance<br/>(Balancing Residual: CTC - Basic - HRA - Retirals)"]
+    Gross["Gross Earnings<br/>(Sum of Earnings - LOP Deduction)"]
+    
+    EPF["Employee PF (12% of Basic)"]
+    PT["Professional Tax (State Slab)"]
+    TDS["Income Tax TDS (Projected Annual Slabs)"]
+    
+    NetPay["Final Net Take-Home Pay<br/>(Gross - PreTax - Taxes - PostTax)"]
+
+    CTC --> Basic
+    Basic --> HRA
+    CTC --> SpecAllow
+    Basic --> SpecAllow
+    HRA --> SpecAllow
+    Allowances --> SpecAllow
+    
+    Basic --> Gross
+    HRA --> Gross
+    Allowances --> Gross
+    SpecAllow --> Gross
+    
+    Basic --> EPF
+    Gross --> PT
+    Gross --> TDS
+    EPF --> TDS
+    
+    Gross --> NetPay
+    EPF --> NetPay
+    PT --> NetPay
+    TDS --> NetPay
+```
+
+#### 3. Component Rounding Rules
+For every structure, the administrator selects the rounding precision:
+* `NEAREST_INTEGER`: Rounds to whole currency units (`INR 42,150.00`).
+* `CEILING`: Always rounds up to the next integer.
+* `FLOOR`: Truncates fractional amounts.
+* `EXACT_DECIMAL`: Preserves 2 decimal places (`INR 42,150.48`).
+
+#### 4. Employee Assignment Engine & Versioned Revisions
+* **Assignment Hierarchy**:
+  1. Organization Default Template (fallback)
+  2. Department Default Template (e.g. all `SALES` employees get Sales Plan)
+  3. Designation Default Template (e.g. all `INTERN` get Stipend Plan)
+  4. Individual Contract Overrides (custom negotiated packages)
+* **Effective-Date Versioning**: When an employee receives a salary revision or promotion, a new versioned contract is created with an `effective_from` date (e.g. `2026-04-01`). Historical payroll runs remain immutable and permanently verifiable.
+
+---
+
+## Domain 3: Compliance & Taxes
+
+### Section 5: Modular Statutory Compliance Toggles (India & Global)
 
 Statutory deductions are strictly modular. Startups toggle ON compliance features only when they reach the statutory employee count thresholds:
 
@@ -199,7 +255,7 @@ STATUTORY COMPLIANCE TOGGLES (SETTINGS > PAYROLL > STATUTORY)
 
 ---
 
-### Section 5: Income Tax Regimes & TDS Projection Engine
+### Section 6: Income Tax Regimes & TDS Projection Engine
 
 Innostes implements an automated, annualized tax projection engine for Indian Income Tax under Section 192:
 
@@ -224,7 +280,9 @@ flowchart TD
 
 ---
 
-### Section 6: Bank Disbursement Rails & Export Templates
+## Domain 4: Disbursements & Books
+
+### Section 7: Bank Disbursement Rails & Export Templates
 
 When payroll is finalized, Innostes generates corporate bank upload files formatted for direct corporate net banking batch processing:
 
@@ -236,7 +294,7 @@ When payroll is finalized, Innostes generates corporate bank upload files format
 
 ---
 
-### Section 7: General Ledger Mapping (LedgerFlow Double-Entry Integration)
+### Section 8: General Ledger Mapping (LedgerFlow Double-Entry Integration)
 
 Payroll is not an isolated silo; every payroll run posts an atomic, balanced double-entry journal entry to the corporate Chart of Accounts in **LedgerFlow**:
 
@@ -254,18 +312,79 @@ flowchart LR
 
 ---
 
-### Section 8: Payslip Delivery, Customization & Security
+### Section 9: Dynamic Payslip Generator & Visual Template Designer
 
-Administrators configure the visual layout and security encryption of employee payslips:
+Payslips are the most critical employee-facing financial deliverable. Innostes provides a **No-Code Payslip Designer** giving organizations complete control over visual branding, displayed data blocks, confidentiality encryption, and PDF distribution.
 
-* **Security Guard (AES Encrypted PDFs)**:
-  * Each generated payslip PDF is encrypted with an employee-specific password formula:
-    * Standard: First 4 characters of employee legal name in CAPS + Date & Month of Birth (e.g. `JANE` born 15 Aug $\implies$ `JANE1508`).
-* **Visual Branding**:
-  * Corporate logo, registered legal entity name, corporate identification number (CIN / Tax ID), and physical office address.
+```
++-------------------------------------------------------------------------------------------------------------------+
+| PAYSLIP TEMPLATE DESIGNER: "ACME CORP STANDARD TEMPLATE"                            [ Preview PDF ] [ Save Design]|
++------------------------------------+------------------------------------------------------------------------------+
+| DESIGN CONTROLS                    | LIVE INTERACTIVE PREVIEW                                                     |
+|                                    |                                                                              |
+| Visual Theme:                      | +--------------------------------------------------------------------------+ |
+| [ Modern Minimal (Dual Card)    v] | | ACME TECHNOLOGIES PVT LTD               PAYSLIP FOR NOVEMBER 2026        | |
+| Primary Accent: [ #2563EB        ] | | CIN: U72200KA2024PTC123456             Pay Date: 30 Nov 2026            | |
+|                                    | +--------------------------------------------------------------------------+ |
+| Demographic Fields to Show:        | | EMPLOYEE SUMMARY                                                         | |
+| [✓] Employee ID   [✓] Joining Date | | Emp ID: EMP-1042       Name: Sarah Chen        Designation: Tech Lead    | |
+| [✓] Designation   [✓] Department   | | Dept: Engineering      PAN: ABCDE****F         Bank A/c: *******4819     | |
+| [✓] Bank A/c (Mask)[✓] IFSC Code   | | UAN: 100928319201      Worked Days: 30         LOP Days: 1.0             | |
+| [✓] PAN (Masked)  [✓] PF UAN       | +------------------------------------+-------------------------------------+ |
+| [✓] Calendar Days [✓] LOP Days     | | EARNINGS                           | DEDUCTIONS                          | |
+|                                    | | Basic Pay               50,000.00  | Employee PF (12%)         6,000.00  | |
+| Modular Cards (Toggles):           | | House Rent Allowance    25,000.00  | Professional Tax            200.00  | |
+| [✓] Leave Balances Snapshot        | | Special Allowance       41,774.19  | Income Tax (TDS)         10,450.00  | |
+| [✓] Employer Retirals (CTC Block)  | | [ LOP Deduction        -3,870.97 ] | [ Voluntary PF (VFP)          0.00 ]| |
+| [✓] Year-to-Date (YTD) Summary     | +------------------------------------+-------------------------------------+ |
+| [✓] Net Pay in Words               | | TOTAL GROSS:        INR 112,903.22 | TOTAL DEDUCTIONS:     INR 16,650.00 | |
+| [✓] Verification QR Code           | +--------------------------------------------------------------------------+ |
+| [ ] Employer Signature Stamp       | | NET TAKE-HOME PAY: INR 96,253.22                                         | |
+|                                    | | Amount in Words: Ninety-Six Thousand Two Hundred Fifty-Three Rupees Only | |
+| Confidentiality Protection:        | +--------------------------------------------------------------------------+ |
+| Password Formula:                  | | LEAVE BALANCES (Closing): Casual: 8.5  | Sick: 4.0  | Earned: 11.0       | |
+| [ NAME4_DOB_DDMM                 v]| +--------------------------------------------------------------------------+ |
+| (First 4 letters of name + DDMM)   | | EMPLOYER RETIRALS (CTC): Employer PF: 6,000.00 | Gratuity: 2,404.00      | |
+|                                    | +--------------------------------------------------------------------------+ |
++------------------------------------+------------------------------------------------------------------------------+
+```
+
+#### 1. Modular Payslip Building Blocks
+
+1. **Header & Branding Block**:
+   * Organization Logo (Left, Center, or Right alignment).
+   * Legal Entity Details: Registered Name, Corporate Identification Number (CIN), Tax Deduction Account Number (TAN), GSTIN, Registered Address.
+   * Pay Period Title (e.g. `NOVEMBER 2026`) and Disbursement Date.
+2. **Employee Demographic Block**:
+   * Administrators select which metadata fields appear using checkboxes.
+   * Sensitive fields (Bank Account, PAN, Social Security) are automatically masked to show only the last 4 digits (e.g. `*******4819`).
+   * Attendance Summary: Total Calendar Days, Loss of Pay (LOP) Days, and Effective Paid Days.
+3. **Dual-Column Financial Breakdown**:
+   * **Left Column (Earnings)**: Lists every earning component configured to display on the payslip, with individual currency figures and a bold **Total Gross Earnings** line.
+   * **Right Column (Deductions)**: Lists Pre-Tax Deductions (PF, NPS), Post-Tax Deductions (Loan advances), and Statutory Taxes (TDS, PT) with a bold **Total Deductions** line.
+4. **Net Pay Take-Home Banner**:
+   * Prominently displays the net payable currency amount in 24pt bold typography.
+   * Automated **Currency in Words Engine**: Transforms numeric net pay into legal text (e.g. *"Ninety-Six Thousand Two Hundred Fifty-Three Rupees Only"* or *"Five Thousand Four Hundred Twenty US Dollars and Zero Cents"*).
+5. **Modular Add-On Cards (Toggled per Template)**:
+   * **Leave Balances Snapshot**: Shows the employee's available opening, availed, and closing balances for each active leave type (Casual, Sick, Earned) as of the pay date.
+   * **Employer Retirals & Benefits Block**: Displays Employer PF (12%), Employer ESIC (3.25%), and Gratuity Accrual (4.81%) for complete CTC transparency without affecting net take-home pay.
+   * **Year-to-Date (YTD) Summary Card**: Shows cumulative Gross Earnings YTD, cumulative Income Tax Deducted YTD, and cumulative PF Contributed YTD across the fiscal year.
+   * **Cryptographic Verification QR Code**: Each payslip includes a scannable QR code resolving to an authenticated, tamper-proof digital signature URL. Third parties (banks, visa consulates) can verify payslip authenticity without contacting HR.
+   * **Signatory Block**: Option to display the HR Director / CFO authorized digital signature image and corporate stamp, or a disclaimer (*"This is a system-generated payslip and requires no physical signature"*).
+
+#### 2. Layout Themes
+* **Modern Minimal**: Contemporary clean card layout with subtle divider borders and custom primary brand accent.
+* **Classic Corporate**: High-density boxed grid layout formatted for strict institutional compliance.
+* **Compact Single-Page**: Streamlined layout engineered specifically to ensure complex multi-component salaries never spill over onto a second page.
+
+#### 3. Security & Automated Distribution
+* **AES-256 PDF Password Encryption**:
+  * Generated PDFs are encrypted using an employee-specific password formula:
+    * Standard default: First 4 characters of legal name in uppercase + Day and Month of Birth (`NAME4_DOB_DDMM` e.g. `JANE1508`).
+    * Alternative formula: Employee ID + Last 4 digits of PAN/SSN (`EMPID_PAN4`).
 * **Automated Payday Dispatch**:
   * Master toggle: `auto_dispatch_payslip_emails = TRUE`.
-  * The moment the administrator commits payroll, payslips are published to the employee's portal drawer and sent via email.
+  * The moment the administrator commits the payroll run, payslips are published to the employee's portal vault and delivered as password-protected attachments via email.
 
 ---
 

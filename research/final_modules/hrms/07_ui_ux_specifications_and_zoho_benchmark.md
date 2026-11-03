@@ -980,7 +980,95 @@ Innostes strictly isolates operational presence tracking from financial compensa
 
 ---
 
-### 6.2 Monthly Payroll Admin Execution Cockpit (`/hrms/payroll`)
+### 6.2 Visual Salary Structure & Formula Builder (`/hrms/payroll/structures/builder`)
+
+Organizations require complete flexibility to construct role-specific compensation packages without hardcoding formulas in application code. The **Visual Salary Structure Builder** provides a drag-and-drop rule matrix with an instant dry-run sandbox:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| SALARY STRUCTURE BUILDER: "Engineering Tech Standard (L1 - L4)"                         [ Test Calculation ] [ Save Structure ]   |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| Base Compensation Anchor: [ Cost to Company (CTC)  v]     Rounding Rule: [ Nearest Rupee (Round) v]     Status: [ Active (Default)]|
++----+-----------------------+-------------------+----------------------+---------------------------------+-------+-------+---------+
+| :: | COMPONENT NAME & CODE | CLASSIFICATION    | CALCULATION MODE     | CALCULATION RULE / EXPRESSION   | PRORAT| SLIP? | ACTIONS |
++----+-----------------------+-------------------+----------------------+---------------------------------+-------+-------+---------+
+| :: | Basic Pay             | EARNING           | [ % of Component   v]| [ 50.000 ] % of [ CTC          v| [✓]   | [✓]   | [Edit]  |
+|    | [BASIC]               | Taxable           |                      |                                 |       |       |         |
+| :: | House Rent Allowance  | EARNING           | [ % of Component   v]| [ 50.000 ] % of [ Basic Pay    v| [✓]   | [✓]   | [Edit]  |
+|    | [HRA]                 | Exempt u/s 10(13A)|                      |                                 |       |       |         |
+| :: | Conveyance Allowance  | EARNING           | [ Flat Amount      v]| INR [ 1,600.00 / month        ] | [✓]   | [✓]   | [Edit]  |
+|    | [CONVEYANCE]          | Non-Taxable       |                      |                                 |       |       |         |
+| :: | Special Allowance     | EARNING           | [ Formula Expressionv]| [ CTC - (BASIC + HRA + CONV +   | [✓]   | [✓]   | [Edit]  |
+|    | [SPECIAL_ALLOW]       | Balancing Residual|                      |   EMPLOYER_PF + GRATUITY)      ]|       |       |         |
+| :: | Employee Provident Fd | DEDUCTION_PRE_TAX | [ % of Component   v]| [ 12.000 ] % of [ Basic Pay    v| [✓]   | [✓]   | [Edit]  |
+|    | [EPF_EE]              | Sec 80C Benefit   |                      | Cap Option: (•) 15k  ( ) Actual |       |       |         |
+| :: | Professional Tax      | STATUTORY_TAX     | [ Statutory Slab   v]| Lookup state slab by work nexus | [ ]   | [✓]   | [Edit]  |
+|    | [PT]                  | State Withholding |                      | (Auto: Karnataka / Maharashtra) |       |       |         |
+| :: | Employer PF Contrib   | EMPLOYER_RETIRAL  | [ % of Component   v]| [ 12.000 ] % of [ Basic Pay    v| [✓]   | [ ]   | [Edit]  |
+|    | [EPF_ER]              | Part of CTC Cost  |                      | (8.33% EPS + 3.67% EPF)         |       |       |         |
+| :: | Gratuity Provisioning | EMPLOYER_RETIRAL  | [ Formula Expressionv]| [ (BASIC * 15) / (26 * 12)     ]| [✓]   | [ ]   | [Edit]  |
+|    | [GRATUITY_PROV]       | Part of CTC Cost  |                      | (4.81% of Annual Basic)         |       |       |         |
++----+-----------------------+-------------------+----------------------+---------------------------------+-------+-------+---------+
+| [ + Add Component from Catalog ]                                                              [ Run Dependency DAG Audit ]        |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| REAL-TIME INTERACTIVE CALCULATION TEST SANDBOX                                                                                    |
+| Input Sample Annual CTC: [ INR 1,200,000.00 ]   Target Month: [ November 2026 (30 Days) ]   Sample LOP Days: [ 0.0 Days ]        |
+|                                                                                                                                   |
+| Monthly Gross Earnings:       INR 93,400.00 (Basic: 50,000 | HRA: 25,000 | Conveyance: 1,600 | Special Allowance: 16,800)       |
+| Monthly Pre-Tax Deductions:   INR  6,000.00 (Employee PF: 6,000.00)                                                               |
+| Monthly Statutory Taxes:      INR    200.00 (Karnataka Professional Tax: 200.00)                                                  |
+| Estimated Net Take-Home Pay:  INR 87,200.00 (Before projected income tax TDS withholding)                                         |
+| Monthly Company Retirals:     INR  6,600.00 (Employer PF: 6,000.00 | Gratuity Accrual: 2,404.00)                                 |
+| Total Monthly Employer Cost:  INR 100,000.00 (Exact 100.00% match to CTC. Zero rounding variance.)                               |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.3 Visual Payslip Designer & Real-Time Live Previewer (`/hrms/payroll/payslip-designer`)
+
+Administrators configure the exact layout, visual branding, data blocks, and encryption rules for employee payslips with a live split-screen preview:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| PAYSLIP TEMPLATE DESIGNER: "Acme Corp Standard Template"                            [ Download Sample PDF ] [ Save Template ]     |
++-------------------------------------+---------------------------------------------------------------------------------------------+
+| DESIGN CONTROLS & MODULAR BLOCKS    | LIVE INTERACTIVE PREVIEW                                                                    |
+|                                     |                                                                                             |
+| Layout Theme:                       | +-----------------------------------------------------------------------------------------+ |
+| [ Modern Minimal (Dual Card)     v] | | ACME TECHNOLOGIES PVT LTD                          CONFIDENTIAL SALARY PAYSLIP          | |
+| Primary Brand Color:                | | CIN: U72200KA2024PTC123456                        Pay Period: NOVEMBER 2026             | |
+| [ #2563EB                 ] (Indigo)| | Reg Address: Koramangala, Bengaluru 560034          Disbursement Date: 30 Nov 2026       | |
+| Logo Alignment: [ Left  v]          | +-----------------------------------------------------------------------------------------+ |
+|                                     | | EMPLOYEE SUMMARY                                                                        | |
+| Demographic Fields (Check to show): | | Employee ID:   EMP-1042           Name:           Sarah Chen                            | |
+| [✓] Employee ID   [✓] Joining Date  | | Designation:   Tech Lead          Department:     Core Platform Engineering             | |
+| [✓] Designation   [✓] Department    | | Bank Account:  *******4819        Bank IFSC:      HDFC0000240                           | |
+| [✓] Masked Bank A/c[✓] IFSC Code    | | PAN (Tax ID):  ABCDE****F         PF UAN:         100928319201                          | |
+| [✓] Masked PAN    [✓] PF UAN        | | Calendar Days: 30                 Loss of Pay:    1.0 Day         Paid Days: 29.0       | |
+| [✓] Calendar Days [✓] LOP Days      | +------------------------------------+----------------------------------------------------+ |
+|                                     | | EARNINGS                           | DEDUCTIONS                                         | |
+| Modular Cards (Admin Toggles):      | | Basic Pay               50,000.00  | Employee PF (12%)                        6,000.00  | |
+| [✓] Leave Balances Snapshot         | | House Rent Allowance    25,000.00  | Professional Tax                           200.00  | |
+| [✓] Employer Retirals (CTC Block)   | | Special Allowance       41,774.19  | Income Tax TDS (Section 115BAC)         10,450.00  | |
+| [✓] Year-to-Date (YTD) Summary      | | [ LOP Deduction        -3,870.97 ] | [ Voluntary Provident Fund (VPF)             0.00 ]| |
+| [✓] Net Pay in Words                | +------------------------------------+----------------------------------------------------+ |
+| [✓] Verification QR Code            | | TOTAL GROSS:        INR 112,903.22 | TOTAL DEDUCTIONS:                    INR 16,650.00 | |
+| [ ] Display Digital Signature Stamp | +------------------------------------+----------------------------------------------------+ |
+|                                     | | NET TAKE-HOME PAY: INR 96,253.22                                                        | |
+| Password Security Formula:          | | Amount in Words: Ninety-Six Thousand Two Hundred Fifty-Three Rupees Only                | |
+| [ NAME4_DOB_DDMM                  v]| +-----------------------------------------------------------------------------------------+ |
+| (First 4 letters of name + DDMM)    | | LEAVE BALANCES (Closing): Casual Leave: 8.5  | Sick Leave: 4.0  | Earned Leave: 11.0     | |
+|                                     | +-----------------------------------------------------------------------------------------+ |
+| Custom Disclaimer / Footer Note:    | | EMPLOYER RETIRALS (CTC): Employer PF: 6,000.00 | Statutory Gratuity Provision: 2,404.00   | |
+| [ This is a system-generated slip,]| +-----------------------------------------------------------------------------------------+ |
+| [ requires no physical signature. ] | | [ QR Code: Scan to verify cryptographic authenticity on verify.innostes.com/ps/8f2a1c ] | |
++-------------------------------------+---------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.4 Monthly Payroll Admin Execution Cockpit (`/hrms/payroll`)
 
 Payroll administrators execute monthly payroll through a guided, zero-variance 3-step sequential stepper:
 

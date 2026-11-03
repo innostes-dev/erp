@@ -820,9 +820,17 @@ CREATE TABLE hrms_salary_components (
     tenant_id UUID NOT NULL,
     code VARCHAR(32) NOT NULL,
     name VARCHAR(128) NOT NULL,
-    type VARCHAR(64) NOT NULL, -- References hrms_picklists category 'SALARY_COMPONENT_TYPE' ('EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX')
+    classification VARCHAR(64) NOT NULL, -- 'EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX', 'EMPLOYER_RETIRAL'
+    calculation_mode VARCHAR(32) NOT NULL DEFAULT 'FLAT_AMOUNT', -- 'FLAT_AMOUNT', 'PERCENTAGE_OF', 'FORMULA_EXPRESSION', 'STATUTORY_SLAB', 'MONTHLY_VARIABLE'
+    percentage_base VARCHAR(64), -- e.g. 'CTC', 'BASIC', 'GROSS', 'BASIC_DA'
+    percentage_value NUMERIC(7, 4), -- e.g. 50.0000 for 50%, 12.0000 for 12%
+    formula_expression TEXT, -- e.g. 'MAX(0, CTC - (BASIC + HRA + RETIRALS))'
+    is_lop_prorated BOOLEAN NOT NULL DEFAULT TRUE,
     is_taxable BOOLEAN NOT NULL DEFAULT TRUE,
-    formula_expression TEXT,
+    tax_exemption_code VARCHAR(64), -- 'SEC_10_13A_HRA', 'SEC_10_14_CONVEYANCE', 'NON_TAXABLE_REIMBURSEMENT'
+    part_of_ctc BOOLEAN NOT NULL DEFAULT TRUE,
+    show_on_payslip BOOLEAN NOT NULL DEFAULT TRUE,
+    hide_if_zero BOOLEAN NOT NULL DEFAULT TRUE,
     depends_on JSONB DEFAULT '[]'::jsonb,
     CONSTRAINT uq_tenant_salary_comp UNIQUE(tenant_id, code)
 );
@@ -830,11 +838,63 @@ CREATE TABLE hrms_salary_components (
 CREATE TABLE hrms_salary_structures (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
-    contract_id UUID NOT NULL REFERENCES hrms_contracts(id) ON DELETE CASCADE,
-    component_id UUID NOT NULL REFERENCES hrms_salary_components(id),
-    fixed_amount NUMERIC(18, 4),
+    code VARCHAR(64) NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    description TEXT,
+    rounding_rule VARCHAR(32) NOT NULL DEFAULT 'NEAREST_INTEGER', -- 'NEAREST_INTEGER', 'CEILING', 'FLOOR', 'EXACT_DECIMAL'
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_structure_code UNIQUE(tenant_id, code)
+);
+
+CREATE TABLE hrms_salary_structure_components (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    structure_id UUID NOT NULL REFERENCES hrms_salary_structures(id) ON DELETE CASCADE,
+    component_id UUID NOT NULL REFERENCES hrms_salary_components(id) ON DELETE RESTRICT,
+    sequence_order INT NOT NULL DEFAULT 1,
+    calculation_mode_override VARCHAR(32),
+    percentage_base_override VARCHAR(64),
+    percentage_value_override NUMERIC(7, 4),
+    formula_expression_override TEXT,
+    fixed_amount_override NUMERIC(18, 4),
+    CONSTRAINT uq_structure_component UNIQUE(structure_id, component_id)
+);
+CREATE INDEX idx_struct_comp_eval ON hrms_salary_structure_components(structure_id, sequence_order);
+
+CREATE TABLE hrms_employee_salary_assignments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    structure_id UUID NOT NULL REFERENCES hrms_salary_structures(id) ON DELETE RESTRICT,
+    annual_ctc NUMERIC(18, 4) NOT NULL,
+    monthly_base_salary NUMERIC(18, 4) NOT NULL,
     effective_from DATE NOT NULL,
-    effective_to DATE
+    effective_to DATE,
+    custom_component_overrides JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_emp_salary_assign ON hrms_employee_salary_assignments(tenant_id, employee_id, effective_from);
+
+CREATE TABLE hrms_payslip_templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    template_name VARCHAR(128) NOT NULL,
+    theme VARCHAR(32) NOT NULL DEFAULT 'MODERN_MINIMAL', -- 'MODERN_MINIMAL', 'CLASSIC_CORPORATE', 'COMPACT_SINGLE_PAGE'
+    brand_color_hex VARCHAR(16) NOT NULL DEFAULT '#2563EB',
+    logo_position VARCHAR(16) NOT NULL DEFAULT 'LEFT', -- 'LEFT', 'CENTER', 'RIGHT'
+    show_leave_balances BOOLEAN NOT NULL DEFAULT TRUE,
+    show_employer_retirals BOOLEAN NOT NULL DEFAULT TRUE,
+    show_ytd_summary BOOLEAN NOT NULL DEFAULT TRUE,
+    show_amount_in_words BOOLEAN NOT NULL DEFAULT TRUE,
+    show_qr_verification BOOLEAN NOT NULL DEFAULT TRUE,
+    show_digital_signature BOOLEAN NOT NULL DEFAULT FALSE,
+    digital_signature_url TEXT,
+    visible_demographic_fields JSONB NOT NULL DEFAULT '["EMPLOYEE_ID", "NAME", "DESIGNATION", "DEPARTMENT", "JOINING_DATE", "BANK_ACCOUNT_MASKED", "IFSC", "PAN_MASKED", "UAN", "CALENDAR_DAYS", "LOP_DAYS", "PAID_DAYS"]'::jsonb,
+    password_formula VARCHAR(64) NOT NULL DEFAULT 'NAME4_DOB_DDMM',
+    custom_footer_note TEXT DEFAULT 'This is a computer-generated payslip and requires no physical signature.',
+    is_default BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE hrms_payroll_runs (
@@ -856,11 +916,18 @@ CREATE TABLE hrms_payslips (
     tenant_id UUID NOT NULL,
     payroll_run_id UUID NOT NULL REFERENCES hrms_payroll_runs(id) ON DELETE CASCADE,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE RESTRICT,
+    payslip_template_id UUID REFERENCES hrms_payslip_templates(id),
     working_days INT NOT NULL DEFAULT 30,
     loss_of_pay_days NUMERIC(5, 2) NOT NULL DEFAULT 0.00,
     gross_pay NUMERIC(18, 4) NOT NULL,
     total_deductions NUMERIC(18, 4) NOT NULL,
     net_pay NUMERIC(18, 4) NOT NULL,
+    net_pay_in_words TEXT NOT NULL,
+    leave_balances_snapshot JSONB DEFAULT '{}'::jsonb,
+    employer_retirals_snapshot JSONB DEFAULT '{}'::jsonb,
+    ytd_totals_snapshot JSONB DEFAULT '{}'::jsonb,
+    pdf_storage_path TEXT,
+    verification_hash VARCHAR(128),
     CONSTRAINT chk_net_non_negative CHECK (net_pay >= 0.0000),
     CONSTRAINT uq_run_emp UNIQUE(payroll_run_id, employee_id)
 );
@@ -870,7 +937,7 @@ CREATE TABLE hrms_payslip_components (
     payslip_id UUID NOT NULL REFERENCES hrms_payslips(id) ON DELETE CASCADE,
     component_id UUID NOT NULL REFERENCES hrms_salary_components(id),
     amount NUMERIC(18, 4) NOT NULL,
-    component_type VARCHAR(64) NOT NULL -- E.g. 'EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX'
+    component_type VARCHAR(64) NOT NULL -- 'EARNING', 'DEDUCTION_PRE_TAX', 'DEDUCTION_POST_TAX', 'STATUTORY_TAX', 'EMPLOYER_RETIRAL'
 );
 CREATE INDEX idx_payslip_components_lookup ON hrms_payslip_components(payslip_id, component_type);
 
@@ -906,6 +973,12 @@ ALTER TABLE hrms_locations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_holiday_calendars ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_holidays ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_payroll_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_salary_components ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_salary_structures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_employee_salary_assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_payslip_templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_payroll_runs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_payslips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_picklists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
@@ -929,6 +1002,24 @@ CREATE POLICY tenant_holidays_isolation ON hrms_holidays
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_payroll_settings_isolation ON hrms_payroll_settings
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_salary_components_isolation ON hrms_salary_components
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_salary_structures_isolation ON hrms_salary_structures
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_emp_salary_assign_isolation ON hrms_employee_salary_assignments
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_payslip_templates_isolation ON hrms_payslip_templates
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_payroll_runs_isolation ON hrms_payroll_runs
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_payslips_isolation ON hrms_payslips
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_picklists_isolation ON hrms_picklists
@@ -1063,15 +1154,25 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/leaves/encash/request` | Employee submits request to liquidate eligible excess leave balance | `peopleops:read` (self) | 201 Created |
 | `POST` | `/peopleops/leaves/encash/{id}/approve` | HR approves encashment request, pushing financial payout to next payroll run | `peopleops:admin` | 200 OK |
 
-### 2.7 Payroll Engine, Setup Cockpit & Disbursals
+### 2.7 Payroll Engine, Salary Structure Builder & Payslip Designer
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/peopleops/payroll/settings` | Retrieve active tenant payroll configuration (frequency, LOP method, statutory toggles, bank rails) | `peopleops:read` | 200 OK |
 | `PUT` | `/peopleops/payroll/settings` | Update tenant payroll setup (toggles for EPF, ESIC, PT, LOP formula, CMS format, GL accounts) | `peopleops:admin` | 200 OK |
-| `GET` | `/peopleops/payroll/salary-components` | List all salary components with DAG calculation formulas and tax classifications | `peopleops:read` | 200 OK |
-| `POST` | `/peopleops/payroll/salary-components` | Create custom earning or deduction component with formula DAG dependencies | `peopleops:admin` | 201 Created |
-| `PUT` | `/peopleops/payroll/salary-components/{id}` | Update component formula expression, taxable flag, or active status | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/payroll/salary-components` | List all custom and standard salary components with math calculation modes and tax rules | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/payroll/salary-components` | Create custom component (% of component, flat amount, formula DAG, or variable) | `peopleops:admin` | 201 Created |
+| `PUT` | `/peopleops/payroll/salary-components/{id}` | Update component formula expression, percentage base, taxable flag, or payslip visibility | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/payroll/structures` | List all named salary structure templates (e.g. Engineering CTC, Sales Plan, Intern Stipend) | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/payroll/structures` | Create a new named salary structure template with component hierarchy and rounding rules | `peopleops:admin` | 201 Created |
+| `GET` | `/peopleops/payroll/structures/{id}` | Retrieve complete structure specifications, component rules, formulas, and sequence DAG | `peopleops:read` | 200 OK |
+| `PUT` | `/peopleops/payroll/structures/{id}` | Update structure rules, percentage allocations, balancing residual component, or active status | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/payroll/structures/{id}/preview` | Dry-run gross-to-net calculation for a hypothetical CTC or base salary against this structure | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/payroll/structures/{id}/assign` | Assign salary structure to employee(s) with effective date versioning and individual contract overrides | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/payroll/payslip-templates` | List all configured visual payslip design templates | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/payroll/payslip-templates` | Create custom payslip design template (modular block toggles, branding, theme, password formula) | `peopleops:admin` | 201 Created |
+| `PUT` | `/peopleops/payroll/payslip-templates/{id}` | Update payslip template design settings (visible demographic fields, leave cards, YTD card, colors) | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/payroll/payslip-templates/{id}/preview-pdf` | Render live vector PDF stream of payslip using sample employee data for instant designer preview | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/payroll/runs` | Initialize a new monthly payroll run for a target pay period | `peopleops:admin` | 201 Created |
 | `POST` | `/peopleops/payroll/runs/{id}/calculate`| Execute DAG gross-to-net computation across all employee contracts in parallel | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/payroll/runs/{id}/commit` | Commit payroll run: seals period, auto-posts balanced GL journal to LedgerFlow, & generates bank batch | `peopleops:admin` | 200 OK |
