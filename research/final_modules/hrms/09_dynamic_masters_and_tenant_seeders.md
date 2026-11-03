@@ -330,11 +330,17 @@ Initialized from tenant registration metadata:
 
 ### 7.4 Canonical Leave Policy Seeders (`hrms_leave_types`)
 
-When a tenant initializes PeopleOps, the seeder creates 10 canonical time-off policies configured with industry-tested 8-dimension parameters:
+When a tenant initializes PeopleOps, the seeder creates initial time-off policy templates. 
+
+**Critical Invariant for Startups:** The quota numbers below (e.g. 12 days Casual Leave, 18 days Privilege Leave) are **initial suggested defaults**, not hardcoded constraints. 
+* Startups have total freedom: an administrator can change Casual Leave to **6 days, 8 days, 15 days, 20 days**, or any custom number.
+* Startups can deactivate separate `CL` and `SL` buckets completely and create a single unified **`PTO` (Paid Time Off)** bucket (e.g. 20 or 25 days/year).
+* Startups can toggle **Unlimited PTO** in 1 click, bypassing quota tracking altogether.
+* Every quota, policy name, accrual schedule, and carry-forward cap is 100% editable from the visual admin cockpit.
 
 ```
 +-----------------------------------------------------------------------------------------------------------------------+
-| CANONICAL LEAVE TYPES SEEDER SPECIFICATION MATRIX                                                                     |
+| CANONICAL LEAVE TYPES SEEDER SPECIFICATION MATRIX (CUSTOMIZABLE PRESETS)                                              |
 +-----------------------------------------------------------------------------------------------------------------------+
 | CODE      | NAME                   | QUOTA   | ACCRUAL MODEL     | CARRY-FORWARD CAP | ENCASHABLE | NOTICE | SANDWICH |
 | :---      | :---                   | :---    | :---              | :---              | :---       | :---   | :---     |

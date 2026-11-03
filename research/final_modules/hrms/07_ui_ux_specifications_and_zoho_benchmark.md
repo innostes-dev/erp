@@ -730,6 +730,9 @@ Administrators have a dedicated cockpit to configure all corporate time-off poli
 +-----------------------------------------------------------------------------------------------------------------------+
 | LEAVE POLICIES & TIME-OFF TYPES                                                                [ + Create Leave Type ]|
 +-----------------------------------------------------------------------------------------------------------------------+
+| Quick Startup Preset Archetypes (1-Click Application):                                                                |
+| ( ) Modern Unlimited PTO   ( ) Unified 20-Day PTO Bank   (•) Traditional Multi-Bucket   ( ) Custom Blank Slate        |
++-----------------------------------------------------------------------------------------------------------------------+
 | Type Name & Code          | Annual Quota    | Accrual Cycle    | Carry Forward      | Encashable | Sandwich Rule| Actions |
 | :---                      | :---            | :---             | :---               | :---       | :---         | :---    |
 | Privilege Leave (PL)      | 18.0 Days       | Monthly (+1.5/mo)| Capped (Max 30d)   | [ YES ]    | [ Disabled ] | [ Edit ]|
@@ -739,7 +742,8 @@ Administrators have a dedicated cockpit to configure all corporate time-off poli
 | Paternity Leave (PL)      | 10 Days         | Event-Triggered  | [ 6 Mo Expiry ]    | [ NO ]     | [ Disabled ] | [ Edit ]|
 | Compensatory Off (COMP)   | Dynamic Punch   | Weekend Overtime | [ 60-Day Expiry ]  | [ NO ]     | [ Disabled ] | [ Edit ]|
 +-----------------------------------------------------------------------------------------------------------------------+
-| Startup Mode Master Toggle: [ ] Enable Unlimited Trust-First PTO (Bypasses quotas for pure output-driven teams)        |
+| Note: Quotas above are suggested defaults. Startups can edit quotas to any custom number (e.g. 8 days Casual Leave), |
+| collapse CL & SL into a single 20-day PTO bank, or enable Unlimited PTO with zero balance tracking.                   |
 +-----------------------------------------------------------------------------------------------------------------------+
 ```
 

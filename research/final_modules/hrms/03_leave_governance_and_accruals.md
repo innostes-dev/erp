@@ -11,15 +11,39 @@
 In Innostes Business OS, leave management is not a hardcoded set of rules. It is an **extensible, multi-dimensional policy engine**. Every organization—from a 10-person remote software startup with Unlimited PTO to a 5,000-employee manufacturing enterprise governed by the Factories Act—can configure its time-off policies without writing code or requesting database migrations.
 
 ### The Core Law of Innostes Leave Governance
-1. **Dynamic Master-Driven Leave Types**: Administrators define leave types (`CL`, `SL`, `PL`, `MATERNITY`, `COMP_OFF`, etc.) via the Admin Settings UI.
-2. **Modular 8-Dimension Policy Configuration**: Every leave type has an independent set of rules controlling accruals, carry-forwards, encashment, sandwich treatment, probation eligibility, and approval flows.
-3. **Immutable Double-Entry Leave Ledger**: Leave balances are never stored as mutable numbers directly on employee records. Every credit, consumption, encashment, and lapse is an append-only ledger transaction (`hrms_leave_ledger`).
+1. **Zero Hardcoded Quotas (Startup Total Freedom)**:
+   * **Casual Leave is NOT fixed at 12 days.** Standard seed values (like 12 days CL or 18 days PL) are merely initial suggested templates for traditional statutory companies.
+   * Startups have 100% freedom to customize any quota: set Casual Leave to 6 days, 8 days, 15 days, or 24 days.
+   * Startups can completely bypass traditional categories and create a single unified **`PTO` (Paid Time Off)** bucket (e.g. 20 or 25 days/year) that employees use for vacation, personal, or sick days without micromanagement.
+   * Startups can enable **Unlimited Trust-First PTO** with a single toggle.
+2. **Dynamic Master-Driven Leave Types**: Administrators define, rename, or delete leave types (`CL`, `SL`, `PL`, `PTO`, `WELLNESS`, `MATERNITY`, `COMP_OFF`, etc.) via the visual Admin Settings UI.
+3. **Modular 8-Dimension Policy Configuration**: Every leave type has an independent set of rules controlling accruals, carry-forwards, encashment, sandwich treatment, probation eligibility, and approval flows.
+4. **Immutable Double-Entry Leave Ledger**: Leave balances are never stored as mutable numbers directly on employee records. Every credit, consumption, encashment, and lapse is an append-only ledger transaction (`hrms_leave_ledger`).
 
 ---
 
-## 2. Complete Enterprise Leave Catalog & Statutory Alignments
+## 2. Startup Presets vs. Traditional Enterprise Leave Catalogs
 
-The Innostes seed engine provides ready-to-use policy templates aligned with Indian and international statutory standards, while giving admins full freedom to customize or create new leave types:
+When an administrator sets up time-off in **Settings > Leave Policies**, Innostes does not force them into an enterprise bureaucracy. The system presents 4 distinct operational archetypes:
+
+```
+LEAVE POLICY ARCHETYPES (CHOOSE ON DAY 1 — FULLY CUSTOMIZABLE AT ANY TIME)
+├── 1. The Modern Remote Startup (Unlimited PTO)
+│      └── Zero quota math, zero balance liability, trust-first lead notification.
+│
+├── 2. The Flexible Tech Startup (Unified PTO Bank — e.g. 20 Days)
+│      └── Single bucket of 20 days (customizable). Covers vacation, personal, and sick time without policing.
+│
+├── 3. The Traditional Statutory Structure (Separated Buckets)
+│      └── Casual Leave (e.g. 10–12d), Sick Leave (e.g. 10–12d), Privilege Leave (e.g. 15–18d).
+│
+└── 4. 100% Custom Blank Slate
+       └── Create your own policy names, quotas (e.g. 8 days "Wellness", 14 days "Personal"), and custom rules.
+```
+
+### The Standard Seed Catalog (Customizable Reference Defaults)
+
+The Innostes seed engine provides ready-to-use policy templates aligned with Indian and international statutory standards, while giving admins full freedom to edit every single number:
 
 | Leave Type Code | Human Label | Standard Accrual Model | Carry-Forward Default | Encashable | Statutory Alignment |
 | :--- | :--- | :--- | :--- | :--- | :--- |
