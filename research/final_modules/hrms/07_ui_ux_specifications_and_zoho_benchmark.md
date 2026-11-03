@@ -131,6 +131,64 @@ The primary employee dashboard (`/hrms`) utilizes a 12-column responsive CSS gri
     * **On Leave:** Solid amber ring with return date subtitle.
     * **Holiday:** Flag indicator.
 
+### 4.5 The Monthly Attendance Calendar & Regularization (`/hrms/attendance`)
+
+Daily check-in / check-out is performed **exclusively on the Dashboard widget** (`AttendanceCockpitWidget`). When an employee clicks on the Attendance navigation item (or clicks *"View Full Timesheet"* on their dashboard widget), they land on the **Monthly Attendance Calendar**:
+
+```
++---------------------------------------------------------------------------------------------------+
+| TIME & ATTENDANCE                                                   [ < November 2026 > ] [ Today]|
+| Monthly Summary: 168h Logged / 160h Target | 20 Days Present | 1 Missing Punch | 1 Approved Leave |
+| View Toggle: [• My Attendance Calendar]  [ Team Requests (1) ]                                    |
++---------------------------------------------------------------------------------------------------+
+| MON 02 NOV         | TUE 03 NOV         | WED 04 NOV         | THU 05 NOV         | FRI 06 NOV    |
+| 09:14 AM - 06:18 PM| 09:30 AM - 06:30 PM| 09:10 AM - [MISSING| 09:15 AM - 06:20 PM| 09:00 - 05:00 |
+| Total: 09h 04m     | Total: 09h 00m     | ⚠️ Missing OUT     | Total: 09h 05m     | Total: 08h 00m|
+| [ ✓ Present ]      | [ ✓ Present ]      | [⚡Regularize]     | [ ✓ Present ]      | [ ✓ Present ] |
++--------------------+--------------------+--------------------+--------------------+---------------+
+| MON 09 NOV         | TUE 10 NOV         | WED 11 NOV         | THU 12 NOV         | FRI 13 NOV    |
+| 09:20 AM - 06:15 PM| 09:15 AM - 06:10 PM| DIWALI HOLIDAY     | CASUAL LEAVE       | 09:10 - 06:05 |
+| Total: 08h 55m     | Total: 08h 55m     | Declared Holiday   | Full Day Approved  | Total: 08h 55m|
+| [ ✓ Present ]      | [ ✓ Present ]      | [ Gazetted Off ]   | [ Approved Leave ] | [ ✓ Present ] |
++---------------------------------------------------------------------------------------------------+
+```
+
+#### The 1-Click Missed-Punch Regularization Modal
+When an employee clicks `[ ⚡ Regularize ]` on any day flagged with `MISSING_OUT` (e.g. forgot to punch out):
+
+```
++-----------------------------------------------------------------------------------+
+| RAISE ATTENDANCE REGULARIZATION                                               [X] |
++-----------------------------------------------------------------------------------+
+| Date: Wednesday, 04 November 2026                                                 |
+| Recorded Clock-In: 09:10 AM                                                       |
+|                                                                                   |
+| Proposed Clock-Out Time *                                                         |
+| [ 06:30 PM                    ]                                                   |
+|                                                                                   |
+| Reason for Regularization *                                                       |
+| [ Forgot to punch out while leaving office                                      ] |
+|                                                                                   |
+| [ Cancel ]                                             [ Submit to Manager -> ]   |
++-----------------------------------------------------------------------------------+
+```
+
+#### Manager Approvals Tab (`[ Team Requests ]`)
+Line managers have a top tab on the same calendar page to review and sign off on direct reports' regularizations in 1 click:
+
+```
++---------------------------------------------------------------------------------------------------+
+| PENDING TEAM REGULARIZATIONS (1 PENDING)                                                          |
++---------------------------------------------------------------------------------------------------+
+| Sarah Chen (Senior Backend Engineer)                                                              |
+| Date: Wed, 04 Nov 2026 | Recorded Punch: 09:10 AM (Missing OUT)                                    |
+| Requested OUT Time: 06:30 PM (Total Effective Duration: 09h 20m)                                  |
+| Reason: "Forgot to punch out while leaving office"                                                |
+|                                                                                                   |
+|                                                 [ ✓ Approve Punch ]   [ ✕ Reject with Note ]      |
++---------------------------------------------------------------------------------------------------+
+```
+
 ---
 
 ## 5. Employee Directory, 60-Second Quick-Add & 8-Step Onboarding Stepper
