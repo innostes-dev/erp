@@ -34,8 +34,8 @@ Innostes resolves both anti-patterns through a **Two-Tier Master Architecture** 
 ```
 MASTER DATA ARCHITECTURE
 ├── Tier 1: Heavy Structural Domain Tables (Dedicated Relational Schemas)
-│   ├── hrms_departments (Hierarchical parent/child, Manager ID, Cost Center)
-│   ├── hrms_designations (Grade band, Job family, Min/Max CTC band)
+│   ├── hrms_departments (Hierarchical parent/child, Manager ID, Optional Cost Center)
+│   ├── hrms_designations (Pure functional role/title - ZERO pay constraints)
 │   ├── hrms_locations (Geofence bounds, Lat/Lng, Timezone, IP subnets)
 │   ├── hrms_leave_types (Accrual rate, Carry-forward cap, Encashable flag)
 │   └── hrms_salary_components (Component type, Tax rules, Formula DAG)
@@ -68,20 +68,20 @@ CREATE TABLE hrms_departments (
     name VARCHAR(255) NOT NULL, -- Human label e.g. 'Core Kernel Systems'
     parent_id UUID REFERENCES hrms_departments(id) ON DELETE SET NULL,
     manager_id UUID, -- References hrms_employees(id)
-    cost_center_code VARCHAR(64) NOT NULL DEFAULT 'CC-GENERAL',
+    cost_center_code VARCHAR(64), -- Completely optional (startups do not use cost centers)
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_tenant_dept_code UNIQUE (tenant_id, code)
 );
 
--- 2. Designations Master (Role Seniority & Job Families)
+-- 2. Designations Master (Pure Functional Titles - Zero Pay Constraints)
 CREATE TABLE hrms_designations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     code VARCHAR(64) NOT NULL, -- e.g. 'STAFF_ENG'
     name VARCHAR(255) NOT NULL, -- e.g. 'Staff Distributed Systems Engineer'
-    grade_band VARCHAR(16) NOT NULL DEFAULT 'L5', -- L1 to L7, M1 to M4
-    job_family VARCHAR(64) NOT NULL DEFAULT 'ENGINEERING',
+    job_family VARCHAR(64),     -- Optional grouping e.g. 'ENGINEERING'
+    description TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_tenant_desig_code UNIQUE (tenant_id, code)

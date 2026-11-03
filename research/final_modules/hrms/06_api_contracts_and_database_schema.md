@@ -95,21 +95,21 @@ CREATE TABLE hrms_departments (
     name VARCHAR(255) NOT NULL, -- Human label e.g. 'Core Kernel Systems'
     parent_id UUID REFERENCES hrms_departments(id) ON DELETE SET NULL,
     manager_id UUID, -- References hrms_employees(id)
-    cost_center_code VARCHAR(64) NOT NULL DEFAULT 'CC-GENERAL',
+    cost_center_code VARCHAR(64), -- Completely optional (startups do not use cost centers)
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_system BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_tenant_dept_code UNIQUE (tenant_id, code)
 );
 
--- Tier 1B: Designations Master (Role Seniority & Job Families)
+-- Tier 1B: Designations Master (Pure Functional Titles - Zero Pay Constraints)
 CREATE TABLE hrms_designations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     code VARCHAR(64) NOT NULL, -- e.g. 'STAFF_ENG'
     name VARCHAR(255) NOT NULL, -- e.g. 'Staff Distributed Systems Engineer'
-    grade_band VARCHAR(16) NOT NULL DEFAULT 'L5', -- L1 to L7, M1 to M4
-    job_family VARCHAR(64) NOT NULL DEFAULT 'ENGINEERING',
+    job_family VARCHAR(64),     -- Optional grouping e.g. 'ENGINEERING'
+    description TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_system BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -166,12 +166,12 @@ CREATE TABLE hrms_parties (
     display_name VARCHAR(150) NOT NULL,
     date_of_birth DATE NOT NULL,
     gender gender_type NOT NULL,
-    marital_status marital_status_type NOT NULL,
+    marital_status marital_status_type, -- Optional
     marriage_date DATE,
-    blood_group blood_group_type NOT NULL,
+    blood_group blood_group_type, -- Optional (never blocks candidate if unknown on Day 1)
     nationality VARCHAR(2) NOT NULL DEFAULT 'IN', -- ISO-3166-1 alpha-2
-    father_name VARCHAR(150) NOT NULL, -- Statutory Form 2 / Form 11 requirement
-    mother_name VARCHAR(150) NOT NULL,
+    father_name VARCHAR(150), -- Optional at master level; conditionally verified for Indian EPF
+    mother_name VARCHAR(150), -- Optional
     spouse_name VARCHAR(150),
     is_differently_abled BOOLEAN NOT NULL DEFAULT FALSE,
     disability_details TEXT,
@@ -180,8 +180,7 @@ CREATE TABLE hrms_parties (
     alternate_phone VARCHAR(32),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMPTZ,
-    CONSTRAINT chk_party_age CHECK (date_of_birth <= CURRENT_DATE - INTERVAL '18 years')
+    deleted_at TIMESTAMPTZ
 );
 CREATE INDEX idx_hrms_parties_tenant ON hrms_parties(tenant_id);
 CREATE UNIQUE INDEX uq_party_tenant_email ON hrms_parties(tenant_id, personal_email) WHERE deleted_at IS NULL;
@@ -291,20 +290,20 @@ CREATE TABLE hrms_bank_accounts (
     tenant_id UUID NOT NULL,
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
     bank_name VARCHAR(150) NOT NULL,
-    branch_name VARCHAR(150) NOT NULL,
+    branch_name VARCHAR(150),
     branch_address TEXT,
     account_number_enc BYTEA NOT NULL, -- AES-256-GCM envelope encrypted
     account_number_masked VARCHAR(30) NOT NULL,
     account_number_search_hash VARCHAR(64) NOT NULL, -- HMAC-SHA256 blind index
     account_type bank_account_type NOT NULL DEFAULT 'SALARY_CORPORATE',
-    ifsc_code VARCHAR(11) NOT NULL, -- Regex: ^[A-Z]{4}0[A-Z0-9]{6}$
+    routing_identifier VARCHAR(64) NOT NULL, -- Holds IFSC (India), Routing/ABA (US), Sort Code (UK), IBAN (EU)
+    routing_identifier_type VARCHAR(32) NOT NULL DEFAULT 'IFSC', -- IFSC, ROUTING_ABA, SORT_CODE, IBAN
     micr_code VARCHAR(9),
     account_holder_name VARCHAR(150) NOT NULL,
     penny_drop_status penny_drop_status NOT NULL DEFAULT 'PENDING',
     disbursal_mode disbursal_mode NOT NULL DEFAULT 'NEFT',
     is_primary BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_ifsc_format CHECK (ifsc_code ~ '^[A-Z]{4}0[A-Z0-9]{6}$')
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_hrms_bank_hash ON hrms_bank_accounts(tenant_id, account_number_search_hash);
 
@@ -325,11 +324,11 @@ CREATE TABLE hrms_employees (
     business_unit VARCHAR(64),
     department_code VARCHAR(64) NOT NULL, -- Foreign key to hrms_departments(tenant_id, code)
     sub_department VARCHAR(64),
-    cost_center_code VARCHAR(32) NOT NULL DEFAULT 'CC-DEFAULT',
+    cost_center_code VARCHAR(32), -- Completely optional (startups do not use cost centers)
     
     -- Hierarchy & Seniority
     designation_code VARCHAR(64) NOT NULL, -- Foreign key to hrms_designations(tenant_id, code)
-    grade_band VARCHAR(16) NOT NULL DEFAULT 'L3', -- L1 to L7, M1 to M4
+    grade_band VARCHAR(64), -- Optional leveling (startups leave this null)
     manager_id UUID REFERENCES hrms_employees(id) ON DELETE SET NULL,
     dotted_line_manager_id UUID REFERENCES hrms_employees(id) ON DELETE SET NULL,
     hrbp_id UUID REFERENCES hrms_employees(id) ON DELETE SET NULL,
@@ -343,10 +342,10 @@ CREATE TABLE hrms_employees (
     -- Lifecycle & Dates
     status employment_status NOT NULL DEFAULT 'DRAFT',
     hire_date DATE NOT NULL,
-    probation_period_days INT NOT NULL DEFAULT 90,
+    probation_period_days INT, -- Optional: NULL indicates direct confirmation on Day 1
     probation_end_date DATE,
     confirmation_date DATE,
-    notice_period_days INT NOT NULL DEFAULT 60,
+    notice_period_days INT NOT NULL DEFAULT 30, -- Company configurable per hire
     notice_start_date DATE,
     termination_date DATE,
     
@@ -366,10 +365,11 @@ CREATE TABLE hrms_contracts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
-    contract_type contract_type NOT NULL DEFAULT 'PERMANENT_FULL_TIME',
-    base_salary NUMERIC(18, 4) NOT NULL,
+    contract_type VARCHAR(64) NOT NULL DEFAULT 'PERMANENT_FULL_TIME',
+    base_salary NUMERIC(18, 4) NOT NULL, -- Total compensation freedom: company decides any amount
     currency VARCHAR(3) NOT NULL DEFAULT 'INR',
-    working_hours_per_week NUMERIC(5, 2) NOT NULL DEFAULT 40.00,
+    pay_frequency VARCHAR(32) NOT NULL DEFAULT 'MONTHLY', -- MONTHLY, HOURLY, ANNUAL, STIPEND
+    working_hours_per_week NUMERIC(5, 2), -- Completely optional / flexible
     effective_from DATE NOT NULL,
     effective_to DATE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -547,9 +547,10 @@ CREATE TABLE hrms_leave_types (
     tenant_id UUID NOT NULL,
     code VARCHAR(32) NOT NULL,
     name VARCHAR(128) NOT NULL,
-    annual_quota NUMERIC(5, 2) NOT NULL DEFAULT 12.00,
-    carry_forward_cap NUMERIC(5, 2) NOT NULL DEFAULT 30.00,
-    is_encashable BOOLEAN NOT NULL DEFAULT TRUE,
+    is_unlimited BOOLEAN NOT NULL DEFAULT FALSE, -- Supports modern Unlimited PTO
+    annual_quota NUMERIC(5, 2) DEFAULT 12.00,
+    carry_forward_cap NUMERIC(5, 2) DEFAULT 0.00,
+    is_encashable BOOLEAN NOT NULL DEFAULT FALSE,
     requires_approval BOOLEAN NOT NULL DEFAULT TRUE,
     is_sandwich_rule_active BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT uq_tenant_leave_code UNIQUE(tenant_id, code)
