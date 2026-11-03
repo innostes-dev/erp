@@ -31,6 +31,7 @@ It synthesizes findings from:
 | **[`06_api_contracts_and_database_schema.md`](./06_api_contracts_and_database_schema.md)** | Database DDL & REST APIs | Complete PostgreSQL relational schema, indexes, constraints, triggers, and full REST OpenAPI 3.1 endpoint catalog. |
 | **[`07_ui_ux_specifications_and_zoho_benchmark.md`](./07_ui_ux_specifications_and_zoho_benchmark.md)** | Modern Employee & Manager UX | Zoho People-style dashboard, line manager approval queues, profile drawers, and `@innostes/ui` component mappings. |
 | **[`08_sensitive_data_protection_and_pii_vault.md`](./08_sensitive_data_protection_and_pii_vault.md)** | Information Security & PII Vault | Aadhaar Data Vault (ADV), AES-256-GCM envelope encryption, HMAC-SHA256 blind indexing, PostgreSQL RLS, and immutable audit logs. |
+| **[`09_dynamic_masters_and_tenant_seeders.md`](./09_dynamic_masters_and_tenant_seeders.md)** | Dynamic Masters & Seeders Engine | Multi-tenant dynamic lookup masters (`hrms_lookup_masters`), out-of-the-box seed packs, admin governance, and safe soft-deactivation. |
 
 ---
 

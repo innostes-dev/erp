@@ -84,6 +84,30 @@ CREATE TYPE payroll_stage AS ENUM ('DRAFT', 'CALCULATING', 'REVIEW', 'COMMITTED'
 CREATE TYPE clearance_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- ============================================================================
+-- 0. DYNAMIC LOOKUP MASTERS (TENANT-CONFIGURABLE MASTER DATA)
+-- ============================================================================
+
+CREATE TABLE hrms_lookup_masters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    category VARCHAR(64) NOT NULL, -- e.g., 'DEPARTMENT', 'DESIGNATION', 'GRADE_BAND', 'DOCUMENT_TYPE'
+    code VARCHAR(64) NOT NULL,     -- Unique machine code per category per tenant, e.g. 'DEP_ENG'
+    name VARCHAR(255) NOT NULL,    -- Human readable display label, e.g. 'Engineering & Technology'
+    description TEXT,
+    parent_id UUID REFERENCES hrms_lookup_masters(id) ON DELETE SET NULL, -- Hierarchical support
+    display_order INT NOT NULL DEFAULT 0,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,   -- Soft-deactivate to preserve historical integrity
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,  -- True for seeded defaults; prevents accidental deletion
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb, -- Extended properties (colors, badges, cost center codes)
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMPTZ,
+    CONSTRAINT uq_tenant_category_code UNIQUE (tenant_id, category, code)
+);
+CREATE INDEX idx_hrms_masters_lookup ON hrms_lookup_masters(tenant_id, category, is_active, display_order);
+CREATE INDEX idx_hrms_masters_parent ON hrms_lookup_masters(parent_id);
+
+-- ============================================================================
 -- 1. PARTY & IDENTITY CORE (STEP 1: PERSONAL & DEMOGRAPHICS)
 -- ============================================================================
 
@@ -602,11 +626,15 @@ CREATE TABLE hrms_separations (
 -- 14. ROW-LEVEL SECURITY (RLS) POLICIES FOR PII & MULTI-TENANCY
 -- ============================================================================
 
+ALTER TABLE hrms_lookup_masters ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_bank_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_onboarding_drafts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_employees ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY tenant_masters_isolation ON hrms_lookup_masters
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_parties_isolation ON hrms_parties
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
@@ -636,9 +664,9 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/peopleops/employees` | List employee directory with filter by department, band, location, and status | `peopleops:read` | 200 OK |
 | `POST` | `/peopleops/employees` | Initialize candidate draft profile and trigger sequential employee code | `peopleops:write` | 201 Created |
-| `GET` | `/peopleops/employees/{id}` | Retrieve comprehensive 360 employee profile across all 9 sections | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/employees/{id}` | Retrieve comprehensive 360 employee profile across all 8 sections | `peopleops:read` | 200 OK |
 | `PATCH` | `/peopleops/employees/{id}` | Update organizational taxonomy, title, department, or manager links | `peopleops:write` | 200 OK |
-| `GET` | `/peopleops/onboarding/{id}/stepper` | Fetch candidate 9-step completion status and remaining requirements | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/onboarding/{id}/stepper` | Fetch candidate 8-step completion status and remaining requirements | `peopleops:read` | 200 OK |
 | `PUT` | `/peopleops/onboarding/{id}/step/{n}/draft` | Debounced auto-save payload (relaxed validation, saves to draft JSONB) | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/step/{n}/draft` | Fetch latest draft for active step (used during cross-device hydration) | `peopleops:read` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/step/{n}/commit` | Synchronous step validation & promotion to canonical master tables | `peopleops:write` | 200 OK |
@@ -648,7 +676,18 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/documents/upload` | Upload compliance file to encrypted vault, generate SHA-256 hash | `peopleops:write` | 201 Created |
 | `GET` | `/peopleops/documents/{id}/download` | Stream authenticated presigned URL for document viewing/download | `peopleops:read` | 200 OK |
 
-### 2.2 Statutory Verification & Lookup Tools
+### 2.2 Dynamic Tenant Master Data Management (MDM)
+
+| Method | Path | Summary & Purpose | Scopes Required | Success |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/peopleops/masters` | Query master options filtered by category (`?category=DEPARTMENT&active_only=true`) | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/masters/categories` | List all available master categories with counts and descriptions | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/masters` | Create a new custom master item in a category | `peopleops:admin` | 201 Created |
+| `PATCH` | `/peopleops/masters/{id}` | Update master name, description, display order, or active status | `peopleops:admin` | 200 OK |
+| `DELETE` | `/peopleops/masters/{id}` | Delete custom master (blocked if referenced by active employees) | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/masters/reseed-defaults` | Re-seed missing system default masters for the tenant | `peopleops:admin` | 200 OK |
+
+### 2.3 Statutory Verification & Lookup Tools
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
