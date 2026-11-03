@@ -280,7 +280,7 @@ When an employee clicks **`[ + Apply Leave ]`** or clicks any balance pill on th
 Daily check-in / check-out is performed **exclusively on the Dashboard widget** (`AttendanceCockpitWidget`). When an employee clicks on the Attendance navigation item (or clicks *"View Full Timesheet"* on their dashboard widget), they land on the **Attendance Cockpit** equipped with a **Dual-Axis View Switcher**:
 
 1. **Time Horizon**: `(•) Month` (30-day aggregate) | `( ) Day` (Single-day granular punch timeline)
-2. **Presentation Mode**: `(•) 📅 Calendar View` (Visual cards with clear badges) | `( ) ☰ List Mode` (Sortable, high-density table)
+2. **Presentation Mode**: `(•) Calendar View` (Visual cards with clear badges) | `( ) List Mode` (Sortable, high-density table)
 
 ```
 +-----------------------------------------------------------------------------------------------------------------------+
@@ -456,7 +456,7 @@ Clicking `[ Create Employee & Generate Credentials ]` immediately creates the em
 | [ sarah.chen@innostes.com                                                       ] |
 |                                                                                   |
 | Auto-Generated Temporary Password:                                                |
-| [ inn-7kPx-9mRt                                 ]    [ 📋 Copy Credentials ]      |
+| [ inn-7kPx-9mRt                                 ]    [ Copy Credentials ]        |
 |                                                                                   |
 | Security & Compliance Policy:                                                     |
 | • Welcome email with temporary credentials and login link has been dispatched.   |
@@ -550,7 +550,7 @@ Instead, they experience a **Dedicated Pre-Hire Application** with a customized 
 | --- HR FEEDBACK & DISCUSSION ---  | | [ Uploaded: infosys_relieving_letter.pdf (Verified) ]        [ View / Replace]| |
 | [✓] All items verified so far     | |                                                                               | |
 | (If HR requests changes, flagged  | | Last 3 Months' Payslips (August, September, October) *                        | |
-|  sections show [⚠️ Action Req])   | | [ Uploaded: payslips_aug_oct.pdf ]                           [ View / Replace]| |
+|  sections show [! Action Req])    | | [ Uploaded: payslips_aug_oct.pdf ]                           [ View / Replace]| |
 |                                   | |                                                                               | |
 |                                   | | Form 16 / Tax Computation Sheet (for FY 2026-27 TDS adjustment) *             | |
 |                                   | | [ Uploaded: form16_part_b.pdf ]                              [ View / Replace]| |
@@ -569,12 +569,12 @@ Instead, they experience a **Dedicated Pre-Hire Application** with a customized 
 2. **Dynamic Header Status Pill:**
    * `SAVING`: `[ • Saving draft... ]` (Subtle pulsing indicator triggered 1,500ms after the last typing pause or on field blur).
    * `SAVED_TO_CLOUD`: `[ ✓ All changes saved (2s ago) ]` (Subtle muted green badge confirming server persistence).
-   * `OFFLINE_LOCAL`: `[ ⚡ Offline — Saved to device ]` (IndexedDB local cache preserves inputs if Wi-Fi drops).
+   * `OFFLINE_LOCAL`: `[ Offline — Saved to device ]` (IndexedDB local cache preserves inputs if Wi-Fi drops).
 3. **Sidebar Completion Indicators**:
    * `[ ✓ ] Completed`: Section passed all schema validations and is committed to draft.
    * `[ • ] In Progress`: Candidate has partially entered data in this section.
    * `[ ○ ] Pending`: Unopened / untouched section.
-   * `[ ⚠️ Action Required ]`: HR flagged this section in the Verification Cockpit. Clicking it jumps directly to the flagged item with the HR reviewer's note.
+   * `[ ! Action Required ]`: HR flagged this section in the Verification Cockpit. Clicking it jumps directly to the flagged item with the HR reviewer's note.
 4. **Emergency Unload Flush (`navigator.sendBeacon`):**
    * If the candidate closes the browser tab, the browser triggers `navigator.sendBeacon` to dispatch the active form payload to `/peopleops/onboarding/{id}/beacon-flush`.
 
@@ -631,20 +631,20 @@ HR administrators track incoming candidates through a high-visibility pipeline d
 +---------------------------------------------------------------------------------------------------+
 | CANDIDATE / ROLE          | JOINING DATE | PROGRESS     | CURRENT STATUS            | ACTIONS     |
 +---------------------------+--------------+--------------+---------------------------+-------------+
-| Sarah Chen                | 15 Nov 2026  | [████████░░] | In Progress (Step 4/8)    | [ 📲 Nudge ]|
+| Sarah Chen                | 15 Nov 2026  | [████████░░] | In Progress (Step 4/8)    | [ Nudge ]   |
 | Senior Backend Engineer   | (In 12 days) | 75% Complete | Awaiting: Bank Cheque Leaf| [ View Draft]|
 +---------------------------+--------------+--------------+---------------------------+-------------+
 | Rohan Gupta               | 18 Nov 2026  | [██████████] | Submitted & Ready         | [ Review &  |
 | Product Designer          | (In 15 days) | 100% Done    | Pending HR Audit          |   Verify ]  |
 +---------------------------+--------------+--------------+---------------------------+-------------+
-| Priya Sharma              | 01 Dec 2026  | [██░░░░░░░░] | Invited (Link Sent)       | [ 📲 Nudge ]|
+| Priya Sharma              | 01 Dec 2026  | [██░░░░░░░░] | Invited (Link Sent)       | [ Nudge ]   |
 | Marketing Lead            | (In 28 days) | 20% Complete | Awaiting: Address & IDs   | [ Resend ]  |
 +---------------------------+--------------+--------------+---------------------------+-------------+
 | Michael Davies            | 10 Nov 2026  | [██████████] | Verified & Ready          | [ View      |
 | DevOps Specialist         | (In 7 days)  | 100% Approved| Credentials Dispatched    |   Profile ] |
 +---------------------------+--------------+--------------+---------------------------+-------------+
 ```
-* **One-Click Nudge (`[ 📲 Nudge ]`)**:
+* **One-Click Nudge (`[ Nudge ]`)**:
   * Pre-composes a context-aware message: *"Hi Sarah, we are excited for your Day 1 on 15 Nov! Please take 2 minutes to upload your bank cheque leaf here: https://app.innostes.com/onboard/tk_88a..."*
   * Dispatches across Email and WhatsApp in 1 click.
 * **Automated Cron Nudges**: The system automatically fires nudges at **T-7**, **T-3**, and **T-1** days prior to the joining date without requiring any manual HR effort.
@@ -1390,6 +1390,147 @@ Employees bundle multiple expense receipts into a single claim report:
 | [ + Add Expense Line Item ]                                               TOTAL CLAIM AMOUNT: INR 14,020.00 (GST: INR 701.00)     |
 +-----------------------------------------------------------------------------------------------------------------------------------+
 | [ Save Draft ]                                                              [ Submit Claim Report for Manager Approval -> ]       |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.11 Offboarding Initiation & Resignation Management Cockpit (`/hrms/offboarding`)
+
+Enables dual-mode execution: 1-click founder 60-second quick exit for early-stage teams vs. enterprise separation management:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| INNOSTES BUSINESS OS  ::  PEOPLEOPS  ::  SEPARATIONS & OFFBOARDING                                               [ Tenant: Acme Corp ] |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| [ All Separations (14) ]  [ Notice Period Active (4) ]  [ Clearances In Progress (3) ]  [ F&F Ready (2) ]  [ Completed/Archived ] |
+|                                                                                                                                   |
+| Total Active Exits: 4     Avg Notice Served: 54 Days     Pending Clearance Tasks: 7        Settlement Liability: INR 5,28,400     |
+| Search: [ Filter by name, emp code, department...            ]    [ + Initiate Separation ]  [ 60-Sec Quick Exit (Startup Mode) ] |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| EMP CODE | EMPLOYEE NAME        | DEPARTMENT    | EXIT TYPE               | RESIGNED ON | LAST DAY    | CLEARANCE | F&F STATUS  | ACTIONS|
++----------+----------------------+---------------+-------------------------+-------------+-------------+-----------+-------------+--------+
+| EMP-0042 | Sarah Chen           | Engineering   | Voluntary Resignation   | 01 Oct 2026 | 30 Nov 2026 | 3/4 Tasks | AUDITED     | [View] |
+| EMP-0089 | Vikram Malhotra      | Sales         | Voluntary Resignation   | 15 Oct 2026 | 15 Dec 2026 | 1/4 Tasks | COMPUTING   | [View] |
+| EMP-0104 | Rohit Sharma         | Product Ops   | Layoff / Redundancy     | 01 Nov 2026 | 05 Nov 2026 | 4/4 Tasks | READY_TO_PAY| [View] |
+| EMP-0012 | Ananya Iyer          | Customer Care | Superannuation / Retire | 01 Sep 2026 | 30 Nov 2026 | 2/4 Tasks | AUDITED     | [View] |
++----------+----------------------+---------------+-------------------------+-------------+-------------+-----------+-------------+--------+
+|                                                                                                                                   |
+| MODAL PREVIEW: [ 60-Sec Quick Exit (Startup Mode) ]                                                                               |
+| +-------------------------------------------------------------------------------------------------------------------------------+ |
+| | QUICK OFFBOARDING WIZARD                                                                                                  [X] | |
+| | Employee * [ EMP-0042 :: Sarah Chen (Engineering)                           v]  Last Working Day * [ 2026-11-30             ] | |
+| | Checklist for Day 1 Founders:                                                                                                 | |
+| |   [✓] Company MacBook Pro M3 and power brick returned and physically inspected                                                | |
+| |   [✓] Trigger automated IdP deprovisioning webhook (Google Workspace, Slack, GitHub, VPN)                                     | |
+| |   [✓] Settle corporate credit card and verify no unsettled cash advances                                                     | |
+| | Quick F&F Calculation:                                                                                                        | |
+| |   Pro-rata November Salary: INR 58,064.52  |  Leave Encashment (14.5 days): INR 48,333.33  |  Net Payout: INR 1,06,397.85     | |
+| | [ Cancel ]                                                                [ Complete Offboarding & Generate Relieving Letter ]| |
+| +-------------------------------------------------------------------------------------------------------------------------------+ |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.12 Multi-Department Clearance & Asset Handover Cockpit (`/hrms/offboarding/{id}/clearances`)
+
+Tracks parallel departmental sign-offs and auto-injects hardware damage or unreturned asset penalties into the F&F ledger:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| CLEARANCE COCKPIT  ::  Sarah Chen (EMP-0042)  ::  Senior Staff Engineer                                  Status: CLEARANCES_ACTIVE |
+| Resignation: 01 Oct 2026  |  Last Working Day: 30 Nov 2026 (12 Days Remaining)  |  Notice Period: 60 Days Contractual (60 Served)  |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| DEPARTMENT     | TASK NAME & SCOPE                          | ASSIGNED TO        | STATUS     | DAMAGE / RECOVERY | ACTIONS       |
++----------------+--------------------------------------------+--------------------+------------+-------------------+---------------+
+| IT Desk        | Hardware Asset Verification (MacBook Pro)  | it-lead@acme.com   | CLEARED    | INR 0.00          | [✓ View Serial]|
+| IT Desk        | External 4K Monitor & Peripherals Return   | it-lead@acme.com   | CLEARED    | INR 4,000.00 (Lost| [ Edit Note ] |
+| IT Desk        | Automated IdP & SaaS Suspension (Google/GH)| system-bot         | SCHEDULED  | --                | [ Force Now ] |
+| Finance        | Corporate Credit Card Deactivation         | finance@acme.com   | CLEARED    | INR 0.00          | [ Confirmed ] |
+| Finance        | Outstanding Expense Claims Settlement      | finance@acme.com   | ACTION_REQ | INR 0.00          | [ Audit Claim]|
+| Facilities     | RFID Smart Badge & Keycard Surrender       | admin@acme.com     | CLEARED    | INR 0.00          | [ Verified ]  |
+| HR & Legal     | Exit Interview Feedback Recording          | hr-lead@acme.com   | CLEARED    | INR 0.00          | [ View Survey]|
+| HR & Legal     | IP Assignment & Non-Disclosure Covenants   | legal@acme.com     | CLEARED    | INR 0.00          | [ Signed PDF ]|
++----------------+--------------------------------------------+--------------------+------------+-------------------+---------------+
+| FINANCIAL SYNC NOTICE: IT recorded INR 4,000.00 replacement charge for Lost Monitor. Charge injected into Settlement Deduction DAG.|
+| Overall Clearance Progress: 6 of 8 Tasks Completed (75%)                              [ Recalculate F&F Settlement Statement -> ] |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.13 Interactive Full and Final (F&F) Settlement Statement & Disbursal Studio (`/hrms/offboarding/{id}/fnf-settlement`)
+
+Features itemized 3-column financial reconciliation, Section 10(10) statutory gratuity formulation, and double-entry General Ledger sync:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| FULL AND FINAL (F&F) SETTLEMENT STUDIO  ::  Sarah Chen (EMP-0042)                                                 Status: AUDITED |
+| Tenure: 5 Years, 4 Months (Eligible for Gratuity u/s 1972)  |  LWD: 30 Nov 2026  |  Bank: HDFC Bank (A/C: ••••••••4921)            |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| 1. GROSS EARNINGS & ACCRUALS (+)        | 2. RECOVERIES & WITHHOLDINGS (-)        | 3. NET PAYABLE & LEDGERFLOW AUDIT             |
++-----------------------------------------+-----------------------------------------+-----------------------------------------------+
+| • Final Month Working Salary:           | • Notice Shortfall Recovery (0 Days):   | NET PAYABLE AMOUNT:                           |
+|   18 Days @ Basic INR 1,00,000          |   INR 0.00 (Full 60 Days Served)        | INR 2,41,884.62                               |
+|   = INR 58,064.52                       |                                         |                                               |
+| • Final Month HRA & Special Allowance:  | • Unsettled Salary Advance:             | Payout Status: APPROVED BY CONTROLLER         |
+|   18 Days Pro-rata = INR 41,935.48      |   INR 25,000.00 (Principal Balance)    | Target Disbursal Date: 30 Nov 2026            |
+| • Accrued Leave Encashment:             |                                         | Disbursement Rail: HDFC CMS Corporate Batch   |
+|   14.5 Days (Basic 1,00,000 / 30 * 14.5)| • Departmental Asset Damage Recovery:   |                                               |
+|   = INR 48,333.33                       |   INR 4,000.00 (Lost Monitor from IT)   | LEDGERFLOW BALANCED GL JOURNAL ENTRY:         |
+| • Statutory Gratuity (Act 1972):        |                                         | • DR 50100 (Final Salary):      INR 1,00,000.00|
+|   (15 * 1,00,000 * 5) / 26              | • Final Month Employee PF Deduction:    | • DR 50150 (Leave Encashment):  INR  48,333.33|
+|   = INR 2,88,461.54 (Section 10(10) Tax-|   INR 6,968.00 (12% of Basic)           | • DR 20500 (Gratuity Liability):INR 2,88,461.54|
+|     Free, Limit INR 20,00,000)          |                                         | • DR 50180 (Reimbursements):    INR  14,020.00|
+| • Pending Expense Claims Settled:       | • Professional Tax (Karnataka Slab):    | • CR 10400 (Salary Advance):    INR  25,000.00|
+|   Trip to Mumbai = INR 14,020.00        |   INR 200.00                            | • CR 50900 (Damage Offset):     INR   4,000.00|
+|                                         |                                         | • CR 20300 (TDS Tax Payable):   INR   6,332.00|
+|                                         | • Final TDS Withholding Tax:            | • CR 20400 (PT Tax Payable):    INR     200.00|
+|                                         |   INR 6,332.00 (Chapter VI-A adjusted)  | • CR 20150 (Net Settlement):    INR 2,41,884.62|
+|                                         |                                         | BALANCE CHECK: SUM(DR) == SUM(CR) (OK)        |
++-----------------------------------------+-----------------------------------------+-----------------------------------------------+
+| TOTAL EARNINGS:        INR 4,50,814.87  | TOTAL DEDUCTIONS:      INR 2,08,930.25  | FINAL NET TAKE-HOME:          INR 2,41,884.62 |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| [ Re-run Settlement DAG ]   [ Download PDF Statement ]    [ Generate Bank CMS File ]    [ Post GL & Commit Final Disbursement -> ]|
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.14 Automated Exit Letters & Post-Employment Alumni Document Vault (`/hrms/alumni/vault`)
+
+Authenticated via personal email (`sarah.chen@gmail.com`) with 7-year statutory post-employment document preservation:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| INNOSTES ALUMNI VAULT  ::  Welcome back, Sarah Chen                                         [ Account: sarah.chen@gmail.com ]     |
+| Former Designation: Senior Staff Engineer  |  Department: Engineering  |  Tenure: 01 Aug 2021 to 30 Nov 2026 (5 Years, 4 Months) |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| STATUTORY AUDIT NOTICE: In accordance with CBDT Section 192 and corporate retention policy, all separation records and tax forms|
+| are cryptographically preserved in this vault for 7 years until 30 November 2033.                                                 |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| OFFICIAL EXIT CERTIFICATES & LETTERS (CRYPTOGRAPHICALLY SIGNED VIA CLASS 3 DSC)                                                   |
++----+--------------------------------+-------------+---------------------------+-----------------------+---------------------------+
+| #  | DOCUMENT TITLE                 | DATE ISSUED | DIGITAL SIGNATURE STATUS  | VERIFICATION SHA-256  | ACTIONS                   |
++----+--------------------------------+-------------+---------------------------+-----------------------+---------------------------+
+| 1  | Relieving Letter               | 30 Nov 2026 | [✓] Signed (Innostes CA)  | e3b0c44298fc1c149afb...| [ Download Vector PDF ]   |
+| 2  | Experience & Service History   | 30 Nov 2026 | [✓] Signed (Innostes CA)  | 4b227777d4dd1fc61c6f...| [ Download Vector PDF ]   |
+| 3  | Full & Final Settlement Summary| 30 Nov 2026 | [✓] Signed (Innostes CA)  | 8f434346648f6b96df89...| [ Download Vector PDF ]   |
+| 4  | Provisional Form 16 (FY 26-27) | 30 Nov 2026 | [✓] Signed (Innostes CA)  | 2c26b46b68ffc68ff99b...| [ Download Vector PDF ]   |
++----+--------------------------------+-------------+---------------------------+-----------------------+---------------------------+
+|                                                                                                                                   |
+| HISTORICAL MONTHLY PAYSLIPS ARCHIVE (54 STATEMENTS AVAILABLE)                                                                     |
+| Select Fiscal Year: [ FY 2026 - 2027 v ]                                                                                          |
++-------------+---------------------+-------------------+---------------------+-------------------------+---------------------------+
+| MONTH       | GROSS EARNINGS      | TOTAL DEDUCTIONS  | NET TAKE-HOME       | PAYMENT STATUS          | DOWNLOAD STATEMENT        |
++-------------+---------------------+-------------------+---------------------+-------------------------+---------------------------+
+| Nov 2026    | INR 4,50,814.87     | INR 2,08,930.25   | INR 2,41,884.62     | PAID (Final Settlement) | [ Download Payslip PDF ]  |
+| Oct 2026    | INR 1,48,500.00     | INR   18,200.00   | INR 1,30,300.00     | PAID (Direct Deposit)   | [ Download Payslip PDF ]  |
+| Sep 2026    | INR 1,48,500.00     | INR   18,200.00   | INR 1,30,300.00     | PAID (Direct Deposit)   | [ Download Payslip PDF ]  |
+| Aug 2026    | INR 1,48,500.00     | INR   18,200.00   | INR 1,30,300.00     | PAID (Direct Deposit)   | [ Download Payslip PDF ]  |
++-------------+---------------------+-------------------+---------------------+-------------------------+---------------------------+
+| [ Bulk Download All Payslips (.ZIP) ]                                 Questions regarding your settlement? Contact: hr@acme.com    |
 +-----------------------------------------------------------------------------------------------------------------------------------+
 ```
 

@@ -1122,26 +1122,97 @@ CREATE TABLE hrms_expense_line_items (
 CREATE INDEX idx_exp_line_items ON hrms_expense_line_items(claim_report_id);
 
 -- ============================================================================
--- 13. OFFBOARDING & EXIT CLEARANCES
+-- 13. OFFBOARDING & FULL AND FINAL (F&F) SETTLEMENT ENGINE
 -- ============================================================================
 
 CREATE TABLE hrms_separations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id),
+    exit_type VARCHAR(64) NOT NULL DEFAULT 'VOLUNTARY_RESIGNATION', -- 'VOLUNTARY_RESIGNATION', 'INVOLUNTARY_TERMINATION_WITHOUT_CAUSE', 'INVOLUNTARY_TERMINATION_WITH_CAUSE', 'RETIREMENT_SUPERANNUATION'
+    separation_mode VARCHAR(32) NOT NULL DEFAULT 'ENTERPRISE', -- 'STARTUP_60_SECOND', 'ENTERPRISE'
     resignation_date DATE NOT NULL,
-    last_working_day DATE NOT NULL,
-    reason TEXT NOT NULL,
+    requested_lwd DATE NOT NULL,
+    approved_lwd DATE NOT NULL,
+    contractual_notice_days INT NOT NULL DEFAULT 60,
+    served_notice_days INT NOT NULL DEFAULT 60,
     notice_shortfall_days INT NOT NULL DEFAULT 0,
-    is_gratuity_eligible BOOLEAN NOT NULL DEFAULT FALSE,
-    it_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
-    finance_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
-    facilities_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
-    hr_clearance VARCHAR(32) NOT NULL DEFAULT 'PENDING',
-    final_settlement_amount NUMERIC(18, 4),
-    settlement_paid_at TIMESTAMPTZ,
+    notice_shortfall_waived BOOLEAN NOT NULL DEFAULT FALSE,
+    waiver_reason TEXT,
+    reason TEXT NOT NULL,
+    internal_notes TEXT,
+    status VARCHAR(64) NOT NULL DEFAULT 'INITIATED', -- 'INITIATED', 'NOTICE_PERIOD_ACTIVE', 'CLEARANCES_ACTIVE', 'CLEARANCES_APPROVED', 'FNF_COMPUTED', 'FNF_AUDITED', 'SETTLEMENT_DISBURSED', 'ACCESS_TERMINATED', 'WITHDRAWN'
+    created_by UUID NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_separations_tenant_status ON hrms_separations(tenant_id, status);
+CREATE INDEX idx_separations_emp ON hrms_separations(employee_id);
+
+CREATE TABLE hrms_separation_clearance_tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    separation_id UUID NOT NULL REFERENCES hrms_separations(id) ON DELETE CASCADE,
+    department VARCHAR(64) NOT NULL, -- 'IT', 'FINANCE', 'FACILITIES', 'HR_LEGAL'
+    task_code VARCHAR(64) NOT NULL, -- e.g. 'IT_HARDWARE_RETURN', 'IDP_SUSPENSION', 'CORP_CARD_CANCEL', 'EXPENSE_AUDIT', 'FACILITY_BADGE_SURRENDER', 'EXIT_INTERVIEW'
+    task_name VARCHAR(255) NOT NULL,
+    assigned_to_role VARCHAR(64) NOT NULL, -- 'IT_ADMIN', 'FINANCE_CONTROLLER', 'FACILITIES_LEAD', 'HR_PARTNER'
+    status VARCHAR(32) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'APPROVED', 'WAIVED'
+    cleared_by UUID,
+    cleared_at TIMESTAMPTZ,
+    financial_recovery_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    recovery_remarks TEXT,
+    remarks TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX idx_clearance_tasks_sep ON hrms_separation_clearance_tasks(separation_id, department);
+
+CREATE TABLE hrms_settlement_sheets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    separation_id UUID NOT NULL REFERENCES hrms_separations(id) ON DELETE CASCADE,
+    final_working_days INT NOT NULL DEFAULT 0,
+    pro_rata_salary NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    encashed_leave_days NUMERIC(8, 2) NOT NULL DEFAULT 0.00,
+    leave_encashment_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    is_gratuity_eligible BOOLEAN NOT NULL DEFAULT FALSE,
+    tenure_years INT NOT NULL DEFAULT 0,
+    gratuity_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    reimbursements_payable NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    notice_shortfall_deduction NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    salary_advance_unrecovered NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    departmental_asset_recoveries NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    final_tds_tax NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    final_professional_tax NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    net_payable_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.00,
+    gl_journal_id UUID,
+    status VARCHAR(32) NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'AUDITED', 'COMMITTED', 'DISBURSED'
+    audited_by UUID,
+    audited_at TIMESTAMPTZ,
+    disbursed_at TIMESTAMPTZ,
+    bank_reference_id VARCHAR(128),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX idx_settlement_sheet_sep ON hrms_settlement_sheets(separation_id);
+
+CREATE TABLE hrms_exit_documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    separation_id UUID NOT NULL REFERENCES hrms_separations(id) ON DELETE CASCADE,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id),
+    doc_type VARCHAR(64) NOT NULL, -- 'RELIEVING_LETTER', 'EXPERIENCE_CERTIFICATE', 'FNF_STATEMENT', 'PROVISIONAL_FORM16'
+    document_title VARCHAR(255) NOT NULL,
+    file_storage_path TEXT NOT NULL,
+    file_size_bytes INT NOT NULL,
+    sha256_hash VARCHAR(64) NOT NULL,
+    is_dsc_signed BOOLEAN NOT NULL DEFAULT FALSE,
+    dsc_signed_at TIMESTAMPTZ,
+    dsc_signer_dn VARCHAR(255),
+    alumni_visible BOOLEAN NOT NULL DEFAULT TRUE,
+    alumni_accessible_until DATE NOT NULL, -- Enforces 7-year statutory post-exit retention
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_exit_docs_emp ON hrms_exit_documents(employee_id, doc_type);
 
 -- ============================================================================
 -- 14. ROW-LEVEL SECURITY (RLS) POLICIES FOR PII & MULTI-TENANCY
@@ -1172,6 +1243,10 @@ ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_bank_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_onboarding_drafts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_employees ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_separations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_separation_clearance_tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_settlement_sheets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_exit_documents ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY tenant_departments_isolation ON hrms_departments
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
@@ -1246,6 +1321,18 @@ CREATE POLICY tenant_drafts_isolation ON hrms_onboarding_drafts
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_employees_isolation ON hrms_employees
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_separations_isolation ON hrms_separations
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_clearance_tasks_isolation ON hrms_separation_clearance_tasks
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_settlement_sheets_isolation ON hrms_settlement_sheets
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_exit_docs_isolation ON hrms_exit_documents
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 ```
 
@@ -1401,13 +1488,26 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/payroll/form16/merge-and-sign` | Merges Part A + Part B and applies Class 3 DSC digital signature to all Form 16 PDFs | `peopleops:admin` | 200 OK |
 | `GET` | `/peopleops/payroll/form16/my-form16` | Employee downloads signed, merged Form 16 PDF from personal ESS vault | `peopleops:read` (self) | 200 OK |
 
-### 2.8 Offboarding & Final Settlement (F&F)
+### 2.8 Offboarding, Clearances & Full and Final (F&F) Settlement
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
-| `POST` | `/peopleops/separations/initiate` | Record employee resignation or termination and set Last Working Day | `peopleops:write` | 201 Created |
-| `PATCH` | `/peopleops/separations/{id}/clearance`| Update departmental clearance status (IT, Finance, Facilities, HR) | `peopleops:write` | 200 OK |
-| `POST` | `/peopleops/separations/{id}/calculate-fnf`| Compute Full & Final settlement including gratuity & encashment | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/separations/initiate` | Record employee resignation or termination, define exit type, and compute contractual notice period | `peopleops:write` | 201 Created |
+| `POST` | `/peopleops/separations/quick-exit` | Founder 60-second exit: 1-click laptop return checklist, triggers IdP deprovisioning webhook, and calculates pro-rata salary | `peopleops:admin` | 201 Created |
+| `GET` | `/peopleops/separations` | List all active and archived employee separations with filter by exit type, status, and LWD | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/separations/{id}` | Retrieve comprehensive separation 360 cockpit (timeline, notice days, clearance DAG, settlement statement) | `peopleops:read` | 200 OK |
+| `PATCH` | `/peopleops/separations/{id}/lwd-negotiate` | Manager/HR confirms or amends Last Working Day, calculates notice shortfall, and toggles waiver | `peopleops:manager` | 200 OK |
+| `POST` | `/peopleops/separations/{id}/withdraw` | Employee withdraws resignation (requires line manager and HR approval) | `peopleops:read` (self) | 200 OK |
+| `GET` | `/peopleops/separations/{id}/clearances` | List departmental clearance tasks across IT, Finance, Facilities, and HR with assigned roles | `peopleops:read` | 200 OK |
+| `PATCH` | `/peopleops/separations/{id}/clearances/{task_id}` | Department lead approves clearance, waives item, or enters financial damage recovery amount | `peopleops:write` | 200 OK |
+| `POST` | `/peopleops/separations/{id}/calculate-fnf` | Settlement DAG engine computes pro-rata salary, leave encashment, gratuity, notice recovery, asset deductions, and final TDS | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/separations/{id}/audit-fnf` | Controller/HR signs off on settlement sheet; moves status to AUDITED | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/separations/{id}/commit-fnf` | Final settlement commit: posts balanced double-entry GL journal in LedgerFlow and enqueues bank payout batch | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/separations/{id}/bank-batch` | Export corporate bank payout file (CMS/ACH) for final settlement net disbursal | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/separations/{id}/exit-documents/generate-all` | Renders Relieving Letter, Service Certificate, and F&F Statement; signs with corporate Class 3 DSC | `peopleops:admin` | 201 Created |
+| `GET` | `/peopleops/separations/{id}/exit-documents/{doc_type}/pdf` | Stream signed vector PDF of exit document for HR or employee | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/alumni/my-documents` | Alumni portal endpoint: retrieve list of available historical payslips, Form 16, and signed exit letters | `peopleops:read` (alumni) | 200 OK |
+| `GET` | `/peopleops/alumni/documents/{id}/download` | Stream authenticated download of exit documents (enforces 7-year statutory post-exit retention) | `peopleops:read` (alumni) | 200 OK |
 
 ### 2.9 Approval Routing, Delegations & Team Operations
 
