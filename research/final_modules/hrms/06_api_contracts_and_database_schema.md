@@ -731,13 +731,16 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `PATCH` | `/peopleops/employees/{id}` | Update organizational taxonomy, title, department, or manager links | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/employees/{id}/reset-password` | Administrative reset: invalidates active sessions, auto-generates a new temporary password with `must_change_password=TRUE`, and notifies employee | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/employees/{id}/resend-invite` | Re-dispatches welcome credentials with new temporary password | `peopleops:write` | 200 OK |
+| `GET` | `/peopleops/onboarding/pipeline` | Fetch incoming candidate pre-onboarding tracking pipeline with progress % and days to start | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/onboarding/{id}/nudge` | Send contextual reminder nudge to candidate via WhatsApp, SMS, and Email | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/stepper` | Fetch candidate 8-step completion status and remaining requirements | `peopleops:read` | 200 OK |
 | `PUT` | `/peopleops/onboarding/{id}/step/{n}/draft` | Debounced auto-save payload (relaxed validation, saves to draft JSONB) | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/step/{n}/draft` | Fetch latest draft for active step (used during cross-device hydration) | `peopleops:read` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/step/{n}/commit` | Synchronous step validation & promotion to canonical master tables | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/beacon-flush` | Emergency beacon flush (`sendBeacon`) executed on browser tab close | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/submit` | Candidate final submission of all steps for HR compliance review | `peopleops:write` | 200 OK |
-| `POST` | `/peopleops/onboarding/{id}/verify-step`| HR auditor approves or requests changes with reason on step $n$ | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/onboarding/{id}/verify-step`| HR auditor approves step $n$ and promotes data to canonical master | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/onboarding/{id}/request-correction`| HR auditor flags specific step or document for correction with structured reason note | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/documents/upload` | Upload compliance file to encrypted vault, generate SHA-256 hash | `peopleops:write` | 201 Created |
 | `GET` | `/peopleops/documents/{id}/download` | Stream authenticated presigned URL for document viewing/download | `peopleops:read` | 200 OK |
 

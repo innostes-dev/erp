@@ -292,33 +292,64 @@ The candidate completes their detailed bank, tax, and address profile on their o
 
 ---
 
-### 5.3 HR Onboarding Review & Compliance Cockpit (`/hrms/onboarding/review`)
+### 5.3 HR Pre-Onboarding Pipeline Tracker (`/hrms/onboarding/pipeline`)
+
+HR administrators track incoming candidates through a high-visibility pipeline dashboard that completely eliminates manual email follow-ups and spreadsheet tracking:
+
+```
++---------------------------------------------------------------------------------------------------+
+| PRE-ONBOARDING PIPELINE TRACKER                                     [ + Invite New Candidate ]    |
+| Filter: [ All Upcoming Hires (4) v ]   Sort: [ Joining Date (Earliest First) v ]   [ Search... ]  |
++---------------------------------------------------------------------------------------------------+
+| CANDIDATE / ROLE          | JOINING DATE | PROGRESS     | CURRENT STATUS            | ACTIONS     |
++---------------------------+--------------+--------------+---------------------------+-------------+
+| Sarah Chen                | 15 Nov 2026  | [████████░░] | In Progress (Step 4/8)    | [ 📲 Nudge ]|
+| Senior Backend Engineer   | (In 12 days) | 75% Complete | Awaiting: Bank Cheque Leaf| [ View Draft]|
++---------------------------+--------------+--------------+---------------------------+-------------+
+| Rohan Gupta               | 18 Nov 2026  | [██████████] | Submitted & Ready         | [ Review &  |
+| Product Designer          | (In 15 days) | 100% Done    | Pending HR Audit          |   Verify ]  |
++---------------------------+--------------+--------------+---------------------------+-------------+
+| Priya Sharma              | 01 Dec 2026  | [██░░░░░░░░] | Invited (Link Sent)       | [ 📲 Nudge ]|
+| Marketing Lead            | (In 28 days) | 20% Complete | Awaiting: Address & IDs   | [ Resend ]  |
++---------------------------+--------------+--------------+---------------------------+-------------+
+| Michael Davies            | 10 Nov 2026  | [██████████] | Verified & Ready          | [ View      |
+| DevOps Specialist         | (In 7 days)  | 100% Approved| Credentials Dispatched    |   Profile ] |
++---------------------------+--------------+--------------+---------------------------+-------------+
+```
+* **One-Click Nudge (`[ 📲 Nudge ]`)**:
+  * Pre-composes a context-aware message: *"Hi Sarah, we are excited for your Day 1 on 15 Nov! Please take 2 minutes to upload your bank cheque leaf here: https://app.innostes.com/onboard/tk_88a..."*
+  * Dispatches across Email and WhatsApp in 1 click.
+* **Automated Cron Nudges**: The system automatically fires nudges at **T-7**, **T-3**, and **T-1** days prior to the joining date without requiring any manual HR effort.
+
+---
+
+### 5.4 HR Onboarding Review & Compliance Cockpit (`/hrms/onboarding/review`)
 
 HR administrators review candidate onboarding packages through a dedicated side-by-side verification interface:
 
 ```
 +---------------------------------------------------------------------------------------------------+
-| HR Verification Cockpit: Alex Rivera (EMP-00104) | Status: PENDING REVIEW | [ Approve ] [ Changes ]|
+| HR Verification Cockpit: Sarah Chen (INN-00105) | Status: PENDING REVIEW | [ Approve All ] [ Close ]|
 +---------------------------------------------------------------------------------------------------+
-| APPLICANT SUBMISSION DATA (50% Screen)          | UPLOADED DOCUMENT PREVIEW (50% Screen)          |
+| CANDIDATE SUBMISSION DATA (50% Screen)          | UPLOADED DOCUMENT PREVIEW (50% Screen)          |
 |                                                 |                                                 |
-| Step 3: Statutory Identification                | +---------------------------------------------+ |
-| Aadhaar (Masked): XXXX-XXXX-4819                | | [ Aadhaar Card Scanned Image ]              | |
-| Name on Card: Alex Rivera                       | | Name: Alex Rivera                           | |
-| Verhoeff Validation: [ PASSED ]                 | | DOB: 14/08/1994                             | |
-|                                                 | | Gender: Male                                | |
-| PAN: ABCPR1234F                                 | | Aadhaar: XXXX XXXX 4819                     | |
-| Name on PAN: Alex Rivera                        | +---------------------------------------------+ |
-| 4th Char Persona Check: [ PASSED ('P') ]        |                                                 |
-|                                                 | Inline Review Actions:                          |
-| UAN: 101234567890                               | [ ✓ Verify Aadhaar ]  [ ✕ Reject Document ]   |
-| Status: Validated against EPFO database         | Rejection Note: [ Blur scan, please re-upload ] |
+| Step 4: Banking & Disbursement Details          | +---------------------------------------------+ |
+| Bank Name: HDFC Bank Ltd (Auto-resolved)        | | [ Scanned Cancelled Cheque / Passbook Image]| |
+| Branch: Richmond Road, Bengaluru                | | Pay: .......................................| |
+| IFSC Code: HDFC0000240 [ MATCHED RBI ]          | | A/C: 50100481923014                         | |
+| Account Number: 50100481923014                  | | Name: Sarah Chen                            | |
+| Account Type: Corporate Salary                  | | IFSC: HDFC0000240                           | |
+| Account Holder Name: Sarah Chen                 | +---------------------------------------------+ |
+| Legal Name Match: 100% MATCH                    |                                                 |
+|                                                 | Inline Review Actions for Step 4:               |
+| Step 3: Statutory Identification (Verified)     | [ ✓ Approve Bank Info ]  [ ✕ Request Changes ]  |
+| Step 2: Address & Emergency Contacts (Verified) | Notes: [ Cheque leaf matches account number ] |
 +---------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-### 5.4 Slide-Over Employee 360 Drawer (`EmployeeDetailDrawer`)
+### 5.5 Slide-Over Employee 360 Drawer (`EmployeeDetailDrawer`)
 
 Selecting an employee row or card opens a non-modal slide-over drawer from the right edge (width: 720px on desktop, full width on mobile), preserving the underlying list context.
 

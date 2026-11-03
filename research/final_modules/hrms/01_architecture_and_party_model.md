@@ -86,18 +86,95 @@ Captures personal details required for corporate directories, medical insurance,
 
 ---
 
-### Startup-First Ergonomics: 60-Second Quick-Add vs. Self-Service Intake
+### The Delegated Pre-Onboarding Strategy: Eliminating the "Email and Manual HR Entry" Anti-Pattern
 
-Startups cannot afford multi-step administrative gridlock when bringing on new teammates. Innostes implements a **Dual-Mode Intake Architecture**:
+In conventional company setups, HR teams face an exhausting, error-prone workflow when onboarding new hires:
+1. HR does not have the candidate's statutory, banking, or educational data prior to onboarding.
+2. HR sends an email asking the candidate to "please reply with scanned copies of your Aadhaar, PAN, cancelled cheque, degree certificate, and payslips."
+3. The candidate sends fragmented emails, WhatsApp photos, or PDFs over several days.
+4. HR sits and manually transcribes 16-digit bank account numbers, IFSC codes, PANs, and addresses into the HRMS.
 
-1. **The 60-Second Founder Quick-Add (`POST /peopleops/employees/quick-add`)**:
-   * Admin enters only 4 essential fields: `Legal Name`, `Work Email`, `Designation`, and `Monthly Compensation`.
-   * An active employee profile is generated immediately with status `INVITED / ONBOARDING`.
-   * An onboarding magic link is dispatched to the candidate's personal email/SMS.
-   * **Instant Day 1 Access:** The employee can immediately log in, access internal announcements, and record daily attendance even while their background document uploads are in progress.
-2. **Progressive Self-Service Completion**:
-   * The candidate completes their bank details, addresses, and statutory IDs on their own time via mobile web.
-   * If a candidate takes 3 days to find their graduation degree certificate, their profile and check-in access are **never blocked**.
+#### Why the Traditional Email-and-Manual-Entry Approach Fails:
+* **Severe Typo Risk:** A single miskeyed digit in an IFSC code or bank account number causes salary disbursement failures on payday.
+* **PII Security & Compliance Violations:** Sensitive government IDs and bank cheques sit permanently unencrypted in corporate email inboxes and chat logs, violating UIDAI and DPDP/GDPR regulations.
+* **Clerical Time Drain:** HR wastes 2 to 3 hours per hire performing manual data entry instead of employee orientation and culture building.
+
+---
+
+### The Innostes Solution: Delegated Pre-Onboarding Intake Pipeline
+
+Innostes flips the paradigm from **HR manual transcription** to **Delegated Candidate Self-Service with Zero-Typing HR Verification**:
+
+```mermaid
+flowchart TD
+    subgraph Step1["Phase 1: Minimal Initiation (HR - 30 Seconds)"]
+        HREntry["HR enters only 5 contractual fields:<br/>• Legal Name<br/>• Personal Email & Mobile<br/>• Designation & Department<br/>• Joining Date & Offered CTC"]
+        HREntry --> Dispatch["System Dispatches Pre-Onboarding Invitation<br/>(Personalized link sent via Email, SMS & WhatsApp)"]
+    end
+
+    subgraph Step2["Phase 2: Candidate Delegated Self-Service (Pre-Day 1)"]
+        Dispatch --> Portal["Candidate Opens Mobile-Friendly Pre-Onboarding Portal<br/>(No corporate network or VPN required)"]
+        Portal --> Stepper["Candidate Fills Own Details (8 Steps):<br/>• Personal & Family<br/>• Addresses & Emergency Contacts<br/>• Statutory IDs (Aadhaar, PAN)<br/>• Bank Details (IFSC auto-resolves branch)<br/>• Uploads Scans Directly to Encrypted Vault"]
+        Stepper --> AutoSave["Live Real-Time Auto-Save:<br/>Saves after every keystroke to draft JSONB<br/>Candidate can pause, resume on phone, or finish in 3 days"]
+    end
+
+    subgraph Step3["Phase 3: HR Side-by-Side Review Cockpit (Zero Typing)"]
+        AutoSave --> Submit["Candidate Submits Onboarding Profile"]
+        Submit --> HRCockpit["HR Opens Verification Cockpit:<br/>• Left Screen: Uploaded Document (Cheque / PAN)<br/>• Right Screen: Candidate Submitted Values"]
+        HRCockpit --> Decision{"HR Review Decision"}
+        Decision -->|Approve| Promote["1-Click Approve:<br/>Data promoted to Canonical Master Tables"]
+        Decision -->|Correction Needed| RejectNote["1-Click Request Changes:<br/>HR adds note: 'Cheque blurred, please re-upload'<br/>Candidate gets instant SMS/email nudge"]
+    end
+
+    subgraph Step4["Phase 4: Day 1 Non-Blocking Transition"]
+        Promote --> Day1["Day 1 Start:<br/>Employee logs in, punches attendance<br/>Missing optional docs show friendly ESS banner<br/>Never blocks Day 1 work or check-in"]
+    end
+```
+
+#### 1. Phase 1: Minimal Initiation (HR - 30 Seconds)
+* The HR administrator or founder enters only the contractual details the company decides:
+  * Legal First & Last Name
+  * Personal Email Address & Mobile Phone
+  * Designation / Job Title & Department
+  * Date of Joining & Offered CTC
+* HR clicks **`[ Send Pre-Onboarding Invitation ]`**.
+* HR does **not** collect, ask for, or type bank accounts, Aadhaar, PAN, emergency contacts, or previous work history.
+
+#### 2. Phase 2: Candidate Delegated Self-Service (Pre-Joining)
+* The candidate receives an invitation via email, SMS, and WhatsApp: *"Welcome to Acme Corp! Please complete your onboarding profile before your start date on 15 Nov."*
+* The candidate opens the secure onboarding portal on their phone or laptop.
+* **Instant Auto-Validation While Typing**:
+  * **IFSC Lookup**: Entering an IFSC code immediately queries the RBI bank branch directory, auto-populating the Bank Name, Branch, and MICR code (zero typing mistakes).
+  * **Dual Account Number Confirmation**: Bank account number must be entered twice to prevent clerical typos.
+  * **Algorithmic Checksums**: Aadhaar is verified in real-time via the Verhoeff algorithm; PAN is validated against the individual persona regex (`[A-Z]{5}[0-9]{4}[A-Z]{1}` with 4th character `'P'`).
+* **Direct Encrypted Document Upload**:
+  * Scans of the cancelled cheque, Aadhaar, PAN, and degree certificates are uploaded directly into the AES-256 envelope-encrypted PII vault. Scans never pass through unencrypted corporate email servers.
+* **Continuous Auto-Save**:
+  * Every input is debounced and auto-saved to `hrms_onboarding_drafts`. If the candidate stops at Step 3 to find their bank passbook and returns the next day on their phone, all progress is preserved.
+
+#### 3. Phase 3: HR Side-by-Side Zero-Typing Review Cockpit
+* When the candidate submits their onboarding package (or completes individual milestones), HR receives an in-app and email alert: *"Candidate Sarah Chen submitted onboarding details for review"*.
+* HR opens the **Side-by-Side Verification Cockpit**:
+  * **Left Pane**: Scanned document preview (e.g. Cancelled Cheque image or PAN card).
+  * **Right Pane**: The candidate's submitted text values (Account Number, IFSC, Account Holder Name).
+* **Zero Typing for HR**:
+  * HR simply verifies: *"Does the account holder name on the cheque match 'Sarah Chen'? Yes. Does the account number match? Yes."*
+  * HR clicks **`[ ✓ Approve Step ]`** $\implies$ The system automatically promotes the data into canonical database tables (`hrms_bank_accounts`, `hrms_statutory_identities`).
+  * If an issue is spotted: HR clicks **`[ ✕ Request Correction ]`** and enters a quick note (e.g., *"Cheque photo is cropped; please re-upload showing full account number"*). The candidate receives an instant SMS/email notification and can fix it in 30 seconds without starting over.
+
+#### 4. Phase 4: Automated Pre-Joining Reminders & Tracking
+* **Automated Nudge Schedule**: The system automatically dispatches polite reminder notifications to the candidate at **T-7 days**, **T-3 days**, and **T-1 day** before their joining date.
+* **HR Pipeline Tracker**: HR has an instant overview of all incoming hires:
+  * `[ Sarah Chen | Senior Engineer | Joining 15 Nov | 80% Complete | Awaiting: Cheque Leaf | [ 📲 Nudge ] ]`
+  * `[ Rohan Gupta | Product Designer | Joining 18 Nov | 100% Submitted | Ready for HR Review | [ Review ] ]`
+* **1-Click WhatsApp / Email Nudge**: HR can click `[ Nudge Candidate ]` at any time to send a friendly pre-templated reminder directly to the candidate's WhatsApp or personal email.
+
+#### 5. Phase 5: Day 1 Non-Blocking Progression
+* If a candidate has completed their bank and statutory info, but has not yet located their previous company's relieving letter or college degree certificate by Day 1:
+  * **The employee is NEVER blocked** from Day 1 orientation, Slack/email access, or web check-in.
+  * The pending items are non-blocking and appear as a gentle action banner on their Employee Self-Service (ESS) home page:
+    `[ ⚠️ Onboarding 85% Complete: Please upload your previous company relieving letter by 30 Nov ]`.
+  * The only hard deadline is bank account + PAN submission before the monthly payroll cutoff date (enforced with automated 5-day warning countdowns).
 
 ---
 
