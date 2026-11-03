@@ -15,6 +15,15 @@ import {
   Send,
   X,
 } from 'lucide-react';
+import {
+  EmployeesTab,
+  AttendanceTab,
+  LeaveTab,
+  PayrollTab,
+  ExpensesTab,
+  OffboardingTab,
+  MastersTab,
+} from '@innostes/peopleops';
 
 interface ApprovalItem {
   id: string;
@@ -25,7 +34,30 @@ interface ApprovalItem {
   reason: string;
 }
 
-export function PeopleOpsDashboard() {
+export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activeSubFeatureId?: string }) {
+  // Delegate to specific sub-feature page when selected in sidemenu
+  if (activeSubFeatureId === 'employees') {
+    return <EmployeesTab />;
+  }
+  if (activeSubFeatureId === 'attendance') {
+    return <AttendanceTab />;
+  }
+  if (activeSubFeatureId === 'leave') {
+    return <LeaveTab />;
+  }
+  if (activeSubFeatureId === 'payroll') {
+    return <PayrollTab />;
+  }
+  if (activeSubFeatureId === 'expenses') {
+    return <ExpensesTab />;
+  }
+  if (activeSubFeatureId === 'offboarding') {
+    return <OffboardingTab />;
+  }
+  if (activeSubFeatureId === 'masters') {
+    return <MastersTab />;
+  }
+
   // Web Check-In & Timer state
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [secondsToday, setSecondsToday] = useState(4 * 3600 + 22 * 60 + 15); // e.g. 4h 22m

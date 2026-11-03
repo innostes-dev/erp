@@ -67,6 +67,8 @@ import {
   PieChart,
   Globe,
   Contact2,
+  Database,
+  LogOut,
 } from 'lucide-react';
 import { useNavigation } from '../context/NavigationContext';
 import { useModules } from '../context/ModulesContext';
@@ -124,6 +126,10 @@ function getSubFeatureIcon(subId: string) {
       return <TrendingUp className="size-4 shrink-0" />;
     case 'expenses':
       return <DollarSign className="size-4 shrink-0" />;
+    case 'offboarding':
+      return <LogOut className="size-4 shrink-0" />;
+    case 'masters':
+      return <Database className="size-4 shrink-0" />;
     case 'leads':
       return <Target className="size-4 shrink-0" />;
     case 'contacts':
@@ -249,7 +255,7 @@ export function ModuleShellLayout({ moduleId }: ModuleShellLayoutProps) {
   function renderModuleDashboard() {
     switch (moduleId) {
       case 'peopleops':
-        return <PeopleOpsDashboard />;
+        return <PeopleOpsDashboard activeSubFeatureId={activeSubFeatureId} />;
       case 'salesflow':
         return <SalesFlowDashboard />;
       case 'hireflow':
@@ -439,8 +445,8 @@ export function ModuleShellLayout({ moduleId }: ModuleShellLayoutProps) {
           {/* Main Module Content Area */}
           <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-muted/10">
             <div className="max-w-6xl mx-auto w-full">
-              {/* Optional Section Banner if non-dashboard item is clicked */}
-              {activeSubFeatureId !== 'dashboard' && activeSubFeatureId !== 'overview' && (
+              {/* Optional Section Banner if non-dashboard item is clicked (only for stub modules) */}
+              {moduleId !== 'peopleops' && activeSubFeatureId !== 'dashboard' && activeSubFeatureId !== 'overview' && (
                 <div className="mb-5 p-3.5 rounded-xl border border-primary/20 bg-primary/5 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-foreground">

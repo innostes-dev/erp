@@ -13,12 +13,12 @@ export const ALL_BUSINESS_MODULES: CatalogItem[] = [
     subFeatures: [
       { id: 'dashboard', label: 'Dashboard', description: 'Personal home, Web check-in/out, live timer, and leave balance.' },
       { id: 'employees', label: 'Employees', description: 'Employee directory, profiles, and organization structure.' },
-      { id: 'onboarding', label: 'Onboarding', description: 'New hire pre-boarding and statutory document verification.' },
       { id: 'attendance', label: 'Attendance', description: 'Daily punches, working hours, and regularization requests.' },
       { id: 'leave', label: 'Leave', description: 'Time-off requests, team approvals, and holiday calendar.' },
       { id: 'payroll', label: 'Payroll', description: 'Monthly salary runs, payslips, and bank payout CSV.' },
-      { id: 'performance', label: 'Performance', description: 'Goal setting, appraisal cycles, and team reviews.' },
       { id: 'expenses', label: 'Expenses', description: 'Expense claims, receipts, and reimbursement payouts.' },
+      { id: 'offboarding', label: 'Offboarding', description: 'Separation workflows, clearance tasks, and F&F settlement.' },
+      { id: 'masters', label: 'Masters', description: 'Departments, designations, office locations, and dynamic picklists.' },
     ],
   },
   {
