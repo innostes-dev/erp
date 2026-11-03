@@ -40,24 +40,45 @@ flowchart TD
 
 ---
 
-## 3. The 9-Step Master Employee Data Catalog
+## 3. The 10-Section Master Employee Pre-Onboarding Data Catalog
 
-Enterprise-grade HRMS requires a comprehensive, multi-step data model. Innostes PeopleOps implements an 8-step Phase 1 onboarding schema (with electronic document signing deferred to Phase 2):
+Enterprise-grade HRMS requires a comprehensive pre-hire intake model comparable to tier-1 enterprise onboarding systems (such as TCS iON, Infosys Launchpad, and Darwinbox). Innostes PeopleOps organizes candidate data collection across 10 specialized sections:
 
 ```
-EMPLOYEE DATA INTAKE PIPELINE (PHASE 1: 8 STEPS + SUBMISSION)
-├── Step 1: Core Personal & Demographic Identity
-├── Step 2: Contact Details, Addresses & Emergency Contacts
-├── Step 3: Statutory & National Identity Vault (India & Global)
-├── Step 4: Banking, Disbursement & Direct Deposit Information
-├── Step 5: Employment, Band Taxonomy & Dual-Matrix Hierarchies
-├── Step 6: Educational Qualifications & Professional Certifications
-├── Step 7: Prior Employment & Experience Verification
-├── Step 8: Family Dependents & Statutory Nominees (Form 2 / Form F)
-└── Review & Submit: Candidate Review & Formal Submission to HR
+ENTERPRISE EMPLOYEE PRE-ONBOARDING INTAKE PIPELINE (10 CANONICAL SECTIONS)
+├── Section 1: Core Personal & Demographic Identity (DOB, Blood Group, Marital, Languages Known)
+├── Section 2: Contact Details, Addresses & Emergency Contacts (Current, Permanent, Escalations)
+├── Section 3: Statutory & National Identity Vault (Aadhaar, PAN, UAN/EPFO, Passport, ESIC)
+├── Section 4: Banking, Disbursement & Direct Deposit (IFSC Lookup, Dual A/C Entry, Cheque Scan)
+├── Section 5: Prior Employment & Work History (Previous Companies, Relieving Letters, Payslips, Form 16, BGV)
+├── Section 6: Technical Skillsets, Tools & Professional Certifications (Skills, Proficiency, Cloud Certs)
+├── Section 7: Educational Qualifications (10th, 12th, UG, PG, Doctorate with Marksheet & Degree Scans)
+├── Section 8: Family Dependents & Statutory Nominees (EPF, EPS, Gratuity Form F 100% Split, GMC Mediclaim)
+├── Section 9: Work Equipment, Asset & Office Preferences (Laptop OS, T-Shirt Size, Dietary Preferences)
+└── Section 10: Final Review & Submission to HR (Read-Only Summary, Declarations, Submission Commit)
 
 [NOTE: Contractual Electronic Document Signing (Aadhaar eSign / DocuSign) is deferred to Phase 2]
 ```
+
+---
+
+### Dedicated Pre-Onboarding Portal Shell (Isolated Application Experience)
+
+When an incoming candidate in `ONBOARDING` status signs into the system (or opens their secure onboarding link), they do **not** see the standard enterprise ERP layout:
+* They are not exposed to the global company navigation, module switchers, CRM pipelines, accounting ledgers, inventory trees, or organization-wide employee directories.
+* Instead, the application automatically mounts the **Dedicated Candidate Onboarding Portal Shell (`CandidateOnboardingLayout`)**.
+
+#### Characteristics of the Candidate Onboarding Portal:
+1. **Distraction-Free Branded Shell**: Modern pre-hire experience featuring company branding, candidate greeting, target start date countdown, and overall onboarding progress bar (`[████████░░] 75% Complete`).
+2. **Dedicated Left Sidebar Navigation**: The sidebar contains **only** the 10 onboarding sections. Each section displays its real-time completion state:
+   * `[ ✓ ] Completed & Validated`
+   * `[ • ] In Progress (Draft auto-saved)`
+   * `[ ○ ] Pending`
+   * `[ ⚠️ Action Required ]` (Flagged by HR with review notes for revision)
+3. **Painless Asynchronous Completion**: The candidate can jump freely between sections (e.g. fill Work History today, and upload Bank Cheque tomorrow) with zero fear of data loss due to continuous auto-saving.
+4. **HR Cross-Checking & Manual Discussion**:
+   * HR's responsibility is solely to cross-check submitted items against scans in the HR Verification Cockpit.
+   * If there is an issue (e.g., blurry image or discrepancy in prior PF member ID), HR can either leave an inline correction note (which instantly flags the item in the candidate's sidebar) or conduct a quick call/discussion with the candidate.
 
 ---
 
@@ -83,6 +104,8 @@ Captures personal details required for corporate directories, medical insurance,
 | `spouse_name` | `VARCHAR(150)` | Nullable | Optional: Required only for married gratuity/insurance nomination. |
 | `is_differently_abled` | `BOOLEAN` | DEFAULT FALSE | Person with Disabilities (PwD) classification. |
 | `disability_details` | `TEXT` | Nullable | Nature of disability, certificate number, and % impairment. |
+| `mother_tongue` | `VARCHAR(50)` | Nullable | Primary native language. |
+| `languages_known` | `JSONB` | DEFAULT '[]' | Array of `{ language: 'English', can_read: true, can_write: true, can_speak: true }`. |
 
 ---
 
@@ -453,53 +476,78 @@ Binds the employee to legal and operational enterprise structures:
 
 ---
 
-### Step 6: Educational Qualifications & Professional Certifications
+### Step 6: Prior Employment, Work History & Relieving Documents
 
-Maintains structured academic records for compliance, client contracts, and ISO/CMMI audit certifications:
+Modeled after tier-1 enterprise pre-hire systems (such as TCS and Infosys), this section captures comprehensive prior employment records for background verification (BGV), statutory PF/EPS continuity, and tax computation:
 
-#### 1. Educational Degrees (`employee_education` table)
-* `qualification_level`: `DOCTORATE`, `POST_GRADUATE`, `UNDERGRADUATE`, `DIPLOMA`, `HIGHER_SECONDARY`, `SECONDARY`.
-* `degree_name`: Full degree (e.g., *Bachelor of Technology*, *Master of Business Administration*).
-* `field_of_study`: Major specialization (e.g., *Computer Science & Engineering*).
-* `institution_name`: College / University name.
-* `board_or_university`: Affiliated governing university.
+| Attribute | Data Type | Constraint | Description & Validation Rules |
+| :--- | :--- | :--- | :--- |
+| `company_name` | `VARCHAR(200)` | NOT NULL | Previous employer corporate entity name. |
+| `designation` | `VARCHAR(150)` | NOT NULL | Final title held at previous organization. |
+| `department` | `VARCHAR(100)` | Nullable | Functional department. |
+| `start_date` & `end_date` | `DATE` | NOT NULL | Verified tenure; validates `end_date >= start_date`. Computes total prior experience. |
+| `last_drawn_annual_ctc` | `NUMERIC(15,2)`| Nullable | Last drawn compensation for benchmark audit. |
+| `reason_for_leaving` | `TEXT` | Nullable | Resignation reason / career transition. |
+| `previous_pf_member_id` | `VARCHAR(50)` | Nullable | EPFO establishment code + member ID (required for online EPF Form 13 transfer). |
+| `reporting_manager_name`| `VARCHAR(150)` | Nullable | Direct supervisor name for BGV reference checks. |
+| `reporting_manager_email`| `VARCHAR(255)` | Nullable | Official work email of reference supervisor. |
+| `reporting_manager_phone`| `VARCHAR(32)` | Nullable | Supervisor direct phone. |
+| `hr_contact_email` | `VARCHAR(255)` | Nullable | HR email of previous organization for formal experience verification. |
+| `relieving_letter_id` | `UUID` | Nullable | Encrypted vault reference to uploaded Relieving Letter / Service Certificate. |
+| `payslips_doc_ids` | `UUID[]` | Nullable | Array of vault references for last 3 consecutive months' payslips. |
+| `form_16_doc_id` | `UUID` | Nullable | Part B / Tax certificate for accurate financial year TDS calculation. |
+
+---
+
+### Step 7: Technical Skillsets, Competencies & Industry Certifications
+
+Captures self-assessed and verified competencies for talent mapping, project staffing, and client audit compliance:
+
+#### 1. Skillsets & Competencies (`hrms_employee_skills`)
+* `skill_code`: Natural key from tenant skill taxonomy (e.g., `TECH_REACT`, `TECH_PYTHON`, `FIN_IFRS`, `OPS_KUBERNETES`).
+* `skill_name`: Human-readable label (e.g., *React.js*, *Python / FastAPI*, *System Architecture*).
+* `proficiency_level`:
+  * `BEGINNER`: Conceptual knowledge, requires guidance.
+  * `INTERMEDIATE`: Able to deliver features independently.
+  * `EXPERT`: Deep domain authority, architects solutions and mentors peers.
+  * `MASTER`: Recognized industry authority or core contributor.
+* `years_of_experience`: Hands-on tenure (e.g., `4.5` years).
+* `is_primary`: Flag distinguishing top 3 core competencies from secondary skills.
+
+#### 2. Professional Industry Certifications (`hrms_certifications`)
+* `certification_name`: (e.g., *AWS Certified Solutions Architect - Professional*, *Certified Kubernetes Administrator (CKA)*, *PMP*, *Chartered Accountant*).
+* `issuing_authority`: (e.g., *Amazon Web Services*, *Cloud Native Computing Foundation*, *PMI*, *Microsoft*).
+* `license_number`: Unique credential identification code.
+* `issue_date` & `expiry_date`: Validity duration. Flag for lifelong validity (`never_expires = true`).
+* `verification_url`: Direct credential validation URL (e.g. Credly or issuer portal).
+* `certificate_doc_id`: Encrypted vault reference to uploaded certificate PDF.
+
+#### 3. Professional Links
+* `github_url`: Open-source repositories and contributions.
+* `linkedin_url`: Professional profile network.
+* `portfolio_url`: Personal website, Behance/Dribbble, or research publications.
+
+---
+
+### Step 8: Educational Qualifications (10th Standard to Doctorate)
+
+Maintains structured academic records for statutory compliance and client master services agreements:
+
+* `qualification_level`: `SECONDARY_10TH`, `HIGHER_SECONDARY_12TH`, `DIPLOMA`, `UNDERGRADUATE`, `POST_GRADUATE`, `DOCTORATE_PHD`.
+* `degree_name`: Full degree (e.g., *Bachelor of Engineering*, *Master of Computer Applications*).
+* `field_of_study`: Major specialization (e.g., *Computer Science*, *Finance*, *Mechanical*).
+* `institution_name`: College or school name.
+* `board_or_university`: Affiliated state board or governing university (e.g., *CBSE*, *VTU*, *Anna University*).
 * `start_year` & `passing_year`: Academic tenure dates.
 * `scoring_format`: `PERCENTAGE`, `CGPA_10_SCALE`, `GPA_4_SCALE`, `GRADE_LETTER`.
-* `score_value`: Scored grade (e.g., `8.75`, `82.4%`).
-* `document_attachment_id`: Reference to uploaded degree certificate PDF.
-
-#### 2. Professional Certifications (`employee_certifications` table)
-* `certification_name`: (e.g., *AWS Certified Solutions Architect - Professional*, *CISSP*, *Chartered Accountant*).
-* `issuing_authority`: (e.g., *Amazon Web Services*, *ICAI*, *Project Management Institute*).
-* `license_number`: Unique credential identification code.
-* `issue_date` & `expiry_date`: Validity window. Flag for lifelong validity (`never_expires = true`).
-* `verification_url`: Direct credential validation URL.
+* `score_value`: Scored grade (e.g., `8.75` CGPA, `84.2%`).
+* `marksheet_doc_id`: Encrypted vault reference to uploaded marksheet or degree certificate scan.
 
 ---
 
-### Step 7: Prior Employment & Experience Verification
+### Step 9: Family Dependents & Statutory Nominees (Form 2 / Form F Compliance)
 
-Captures previous career history for salary benchmarking, gratuity continuity, and background verification (BGV):
-
-| Attribute | Data Type | Description |
-| :--- | :--- | :--- |
-| `company_name` | `VARCHAR(200)` | Previous employer corporate name. |
-| `designation` | `VARCHAR(150)` | Final title held at previous organization. |
-| `start_date` & `end_date` | `DATE` | Exact tenure. Used to compute total aggregate industry experience. |
-| `last_drawn_annual_ctc` | `NUMERIC(15,2)` | Gross annual cost-to-company. |
-| `company_website` | `VARCHAR(255)` | Verification domain. |
-| `reporting_manager_name`| `VARCHAR(150)` | Prior reference supervisor. |
-| `reporting_manager_contact`| `VARCHAR(100)` | Reference phone or work email for BGV agency checks. |
-| `reason_for_leaving` | `TEXT` | Career transition reason. |
-| `previous_pf_member_id` | `VARCHAR(50)` | EPFO establishment and member code for online transfer. |
-| `has_relieving_letter` | `BOOLEAN` | Verified receipt of formal relieving/experience letter. |
-| `document_attachment_ids`| `UUID[]` | Array links to relieving letter, pay slips, and Form 16. |
-
----
-
-### Step 8: Family Dependents & Statutory Nominees (Form 2 / Form F Compliance)
-
-Indian statutory laws (*Payment of Gratuity Act 1972*, *Employees' Provident Funds Act 1952*, and *ESIC Act 1948*) mandate explicit nomination filings. Innostes enforces strict percentage allocation invariants:
+Indian statutory acts mandate explicit nomination filings. Innostes enforces strict percentage allocation invariants:
 
 ```mermaid
 pie title Statutory Nomination Split (Example Gratuity / PF)
@@ -508,7 +556,7 @@ pie title Statutory Nomination Split (Example Gratuity / PF)
     "Dependent Child 2" : 20
 ```
 
-#### Schema: `employee_dependents_nominees`
+#### Schema: `hrms_employee_nominees`
 * `full_name`: Legal name of family member / nominee.
 * `relationship`: `SPOUSE`, `SON`, `DAUGHTER`, `FATHER`, `MOTHER`, `BROTHER`, `SISTER`, `GUARDIAN`.
 * `date_of_birth`: Date of birth.
@@ -522,6 +570,30 @@ pie title Statutory Nomination Split (Example Gratuity / PF)
 * **Medical Insurance Dependent Coverage (GMC)**:
   * `is_covered_under_mediclaim`: Flag including dependent in corporate health insurance policy.
   * `pre_existing_conditions`: Medical declaration required by underwriter.
+
+---
+
+### Step 10: Work Equipment, Asset & Office Preferences
+
+Eliminates Day 1 IT bottlenecks and personalizes the new hire welcome experience:
+
+* `laptop_preference`: Hardware and operating system choice:
+  * `MACOS_PRO` (Apple MacBook Pro M-Series)
+  * `MACOS_AIR` (Apple MacBook Air)
+  * `LINUX_DEV` (ThinkPad / Dell XPS with Ubuntu LTS)
+  * `WINDOWS_ENTERPRISE` (Dell Latitude / HP EliteBook Windows 11)
+* `tshirt_size`: Corporate welcome merchandise size (`XS`, `S`, `M`, `L`, `XL`, `XXL`, `3XL`).
+* `dietary_preference`: Catering and Day 1 welcome lunch preference:
+  * `VEGETARIAN`, `NON_VEGETARIAN`, `VEGAN`, `JAIN`, `HALAL`, `EGGETARIAN`, `GLUTEN_FREE`.
+* `ergonomic_accommodations`: Optional notes for IT/Facilities (e.g., dual monitor setup, ergonomic vertical mouse, screen magnifier, mobility ramp access).
+
+---
+
+### Step 11: Final Candidate Review & Formal Submission to HR
+
+* **Read-Only Accordion Summary**: Comprehensive review of all entered details and uploaded attachments across all prior 10 steps.
+* **Integrity Declaration**: Candidate confirms: *"I hereby declare that all information, work history, and academic documents submitted are genuine and accurate."*
+* **Commit Submission**: Clicking `[ Submit Onboarding Package to HR ]` transitions status to `SUBMITTED`, notifies HR, and locks the stepper into review mode.
 
 ---
 

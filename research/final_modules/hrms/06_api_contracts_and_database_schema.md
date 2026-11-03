@@ -403,17 +403,72 @@ CREATE TABLE hrms_previous_employments (
     party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
     company_name VARCHAR(200) NOT NULL,
     designation VARCHAR(150) NOT NULL,
+    department VARCHAR(100),
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     last_drawn_annual_ctc NUMERIC(15, 2),
     company_website VARCHAR(255),
     reporting_manager_name VARCHAR(150),
+    reporting_manager_email VARCHAR(255),
     reporting_manager_contact VARCHAR(100),
+    hr_contact_email VARCHAR(255),
     reason_for_leaving TEXT,
     previous_pf_member_id VARCHAR(50),
     has_relieving_letter BOOLEAN NOT NULL DEFAULT FALSE,
+    relieving_letter_id UUID,
+    payslips_doc_ids UUID[] DEFAULT '{}',
+    form_16_doc_id UUID,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_exp_dates CHECK (end_date >= start_date)
+);
+
+CREATE TABLE hrms_skills (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    code VARCHAR(64) NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    category VARCHAR(64) NOT NULL DEFAULT 'TECHNICAL',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    CONSTRAINT uq_tenant_skill UNIQUE (tenant_id, code)
+);
+
+CREATE TABLE hrms_employee_skills (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
+    skill_code VARCHAR(64) NOT NULL,
+    proficiency_level VARCHAR(32) NOT NULL DEFAULT 'INTERMEDIATE',
+    years_of_experience NUMERIC(4, 1) NOT NULL DEFAULT 0.0,
+    is_primary BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_party_skill UNIQUE (tenant_id, party_id, skill_code)
+);
+
+CREATE TABLE hrms_certifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    party_id UUID NOT NULL REFERENCES hrms_parties(id) ON DELETE CASCADE,
+    certification_name VARCHAR(200) NOT NULL,
+    issuing_authority VARCHAR(200) NOT NULL,
+    license_number VARCHAR(100),
+    issue_date DATE NOT NULL,
+    expiry_date DATE,
+    never_expires BOOLEAN NOT NULL DEFAULT FALSE,
+    verification_url VARCHAR(512),
+    certificate_doc_id UUID,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE hrms_onboarding_preferences (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    laptop_preference VARCHAR(64) NOT NULL DEFAULT 'MACOS_PRO',
+    tshirt_size VARCHAR(16) NOT NULL DEFAULT 'L',
+    dietary_preference VARCHAR(64) NOT NULL DEFAULT 'NON_VEGETARIAN',
+    ergonomic_accommodations TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_emp_preferences UNIQUE (tenant_id, employee_id)
 );
 
 -- ============================================================================
@@ -476,15 +531,17 @@ CREATE TABLE hrms_onboarding_steppers (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
-    current_step INT NOT NULL DEFAULT 1, -- 1 through 8
-    step_1_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Core Personal
-    step_2_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Addresses & Emergency
-    step_3_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Statutory Vault
-    step_4_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Bank & Disbursement
-    step_5_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Hierarchy & Taxonomy
-    step_6_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Education
-    step_7_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Prior Experience
-    step_8_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Statutory Nominees
+    current_step INT NOT NULL DEFAULT 1, -- 1 through 10
+    step_1_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Core Personal & Demographics (with Languages)
+    step_2_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Addresses & Emergency Contacts
+    step_3_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Statutory Vault (Aadhaar, PAN, UAN, Passport)
+    step_4_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Bank & Direct Disbursement
+    step_5_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Prior Employment & Relieving Documents
+    step_6_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Technical Skills, Tools & Certifications
+    step_7_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Educational Qualifications
+    step_8_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Statutory Nominees & Dependents
+    step_9_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Work Equipment & Asset Preferences
+    step_10_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Final Review & Candidate Integrity Declaration
     is_submitted BOOLEAN NOT NULL DEFAULT FALSE,
     is_hr_approved BOOLEAN NOT NULL DEFAULT FALSE,
     is_sealed BOOLEAN NOT NULL DEFAULT FALSE, -- Sealed upon HR approval & transition to ACTIVE
@@ -499,7 +556,7 @@ CREATE TABLE hrms_onboarding_drafts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
-    step_number INT NOT NULL CHECK (step_number BETWEEN 1 AND 8),
+    step_number INT NOT NULL CHECK (step_number BETWEEN 1 AND 10),
     draft_payload JSONB NOT NULL DEFAULT '{}'::jsonb, -- Relaxed schema allowing incomplete partial inputs
     client_version INT NOT NULL DEFAULT 1,
     last_saved_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

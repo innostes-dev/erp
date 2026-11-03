@@ -244,73 +244,82 @@ If a candidate attempts to log into the main ERP application (`/auth/login`) whi
 
 ---
 
-### 5.2 The 8-Step Candidate Self-Service Stepper (`/hrms/onboarding/[token]`)
+### 5.2 Dedicated Candidate Onboarding Portal Shell (`/hrms/onboarding/[token]`)
 
-The candidate completes their detailed bank, tax, and address profile on their own time via an interactive 8-step wizard with real-time auto-saving drafts:
+When a candidate in `ONBOARDING` status signs in, the ERP application shell dynamically isolates them from the main company workspace. They do **not** see the ERP top bar, organization directories, finance modules, or CRM pipelines.
+
+Instead, they experience a **Dedicated Pre-Hire Application** with a customized left sidebar navigation containing exclusively the onboarding intake sections, live completion pills, and contextual HR discussion alerts:
 
 ```
-+---------------------------------------------------------------------------------------------------+
-| INNOSTES ONBOARDING PORTAL | Candidate: Alex Rivera | [ ✓ Saved 3s ago ] [████████░░░░] 50% Done   |
-+---------------------------------------------------------------------------------------------------+
-| 1. Personal | 2. Addresses | 3. Statutory | 4. Banking | 5. Role | 6. Edu | 7. Exp | 8. Nominees | Submit |
-|   (Done)    |    (Done)    |    (Done)    |  (ACTIVE)  | (Wait)  | (Wait) | (Wait) |   (Wait)    | (Wait) |
-+---------------------------------------------------------------------------------------------------+
-| STEP 4 OF 8: BANKING & DIRECT DISBURSEMENT INFORMATION                                            |
-|                                                                                                   |
-| Bank IFSC Code *                                    Bank Name (Auto-resolved via RBI directory)   |
-| [ HDFC0000240                   ] [ Lookup ]        [ HDFC Bank Ltd                             ] |
-|                                                                                                   |
-| Branch Name (Auto-resolved)                         Account Type *                                |
-| [ Richmond Road, Bengaluru      ]                   (•) Corporate Salary  ( ) Savings  ( ) Current| |
-|                                                                                                   |
-| Bank Account Number *                               Re-enter Bank Account Number *                |
-| [ •••••••••••••••••             ]                   [ •••••••••••••••••                         ] |
-|                                                                                                   |
-| Account Holder Name (as per Bank Passbook) *                                                      |
-| [ Alex Rivera                   ] (Matches legal name 100%)                                       |
-|                                                                                                   |
-| Cancelled Cheque / Passbook Copy *                                                                |
-| +-----------------------------------------------------------------------------------------------+ |
-| | [Drag & Drop or Click to Upload PDF/PNG] - Uploaded: cheque_leaf.pdf (Verified)               | |
-| +-----------------------------------------------------------------------------------------------+ |
-|                                                                                                   |
-| Auto-Save Status: [ ✓ Draft saved to cloud ]                     [ Back: Step 3 ]  [ Continue: Step 5 ] |
-+---------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------------------------------------+
+| ACME CORP | CANDIDATE ONBOARDING PORTAL           Candidate: Sarah Chen | Joining: 15 Nov 2026 | [ ✓ Saved 2s ago ]   |
++-----------------------------------------------------------------------------------------------------------------------+
+| ONBOARDING NAVIGATION (SIDEBAR)   | SECTION 5: PRIOR EMPLOYMENT & WORK HISTORY (MAIN WORKSPACE)                       |
+|                                   |                                                                                   |
+| Overall Progress: [████████░░] 70%| Add your previous work experience. This will be used for service continuity,     |
+| 7 of 10 Sections Completed        | provident fund transfer (Form 13), and Year-to-Date tax calculations.             |
+|                                   |                                                                                   |
+| [✓] 1. Welcome & Guidelines       | +-------------------------------------------------------------------------------+ |
+| [✓] 2. Personal & Demographics    | | PREVIOUS EMPLOYER #1 (Most Recent)                              [ Remove ]    | |
+| [✓] 3. Addresses & Emergency      | | Company Name *                              Designation *                     | |
+| [✓] 4. Statutory IDs (Aadhaar/PAN)| | [ Infosys Limited                 ]         [ Technology Analyst            ] | |
+| [✓] 5. Banking & Direct Deposit   | |                                                                               | |
+| [•] 6. Prior Employment (ACTIVE)  | | Start Date *             End Date *         Last Drawn Annual CTC (INR) *     | |
+| [○] 7. Skills & Certifications    | | [ 01/06/2022 ]           [ 31/10/2026 ]     [ 1250000                       ] | |
+| [○] 8. Educational Qualifications | |                                                                               | |
+| [○] 9. Nominees & Insurance       | | Previous PF Member ID (EPFO)                Previous EPS Scheme Certificate   | |
+| [○] 10. Equipment Preferences     | | [ PYBOM00123450000012345        ]           [ Optional                      ] | |
+| [ ] 11. Review & Submit to HR     | |                                                                               | |
+|                                   | | Relieving Letter / Service Certificate *                                      | |
+| --- HR FEEDBACK & DISCUSSION ---  | | [ Uploaded: infosys_relieving_letter.pdf (Verified) ]        [ View / Replace]| |
+| [✓] All items verified so far     | |                                                                               | |
+| (If HR requests changes, flagged  | | Last 3 Months' Payslips (August, September, October) *                        | |
+|  sections show [⚠️ Action Req])   | | [ Uploaded: payslips_aug_oct.pdf ]                           [ View / Replace]| |
+|                                   | |                                                                               | |
+|                                   | | Form 16 / Tax Computation Sheet (for FY 2026-27 TDS adjustment) *             | |
+|                                   | | [ Uploaded: form16_part_b.pdf ]                              [ View / Replace]| |
+|                                   | |                                                                               | |
+|                                   | | Supervisor Reference (for Background Verification / BGV)                      | |
+|                                   | | Name: [ Rajesh Kumar             ]  Email: [ rajesh.k@infosys.com           ] | |
+|                                   | +-------------------------------------------------------------------------------+ |
+|                                   | [ + Add Another Previous Employer ]                                               |
+|                                   |                                                                                   |
+|                                   | [ Back: Banking ]                                 [ Continue: Skills & Certs -> ] |
++-----------------------------------------------------------------------------------------------------------------------+
 ```
 
 #### Real-Time Auto-Save Feedback & Resilience Ergonomics:
 1. **Zero-Latency Non-Blocking Inputs:** Auto-save operations occur entirely in the background. Keystroke inputs are never locked, throttled, or interrupted by blocking modal spinners.
 2. **Dynamic Header Status Pill:**
    * `SAVING`: `[ • Saving draft... ]` (Subtle pulsing indicator triggered 1,500ms after the last typing pause or on field blur).
-   * `SAVED_TO_CLOUD`: `[ ✓ All changes saved (3s ago) ]` (Subtle muted green/zinc badge confirming server persistence).
-   * `OFFLINE_LOCAL`: `[ ⚡ Offline — Saved to device ]` (Triggered if network connectivity drops. Informs the user that `IndexedDB` has captured all inputs safely).
-   * `NETWORK_RETRY`: `[ ⚠️ Connection unstable — Retrying sync... ]` (Automatic background retry with exponential jitter).
-3. **Emergency Unload Flush (`navigator.sendBeacon`):**
-   * If the candidate closes the browser tab, restarts their laptop, or accidentally navigates backwards, the browser triggers `navigator.sendBeacon` to dispatch the active form payload to `/peopleops/onboarding/{id}/beacon-flush`.
-4. **Cross-Device Hydration Prompt:**
-   * When logging in from another device (e.g. mobile after starting on desktop), the UI displays a clean resume banner: *"Resumed from your draft on Desktop (12 minutes ago)"*, with an instant one-click option to continue from the exact field last touched.
+   * `SAVED_TO_CLOUD`: `[ ✓ All changes saved (2s ago) ]` (Subtle muted green badge confirming server persistence).
+   * `OFFLINE_LOCAL`: `[ ⚡ Offline — Saved to device ]` (IndexedDB local cache preserves inputs if Wi-Fi drops).
+3. **Sidebar Completion Indicators**:
+   * `[ ✓ ] Completed`: Section passed all schema validations and is committed to draft.
+   * `[ • ] In Progress`: Candidate has partially entered data in this section.
+   * `[ ○ ] Pending`: Unopened / untouched section.
+   * `[ ⚠️ Action Required ]`: HR flagged this section in the Verification Cockpit. Clicking it jumps directly to the flagged item with the HR reviewer's note.
+4. **Emergency Unload Flush (`navigator.sendBeacon`):**
+   * If the candidate closes the browser tab, the browser triggers `navigator.sendBeacon` to dispatch the active form payload to `/peopleops/onboarding/{id}/beacon-flush`.
 
-#### Step-by-Step Functional & Ergonomic Highlights:
-* **Step 1: Personal & Demographics**: First, middle, and last names, date of birth (validates age $\ge 18$), gender, blood group pills, marital status, and statutory father's/mother's/spouse's names.
-* **Step 2: Addresses & Emergency Contacts**: Present address with auto-complete, "Same as Present" toggle for permanent address (copies in 0ms), and primary + secondary emergency contacts with relationship badges. Contextual address proof upload.
-* **Step 3: Statutory ID Vault**:
-  * **Aadhaar Input**: Instant Verhoeff algorithm validation. As digits are entered, the system validates the checksum and automatically masks the first 8 digits (`XXXX-XXXX-1234`). Contextual Aadhaar card scan upload.
-  * **PAN Card**: Format validation (`[A-Z]{5}[0-9]{4}[A-Z]{1}`) with instant check that the 4th character is `'P'`. Contextual PAN scan upload.
-  * **UAN Number**: 12-digit numeric input with tooltip guide for prior EPFO account transfer.
-* **Step 4: Banking & Direct Deposit**:
-  * Real-time IFSC lookup: entering `HDFC0000240` instantly populates Bank Name (*HDFC Bank Ltd*), Branch (*Richmond Road*), and MICR code without server reload.
-  * Double-entry account number confirmation with copy-paste disabled.
-  * Contextual cancelled cheque / passbook copy upload.
-* **Step 5: Employment & Taxonomy (HR Pre-filled)**: Displays assigned Business Unit, Department, Job Title, Grade/Band (`L3`), Reporting Manager, Work Mode (`Office` / `Remote`), and Probation terms.
-* **Step 6: Educational Qualifications**: Stepper list for degrees (Doctorate, PG, UG, 10th/12th) with field of study, passing year, score, and certificate attachment dropzone.
-* **Step 7: Prior Experience**: Chronological company history, start/end dates, last drawn CTC, previous PF member ID, and relieving letter upload.
-* **Step 8: Statutory Nominees (Form 2 & Form F)**:
-  * Interactive allocation sliders for PF, Pension (EPS), and Gratuity.
-  * Real-time validation warning if the total sum does not equal exactly 100.00%.
-  * Medical insurance (GMC) dependent checkboxes with pre-existing illness notes.
-* **Review & Submit Screen**:
-  * Clean, read-only accordion summary of all 8 steps allowing candidate to review information before final submission.
-  * 1-Click final submission button transitioning status to `SUBMITTED` for HR compliance audit.
+#### Comprehensive Intake Highlights by Section:
+* **Section 1: Personal & Demographics**: Legal Name, Preferred Name, DOB, Gender, Blood Group, Marital Status, Mother Tongue, and Languages Known (with Read/Write/Speak checkboxes).
+* **Section 2: Addresses & Emergency Contacts**: Present & Permanent Address with "Same as Present" toggle (0ms copy) and primary/secondary emergency escalation contacts.
+* **Section 3: Statutory ID Vault**: Verhoeff-validated 12-digit Aadhaar with automatic masking (`XXXX-XXXX-1234`), 10-char PAN with 4th-char individual persona check (`'P'`), 12-digit UAN, and Passport details for global travel.
+* **Section 4: Banking & Direct Deposit**: 11-char IFSC code auto-resolves Bank Name and Branch from RBI directory; dual-entry bank account number confirmation; cancelled cheque leaf upload.
+* **Section 5: Prior Employment & Work History**: Chronological company history, start/end dates, last drawn CTC, previous EPFO member ID, uploaded Relieving Letter, last 3 months' payslips, Form 16, and BGV supervisor references.
+* **Section 6: Technical Skillsets, Tools & Certifications**:
+  * Skill tagging (e.g., Python, React, PostgreSQL, Docker) with hands-on years and proficiency ratings (`BEGINNER`, `INTERMEDIATE`, `EXPERT`, `MASTER`).
+  * Professional Certifications (AWS, GCP, CKA, PMP) with credential IDs, verification URLs, and certificate PDFs.
+  * Links to GitHub, LinkedIn, and portfolios.
+* **Section 7: Educational Qualifications**: Stepper list from 10th Standard to Doctorate (School/University, Board, Graduation Year, CGPA/Percentage, and Degree/Marksheet uploads).
+* **Section 8: Family Dependents & Statutory Nominees**: PF, EPS, and Gratuity Form F percentage allocations (strictly validated to sum to 100.00%) and GMC medical insurance dependent coverage.
+* **Section 9: Work Equipment, Asset & Office Preferences**:
+  * Laptop Hardware & OS preference (`MacBook Pro`, `MacBook Air`, `Linux Dev`, `Windows Enterprise`).
+  * Company T-Shirt / Swag size (`XS` to `3XL`).
+  * Dietary Preference (`Vegetarian`, `Non-Vegetarian`, `Vegan`, `Jain`, `Halal`, `Gluten-Free`).
+  * Ergonomic/accessibility accommodations.
+* **Section 10: Review & Submit to HR**: Read-only summary accordion, legal honesty declaration, and final submit button triggering notification to the HR team.
 * **Phase 2 Scope Note**: Contractual electronic document signing (Aadhaar eSign, DocuSign integrations, digital signature canvas) is deferred to Phase 2. Executed paper contracts can be uploaded as profile attachments.
 
 #### Onboarding Sealed & Profile Activated Screen (`status == ACTIVE`)
