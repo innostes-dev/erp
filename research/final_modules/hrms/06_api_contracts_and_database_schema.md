@@ -778,6 +778,43 @@ CREATE INDEX idx_leave_ledger_balance ON hrms_leave_ledger(tenant_id, employee_i
 -- 12. PAYROLL ENGINE & SALARY STRUCTURES
 -- ============================================================================
 
+CREATE TABLE hrms_payroll_settings (
+    tenant_id UUID PRIMARY KEY,
+    pay_frequency VARCHAR(32) NOT NULL DEFAULT 'MONTHLY', -- 'MONTHLY', 'BI_WEEKLY', 'SEMI_MONTHLY', 'WEEKLY'
+    cycle_start_day INT NOT NULL DEFAULT 1,
+    payout_day VARCHAR(32) NOT NULL DEFAULT 'LAST_DAY_OF_MONTH', -- 'LAST_DAY_OF_MONTH', '1ST_OF_NEXT_MONTH', '5TH', '7TH'
+    lop_calculation_method VARCHAR(32) NOT NULL DEFAULT 'CALENDAR_DAYS', -- 'CALENDAR_DAYS', 'FIXED_26_DAYS', 'ACTUAL_WORK_DAYS'
+    
+    -- Modular Statutory Toggles (Disabled by default for early startups)
+    enable_epf BOOLEAN NOT NULL DEFAULT FALSE,
+    epf_calculation_mode VARCHAR(32) NOT NULL DEFAULT 'STATUTORY_CEILING_15K', -- 'STATUTORY_CEILING_15K', 'FULL_BASIC'
+    epf_establishment_code VARCHAR(64),
+    enable_esic BOOLEAN NOT NULL DEFAULT FALSE,
+    esic_establishment_code VARCHAR(64),
+    enable_professional_tax BOOLEAN NOT NULL DEFAULT FALSE,
+    enable_lwf BOOLEAN NOT NULL DEFAULT FALSE,
+    enable_gratuity BOOLEAN NOT NULL DEFAULT FALSE,
+    
+    -- Tax & Withholding Configuration
+    default_tax_regime VARCHAR(32) NOT NULL DEFAULT 'SECTION_115BAC_NEW', -- 'SECTION_115BAC_NEW', 'OLD_REGIME'
+    
+    -- Corporate Banking Rails & CMS Formats
+    bank_cms_format VARCHAR(64) NOT NULL DEFAULT 'HDFC_CMS', -- 'HDFC_CMS', 'ICICI_CIB', 'AXIS_CMS', 'SBI_CMS', 'US_NACHA'
+    corporate_bank_account_number VARCHAR(64),
+    corporate_bank_ifsc VARCHAR(32),
+    
+    -- General Ledger Double-Entry Mapping (LedgerFlow Integration)
+    gl_salary_expense_account_id UUID,
+    gl_salaries_payable_account_id UUID,
+    gl_tax_payable_account_id UUID,
+    auto_post_gl_journal BOOLEAN NOT NULL DEFAULT TRUE,
+    
+    -- Payslip Branding & Security
+    auto_dispatch_payslip_emails BOOLEAN NOT NULL DEFAULT TRUE,
+    payslip_password_formula VARCHAR(64) NOT NULL DEFAULT 'NAME4_DOB_DDMM',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE hrms_salary_components (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
@@ -868,6 +905,7 @@ ALTER TABLE hrms_designations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_locations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_holiday_calendars ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_holidays ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_payroll_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_picklists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
@@ -888,6 +926,9 @@ CREATE POLICY tenant_holiday_cals_isolation ON hrms_holiday_calendars
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_holidays_isolation ON hrms_holidays
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_payroll_settings_isolation ON hrms_payroll_settings
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_picklists_isolation ON hrms_picklists
@@ -1022,16 +1063,23 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/leaves/encash/request` | Employee submits request to liquidate eligible excess leave balance | `peopleops:read` (self) | 201 Created |
 | `POST` | `/peopleops/leaves/encash/{id}/approve` | HR approves encashment request, pushing financial payout to next payroll run | `peopleops:admin` | 200 OK |
 
-### 2.7 Payroll Engine & Disbursals
+### 2.7 Payroll Engine, Setup Cockpit & Disbursals
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/peopleops/payroll/settings` | Retrieve active tenant payroll configuration (frequency, LOP method, statutory toggles, bank rails) | `peopleops:read` | 200 OK |
+| `PUT` | `/peopleops/payroll/settings` | Update tenant payroll setup (toggles for EPF, ESIC, PT, LOP formula, CMS format, GL accounts) | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/payroll/salary-components` | List all salary components with DAG calculation formulas and tax classifications | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/payroll/salary-components` | Create custom earning or deduction component with formula DAG dependencies | `peopleops:admin` | 201 Created |
+| `PUT` | `/peopleops/payroll/salary-components/{id}` | Update component formula expression, taxable flag, or active status | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/payroll/runs` | Initialize a new monthly payroll run for a target pay period | `peopleops:admin` | 201 Created |
-| `POST` | `/peopleops/payroll/runs/{id}/calculate`| Execute DAG gross-to-net computation across all employee contracts | `peopleops:admin` | 200 OK |
-| `POST` | `/peopleops/payroll/runs/{id}/commit` | Commit payroll, generate LedgerFlow journal & bank payout file | `peopleops:admin` | 200 OK |
-| `GET` | `/peopleops/payroll/runs/{id}/bank-csv`| Export bank payout format (NEFT/RTGS/ACH) for bulk corporate upload | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/payroll/runs/{id}/calculate`| Execute DAG gross-to-net computation across all employee contracts in parallel | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/payroll/runs/{id}/commit` | Commit payroll run: seals period, auto-posts balanced GL journal to LedgerFlow, & generates bank batch | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/payroll/runs/{id}/bank-csv`| Export bank payout format (HDFC/ICICI/Axis/SBI CMS or US NACHA ACH) for corporate batch upload | `peopleops:admin` | 200 OK |
 | `GET` | `/peopleops/payslips/my-payslips` | List historical monthly payslips for logged-in employee | `peopleops:read` (self) | 200 OK |
 | `GET` | `/peopleops/payslips/{id}/pdf` | Download signed, password-protected PDF payslip | `peopleops:read` (self) | 200 OK |
+| `POST` | `/peopleops/payroll/tax-declarations` | Employee submits proposed tax investment declarations (80C, 80D, HRA) | `peopleops:read` (self) | 201 Created |
+| `GET` | `/peopleops/payroll/tax-declarations/me` | Retrieve active tax regime projection (Section 115BAC New vs Old Regime comparison) | `peopleops:read` (self) | 200 OK |
 
 ### 2.8 Offboarding & Final Settlement (F&F)
 

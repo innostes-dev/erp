@@ -869,9 +869,74 @@ Administrators configure branch-specific holiday calendars, import statutory gaz
 
 ---
 
-## 6. Monthly Payroll Admin Cockpit (`/hrms/payroll`)
+## 6. Payroll Architecture: Setup Cockpit & 3-Step Execution Stepper
 
-Payroll administrators require a fail-safe, guided execution flow that prevents unverified disbursements. The Innostes Payroll Cockpit structures execution into a 3-step sequential stepper:
+### 6.1 Dedicated Payroll Setup Cockpit (`/hrms/payroll/setup`)
+
+Innostes separates operational presence tracking from financial compensation configuration. Administrators configure company-wide payroll rules across 8 modular tabs:
+
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| COMPANY SETTINGS: PAYROLL SETUP & FINANCIAL LOCALIZATION                                                              |
++-----------------------------------------------------------------------------------------------------------------------+
+| [• 1. Pay Schedule] [ 2. Components ] [ 3. LOP Math ] [ 4. Statutory ] [ 5. Taxes ] [ 6. Bank ] [ 7. GL ] [ 8. Slips ]|
++-----------------------------------------------------------------------------------------------------------------------+
+| TAB 1: PAY SCHEDULE & CUTOFF CYCLE                                                                                    |
+|                                                                                                                       |
+| Pay Frequency *                               Attendance Cutoff Cycle *                                               |
+| [ Monthly (Standard India / EU)             v][ 1st to Last Day of Month (Standard)                                 v]|
+|                                                                                                                       |
+| Payout Day *                                  Attendance Locking Buffer *                                             |
+| [ Last Working Day of Month                 v][ 3 Days before Payday                                                v]|
++-----------------------------------------------------------------------------------------------------------------------+
+| TAB 3: LOSS OF PAY (LOP) & PRORATION MATH ENGINE                                                                      |
+|                                                                                                                       |
+| Deduction Denominator Method (Single Day Salary Rate Formula):                                                        |
+| (•) Method A: Actual Calendar Days in Month (Monthly Base / 28, 29, 30, or 31) — Recommended for tech startups        |
+| ( ) Method B: Fixed 26 Working Days (Monthly Base / 26.0) — Standard factory / manufacturing compliance               |
+| ( ) Method C: Actual Scheduled Work Days (Monthly Base / Working Days excluding weekends and holidays)                |
+|                                                                                                                       |
+| Mid-Month Joiner Proration:                                                                                           |
+| (•) Prorate by Exact Active Calendar Days remaining in month                                                          |
+| ( ) Full month salary if joined on or before 15th; half month if after 15th                                           |
++-----------------------------------------------------------------------------------------------------------------------+
+| TAB 4: MODULAR STATUTORY COMPLIANCE TOGGLES                                                                           |
+|                                                                                                                       |
+| [ ] Enable Employee Provident Fund (EPF & EPS)                                                                        |
+|     (Statutory threshold: Mandatory in India once headcount reaches 20 employees. Disabled by default for startups.)  |
+|     EPF Calculation Rule: (•) 12% on Basic (Capped at INR 15,000 ceiling)  ( ) 12% on Actual Full Basic                |
+|                                                                                                                       |
+| [ ] Enable Employee State Insurance (ESIC)                                                                            |
+|     (Mandatory only if gross wages <= INR 21,000/month. Disabled by default for knowledge-worker startups.)            |
+|                                                                                                                       |
+| [ ] Enable State Professional Tax (PT)                                                                                |
+|     (Auto-deducts state slab amounts: Karnataka INR 200, Maharashtra INR 200/300, Telangana INR 200.)                |
+|                                                                                                                       |
+| [ ] Enable Statutory Gratuity Provisioning (Accrues 15/26 of last basic per completed year)                           |
++-----------------------------------------------------------------------------------------------------------------------+
+| TAB 6: BANK DISBURSEMENT RAILS & CMS FORMATS                                                                          |
+|                                                                                                                       |
+| Primary Corporate Disbursement Bank:                                                                                  |
+| [ HDFC Bank Corporate NetBanking (CMS Template Format)                                                              v]|
+| Corporate Debit Account Number: [ 50200048192031             ] Corporate IFSC: [ HDFC0000240                         ]|
+| Export Format: CSV Batch with Beneficiary Account, IFSC, Beneficiary Legal Name, Net Amount, Transaction Narration.    |
++-----------------------------------------------------------------------------------------------------------------------+
+| TAB 7: GENERAL LEDGER MAPPING (LEDGERFLOW DOUBLE-ENTRY SYNC)                                                          |
+|                                                                                                                       |
+| Salary Expense Account (Debit):       [ 50100 - Salaries & Wages Expense                                            v]|
+| Net Salaries Payable (Credit):        [ 20100 - Net Payroll Payable                                                 v]|
+| Statutory Tax Liabilities (Credit):   [ 20300 - TDS & Statutory Withholdings Payable                                v]|
+| [✓] Automatically generate and commit balanced journal in LedgerFlow upon payroll run approval                         |
++-----------------------------------------------------------------------------------------------------------------------+
+| [ Cancel ]                                                                             [ Save Payroll Setup Changes ] |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.2 Monthly Payroll Admin Execution Cockpit (`/hrms/payroll`)
+
+Payroll administrators execute monthly payroll through a guided, zero-variance 3-step sequential stepper:
 
 ```mermaid
 flowchart LR
