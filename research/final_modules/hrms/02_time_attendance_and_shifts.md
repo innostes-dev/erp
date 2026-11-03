@@ -131,9 +131,9 @@ Clicking `[ Day ]` or selecting any date opens a granular single-day timeline sh
 
 ---
 
-### 2.4 The 1-Click Missed-Punch Regularization Modal
+### 2.4 The 1-Click Missed-Punch Regularization Modal & Automatic Hours Recalculation
 If an employee forgets to clock out, the system flags the day as `MISSING_OUT`.
-1. Clicking **`[ ⚡ Regularize ]`** (from either Calendar, List, or Day view) opens this clean 3-field modal:
+1. Clicking **`[ Regularize ]`** (from either Calendar, List, or Day view) opens this clean 3-field modal:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -151,12 +151,63 @@ If an employee forgets to clock out, the system flags the day as `MISSING_OUT`.
 | [ Cancel ]                                             [ Submit to Manager -> ]   |
 +-----------------------------------------------------------------------------------+
 ```
-2. Once submitted, the status immediately reflects: `[ ⏳ Pending Manager Approval ]`.
-3. The reporting manager receives a notification and reviews it in their approvals tab.
+2. Once submitted, the status immediately reflects: `[ Pending Manager Approval ]`.
+3. **Automatic Real-Time Hours Adjustment**:
+   * The moment the manager clicks **`[ Approve Punch ]`**:
+     * The system pairs the recorded `09:10 AM` with the approved `06:30 PM`.
+     * Calculates gross elapsed duration: `09h 20m`.
+     * Subtracts recorded breaks (`45m` lunch) -> Net Duration: **`08h 35m`**.
+     * Day status flips from amber `[ Missing OUT ]` to green `[ Present (08h 35m) ]`.
+     * The monthly cumulative total (`159h 25m` -> `168h 00m`) and present day count (`19` -> `20 days`) update **automatically in real time**. Zero manual calculation required.
 
 ---
 
-## 3. Manager Approvals Tab (`[ Team Requests ]`)
+## 3. Monthly Timesheet Submission & Team Lead Approval Workflow
+
+At the end of each calendar month / pay cycle, an optional monthly sign-off workflow guarantees that all hours and attendance records are verified before payroll runs:
+
+```mermaid
+flowchart LR
+    ActiveMonth["Month in Progress<br/>(Employee clocks in/out, fixes missed punches)"] --> MonthEnd["Month End / Pay Cutoff<br/>Employee clicks 'Submit Timesheet'"]
+    
+    MonthEnd --> PreCheck{"Pre-Submission Sanity Check"}
+    PreCheck -->|Missing Punches Exist| Block["Alert: 'You have 1 unresolved missing punch on 04 Nov.<br/>Please regularize before submitting.'"]
+    
+    PreCheck -->|All Days Clean| LeadQueue["Routes to Reporting Lead / Manager<br/>Status: SUBMITTED (Locked against employee edits)"]
+    
+    LeadQueue --> LeadDecision{"Lead Review"}
+    LeadDecision -->|Approve| Approved["Status: APPROVED<br/>Locked & ready for Monthly Payroll freeze"]
+    LeadDecision -->|Send Back| Rejected["Status: CHANGES_REQUESTED<br/>Lead note: 'Clarify overtime on 12 Nov'<br/>Returned to employee to revise"]
+```
+
+### 3.1 Employee Monthly Submission
+On the last day of the month, the attendance header displays a prominent action: **`[ Submit Monthly Timesheet for Approval ]`**.
+* Clicking it opens a pre-submission review:
+  * Total Logged Hours: `168h 00m / 160h Target`
+  * Total Present Days: `20 Days` | Leaves: `1 Day` | Holidays: `1 Day`
+  * Unresolved Missing Punches: `0`
+* Once submitted, the month is locked against employee changes, and a review task is assigned to their designated **Reporting Lead / Manager**.
+
+### 3.2 Lead / Manager Monthly Sign-Off
+The manager opens their **`[ Team Requests ]`** tab to audit the monthly timesheets of their direct reports:
+
+```
++---------------------------------------------------------------------------------------------------+
+| PENDING MONTHLY TIMESHEET APPROVALS (NOVEMBER 2026)                                               |
++---------------------------------------------------------------------------------------------------+
+| Sarah Chen — Senior Backend Engineer (Reports to: John Doe)                                       |
+| Total Logged: 168h 00m (Target: 160h) | Present: 20 Days | Leaves: 1 Day | Regularized: 1 Day     |
+| Status: [ SUBMITTED FOR REVIEW ]                                                                  |
+|                                                                                                   |
+| [ View Full Month Calendar ]              [ Approve Timesheet ]    [ Send Back with Comment ]     |
++---------------------------------------------------------------------------------------------------+
+```
+* **1-Click Approval**: Clicking `[ Approve Timesheet ]` marks the timesheet as `APPROVED`.
+* **Send Back**: If the lead notices an anomaly, clicking `[ Send Back with Comment ]` prompts a note (e.g. *"Please regularize 14 Nov before we close the month"*), unlocking the employee's calendar to make the correction.
+
+---
+
+## 4. Manager Approvals Tab (`[ Team Requests ]`)
 
 If the logged-in user is a reporting manager with direct reports, the top of the calendar displays a clean secondary tab: **`[ Team Requests (N) ]`**:
 
@@ -169,14 +220,14 @@ If the logged-in user is a reporting manager with direct reports, the top of the
 | Requested OUT Time: 06:30 PM (Total Effective Duration: 09h 20m)                                  |
 | Reason: "Forgot to punch out while leaving office"                                                |
 |                                                                                                   |
-|                                                 [ ✓ Approve Punch ]   [ ✕ Reject with Note ]      |
+|                                                 [ Approve Punch ]   [ Reject with Note ]          |
 +---------------------------------------------------------------------------------------------------+
 ```
-* **1-Click Action**: Manager clicks `[ ✓ Approve Punch ]` $\implies$ the punch record is updated to `REGULARIZED`, the day status turns green `[ ✓ Present ]`, and the employee is notified.
+* **1-Click Action**: Manager clicks `[ Approve Punch ]` -> the punch record is updated to `REGULARIZED`, the day status turns green `[ Present ]`, and the employee is notified.
 
 ---
 
-## 4. Strict Separation from Payroll
+## 5. Strict Separation from Payroll
 
 Attendance is strictly an **operational presence log**, not a financial calculation engine.
 * **What Attendance Produces**:
@@ -188,7 +239,7 @@ Attendance is strictly an **operational presence log**, not a financial calculat
 
 ---
 
-## 5. Startup-First Mode: Option to Disable Attendance Tracking Entirely
+## 6. Startup-First Mode: Option to Disable Attendance Tracking Entirely
 
 In modern tech startups and asynchronous remote teams (e.g. 5 to 20 engineers working output-first), tracking daily check-in hours creates friction and damages trust.
 
@@ -212,7 +263,7 @@ In Innostes Company Settings, administrators have a master toggle:
 
 ---
 
-## 6. Lightweight Punch Ingestion Rules
+## 7. Lightweight Punch Ingestion Rules
 
 For teams that use attendance tracking:
 1. **60-Second De-Bounce**: If an employee double-clicks the check-in button or scans a biometric reader twice in rapid succession, duplicate events within 60 seconds are discarded automatically.

@@ -237,7 +237,26 @@ Line managers have a top tab on the same calendar page to review and sign off on
 | Requested OUT Time: 06:30 PM (Total Effective Duration: 09h 20m)                                  |
 | Reason: "Forgot to punch out while leaving office"                                                |
 |                                                                                                   |
-|                                                 [ ✓ Approve Punch ]   [ ✕ Reject with Note ]      |
+|                                                 [ Approve Punch ]   [ Reject with Note ]          |
++---------------------------------------------------------------------------------------------------+
+```
+
+#### 6. Monthly Timesheet Submission & Team Lead Approval Card
+At the end of the month, the employee submits their timesheet for lead approval, and their reporting lead reviews the roll-up:
+
+```
++---------------------------------------------------------------------------------------------------+
+| PENDING MONTHLY TIMESHEET APPROVALS (NOVEMBER 2026)                                               |
++---------------------------------------------------------------------------------------------------+
+| Sarah Chen — Senior Backend Engineer (Reporting To: John Doe)                                     |
+| Period: 01 Nov 2026 - 30 Nov 2026                                                                 |
+|                                                                                                   |
+| Summary:                                                                                          |
+| * Total Logged: 168h 00m (Target: 160h)  * Present: 20 Days                                       |
+| * Approved Leaves: 1 Day (Casual Leave)  * Regularized Punches: 1 Day                             |
+| * Status: [ SUBMITTED FOR REVIEW ]                                                                |
+|                                                                                                   |
+| [ View Full Month Calendar ]              [ Approve Timesheet ]    [ Send Back with Comment ]     |
 +---------------------------------------------------------------------------------------------------+
 ```
 
@@ -267,8 +286,11 @@ Startups do not have time to fill 50 fields before hiring someone. A clean modal
 | Designation / Job Title *                     Department *                        |
 | [ Senior Backend Engineer           ]         [ Engineering                     ] |
 |                                                                                   |
-| Monthly Compensation / CTC (INR) *            Date of Joining *                   |
-| [ 180000                            ]         [ 15 Nov 2026                     ] |
+| Reporting To / Lead *                         Date of Joining *                   |
+| [ John Doe (VP Engineering)        v]         [ 15 Nov 2026                     ] |
+|                                                                                   |
+| Monthly Compensation / CTC (INR) *                                                |
+| [ 180000                            ]                                             |
 |                                                                                   |
 | [✓] Auto-generate temporary password & email credentials to candidate             |
 | [✓] Allow immediate Day 1 web check-in & dashboard access                         |

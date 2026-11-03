@@ -155,10 +155,11 @@ flowchart TD
 ```
 
 #### 1. Phase 1: Minimal Initiation (HR - 30 Seconds)
-* The HR administrator or founder enters only the contractual details the company decides:
+* The HR administrator or founder enters only the essential contractual details the company decides:
   * Legal First & Last Name
   * Personal Email Address & Mobile Phone
   * Designation / Job Title & Department
+  * **Reporting To / Direct Lead (`manager_id`)**: Searchable dropdown to assign their manager (vital for routing punch regularizations, leave requests, and monthly timesheet approvals).
   * Date of Joining & Offered CTC
 * HR clicks **`[ Send Pre-Onboarding Invitation ]`**.
 * HR does **not** collect, ask for, or type bank accounts, Aadhaar, PAN, emergency contacts, or previous work history.

@@ -84,6 +84,7 @@ CREATE TYPE payroll_stage AS ENUM ('DRAFT', 'CALCULATING', 'REVIEW', 'COMMITTED'
 CREATE TYPE clearance_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 CREATE TYPE profile_approval_mode AS ENUM ('AUTO_APPROVE', 'MANUAL_APPROVE');
 CREATE TYPE change_request_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
+CREATE TYPE timesheet_status AS ENUM ('DRAFT', 'SUBMITTED', 'APPROVED', 'CHANGES_REQUESTED', 'LOCKED');
 
 -- ============================================================================
 -- 0. TIERED MASTER DATA: STRUCTURAL ENTITIES & LIGHTWEIGHT PICKLISTS
@@ -654,6 +655,27 @@ CREATE TABLE hrms_attendance_blocks (
 );
 CREATE INDEX idx_hrms_attendance_date ON hrms_attendance_blocks(tenant_id, work_date);
 
+CREATE TABLE hrms_monthly_timesheets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    manager_id UUID REFERENCES hrms_employees(id), -- Reporting Lead / Approver
+    period_month VARCHAR(7) NOT NULL, -- e.g. '2026-11'
+    total_present_days NUMERIC(4, 1) NOT NULL DEFAULT 0.0,
+    total_absent_days NUMERIC(4, 1) NOT NULL DEFAULT 0.0,
+    total_leave_days NUMERIC(4, 1) NOT NULL DEFAULT 0.0,
+    total_worked_hours NUMERIC(6, 2) NOT NULL DEFAULT 0.0,
+    status timesheet_status NOT NULL DEFAULT 'DRAFT',
+    submitted_at TIMESTAMPTZ,
+    approved_by UUID REFERENCES hrms_employees(id),
+    approved_at TIMESTAMPTZ,
+    rejection_comment TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_emp_monthly_timesheet UNIQUE (tenant_id, employee_id, period_month)
+);
+CREATE INDEX idx_hrms_timesheet_mgr ON hrms_monthly_timesheets(tenant_id, manager_id, status);
+
 -- ============================================================================
 -- 11. LEAVE GOVERNANCE & LEDGER
 -- ============================================================================
@@ -903,6 +925,10 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/attendance/summary` | Query monthly aggregate working hours, present days, and absent days | `peopleops:read` | 200 OK |
 | `POST` | `/peopleops/attendance/regularize` | Submit punch regularization request with reason for manager sign-off | `peopleops:read` (self) | 201 Created |
 | `PATCH` | `/peopleops/attendance/regularize/{id}`| Line manager approves or rejects punch regularization | `peopleops:manager` | 200 OK |
+| `POST` | `/peopleops/attendance/timesheets/submit` | Employee submits monthly attendance timesheet for lead sign-off | `peopleops:read` (self) | 200 OK |
+| `GET` | `/peopleops/attendance/timesheets/pending-approvals` | Reporting lead queries pending direct-report monthly timesheets | `peopleops:manager` | 200 OK |
+| `POST` | `/peopleops/attendance/timesheets/{id}/approve` | Reporting lead signs off and locks monthly timesheet | `peopleops:manager` | 200 OK |
+| `POST` | `/peopleops/attendance/timesheets/{id}/reject` | Reporting lead returns timesheet with change request comments | `peopleops:manager` | 200 OK |
 
 ### 2.6 Leave Governance & Ledgers
 
