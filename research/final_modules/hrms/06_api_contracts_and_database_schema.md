@@ -84,28 +84,73 @@ CREATE TYPE payroll_stage AS ENUM ('DRAFT', 'CALCULATING', 'REVIEW', 'COMMITTED'
 CREATE TYPE clearance_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- ============================================================================
--- 0. DYNAMIC LOOKUP MASTERS (TENANT-CONFIGURABLE MASTER DATA)
+-- 0. TIERED MASTER DATA: STRUCTURAL ENTITIES & LIGHTWEIGHT PICKLISTS
 -- ============================================================================
 
-CREATE TABLE hrms_lookup_masters (
+-- Tier 1A: Departments Master (Hierarchical with Head of Department)
+CREATE TABLE hrms_departments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
-    category VARCHAR(64) NOT NULL, -- e.g., 'DEPARTMENT', 'DESIGNATION', 'GRADE_BAND', 'DOCUMENT_TYPE'
-    code VARCHAR(64) NOT NULL,     -- Unique machine code per category per tenant, e.g. 'DEP_ENG'
-    name VARCHAR(255) NOT NULL,    -- Human readable display label, e.g. 'Engineering & Technology'
-    description TEXT,
-    parent_id UUID REFERENCES hrms_lookup_masters(id) ON DELETE SET NULL, -- Hierarchical support
-    display_order INT NOT NULL DEFAULT 0,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,   -- Soft-deactivate to preserve historical integrity
-    is_system BOOLEAN NOT NULL DEFAULT FALSE,  -- True for seeded defaults; prevents accidental deletion
-    metadata JSONB NOT NULL DEFAULT '{}'::jsonb, -- Extended properties (colors, badges, cost center codes)
+    code VARCHAR(64) NOT NULL, -- Machine code e.g. 'ENG_KERNEL'
+    name VARCHAR(255) NOT NULL, -- Human label e.g. 'Core Kernel Systems'
+    parent_id UUID REFERENCES hrms_departments(id) ON DELETE SET NULL,
+    manager_id UUID, -- References hrms_employees(id)
+    cost_center_code VARCHAR(64) NOT NULL DEFAULT 'CC-GENERAL',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMPTZ,
-    CONSTRAINT uq_tenant_category_code UNIQUE (tenant_id, category, code)
+    CONSTRAINT uq_tenant_dept_code UNIQUE (tenant_id, code)
 );
-CREATE INDEX idx_hrms_masters_lookup ON hrms_lookup_masters(tenant_id, category, is_active, display_order);
-CREATE INDEX idx_hrms_masters_parent ON hrms_lookup_masters(parent_id);
+
+-- Tier 1B: Designations Master (Role Seniority & Job Families)
+CREATE TABLE hrms_designations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    code VARCHAR(64) NOT NULL, -- e.g. 'STAFF_ENG'
+    name VARCHAR(255) NOT NULL, -- e.g. 'Staff Distributed Systems Engineer'
+    grade_band VARCHAR(16) NOT NULL DEFAULT 'L5', -- L1 to L7, M1 to M4
+    job_family VARCHAR(64) NOT NULL DEFAULT 'ENGINEERING',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_desig_code UNIQUE (tenant_id, code)
+);
+
+-- Tier 1C: Office Locations & Branches Master (Geofencing & Timezone)
+CREATE TABLE hrms_locations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    code VARCHAR(64) NOT NULL, -- e.g. 'BLR_HQ'
+    name VARCHAR(255) NOT NULL, -- e.g. 'Bengaluru Tech Park HQ'
+    physical_address TEXT NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    country_code VARCHAR(2) NOT NULL DEFAULT 'IN',
+    timezone VARCHAR(64) NOT NULL DEFAULT 'Asia/Kolkata',
+    latitude NUMERIC(10, 7),
+    longitude NUMERIC(10, 7),
+    geofence_radius_meters INT NOT NULL DEFAULT 200,
+    ip_whitelist_cidrs TEXT[] DEFAULT '{}',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_loc_code UNIQUE (tenant_id, code)
+);
+
+-- Tier 2: Lightweight Dynamic Picklists (Document Types, Relationships, Degrees)
+CREATE TABLE hrms_picklists (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    category VARCHAR(64) NOT NULL, -- 'DOCUMENT_TYPE', 'RELATIONSHIP', 'DEGREE_LEVEL', 'EMPLOYMENT_TYPE'
+    code VARCHAR(64) NOT NULL,     -- 'DOC_AADHAAR', 'REL_SPOUSE', 'EMP_PERM_FT'
+    name VARCHAR(255) NOT NULL,    -- Human readable label
+    display_order INT NOT NULL DEFAULT 0,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_picklist_code UNIQUE (tenant_id, category, code)
+);
+CREATE INDEX idx_hrms_picklists ON hrms_picklists(tenant_id, category, is_active, display_order);
 
 -- ============================================================================
 -- 1. PARTY & IDENTITY CORE (STEP 1: PERSONAL & DEMOGRAPHICS)
@@ -275,22 +320,22 @@ CREATE TABLE hrms_employees (
     biometric_badge_id VARCHAR(64),
     work_email VARCHAR(255) NOT NULL,
     
-    -- Organizational Taxonomy
+    -- Organizational Taxonomy (Code-First Natural Keys)
     legal_entity_id UUID NOT NULL, -- Link to Corporate Operating Legal Entity
     business_unit VARCHAR(64),
-    department VARCHAR(64) NOT NULL,
+    department_code VARCHAR(64) NOT NULL, -- Foreign key to hrms_departments(tenant_id, code)
     sub_department VARCHAR(64),
     cost_center_code VARCHAR(32) NOT NULL DEFAULT 'CC-DEFAULT',
     
     -- Hierarchy & Seniority
-    title VARCHAR(128) NOT NULL,
+    designation_code VARCHAR(64) NOT NULL, -- Foreign key to hrms_designations(tenant_id, code)
     grade_band VARCHAR(16) NOT NULL DEFAULT 'L3', -- L1 to L7, M1 to M4
     manager_id UUID REFERENCES hrms_employees(id) ON DELETE SET NULL,
     dotted_line_manager_id UUID REFERENCES hrms_employees(id) ON DELETE SET NULL,
     hrbp_id UUID REFERENCES hrms_employees(id) ON DELETE SET NULL,
     
     -- Location & Work Topology
-    location_id VARCHAR(64) NOT NULL DEFAULT 'HQ',
+    location_code VARCHAR(64) NOT NULL DEFAULT 'HQ', -- Foreign key to hrms_locations(tenant_id, code)
     work_mode VARCHAR(32) NOT NULL DEFAULT 'IN_OFFICE', -- IN_OFFICE, REMOTE_WFH, HYBRID, CLIENT_SITE
     shift_policy_id UUID,
     holiday_calendar_id UUID,
@@ -309,7 +354,10 @@ CREATE TABLE hrms_employees (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMPTZ,
     CONSTRAINT uq_tenant_employee_code UNIQUE(tenant_id, employee_code),
-    CONSTRAINT uq_tenant_work_email UNIQUE(tenant_id, work_email)
+    CONSTRAINT uq_tenant_work_email UNIQUE(tenant_id, work_email),
+    CONSTRAINT fk_emp_dept FOREIGN KEY (tenant_id, department_code) REFERENCES hrms_departments(tenant_id, code) ON UPDATE CASCADE,
+    CONSTRAINT fk_emp_desig FOREIGN KEY (tenant_id, designation_code) REFERENCES hrms_designations(tenant_id, code) ON UPDATE CASCADE,
+    CONSTRAINT fk_emp_loc FOREIGN KEY (tenant_id, location_code) REFERENCES hrms_locations(tenant_id, code) ON UPDATE CASCADE
 );
 CREATE INDEX idx_hrms_employees_tenant ON hrms_employees(tenant_id, status);
 CREATE INDEX idx_hrms_employees_manager ON hrms_employees(manager_id);
@@ -626,14 +674,26 @@ CREATE TABLE hrms_separations (
 -- 14. ROW-LEVEL SECURITY (RLS) POLICIES FOR PII & MULTI-TENANCY
 -- ============================================================================
 
-ALTER TABLE hrms_lookup_masters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_departments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_designations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_picklists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_bank_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_onboarding_drafts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_employees ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY tenant_masters_isolation ON hrms_lookup_masters
+CREATE POLICY tenant_departments_isolation ON hrms_departments
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_designations_isolation ON hrms_designations
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_locations_isolation ON hrms_locations
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_picklists_isolation ON hrms_picklists
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_parties_isolation ON hrms_parties
