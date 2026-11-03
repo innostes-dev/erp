@@ -101,50 +101,55 @@ Startups cannot afford multi-step administrative gridlock when bringing on new t
 
 ---
 
-### Employee Credential Lifecycle: Magic Invite Link vs. Temporary Password
+### Employee Credential Lifecycle: Auto-Generated Temporary Password with Mandatory First-Login Reset
 
-A critical question in onboarding security: **How are the employee's initial login credentials handled?**
+A fundamental requirement in startup and enterprise onboarding: **How are employee initial login credentials handled securely and frictionlessly?**
 
-* **The Anti-Pattern to Avoid (Plaintext Static Passwords):**
-  * Admin assigning a static default password (e.g. `Welcome@123`) is a major security hazard. Anyone in the company who knows a new hire's work email can log in as them before they ever start.
-  * Admins must **never** know, store, or view an employee's permanent confidential password.
+* **The Anti-Pattern to Avoid (Static Passwords):**
+  * Admins assigning a static default password (such as `Welcome@123` or `Company@2026`) is a major security vulnerability. Anyone who knows a new hire's work email before Day 1 could log in, impersonate them, or view confidential payroll data.
+  * Admins must **never** set, store, or view an employee's permanent confidential password.
 
-Innostes implements the **Dual-Mode Zero-Knowledge Credential Architecture**:
+Innostes implements the **Auto-Generated Temporary Password & Mandatory First-Login Reset Architecture**:
 
 ```mermaid
 flowchart TD
-    QuickAdd["Founder / HR Adds Employee<br/>(Enters Work Email)"] --> Choice{"Delivery Mode Selected"}
+    QuickAdd["Admin / Founder Creates Employee<br/>(Enters Name, Work Email, Role)"] --> AutoGen["System Auto-Generates Temporary Password<br/>(High-entropy random string e.g., 'inn-7kPx-9mRt')"]
     
-    Choice -->|Mode A: Magic Invite Link (Default)| Magic["Generate 72h Crypto Setup Token<br/>(One-time, unguessable URL)"]
-    Magic --> Email["Dispatched via Email / SMS<br/>OR Founder Clicks '[Copy Link]'"]
-    Email --> SetPasswordScreen["Employee Clicks Link -> /auth/set-password<br/>• Sets confidential permanent password<br/>• Zero admin visibility<br/>• Account activated immediately"]
+    AutoGen --> DBFlags["Database Flags Set in kernel_users:<br/>• must_change_password = TRUE<br/>• temp_password_expires_at = 72h<br/>• password_hash = hash(temp_password)"]
     
-    Choice -->|Mode B: In-Person Temp Password| TempPass["Generate High-Entropy Temp Password<br/>(e.g., 'inn-7kPx-9mRt')"]
-    TempPass --> Flags["Database Flags Set:<br/>• must_change_password = TRUE<br/>• temp_password_expires_at = 72h"]
-    Flags --> FirstLogin["Employee Logs in with Temp Password<br/>-> Token Response: must_change_password: true"]
-    FirstLogin --> ForceModal["Screen Hard-Locked with 'Set New Password'<br/>(No dashboard access permitted until changed)"]
-    ForceModal --> SetPasswordScreen
+    DBFlags --> Delivery["Credentials Hand-off:<br/>1. Welcome email dispatched to employee<br/>2. Confirmation modal shows temp password with '[Copy Credentials]' button"]
+    
+    Delivery --> FirstLogin["Employee Signs In at /auth/login<br/>Enters Work Email + Auto-Generated Temp Password"]
+    
+    FirstLogin --> CheckFlag{"must_change_password == TRUE?"}
+    
+    CheckFlag -->|Yes| HardLock["Hard-Locked Screen Interception:<br/>Redirects directly to /auth/first-login<br/>• All dashboards, menus, and APIs strictly blocked<br/>• Employee enters & confirms confidential permanent password"]
+    
+    HardLock --> PermanentStore["System Promotes to Permanent Password:<br/>• Stores new Argon2id / bcrypt hash<br/>• must_change_password = FALSE<br/>• temp_password_expires_at = NULL<br/>• Temporary credentials permanently destroyed"]
+    
+    PermanentStore --> Dashboard["Employee Lands on Personal Dashboard<br/>(Zero-Knowledge: Admin never knows permanent password)"]
 ```
 
-#### 1. Mode A (Recommended): Magic Activation Link
-* **How it works**: The system creates a user record with no active password hash, generating an unguessable 72-hour `setup_token`.
-* **Zero Friction**: The founder can either let the automated email fire, or click **`[ 📋 Copy Activation Link ]`** directly in the modal to send it over Slack or WhatsApp (essential when corporate email MX records are still propagating on Day 1).
-* **The Experience**: The candidate clicks the link, enters their confidential password once, and lands directly on their new dashboard.
+#### 1. Creation-Time Auto-Generation & Delivery
+* **Zero Admin Guesswork**: The admin never types or devises passwords. When the employee is created, the cryptographic engine automatically generates a high-entropy temporary password (e.g., `inn-7kPx-9mRt`).
+* **Instant Hand-Off**:
+  * An automated welcome email containing the login URL and temporary password is sent to the employee's work and personal email.
+  * The creation modal immediately reveals a confirmation card with a **`[ 📋 Copy Credentials ]`** button, allowing founders to paste it directly into Slack or WhatsApp for Day 1 in-person or remote hires whose corporate email might still be propagating.
 
-#### 2. Mode B: In-Person Auto-Generated Temporary Password
-* **When to use**: When an in-office employee is sitting next to the founder on Day 1 without immediate email access.
-* **How it works**: The admin clicks **`[ Generate Temporary Password ]`**. The system outputs a high-entropy string (e.g., `inn-7kPx-9mRt`).
-* **Strict Enforcement**:
-  * The database sets `must_change_password = TRUE` and `temp_password_expires_at = NOW() + INTERVAL '72 hours'`.
-  * Upon entering this temporary password, the API issues an authentication payload with `must_change_password: true`.
-  * The frontend **strictly blocks all application navigation, APIs, and data views**, forcing the employee to input and verify their new confidential password before granting access.
+#### 2. First-Login Mandatory Reset (Screen Hard-Lock)
+* **Interception**: When the employee enters their work email and temporary password on the login screen, the authentication endpoint verifies the temporary password and detects `must_change_password: true`.
+* **Hard Barrier**: Rather than granting an open session, the auth API issues a restricted, single-purpose temporary token and forces the browser to `/auth/first-login`.
+* **Zero Bypass**: The frontend strictly prevents access to any ERP module, dashboard widget, or background API. The employee cannot proceed without providing:
+  * `new_password` (evaluated against strength policies: minimum length, uppercase, numbers, symbols)
+  * `confirm_new_password`
+* **Commit**: Upon submission, the temporary password is wiped, the new permanent password is saved, `must_change_password` is flipped to `FALSE`, and a full session JWT is issued.
 
-#### 3. Ongoing Password Changes & Resets
-* **No Plaintext Admin Overrides:** An administrator can never directly view or type an employee's password.
-* **If an Employee Forgets Password:**
-  * Self-service: Clicks *"Forgot Password"* on the login page (sends OTP / 15-minute reset link to their verified email/mobile).
-  * Administrative Reset: Admin clicks **`[ 🔄 Trigger Password Reset ]`** from the Employee Directory, which invalidates active sessions and sends a fresh reset link or generates a new 1-time temporary password.
-* **Changing Password from Profile:** Requires providing `current_password` + `new_password` to prevent session hijacking if a laptop is left unlocked.
+#### 3. Administrative Governance & Ongoing Resets
+* **Admins Cannot Edit Passwords**: The administrator never has a field to edit, view, or override an employee's permanent password.
+* **Locked Out / Forgotten Passwords**:
+  * **Self-Service**: The employee can click *"Forgot Password"* on the login page anytime to receive a 15-minute reset token.
+  * **Administrative Reset**: If an employee is locked out, the admin clicks **`[ 🔄 Regenerate Temporary Password / Reset ]`** from the Employee Directory. This invalidates active sessions ([`token_version += 1`](file:///home/sai/Documents/GitHub/innostes_projects/erp/kernel/backend/kernel/user/models/user.py#L58)), auto-generates a fresh temporary password with `must_change_password = TRUE`, and forces the employee to reset it on their next login.
+* **In-App Password Changes**: Employees changing their password from user profile settings must provide their `current_password` to prevent unauthorized changes on unlocked laptops.
 
 ---
 

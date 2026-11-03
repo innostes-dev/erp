@@ -726,11 +726,11 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | :--- | :--- | :--- | :--- | :--- |
 | `GET` | `/peopleops/employees` | List employee directory with filter by department, band, location, and status | `peopleops:read` | 200 OK |
 | `POST` | `/peopleops/employees` | Initialize candidate draft profile and trigger sequential employee code | `peopleops:write` | 201 Created |
-| `POST` | `/peopleops/employees/quick-add` | Founder 60-second hire: creates user, party, employee, contract & issues credential link/temp password | `peopleops:write` | 201 Created |
+| `POST` | `/peopleops/employees/quick-add` | Founder 60-second hire: creates user, party, employee, contract, auto-generates temp password with `must_change_password=TRUE` & returns copyable payload | `peopleops:write` | 201 Created |
 | `GET` | `/peopleops/employees/{id}` | Retrieve comprehensive 360 employee profile across all 8 sections | `peopleops:read` | 200 OK |
 | `PATCH` | `/peopleops/employees/{id}` | Update organizational taxonomy, title, department, or manager links | `peopleops:write` | 200 OK |
-| `POST` | `/peopleops/employees/{id}/reset-password` | Administrative reset trigger: invalidates active sessions and sends 15-min reset link or issues new temp password | `peopleops:admin` | 200 OK |
-| `POST` | `/peopleops/employees/{id}/resend-invite` | Re-generates 72-hour magic activation link or re-dispatches welcome email | `peopleops:write` | 200 OK |
+| `POST` | `/peopleops/employees/{id}/reset-password` | Administrative reset: invalidates active sessions, auto-generates a new temporary password with `must_change_password=TRUE`, and notifies employee | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/employees/{id}/resend-invite` | Re-dispatches welcome credentials with new temporary password | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/stepper` | Fetch candidate 8-step completion status and remaining requirements | `peopleops:read` | 200 OK |
 | `PUT` | `/peopleops/onboarding/{id}/step/{n}/draft` | Debounced auto-save payload (relaxed validation, saves to draft JSONB) | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/step/{n}/draft` | Fetch latest draft for active step (used during cross-device hydration) | `peopleops:read` | 200 OK |

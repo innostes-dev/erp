@@ -160,39 +160,59 @@ Startups do not have time to fill 50 fields before hiring someone. A clean modal
 | Monthly Compensation / CTC (INR) *            Date of Joining *                   |
 | [ 180000                            ]         [ 15 Nov 2026                     ] |
 |                                                                                   |
-| Credential & Access Delivery Mode:                                                |
-| (•) Magic Setup Link (Recommended: sends 72h link to set confidential password)   |
-| ( ) Auto-generate Temporary Password (for in-person Day 1 onboarding)             |
-|                                                                                   |
-| [✓] Send self-onboarding link to candidate work & personal email                  |
+| [✓] Auto-generate temporary password & email credentials to candidate             |
 | [✓] Allow immediate Day 1 web check-in & dashboard access                         |
 |                                                                                   |
-| [ Cancel ]                                         [ Create Employee & Invite ]   |
+| [ Cancel ]                               [ Create Employee & Generate Credentials ]|
 +-----------------------------------------------------------------------------------+
 ```
-* **Outcome**: Clicking `[ Create Employee & Invite ]` immediately creates the employee record, assigns the next sequential employee code (`INN-00105`), and dispatches the self-service onboarding link.
-  * If **Magic Link** was chosen: A success banner displays `[ 📋 Copy Direct Setup Link ]` so the founder can instantly paste it into Slack or WhatsApp.
-  * If **Temporary Password** was chosen: A modal popup reveals `Temporary Password: inn-7kPx-9mRt [ 📋 Copy ]` with a notice: *"The employee will be strictly required to change this password on their very first login."*
 
-#### First Login Forced Password Change (`/auth/set-password`)
-When an employee signs in with an auto-generated temporary password or clicks their single-use magic setup link, they are greeted by a zero-knowledge password establishment screen. All application navigation, menus, and background APIs are hard-locked until this step is completed:
+#### Immediate Credential Hand-Off Modal
+Clicking `[ Create Employee & Generate Credentials ]` immediately creates the employee record, assigns the next sequential employee code (`INN-00105`), auto-generates a high-entropy temporary password, and displays this instant confirmation dialog:
+
+```
++-----------------------------------------------------------------------------------+
+| EMPLOYEE CREATED & CREDENTIALS GENERATED                                       [X] |
++-----------------------------------------------------------------------------------+
+| Sarah Chen has been added as Senior Backend Engineer (Code: INN-00105).           |
+|                                                                                   |
+| Login Email:                                                                      |
+| [ sarah.chen@innostes.com                                                       ] |
+|                                                                                   |
+| Auto-Generated Temporary Password:                                                |
+| [ inn-7kPx-9mRt                                 ]    [ 📋 Copy Credentials ]      |
+|                                                                                   |
+| Security & Compliance Policy:                                                     |
+| • Welcome email with temporary credentials and login link has been dispatched.   |
+| • This temporary password is valid for 72 hours.                                  |
+| • MANDATORY RESET: On Sarah's very first login, she will be automatically forced  |
+|   to create her personal permanent password before accessing any company data.    |
+| • Admins will never see or store her permanent confidential password.             |
+|                                                                                   |
+|                                                                 [ Done / Close ]  |
++-----------------------------------------------------------------------------------+
+```
+
+#### First Login Mandatory Password Reset (`/auth/first-login`)
+When the employee signs in using their work email and auto-generated temporary password, the system detects `must_change_password = true` and presents a hard-locked screen. All application navigation, menus, and background APIs are strictly blocked until the permanent password is established:
 
 ```
 +-----------------------------------------------------------------------------------+
 | INNOSTES BUSINESS OS                                                              |
 +-----------------------------------------------------------------------------------+
 | Welcome to Acme Corp, Sarah!                                                      |
-| Set up your permanent, confidential account password to continue.                 |
+| Your administrator provided a temporary login password.                           |
+| Please set up your confidential permanent password to activate your account.      |
 |                                                                                   |
-| New Password *                                                                    |
+| New Permanent Password *                                                          |
 | [ •••••••••••••••••••••••••••••••• ]  [ Show ]                                    |
 | [████████████████████░░░░] Strong (14 characters, numbers & symbols)              |
 |                                                                                   |
 | Confirm New Password *                                                            |
 | [ •••••••••••••••••••••••••••••••• ]                                              |
 |                                                                                   |
-| Security Notice:                                                                  |
-| • Your password is encrypted via Argon2id / bcrypt.                               |
+| Zero-Knowledge Privacy Guarantee:                                                 |
+| • Your permanent password is encrypted via Argon2id / bcrypt.                     |
 | • Company administrators and founders will never have access to this password.    |
 |                                                                                   |
 |                                          [ Set Password & Enter Workspace -> ]    |
