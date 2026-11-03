@@ -1036,6 +1036,92 @@ CREATE TABLE hrms_approval_delegations (
 CREATE INDEX idx_delegation_active ON hrms_approval_delegations(tenant_id, delegator_id, is_active, start_date, end_date);
 
 -- ============================================================================
+-- 12.3 EXPENSE REIMBURSEMENTS & UNIVERSAL APPROVAL WORKFLOWS
+-- ============================================================================
+
+CREATE TABLE hrms_expense_categories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    code VARCHAR(64) NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    max_limit_per_claim NUMERIC(18, 4),
+    is_receipt_mandatory BOOLEAN NOT NULL DEFAULT TRUE,
+    receipt_threshold_amount NUMERIC(18, 4) NOT NULL DEFAULT 500.0000,
+    max_claim_age_days INT NOT NULL DEFAULT 60,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_tax_deductible_itc BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_exp_cat UNIQUE(tenant_id, code)
+);
+
+CREATE TABLE hrms_workflow_definitions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    entity_type VARCHAR(64) NOT NULL, -- 'EXPENSE_REIMBURSEMENT', 'LEAVE_APPLICATION', 'ATTENDANCE_REGULARIZATION', 'SALARY_ADVANCE'
+    name VARCHAR(128) NOT NULL,
+    description TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_workflow UNIQUE(tenant_id, entity_type, name)
+);
+
+CREATE TABLE hrms_workflow_rules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workflow_id UUID NOT NULL REFERENCES hrms_workflow_definitions(id) ON DELETE CASCADE,
+    rule_name VARCHAR(128) NOT NULL,
+    priority_order INT NOT NULL DEFAULT 1,
+    condition_expression JSONB NOT NULL DEFAULT '{}'::jsonb, -- e.g. {"amount_lte": 2000}
+    sla_hours INT NOT NULL DEFAULT 48,
+    on_sla_timeout VARCHAR(32) NOT NULL DEFAULT 'ESCALATE_TO_SKIP_LEVEL'
+);
+
+CREATE TABLE hrms_workflow_rule_steps (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    rule_id UUID NOT NULL REFERENCES hrms_workflow_rules(id) ON DELETE CASCADE,
+    step_number INT NOT NULL DEFAULT 1,
+    approver_type VARCHAR(32) NOT NULL, -- 'REPORTING_LEAD', 'SKIP_LEVEL_MANAGER', 'ROLE_BASED', 'DEPARTMENT_HEAD', 'SPECIFIC_USER', 'AUTO_APPROVE'
+    target_role VARCHAR(64),
+    target_user_id UUID REFERENCES hrms_employees(id)
+);
+
+CREATE TABLE hrms_expense_claim_reports (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tenant_id UUID NOT NULL,
+    employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
+    claim_number VARCHAR(64) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    business_purpose TEXT NOT NULL,
+    cost_center VARCHAR(64),
+    total_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    total_tax_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    status VARCHAR(32) NOT NULL DEFAULT 'DRAFT', -- 'DRAFT', 'SUBMITTED', 'MANAGER_APPROVED', 'FINANCE_APPROVED', 'INGESTED_IN_PAYROLL', 'PAID_OUT_OF_CYCLE', 'REJECTED'
+    current_workflow_step INT NOT NULL DEFAULT 1,
+    settlement_destination VARCHAR(32) NOT NULL DEFAULT 'NEXT_PAYROLL', -- 'NEXT_PAYROLL', 'INSTANT_BANK_PAYOUT'
+    payroll_run_id UUID REFERENCES hrms_payroll_runs(id),
+    bank_disbursement_reference VARCHAR(128),
+    submitted_at TIMESTAMPTZ,
+    settled_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tenant_claim_no UNIQUE(tenant_id, claim_number)
+);
+
+CREATE TABLE hrms_expense_line_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    claim_report_id UUID NOT NULL REFERENCES hrms_expense_claim_reports(id) ON DELETE CASCADE,
+    category_id UUID NOT NULL REFERENCES hrms_expense_categories(id),
+    expense_date DATE NOT NULL,
+    merchant_name VARCHAR(128) NOT NULL,
+    merchant_gstin VARCHAR(32),
+    amount NUMERIC(18, 4) NOT NULL,
+    tax_amount NUMERIC(18, 4) NOT NULL DEFAULT 0.0000,
+    is_client_billable BOOLEAN NOT NULL DEFAULT FALSE,
+    receipt_file_url TEXT,
+    status VARCHAR(32) NOT NULL DEFAULT 'PENDING' -- 'PENDING', 'APPROVED', 'REJECTED'
+);
+CREATE INDEX idx_exp_line_items ON hrms_expense_line_items(claim_report_id);
+
+-- ============================================================================
 -- 13. OFFBOARDING & EXIT CLEARANCES
 -- ============================================================================
 
@@ -1077,6 +1163,9 @@ ALTER TABLE hrms_tax_declarations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_previous_employments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_form16_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_approval_delegations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_expense_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_workflow_definitions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hrms_expense_claim_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_picklists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_parties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hrms_statutory_identities ENABLE ROW LEVEL SECURITY;
@@ -1130,6 +1219,15 @@ CREATE POLICY tenant_form16_isolation ON hrms_form16_records
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_approval_delegations_isolation ON hrms_approval_delegations
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_expense_categories_isolation ON hrms_expense_categories
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_workflow_defs_isolation ON hrms_workflow_definitions
+    FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
+
+CREATE POLICY tenant_expense_claims_isolation ON hrms_expense_claim_reports
     FOR ALL USING (tenant_id = NULLIF(current_setting('app.current_tenant_id', true), '')::UUID);
 
 CREATE POLICY tenant_picklists_isolation ON hrms_picklists
@@ -1321,3 +1419,19 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/approvals/team-queue` | Retrieve manager's unified pending approval queue (leaves, regularizations, comp-offs, escalated tasks) | `peopleops:manager` | 200 OK |
 | `POST` | `/peopleops/approvals/{id}/action` | Universal approval endpoint; records approver, acting proxy status, and audit comment | `peopleops:manager` | 200 OK |
 | `GET` | `/peopleops/team/presence-radar` | Lead retrieves real-time departmental presence (in-office, remote, on-leave, missing punch) | `peopleops:manager` | 200 OK |
+
+### 2.10 Expense Reimbursements & Universal Approval Workflows
+
+| Method | Path | Summary & Purpose | Scopes Required | Success |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/peopleops/claims/categories` | List active corporate expense categories with limits and mandatory receipt thresholds | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/claims/categories` | Admin creates custom expense category with policy caps and submission windows | `peopleops:admin` | 201 Created |
+| `POST` | `/peopleops/claims/reports` | Employee submits bundled expense claim report with itemized bills and receipts | `peopleops:read` (self) | 201 Created |
+| `GET` | `/peopleops/claims/reports/my` | List logged-in employee's submitted expense claims and settlement tracking | `peopleops:read` (self) | 200 OK |
+| `GET` | `/peopleops/claims/reports/{id}` | Retrieve full claim details, itemized line items, and invoice attachments | `peopleops:read` | 200 OK |
+| `PATCH` | `/peopleops/claims/reports/{id}/manager-review` | Direct lead approves or rejects claim line items for business justification | `peopleops:manager` | 200 OK |
+| `PATCH` | `/peopleops/claims/reports/{id}/finance-verify` | Finance reviews corporate tax invoice, validates GST ITC, and assigns settlement rail | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/claims/reports/{id}/instant-disburse` | Finance triggers immediate out-of-cycle direct bank transfer via corporate API | `peopleops:admin` | 200 OK |
+| `GET` | `/peopleops/workflows` | List all configured multi-tier approval workflows across entity types | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/workflows` | Create dynamic conditional approval workflow with rule branches and approver steps | `peopleops:admin` | 201 Created |
+| `PUT` | `/peopleops/workflows/{id}` | Update workflow rules, value thresholds, approver targets, and SLA timeouts | `peopleops:admin` | 200 OK |

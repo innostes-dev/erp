@@ -1308,6 +1308,93 @@ Administrators complete the annual Indian statutory tax cycle through a guided 4
 
 ---
 
+### 6.8 Visual Universal Approval Workflow Builder (`/hrms/settings/approval-workflows`)
+
+Administrators configure multi-tier approval chains and conditional value thresholds dynamically across any operational entity:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| APPROVAL WORKFLOW BUILDER: "Corporate Expense Reimbursement Policy"                        [ Test Dry Run ] [ Save Policy ]       |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| Target Entity Type: [ EXPENSE_REIMBURSEMENT v]   Policy Status: [ Active (Default) v]   Evaluation Order: [ Sequential Slabs   v] |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| RULE SET 1: SMALL VALUE CLAIMS (<= INR 2,000.00)                                                                                  |
+| Condition: [ Amount <= 2,000.00 ] AND [ Category IN ('MEALS', 'BROADBAND', 'LOCAL_CONVEYANCE') ]                                  |
+|                                                                                                                                   |
+| [ Step 1: Direct Reporting Lead (REPORTING_LEAD) ] ────> [ Settlement Action: Push to Next Payroll Run ]                          |
+| SLA: [ 48 Hours v] | On SLA Timeout: [ Auto-Escalate to Skip-Level Manager v]                                                     |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| RULE SET 2: STANDARD BUSINESS EXPENSES (INR 2,001.00 TO INR 25,000.00)                                                            |
+| Condition: [ Amount > 2,000.00 ] AND [ Amount <= 25,000.00 ]                                                                      |
+|                                                                                                                                   |
+| [ Step 1: Direct Reporting Lead ] ──> [ Step 2: Role: FINANCE_CONTROLLER ] ──> [ Settlement: Payroll / Bank Rail ]                |
+| Step 1 SLA: [ 48 Hours v] | Step 2 SLA: [ 72 Hours v] | Presence Fallback: [✓] Auto-fallback to 2nd-Line Manager if Lead on Leave   |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| RULE SET 3: HIGH VALUE & EXECUTIVE CAPITAL CLAIMS (> INR 25,000.00)                                                               |
+| Condition: [ Amount > 25,000.00 ] OR [ Category == 'HARDWARE_PERIPHERAL' ]                                                        |
+|                                                                                                                                   |
+| [ Step 1: Reporting Lead ] ──> [ Step 2: Finance Controller ] ──> [ Step 3: Department Head / CFO ] ──> [ Settlement ]            |
+| Step 3 Approver: [ DEPARTMENT_HEAD v] (Fallback to CFO if submitter is Department Head)                                           |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| [ + Add New Rule Set / Branch ]                                                               [ Run Dependency & Deadlock Audit ] |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.9 Finance Claims Verification Cockpit (`/hrms/claims/finance-verification`)
+
+Finance reviewers inspect corporate tax invoices, validate GSTIN for Input Tax Credit (ITC), and route approved amounts to either the monthly payroll run or an immediate corporate bank payout:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| FINANCE CLAIMS VERIFICATION COCKPIT                                                 [ Status: 6 Pending Verification ] [ Filter v]|
++------------------------------------+----------------------------------------------------------------------------------------------+
+| CLAIMS QUEUE                       | CLAIM DETAILS: EXP-8842 — Sarah Chen (Client Pitch Trip to Mumbai)                           |
+|                                    | Total Claim: INR 14,020.00 | Manager Approved: INR 14,020.00 by Keshav Iyer                   |
+| [•] EXP-8842: Sarah Chen   [14.0k] | +------------------------------------------------------------------------------------------+ |
+| [ ] EXP-8843: Rahul Verma  [ 1.5k] | | LINE ITEM 1: IndiGo Airlines (Flight 6E-204 BLR -> BOM)                                  | |
+| [ ] EXP-8844: David Miller [ 4.2k] | | Amount: INR 8,450.00 | GSTIN: 29AABCI1234D1Z0 (Valid ITC Eligible)                        | |
+|                                    | | Invoice Status: Corporate Legal Entity Name & GSTIN verified on bill.                    | |
+| Quick Actions:                     | | Decision: [✓ Accept Tax Invoice ]  [ Disallow GST ITC ]  [ Reject Item ]                  | |
+| (•) All Pending Review (6)         | +------------------------------------------------------------------------------------------+ |
+| ( ) High Value (> 25k) (1)         | | SPLIT-SCREEN INLINE RECEIPT VIEWER: [ indigo_ticket.pdf ]                                | |
+|                                    | | [ Zoom In ] [ Zoom Out ] [ Rotate ] [ Download Original ]                                | |
+| Settlement Destination:            | | Verified GSTIN: 29AABCI1234D1Z0 | GST Amount: INR 422.50 (Passes GSTR-2B verification)   | |
+| (•) Include in Next Payroll Run    | +------------------------------------------------------------------------------------------+ |
+|     (November 2026 Cycle)          | | FINAL DISBURSEMENT ACTION:                                                               | |
+| ( ) Immediate Bank Payout (API)    | | [✓ Approve & Ingest into November Payroll ]    [ Disburse Immediately via Bank Rail -> ] | |
++------------------------------------+----------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 6.10 Employee Expense Claim Submission Modal (`ExpenseClaimModal`)
+
+Employees bundle multiple expense receipts into a single claim report:
+
+```
++-----------------------------------------------------------------------------------------------------------------------------------+
+| SUBMIT EXPENSE CLAIM REPORT                                                                                                   [X] |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| Report Title * [ Client Pitch Trip to Mumbai                       ]   Cost Center * [ SALES - Enterprise Deals                 v]|
+| Business Justification * [ On-site executive presentation with Acme Corp leadership.                                            ] |
++----+-------------+----------------------+-------------------+---------------+---------------+-------------------+----------------+
+| #  | DATE        | CATEGORY             | MERCHANT NAME     | AMOUNT (INR)  | TAX/GST PAID  | ATTACHED RECEIPT  | BILLABLE?      |
++----+-------------+----------------------+-------------------+---------------+---------------+-------------------+----------------+
+| 1  | 02 Nov 2026 | TRAVEL_CONVEYANCE    | IndiGo Airlines   |  8,450.00     | 422.50 (CGST) | indigo_ticket.pdf | [✓] Billable   |
+| 2  | 02 Nov 2026 | TRAVEL_CONVEYANCE    | Uber India        |    650.00     |  32.50 (GST)  | uber_ride_02.pdf  | [✓] Billable   |
+| 3  | 02 Nov 2026 | MEALS_ENTERTAINMENT  | The Oberoi Dining |  4,200.00     | 210.00 (GST)  | dinner_bill.jpg   | [✓] Billable   |
+| 4  | 03 Nov 2026 | TRAVEL_CONVEYANCE    | Uber India        |    720.00     |  36.00 (GST)  | uber_ride_03.pdf  | [✓] Billable   |
++----+-------------+----------------------+-------------------+---------------+---------------+-------------------+----------------+
+| [ + Add Expense Line Item ]                                               TOTAL CLAIM AMOUNT: INR 14,020.00 (GST: INR 701.00)     |
++-----------------------------------------------------------------------------------------------------------------------------------+
+| [ Save Draft ]                                                              [ Submit Claim Report for Manager Approval -> ]       |
++-----------------------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
 ## 7. Design System & Component Library Tokens
 
 The PeopleOps UI relies on `@innostes/ui` primitives with strict theme variables supporting both Dark and Light themes without style bleeding.

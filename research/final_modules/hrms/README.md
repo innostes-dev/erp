@@ -33,6 +33,7 @@ It synthesizes findings from:
 | **[`08_sensitive_data_protection_and_pii_vault.md`](./08_sensitive_data_protection_and_pii_vault.md)** | Information Security & PII Vault | Aadhaar Data Vault (ADV), AES-256-GCM envelope encryption, HMAC-SHA256 blind indexing, PostgreSQL RLS, and immutable audit logs. |
 | **[`09_dynamic_masters_and_tenant_seeders.md`](./09_dynamic_masters_and_tenant_seeders.md)** | Dynamic Masters & Seeders Engine | Two-tier master architecture, out-of-the-box seed packs, code-first natural keys, and zero-join hydration. |
 | **[`10_policy_separation_and_compensation_freedom.md`](./10_policy_separation_and_compensation_freedom.md)** | Policy Decoupling & Pay Freedom | Complete separation of master identity from operational policies, total compensation freedom, and audit of startup vs enterprise flexibility. |
+| **[`11_claims_reimbursements_and_dynamic_approval_engine.md`](./11_claims_reimbursements_and_dynamic_approval_engine.md)** | Expense Claims & Workflow Engine | Multi-tier approval workflows, expense categories, GST tax invoice verification, instant bank payouts vs payroll ingestion. |
 
 ---
 
