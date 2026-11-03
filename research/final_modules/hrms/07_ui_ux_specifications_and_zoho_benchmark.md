@@ -219,6 +219,29 @@ When the employee signs in using their work email and auto-generated temporary p
 +-----------------------------------------------------------------------------------+
 ```
 
+#### Pre-Active Login Barrier (`status != ACTIVE`)
+If a candidate attempts to log into the main ERP application (`/auth/login`) while their profile is in `INVITED` or `ONBOARDING` status (before HR gives final approval and activates their profile), the system halts the session and displays this informative barrier card:
+
+```
++-----------------------------------------------------------------------------------+
+| INNOSTES BUSINESS OS                                                              |
++-----------------------------------------------------------------------------------+
+| ACCOUNT PENDING HR ACTIVATION                                                     |
+|                                                                                   |
+| Candidate: Sarah Chen (sarah.chen@innostes.com)                                   |
+| Status: [ ONBOARDING - UNDER REVIEW ]                                             |
+| Expected Joining Date: 15 November 2026                                           |
+|                                                                                   |
+| Notice:                                                                           |
+| • Your pre-onboarding submission has been received and is being verified by HR.   |
+| • Full workspace access, company directory, and attendance check-in will be       |
+|   automatically enabled on your joining date upon final HR approval.              |
+|                                                                                   |
+| Need to update your submitted onboarding documents?                               |
+| [ -> Return to Pre-Onboarding Portal ]                           [ Back to Login ]|
++-----------------------------------------------------------------------------------+
+```
+
 ---
 
 ### 5.2 The 8-Step Candidate Self-Service Stepper (`/hrms/onboarding/[token]`)
@@ -289,6 +312,26 @@ The candidate completes their detailed bank, tax, and address profile on their o
   * Clean, read-only accordion summary of all 8 steps allowing candidate to review information before final submission.
   * 1-Click final submission button transitioning status to `SUBMITTED` for HR compliance audit.
 * **Phase 2 Scope Note**: Contractual electronic document signing (Aadhaar eSign, DocuSign integrations, digital signature canvas) is deferred to Phase 2. Executed paper contracts can be uploaded as profile attachments.
+
+#### Onboarding Sealed & Profile Activated Screen (`status == ACTIVE`)
+When an employee or external visitor attempts to open `/onboarding/[token]` after HR has approved the package and transitioned their profile to `ACTIVE`, the stepper is strictly locked to prevent unauthorized alterations:
+
+```
++-----------------------------------------------------------------------------------+
+| INNOSTES ONBOARDING PORTAL                                                        |
++-----------------------------------------------------------------------------------+
+| ONBOARDING COMPLETED & PROFILE ACTIVE                                             |
+|                                                                                   |
+| Welcome aboard, Sarah Chen!                                                       |
+| Your onboarding documentation has been verified and approved by HR.               |
+| Your profile is active and your onboarding portal is now permanently sealed.      |
+|                                                                                   |
+| • Need to update your bank account, PAN, or emergency contacts?                   |
+|   Please submit an ESS Change Request from your employee workspace settings.      |
+|                                                                                   |
+|                                            [ Go to Employee Workspace -> ]        |
++-----------------------------------------------------------------------------------+
+```
 
 ---
 

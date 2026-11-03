@@ -171,10 +171,84 @@ flowchart TD
 
 #### 5. Phase 5: Day 1 Non-Blocking Progression
 * If a candidate has completed their bank and statutory info, but has not yet located their previous company's relieving letter or college degree certificate by Day 1:
-  * **The employee is NEVER blocked** from Day 1 orientation, Slack/email access, or web check-in.
+  * **The employee is NEVER blocked** from Day 1 orientation, Slack/email access, or web check-in once activated.
   * The pending items are non-blocking and appear as a gentle action banner on their Employee Self-Service (ESS) home page:
     `[ ⚠️ Onboarding 85% Complete: Please upload your previous company relieving letter by 30 Nov ]`.
   * The only hard deadline is bank account + PAN submission before the monthly payroll cutoff date (enforced with automated 5-day warning countdowns).
+
+---
+
+### Employment Status State Machine & Mutual Access Safeguards
+
+A critical security principle governs the boundary between candidate onboarding and active enterprise access: **Strict State-Gated Mutual Isolation**.
+
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT: HR creates initial hire draft
+    DRAFT --> INVITED: HR dispatches pre-onboarding invite
+    INVITED --> ONBOARDING: Candidate accesses pre-onboarding portal
+    
+    state ONBOARDING {
+        [*] --> InProgress: Filling 8 steps with auto-save
+        InProgress --> Submitted: Candidate clicks 'Submit to HR'
+        Submitted --> InProgress: HR requests changes with note
+    }
+    
+    note right of ONBOARDING
+        SAFEGUARD 1: Candidate CAN fill & mutate 8-step draft.
+        SAFEGUARD 2: Candidate CANNOT log in to ERP workspace
+        (Login strictly denied: 403 ACCOUNT_PENDING_ACTIVATION).
+    end note
+    
+    Submitted --> ACTIVE: HR audits docs & clicks 'Approve & Activate'
+    
+    state ACTIVE {
+        [*] --> WorkspaceAccess: Employee logs in (forces 1st-login reset)
+        WorkspaceAccess --> DailyAttendance: Web clock-in & timer
+        WorkspaceAccess --> LeaveRequests: Apply for PTO
+        WorkspaceAccess --> ESSProfileEdits: Governed change requests
+    }
+    
+    note right of ACTIVE
+        SAFEGUARD 1: Employee CAN log in to ERP workspace.
+        SAFEGUARD 2: Pre-onboarding stepper is PERMANENTLY SEALED
+        (Draft edits rejected: 403 ONBOARDING_SEALED).
+    end note
+    
+    ACTIVE --> PROBATION: Direct hire on probation
+    PROBATION --> ACTIVE: Confirmation review passed
+    ACTIVE --> NOTICE_PERIOD: Resignation or Termination
+    NOTICE_PERIOD --> TERMINATED: Last working day closed
+    TERMINATED --> ALUMNI: Final settlement paid
+```
+
+#### Safeguard 1: Pre-Active Application Login Gate (`status != ACTIVE`)
+* **Hard Block on Application Login**: An employee account is strictly forbidden from logging in to the ERP application (dashboards, team directories, announcements, attendance punch clock) while their status is `DRAFT`, `INVITED`, or `ONBOARDING`.
+* **API Enforcement**:
+  * When `POST /auth/login` is executed, the authentication gateway checks the employee's active status.
+  * If `status != 'ACTIVE'` (and not `'PROBATION'`), authentication returns `HTTP 403 Forbidden`:
+    ```json
+    {
+      "error": "ACCOUNT_PENDING_ACTIVATION",
+      "message": "Your onboarding package is currently in review. Full system access will be activated by HR on your start date.",
+      "status": "ONBOARDING",
+      "joining_date": "2026-11-15"
+    }
+    ```
+* **Security Outcome**: Unverified candidates cannot wander through company systems, view proprietary internal data, or record phantom attendance hours prior to formal HR verification and Day 1 activation.
+
+#### Safeguard 2: Onboarding Stepper Hard-Lock (`status == ONBOARDING`)
+* **Exclusive Mutability in Onboarding State**: The candidate can view, edit, and auto-save the 8-step onboarding wizard (`/onboarding/[token]` and `/peopleops/onboarding/{id}/step/*`) **only and exclusively** while their status is `INVITED` or `ONBOARDING`.
+* **Permanent Sealing Upon Activation**:
+  * When HR approves the onboarding package in the Verification Cockpit, the system flips `hrms_employees.status = 'ACTIVE'` and sets `hrms_onboarding_steppers.is_sealed = TRUE`.
+  * Any subsequent API calls to `PUT /peopleops/onboarding/{id}/step/{n}/draft` or `POST /peopleops/onboarding/{id}/step/{n}/commit` are rejected with `HTTP 403 Forbidden`:
+    ```json
+    {
+      "error": "ONBOARDING_SEALED",
+      "message": "Onboarding has already been approved and sealed by HR. All subsequent profile updates must be submitted via Employee Self-Service change requests."
+    }
+    ```
+* **Post-Activation Governance**: Once an employee is `ACTIVE`, any changes to critical fields (such as Bank Account, IFSC, or PAN) cannot be made via an unauthenticated stepper. They require a formal **ESS Change Request** that routes to HR for re-verification to prevent payroll fraud.
 
 ---
 

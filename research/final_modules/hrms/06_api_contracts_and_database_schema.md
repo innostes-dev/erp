@@ -487,6 +487,7 @@ CREATE TABLE hrms_onboarding_steppers (
     step_8_completed BOOLEAN NOT NULL DEFAULT FALSE, -- Statutory Nominees
     is_submitted BOOLEAN NOT NULL DEFAULT FALSE,
     is_hr_approved BOOLEAN NOT NULL DEFAULT FALSE,
+    is_sealed BOOLEAN NOT NULL DEFAULT FALSE, -- Sealed upon HR approval & transition to ACTIVE
     reviewed_by UUID REFERENCES hrms_employees(id),
     review_notes TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -505,6 +506,24 @@ CREATE TABLE hrms_onboarding_drafts (
     CONSTRAINT uq_emp_step_draft UNIQUE (tenant_id, employee_id, step_number)
 );
 CREATE INDEX idx_hrms_onboarding_drafts ON hrms_onboarding_drafts(tenant_id, employee_id, step_number);
+
+-- Database Hard Guard: Onboarding drafts can ONLY be mutated when employee is in ONBOARDING or INVITED status
+CREATE OR REPLACE FUNCTION fn_guard_onboarding_drafts()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_status employment_status;
+BEGIN
+    SELECT status INTO v_status FROM hrms_employees WHERE id = NEW.employee_id;
+    IF v_status NOT IN ('INVITED', 'ONBOARDING') THEN
+        RAISE EXCEPTION 'ONBOARDING_SEALED: Cannot modify onboarding drafts when employee status is %', v_status;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_guard_onboarding_drafts
+BEFORE INSERT OR UPDATE ON hrms_onboarding_drafts
+FOR EACH ROW EXECUTE FUNCTION fn_guard_onboarding_drafts();
 
 -- ============================================================================
 -- 10. ATTENDANCE & PUNCH NORMALIZATION
@@ -734,13 +753,14 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `GET` | `/peopleops/onboarding/pipeline` | Fetch incoming candidate pre-onboarding tracking pipeline with progress % and days to start | `peopleops:read` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/nudge` | Send contextual reminder nudge to candidate via WhatsApp, SMS, and Email | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/stepper` | Fetch candidate 8-step completion status and remaining requirements | `peopleops:read` | 200 OK |
-| `PUT` | `/peopleops/onboarding/{id}/step/{n}/draft` | Debounced auto-save payload (relaxed validation, saves to draft JSONB) | `peopleops:write` | 200 OK |
+| `PUT` | `/peopleops/onboarding/{id}/step/{n}/draft` | Debounced auto-save payload (guarded: requires status=ONBOARDING, returns 403 ONBOARDING_SEALED if ACTIVE) | `peopleops:write` | 200 OK |
 | `GET` | `/peopleops/onboarding/{id}/step/{n}/draft` | Fetch latest draft for active step (used during cross-device hydration) | `peopleops:read` | 200 OK |
-| `POST` | `/peopleops/onboarding/{id}/step/{n}/commit` | Synchronous step validation & promotion to canonical master tables | `peopleops:write` | 200 OK |
+| `POST` | `/peopleops/onboarding/{id}/step/{n}/commit` | Synchronous step validation & promotion to canonical master tables (guarded: status=ONBOARDING only) | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/beacon-flush` | Emergency beacon flush (`sendBeacon`) executed on browser tab close | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/submit` | Candidate final submission of all steps for HR compliance review | `peopleops:write` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/verify-step`| HR auditor approves step $n$ and promotes data to canonical master | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/onboarding/{id}/request-correction`| HR auditor flags specific step or document for correction with structured reason note | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/onboarding/{id}/activate` | HR Final Approval & Day 1 Activation: sets status=ACTIVE, seals onboarding draft (is_sealed=TRUE), and unlocks ERP login access | `peopleops:admin` | 200 OK |
 | `POST` | `/peopleops/documents/upload` | Upload compliance file to encrypted vault, generate SHA-256 hash | `peopleops:write` | 201 Created |
 | `GET` | `/peopleops/documents/{id}/download` | Stream authenticated presigned URL for document viewing/download | `peopleops:read` | 200 OK |
 
