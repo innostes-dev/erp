@@ -34,6 +34,7 @@ It synthesizes findings from:
 | **[`09_dynamic_masters_and_tenant_seeders.md`](./09_dynamic_masters_and_tenant_seeders.md)** | Dynamic Masters & Seeders Engine | Two-tier master architecture, out-of-the-box seed packs, code-first natural keys, and zero-join hydration. |
 | **[`10_policy_separation_and_compensation_freedom.md`](./10_policy_separation_and_compensation_freedom.md)** | Policy Decoupling & Pay Freedom | Complete separation of master identity from operational policies, total compensation freedom, and audit of startup vs enterprise flexibility. |
 | **[`11_claims_reimbursements_and_dynamic_approval_engine.md`](./11_claims_reimbursements_and_dynamic_approval_engine.md)** | Expense Claims & Workflow Engine | Multi-tier approval workflows, expense categories, GST tax invoice verification, instant bank payouts vs payroll ingestion. |
+| **[`12_phase2_universal_workflow_and_approval_engine.md`](./12_phase2_universal_workflow_and_approval_engine.md)** | Phase 2 Universal Approval Engine | Cross-module universal workflow architecture, 6 topologies, presence-aware skip-level routing, unified `/approvals` inbox, and kernel DDL schema. |
 
 ---
 
