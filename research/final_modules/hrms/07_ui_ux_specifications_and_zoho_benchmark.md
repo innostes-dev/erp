@@ -106,6 +106,40 @@ The primary employee dashboard (`/hrms`) utilizes a 12-column responsive CSS gri
   * Clicking any pill opens the **Quick Leave Application Drawer** with the selected leave type pre-filled.
   * Hovering displays a tooltip breakdown: `Total Allotted: 18 | Consumed: 4 | Pending Approval: 1 | Net Usable: 13`.
 
+#### 4.2.1 Quick Leave Application Modal (`LeaveApplicationModal`)
+
+When an employee clicks **`[ + Apply Leave ]`** or clicks any balance pill on their dashboard:
+
+```
++-----------------------------------------------------------------------------------+
+| APPLY FOR TIME OFF                                                            [X] |
++-----------------------------------------------------------------------------------+
+| Leave Type *                                                                      |
+| [ Casual Leave (CL) — Available: 6.5 Days                                      v] |
+|                                                                                   |
+| From Date *                                   To Date *                           |
+| [ 2026-11-13               ] [ Full Day v ]   [ 2026-11-16     ] [ Full Day v ]   |
+|                                                                                   |
+| +-------------------------------------------------------------------------------+ |
+| | LIVE LEAVE CALCULATION & SANDWICH RULE PREVIEW                                | |
+| | Scheduled Working Days: 2.0 Days (Fri, Mon)                                   | |
+| | Sandwich Rule: DISABLED (Sat & Sun remain paid weekly off days)               | |
+| | Total Days to Deduct:   2.0 Days                                              | |
+| | Balance After Leave:    4.5 Days Remaining                                    | |
+| +-------------------------------------------------------------------------------+ |
+|                                                                                   |
+| Reason for Leave *                                                                |
+| [ Attending family function out of town                                         ] |
+|                                                                                   |
+| Supporting Attachment (Optional for CL; Mandatory for SL > 2 days)               |
+| [ Drop medical certificate or ticket here / Browse file (Max 10MB)             ] |
+|                                                                                   |
+| Approving Manager: John Doe (VP Engineering) — Auto-routed via Org Hierarchy      |
+|                                                                                   |
+| [ Cancel ]                                           [ Submit Leave Request -> ]  |
++-----------------------------------------------------------------------------------+
+```
+
 ### 4.3 Manager Approvals Queue (`ManagerApprovalsWidget`)
 
 * **Visibility Condition:** Rendered only when `auth.user.has_role('line_manager')` or `auth.user.direct_reports_count > 0`.
@@ -117,8 +151,24 @@ The primary employee dashboard (`/hrms`) utilizes a 12-column responsive CSS gri
     * Overtime pre-authorizations.
   * Card items feature the applicant's avatar, full name, dates requested, deduction count, and user-provided reason.
 * **Action Handlers:**
-  * `Approve`: Triggers optimistic removal from queue with instant mutation call to `/api/v1/hrms/leaves/{id}/approve`.
-  * `Reject`: Opens a micro-popover requiring a mandatory rejection rationale before sending state update to `/api/v1/hrms/leaves/{id}/reject`.
+  * `Approve`: Triggers optimistic removal from queue with instant mutation call to `/peopleops/leaves/{id}/status`.
+  * `Reject`: Opens a micro-popover requiring a mandatory rejection rationale before sending state update to `/peopleops/leaves/{id}/status`.
+
+#### 4.3.1 Manager Leave Sign-Off Card (In `[ Team Requests ]`)
+
+```
++---------------------------------------------------------------------------------------------------+
+| PENDING TEAM LEAVE APPLICATIONS (1 PENDING)                                                       |
++---------------------------------------------------------------------------------------------------+
+| Alex Smith — Senior Backend Engineer (Reports to: John Doe)                                       |
+| Leave Type: Casual Leave (CL)                                                                     |
+| Duration: 13 Nov 2026 to 16 Nov 2026 (2.0 Working Days | Fri, Mon)                                |
+| Reason: "Attending family function out of town"                                                   |
+| Current Balance: 6.5 Days | Balance Post-Approval: 4.5 Days                                       |
+|                                                                                                   |
+| [ View Team Calendar Radar ]                      [ Approve Leave ]       [ Reject with Note ]    |
++---------------------------------------------------------------------------------------------------+
+```
 
 ### 4.4 Team Presence Radar (`TeamPresenceWidget`)
 
@@ -141,7 +191,7 @@ Daily check-in / check-out is performed **exclusively on the Dashboard widget** 
 ```
 +-----------------------------------------------------------------------------------------------------------------------+
 | TIME & ATTENDANCE                                                 [ < November 2026 > ] [ Today ]                     |
-| Horizon: (•) Month   ( ) Day                   | Mode: (•) 📅 Calendar View   ( ) ☰ List Mode                         |
+| Horizon: (•) Month   ( ) Day                   | Mode: (•) Calendar View   ( ) List Mode                              |
 | View Toggle: [• My Attendance]  [ Team Requests (1) ]                                                                 |
 +-----------------------------------------------------------------------------------------------------------------------+
 ```
@@ -153,14 +203,14 @@ Visual day cards with color-coded, human-readable labels:
 +--------------------+--------------------+--------------------+--------------------+---------------+
 | MON 02 NOV         | TUE 03 NOV         | WED 04 NOV         | THU 05 NOV         | FRI 06 NOV    |
 | 09:14 AM - 06:18 PM| 09:30 AM - 06:30 PM| 09:10 AM - [MISSING| 09:15 AM - 06:20 PM| 09:00 - 05:00 |
-| Net: 08h 19m (45m B| Net: 08h 30m (30m B| ⚠️ Missing OUT     | Net: 08h 20m (45m B| Net: 07h 30m  |
+| Net: 08h 19m (45m B| Net: 08h 30m (30m B| [ Missing OUT ]    | Net: 08h 20m (45m B| Net: 07h 30m  |
 | Mode: [ Office ]   | Mode: [ Home/WFH ] | Mode: [ Office ]   | Mode: [ Office ]   | Mode: [ Office|
-| [ ✓ Present ]      | [ ✓ Present ]      | [⚡Regularize]     | [ ✓ Present ]      | [ ✓ Present ] |
+| [ Present ]        | [ Present ]        | [ Regularize ]     | [ Present ]        | [ Present ]   |
 +--------------------+--------------------+--------------------+--------------------+---------------+
 | SAT 07 NOV         | SUN 08 NOV         | MON 09 NOV         | TUE 10 NOV         | WED 11 NOV    |
 | WEEKLY OFF         | WEEKLY OFF         | 09:20 AM - 06:15 PM| 09:15 AM - 06:10 PM| DIWALI        |
 | Saturday           | Sunday             | Net: 08h 15m       | Net: 08h 15m       | Gazetted      |
-| [ ☕ Weekend Off ] | [ ☕ Weekend Off ] | [ ✓ Present ]      | [ ✓ Present ]      | [ 🪔 Holiday ]|
+| [ Weekend Off ]    | [ Weekend Off ]    | [ Present ]        | [ Present ]        | [ Holiday ]   |
 +--------------------+--------------------+--------------------+--------------------+---------------+
 ```
 
@@ -173,12 +223,12 @@ For users who prefer high-density tabular scanning, filtering by missing punches
 +-----------------------------------------------------------------------------------------------------------------------+
 | DATE       | DAY | STATUS LABEL       | FIRST IN | LAST OUT | GROSS HRS | BREAKS  | NET HRS | WORK MODE| ACTIONS          |
 +------------+-----+--------------------+----------+----------+-----------+---------+---------+----------+------------------+
-| 06 Nov 2026| Fri | [ ✓ Present ]      | 09:00 AM | 05:00 PM | 08h 00m   | 30 mins | 07h 30m | Office   | [ View Details ] |
-| 05 Nov 2026| Thu | [ ✓ Present ]      | 09:15 AM | 06:20 PM | 09h 05m   | 45 mins | 08h 20m | Office   | [ View Details ] |
-| 04 Nov 2026| Wed | [ ⚠️ Missing OUT ]  | 09:10 AM | --:-- -- | --h --m   | 0 mins  | --h --m | Office   | [⚡Regularize]   |
-| 03 Nov 2026| Tue | [ ✓ Present ]      | 09:30 AM | 06:30 PM | 09h 00m   | 30 mins | 08h 30m | Home/WFH | [ View Details ] |
-| 02 Nov 2026| Mon | [ ✓ Present ]      | 09:14 AM | 06:18 PM | 09h 04m   | 45 mins | 08h 19m | Office   | [ View Details ] |
-| 01 Nov 2026| Sun | [ ☕ Weekend Off ]  | --:-- -- | --:-- -- | --        | --      | --      | --       | --               |
+| 06 Nov 2026| Fri | [ Present ]        | 09:00 AM | 05:00 PM | 08h 00m   | 30 mins | 07h 30m | Office   | [ View Details ] |
+| 05 Nov 2026| Thu | [ Present ]        | 09:15 AM | 06:20 PM | 09h 05m   | 45 mins | 08h 20m | Office   | [ View Details ] |
+| 04 Nov 2026| Wed | [ Missing OUT ]    | 09:10 AM | --:-- -- | --h --m   | 0 mins  | --h --m | Office   | [ Regularize ]   |
+| 03 Nov 2026| Tue | [ Present ]        | 09:30 AM | 06:30 PM | 09h 00m   | 30 mins | 08h 30m | Home/WFH | [ View Details ] |
+| 02 Nov 2026| Mon | [ Present ]        | 09:14 AM | 06:18 PM | 09h 04m   | 45 mins | 08h 19m | Office   | [ View Details ] |
+| 01 Nov 2026| Sun | [ Weekend Off ]    | --:-- -- | --:-- -- | --        | --      | --      | --       | --               |
 +-----------------------------------------------------------------------------------------------------------------------+
 ```
 
@@ -188,25 +238,25 @@ Selecting `[ Day ]` or clicking on any date opens the granular intraday breakdow
 ```
 +-----------------------------------------------------------------------------------------------------------------------+
 | ATTENDANCE BREAKDOWN: WEDNESDAY, 04 NOVEMBER 2026                                      [ < Previous Day ] [ Next Day > ]|
-| Summary: Recorded Clock-In at 09:10 AM | Status: [ ⚠️ Incomplete Session — Missing OUT Punch ]                          |
+| Summary: Recorded Clock-In at 09:10 AM | Status: [ Incomplete Session — Missing OUT Punch ]                           |
 +-----------------------------------------------------------------------------------------------------------------------+
 | VISUAL TIMELINE:                                                                                                      |
-| [████████████████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]                 |
+| [=============================================.........................................................................] |
 | 09:10 AM (IN)                                01:00 PM (LUNCH) 01:45 PM           06:00 PM (Expected OUT)               |
 |                                                                                                                       |
 | RAW PUNCH CHRONOLOGY:                                                                                                 |
-| • 09:10:24 AM — CLOCK IN    | Source: Web Portal      | IP: 192.168.1.45 (Office Corporate Wi-Fi)                     |
-| • 01:00:15 PM — BREAK START | Type: Lunch Break       | Source: Mobile App (GPS: 12.9716° N, 77.5946° E)              |
-| • 01:45:30 PM — BREAK END   | Duration: 45 minutes    | Source: Mobile App                                            |
-| • [ MISSING OUT PUNCH ]     | Expected Out: ~06:30 PM | Status: No exit punch recorded before shift window closed     |
+| * 09:10:24 AM — CLOCK IN    | Source: Web Portal      | IP: 192.168.1.45 (Office Corporate Wi-Fi)                     |
+| * 01:00:15 PM — BREAK START | Type: Lunch Break       | Source: Mobile App (GPS: 12.9716 N, 77.5946 E)                |
+| * 01:45:30 PM — BREAK END   | Duration: 45 minutes    | Source: Mobile App                                            |
+| * [ MISSING OUT PUNCH ]     | Expected Out: ~06:30 PM | Status: No exit punch recorded before shift window closed     |
 |                                                                                                                       |
 | RESOLUTION ACTION:                                                                                                    |
-| [ ⚡ Raise Regularization for this Day ]                                                                               |
+| [ Raise Regularization for this Day ]                                                                                 |
 +-----------------------------------------------------------------------------------------------------------------------+
 ```
 
 #### 4. The 1-Click Missed-Punch Regularization Modal
-When an employee clicks `[ ⚡ Regularize ]` on any day flagged with `MISSING_OUT`:
+When an employee clicks `[ Regularize ]` on any day flagged with `MISSING_OUT`:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -667,6 +717,87 @@ In Innostes Business OS, hardcoded database ENUMs are completely abolished. The 
 | Note: Renaming a display label updates all active employee profiles and filter views instantly with zero code changes.|
 | Deactivating an item hides it from new hire forms while safely preserving historical employee contracts.              |
 +-----------------------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 5.8 Company Settings: Admin Leave Policy Builder Cockpit (`/hrms/settings/leaves/types`)
+
+Administrators have a dedicated cockpit to configure all corporate time-off policies with zero developer intervention.
+
+#### 1. Policy Overview Directory
+```
++-----------------------------------------------------------------------------------------------------------------------+
+| LEAVE POLICIES & TIME-OFF TYPES                                                                [ + Create Leave Type ]|
++-----------------------------------------------------------------------------------------------------------------------+
+| Type Name & Code          | Annual Quota    | Accrual Cycle    | Carry Forward      | Encashable | Sandwich Rule| Actions |
+| :---                      | :---            | :---             | :---               | :---       | :---         | :---    |
+| Privilege Leave (PL)      | 18.0 Days       | Monthly (+1.5/mo)| Capped (Max 30d)   | [ YES ]    | [ Disabled ] | [ Edit ]|
+| Casual Leave (CL)         | 12.0 Days       | Annual Lump-Sum  | [ Zero / Lapse ]   | [ NO ]     | [ Disabled ] | [ Edit ]|
+| Sick Leave (SL)           | 12.0 Days       | Annual Lump-Sum  | Capped (Max 15d)   | [ NO ]     | [ Disabled ] | [ Edit ]|
+| Maternity Leave (ML)      | 26 Weeks        | Event-Triggered  | [ N/A ]            | [ NO ]     | [ Disabled ] | [ Edit ]|
+| Paternity Leave (PL)      | 10 Days         | Event-Triggered  | [ 6 Mo Expiry ]    | [ NO ]     | [ Disabled ] | [ Edit ]|
+| Compensatory Off (COMP)   | Dynamic Punch   | Weekend Overtime | [ 60-Day Expiry ]  | [ NO ]     | [ Disabled ] | [ Edit ]|
++-----------------------------------------------------------------------------------------------------------------------+
+| Startup Mode Master Toggle: [ ] Enable Unlimited Trust-First PTO (Bypasses quotas for pure output-driven teams)        |
++-----------------------------------------------------------------------------------------------------------------------+
+```
+
+#### 2. The 4-Tab Leave Policy Builder Drawer (`[ Edit Privilege Leave ]`)
+
+```
++---------------------------------------------------------------------------------------------------+
+| CONFIGURE LEAVE POLICY: PRIVILEGE LEAVE (PL)                                                  [X] |
++---------------------------------------------------------------------------------------------------+
+| [ TAB 1: QUOTA & ACCRUAL ] [ TAB 2: CARRY-OVER & CASH ] [ TAB 3: BOOKING & RULES ] [ TAB 4: ROUTE] |
++---------------------------------------------------------------------------------------------------+
+| TAB 1: QUOTA, ACCRUAL ENGINE & PRORATION                                                          |
+|                                                                                                   |
+| Annual Quota (Days per year) *               Accrual Frequency *                                  |
+| [ 18.00                             ]        [ Monthly Pro-Rata (1.5 days/month)                v]|
+|                                                                                                   |
+| Accrual Credit Timing *                      Mid-Year Joiner Proration *                          |
+| [ Beginning of Month (Advance)      v]       [ Exact Days Remaining in Fiscal Year              v]|
+|                                                                                                   |
+| [ ] Unlimited PTO Mode (Check to remove quota caps and track purely for calendar awareness)       |
++---------------------------------------------------------------------------------------------------+
+| TAB 2: CARRY-FORWARD, EXPIRATION & FINANCIAL ENCASHMENT                                           |
+|                                                                                                   |
+| [✓] Allow Balance Carry-Forward to Next Year                                                      |
+|     Max Rollover Cap: [ 30.00 ] Days (Excess days beyond cap will be encashed or lapsed)          |
+|     Carry-Forward Expiry Window: [ 3 ] Months (Must be used before March 31st, or lapses)         |
+|                                                                                                   |
+| [✓] Allow Financial Leave Encashment                                                              |
+|     Encashment Mode: [ Upon Employee Separation (F&F Only)                                      v]|
+|     Salary Calculation Basis: [ Basic Salary Only (Statutory Standard)                          v]|
+|     Min Retained Balance Required: [ 15.00 ] Days | Max Encashable Per Year: [ 10.00 ] Days        |
++---------------------------------------------------------------------------------------------------+
+| TAB 3: BOOKING CONSTRAINTS, PROOFS & SANDWICH RULE                                                |
+|                                                                                                   |
+| [✓] Allow Half-Day Leaves (First Half / Second Half)                                              |
+| Minimum Advance Notice: [ 7 ] Days in advance | Max Consecutive Days: [ 15 ] Days                 |
+| Backdated Requests Allowed: [✓] Yes | Max Backdated Window: [ 3 ] Days                             |
+| Overdraft / Negative Balance: [ ] Disallowed                                                      |
+|                                                                                                   |
+| Mandatory Supporting Attachment: [✓] Yes, when applied for more than [ 2 ] consecutive days       |
+|                                                                                                   |
+| Sandwich Rule Enforcement:                                                                        |
+| (•) DISABLED (Modern Standard: Taking Friday + Monday off deducts exactly 2.0 working days)       |
+| ( ) SANDWICH WEEKENDS (Intervening Sat + Sun are converted into deducted leave = 4.0 days total)   |
+| ( ) SANDWICH ALL (Intervening weekends AND declared public holidays are deducted)                 |
++---------------------------------------------------------------------------------------------------+
+| TAB 4: ELIGIBILITY & APPROVAL WORKFLOW                                                            |
+|                                                                                                   |
+| Applicable Gender: [ ALL v ] | Applicable Contract Types: [✓] Full-Time [✓] Part-Time [ ] Interns |
+| Availability During Probation: [ Accrue in background; unlocked on confirmation day             v]|
+| Availability During Notice Period: [ Manager Discretion                                         v]|
+|                                                                                                   |
+| Approval Routing Matrix:                                                                          |
+| [ Single-Level Direct Manager Approval (1-Click Dashboard Sign-Off)                             v]|
+| Auto-Escalation SLA: Escalate if direct manager takes no action within [ 48 ] Hours               |
+|                                                                                                   |
+| [ Cancel ]                                                             [ Save Policy Changes ]    |
++---------------------------------------------------------------------------------------------------+
 ```
 
 ---

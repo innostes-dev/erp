@@ -623,20 +623,67 @@ CREATE TABLE hrms_monthly_timesheets (
 CREATE INDEX idx_hrms_timesheet_mgr ON hrms_monthly_timesheets(tenant_id, manager_id, status);
 
 -- ============================================================================
--- 11. LEAVE GOVERNANCE & LEDGER
+-- 11. LEAVE GOVERNANCE & LEDGER (8-DIMENSION MODULAR POLICY ENGINE)
 -- ============================================================================
 
 CREATE TABLE hrms_leave_types (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id UUID NOT NULL,
-    code VARCHAR(32) NOT NULL,
-    name VARCHAR(128) NOT NULL,
-    is_unlimited BOOLEAN NOT NULL DEFAULT FALSE, -- Supports modern Unlimited PTO
-    annual_quota NUMERIC(5, 2) DEFAULT 12.00,
-    carry_forward_cap NUMERIC(5, 2) DEFAULT 0.00,
+    code VARCHAR(32) NOT NULL, -- Machine code e.g. 'CL', 'SL', 'PL', 'MATERNITY', 'COMP_OFF'
+    name VARCHAR(128) NOT NULL, -- Human label e.g. 'Casual Leave'
+    description TEXT,
+    color_hex VARCHAR(7) NOT NULL DEFAULT '#3B82F6',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE, -- System seed default (prevents accidental hard delete)
+
+    -- Dimension 1: Quota, Accrual Engine & Proration
+    is_unlimited BOOLEAN NOT NULL DEFAULT FALSE, -- 1-Click Startup Unlimited PTO
+    annual_quota NUMERIC(5, 2) NOT NULL DEFAULT 12.00,
+    accrual_frequency VARCHAR(32) NOT NULL DEFAULT 'ANNUAL_LUMP_SUM', -- 'ANNUAL_LUMP_SUM', 'MONTHLY_PRO_RATA', 'QUARTERLY', 'EVENT_BASED', 'UNLIMITED'
+    accrual_timing VARCHAR(32) NOT NULL DEFAULT 'BEGINNING_OF_PERIOD', -- 'BEGINNING_OF_PERIOD', 'END_OF_PERIOD'
+    proration_rule VARCHAR(32) NOT NULL DEFAULT 'EXACT_DAYS', -- 'EXACT_DAYS', 'MID_MONTH_CUTOFF', 'NONE'
+
+    -- Dimension 2: Carry-Forward, Rollover & Expiry
+    can_carry_forward BOOLEAN NOT NULL DEFAULT FALSE,
+    carry_forward_cap NUMERIC(5, 2) NOT NULL DEFAULT 0.00,
+    carry_forward_expiry_months INT, -- Optional: expires after X months (e.g. 3 months / 90 days)
+
+    -- Dimension 3: Financial Encashment
     is_encashable BOOLEAN NOT NULL DEFAULT FALSE,
-    requires_approval BOOLEAN NOT NULL DEFAULT TRUE,
-    is_sandwich_rule_active BOOLEAN NOT NULL DEFAULT FALSE,
+    encashment_mode VARCHAR(32) NOT NULL DEFAULT 'UPON_SEPARATION_ONLY', -- 'UPON_SEPARATION_ONLY', 'ANNUAL_WINDOW', 'ON_DEMAND', 'NONE'
+    encashment_salary_basis VARCHAR(32) NOT NULL DEFAULT 'BASIC_SALARY', -- 'BASIC_SALARY', 'GROSS_SALARY'
+    encashment_min_balance_retained NUMERIC(5, 2) NOT NULL DEFAULT 0.00,
+    encashment_max_days_per_year NUMERIC(5, 2) NOT NULL DEFAULT 0.00,
+
+    -- Dimension 4: Booking & Application Constraints
+    allow_half_day BOOLEAN NOT NULL DEFAULT TRUE,
+    min_notice_days INT NOT NULL DEFAULT 0,
+    max_consecutive_days INT, -- Optional cap (e.g. max 3 days for CL)
+    allow_past_dating BOOLEAN NOT NULL DEFAULT TRUE,
+    max_past_days INT NOT NULL DEFAULT 3, -- Max backdated days
+    allow_negative_balance BOOLEAN NOT NULL DEFAULT FALSE,
+    max_negative_days NUMERIC(4, 2) NOT NULL DEFAULT 0.00,
+    requires_attachment BOOLEAN NOT NULL DEFAULT FALSE,
+    attachment_mandatory_above_days INT, -- e.g. medical cert required if > 2 days
+
+    -- Dimension 5: Weekend & Holiday Treatment (Sandwich Rule Engine)
+    include_weekends BOOLEAN NOT NULL DEFAULT FALSE,
+    include_holidays BOOLEAN NOT NULL DEFAULT FALSE,
+    sandwich_rule_mode VARCHAR(32) NOT NULL DEFAULT 'DISABLED', -- 'DISABLED', 'SANDWICH_WEEKENDS', 'SANDWICH_ALL'
+
+    -- Dimension 6 & 7: Lifecycle & Target Cohorts
+    probation_rule VARCHAR(32) NOT NULL DEFAULT 'FULL_ACCESS', -- 'FULL_ACCESS', 'ACCRUE_ONLY_LOCKED', 'LOSS_OF_PAY_ONLY'
+    notice_period_rule VARCHAR(32) NOT NULL DEFAULT 'MANAGER_DISCRETION', -- 'PROHIBITED', 'MANAGER_DISCRETION', 'EXTENDS_NOTICE_PERIOD'
+    applicable_gender VARCHAR(32) NOT NULL DEFAULT 'ALL', -- 'ALL', 'MALE_ONLY', 'FEMALE_ONLY'
+    applicable_employment_types VARCHAR(64)[] DEFAULT '{PERMANENT_FULL_TIME,PERMANENT_PART_TIME}',
+
+    -- Dimension 8: Approval Routing & SLA
+    approval_workflow VARCHAR(32) NOT NULL DEFAULT 'SINGLE_LEVEL_MANAGER', -- 'AUTO_APPROVE', 'SINGLE_LEVEL_MANAGER', 'TWO_TIER_MANAGER_SKIP', 'MANAGER_PLUS_HR'
+    auto_approve_if_below_days NUMERIC(3, 1),
+    sla_hours INT NOT NULL DEFAULT 48,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uq_tenant_leave_code UNIQUE(tenant_id, code)
 );
 
@@ -646,15 +693,24 @@ CREATE TABLE hrms_leave_applications (
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
     leave_type_id UUID NOT NULL REFERENCES hrms_leave_types(id),
     start_date DATE NOT NULL,
+    start_half VARCHAR(16) NOT NULL DEFAULT 'FULL_DAY', -- 'FIRST_HALF', 'SECOND_HALF', 'FULL_DAY'
     end_date DATE NOT NULL,
-    total_days NUMERIC(5, 2) NOT NULL,
-    status VARCHAR(32) NOT NULL DEFAULT 'PENDING', -- 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'
+    end_half VARCHAR(16) NOT NULL DEFAULT 'FULL_DAY',   -- 'FIRST_HALF', 'SECOND_HALF', 'FULL_DAY'
+    base_days NUMERIC(5, 2) NOT NULL,                   -- Scheduled working days
+    sandwich_days NUMERIC(5, 2) NOT NULL DEFAULT 0.00,  -- Intervening weekend/holiday days added by sandwich policy
+    total_days NUMERIC(5, 2) NOT NULL,                  -- base_days + sandwich_days
+    status VARCHAR(32) NOT NULL DEFAULT 'PENDING',      -- 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'
     reason TEXT NOT NULL,
+    supporting_document_id UUID,                        -- Optional/Mandatory medical cert or event proof
+    manager_id UUID REFERENCES hrms_employees(id),       -- Assigned lead approver
+    skip_level_id UUID REFERENCES hrms_employees(id),   -- For two-tier workflows
     approved_by UUID REFERENCES hrms_employees(id),
-    decision_notes TEXT,
+    approved_at TIMESTAMPTZ,
+    rejection_reason TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_date_span CHECK (end_date >= start_date)
 );
+CREATE INDEX idx_hrms_leave_app_emp ON hrms_leave_applications(tenant_id, employee_id, status);
 
 CREATE TABLE hrms_leave_ledger (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -662,9 +718,10 @@ CREATE TABLE hrms_leave_ledger (
     employee_id UUID NOT NULL REFERENCES hrms_employees(id) ON DELETE CASCADE,
     leave_type_id UUID NOT NULL REFERENCES hrms_leave_types(id),
     transaction_date DATE NOT NULL,
-    action VARCHAR(32) NOT NULL, -- 'ACCRUED', 'CONSUMED', 'ENCASHED', 'LAPSED', 'REVERSED'
+    action VARCHAR(32) NOT NULL, -- 'ACCRUED', 'CONSUMED', 'ENCASHED', 'LAPSED', 'REVERSED', 'ADJUSTED'
     days NUMERIC(5, 2) NOT NULL,
-    reference_id UUID,
+    reference_id UUID,           -- Application ID, Payroll Run ID, or Comp-Off Punch ID
+    expires_at TIMESTAMPTZ,      -- Used for Comp-Off or Carry-Forward balance expiry
     remarks TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -876,15 +933,24 @@ All routes are mounted under `/peopleops` and require valid JWT authentication p
 | `POST` | `/peopleops/attendance/timesheets/{id}/approve` | Reporting lead signs off and locks monthly timesheet | `peopleops:manager` | 200 OK |
 | `POST` | `/peopleops/attendance/timesheets/{id}/reject` | Reporting lead returns timesheet with change request comments | `peopleops:manager` | 200 OK |
 
-### 2.6 Leave Governance & Ledgers
+### 2.6 Leave Governance & Ledgers (Modular Policy Engine)
 
 | Method | Path | Summary & Purpose | Scopes Required | Success |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/peopleops/leaves/balances` | Retrieve real-time available leave balance matrix across all types | `peopleops:read` | 200 OK |
-| `POST` | `/peopleops/leaves/apply` | Submit formal leave application with sandwich rule computation | `peopleops:read` (self) | 201 Created |
-| `PATCH` | `/peopleops/leaves/{id}/status` | Manager approves or rejects pending leave application with reason | `peopleops:manager` | 200 OK |
+| `GET` | `/peopleops/leave-types` | List all configured leave types with active 8-dimension policy matrix | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/leave-types` | Admin creates a new custom leave type with quota, carry-forward, encashment, & sandwich rules | `peopleops:admin` | 201 Created |
+| `GET` | `/peopleops/leave-types/{id}` | Retrieve full 8-dimension policy specifications for a specific leave type | `peopleops:read` | 200 OK |
+| `PUT` | `/peopleops/leave-types/{id}` | Admin updates policy rules (quota, rollover caps, encashment mode, notice days, sandwich rule) | `peopleops:admin` | 200 OK |
+| `DELETE` | `/peopleops/leave-types/{id}` | Admin deletes custom leave type (deactivates if referenced in ledger) | `peopleops:admin` | 200 OK |
+| `POST` | `/peopleops/leaves/preview` | Real-time pre-submission dry run: validates balance, computes sandwich days, and returns total deduction breakdown | `peopleops:read` (self) | 200 OK |
+| `POST` | `/peopleops/leaves/apply` | Submit formal leave application with half-day flags and supporting document attachment | `peopleops:read` (self) | 201 Created |
+| `PATCH` | `/peopleops/leaves/{id}/status` | Direct manager or HR approves/rejects application, posting CONSUMED transaction to ledger | `peopleops:manager` | 200 OK |
+| `GET` | `/peopleops/leaves/balances` | Retrieve real-time available leave balance matrix across all types from ledger | `peopleops:read` (self) | 200 OK |
 | `GET` | `/peopleops/leaves/team-presence` | Get real-time departmental presence radar ("Who's out today") | `peopleops:read` | 200 OK |
-| `GET` | `/peopleops/leaves/ledger/{employee_id}`| Audit trail of all accruals, debits, carry-forwards, and encashments | `peopleops:read` | 200 OK |
+| `GET` | `/peopleops/leaves/ledger/{employee_id}`| Audit trail of all accruals, debits, carry-forwards, encashments, and lapses | `peopleops:read` | 200 OK |
+| `POST` | `/peopleops/leaves/comp-off/grant` | Reporting lead converts verified weekend/holiday overtime punch into an active Comp-Off credit | `peopleops:manager` | 201 Created |
+| `POST` | `/peopleops/leaves/encash/request` | Employee submits request to liquidate eligible excess leave balance | `peopleops:read` (self) | 201 Created |
+| `POST` | `/peopleops/leaves/encash/{id}/approve` | HR approves encashment request, pushing financial payout to next payroll run | `peopleops:admin` | 200 OK |
 
 ### 2.7 Payroll Engine & Disbursals
 
