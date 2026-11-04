@@ -1,7 +1,7 @@
 """FastAPI HTTP router for PeopleOps Attendance."""
 
 from fastapi import APIRouter, status
-from peopleops.attendance.schemas import AttendanceBaseResponse
+from peopleops.attendance.schemas import AttendanceBaseResponse, RegularizePunchRequest
 from peopleops.attendance.services import service
 
 router = APIRouter(prefix="/attendance", tags=["PeopleOps Attendance"])
@@ -20,7 +20,7 @@ async def check_in() -> AttendanceBaseResponse:
     Returns:
         AttendanceBaseResponse with operational data.
     """
-    data = await service.get_overview()
+    data = await service.process_punch(direction="in")
     return AttendanceBaseResponse(data=data)
 
 @router.post(
@@ -37,7 +37,7 @@ async def check_out() -> AttendanceBaseResponse:
     Returns:
         AttendanceBaseResponse with operational data.
     """
-    data = await service.get_overview()
+    data = await service.process_punch(direction="out")
     return AttendanceBaseResponse(data=data)
 
 @router.get(
@@ -54,7 +54,7 @@ async def get_daily_status() -> AttendanceBaseResponse:
     Returns:
         AttendanceBaseResponse with operational data.
     """
-    data = await service.get_overview()
+    data = await service.get_daily_status()
     return AttendanceBaseResponse(data=data)
 
 @router.get(
@@ -71,6 +71,29 @@ async def get_timesheets() -> AttendanceBaseResponse:
     Returns:
         AttendanceBaseResponse with operational data.
     """
-    data = await service.get_overview()
+    data = await service.get_timesheets()
     return AttendanceBaseResponse(data=data)
 
+@router.post(
+    "/regularize",
+    response_model=AttendanceBaseResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Submit punch regularization request",
+    operation_id="attendance_regularize",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+)
+async def regularize_punch(request: RegularizePunchRequest) -> AttendanceBaseResponse:
+    """Submit punch regularization request with reason for manager sign-off.
+    \f
+    Args:
+        request: RegularizePunchRequest with details.
+
+    Returns:
+        AttendanceBaseResponse with operational data.
+    """
+    data = await service.regularize_punch(
+        reason=request.reason,
+        punch_time=request.punch_time,
+        direction=request.direction,
+    )
+    return AttendanceBaseResponse(data=data)

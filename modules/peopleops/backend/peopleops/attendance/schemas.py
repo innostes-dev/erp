@@ -23,3 +23,11 @@ class AttendanceBaseResponse(BaseSchema):
             ]
         }
     )
+
+
+class RegularizePunchRequest(BaseSchema):
+    """Request schema for regularize punch."""
+    
+    reason: str = Field(description="Reason for regularization.")
+    punch_time: str = Field(description="Original or intended punch time.")
+    direction: str = Field(description="Punch direction (in/out).")
