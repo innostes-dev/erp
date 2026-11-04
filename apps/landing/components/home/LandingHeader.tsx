@@ -11,6 +11,7 @@ import {
   ArrowRight,
   ChevronDown,
   Menu,
+  Monitor,
   Moon,
   Sun,
   TrendingUp,
@@ -32,8 +33,8 @@ const FEATURED_MODULES = [
     icon: <Users className="size-4 text-emerald-500" />,
   },
   {
-    title: 'Tracura',
-    description: 'Universal API telemetry, distributed tracing & request logging.',
+    title: 'Tracura API Telemetry',
+    description: 'Real-time API observability, request tracing & payload logging.',
     href: '/plugins/tracura',
     icon: <Activity className="size-4 text-purple-500" />,
   },
@@ -48,7 +49,8 @@ export function LandingHeader() {
   const headerRef = useRef<HTMLElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const isDark = mounted ? (resolvedTheme || theme) === 'dark' : false;
 
   useEffect(() => {
     setMounted(true);
@@ -98,7 +100,7 @@ export function LandingHeader() {
   };
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(isDark ? 'light' : 'dark');
   };
 
   return (
@@ -274,20 +276,22 @@ export function LandingHeader() {
           </a>
 
           {/* Theme Switcher Toggle */}
-          {mounted && (
-            <button
-              onClick={toggleTheme}
-              className="inline-flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200/80 bg-white/80 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
-              aria-label="Toggle Theme"
-              title="Toggle theme"
-            >
-              {theme === 'dark' ? (
-                <Sun className="size-4 text-amber-400" />
+          <button
+            onClick={toggleTheme}
+            className="inline-flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200/90 bg-white/80 text-slate-700 shadow-2xs backdrop-blur-sm transition-all hover:bg-slate-100 hover:text-slate-950 dark:border-white/10 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15 cursor-pointer"
+            aria-label={mounted ? (isDark ? 'Switch to light theme' : 'Switch to dark theme') : 'Toggle theme'}
+            title={mounted ? (isDark ? 'Switch to light theme' : 'Switch to dark theme') : 'Toggle theme'}
+          >
+            {mounted ? (
+              isDark ? (
+                <Sun className="size-4 text-amber-400 transition-transform duration-200 hover:rotate-45" />
               ) : (
-                <Moon className="size-4 text-slate-700" />
-              )}
-            </button>
-          )}
+                <Moon className="size-4 text-slate-700 transition-transform duration-200 hover:-rotate-12" />
+              )
+            ) : (
+              <span className="size-4 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
+            )}
+          </button>
 
           {/* Primary Action: Deploy Free */}
           <Link
@@ -362,7 +366,53 @@ export function LandingHeader() {
               Services & Pricing
             </Link>
 
-            <div className="mt-2 pt-2 border-t border-fd-border/70">
+            {/* Mobile Theme Selector */}
+            <div className="my-2 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-white/5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  {mounted && isDark ? (
+                    <Moon className="size-4 text-amber-400" />
+                  ) : (
+                    <Sun className="size-4 text-amber-500" />
+                  )}
+                  <span>Appearance</span>
+                </div>
+                <div className="inline-flex rounded-full border border-slate-200/80 bg-white/80 p-0.5 dark:border-white/10 dark:bg-slate-900">
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                      mounted && (theme === 'light' || (!theme && !isDark))
+                        ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    Light
+                  </button>
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                      mounted && (theme === 'dark' || (!theme && isDark))
+                        ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    Dark
+                  </button>
+                  <button
+                    onClick={() => setTheme('system')}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                      mounted && theme === 'system'
+                        ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    System
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-1 pt-2 border-t border-fd-border/70">
               <Button
                 size="md"
                 render={<Link href="/docs/getting-started" onClick={() => setMobileOpen(false)} />}

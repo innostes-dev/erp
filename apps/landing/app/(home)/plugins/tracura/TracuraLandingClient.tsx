@@ -223,38 +223,45 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-screen text-fd-foreground">
-      {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden border-b border-fd-border bg-gradient-to-b from-blue-50/60 via-background to-background dark:from-blue-950/25 dark:via-background dark:to-background pt-16 pb-20 md:pt-24 md:pb-28">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.18),transparent)] pointer-events-none" />
+    <div className="flex flex-col w-full min-h-screen">
+      {/* ── 1. HERO SECTION WITH CADENCE MESH ────────────────────── */}
+      <section className="hero-mesh relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28 lg:pt-32 lg:pb-36 section-divider transition-colors duration-300">
+        {/* Centered Ambient Atmospheric Glow */}
+        <div className="pointer-events-none absolute inset-x-0 top-1/4 -z-10 flex justify-center">
+          <div className="size-[500px] sm:size-[700px] rounded-full bg-gradient-to-tr from-amber-400/10 via-purple-500/15 to-blue-500/10 blur-[130px] dark:from-orange-500/15 dark:via-purple-600/20 dark:to-blue-600/20" />
+        </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center text-center">
             {/* Top Eyebrow Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 mb-6 backdrop-blur-xs">
-              <Sparkles className="size-3.5 animate-pulse text-blue-500" />
-              <span>Open Source Telemetry & API Observability Engine</span>
-              <span className="flex size-1.5 rounded-full bg-emerald-500 animate-ping" />
+            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs sm:text-sm font-medium text-slate-800 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200 mb-6">
+              <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:bg-emerald-400/20 dark:text-emerald-300">
+                <Sparkles className="size-3" /> Company Developer Tools
+              </span>
+              <span>API Observability Engine</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">100% Free to Self-Host</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="text-slate-600 dark:text-slate-300">Zero 3rd-Party SaaS Bills</span>
             </div>
 
-            {/* Headline */}
-            <h1 className="max-w-4xl text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.12]">
-              Universal API Telemetry & Tracing{' '}
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400 bg-clip-text text-transparent">
-                at In-Memory Speed.
-              </span>
+            {/* Headline with Cadence Gradient */}
+            <h1 className="animate-fade-up stagger-1 max-w-5xl text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+              Real-time API telemetry &amp; tracing
+              <br className="hidden sm:inline" />{' '}
+              <span className="gradient-cadence">for every service your company runs</span>
             </h1>
 
             {/* Subheadline */}
-            <p className="mt-6 max-w-2xl text-lg sm:text-xl text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
-              Ingest 10,000+ req/sec from microservices, serverless functions, external APIs, and AI agent pipelines with a sub-millisecond circular ring buffer. Inspect payloads, scrub PII automatically, and control everything via scoped API Keys.
+            <p className="animate-fade-up stagger-2 mt-6 max-w-2xl text-base sm:text-lg text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
+              Every modern company builds microservices, webhook listeners, and AI agent pipelines. Tracura delivers high-throughput request tracing, live payload inspection, and latency metrics right out of the box—giving your team full API observability without expensive third-party APM bills.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            {/* CTA Buttons in Cadence Pill Style */}
+            <div className="animate-fade-up stagger-3 mt-8 flex flex-wrap items-center justify-center gap-3.5">
               <Link
                 href="/plugins/tracura/docs"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-7 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
               >
                 <span>Read Developer Documentation</span>
                 <ArrowRight className="size-4" />
@@ -262,7 +269,7 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
 
               <Link
                 href="/plugins/tracura/docs#api-reference"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-fd-border bg-fd-card px-6 py-3.5 text-sm font-semibold text-fd-foreground hover:bg-fd-muted transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-6 py-3.5 text-sm font-semibold text-slate-800 shadow-2xs backdrop-blur-xs transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
               >
                 <Code2 className="size-4 text-blue-500" />
                 <span>REST API Reference (20 Endpoints)</span>
@@ -270,20 +277,20 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
             </div>
 
             {/* Universal Ingestion Callout Pill */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 font-mono text-xs text-slate-500 dark:text-slate-400 border border-fd-border/80 bg-fd-card/60 backdrop-blur-md rounded-full px-5 py-2">
-              <span className="text-emerald-500 font-bold">Universal HTTP / REST</span>
+            <div className="animate-fade-up stagger-4 mt-8 flex flex-wrap items-center justify-center gap-3 font-mono text-xs text-slate-600 dark:text-slate-400 border border-slate-200/80 bg-white/80 dark:border-white/10 dark:bg-white/5 backdrop-blur-md rounded-full px-5 py-2 shadow-2xs">
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">Universal HTTP / REST</span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span className="text-blue-500 font-medium">Any Project or Stack</span>
+              <span className="text-blue-600 dark:text-blue-400 font-medium">Monitor Any Company Stack</span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span className="text-purple-500 font-medium">In-Memory Ring Buffer (&lt;0.2ms)</span>
+              <span className="text-purple-600 dark:text-purple-400 font-medium">In-Memory Ring Buffer (&lt;0.2ms)</span>
               <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span className="text-amber-500 font-medium">100% Self-Hosted</span>
+              <span className="text-amber-600 dark:text-amber-400 font-medium">100% Free Self-Hosted</span>
             </div>
           </div>
 
           {/* Hero Terminal Box */}
-          <div className="mt-12 mx-auto max-w-4xl rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-900 shadow-2xl overflow-hidden text-left">
-            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-4 py-3">
+          <div className="mt-12 mx-auto max-w-4xl overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 text-slate-200 shadow-2xl text-left">
+            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/90 px-4 py-3">
               <div className="flex items-center gap-2">
                 <div className="size-3 rounded-full bg-rose-500/80" />
                 <div className="size-3 rounded-full bg-amber-500/80" />
@@ -292,7 +299,7 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
               </div>
               <button
                 onClick={() => copyCode(codeSnippets.curl)}
-                className="flex items-center gap-1.5 rounded-md bg-slate-800/80 hover:bg-slate-700 px-2.5 py-1 text-xs text-slate-300 transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 px-2.5 py-1 text-xs text-slate-300 transition-colors cursor-pointer"
               >
                 {copiedCode ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
                 <span>{copiedCode ? 'Copied to Clipboard' : 'Copy cURL'}</span>
@@ -323,31 +330,31 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
         </div>
       </section>
 
-      {/* 2. THE 3 DESIGN SURFACES (DASHBOARD, EXPLORER, SETTINGS) */}
-      <section className="py-20 bg-fd-background border-b border-fd-border">
+      {/* ── 2. THE 3 DESIGN SURFACES (DASHBOARD, EXPLORER, SETTINGS) ─ */}
+      <section className="py-20 lg:py-28 section-divider">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               Interactive Product Showcase
+            </span>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white">
+              Engineered with Enterprise Polish &amp; Depth
             </h2>
-            <p className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Engineered with Enterprise Polish & Observability Depth
-            </p>
             <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
               Complete observability suite with responsive KPI sparklines, dual-series SVG charts, split request inspection drawers, and real-time PII redaction.
             </p>
           </div>
 
-          {/* Tab Selector */}
+          {/* Pill Tab Selector */}
           <div className="mt-10 flex justify-center">
-            <div className="inline-flex rounded-xl border border-fd-border bg-fd-muted/50 p-1.5 shadow-xs">
+            <div className="inline-flex rounded-full border border-slate-200/90 bg-white/80 p-1.5 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-slate-900/80">
               <button
                 type="button"
                 onClick={() => setActiveTab('dashboard')}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-2 rounded-full px-5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === 'dashboard'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-background'
+                    ? 'bg-slate-950 text-white shadow-xs dark:bg-white dark:text-slate-950'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
                 <Activity className="size-4" />
@@ -357,27 +364,27 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
               <button
                 type="button"
                 onClick={() => setActiveTab('explorer')}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-2 rounded-full px-5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === 'explorer'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-background'
+                    ? 'bg-slate-950 text-white shadow-xs dark:bg-white dark:text-slate-950'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
                 <Search className="size-4" />
-                <span>Split Inspector & Explorer</span>
+                <span>Split Inspector &amp; Explorer</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('settings')}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex items-center gap-2 rounded-full px-5 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                   activeTab === 'settings'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-fd-muted-foreground hover:text-fd-foreground hover:bg-fd-background'
+                    ? 'bg-slate-950 text-white shadow-xs dark:bg-white dark:text-slate-950'
+                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
                 <Sliders className="size-4" />
-                <span>Redaction & Retention Settings</span>
+                <span>Redaction &amp; Settings</span>
               </button>
             </div>
           </div>
@@ -386,16 +393,16 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
           <div className="mt-10">
             {activeTab === 'dashboard' && (
               <div className="flex flex-col gap-6">
-                <div className="relative rounded-2xl border border-fd-border bg-fd-card overflow-hidden shadow-xl transition-all">
-                  <div className="border-b border-fd-border bg-fd-muted/30 px-5 py-3 flex items-center justify-between">
+                <div className="bento-card overflow-hidden rounded-3xl shadow-xl transition-all">
+                  <div className="border-b border-slate-100 bg-slate-50/60 dark:border-white/5 dark:bg-white/5 px-5 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-sm">Dashboard Overview</span>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white">Dashboard Overview</span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         Live Streaming
                       </span>
                     </div>
-                    <span className="text-xs text-fd-muted-foreground">Org: Innostes · Project: E-commerce API</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Org: Innostes · Project: E-commerce API</span>
                   </div>
                   <div className="relative w-full aspect-[16/10] bg-slate-950">
                     <Image
@@ -408,34 +415,34 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
                   </div>
                 </div>
 
-                {/* Annotation Cards */}
+                {/* Annotation Bento Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-sm">
                       <Activity className="size-4" />
                       <span>5 Real-Time KPI Metric Cards</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Instant visibility into Total Requests (12,482), 98.2% Success Rate, Error Rate with sparkline trends, and P95 latency percentiles.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                       <FastForward className="size-4" />
-                      <span>Dual-Series Requests & Error Bars</span>
+                      <span>Dual-Series Requests &amp; Error Bars</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Pure SVG dual-bar visualization tracking volume spikes and error anomalies across 24h hourly buckets with zero external dependencies.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-sm">
                       <Globe className="size-4" />
                       <span>Environment Health Matrix</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Cross-environment telemetry status comparing Production (Healthy, 243ms), Staging (Degraded, 412ms), and Development in one cohesive view.
                     </p>
                   </div>
@@ -445,15 +452,15 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
 
             {activeTab === 'explorer' && (
               <div className="flex flex-col gap-6">
-                <div className="relative rounded-2xl border border-fd-border bg-fd-card overflow-hidden shadow-xl transition-all">
-                  <div className="border-b border-fd-border bg-fd-muted/30 px-5 py-3 flex items-center justify-between">
+                <div className="bento-card overflow-hidden rounded-3xl shadow-xl transition-all">
+                  <div className="border-b border-slate-100 bg-slate-50/60 dark:border-white/5 dark:bg-white/5 px-5 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-sm">API Requests Deep Explorer</span>
-                      <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white">API Requests Deep Explorer</span>
+                      <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
                         12,482 Logs Indexed
                       </span>
                     </div>
-                    <span className="text-xs text-fd-muted-foreground">Split Drawer Inspector & Sub-Millisecond Trace</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">Split Drawer Inspector &amp; Sub-Millisecond Trace</span>
                   </div>
                   <div className="relative w-full aspect-[16/10] bg-slate-950">
                     <Image
@@ -465,34 +472,34 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
                   </div>
                 </div>
 
-                {/* Annotation Cards */}
+                {/* Annotation Bento Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-sm">
                       <Search className="size-4" />
                       <span>Sub-Second Multi-Filter Search</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Filter by HTTP method (POST, GET, PUT, DELETE), status code (2xx, 4xx, 5xx), environment, or query by trace ID and user ID instantly.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-sm">
                       <Eye className="size-4" />
                       <span>Split JSON Request/Response Inspector</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Side-by-side formatted JSON blocks displaying headers, request payloads, response bodies, and 1-click reproduction cURL generator.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-sm">
                       <Flame className="size-4" />
                       <span>Microsecond Execution Timeline</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Step-by-step breakdown tracing auth checks, DB writes, third-party payment gateway calls, and exact failure point identification.
                     </p>
                   </div>
@@ -502,15 +509,15 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
 
             {activeTab === 'settings' && (
               <div className="flex flex-col gap-6">
-                <div className="relative rounded-2xl border border-fd-border bg-fd-card overflow-hidden shadow-xl transition-all">
-                  <div className="border-b border-fd-border bg-fd-muted/30 px-5 py-3 flex items-center justify-between">
+                <div className="bento-card overflow-hidden rounded-3xl shadow-xl transition-all">
+                  <div className="border-b border-slate-100 bg-slate-50/60 dark:border-white/5 dark:bg-white/5 px-5 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-sm">Dynamic Redaction & Retention Controls</span>
-                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white">Dynamic Redaction &amp; Retention Controls</span>
+                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                         GDPR Compliant
                       </span>
                     </div>
-                    <span className="text-xs text-fd-muted-foreground">In-Memory Secret Masker & Storage Gauge</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">In-Memory Secret Masker &amp; Storage Gauge</span>
                   </div>
                   <div className="relative w-full aspect-[16/10] bg-slate-950">
                     <Image
@@ -522,34 +529,34 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
                   </div>
                 </div>
 
-                {/* Annotation Cards */}
+                {/* Annotation Bento Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-sm">
                       <ShieldCheck className="size-4" />
                       <span>Multi-Vector Secret Redactor</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Mask sensitive fields (password, token, secret, credit_card, ssn) and headers (Authorization, Cookie, X-API-Key) before persistence.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm">
                       <Filter className="size-4" />
-                      <span>Granular Path & Status Exclusion</span>
+                      <span>Granular Path &amp; Status Exclusion</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Exclude noisy endpoints (/health, /metrics, /static/*) and unwanted status codes (200, 204) to drastically cut storage consumption.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-fd-border bg-fd-card p-5">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
+                  <div className="bento-card rounded-2xl p-6 transition-all">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                       <Database className="size-4" />
-                      <span>Live Preview & Storage Meter</span>
+                      <span>Live Preview &amp; Storage Meter</span>
                     </div>
-                    <p className="mt-2 text-xs text-fd-muted-foreground leading-relaxed">
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                       Simulate configuration changes in real-time with our live JSON preview and dynamic monthly storage volume forecast meter (~12 GB/mo).
                     </p>
                   </div>
@@ -560,14 +567,14 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
         </div>
       </section>
 
-      {/* 3. UNIVERSAL INGESTION ARCHITECTURE (ANY PROJECT / ANY STACK) */}
-      <section className="py-20 bg-fd-muted/30 border-b border-fd-border">
+      {/* ── 3. UNIVERSAL INGESTION ARCHITECTURE BENTO GRID ─────────── */}
+      <section className="py-20 lg:py-28 section-divider">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               Universal Ecosystem Integration
             </span>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white">
               Connect Any Service, Project, or Stack
             </h2>
             <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
@@ -575,96 +582,108 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
             </p>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Card 1 */}
-            <div className="rounded-2xl border border-fd-border bg-fd-card p-7 shadow-xs hover:shadow-md transition-shadow">
-              <div className="inline-flex size-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 mb-5">
-                <Globe className="size-5" />
+            <div className="bento-card group flex flex-col justify-between rounded-3xl p-7 transition-all">
+              <div>
+                <div className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 text-blue-600 shadow-2xs dark:border-white/10 dark:bg-white/5 dark:text-blue-400 mb-5">
+                  <Globe className="size-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Universal HTTP &amp; cURL Ingestion
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Connect microservices fleets, Kubernetes sidecars, serverless functions, or custom backends using standard HTTP POST requests with scoped API keys (<code className="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">X-API-Key: inno_log_live_*</code>).
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Universal HTTP & cURL Ingestion
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Connect microservices fleets, Kubernetes sidecars, serverless functions, or custom backends using standard HTTP POST requests with scoped API keys (<code className="text-xs bg-fd-muted px-1.5 py-0.5 rounded font-mono">X-API-Key: inno_log_live_*</code>).
-              </p>
             </div>
 
             {/* Card 2 */}
-            <div className="rounded-2xl border border-fd-border bg-fd-card p-7 shadow-xs hover:shadow-md transition-shadow">
-              <div className="inline-flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mb-5">
-                <Cpu className="size-5" />
+            <div className="bento-card group flex flex-col justify-between rounded-3xl p-7 transition-all">
+              <div>
+                <div className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 text-emerald-600 shadow-2xs dark:border-white/10 dark:bg-white/5 dark:text-emerald-400 mb-5">
+                  <Cpu className="size-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Non-Blocking Ring Buffer (&lt;0.2ms)
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Ingest telemetry at wire speed. The circular in-memory buffer isolates client request execution from disk persistence, maintaining near-zero latency impact on high-throughput services.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Non-Blocking Ring Buffer (&lt;0.2ms)
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Ingest telemetry at wire speed. The circular in-memory buffer isolates client request execution from disk persistence, maintaining near-zero latency impact on high-throughput services.
-              </p>
             </div>
 
             {/* Card 3 */}
-            <div className="rounded-2xl border border-fd-border bg-fd-card p-7 shadow-xs hover:shadow-md transition-shadow">
-              <div className="inline-flex size-11 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 mb-5">
-                <ShieldCheck className="size-5" />
+            <div className="bento-card group flex flex-col justify-between rounded-3xl p-7 transition-all">
+              <div>
+                <div className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 text-purple-600 shadow-2xs dark:border-white/10 dark:bg-white/5 dark:text-purple-400 mb-5">
+                  <ShieldCheck className="size-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Multi-Vector PII &amp; Secret Redactor
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Zero-leakage guarantee. Automatically strips passwords, bearer tokens, API secrets, SSNs, and credit cards from headers, query strings, and deep nested JSON bodies before disk persistence.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Multi-Vector PII & Secret Redactor
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Zero-leakage guarantee. Automatically strips passwords, bearer tokens, API secrets, SSNs, and credit cards from headers, query strings, and deep nested JSON bodies before disk persistence.
-              </p>
             </div>
 
             {/* Card 4 */}
-            <div className="rounded-2xl border border-fd-border bg-fd-card p-7 shadow-xs hover:shadow-md transition-shadow">
-              <div className="inline-flex size-11 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mb-5">
-                <Eye className="size-5" />
+            <div className="bento-card group flex flex-col justify-between rounded-3xl p-7 transition-all">
+              <div>
+                <div className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 text-amber-600 shadow-2xs dark:border-white/10 dark:bg-white/5 dark:text-amber-400 mb-5">
+                  <Eye className="size-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Split Inspector &amp; 1-Click Replay
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Inspect raw payloads, headers, and execution timelines side-by-side. Generate complete copyable cURL commands in one click to reproduce difficult production anomalies locally.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Split Inspector & 1-Click Replay
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Inspect raw payloads, headers, and execution timelines side-by-side. Generate complete copyable cURL commands in one click to reproduce difficult production anomalies locally.
-              </p>
             </div>
 
             {/* Card 5 */}
-            <div className="rounded-2xl border border-fd-border bg-fd-card p-7 shadow-xs hover:shadow-md transition-shadow">
-              <div className="inline-flex size-11 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 mb-5">
-                <Boxes className="size-5" />
+            <div className="bento-card group flex flex-col justify-between rounded-3xl p-7 transition-all">
+              <div>
+                <div className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 text-sky-600 shadow-2xs dark:border-white/10 dark:bg-white/5 dark:text-sky-400 mb-5">
+                  <Boxes className="size-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Multi-Project &amp; Multi-Environment
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Organize distinct services into discrete projects (e.g. <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">mobile-api</code>, <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">billing-engine</code>) with individual environments (Production, Staging, QA) and dedicated scoped keys.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                Multi-Project & Multi-Environment
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                Organize distinct services into discrete projects (e.g. <code className="text-xs bg-fd-muted px-1.5 py-0.5 rounded font-mono">mobile-api</code>, <code className="text-xs bg-fd-muted px-1.5 py-0.5 rounded font-mono">billing-engine</code>) with individual environments (Production, Staging, QA) and dedicated scoped keys.
-              </p>
             </div>
 
             {/* Card 6 */}
-            <div className="rounded-2xl border border-fd-border bg-fd-card p-7 shadow-xs hover:shadow-md transition-shadow">
-              <div className="inline-flex size-11 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 mb-5">
-                <Database className="size-5" />
+            <div className="bento-card group flex flex-col justify-between rounded-3xl p-7 transition-all">
+              <div>
+                <div className="inline-flex size-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/80 text-rose-600 shadow-2xs dark:border-white/10 dark:bg-white/5 dark:text-rose-400 mb-5">
+                  <Database className="size-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  100% Self-Hosted &amp; GDPR Ready
+                </h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  No third-party SaaS cloud subscription and zero data exfiltration. Host Tracura in your own VPC with automatic client IP zero-masking (<code className="text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-mono">192.168.1.0</code>) and automated retention pruning.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                100% Self-Hosted & GDPR Ready
-              </h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                No third-party SaaS cloud subscription and zero data exfiltration. Host Tracura in your own VPC with automatic client IP zero-masking (<code className="text-xs bg-fd-muted px-1.5 py-0.5 rounded font-mono">192.168.1.0</code>) and automated retention pruning.
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. MULTI-FRAMEWORK CODE SHOWCASE */}
-      <section className="py-20 bg-fd-background border-b border-fd-border">
+      {/* ── 4. MULTI-FRAMEWORK CODE SHOWCASE ───────────────────────── */}
+      <section className="py-20 lg:py-28 section-divider">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               Developer First Integration
             </span>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white">
               Drop-In Middleware for Every Language
             </h2>
             <p className="mt-3 text-base text-slate-600 dark:text-slate-400">
@@ -674,7 +693,7 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
 
           <div className="mt-10 mx-auto max-w-4xl">
             {/* Framework Switcher Tabs */}
-            <div className="flex flex-wrap items-center justify-center gap-2 border-b border-fd-border pb-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 pb-4">
               {[
                 { id: 'curl', label: 'cURL / HTTP' },
                 { id: 'fastapi', label: 'Python (FastAPI)' },
@@ -685,10 +704,10 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
                 <button
                   key={tab.id}
                   onClick={() => setActiveCodeTab(tab.id as any)}
-                  className={`rounded-lg px-4 py-2 text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  className={`rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                     activeCodeTab === tab.id
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'border border-fd-border bg-fd-card text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
+                      ? 'bg-slate-950 text-white shadow-xs dark:bg-white dark:text-slate-950'
+                      : 'border border-slate-200/90 bg-white/80 text-slate-600 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
                   {tab.label}
@@ -696,16 +715,16 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
               ))}
             </div>
 
-            {/* Code Box */}
-            <div className="mt-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 shadow-xl overflow-hidden">
-              <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3 bg-slate-900/60">
+            {/* Dark Slate Terminal Box */}
+            <div className="mt-4 overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 text-slate-200 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3 bg-slate-900/90">
                 <span className="font-mono text-xs text-slate-400 flex items-center gap-2">
                   <Terminal className="size-3.5 text-blue-400" />
                   Integration Example: {activeCodeTab.toUpperCase()}
                 </span>
                 <button
                   onClick={() => copyCode(codeSnippets[activeCodeTab])}
-                  className="flex items-center gap-1.5 rounded-md bg-slate-800/80 hover:bg-slate-700 px-3 py-1 text-xs text-slate-300 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 px-2.5 py-1 text-xs text-slate-300 transition-colors cursor-pointer"
                 >
                   {copiedCode ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
                   <span>{copiedCode ? 'Copied' : 'Copy Code'}</span>
@@ -719,51 +738,68 @@ async function auditLlmCompletion(prompt: string, model = 'gpt-4o') {
         </div>
       </section>
 
-      {/* 5. PERFORMANCE BENCHMARKS BANNER */}
-      <section className="py-16 bg-blue-600 text-white">
+      {/* ── 5. PERFORMANCE BENCHMARKS BENTO ───────────────────────── */}
+      <section className="py-20 lg:py-28 section-divider">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-y lg:divide-y-0 lg:divide-x divide-blue-500/50">
-            <div className="pt-4 lg:pt-0">
-              <div className="text-4xl sm:text-5xl font-black tracking-tight">&lt; 0.2ms</div>
-              <div className="mt-2 text-sm font-medium text-blue-100">Ingestion Latency Overhead</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+            <div className="bento-card rounded-3xl p-7 transition-all">
+              <div className="font-mono text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">&lt; 0.2ms</div>
+              <div className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Ingestion Latency Overhead</div>
             </div>
-            <div className="pt-4 lg:pt-0">
-              <div className="text-4xl sm:text-5xl font-black tracking-tight">10,000+</div>
-              <div className="mt-2 text-sm font-medium text-blue-100">Req/sec per Node</div>
+            <div className="bento-card rounded-3xl p-7 transition-all">
+              <div className="font-mono text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">10,000+</div>
+              <div className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Req/sec Ingest Capacity</div>
             </div>
-            <div className="pt-4 lg:pt-0">
-              <div className="text-4xl sm:text-5xl font-black tracking-tight">100%</div>
-              <div className="mt-2 text-sm font-medium text-blue-100">Self-Hosted & Private</div>
+            <div className="bento-card rounded-3xl p-7 transition-all">
+              <div className="font-mono text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">100%</div>
+              <div className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Self-Hosted &amp; Private</div>
             </div>
-            <div className="pt-4 lg:pt-0">
-              <div className="text-4xl sm:text-5xl font-black tracking-tight">0 Vendor</div>
-              <div className="mt-2 text-sm font-medium text-blue-100">Lock-In or Cloud Cost</div>
+            <div className="bento-card rounded-3xl p-7 transition-all">
+              <div className="font-mono text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">₹0</div>
+              <div className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">Vendor Tax / Per-Seat Cost</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. BOTTOM CALL TO ACTION */}
-      <section className="py-20 bg-fd-background">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="rounded-3xl border border-fd-border bg-gradient-to-b from-fd-card to-fd-muted/30 p-10 sm:p-14 shadow-lg">
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Ready to Inspect, Scrub & Secure Your API Traffic?
+      {/* ── 6. BOTTOM BENTO CALL TO ACTION ────────────────────────── */}
+      <section className="relative overflow-hidden py-24 section-divider transition-colors duration-300">
+        <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
+          <div className="size-[500px] rounded-full bg-gradient-to-tr from-orange-400/10 via-purple-500/15 to-blue-500/10 blur-[130px] dark:from-orange-500/15 dark:via-purple-600/20 dark:to-blue-600/20" />
+        </div>
+
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="bento-card relative overflow-hidden rounded-[2.5rem] p-8 text-center sm:p-14">
+            <div className="inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+              <span className="flex items-center gap-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-semibold text-orange-600 dark:bg-orange-400/20 dark:text-orange-300">
+                <Zap className="size-3" /> Get Started
+              </span>
+              <span>Universal APM</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">₹0 Software Fees</span>
+            </div>
+
+            <h2 className="mt-7 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+              Ready to inspect, scrub &amp; secure
+              <br />
+              <span className="gradient-cadence">your production API traffic?</span>
             </h2>
-            <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-              Get started with Tracura in under 5 minutes. Use our complete REST API, scoped ingestion keys, and step-by-step developer guides.
+
+            <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 dark:text-slate-400">
+              Get started with Tracura in under five minutes. Use our complete REST API, scoped ingestion keys, and step-by-step developer guides.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
               <Link
                 href="/plugins/tracura/docs"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-7 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
               >
                 <span>Read Developer Documentation</span>
                 <ArrowRight className="size-4" />
               </Link>
               <Link
                 href="/plugins/tracura/docs#api-reference"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-fd-border bg-fd-background px-7 py-3.5 text-sm font-semibold text-fd-foreground hover:bg-fd-muted transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-6 py-3.5 text-sm font-semibold text-slate-800 shadow-2xs transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
               >
                 <Code2 className="size-4 text-blue-500" />
                 <span>REST API Reference (20 Endpoints)</span>

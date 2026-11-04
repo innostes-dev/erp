@@ -25,7 +25,7 @@ export default function HomePage() {
       {/* 3. The Modular Business Suites Matrix (Clickable to dedicated landing pages) */}
       <ModuleMatrixSection />
 
-      {/* 4. Standalone Developer Tools & Infrastructure (@innostes/ui + Tracura) */}
+      {/* 4. Company Developer Tools (Enterprise Design System + Tracura API Telemetry) */}
       <DeveloperFrameworkSection />
 
       {/* 5. Kernel Security & Multi-Tenancy Governance */}

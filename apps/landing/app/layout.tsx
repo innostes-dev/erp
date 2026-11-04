@@ -63,46 +63,13 @@ export const metadata: Metadata = {
   },
 };
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'SoftwareApplication',
-      name: 'Innostes Business OS',
-      operatingSystem: 'Linux, Docker, Kubernetes, Cloud',
-      applicationCategory: 'BusinessApplication, ERP, CRM, HRMS',
-      offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'USD',
-      },
-      description:
-        'Open-source, modular, decoupled business operating system unifying CRM, HR, Finance, Inventory, and DevOps on a hardened FastAPI/PostgreSQL kernel.',
-      url: 'https://innostes.com',
-    },
-    {
-      '@type': 'Organization',
-      name: 'Innostes',
-      url: 'https://innostes.com',
-      logo: 'https://innostes.com/logo.svg',
-      sameAs: ['https://github.com/innostes-dev/erp'],
-    },
-  ],
-};
-
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
       <body
         className="flex min-h-screen flex-col bg-fd-background text-fd-foreground antialiased"
       >
-        <RootProvider theme={{ defaultTheme: 'light' }}>
+        <RootProvider theme={{ attribute: 'class', defaultTheme: 'light', enableSystem: true }}>
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster />
         </RootProvider>

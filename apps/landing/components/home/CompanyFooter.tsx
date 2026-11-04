@@ -1,10 +1,21 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import { Monitor, Moon, Sun } from 'lucide-react';
 import { Logo } from '@/components/logo';
 
 export function CompanyFooter() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted ? (resolvedTheme || theme) === 'dark' : false;
+
   return (
     <footer className="border-t border-slate-200/80 bg-white/70 text-slate-900 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-100 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -80,7 +91,7 @@ export function CompanyFooter() {
             <ul className="mt-4 space-y-2.5 text-sm">
               <li>
                 <Link href="/ui" className="text-slate-600 transition-colors hover:text-slate-950 dark:text-slate-400 dark:hover:text-white">
-                  @innostes/ui Framework
+                  Enterprise Design System
                 </Link>
               </li>
               <li>
@@ -147,10 +158,54 @@ export function CompanyFooter() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200/80 pt-8 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200/80 pt-8 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400 md:flex-row">
           <div>
             © {new Date().getFullYear()} Innostes. All rights reserved. 100% Free Self-Hosted Business OS.
           </div>
+
+          {/* Theme Switcher in Footer */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Theme:</span>
+            <div className="inline-flex items-center rounded-full border border-slate-200/80 bg-white/80 p-0.5 dark:border-white/10 dark:bg-white/5 backdrop-blur-xs">
+              <button
+                onClick={() => setTheme('light')}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                  mounted && (theme === 'light' || (!theme && !isDark))
+                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'
+                }`}
+                aria-label="Light Theme"
+              >
+                <Sun className="size-3.5 text-amber-500" />
+                <span>Light</span>
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                  mounted && (theme === 'dark' || (!theme && isDark))
+                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'
+                }`}
+                aria-label="Dark Theme"
+              >
+                <Moon className="size-3.5 text-blue-400" />
+                <span>Dark</span>
+              </button>
+              <button
+                onClick={() => setTheme('system')}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                  mounted && theme === 'system'
+                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white'
+                }`}
+                aria-label="System Theme"
+              >
+                <Monitor className="size-3.5 text-purple-400" />
+                <span>System</span>
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center gap-4 font-mono text-[11px]">
             <span>FastAPI + Next.js 15</span>
             <span>•</span>

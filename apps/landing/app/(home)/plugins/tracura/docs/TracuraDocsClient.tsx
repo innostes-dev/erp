@@ -704,40 +704,46 @@ export function TracuraDocsClient() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-screen text-fd-foreground">
-      {/* Header Banner */}
-      <div className="border-b border-fd-border bg-gradient-to-r from-blue-50/60 via-background to-indigo-50/40 dark:from-blue-950/20 dark:via-background dark:to-indigo-950/20 py-12">
+    <div className="flex flex-col w-full min-h-screen">
+      {/* ── Header Banner with Cadence Mesh ──────────────────────── */}
+      <div className="hero-mesh relative overflow-hidden py-14 md:py-18 section-divider transition-colors duration-300">
+        {/* Centered Ambient Atmospheric Glow */}
+        <div className="pointer-events-none absolute inset-x-0 top-1/4 -z-10 flex justify-center">
+          <div className="size-[450px] sm:size-[600px] rounded-full bg-gradient-to-tr from-amber-400/10 via-purple-500/15 to-blue-500/10 blur-[130px] dark:from-orange-500/15 dark:via-purple-600/20 dark:to-blue-600/20" />
+        </div>
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400 mb-3">
-            <Link href="/plugins/tracura" className="hover:underline flex items-center gap-1">
-              <span>Tracura</span>
+          {/* Frosted Floating Breadcrumb Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200 mb-4">
+            <Link href="/plugins/tracura" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              Tracura
             </Link>
-            <ChevronRight className="size-3 text-fd-muted-foreground" />
-            <span>Developer Documentation & REST API Reference</span>
+            <ChevronRight className="size-3 text-slate-400" />
+            <span className="text-blue-600 dark:text-blue-400">Developer Documentation &amp; REST API</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                Tracura Developer Documentation & REST API Reference
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+                Developer Guides &amp; <span className="gradient-cadence">REST API Reference</span>
               </h1>
-              <p className="mt-2 text-base text-slate-600 dark:text-slate-300 max-w-3xl">
-                Comprehensive integration guides, SDK middleware examples, and interactive API documentation for all 20 management & telemetry endpoints.
+              <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
+                Comprehensive integration guides, SDK middleware examples, and interactive API documentation for all 20 management &amp; telemetry endpoints.
               </p>
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
               <Link
                 href="/plugins/tracura"
-                className="inline-flex items-center gap-2 rounded-xl border border-fd-border bg-fd-card px-4 py-2.5 text-xs font-semibold text-fd-foreground hover:bg-fd-muted transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-5 py-2.5 text-xs font-semibold text-slate-800 shadow-2xs transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
               >
                 <span>Product Overview</span>
               </Link>
               <a
                 href="#api-reference"
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md hover:bg-blue-700 transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white shadow-md transition-all hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
               >
-                <Code2 className="size-3.5" />
+                <Code2 className="size-3.5 text-blue-400" />
                 <span>Jump to Endpoints ({ENDPOINTS.length})</span>
               </a>
             </div>
@@ -752,62 +758,62 @@ export function TracuraDocsClient() {
           <aside className="lg:col-span-3 lg:sticky lg:top-20 space-y-6">
             {/* Quick Jump Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 size-4 text-fd-muted-foreground" />
+              <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search endpoints or guides..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-fd-border bg-fd-card pl-9 pr-4 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-full border border-slate-200/90 bg-white/80 dark:border-white/10 dark:bg-slate-900/80 pl-9 pr-4 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 shadow-2xs"
               />
             </div>
 
             {/* Sidebar Guide Links */}
-            <div className="rounded-2xl border border-fd-border bg-fd-card p-4 space-y-4 shadow-2xs">
-              <div className="text-xs font-bold uppercase tracking-wider text-fd-muted-foreground">
+            <div className="bento-card rounded-2xl p-4 space-y-4">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Integration Guides
               </div>
               <nav className="flex flex-col space-y-1 text-xs">
                 <a
                   href="#overview"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
-                  Overview & Ring Buffer
+                  Overview &amp; Ring Buffer
                 </a>
                 <a
                   href="#quickstart"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   30-Second Quickstart
                 </a>
                 <a
                   href="#authentication"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   Universal Authentication
                 </a>
                 <a
                   href="#middleware-sdks"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   Framework Middleware (Python, Node, Go)
                 </a>
                 <a
                   href="#pii-redaction"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
-                  PII Redaction & GDPR Masking
+                  PII Redaction &amp; GDPR Masking
                 </a>
                 <a
                   href="#enterprise-scoping"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
-                  Enterprise Scoping & Correlation
+                  Enterprise Scoping &amp; Correlation
                 </a>
               </nav>
 
-              <div className="pt-3 border-t border-fd-border">
-                <div className="text-xs font-bold uppercase tracking-wider text-fd-muted-foreground mb-2">
+              <div className="pt-3 border-t border-slate-100 dark:border-white/5">
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                   API Endpoints
                 </div>
                 <div className="flex flex-col space-y-1">
@@ -818,7 +824,7 @@ export function TracuraDocsClient() {
                       className={`text-left rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer flex items-center justify-between ${
                         selectedCategory === cat
                           ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold'
-                          : 'text-fd-muted-foreground hover:bg-fd-muted hover:text-fd-foreground'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
                       }`}
                     >
                       <span>{cat}</span>
@@ -850,37 +856,37 @@ export function TracuraDocsClient() {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
-                <div className="rounded-xl border border-fd-border bg-fd-card p-4">
+                <div className="bento-card rounded-2xl p-4 transition-all">
                   <div className="font-bold text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
                     <Zap className="size-3.5" />
                     <span>1. In-Process ASGI Hook</span>
                   </div>
-                  <p className="mt-1 text-xs text-fd-muted-foreground">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     Direct in-memory capture for host apps in &lt; 0.002ms with zero HTTP loopback.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-fd-border bg-fd-card p-4">
+                <div className="bento-card rounded-2xl p-4 transition-all">
                   <div className="font-bold text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
                     <Globe className="size-3.5" />
                     <span>2. External Polyglot Ingest</span>
                   </div>
-                  <p className="mt-1 text-xs text-fd-muted-foreground">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     Accepts remote batch logs from Node, Go, Python, and cURL via scoped API keys.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-fd-border bg-fd-card p-4">
+                <div className="bento-card rounded-2xl p-4 transition-all">
                   <div className="font-bold text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
                     <Layers className="size-3.5" />
                     <span>3. Hybrid Redis Queue</span>
                   </div>
-                  <p className="mt-1 text-xs text-fd-muted-foreground">
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                     Buffers into Redis when configured, with automatic fallback to RAM if offline.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-fd-border bg-fd-card p-4">
+                <div className="bento-card rounded-2xl p-4 transition-all">
                   <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                     <Database className="size-3.5" />
                     <span>4. Bulk Persistence</span>

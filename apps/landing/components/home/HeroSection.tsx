@@ -50,7 +50,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
   };
 
   return (
-    <section className="hero-mesh relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28 lg:pt-32 lg:pb-36 section-divider transition-colors duration-300">
+    <section className="hero-mesh relative overflow-hidden pt-6 pb-16 sm:pt-8 md:pt-10 md:pb-20 lg:pt-12 lg:pb-28 section-divider transition-colors duration-300">
       
       {/* Centered Ambient Atmospheric Glow */}
       <div className="pointer-events-none absolute inset-x-0 top-1/4 -z-10 flex justify-center">
@@ -60,32 +60,32 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* ── Top Hero Content ────────────────────────────────────────── */}
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           
           {/* Cadence-style Frosted Floating Badge */}
           <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs sm:text-sm font-medium text-slate-800 shadow-sm backdrop-blur-md transition-all hover:border-orange-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
             <span className="flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-xs font-semibold text-violet-600 dark:bg-violet-400/20 dark:text-violet-300">
-              <Sparkles className="size-3" /> New
+              <Sparkles className="size-3" /> Built for Startups
             </span>
-            <span>Open-Source v2.4</span>
+            <span>Open-Source Business OS</span>
             <span className="text-slate-300 dark:text-slate-600">•</span>
             <span className="font-semibold text-emerald-600 dark:text-emerald-400">100% Free to Self-Host</span>
             <span className="text-slate-300 dark:text-slate-600">•</span>
-            <span className="text-slate-600 dark:text-slate-300">Zero Seat Fees</span>
+            <span className="text-slate-600 dark:text-slate-300">Zero Per-Seat Fees</span>
             <ArrowRight className="size-3 text-slate-400 dark:text-slate-500" />
           </div>
 
           {/* Cadence-style Big Headline */}
-          <h1 className="animate-fade-up stagger-1 mt-7 text-4xl sm:text-6xl md:text-7xl lg:text-[5.2rem] font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.08]">
-            Every business domain,
-            <br />
-            <span className="gradient-cadence">one calm operating system</span>
+          <h1 className="animate-fade-up stagger-1 mt-5 sm:mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+            Run your entire company on
+            <br className="hidden sm:inline" />{' '}
+            <span className="gradient-cadence">one calm, open platform</span>
           </h1>
 
-          {/* Subheadline — Clean, Human-Friendly */}
+          {/* Subheadline — Clean, Company & Startup Friendly */}
           <p className="animate-fade-up stagger-2 mx-auto mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-            Innostes replaces Salesforce, Workday, QuickBooks, and Jira with a single decoupled, modular kernel.
-            Deploy in minutes on your own infrastructure — zero per-seat taxes, complete API decoupling, and 100% data sovereignty.
+            Innostes replaces Salesforce, Workday, QuickBooks, and Jira with a single unified platform built for startups and growing companies.
+            Manage your deals, team, finances, and projects in one place—100% open-source, zero per-seat subscription fees, and complete data ownership.
           </p>
 
           {/* Cadence-style Dual Pill CTAs */}
@@ -102,7 +102,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
               href="/docs/getting-started"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
             >
-              <span>Deploy free</span>
+              <span>Get started free</span>
               <ArrowRight className="size-3.5" />
             </a>
 
@@ -117,6 +117,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
           {/* Quick Copy Docker Snippet */}
           <div className="animate-fade-up stagger-4 mx-auto mt-6 flex max-w-md items-center justify-between rounded-xl border border-slate-200/80 bg-white/90 px-3.5 py-2 text-xs shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-slate-950/80">
             <div className="flex min-w-0 items-center gap-2 overflow-hidden text-slate-700 dark:text-slate-300">
+              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 shrink-0 hidden sm:inline">Self-host in 2m:</span>
               <Terminal className="size-3.5 shrink-0 text-blue-500" />
               <code className="truncate font-mono text-[11px]">{dockerCommand}</code>
             </div>
@@ -142,7 +143,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
               </div>
             </div>
             <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-              Trusted by <span className="font-semibold text-slate-900 dark:text-white">3,200+ product &amp; engineering teams</span> shipping every week
+              Trusted by <span className="font-semibold text-slate-900 dark:text-white">3,200+ founders, operators &amp; growing startups</span> running on Innostes
             </p>
           </div>
         </div>
@@ -166,11 +167,11 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
             {/* Top-Right Floating Pill */}
             <div className="animate-float absolute -right-8 top-20 z-20 flex items-center gap-2.5 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/95" style={{ animationDelay: '1.5s' }}>
               <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold text-xs">
-                ⚡
+                📈
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Tracura Telemetry</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">14,280 req/s · 0.4ms latency · 0 errors</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white">Runway &amp; Cash Flow</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">+18.4% MoM · 24mo Runway · LedgerFlow</p>
               </div>
             </div>
 
@@ -181,7 +182,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-900 dark:text-white">Elena Rostova Joined</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Staff Platform Architect · PeopleOps</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Head of Growth · PeopleOps</p>
               </div>
             </div>
           </div>
@@ -200,7 +201,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
                   <span className="size-3 rounded-full bg-emerald-400/80" />
                 </div>
                 <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3 dark:border-slate-800">
-                  <span className="font-bold text-xs tracking-tight text-slate-900 dark:text-white">innostes</span>
+                  <span className="font-bold text-xs tracking-tight text-slate-950 dark:text-white">innostes</span>
                   <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
                     acme-workspace
                   </span>
@@ -228,7 +229,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
                   }`}
                 >
                   <Monitor className="size-3.5" />
-                  <span>Interactive GUI</span>
+                  <span>Company Workspace</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('headless')}
@@ -239,7 +240,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
                   }`}
                 >
                   <Code2 className="size-3.5" />
-                  <span>Headless API</span>
+                  <span>API &amp; Automations</span>
                 </button>
               </div>
             </div>
@@ -306,10 +307,10 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
 
               {/* KPI 3 */}
               <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Telemetry Ingest</p>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Cash Runway</p>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">14,280/s</span>
-                  <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">0.4ms</span>
+                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">24 Mos</span>
+                  <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">+6mo ext</span>
                 </div>
                 {/* Cyan/Blue Sparkline SVG */}
                 <div className="mt-2 h-6 w-full">

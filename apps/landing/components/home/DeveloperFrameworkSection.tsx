@@ -20,18 +20,17 @@ export function DeveloperFrameworkSection() {
   const [copied, setCopied] = useState(false);
 
   const snippets = {
-    ui: `// 1. Install standalone enterprise UI framework
-// $ pnpm add @innostes/ui
-
+    ui: `// 1. Build any company portal, dashboard, or internal tool
+// Using the Innostes Enterprise Design System (240+ components & widgets)
 import { Button, MetricCard, KanbanBoard, DataTable } from '@innostes/ui';
 
-export function ExecutiveDashboard() {
+export function CompanyExecutiveDashboard() {
   return (
     <div className="grid gap-6 md:grid-cols-3">
       <MetricCard
-        title="Pipeline Velocity"
-        value="$342,850.00"
-        trend={{ value: "+28.4%", isPositive: true }}
+        title="Monthly Revenue"
+        value="$184,650.00"
+        trend={{ value: "+12.4%", isPositive: true }}
         sparkline={[35, 48, 62, 59, 75, 88, 96]}
       />
       <DataTable
@@ -43,7 +42,7 @@ export function ExecutiveDashboard() {
     </div>
   );
 }`,
-    tracura: `# Ingest API telemetry from any microservice via standard HTTP
+    tracura: `# Ingest API telemetry from any company service or microservice
 curl -X POST https://api.yourdomain.com/tracura/v1/ingest \\
   -H "X-API-Key: inno_log_live_prod_8849b2c" \\
   -H "Content-Type: application/json" \\
@@ -93,22 +92,21 @@ print(f"Loaded {len(deals)} active pipeline records.")`,
         <div className="mx-auto max-w-3xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-purple-200/80 bg-white/80 px-4 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
             <span className="flex items-center gap-1 rounded-full bg-purple-500/10 px-2 py-0.5 text-xs font-semibold text-purple-600 dark:bg-purple-400/20 dark:text-purple-300">
-              <Cpu className="size-3" /> Developer First
+              <Cpu className="size-3" /> Company Developer Tools
             </span>
-            <span>FastAPI &amp; Next.js</span>
+            <span>Included Out-of-the-Box</span>
             <span className="text-slate-300 dark:text-slate-600">•</span>
             <span className="font-semibold text-emerald-600 dark:text-emerald-400">Strict OpenAPI 3.1</span>
           </div>
 
-          <h2 className="mt-7 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
-            Engineered for teams who
+          <h2 className="mt-7 text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+            The developer tools your company needs,
             <br className="hidden sm:inline" />{' '}
-            <span className="gradient-cadence">refuse proprietary lock-in</span>
+            <span className="gradient-cadence">included right out of the box</span>
           </h2>
 
           <p className="mt-5 text-base sm:text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-            We did not just build business applications. We engineered standalone, high-performance developer
-            infrastructure and modular UI frameworks that engineering teams can adopt independently into any codebase.
+            Modern companies don&apos;t just use business software—they build custom apps, internal tools, and automated microservices. Innostes provides the foundational developer infrastructure—from a complete enterprise design system to real-time API telemetry—so your team can build any project without paying for third-party developer SaaS.
           </p>
         </div>
 
@@ -118,7 +116,7 @@ print(f"Loaded {len(deals)} active pipeline records.")`,
           {/* Left Column: Developer Pillars */}
           <div className="space-y-4">
             
-            {/* Pillar 1 */}
+            {/* Pillar 1: Design System */}
             <div className="bento-card group rounded-3xl p-6">
               <div className="flex items-start gap-4">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
@@ -126,16 +124,16 @@ print(f"Loaded {len(deals)} active pipeline records.")`,
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-950 dark:text-white">
-                    Standalone @innostes/ui Package
+                    Enterprise Design System &amp; Widgets
                   </h3>
                   <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    240+ WCAG-accessible React components, dense data tables, interactive Kanban boards, and Cartesian charts installable in any external project.
+                    Build any internal tool, client portal, or custom company app with 240+ accessible React components, dense data tables, Kanban boards, and charts—free from 3rd-party UI licensing fees.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Pillar 2 */}
+            {/* Pillar 2: Tracura Telemetry */}
             <div className="bento-card group rounded-3xl p-6">
               <div className="flex items-start gap-4">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -143,16 +141,16 @@ print(f"Loaded {len(deals)} active pipeline records.")`,
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-950 dark:text-white">
-                    Tracura Distributed API Telemetry
+                    Company-Grade API Telemetry (Tracura)
                   </h3>
                   <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    Universal sub-millisecond ring buffer ingesting 10,000+ requests/sec across microservices, serverless functions, and AI agent pipelines.
+                    Monitor every API, microservice, and AI pipeline your company runs. Sub-millisecond ring buffer ingesting 10,000+ req/s with live payload inspection and zero third-party APM bills.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Pillar 3 */}
+            {/* Pillar 3: Multi-Tenant API */}
             <div className="bento-card group rounded-3xl p-6">
               <div className="flex items-start gap-4">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -160,10 +158,10 @@ print(f"Loaded {len(deals)} active pipeline records.")`,
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-slate-950 dark:text-white">
-                    Hardened Multi-Tenant REST Engine
+                    Unified Multi-Tenant API Gateway
                   </h3>
                   <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                    FastAPI + PostgreSQL with automatic tenant header gating (<code className="font-mono text-xs">X-Tenant-ID</code>), JWT rotation, and cryptographic audit records.
+                    Connect external mobile apps, custom portals, or automated workflows with strict OpenAPI 3.1 contracts, automatic tenant isolation, and cryptographic audit security.
                   </p>
                 </div>
               </div>
@@ -185,9 +183,9 @@ print(f"Loaded {len(deals)} active pipeline records.")`,
                 <div className="flex rounded-full border border-slate-800 bg-slate-950 p-0.5">
                   {(
                     [
-                      { id: 'ui', label: '@innostes/ui' },
-                      { id: 'tracura', label: 'Tracura Ingest' },
-                      { id: 'backend', label: 'FastAPI Core' },
+                      { id: 'ui', label: 'Design System' },
+                      { id: 'tracura', label: 'API Telemetry' },
+                      { id: 'backend', label: 'Multi-Tenant API' },
                     ] as const
                   ).map(({ id, label }) => (
                     <button

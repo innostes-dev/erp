@@ -61,7 +61,7 @@ export function ServicesModelSection({ onOpenQuote }: ServicesModelSectionProps)
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
                   Community Edition
                 </span>
-                <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                   Apache 2.0 / MIT
                 </span>
               </div>
@@ -70,13 +70,13 @@ export function ServicesModelSection({ onOpenQuote }: ServicesModelSectionProps)
                 Self-Hosted Free
               </h3>
               
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-mono text-4xl font-extrabold text-slate-900 dark:text-slate-50">₹0</span>
-                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">/ forever free</span>
+              <div className="mt-4 flex flex-wrap items-baseline gap-2">
+                <span className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">₹0</span>
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">/ forever free</span>
               </div>
               
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Full access to all 7 modular business suites, Tracura telemetry, the FastAPI backend, and @innostes/ui.
+                Full access to all 7 modular business suites, Tracura telemetry, the FastAPI backend, and the Enterprise Design System.
               </p>
 
               <div className="mt-8 space-y-3 border-t border-slate-100 pt-6 text-sm text-slate-700 dark:border-white/5 dark:text-slate-300">
@@ -120,7 +120,7 @@ export function ServicesModelSection({ onOpenQuote }: ServicesModelSectionProps)
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
                   Turnkey Deployment
                 </span>
-                <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                   Production Ready
                 </span>
               </div>
@@ -129,9 +129,9 @@ export function ServicesModelSection({ onOpenQuote }: ServicesModelSectionProps)
                 Assisted Cloud Setup
               </h3>
               
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-mono text-3xl font-extrabold text-slate-900 dark:text-slate-50">Custom Quote</span>
-                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">/ fixed setup</span>
+              <div className="mt-4 flex flex-wrap items-baseline gap-2">
+                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Custom Quote</span>
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">/ fixed setup</span>
               </div>
 
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
@@ -175,7 +175,7 @@ export function ServicesModelSection({ onOpenQuote }: ServicesModelSectionProps)
                 <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">
                   Dedicated Retainer
                 </span>
-                <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
+                <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">
                   Core Engineering
                 </span>
               </div>
@@ -184,8 +184,9 @@ export function ServicesModelSection({ onOpenQuote }: ServicesModelSectionProps)
                 Custom Engineering &amp; SLAs
               </h3>
               
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-mono text-3xl font-extrabold text-slate-900 dark:text-slate-50">Monthly Retainer</span>
+              <div className="mt-4 flex flex-wrap items-baseline gap-2">
+                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Monthly Retainer</span>
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">/ dedicated team</span>
               </div>
 
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">

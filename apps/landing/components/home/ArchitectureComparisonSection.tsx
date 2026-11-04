@@ -25,7 +25,7 @@ export function ArchitectureComparisonSection() {
     },
     {
       factor: 'Developer & UI Tooling',
-      innostes: 'Standalone @innostes/ui component library (240+ components) included free',
+      innostes: 'Enterprise Design System with 240+ accessible components & business widgets included free for any project',
       saas: 'Zero reusable UI components or design systems provided for custom apps',
       monolith: 'Proprietary, antiquated UI widgets with virtually no modern styling capability',
     },
@@ -37,7 +37,7 @@ export function ArchitectureComparisonSection() {
     },
     {
       factor: 'Native API Telemetry',
-      innostes: 'Integrated Tracura telemetry engine (10,000+ req/s) with ring-buffer storage',
+      innostes: 'Integrated Tracura API telemetry engine for real-time request tracing without third-party APM bills',
       saas: 'Requires separate expensive third-party APM subscriptions (Datadog, New Relic)',
       monolith: 'Cumbersome legacy audit logs that require dedicated diagnostic appliances',
     },

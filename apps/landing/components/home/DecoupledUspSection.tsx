@@ -173,7 +173,7 @@ export function DecoupledUspSection() {
             </div>
           </div>
 
-          {/* Bento Card 3: Standalone UI */}
+          {/* Bento Card 3: Enterprise Design System */}
           <div className="bento-card group flex flex-col justify-between rounded-3xl p-8">
             <div>
               <div className="flex items-center justify-between">
@@ -181,29 +181,28 @@ export function DecoupledUspSection() {
                   <Package className="size-6" />
                 </div>
                 <span className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700 dark:bg-purple-950/60 dark:text-purple-300">
-                  Standalone UI
+                  Enterprise Design System
                 </span>
               </div>
 
               <h3 className="mt-6 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-                Standalone @innostes/ui Package
+                Enterprise Design System &amp; Widgets
               </h3>
               <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Our design system is an independent package. Install <code className="font-mono text-xs text-purple-600 dark:text-purple-400">@innostes/ui</code> into
-                any external React or Next.js project to leverage 240+ WCAG-accessible components.
+                Not just for our business platform—use our battle-tested design system to build any custom product, internal dashboard, or client portal for your company. Skip expensive 3rd-party UI libraries and build faster with 240+ accessible components and rich enterprise widgets.
               </p>
 
               {/* Mini UI Component Kit preview */}
               <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-slate-950/60">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] text-slate-500">240+ Primitives</span>
-                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[9px] font-bold text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">NPM</span>
+                  <span className="font-mono text-[10px] text-slate-500">240+ Widgets &amp; Primitives</span>
+                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[9px] font-bold text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">Any Project</span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Kanban</span>
-                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">DataTable</span>
-                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">MetricCard</span>
-                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Sparkline</span>
+                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Kanban Board</span>
+                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Virtual DataTable</span>
+                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Metric Card</span>
+                  <span className="rounded-md border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">Charts &amp; Sparklines</span>
                 </div>
               </div>
 
@@ -211,11 +210,11 @@ export function DecoupledUspSection() {
               <ul className="mt-6 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 shrink-0 text-purple-500" />
-                  <span>240+ production-ready accessible enterprise components</span>
+                  <span>Build any custom company app, portal, or internal tool</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 shrink-0 text-purple-500" />
-                  <span>Zero vendor coupling — standalone React package</span>
+                  <span>240+ pre-built widgets — zero 3rd-party component subscription fees</span>
                 </li>
               </ul>
             </div>
@@ -225,7 +224,7 @@ export function DecoupledUspSection() {
                 href="/ui"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-purple-600 transition-colors hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
               >
-                <span>Explore Design System Showcase</span>
+                <span>Explore Design System &amp; Widgets</span>
                 <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
