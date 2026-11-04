@@ -121,6 +121,28 @@ async def update_department(
     dept_service = DepartmentService(session)
     return await dept_service.update(id, payload, ctx.user.id, tenant_id=ctx.tenant_id)
 
+@router.delete(
+    "/departments/{id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a department",
+    operation_id="departments_delete",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def delete_department(
+    id: uuid.UUID,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Delete a department.
+    \f
+    Returns:
+        Status response.
+    """
+    dept_service = DepartmentService(session)
+    await dept_service.delete(id, ctx.user.id, tenant_id=ctx.tenant_id)
+    return {"status": "ok"}
+
 
 # Designations
 @router.post(
@@ -191,6 +213,28 @@ async def update_designation(
     """
     desig_service = DesignationService(session)
     return await desig_service.update(id, payload, ctx.user.id, tenant_id=ctx.tenant_id)
+
+@router.delete(
+    "/designations/{id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a designation",
+    operation_id="designations_delete",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def delete_designation(
+    id: uuid.UUID,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Delete a designation.
+    \f
+    Returns:
+        Status response.
+    """
+    desig_service = DesignationService(session)
+    await desig_service.delete(id, ctx.user.id, tenant_id=ctx.tenant_id)
+    return {"status": "ok"}
 
 
 # Locations
@@ -263,6 +307,28 @@ async def update_location(
     loc_service = LocationService(session)
     return await loc_service.update(id, payload, ctx.user.id, tenant_id=ctx.tenant_id)
 
+@router.delete(
+    "/locations/{id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a location",
+    operation_id="locations_delete",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def delete_location(
+    id: uuid.UUID,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Delete a location.
+    \f
+    Returns:
+        Status response.
+    """
+    loc_service = LocationService(session)
+    await loc_service.delete(id, ctx.user.id, tenant_id=ctx.tenant_id)
+    return {"status": "ok"}
+
 
 # Holiday Calendars
 @router.post(
@@ -310,6 +376,51 @@ async def list_holiday_calendars(
     cal_service = HolidayCalendarService(session)
     items, total = await cal_service.list(skip=skip, limit=limit, tenant_id=ctx.tenant_id)
     return HolidayCalendarPage(items=items, total=total, offset=skip, limit=limit)
+
+@router.patch(
+    "/holiday-calendars/{id}",
+    response_model=HolidayCalendarRead,
+    status_code=status.HTTP_200_OK,
+    summary="Update a holiday calendar",
+    operation_id="holiday_calendars_update",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def update_holiday_calendar(
+    id: uuid.UUID,
+    payload: HolidayCalendarUpdate,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+) -> HolidayCalendarRead:
+    """Update holiday calendar attributes.
+    \f
+    Returns:
+        The updated holiday calendar.
+    """
+    cal_service = HolidayCalendarService(session)
+    return await cal_service.update(id, payload, ctx.user.id, tenant_id=ctx.tenant_id)
+
+@router.delete(
+    "/holiday-calendars/{id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a holiday calendar",
+    operation_id="holiday_calendars_delete",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def delete_holiday_calendar(
+    id: uuid.UUID,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Delete a holiday calendar.
+    \f
+    Returns:
+        Status response.
+    """
+    cal_service = HolidayCalendarService(session)
+    await cal_service.delete(id, ctx.user.id, tenant_id=ctx.tenant_id)
+    return {"status": "ok"}
 
 
 # Holidays
@@ -359,6 +470,51 @@ async def list_holidays(
     items, total = await hol_service.list(skip=skip, limit=limit, tenant_id=ctx.tenant_id)
     return HolidayPage(items=items, total=total, offset=skip, limit=limit)
 
+@router.patch(
+    "/holidays/{id}",
+    response_model=HolidayRead,
+    status_code=status.HTTP_200_OK,
+    summary="Update a holiday",
+    operation_id="holidays_update",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def update_holiday(
+    id: uuid.UUID,
+    payload: HolidayUpdate,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+) -> HolidayRead:
+    """Update holiday attributes.
+    \f
+    Returns:
+        The updated holiday.
+    """
+    hol_service = HolidayService(session)
+    return await hol_service.update(id, payload, ctx.user.id, tenant_id=ctx.tenant_id)
+
+@router.delete(
+    "/holidays/{id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a holiday",
+    operation_id="holidays_delete",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def delete_holiday(
+    id: uuid.UUID,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Delete a holiday.
+    \f
+    Returns:
+        Status response.
+    """
+    hol_service = HolidayService(session)
+    await hol_service.delete(id, ctx.user.id, tenant_id=ctx.tenant_id)
+    return {"status": "ok"}
+
 
 # Picklists
 @router.post(
@@ -384,7 +540,7 @@ async def create_picklist(
     return await pick_service.create(payload, ctx.user.id, tenant_id=ctx.tenant_id)
 
 @router.get(
-    "/picklists",
+    "/picklists/{category}",
     response_model=PicklistPage,
     status_code=status.HTTP_200_OK,
     summary="List dynamic picklists by category",
@@ -393,6 +549,7 @@ async def create_picklist(
     responses=error_responses(UnauthorizedError, ForbiddenError)
 )
 async def list_picklists(
+    category: str,
     ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:read"))],
     session: Annotated[AsyncSession, Depends(get_db)],
     skip: int = Query(0, ge=0),
@@ -404,7 +561,11 @@ async def list_picklists(
         Paginated picklists.
     """
     pick_service = PicklistService(session)
-    items, total = await pick_service.list(skip=skip, limit=limit, tenant_id=ctx.tenant_id)
+    # Applying the explicit category filter
+    items, total = await pick_service.list(
+        skip=skip, limit=limit, tenant_id=ctx.tenant_id,
+        filters={"category": category}
+    )
     return PicklistPage(items=items, total=total, offset=skip, limit=limit)
 
 @router.patch(
@@ -429,3 +590,25 @@ async def update_picklist(
     """
     pick_service = PicklistService(session)
     return await pick_service.update(id, payload, ctx.user.id, tenant_id=ctx.tenant_id)
+
+@router.delete(
+    "/picklists/{id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a picklist",
+    operation_id="picklists_delete",
+    openapi_extra={"security": [{"BearerAuth": []}]},
+    responses=error_responses(UnauthorizedError, ForbiddenError, NotFoundError)
+)
+async def delete_picklist(
+    id: uuid.UUID,
+    ctx: Annotated[SecurityContext, Depends(require_security_context("peopleops:admin"))],
+    session: Annotated[AsyncSession, Depends(get_db)]
+):
+    """Delete a picklist.
+    \f
+    Returns:
+        Status response.
+    """
+    pick_service = PicklistService(session)
+    await pick_service.delete(id, ctx.user.id, tenant_id=ctx.tenant_id)
+    return {"status": "ok"}
