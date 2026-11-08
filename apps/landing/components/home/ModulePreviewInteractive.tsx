@@ -40,9 +40,9 @@ export function ModulePreviewInteractive({ type }: ModulePreviewProps) {
       <div className="flex items-center justify-between border-b border-fd-border bg-fd-muted/60 px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
-            <span className="size-3 rounded-full bg-red-500/80" />
-            <span className="size-3 rounded-full bg-amber-500/80" />
-            <span className="size-3 rounded-full bg-emerald-500/80" />
+            <span className="size-3 rounded-full bg-error-bg" />
+            <span className="size-3 rounded-full bg-warning-bg" />
+            <span className="size-3 rounded-full bg-success-bg" />
           </div>
           <span className="ml-2 font-mono text-xs text-fd-muted-foreground">
             innostes://{type}.workspace
@@ -87,8 +87,8 @@ export function ModulePreviewInteractive({ type }: ModulePreviewProps) {
             {type === 'wiki' && <DocFlowWikiPreview />}
           </div>
         ) : (
-          <div className="rounded-xl border border-fd-border bg-zinc-950 p-4 font-mono text-xs text-zinc-100 dark:bg-black">
-            <div className="mb-3 flex items-center justify-between text-zinc-400">
+          <div className="rounded-xl border border-fd-border bg-brand-navy p-4 font-mono text-xs text-white dark:bg-black">
+            <div className="mb-3 flex items-center justify-between text-muted-foreground">
               <span>Standard REST OpenAPI 3.1 Spec (Decoupled Backend)</span>
               <button
                 onClick={() =>
@@ -96,13 +96,13 @@ export function ModulePreviewInteractive({ type }: ModulePreviewProps) {
                     `curl -X GET https://api.yourdomain.com/${type} -H "X-Tenant-ID: acme" -H "Authorization: Bearer inno_key"`
                   )
                 }
-                className="flex items-center gap-1 rounded border border-zinc-800 bg-zinc-900 px-2 py-1 text-zinc-300 hover:text-white"
+                className="flex items-center gap-1 rounded border border-border-strong bg-brand-navy px-2 py-1 text-sidebar-foreground hover:text-white"
               >
-                {copied ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
+                {copied ? <Check className="size-3 text-success" /> : <Copy className="size-3" />}
                 <span>{copied ? 'Copied' : 'Copy cURL'}</span>
               </button>
             </div>
-            <pre className="overflow-x-auto text-zinc-300">
+            <pre className="overflow-x-auto text-muted-foreground">
               <code>{`# Query live records from the decoupled ${type} engine
 curl -X GET "https://api.yourdomain.com/${type}/records" \\
   -H "Authorization: Bearer inno_live_sec_8849b2c" \\
@@ -160,7 +160,7 @@ function SalesFlowKanbanPreview() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-fd-border bg-fd-muted/30 p-3">
         <div className="flex items-center gap-2">
-          <TrendingUp className="size-4 text-emerald-500" />
+          <TrendingUp className="size-4 text-success-text" />
           <span className="text-xs font-semibold text-fd-foreground">Q4 Active Revenue Pipeline</span>
         </div>
         <div className="flex gap-4 font-mono text-xs">
@@ -170,7 +170,7 @@ function SalesFlowKanbanPreview() {
           </div>
           <div>
             <span className="text-fd-muted-foreground">Total Pipeline: </span>
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">$695,000</span>
+            <span className="font-semibold text-success-text ">$695,000</span>
           </div>
         </div>
       </div>
@@ -180,7 +180,7 @@ function SalesFlowKanbanPreview() {
           <div key={col.title} className="rounded-xl border border-fd-border bg-fd-muted/20 p-3">
             <div className="mb-2 flex items-center justify-between border-b border-fd-border pb-2">
               <span className="text-xs font-semibold text-fd-foreground">{col.title}</span>
-              <span className="rounded bg-fd-muted px-1.5 py-0.5 text-[10px] font-mono text-fd-muted-foreground">
+              <span className="rounded bg-fd-muted px-1.5 py-0.5 text-xs font-mono text-fd-muted-foreground">
                 {col.count}
               </span>
             </div>
@@ -191,8 +191,8 @@ function SalesFlowKanbanPreview() {
                   className="rounded-lg border border-fd-border bg-fd-background p-2.5 shadow-xs"
                 >
                   <p className="text-xs font-medium text-fd-foreground">{item.title}</p>
-                  <div className="mt-2 flex items-center justify-between text-[11px]">
-                    <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
+                  <div className="mt-2 flex items-center justify-between text-xs">
+                    <span className="font-mono font-semibold text-primary ">
                       {item.value}
                     </span>
                     <span className="text-fd-muted-foreground">{item.prob} win</span>
@@ -219,10 +219,10 @@ function PeopleOpsRosterPreview() {
     <div className="space-y-3">
       <div className="flex items-center justify-between border-b border-fd-border pb-3">
         <div className="flex items-center gap-2">
-          <Users className="size-4 text-blue-500" />
+          <Users className="size-4 text-primary" />
           <span className="text-xs font-semibold text-fd-foreground">Organization Roster Directory</span>
         </div>
-        <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+        <span className="rounded-full bg-primary-tint px-2.5 py-0.5 text-xs font-medium text-primary ">
           42 Total Staff
         </span>
       </div>
@@ -242,24 +242,24 @@ function PeopleOpsRosterPreview() {
               <tr key={e.name} className="hover:bg-fd-muted/30">
                 <td className="py-2.5">
                   <div className="font-medium text-fd-foreground">{e.name}</div>
-                  <div className="text-[11px] text-fd-muted-foreground">{e.role}</div>
+                  <div className="text-xs text-fd-muted-foreground">{e.role}</div>
                 </td>
                 <td className="py-2.5">
-                  <span className="rounded border border-fd-border bg-fd-muted/40 px-2 py-0.5 text-[11px]">
+                  <span className="rounded border border-fd-border bg-fd-muted/40 px-2 py-0.5 text-xs">
                     {e.dept}
                   </span>
                 </td>
                 <td className="py-2.5">
                   <span
-                    className={`inline-flex items-center gap-1 text-[11px] font-medium ${
-                      e.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+                    className={`inline-flex items-center gap-1 text-xs font-medium ${
+                      e.status === 'Active' ? 'text-success-text ' : 'text-warning-text '
                     }`}
                   >
                     <span className="size-1.5 rounded-full bg-current" />
                     {e.status}
                   </span>
                 </td>
-                <td className="py-2.5 text-right font-mono text-[11px] text-fd-muted-foreground">
+                <td className="py-2.5 text-right font-mono text-xs text-fd-muted-foreground">
                   {e.leave}
                 </td>
               </tr>
@@ -282,7 +282,7 @@ function HireFlowPipelinePreview() {
     <div className="space-y-3">
       <div className="flex items-center justify-between border-b border-fd-border pb-3">
         <div className="flex items-center gap-2">
-          <Briefcase className="size-4 text-purple-500" />
+          <Briefcase className="size-4 text-muted-foreground" />
           <span className="text-xs font-semibold text-fd-foreground">Active Recruitment Requisitions</span>
         </div>
         <span className="text-xs text-fd-muted-foreground">5 Open Positions</span>
@@ -296,13 +296,13 @@ function HireFlowPipelinePreview() {
           >
             <div>
               <div className="text-xs font-medium text-fd-foreground">{c.name}</div>
-              <div className="text-[11px] text-fd-muted-foreground">{c.role}</div>
+              <div className="text-xs text-fd-muted-foreground">{c.role}</div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="rounded bg-fd-muted px-2 py-0.5 text-[11px] font-medium text-fd-muted-foreground">
+              <span className="rounded bg-fd-muted px-2 py-0.5 text-xs font-medium text-fd-muted-foreground">
                 {c.stage}
               </span>
-              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <span className="rounded-full bg-success-bg px-2 py-0.5 font-mono text-xs font-semibold text-success-text ">
                 {c.score}
               </span>
             </div>
@@ -318,19 +318,19 @@ function LedgerFlowLedgerPreview() {
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-fd-border bg-fd-muted/20 p-3">
-          <div className="text-[11px] text-fd-muted-foreground">Current Accounts Receivable</div>
+          <div className="text-xs text-fd-muted-foreground">Current Accounts Receivable</div>
           <div className="mt-1 font-mono text-lg font-bold text-fd-foreground">$184,200.00</div>
-          <div className="text-[10px] text-emerald-600 dark:text-emerald-400">92% current / 0 past due</div>
+          <div className="text-xs text-success-text ">92% current / 0 past due</div>
         </div>
         <div className="rounded-xl border border-fd-border bg-fd-muted/20 p-3">
-          <div className="text-[11px] text-fd-muted-foreground">Accounts Payable</div>
+          <div className="text-xs text-fd-muted-foreground">Accounts Payable</div>
           <div className="mt-1 font-mono text-lg font-bold text-fd-foreground">$42,850.00</div>
-          <div className="text-[10px] text-fd-muted-foreground">Reconciled with StockFlow POs</div>
+          <div className="text-xs text-fd-muted-foreground">Reconciled with StockFlow POs</div>
         </div>
         <div className="rounded-xl border border-fd-border bg-fd-muted/20 p-3">
-          <div className="text-[11px] text-fd-muted-foreground">Net Operating Cash Flow</div>
-          <div className="mt-1 font-mono text-lg font-bold text-emerald-600 dark:text-emerald-400">+$141,350.00</div>
-          <div className="text-[10px] text-emerald-600 dark:text-emerald-400">+18.4% month-over-month</div>
+          <div className="text-xs text-fd-muted-foreground">Net Operating Cash Flow</div>
+          <div className="mt-1 font-mono text-lg font-bold text-success-text ">+$141,350.00</div>
+          <div className="text-xs text-success-text ">+18.4% month-over-month</div>
         </div>
       </div>
     </div>
@@ -348,7 +348,7 @@ function StockFlowInventoryPreview() {
     <div className="space-y-3">
       <div className="flex items-center justify-between border-b border-fd-border pb-3">
         <div className="flex items-center gap-2">
-          <Boxes className="size-4 text-amber-500" />
+          <Boxes className="size-4 text-warning-text" />
           <span className="text-xs font-semibold text-fd-foreground">Multi-Facility Warehouse Balance</span>
         </div>
         <span className="text-xs text-fd-muted-foreground">East Coast Hub & EU Central</span>
@@ -369,16 +369,16 @@ function StockFlowInventoryPreview() {
               <tr key={item.sku} className="hover:bg-fd-muted/30">
                 <td className="py-2.5">
                   <div className="font-mono font-medium text-fd-foreground">{item.sku}</div>
-                  <div className="text-[11px] text-fd-muted-foreground">{item.name}</div>
+                  <div className="text-xs text-fd-muted-foreground">{item.name}</div>
                 </td>
                 <td className="py-2.5 text-right font-mono">{item.wh1}</td>
                 <td className="py-2.5 text-right font-mono">{item.wh2}</td>
                 <td className="py-2.5 text-right">
                   <span
-                    className={`rounded px-2 py-0.5 text-[10px] font-medium ${
+                    className={`rounded px-2 py-0.5 text-xs font-medium ${
                       item.status === 'Healthy'
-                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                        ? 'bg-success-bg text-success-text '
+                        : 'bg-warning-bg text-warning-text '
                     }`}
                   >
                     {item.status}
@@ -404,12 +404,12 @@ function SprintFlowSprintPreview() {
     <div className="space-y-3">
       <div className="flex items-center justify-between border-b border-fd-border pb-3">
         <div className="flex items-center gap-2">
-          <FolderGit2 className="size-4 text-cyan-500" />
+          <FolderGit2 className="size-4 text-info-text" />
           <span className="text-xs font-semibold text-fd-foreground">Sprint 2026-Q4.02 Progress</span>
         </div>
         <div className="flex items-center gap-2 text-xs">
           <span className="text-fd-muted-foreground">38 of 45 Points Closed</span>
-          <span className="rounded bg-cyan-500/10 px-2 py-0.5 font-mono text-[11px] font-semibold text-cyan-600 dark:text-cyan-400">
+          <span className="rounded bg-info-bg px-2 py-0.5 font-mono text-xs font-semibold text-info-text ">
             84%
           </span>
         </div>
@@ -422,14 +422,14 @@ function SprintFlowSprintPreview() {
             className="flex items-center justify-between rounded-lg border border-fd-border bg-fd-background p-3"
           >
             <div className="flex items-center gap-3">
-              <span className="font-mono text-xs font-semibold text-blue-600 dark:text-blue-400">{i.key}</span>
+              <span className="font-mono text-xs font-semibold text-primary ">{i.key}</span>
               <span className="text-xs text-fd-foreground">{i.title}</span>
             </div>
             <div className="flex items-center gap-2 font-mono text-xs">
-              <span className="rounded bg-fd-muted px-1.5 py-0.5 text-[10px] text-fd-muted-foreground">
+              <span className="rounded bg-fd-muted px-1.5 py-0.5 text-xs text-fd-muted-foreground">
                 {i.pts}
               </span>
-              <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">
+              <span className="rounded bg-error-bg px-1.5 py-0.5 text-xs font-medium text-error-text ">
                 {i.prio}
               </span>
             </div>
@@ -445,7 +445,7 @@ function DocFlowWikiPreview() {
     <div className="space-y-3">
       <div className="flex items-center justify-between border-b border-fd-border pb-3">
         <div className="flex items-center gap-2">
-          <FileText className="size-4 text-blue-500" />
+          <FileText className="size-4 text-primary" />
           <span className="text-xs font-semibold text-fd-foreground">Engineering Knowledge Base & SOPs</span>
         </div>
         <span className="font-mono text-xs text-fd-muted-foreground">Revision #42 (Committed)</span>
@@ -458,7 +458,7 @@ function DocFlowWikiPreview() {
           No business module may import another business module directly; cross-module events are published through
           the Kernel event bus.
         </p>
-        <div className="mt-3 rounded border border-fd-border bg-fd-muted/30 p-2 font-mono text-[11px] text-fd-foreground">
+        <div className="mt-3 rounded border border-fd-border bg-fd-muted/30 p-2 font-mono text-xs text-fd-foreground">
           ✓ Contracts: 5 kept, 0 broken (Enforced on git commit)
         </div>
       </div>

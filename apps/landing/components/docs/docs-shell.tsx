@@ -41,10 +41,8 @@ export function DocsShell({
         url: homeUrl,
         title: (
           <>
-            <Logo className="size-7" />
-            <span className="text-lg font-semibold tracking-tight">
-              {title}
-            </span>
+            <Logo className="h-5" />
+            <span className="text-sm font-medium text-muted-foreground">{title}</span>
             {badge && (
               <span className="rounded-md bg-fd-accent px-1.5 py-0.5 text-xs font-medium text-fd-accent-foreground">
                 {badge}

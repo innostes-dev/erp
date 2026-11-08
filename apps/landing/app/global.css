@@ -2,7 +2,7 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-/* Innostes design system */
+/* INNOSTES design system: one palette for the product, the website and the docs. */
 @import '@innostes/ui/tailwind.css';
 @import '@innostes/ui/dark.css';
 
@@ -10,85 +10,40 @@
 @source '../content';
 
 /* ────────────────────────────────────────────
-   Design Tokens — Light
+   Typography (Inter + JetBrains Mono via next/font)
    ──────────────────────────────────────────── */
 @theme {
-  /* Brand palette */
-  --color-brand-50:  #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
-
-  /* Fumadocs chrome — tuned to Innostes */
-  --color-fd-background: #fafafa;
-  --color-fd-foreground: #0f172a;
-  --color-fd-muted: #f1f5f9;
-  --color-fd-muted-foreground: #64748b;
-  --color-fd-popover: #ffffff;
-  --color-fd-popover-foreground: #0f172a;
-  --color-fd-card: #ffffff;
-  --color-fd-card-foreground: #0f172a;
-  --color-fd-border: #e2e8f0;
-  --color-fd-primary: #2563eb;
-  --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: #f1f5f9;
-  --color-fd-secondary-foreground: #0f172a;
-  --color-fd-accent: #eff6ff;
-  --color-fd-accent-foreground: #1d4ed8;
-  --color-fd-ring: #3b82f6;
-
-  /* Typography */
   --font-sans: var(--font-sans), 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono), 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
-
-  /* Fluid type scale */
-  --text-xs:   0.75rem;   /* 12px */
-  --text-sm:   0.875rem;  /* 14px */
-  --text-base: 1rem;      /* 16px */
-  --text-lg:   1.125rem;  /* 18px */
-  --text-xl:   1.25rem;   /* 20px */
-  --text-2xl:  1.5rem;    /* 24px */
-  --text-3xl:  1.875rem;  /* 30px */
-  --text-4xl:  2.25rem;   /* 36px */
-  --text-5xl:  3rem;      /* 48px */
-  --text-6xl:  3.75rem;   /* 60px */
-  --text-7xl:  4.5rem;    /* 72px */
-
-  /* Elevation */
-  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --shadow-md:    0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
-  --shadow-lg:    0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-  --shadow-xl:    0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-  --shadow-glow:  0 0 0 1px rgba(37,99,235,0.12), 0 4px 24px rgba(37,99,235,0.18);
 }
 
 /* ────────────────────────────────────────────
-   Design Tokens — Dark
+   Fumadocs chrome → shared semantic tokens.
+   No separate brand palette: the docs use the same colours as the product.
+   (Defined on :root and .dark so they follow the shared light/dark tokens.)
    ──────────────────────────────────────────── */
+:root,
+.dark,
+[data-theme='dark'] {
+  --color-fd-background: var(--color-canvas);
+  --color-fd-foreground: var(--color-foreground);
+  --color-fd-muted: var(--color-muted);
+  --color-fd-muted-foreground: var(--color-muted-foreground);
+  --color-fd-popover: var(--color-popover);
+  --color-fd-popover-foreground: var(--color-popover-foreground);
+  --color-fd-card: var(--color-card);
+  --color-fd-card-foreground: var(--color-card-foreground);
+  --color-fd-border: var(--color-border);
+  --color-fd-primary: var(--color-primary);
+  --color-fd-primary-foreground: var(--color-primary-foreground);
+  --color-fd-secondary: var(--color-muted);
+  --color-fd-secondary-foreground: var(--color-foreground);
+  --color-fd-accent: var(--color-primary-tint);
+  --color-fd-accent-foreground: var(--color-primary-hover);
+  --color-fd-ring: var(--color-ring);
+}
 .dark {
-  --color-fd-background: #020617;
-  --color-fd-foreground: #f1f5f9;
-  --color-fd-muted: #0f172a;
-  --color-fd-muted-foreground: #94a3b8;
-  --color-fd-popover: #0f172a;
-  --color-fd-popover-foreground: #f1f5f9;
-  --color-fd-card: #0f172a;
-  --color-fd-card-foreground: #f1f5f9;
-  --color-fd-border: #1e293b;
-  --color-fd-primary: #60a5fa;
-  --color-fd-primary-foreground: #020617;
-  --color-fd-secondary: #1e293b;
-  --color-fd-secondary-foreground: #f1f5f9;
-  --color-fd-accent: color-mix(in oklab, #3b82f6 12%, transparent);
-  --color-fd-accent-foreground: #93c5fd;
-  --color-fd-ring: #60a5fa;
-  --shadow-glow: 0 0 0 1px rgba(96,165,250,0.15), 0 4px 32px rgba(96,165,250,0.20);
+  --color-fd-accent-foreground: var(--color-primary);
 }
 
 /* ────────────────────────────────────────────
@@ -98,7 +53,7 @@
 .dark span[style*="--shiki-dark:#6a737d"],
 .dark span[style*="#6A737D"],
 .dark span[style*="#6a737d"] {
-  color: #64748b !important;
+  color: var(--color-muted-foreground) !important;
 }
 
 /* ────────────────────────────────────────────
@@ -125,224 +80,390 @@ html > body[data-scroll-locked] {
 }
 
 /* ────────────────────────────────────────────
-   Landing-page utility classes
+   Marketing surfaces. Same system as the product, larger rhythm.
+   Legacy class names are kept so existing pages render, but they are now quiet:
+   no gradients, no glass, no glow, no hover lift.
    ──────────────────────────────────────────── */
 
-/* Gradient text utility */
-.gradient-text {
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #0891b2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-hero {
-  background: linear-gradient(135deg, #1e40af 0%, #2563eb 40%, #0284c7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Cadence-style multi-tone warm-to-violet gradient text */
+/* Emphasis inside headings: Executive Blue, never gradient text. */
+.gradient-text,
+.gradient-text-hero,
 .gradient-cadence {
-  background: linear-gradient(90deg, #f97316 0%, #fb7185 28%, #c084fc 65%, #818cf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-primary);
 }
 
-.dark .gradient-cadence {
-  background: linear-gradient(90deg, #fb923c 0%, #f43f5e 30%, #d8b4fe 65%, #a5b4fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Glass cards */
-.glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(226, 232, 240, 0.6);
-}
-
-.dark .glass-card {
-  background: rgba(15, 23, 42, 0.7);
-  border-color: rgba(30, 41, 59, 0.8);
-}
-
-/* Cadence-style atmospheric mesh background (Light: warm apricot + soft lavender; Dark: rich obsidian nebula) */
-.hero-mesh {
-  background-color: #fafbfc;
-  background-image:
-    radial-gradient(ellipse 70% 50% at 15% 35%, rgba(251, 146, 60, 0.16) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(192, 132, 252, 0.20) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(254, 215, 170, 0.25) 0%, transparent 65%),
-    linear-gradient(rgba(148, 163, 184, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 56px 56px, 56px 56px;
-}
-
-.dark .hero-mesh {
-  background-color: #030712;
-  background-image:
-    radial-gradient(ellipse 70% 50% at 15% 35%, rgba(249, 115, 22, 0.16) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(139, 92, 246, 0.22) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(59, 130, 246, 0.18) 0%, transparent 65%),
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 56px 56px, 56px 56px;
-}
-
-/* Site canvas with continuous subtle architectural grid */
+/* Page and hero backgrounds: solid canvas. */
+.hero-mesh,
 .site-canvas {
-  background-color: #fafbfc;
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-  background-size: 56px 56px;
+  background-color: var(--color-canvas);
 }
 
-.dark .site-canvas {
-  background-color: #030712;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 56px 56px;
-}
-
-/* Cadence & Linear modern Bento Card surface */
+/* Cards: solid surface + hairline, border emphasis on hover. */
+.glass-card,
 .bento-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color 160ms ease-out;
 }
-
+.bento-card {
+  transition:
+    border-color 160ms ease-out,
+    box-shadow 200ms ease-out,
+    transform 200ms ease-out;
+}
 .bento-card:hover {
-  border-color: rgba(203, 213, 225, 1);
-  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.02);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
-.dark .bento-card {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.3);
-}
-
-.dark .bento-card:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.1);
-  transform: translateY(-2px);
-}
-
-/* Section divider glow */
-.section-divider {
-  border-bottom: 1px solid var(--color-fd-border);
+/*
+ * Brand stage: the website's signature surface (hero, closing CTA). Marketing pages only.
+ * Midnight Navy with soft light in the approved accents (Executive Blue, teal) and a faint grid.
+ * This is the one approved exception to "no gradients": the light is diffuse and never sits behind
+ * body text at a level that changes contrast (white on navy stays ≥ 12:1).
+ */
+.brand-stage {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--color-brand-navy);
+  color: #ffffff;
 }
-
-.section-divider::after {
+.brand-stage::before {
   content: '';
   position: absolute;
-  bottom: -1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #2563eb, transparent);
-  border-radius: 9999px;
+  inset: -25% -15%;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 38% 42% at 18% 22%, rgb(49 87 213 / 0.55), transparent 70%),
+    radial-gradient(ellipse 34% 38% at 84% 18%, rgb(15 118 110 / 0.45), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 55% 78%, rgb(143 168 240 / 0.22), transparent 70%);
+  filter: blur(12px);
+  animation: brand-drift 26s ease-in-out infinite alternate;
 }
-
-/* Animated underline on hover */
-.hover-underline {
-  position: relative;
-  text-decoration: none;
-}
-
-.hover-underline::after {
+.brand-stage::after {
   content: '';
   position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: #2563eb;
-  border-radius: 9999px;
-  transition: width 0.25s ease;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 25%, #000 25%, transparent 75%);
+  mask-image: radial-gradient(ellipse 75% 60% at 50% 25%, #000 25%, transparent 75%);
+}
+@keyframes brand-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
 }
 
-.hover-underline:hover::after {
-  width: 100%;
+/* Headline emphasis on the brand stage: light blue → teal (6.7:1 and 8:1 on navy). */
+.text-brand-highlight {
+  background: linear-gradient(90deg, var(--ino-blue-200) 0%, var(--ino-blue-300) 35%, var(--ino-teal-300) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Light sections with a whisper of brand colour, for rhythm between plain bands. */
+.soft-wash {
+  background-color: var(--color-canvas);
+  background-image:
+    radial-gradient(ellipse 45% 55% at 0% 0%, rgb(49 87 213 / 0.07), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 100% 100%, rgb(15 118 110 / 0.06), transparent 70%);
+}
+.dark .soft-wash {
+  background-image:
+    radial-gradient(ellipse 45% 55% at 0% 0%, rgb(143 168 240 / 0.08), transparent 70%),
+    radial-gradient(ellipse 40% 50% at 100% 100%, rgb(94 196 182 / 0.06), transparent 70%);
+}
+.surface-band {
+  background-color: var(--color-card);
+}
+
+/* Primary call to action glows softly on the brand stage. */
+.cta-glow {
+  box-shadow: 0 10px 30px -8px rgb(49 87 213 / 0.7);
 }
 
 /* ────────────────────────────────────────────
-   Keyframe animations
+   Scroll experience (components/home/ScrollExperience.tsx)
    ──────────────────────────────────────────── */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-6px); }
+
+/* Content reveal: rise + fade, staggered via --reveal-delay. */
+[data-revealed='false'] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+[data-revealed='true'] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.65s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms),
+    transform 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms);
 }
 
-@keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0   rgba(37, 99, 235, 0.35); }
-  70%  { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
-  100% { box-shadow: 0 0 0 0   rgba(37, 99, 235, 0); }
+/* Section connector: a line that draws in across the section boundary, with a pulse travelling down. */
+.section-connector__line {
+  position: absolute;
+  top: -64px;
+  width: 1px;
+  height: 128px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-primary) 35%,
+    var(--ino-teal-300) 65%,
+    transparent
+  );
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.section-connector[data-revealed='true'] .section-connector__line,
+.section-connector[data-revealed='done'] .section-connector__line {
+  transform: scaleY(1);
+}
+.section-connector__node {
+  position: absolute;
+  top: -64px;
+  width: 7px;
+  height: 7px;
+  margin-left: -0px;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 3px rgb(49 87 213 / 0.25),
+    0 0 14px 2px rgb(49 87 213 / 0.75);
+  opacity: 0;
+  animation: connector-pulse 2.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+@keyframes connector-pulse {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(122px);
+    opacity: 0;
+  }
 }
 
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position:  400px 0; }
+/* Story rail nodes */
+.story-node[data-state='next'] {
+  border-color: var(--color-border-strong);
+  background: var(--color-canvas);
+}
+.story-node[data-state='done'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+.story-node[data-state='active'] {
+  border-color: var(--ino-teal-300);
+  background: var(--color-card);
+  box-shadow: 0 0 0 4px rgb(94 196 182 / 0.25);
+}
+.story-rail a > span:last-child {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
 }
 
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50%       { background-position: 100% 50%; }
+/* Cursor spotlight on cards */
+.bento-card {
+  background-image: radial-gradient(
+    260px circle at var(--mx, -999px) var(--my, -999px),
+    rgb(49 87 213 / 0.09),
+    transparent 65%
+  );
+}
+[data-theme='dark'] .bento-card {
+  background-image: radial-gradient(
+    260px circle at var(--mx, -999px) var(--my, -999px),
+    rgb(143 168 240 / 0.12),
+    transparent 65%
+  );
 }
 
+/* Product preview: settles from a 3D tilt as it scrolls in (--tilt: 1 → 0). */
+[data-tilt] {
+  transform: perspective(1600px) rotateX(calc(var(--tilt, 0) * 16deg)) scale(calc(1 - var(--tilt, 0) * 0.05));
+  transform-origin: 50% 0%;
+  will-change: transform;
+}
+
+/* Light sweeping across the top edge of the preview window. */
+.beam-top {
+  position: relative;
+}
+.beam-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  width: 30%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ino-blue-300), var(--ino-teal-300), transparent);
+  animation: beam-sweep 5s ease-in-out infinite;
+}
+@keyframes beam-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* Dark chapters keep the brand stage while their content uses the dark tokens. */
+.brand-stage[data-theme='dark'] {
+  color: var(--color-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-revealed] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  [data-tilt] {
+    transform: none !important;
+  }
+  .section-connector__node,
+  .beam-top::before {
+    display: none;
+  }
+}
+
+/* Section divider: plain hairline. */
+.section-divider {
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Link underline on hover. */
+.hover-underline {
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+.hover-underline:hover {
+  text-decoration: underline;
+}
+
+/* One subtle entrance (8px, 200ms). Disabled for reduced motion by the shared theme. */
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.animate-fade-up {
+  animation: fade-up 0.2s ease-out both;
 }
-
-.animate-float       { animation: float 4s ease-in-out infinite; }
-.animate-pulse-ring  { animation: pulse-ring 2.2s ease infinite; }
-.animate-gradient    { animation: gradient-shift 5s ease infinite; background-size: 200% 200%; }
-.animate-fade-up     { animation: fade-up  0.5s ease both; }
-.animate-scale-in    { animation: scale-in 0.4s ease both; }
-
-/* Stagger children delay utilities */
-.stagger-1 { animation-delay: 0.10s; }
-.stagger-2 { animation-delay: 0.20s; }
-.stagger-3 { animation-delay: 0.30s; }
-.stagger-4 { animation-delay: 0.40s; }
-.stagger-5 { animation-delay: 0.50s; }
+/* Retired decorative motion: kept as no-ops so legacy markup stays valid. */
+.animate-float,
+.animate-pulse-ring,
+.animate-gradient,
+.animate-scale-in {
+  animation: none;
+}
+.stagger-1,
+.stagger-2,
+.stagger-3,
+.stagger-4,
+.stagger-5 {
+  animation-delay: 0s;
+}
 
 /* ────────────────────────────────────────────
    Mono font override for code blocks
    ──────────────────────────────────────────── */
-pre, code, kbd, samp {
+pre,
+code,
+kbd,
+samp {
   font-family: var(--font-mono);
+}
+
+/* ────────────────────────────────────────────
+   Problem chapter: scattered tools converge (driven by --p, 0 → 1)
+   ──────────────────────────────────────────── */
+.converge__tile {
+  --k: clamp(0, calc((var(--p) - var(--i) * 0.02) * 1.6), 1);
+  transform: translate(-50%, -50%)
+    translate(calc(var(--x) * (1 - var(--k))), calc(var(--y) * (1 - var(--k))))
+    rotate(calc(var(--r) * (1 - var(--k))))
+    scale(calc(1 - var(--k) * 0.45));
+  opacity: clamp(0, calc((1 - var(--k)) * 3), 1);
+  will-change: transform, opacity;
+}
+.converge__unified {
+  --u: clamp(0, calc((var(--p) - 0.6) * 2.5), 1);
+  transform: translate(-50%, -50%) scale(calc(0.85 + var(--u) * 0.15));
+  opacity: var(--u);
+  will-change: transform, opacity;
+}
+@media (max-width: 640px) {
+  /* Pull the scattered tiles inward so they stay on a phone screen. */
+  .converge__tile {
+    transform: translate(-50%, -50%)
+      translate(calc(var(--x) * 0.42 * (1 - var(--k))), calc(var(--y) * 0.9 * (1 - var(--k))))
+      rotate(calc(var(--r) * (1 - var(--k))))
+      scale(calc(0.9 - var(--k) * 0.4));
+  }
+}
+
+/* Hero flow: step text fades in on change (phone) and the journey fades in on rotation */
+.hero-flow,
+.hero-flow-step {
+  animation: story-view 0.45s ease-out both;
+}
+
+/* ────────────────────────────────────────────
+   Hire story: data packet travelling along the track, and step view fade
+   ──────────────────────────────────────────── */
+.story-packet {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 9999px;
+  background: var(--ino-teal-300);
+  box-shadow: 0 0 10px var(--ino-teal-300);
+  animation: story-packet 1.6s ease-in-out infinite;
+}
+@keyframes story-packet {
+  from { left: 0; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  to { left: calc(100% - 8px); opacity: 0; }
+}
+.story-view {
+  animation: story-view 0.45s ease-out both;
+}
+@keyframes story-view {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .story-packet, .story-view, .hero-flow, .hero-flow-step { animation: none; }
 }
 
 /* ────────────────────────────────────────────
@@ -352,10 +473,10 @@ pre, code, kbd, samp {
   header,
   nav,
   aside,
-  [data-slot="toc"],
+  [data-slot='toc'],
   .fd-toc,
   .fd-sidebar,
-  [role="tablist"],
+  [role='tablist'],
   button {
     display: none !important;
   }

@@ -7,10 +7,8 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: (
         <>
-          <Logo className="size-7" />
-          <span className="text-lg font-semibold tracking-tight">
-            {appName}
-          </span>
+          <Logo className="h-5" />
+          <span className="sr-only">{appName}</span>
         </>
       ),
     },

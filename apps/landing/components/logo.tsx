@@ -1,12 +1,33 @@
-import type { SVGProps } from 'react';
+import wordmarkOnLight from '@innostes/ui/brand/innostes-wordmark-on-light.png';
+import wordmarkOnDark from '@innostes/ui/brand/innostes-wordmark-on-dark.png';
+import symbolOnLight from '@innostes/ui/brand/innostes-symbol.png';
+import symbolOnDark from '@innostes/ui/brand/innostes-symbol-on-dark.png';
+import { cn } from '@/lib/cn';
 
-/** Placeholder mark for innostes. Replace with the real logo. */
-export function Logo(props: SVGProps<SVGSVGElement>) {
+/**
+ * The INNOSTES logo, from the shared brand assets in @innostes/ui (same artwork as the product).
+ * `wordmark` (default) for headers and footers; `symbol` for tight square spaces.
+ * Pass `surface="dark"` on navy bands; otherwise it follows the site's light/dark theme.
+ */
+export function Logo({
+  variant = 'wordmark',
+  surface,
+  className,
+}: {
+  variant?: 'wordmark' | 'symbol';
+  surface?: 'dark';
+  className?: string;
+}) {
+  const light = variant === 'symbol' ? symbolOnLight : wordmarkOnLight;
+  const dark = variant === 'symbol' ? symbolOnDark : wordmarkOnDark;
+  const size = cn(variant === 'symbol' ? 'size-7' : 'h-6 w-auto', className);
+  if (surface === 'dark') {
+    return <img src={dark.src} alt="INNOSTES" className={size} draggable={false} />;
+  }
   return (
-    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" {...props}>
-      <rect width="32" height="32" rx="8" className="fill-blue-600" />
-      <path d="M11 9h4v14h-4z" fill="white" />
-      <path d="M17 9h4l-4 7 4 7h-4l-4-7z" fill="white" opacity="0.7" />
-    </svg>
+    <>
+      <img src={light.src} alt="INNOSTES" className={cn(size, 'dark:hidden')} draggable={false} />
+      <img src={dark.src} alt="INNOSTES" className={cn(size, 'hidden dark:block')} draggable={false} />
+    </>
   );
 }

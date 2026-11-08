@@ -6,12 +6,12 @@ import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { Button } from '@innostes/ui';
 import { Logo } from '@/components/logo';
+import { useQuoteModal } from './QuoteModalContext';
 import {
   Activity,
   ArrowRight,
   ChevronDown,
   Menu,
-  Monitor,
   Moon,
   Sun,
   TrendingUp,
@@ -24,23 +24,24 @@ const FEATURED_MODULES = [
     title: 'SalesFlow',
     description: 'CRM, deals pipeline, probability forecasting & quotes.',
     href: '/modules/salesflow',
-    icon: <TrendingUp className="size-4 text-blue-500" />,
+    icon: <TrendingUp className="size-4 text-primary" />,
   },
   {
     title: 'PeopleOps',
     description: 'Workforce directory, org charts, leave approvals & payroll.',
     href: '/modules/peopleops',
-    icon: <Users className="size-4 text-emerald-500" />,
+    icon: <Users className="size-4 text-success-text" />,
   },
   {
     title: 'Tracura API Telemetry',
     description: 'Real-time API observability, request tracing & payload logging.',
     href: '/plugins/tracura',
-    icon: <Activity className="size-4 text-purple-500" />,
+    icon: <Activity className="size-4 text-muted-foreground" />,
   },
 ];
 
 export function LandingHeader() {
+  const { openQuote } = useQuoteModal();
   const [modulesOpen, setModulesOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -99,6 +100,18 @@ export function LandingHeader() {
     }, 250);
   };
 
+  // On the homepage the bar sits transparently over the navy hero, then turns solid once you scroll.
+  const isHome = pathname === '/';
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    if (!isHome) return;
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isHome]);
+  const overHero = isHome && !scrolled && !mobileOpen;
+
   const toggleTheme = () => {
     setTheme(isDark ? 'light' : 'dark');
   };
@@ -106,20 +119,21 @@ export function LandingHeader() {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-40 w-full border-b border-slate-200/60 bg-white/70 backdrop-blur-xl transition-[background-color,border-color] duration-200 dark:border-white/5 dark:bg-slate-950/70 supports-backdrop-filter:bg-white/60 dark:supports-backdrop-filter:bg-slate-950/60"
+      data-over-hero={overHero || undefined}
+      className={`sticky top-0 z-40 w-full border-b transition-[background-color,border-color,box-shadow] duration-300 ${
+        isHome ? '-mb-16' : ''
+      } ${
+        overHero
+          ? 'dark border-transparent bg-transparent'
+          : 'border-border bg-card/90 shadow-xs backdrop-blur-md dark:border-white/5'
+      }`}
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Left: Brand Identity */}
         <div className="flex items-center gap-3">
           <Link href="/" className="group flex items-center gap-2.5">
-            <Logo className="size-7 transition-transform group-hover:scale-105" />
-            <span className="text-lg font-bold tracking-tight text-fd-foreground">
-              innostes
-            </span>
+            <Logo className="h-7" />
           </Link>
-          <span className="hidden items-center rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-600 dark:text-blue-400 sm:inline-flex">
-            Business OS
-          </span>
         </div>
 
         {/* Center: Essential Navigation Links */}
@@ -209,28 +223,18 @@ export function LandingHeader() {
             )}
           </div>
 
-          {/* Architecture */}
-          <Link
-            href="/docs/architecture/building-blocks"
-            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              pathname.startsWith('/docs/architecture')
-                ? 'text-fd-primary'
-                : 'text-fd-muted-foreground hover:bg-fd-accent/60 hover:text-fd-foreground'
-            }`}
-          >
-            Architecture
-          </Link>
-
           {/* Docs */}
+
+          {/* Custom builds */}
           <Link
-            href="/docs"
+            href="/build"
             className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              pathname.startsWith('/docs') && !pathname.startsWith('/docs/architecture')
+              pathname === '/build'
                 ? 'text-fd-primary'
                 : 'text-fd-muted-foreground hover:bg-fd-accent/60 hover:text-fd-foreground'
             }`}
           >
-            Docs
+            Custom builds
           </Link>
 
           {/* Services */}
@@ -242,19 +246,29 @@ export function LandingHeader() {
                 : 'text-fd-muted-foreground hover:bg-fd-accent/60 hover:text-fd-foreground'
             }`}
           >
-            Services & Pricing
+            Pricing
+          </Link>
+
+          <Link
+            href="/docs"
+            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              pathname.startsWith('/docs') && !pathname.startsWith('/docs/architecture')
+                ? 'text-fd-primary'
+                : 'text-fd-muted-foreground hover:bg-fd-accent/60 hover:text-fd-foreground'
+            }`}
+          >
+            Docs
           </Link>
         </nav>
 
-        {/* Right Side: Demo, GitHub, Theme, Deploy Free */}
+        {/* Right side: self-host link, GitHub, theme, Book a demo */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Watch / Interactive Demo link */}
+          {/* Secondary: self-host, as a quiet text link */}
           <Link
-            href="/#modules"
-            className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs backdrop-blur-sm transition-all hover:bg-slate-100 hover:text-slate-950 dark:border-white/10 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15"
+            href="/docs/getting-started"
+            className="hidden lg:inline-flex rounded-md px-2 py-1.5 text-sm font-medium text-fd-muted-foreground transition-colors hover:text-fd-foreground"
           >
-            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Interactive Demo</span>
+            Self-host free
           </Link>
 
           {/* GitHub Repository Link */}
@@ -262,7 +276,7 @@ export function LandingHeader() {
             href="https://github.com/innostes-dev/erp"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200/80 bg-white/80 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+            className="inline-flex size-8 sm:size-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground dark:border-white/10 dark:bg-card dark:hover:bg-card dark:hover:text-white"
             aria-label="View on GitHub"
             title="GitHub Repository"
           >
@@ -278,28 +292,29 @@ export function LandingHeader() {
           {/* Theme Switcher Toggle */}
           <button
             onClick={toggleTheme}
-            className="inline-flex size-8 sm:size-9 items-center justify-center rounded-full border border-slate-200/90 bg-white/80 text-slate-700 shadow-2xs backdrop-blur-sm transition-all hover:bg-slate-100 hover:text-slate-950 dark:border-white/10 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15 cursor-pointer"
+            className="inline-flex size-8 sm:size-9 items-center justify-center rounded-full border border-border bg-card text-strong-foreground shadow-2xs transition-all hover:bg-muted hover:text-foreground dark:border-white/10 dark:bg-card  dark:hover:bg-card cursor-pointer"
             aria-label={mounted ? (isDark ? 'Switch to light theme' : 'Switch to dark theme') : 'Toggle theme'}
             title={mounted ? (isDark ? 'Switch to light theme' : 'Switch to dark theme') : 'Toggle theme'}
           >
             {mounted ? (
               isDark ? (
-                <Sun className="size-4 text-amber-400 transition-transform duration-200 hover:rotate-45" />
+                <Sun className="size-4 text-warning transition-transform duration-200 hover:rotate-45" />
               ) : (
-                <Moon className="size-4 text-slate-700 transition-transform duration-200 hover:-rotate-12" />
+                <Moon className="size-4 text-strong-foreground transition-transform duration-200 hover:-rotate-12" />
               )
             ) : (
-              <span className="size-4 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse" />
+              <span className="size-4 rounded-full bg-border animate-pulse" />
             )}
           </button>
 
-          {/* Primary Action: Deploy Free */}
-          <Link
-            href="/docs/getting-started"
-            className="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 hover:shadow dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+          {/* Primary action: Book a demo */}
+          <button
+            type="button"
+            onClick={() => openQuote('Innostes Business OS')}
+            className="hidden h-9 cursor-pointer items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:inline-flex"
           >
-            Deploy Free
-          </Link>
+            Book a demo
+          </button>
 
           {/* Mobile Hamburger Toggle */}
           <button
@@ -342,13 +357,6 @@ export function LandingHeader() {
 
             <div className="my-2 border-t border-fd-border/70" />
 
-            <Link
-              href="/docs/architecture/building-blocks"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-fd-foreground hover:bg-fd-accent"
-            >
-              Architecture
-            </Link>
 
             <Link
               href="/docs"
@@ -359,31 +367,39 @@ export function LandingHeader() {
             </Link>
 
             <Link
+              href="/build"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-fd-foreground hover:bg-fd-accent"
+            >
+              Custom builds
+            </Link>
+
+            <Link
               href="/services"
               onClick={() => setMobileOpen(false)}
               className="rounded-lg px-3 py-2 text-sm font-medium text-fd-foreground hover:bg-fd-accent"
             >
-              Services & Pricing
+              Pricing
             </Link>
 
             {/* Mobile Theme Selector */}
-            <div className="my-2 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-white/5">
+            <div className="my-2 rounded-2xl border border-border bg-muted p-3 dark:border-white/10 dark:bg-card">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <div className="flex items-center gap-2 text-xs font-semibold text-strong-foreground ">
                   {mounted && isDark ? (
-                    <Moon className="size-4 text-amber-400" />
+                    <Moon className="size-4 text-warning" />
                   ) : (
-                    <Sun className="size-4 text-amber-500" />
+                    <Sun className="size-4 text-warning-text" />
                   )}
                   <span>Appearance</span>
                 </div>
-                <div className="inline-flex rounded-full border border-slate-200/80 bg-white/80 p-0.5 dark:border-white/10 dark:bg-slate-900">
+                <div className="inline-flex rounded-full border border-border bg-card p-0.5 dark:border-white/10 ">
                   <button
                     onClick={() => setTheme('light')}
                     className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
-                      mounted && (theme === 'light' || (!theme && !isDark))
-                        ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      mounted && !isDark
+                        ? 'bg-brand-navy text-white dark:bg-card  shadow-xs'
+                        : 'text-muted-foreground hover:text-foreground  dark:hover:text-white'
                     }`}
                   >
                     Light
@@ -391,22 +407,12 @@ export function LandingHeader() {
                   <button
                     onClick={() => setTheme('dark')}
                     className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
-                      mounted && (theme === 'dark' || (!theme && isDark))
-                        ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      mounted && isDark
+                        ? 'bg-brand-navy text-white dark:bg-card  shadow-xs'
+                        : 'text-muted-foreground hover:text-foreground  dark:hover:text-white'
                     }`}
                   >
                     Dark
-                  </button>
-                  <button
-                    onClick={() => setTheme('system')}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition-all cursor-pointer ${
-                      mounted && theme === 'system'
-                        ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                    }`}
-                  >
-                    System
                   </button>
                 </div>
               </div>
@@ -415,12 +421,21 @@ export function LandingHeader() {
             <div className="mt-1 pt-2 border-t border-fd-border/70">
               <Button
                 size="md"
-                render={<Link href="/docs/getting-started" onClick={() => setMobileOpen(false)} />}
-                nativeButton={false}
+                onClick={() => {
+                  setMobileOpen(false);
+                  openQuote('Innostes Business OS');
+                }}
                 className="w-full justify-center font-semibold"
               >
-                Deploy Free (0 Rs)
+                Book a demo
               </Button>
+              <Link
+                href="/docs/getting-started"
+                onClick={() => setMobileOpen(false)}
+                className="mt-2 block rounded-lg px-3 py-2 text-center text-sm font-medium text-fd-muted-foreground hover:text-fd-foreground"
+              >
+                Or self-host for free
+              </Link>
             </div>
           </nav>
         </div>

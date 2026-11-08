@@ -1,4 +1,21 @@
-# innostes UI
+# INNOSTES
+
+> INNOSTES is an open-source (MIT) business operating system for founders and growing companies. Recruiting, HR, payroll, CRM, accounting, inventory, projects and documents run as connected modules on one shared core, so every team works from the same data. Free to self-host with Docker, no per-seat fees; managed setup is available from the Innostes team.
+
+## Product
+- [Home](https://innostes.com/): What INNOSTES is, how the modules connect, trust and pricing.
+- [Modules](https://innostes.com/modules): HireFlow (recruiting), PeopleOps (HR, attendance, leave, payroll), SalesFlow (CRM), LedgerFlow (accounting), StockFlow (inventory and assets), SprintFlow (projects), DocFlow (documents).
+- [Services](https://innostes.com/services): Managed setup and hosting by the Innostes team.
+- [Getting started](https://innostes.com/docs/getting-started): Self-host INNOSTES with Docker.
+
+## Key facts
+- License: MIT, free to self-host, no per-seat fees.
+- Data: stored in your own PostgreSQL database; full export at any time.
+- Security: role-based access, scoped API keys, company-wide audit trail.
+- Developers: every module has a REST API with an OpenAPI spec; the React design system (@innostes/ui) is documented below.
+- Stage: early; some modules are in preview.
+
+## innostes UI design system
 
 > A production-grade design system and React component library engineered for enterprise ERP, PeopleOps, and SalesFlow platforms. Accessible, WCAG 2.2 AA compliant, and localized.
 

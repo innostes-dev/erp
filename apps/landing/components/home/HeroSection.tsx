@@ -25,6 +25,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { SalesFlowPreviewMini, HeadlessApiPreviewMini } from './HeroSandboxes';
+import { HeroFlow } from './HeroFlow';
 
 interface HeroSectionProps {
   onOpenQuote: () => void;
@@ -50,182 +51,121 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
   };
 
   return (
-    <section className="hero-mesh relative overflow-hidden pt-6 pb-16 sm:pt-8 md:pt-10 md:pb-20 lg:pt-12 lg:pb-28 section-divider transition-colors duration-300">
-      
-      {/* Centered Ambient Atmospheric Glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-1/4 -z-10 flex justify-center">
-        <div className="size-[500px] sm:size-[700px] rounded-full bg-gradient-to-tr from-amber-400/10 via-purple-500/10 to-indigo-500/10 blur-[130px] dark:from-orange-500/10 dark:via-purple-600/15 dark:to-blue-600/15" />
-      </div>
+    <section id="overview" data-chapter className="brand-stage pt-30 pb-0 sm:pt-36 lg:pt-40">
+      {/* Lower band in the page colour, so the product preview rises out of the navy stage */}
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-1 h-40 bg-card sm:h-56 lg:h-72" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* ── Top Hero Content ────────────────────────────────────────── */}
         <div className="mx-auto max-w-5xl text-center">
           
-          {/* Cadence-style Frosted Floating Badge */}
-          <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs sm:text-sm font-medium text-slate-800 shadow-sm backdrop-blur-md transition-all hover:border-orange-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
-            <span className="flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-xs font-semibold text-violet-600 dark:bg-violet-400/20 dark:text-violet-300">
-              <Sparkles className="size-3" /> Built for Startups
-            </span>
-            <span>Open-Source Business OS</span>
-            <span className="text-slate-300 dark:text-slate-600">•</span>
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">100% Free to Self-Host</span>
-            <span className="text-slate-300 dark:text-slate-600">•</span>
-            <span className="text-slate-600 dark:text-slate-300">Zero Per-Seat Fees</span>
-            <ArrowRight className="size-3 text-slate-400 dark:text-slate-500" />
-          </div>
+          {/* Live preview of "connected": one event flowing through the business */}
+          <HeroFlow />
 
-          {/* Cadence-style Big Headline */}
-          <h1 className="animate-fade-up stagger-1 mt-5 sm:mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
-            Run your entire company on
+          {/* Headline */}
+          <h1 className="animate-fade-up mt-7 text-display font-semibold tracking-tight text-white">
+            Your whole company.
             <br className="hidden sm:inline" />{' '}
-            <span className="gradient-cadence">one calm, open platform</span>
+            <span className="text-brand-highlight">One operating system.</span>
           </h1>
 
-          {/* Subheadline — Clean, Company & Startup Friendly */}
-          <p className="animate-fade-up stagger-2 mx-auto mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-            Innostes replaces Salesforce, Workday, QuickBooks, and Jira with a single unified platform built for startups and growing companies.
-            Manage your deals, team, finances, and projects in one place—100% open-source, zero per-seat subscription fees, and complete data ownership.
+          {/* Subheadline */}
+          <p className="animate-fade-up mx-auto mt-6 max-w-2xl text-base leading-relaxed text-sidebar-foreground sm:text-lg">
+            INNOSTES is open-source software that connects hiring, people, payroll, sales, stock and the books,
+            so every team works from the same data.
           </p>
 
-          {/* Cadence-style Dual Pill CTAs */}
-          <div className="animate-fade-up stagger-3 mt-8 flex flex-wrap items-center justify-center gap-3.5">
+          {/* Calls to action: one primary, one secondary, one text link */}
+          <div className="animate-fade-up mt-8 flex flex-wrap items-center justify-center gap-3">
             <button
-              onClick={scrollToModules}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-6 py-3 text-sm font-semibold text-slate-800 shadow-sm backdrop-blur-sm transition-all hover:bg-slate-50 hover:shadow dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+              type="button"
+              onClick={onOpenQuote}
+              className="cta-glow inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-md bg-primary px-6 text-sm font-medium text-white transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring"
             >
-              <Play className="size-3.5 fill-current text-slate-700 dark:text-slate-200" />
-              <span>See it in motion</span>
+              Book a demo
+              <ArrowRight className="size-4" />
             </button>
-
             <a
               href="/docs/getting-started"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/5 px-6 text-sm font-medium text-white transition-colors hover:border-white/35 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring"
             >
-              <span>Get started free</span>
-              <ArrowRight className="size-3.5" />
+              Start free
             </a>
-
             <button
-              onClick={onOpenQuote}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-transparent px-5 py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              type="button"
+              onClick={scrollToModules}
+              className="inline-flex h-12 cursor-pointer items-center gap-1.5 rounded-md px-3 text-sm font-medium text-sidebar-primary hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring"
             >
-              <span>Request Assisted Setup</span>
+              Explore modules
+              <Play className="size-3.5" />
             </button>
           </div>
 
           {/* Quick Copy Docker Snippet */}
-          <div className="animate-fade-up stagger-4 mx-auto mt-6 flex max-w-md items-center justify-between rounded-xl border border-slate-200/80 bg-white/90 px-3.5 py-2 text-xs shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-slate-950/80">
-            <div className="flex min-w-0 items-center gap-2 overflow-hidden text-slate-700 dark:text-slate-300">
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 shrink-0 hidden sm:inline">Self-host in 2m:</span>
-              <Terminal className="size-3.5 shrink-0 text-blue-500" />
-              <code className="truncate font-mono text-[11px]">{dockerCommand}</code>
+          <div className="animate-fade-up mx-auto mt-7 flex max-w-md items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3.5 py-2 text-xs">
+            <div className="flex min-w-0 items-center gap-2 overflow-hidden text-white">
+              <span className="hidden shrink-0 text-xs font-medium text-sidebar-muted-foreground sm:inline">Self-host in 2m:</span>
+              <Terminal className="size-3.5 shrink-0 text-sidebar-primary" />
+              <code className="truncate font-mono text-xs">{dockerCommand}</code>
             </div>
             <button
               onClick={copyDocker}
-              className="ml-2 flex shrink-0 items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[10px] font-semibold text-slate-700 transition-all hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              className="ml-2 flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-white/15 bg-white/10 px-2 py-1 font-mono text-xs font-semibold text-white transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-sidebar-ring"
               title="Copy Docker Command"
             >
-              {copiedDocker ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+              {copiedDocker ? <Check className="size-3 text-ai-on-dark" /> : <Copy className="size-3" />}
               <span>{copiedDocker ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
 
-          {/* Social Proof / Avatars Row (Cadence Style) */}
-          <div className="animate-fade-up stagger-5 mt-8 flex flex-wrap items-center justify-center gap-3">
-            <div className="flex -space-x-2 overflow-hidden">
-              <div className="inline-block size-7 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-amber-400 to-orange-500" />
-              <div className="inline-block size-7 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-indigo-500 to-purple-600" />
-              <div className="inline-block size-7 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-emerald-400 to-teal-500" />
-              <div className="inline-block size-7 rounded-full ring-2 ring-white dark:ring-slate-900 bg-gradient-to-tr from-rose-400 to-pink-500" />
-              <div className="inline-flex size-7 items-center justify-center rounded-full bg-slate-100 ring-2 ring-white dark:bg-slate-800 dark:ring-slate-900 text-[10px] font-bold text-slate-600 dark:text-slate-300">
-                +3.2k
-              </div>
-            </div>
-            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">
-              Trusted by <span className="font-semibold text-slate-900 dark:text-white">3,200+ founders, operators &amp; growing startups</span> running on Innostes
-            </p>
-          </div>
+          <p className="animate-fade-up mt-6 text-sm text-sidebar-muted-foreground">
+            Built for founders who want one system, not eleven.
+          </p>
         </div>
 
-        {/* ── Cadence-style Hero Product Mockup with Floating Orbit Pills ── */}
-        <div className="animate-scale-in relative mx-auto mt-14 max-w-5xl">
+        {/* ── Hero product preview ── */}
+        <div data-tilt className="relative mx-auto mt-14 max-w-5xl sm:mt-16">
           
-          {/* Floating Orbit Notification Pills (Screenshot 2 Inspiration) */}
-          <div className="hidden lg:block">
-            {/* Top-Left Floating Pill */}
-            <div className="animate-float absolute -left-8 top-12 z-20 flex items-center gap-2.5 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/95">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
-                🎉
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Enterprise Deal Closed</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">$148,000 · Acme Global · SalesFlow</p>
-              </div>
-            </div>
-
-            {/* Top-Right Floating Pill */}
-            <div className="animate-float absolute -right-8 top-20 z-20 flex items-center gap-2.5 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/95" style={{ animationDelay: '1.5s' }}>
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold text-xs">
-                📈
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Runway &amp; Cash Flow</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">+18.4% MoM · 24mo Runway · LedgerFlow</p>
-              </div>
-            </div>
-
-            {/* Bottom-Left Floating Pill */}
-            <div className="animate-float absolute -left-6 bottom-16 z-20 flex items-center gap-2.5 rounded-2xl border border-slate-200/90 bg-white/95 p-3 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/95" style={{ animationDelay: '2.5s' }}>
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-xs">
-                👤
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Elena Rostova Joined</p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">Head of Growth · PeopleOps</p>
-              </div>
-            </div>
-          </div>
-
           {/* ── Main Dashboard Window ───────────────────────────────── */}
-          <div className="relative overflow-hidden rounded-t-[2.2rem] border-t border-x border-slate-200/90 bg-white/95 shadow-[0_-25px_60px_-15px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.03)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/95 dark:shadow-[0_-25px_60px_-15px_rgba(59,130,246,0.15)]">
+          <div className="beam-top relative overflow-hidden rounded-t-xl border-x border-t border-white/20 bg-card shadow-[0_-20px_60px_-10px_rgb(0_0_0/0.45)] ring-1 ring-white/10">
             
-            {/* Window Top Chrome (Cadence Style) */}
-            <div className="flex flex-wrap items-center justify-between border-b border-slate-100 bg-slate-50/70 px-4 py-3 dark:border-white/5 dark:bg-slate-950/70 sm:px-6">
+            {/* Window Top Chrome */}
+            <div className="flex flex-wrap items-center justify-between border-b border-border bg-muted px-4 py-3 dark:border-white/5 sm:px-6">
               
               {/* Left: Window Dots & App Brand */}
               <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
-                  <span className="size-3 rounded-full bg-red-400/80" />
-                  <span className="size-3 rounded-full bg-amber-400/80" />
-                  <span className="size-3 rounded-full bg-emerald-400/80" />
+                  <span className="size-3 rounded-full bg-error-bg" />
+                  <span className="size-3 rounded-full bg-warning-bg" />
+                  <span className="size-3 rounded-full bg-success-bg" />
                 </div>
-                <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3 dark:border-slate-800">
-                  <span className="font-bold text-xs tracking-tight text-slate-950 dark:text-white">innostes</span>
-                  <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                <div className="flex items-center gap-1.5 border-l border-border pl-3 ">
+                  <span className="font-bold text-xs tracking-tight text-foreground dark:text-white">innostes</span>
+                  <span className="rounded bg-primary-tint px-1.5 py-0.5 text-xs font-semibold text-primary ">
                     acme-workspace
                   </span>
                 </div>
               </div>
 
-              {/* Center: Live Time & Status (Cadence Style) */}
-              <div className="hidden sm:flex items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400">
-                <span className="font-semibold text-slate-700 dark:text-slate-200">12:45 PM</span>
+              {/* Center: Live Time & Status */}
+              <div className="hidden sm:flex items-center gap-2 font-mono text-xs text-muted-foreground ">
+                <span className="font-semibold text-strong-foreground ">12:45 PM</span>
                 <span>•</span>
-                <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
-                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="flex items-center gap-1.5 text-success-text font-medium">
+                  <span className="size-2 rounded-full bg-success animate-pulse" />
                   Live · 2,481 events/sec
                 </span>
               </div>
 
               {/* Right: Mode Switcher (Full-Stack UI vs OpenAPI REST) */}
-              <div className="flex items-center gap-1 rounded-lg border border-slate-200/90 bg-white p-0.5 dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-0.5 ">
                 <button
                   onClick={() => setActiveTab('ui')}
                   className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-all ${
                     activeTab === 'ui'
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      ? 'bg-primary text-white shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground  dark:hover:text-white'
                   }`}
                 >
                   <Monitor className="size-3.5" />
@@ -235,8 +175,8 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
                   onClick={() => setActiveTab('headless')}
                   className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-all ${
                     activeTab === 'headless'
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                      ? 'bg-primary text-white shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground  dark:hover:text-white'
                   }`}
                 >
                   <Code2 className="size-3.5" />
@@ -246,31 +186,31 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
             </div>
 
             {/* Dashboard Breadcrumb & Live Search Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 dark:border-white/5 dark:bg-slate-900 sm:px-6">
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 dark:border-white/5 sm:px-6">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground ">
                 <span>Workspace</span>
                 <span>›</span>
                 <span>Production</span>
                 <span>›</span>
-                <span className="font-semibold text-slate-900 dark:text-white">Executive Pulse</span>
+                <span className="font-semibold text-foreground dark:text-white">Executive Pulse</span>
               </div>
 
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1 text-xs text-slate-400 dark:border-slate-800 dark:bg-slate-950/60">
-                <Search className="size-3 text-slate-400" />
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                <Search className="size-3 text-subtle-foreground" />
                 <span className="font-sans">Search domains, deals, employees...</span>
-                <kbd className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-500 dark:border-slate-700 dark:bg-slate-800">⌘K</kbd>
+                <kbd className="rounded border border-border bg-card px-1.5 py-0.5 font-mono text-xs text-muted-foreground ">⌘K</kbd>
               </div>
             </div>
 
-            {/* ── KPI Metric Cards Row (Cadence Inspiration) ──────────── */}
-            <div className="grid grid-cols-2 gap-3 p-4 border-b border-slate-100 bg-slate-50/30 dark:border-white/5 dark:bg-slate-950/20 sm:grid-cols-4 sm:p-6">
+            {/* ── KPI Metric Cards Row ──────────── */}
+            <div className="grid grid-cols-2 gap-3 p-4 border-b border-border bg-muted dark:border-white/5 sm:grid-cols-4 sm:p-6">
               
               {/* KPI 1 */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Monthly Revenue</p>
+              <div className="rounded-2xl border border-border bg-card p-3.5 shadow-xs ">
+                <p className="text-xs font-medium text-muted-foreground ">Monthly Revenue</p>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">$184.6k</span>
-                  <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">+12.4%</span>
+                  <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground dark:text-white">$184.6k</span>
+                  <span className="text-xs font-semibold text-success-text ">+12.4%</span>
                 </div>
                 {/* Emerald Sparkline SVG */}
                 <div className="mt-2 h-6 w-full">
@@ -286,11 +226,11 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
               </div>
 
               {/* KPI 2 */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Active Pipeline</p>
+              <div className="rounded-2xl border border-border bg-card p-3.5 shadow-xs ">
+                <p className="text-xs font-medium text-muted-foreground ">Active Pipeline</p>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">$842.0k</span>
-                  <span className="text-[11px] font-semibold text-violet-600 dark:text-violet-400">+34% vel</span>
+                  <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground dark:text-white">$842.0k</span>
+                  <span className="text-xs font-semibold text-strong-foreground ">+34% vel</span>
                 </div>
                 {/* Violet Sparkline SVG */}
                 <div className="mt-2 h-6 w-full">
@@ -306,11 +246,11 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
               </div>
 
               {/* KPI 3 */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Cash Runway</p>
+              <div className="rounded-2xl border border-border bg-card p-3.5 shadow-xs ">
+                <p className="text-xs font-medium text-muted-foreground ">Cash Runway</p>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">24 Mos</span>
-                  <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">+6mo ext</span>
+                  <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground dark:text-white">24 Mos</span>
+                  <span className="text-xs font-semibold text-primary ">+6mo ext</span>
                 </div>
                 {/* Cyan/Blue Sparkline SVG */}
                 <div className="mt-2 h-6 w-full">
@@ -326,11 +266,11 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
               </div>
 
               {/* KPI 4 */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Win Rate</p>
+              <div className="rounded-2xl border border-border bg-card p-3.5 shadow-xs ">
+                <p className="text-xs font-medium text-muted-foreground ">Win Rate</p>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-950 dark:text-white">94.8%</span>
-                  <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">+5.2pp</span>
+                  <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground dark:text-white">94.8%</span>
+                  <span className="text-xs font-semibold text-warning-text ">+5.2pp</span>
                 </div>
                 {/* Amber Sparkline SVG */}
                 <div className="mt-2 h-6 w-full">
@@ -347,7 +287,7 @@ export function HeroSection({ onOpenQuote }: HeroSectionProps) {
             </div>
 
             {/* ── Active View Content (Mini Kanban or Headless API) ───── */}
-            <div className="p-4 sm:p-6 bg-white dark:bg-slate-900">
+            <div className="p-4 sm:p-6 bg-card ">
               {activeTab === 'ui' ? <SalesFlowPreviewMini /> : <HeadlessApiPreviewMini />}
             </div>
           </div>

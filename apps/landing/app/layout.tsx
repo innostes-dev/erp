@@ -8,7 +8,7 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  weight: ['400', '500', '600'],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -21,39 +21,40 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL('https://innostes.com'),
   title: {
-    default: 'Innostes — Open-Source Modular Business OS | Free to Self-Host',
-    template: '%s | Innostes Business OS',
+    default: 'INNOSTES: Open-Source Business Operating System',
+    template: '%s | INNOSTES',
   },
   description:
-    'Innostes is the open-source, decoupled business operating system for modern teams. Unify CRM, HR, Finance, Inventory, and DevOps on one hardened kernel. Deploy in under 5 minutes — 0 Rs, zero seat fees, 100% data ownership.',
+    'INNOSTES is an open-source business operating system for founders and growing companies. Hiring, HR, payroll, sales, inventory, projects and accounting in one connected system. Free to self-host, no per-seat fees.',
   keywords: [
+    'open source business operating system',
     'open source ERP',
-    'self-hosted business OS',
-    'modular ERP',
-    'free ERP software',
-    'decoupled business software',
-    'headless ERP API',
-    'CRM HR Finance Inventory',
-    'self-hosted CRM',
-    'FastAPI ERP',
-    'Next.js enterprise software',
+    'self-hosted ERP',
+    'open source HR and payroll software',
+    'open source CRM',
+    'all-in-one business software for startups',
+    'free ERP for small business',
+    'self-hosted HRMS',
+    'open source accounting software',
+    'MIT licensed ERP',
   ],
-  authors: [{ name: 'Innostes', url: 'https://innostes.com' }],
-  creator: 'Innostes',
-  publisher: 'Innostes',
+  authors: [{ name: 'Innostes Technologies', url: 'https://innostes.com' }],
+  creator: 'Innostes Technologies',
+  publisher: 'Innostes Technologies',
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://innostes.com',
-    siteName: 'Innostes Business OS',
-    title: 'Innostes — Open-Source Business OS | Free to Self-Host',
+    siteName: 'INNOSTES',
+    title: 'INNOSTES: Your whole company. One operating system.',
     description:
-      'The open-source, modular business operating system. Unify CRM, HR, Finance, and DevOps on one decoupled kernel. Free to self-host, zero seat fees.',
+      'Open-source system for founders: hiring, HR, payroll, sales, stock and the books, all connected. Free to self-host.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Innostes — Open-Source Business OS',
-    description: 'Modular, decoupled business OS. Free self-hosted. Zero seat fees. CRM, HR, Finance, DevInfra.',
+    title: 'INNOSTES: Your whole company. One operating system.',
+    description: 'Open-source business OS for founders. Hiring, HR, payroll, sales, stock and accounting, all connected. Free to self-host.',
     creator: '@innostes',
   },
   robots: {
@@ -63,13 +64,45 @@ export const metadata: Metadata = {
   },
 };
 
+const STRUCTURED_DATA = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://innostes.com/#org',
+      name: 'Innostes Technologies',
+      url: 'https://innostes.com',
+      logo: 'https://innostes.com/images/home/section_navbar/company-latest-logo.png',
+      slogan: 'We love to innovate',
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'INNOSTES',
+      url: 'https://innostes.com',
+      applicationCategory: 'BusinessApplication',
+      applicationSubCategory: 'ERP',
+      operatingSystem: 'Web, Linux (Docker)',
+      description:
+        'Open-source business operating system. Recruiting, HR, payroll, CRM, accounting, inventory, projects and documents as connected modules on one shared core.',
+      license: 'https://opensource.org/licenses/MIT',
+      isAccessibleForFree: true,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR', description: 'Free to self-host. Managed setup available.' },
+      featureList: ['Recruiting (HireFlow)', 'HR, attendance, leave and payroll (PeopleOps)', 'CRM (SalesFlow)', 'Accounting (LedgerFlow)', 'Inventory and assets (StockFlow)', 'Projects (SprintFlow)', 'Documents (DocFlow)', 'Role-based access control', 'Company-wide audit trail', 'REST APIs with OpenAPI'],
+      publisher: { '@id': 'https://innostes.com/#org' },
+    },
+  ],
+};
+
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
+      </head>
       <body
         className="flex min-h-screen flex-col bg-fd-background text-fd-foreground antialiased"
       >
-        <RootProvider theme={{ attribute: 'class', defaultTheme: 'light', enableSystem: true }}>
+        <RootProvider theme={{ attribute: 'class', defaultTheme: 'light', enableSystem: false }}>
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster />
         </RootProvider>

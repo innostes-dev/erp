@@ -691,43 +691,43 @@ export function TracuraDocsClient() {
   const getMethodBadge = (method: string) => {
     switch (method) {
       case 'GET':
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+        return 'bg-primary-tint text-primary  border-border';
       case 'POST':
-        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+        return 'bg-success-bg text-success-text  border-border';
       case 'PATCH':
-        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+        return 'bg-warning-bg text-warning-text  border-border';
       case 'DELETE':
-        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
+        return 'bg-error-bg text-error-text  border-border';
       default:
-        return 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20';
+        return 'bg-muted text-muted-foreground  border-border-strong';
     }
   };
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      {/* ── Header Banner with Cadence Mesh ──────────────────────── */}
+      {/* ── Header Banner ──────────────────────── */}
       <div className="hero-mesh relative overflow-hidden py-14 md:py-18 section-divider transition-colors duration-300">
         {/* Centered Ambient Atmospheric Glow */}
         <div className="pointer-events-none absolute inset-x-0 top-1/4 -z-10 flex justify-center">
-          <div className="size-[450px] sm:size-[600px] rounded-full bg-gradient-to-tr from-amber-400/10 via-purple-500/15 to-blue-500/10 blur-[130px] dark:from-orange-500/15 dark:via-purple-600/20 dark:to-blue-600/20" />
+          <div className="size-[450px] sm:size-[600px] rounded-full blur-[130px]   " />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Frosted Floating Breadcrumb Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200 mb-4">
-            <Link href="/plugins/tracura" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground shadow-2xs dark:border-white/10 dark:bg-card  mb-4">
+            <Link href="/plugins/tracura" className="hover:text-primary transition-colors">
               Tracura
             </Link>
-            <ChevronRight className="size-3 text-slate-400" />
-            <span className="text-blue-600 dark:text-blue-400">Developer Documentation &amp; REST API</span>
+            <ChevronRight className="size-3 text-subtle-foreground" />
+            <span className="text-primary ">Developer Documentation &amp; REST API</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-foreground dark:text-white leading-[1.12]">
                 Developer Guides &amp; <span className="gradient-cadence">REST API Reference</span>
               </h1>
-              <p className="mt-3 text-base text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
+              <p className="mt-3 text-base text-muted-foreground max-w-3xl leading-relaxed">
                 Comprehensive integration guides, SDK middleware examples, and interactive API documentation for all 20 management &amp; telemetry endpoints.
               </p>
             </div>
@@ -735,15 +735,15 @@ export function TracuraDocsClient() {
             <div className="flex items-center gap-3 shrink-0">
               <Link
                 href="/plugins/tracura"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-5 py-2.5 text-xs font-semibold text-slate-800 shadow-2xs transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-xs font-semibold text-foreground shadow-2xs transition-all hover:bg-canvas dark:border-white/10 dark:bg-card dark:text-white dark:hover:bg-card"
               >
                 <span>Product Overview</span>
               </Link>
               <a
                 href="#api-reference"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-2.5 text-xs font-semibold text-white shadow-md transition-all hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 text-xs font-semibold text-white shadow-md transition-all hover:bg-brand-navy dark:bg-card "
               >
-                <Code2 className="size-3.5 text-blue-400" />
+                <Code2 className="size-3.5 text-primary" />
                 <span>Jump to Endpoints ({ENDPOINTS.length})</span>
               </a>
             </div>
@@ -758,62 +758,62 @@ export function TracuraDocsClient() {
           <aside className="lg:col-span-3 lg:sticky lg:top-20 space-y-6">
             {/* Quick Jump Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 size-4 text-slate-400" />
+              <Search className="absolute left-3 top-2.5 size-4 text-subtle-foreground" />
               <input
                 type="text"
                 placeholder="Search endpoints or guides..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-slate-200/90 bg-white/80 dark:border-white/10 dark:bg-slate-900/80 pl-9 pr-4 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                className="w-full rounded-full border border-border bg-card dark:border-white/10 pl-9 pr-4 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-primary shadow-2xs"
               />
             </div>
 
             {/* Sidebar Guide Links */}
             <div className="bento-card rounded-2xl p-4 space-y-4">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground ">
                 Integration Guides
               </div>
               <nav className="flex flex-col space-y-1 text-xs">
                 <a
                   href="#overview"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-muted-foreground hover:bg-muted dark:hover:bg-card hover:text-foreground dark:hover:text-white transition-colors"
                 >
                   Overview &amp; Ring Buffer
                 </a>
                 <a
                   href="#quickstart"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-muted-foreground hover:bg-muted dark:hover:bg-card hover:text-foreground dark:hover:text-white transition-colors"
                 >
                   30-Second Quickstart
                 </a>
                 <a
                   href="#authentication"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-muted-foreground hover:bg-muted dark:hover:bg-card hover:text-foreground dark:hover:text-white transition-colors"
                 >
                   Universal Authentication
                 </a>
                 <a
                   href="#middleware-sdks"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-muted-foreground hover:bg-muted dark:hover:bg-card hover:text-foreground dark:hover:text-white transition-colors"
                 >
                   Framework Middleware (Python, Node, Go)
                 </a>
                 <a
                   href="#pii-redaction"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-muted-foreground hover:bg-muted dark:hover:bg-card hover:text-foreground dark:hover:text-white transition-colors"
                 >
                   PII Redaction &amp; GDPR Masking
                 </a>
                 <a
                   href="#enterprise-scoping"
-                  className="rounded-lg px-2.5 py-1.5 font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="rounded-lg px-2.5 py-1.5 font-medium text-muted-foreground hover:bg-muted dark:hover:bg-card hover:text-foreground dark:hover:text-white transition-colors"
                 >
                   Enterprise Scoping &amp; Correlation
                 </a>
               </nav>
 
-              <div className="pt-3 border-t border-slate-100 dark:border-white/5">
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+              <div className="pt-3 border-t border-border dark:border-white/5">
+                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
                   API Endpoints
                 </div>
                 <div className="flex flex-col space-y-1">
@@ -823,12 +823,12 @@ export function TracuraDocsClient() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`text-left rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer flex items-center justify-between ${
                         selectedCategory === cat
-                          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                          ? 'bg-primary-tint text-primary  font-semibold'
+                          : 'text-muted-foreground  hover:bg-muted dark:hover:bg-card hover:text-foreground dark:hover:text-white'
                       }`}
                     >
                       <span>{cat}</span>
-                      <span className="text-[10px] opacity-70">
+                      <span className="text-xs opacity-70">
                         {cat === 'All'
                           ? ENDPOINTS.length
                           : ENDPOINTS.filter((e) => e.category === cat).length}
@@ -844,50 +844,50 @@ export function TracuraDocsClient() {
           <main className="lg:col-span-9 space-y-14">
             {/* 1. OVERVIEW & RING BUFFER */}
             <section id="overview" className="scroll-mt-24 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary ">
                 <Cpu className="size-4" />
                 <span>Architecture</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                 How Tracura Telemetry Engine Works
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Traditional logging solutions add unacceptable latency overhead (50-200ms) by executing synchronous HTTP network requests during the active user response lifecycle. Tracura features a <strong>Dual-Ingestion Architecture</strong> backed by a <strong>Hybrid Queue Buffer (Redis with graceful In-Memory Fallback)</strong>, ensuring client requests are never blocked by logging.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
                 <div className="bento-card rounded-2xl p-4 transition-all">
-                  <div className="font-bold text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+                  <div className="font-bold text-xs text-primary flex items-center gap-1.5">
                     <Zap className="size-3.5" />
                     <span>1. In-Process ASGI Hook</span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                  <p className="mt-1 text-xs text-muted-foreground ">
                     Direct in-memory capture for host apps in &lt; 0.002ms with zero HTTP loopback.
                   </p>
                 </div>
 
                 <div className="bento-card rounded-2xl p-4 transition-all">
-                  <div className="font-bold text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
+                  <div className="font-bold text-xs text-primary flex items-center gap-1.5">
                     <Globe className="size-3.5" />
                     <span>2. External Polyglot Ingest</span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                  <p className="mt-1 text-xs text-muted-foreground ">
                     Accepts remote batch logs from Node, Go, Python, and cURL via scoped API keys.
                   </p>
                 </div>
 
                 <div className="bento-card rounded-2xl p-4 transition-all">
-                  <div className="font-bold text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+                  <div className="font-bold text-xs text-strong-foreground flex items-center gap-1.5">
                     <Layers className="size-3.5" />
                     <span>3. Hybrid Redis Queue</span>
                   </div>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                  <p className="mt-1 text-xs text-muted-foreground ">
                     Buffers into Redis when configured, with automatic fallback to RAM if offline.
                   </p>
                 </div>
 
                 <div className="bento-card rounded-2xl p-4 transition-all">
-                  <div className="font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <div className="font-bold text-xs text-success-text flex items-center gap-1.5">
                     <Database className="size-3.5" />
                     <span>4. Bulk Persistence</span>
                   </div>
@@ -900,30 +900,30 @@ export function TracuraDocsClient() {
 
             {/* 2. 30-SECOND QUICKSTART */}
             <section id="quickstart" className="scroll-mt-24 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-success-text ">
                 <FastForward className="size-4" />
                 <span>Quickstart</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                 Get Started in 30 Seconds
               </h2>
               <div className="space-y-4">
                 <div className="rounded-xl border border-fd-border bg-fd-card p-5 space-y-3">
                   <div className="font-semibold text-sm flex items-center gap-2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white font-bold">1</span>
+                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs text-white font-bold">1</span>
                     <span>Generate an Ingestion Key</span>
                   </div>
                   <p className="text-xs text-fd-muted-foreground">
-                    Navigate to <strong className="text-fd-foreground">Tracura &gt; Ingestion Keys</strong> in the dashboard or use <code className="font-mono bg-fd-muted px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400">POST /plugins/tracura/v1/keys</code> to generate a scoped key bound to your project and environment.
+                    Navigate to <strong className="text-fd-foreground">Tracura &gt; Ingestion Keys</strong> in the dashboard or use <code className="font-mono bg-fd-muted px-1.5 py-0.5 rounded text-primary ">POST /plugins/tracura/v1/keys</code> to generate a scoped key bound to your project and environment.
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-fd-border bg-fd-card p-5 space-y-3">
                   <div className="font-semibold text-sm flex items-center gap-2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white font-bold">2</span>
+                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs text-white font-bold">2</span>
                     <span>Send Your First Telemetry Record</span>
                   </div>
-                  <div className="rounded-lg bg-slate-950 p-4 text-xs font-mono text-slate-300 overflow-x-auto relative">
+                  <div className="rounded-lg bg-brand-navy p-4 text-xs font-mono text-sidebar-foreground overflow-x-auto relative">
                     <button
                       onClick={() =>
                         handleCopy(
@@ -931,9 +931,9 @@ export function TracuraDocsClient() {
                           `curl -X POST https://api.yourdomain.com/tracura/v1/ingest \\\n  -H "X-API-Key: inno_log_live_prod_99f38e4a77b1029c" \\\n  -H "Content-Type: application/json" \\\n  -d '{"environment":"production","method":"POST","endpoint":"/api/orders","status_code":200,"duration_ms":142.5}'`
                         )
                       }
-                      className="absolute right-3 top-3 text-slate-400 hover:text-white"
+                      className="absolute right-3 top-3 text-sidebar-muted-foreground hover:text-white"
                     >
-                      {copiedId === 'quickstart-curl' ? <Check className="size-4 text-emerald-400" /> : <Copy className="size-4" />}
+                      {copiedId === 'quickstart-curl' ? <Check className="size-4 text-success" /> : <Copy className="size-4" />}
                     </button>
                     <pre>{`curl -X POST https://api.yourdomain.com/tracura/v1/ingest \\
   -H "X-API-Key: inno_log_live_prod_99f38e4a77b1029c" \\
@@ -944,7 +944,7 @@ export function TracuraDocsClient() {
 
                 <div className="rounded-xl border border-fd-border bg-fd-card p-5 space-y-3">
                   <div className="font-semibold text-sm flex items-center gap-2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white font-bold">3</span>
+                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs text-white font-bold">3</span>
                     <span>Inspect Instantly on Dashboard & Explorer</span>
                   </div>
                   <p className="text-xs text-fd-muted-foreground">
@@ -956,20 +956,20 @@ export function TracuraDocsClient() {
 
             {/* 3. UNIVERSAL AUTHENTICATION */}
             <section id="authentication" className="scroll-mt-24 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-strong-foreground ">
                 <Lock className="size-4" />
                 <span>Security</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                 Universal Key-Based Authentication
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 All 20 endpoints of the Tracura system can be authenticated using either scoped API Keys or JWT Access Tokens.
               </p>
 
               <div className="rounded-xl border border-fd-border bg-fd-card overflow-hidden">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-fd-muted/50 text-fd-muted-foreground uppercase text-[10px] tracking-wider border-b border-fd-border">
+                  <thead className="bg-fd-muted/50 text-fd-muted-foreground uppercase text-xs tracking-wider border-b border-fd-border">
                     <tr>
                       <th className="px-4 py-3">Header</th>
                       <th className="px-4 py-3">Format</th>
@@ -979,17 +979,17 @@ export function TracuraDocsClient() {
                   <tbody className="divide-y divide-fd-border">
                     <tr>
                       <td className="px-4 py-3 font-mono font-semibold">X-API-Key</td>
-                      <td className="px-4 py-3 font-mono text-blue-600 dark:text-blue-400">inno_log_live_*</td>
+                      <td className="px-4 py-3 font-mono text-primary ">inno_log_live_*</td>
                       <td className="px-4 py-3 text-fd-muted-foreground">Universal ingestion and management APIs across any project or script</td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3 font-mono font-semibold">Authorization</td>
-                      <td className="px-4 py-3 font-mono text-purple-600 dark:text-purple-400">Bearer inno_log_live_*</td>
+                      <td className="px-4 py-3 font-mono text-strong-foreground ">Bearer inno_log_live_*</td>
                       <td className="px-4 py-3 text-fd-muted-foreground">Universal key authorization via standard HTTP Bearer</td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3 font-mono font-semibold">Authorization</td>
-                      <td className="px-4 py-3 font-mono text-emerald-600 dark:text-emerald-400">Bearer &lt;jwt_access_token&gt;</td>
+                      <td className="px-4 py-3 font-mono text-success-text ">Bearer &lt;jwt_access_token&gt;</td>
                       <td className="px-4 py-3 text-fd-muted-foreground">Browser web application and UI session tokens</td>
                     </tr>
                   </tbody>
@@ -999,11 +999,11 @@ export function TracuraDocsClient() {
 
             {/* 4. FRAMEWORK MIDDLEWARE GUIDE */}
             <section id="middleware-sdks" className="scroll-mt-24 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-warning-text ">
                 <Code2 className="size-4" />
                 <span>Integration Code</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                 Framework Middleware Implementations
               </h2>
 
@@ -1011,7 +1011,7 @@ export function TracuraDocsClient() {
               <div className="rounded-2xl border border-fd-border bg-fd-card overflow-hidden">
                 <div className="border-b border-fd-border bg-fd-muted/40 px-4 py-2.5 flex items-center justify-between">
                   <span className="font-semibold text-xs flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-blue-500" />
+                    <span className="size-2 rounded-full bg-primary" />
                     Python FastAPI (ASGI Middleware)
                   </span>
                   <button
@@ -1023,11 +1023,11 @@ export function TracuraDocsClient() {
                     }
                     className="text-xs text-fd-muted-foreground hover:text-fd-foreground flex items-center gap-1 cursor-pointer"
                   >
-                    {copiedId === 'code-py' ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+                    {copiedId === 'code-py' ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
                     <span>{copiedId === 'code-py' ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
-                <pre className="p-4 bg-slate-950 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed">
+                <pre className="p-4 bg-brand-navy font-mono text-xs text-sidebar-foreground overflow-x-auto leading-relaxed">
 {`from fastapi import FastAPI, Request
 import time, httpx, asyncio
 
@@ -1065,7 +1065,7 @@ async def tracura_middleware(request: Request, call_next):
               <div className="rounded-2xl border border-fd-border bg-fd-card overflow-hidden">
                 <div className="border-b border-fd-border bg-fd-muted/40 px-4 py-2.5 flex items-center justify-between">
                   <span className="font-semibold text-xs flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-emerald-500" />
+                    <span className="size-2 rounded-full bg-success" />
                     Node.js Express / Fastify
                   </span>
                   <button
@@ -1077,11 +1077,11 @@ async def tracura_middleware(request: Request, call_next):
                     }
                     className="text-xs text-fd-muted-foreground hover:text-fd-foreground flex items-center gap-1 cursor-pointer"
                   >
-                    {copiedId === 'code-node' ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+                    {copiedId === 'code-node' ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
                     <span>{copiedId === 'code-node' ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
-                <pre className="p-4 bg-slate-950 font-mono text-xs text-slate-300 overflow-x-auto leading-relaxed">
+                <pre className="p-4 bg-brand-navy font-mono text-xs text-sidebar-foreground overflow-x-auto leading-relaxed">
 {`app.use((req, res, next) => {
   const start = performance.now();
 
@@ -1113,41 +1113,41 @@ async def tracura_middleware(request: Request, call_next):
 
             {/* 5. PII REDACTION & GDPR */}
             <section id="pii-redaction" className="scroll-mt-24 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-error-text ">
                 <Shield className="size-4" />
                 <span>Compliance</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                 PII Redaction Engine & GDPR Masking
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Tracura API Logger enforces in-memory sanitization before data is written to disk or ring buffers:
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
-                  <div className="font-semibold text-xs text-blue-600 dark:text-blue-400">Headers Masking</div>
+                  <div className="font-semibold text-xs text-primary ">Headers Masking</div>
                   <p className="text-xs text-fd-muted-foreground">
                     Automatically scrubs <code className="font-mono bg-fd-muted px-1 rounded">Authorization</code>, <code className="font-mono bg-fd-muted px-1 rounded">Cookie</code>, <code className="font-mono bg-fd-muted px-1 rounded">Set-Cookie</code>, and <code className="font-mono bg-fd-muted px-1 rounded">X-API-Key</code>.
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
-                  <div className="font-semibold text-xs text-purple-600 dark:text-purple-400">Deep JSON Body Scrubbing</div>
+                  <div className="font-semibold text-xs text-strong-foreground ">Deep JSON Body Scrubbing</div>
                   <p className="text-xs text-fd-muted-foreground">
                     Recursively traverses request and response JSON trees to mask keys containing <code className="font-mono bg-fd-muted px-1 rounded">password</code>, <code className="font-mono bg-fd-muted px-1 rounded">token</code>, <code className="font-mono bg-fd-muted px-1 rounded">secret</code>, <code className="font-mono bg-fd-muted px-1 rounded">ssn</code>, and <code className="font-mono bg-fd-muted px-1 rounded">credit_card</code>.
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
-                  <div className="font-semibold text-xs text-emerald-600 dark:text-emerald-400">GDPR Client IP Zero-Masking</div>
+                  <div className="font-semibold text-xs text-success-text ">GDPR Client IP Zero-Masking</div>
                   <p className="text-xs text-fd-muted-foreground">
                     Zero-masks the final octet of IPv4 addresses (<code className="font-mono bg-fd-muted px-1 rounded">198.51.100.42</code> &rarr; <code className="font-mono bg-fd-muted px-1 rounded">198.51.100.0</code>) to meet strict GDPR and HIPAA requirements.
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
-                  <div className="font-semibold text-xs text-amber-600 dark:text-amber-400">Automatic Storage Pruning</div>
+                  <div className="font-semibold text-xs text-warning-text ">Automatic Storage Pruning</div>
                   <p className="text-xs text-fd-muted-foreground">
                     Automated background worker purges log records exceeding your configured retention window (7d, 30d, 90d, 180d) to keep storage clean and lightweight.
                   </p>
@@ -1157,34 +1157,34 @@ async def tracura_middleware(request: Request, call_next):
 
             {/* 6. ENTERPRISE SCOPING & CORRELATION */}
             <section id="enterprise-scoping" className="scroll-mt-24 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary ">
                 <Layers className="size-4" />
                 <span>Enterprise Architecture</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                 Deterministic Scoping, Fallbacks & Audit Correlation
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Tracura is engineered to support mission-critical enterprise deployments where multi-tenant isolation, zero-latency ingestion, and regulatory compliance are non-negotiable.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
-                  <div className="font-semibold text-xs text-blue-600 dark:text-blue-400">Deterministic UUIDv5 Scoping</div>
+                  <div className="font-semibold text-xs text-primary ">Deterministic UUIDv5 Scoping</div>
                   <p className="text-xs text-fd-muted-foreground leading-relaxed">
                     Host ERP telemetry is deterministically bound to the tenant using <code className="font-mono bg-fd-muted px-1 rounded">uuid5(tenant_id, &quot;project:innostes-erp&quot;)</code>. Never blocks the request loop with database checks.
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
-                  <div className="font-semibold text-xs text-purple-600 dark:text-purple-400">Multi-Tiered Fallback Ladder</div>
+                  <div className="font-semibold text-xs text-strong-foreground ">Multi-Tiered Fallback Ladder</div>
                   <p className="text-xs text-fd-muted-foreground leading-relaxed">
                     Seamlessly resolves environment from <code className="font-mono bg-fd-muted px-1 rounded">X-Environment</code> headers, falling back to <code className="font-mono bg-fd-muted px-1 rounded">APP_ENV</code>, and safely defaulting to <code className="font-mono bg-fd-muted px-1 rounded">&quot;development&quot;</code> if unset.
                   </p>
                 </div>
 
                 <div className="rounded-xl border border-fd-border bg-fd-card p-4 space-y-2">
-                  <div className="font-semibold text-xs text-emerald-600 dark:text-emerald-400">Kernel Audit Trail Cross-Link</div>
+                  <div className="font-semibold text-xs text-success-text ">Kernel Audit Trail Cross-Link</div>
                   <p className="text-xs text-fd-muted-foreground leading-relaxed">
                     Propagates <code className="font-mono bg-fd-muted px-1 rounded">X-Correlation-ID</code> across both systems. Enables 1-click cross-navigation between Tracura HTTP telemetry and Kernel Audit Trail compliance records.
                   </p>
@@ -1195,14 +1195,14 @@ async def tracura_middleware(request: Request, call_next):
             {/* 7. COMPLETE API REFERENCE (ALL 20 ENDPOINTS) */}
             <section id="api-reference" className="scroll-mt-24 space-y-8 pt-6 border-t border-fd-border">
               <div>
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary ">
                   <Code2 className="size-4" />
                   <span>REST API Reference</span>
                 </div>
-                <h2 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                <h2 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                   Interactive API Endpoints Reference
                 </h2>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                <p className="mt-2 text-sm text-muted-foreground ">
                   Complete documentation for all {ENDPOINTS.length} Tracura endpoints with request schemas, status codes, and copyable cURL commands.
                 </p>
               </div>
@@ -1239,7 +1239,7 @@ async def tracura_middleware(request: Request, call_next):
                           onClick={() => handleCopy(ep.id, ep.curlExample)}
                           className="rounded-lg border border-fd-border bg-fd-background hover:bg-fd-accent px-2.5 py-1 text-xs text-fd-muted-foreground hover:text-fd-foreground transition-colors flex items-center gap-1 cursor-pointer"
                         >
-                          {copiedId === ep.id ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+                          {copiedId === ep.id ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
                           <span>{copiedId === ep.id ? 'Copied cURL' : 'Copy cURL'}</span>
                         </button>
                       </div>
@@ -1248,8 +1248,8 @@ async def tracura_middleware(request: Request, call_next):
                     {/* Endpoint Content */}
                     <div className="p-5 sm:p-6 space-y-6 text-xs">
                       <div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-white">{ep.title}</h3>
-                        <p className="mt-1 text-slate-600 dark:text-slate-300 leading-relaxed text-xs">
+                        <h3 className="text-base font-bold text-foreground dark:text-white">{ep.title}</h3>
+                        <p className="mt-1 text-muted-foreground leading-relaxed text-xs">
                           {ep.description}
                         </p>
                       </div>
@@ -1257,12 +1257,12 @@ async def tracura_middleware(request: Request, call_next):
                       {/* Path Params */}
                       {ep.pathParams && ep.pathParams.length > 0 && (
                         <div>
-                          <div className="font-bold text-[11px] uppercase tracking-wider text-fd-muted-foreground mb-2">
+                          <div className="font-bold text-xs uppercase tracking-wider text-fd-muted-foreground mb-2">
                             Path Parameters
                           </div>
                           <div className="rounded-lg border border-fd-border overflow-hidden">
                             <table className="w-full text-left">
-                              <thead className="bg-fd-muted/40 text-[10px] uppercase text-fd-muted-foreground border-b border-fd-border">
+                              <thead className="bg-fd-muted/40 text-xs uppercase text-fd-muted-foreground border-b border-fd-border">
                                 <tr>
                                   <th className="px-3 py-2">Parameter</th>
                                   <th className="px-3 py-2">Type</th>
@@ -1272,7 +1272,7 @@ async def tracura_middleware(request: Request, call_next):
                               <tbody className="divide-y divide-fd-border">
                                 {ep.pathParams.map((p) => (
                                   <tr key={p.name}>
-                                    <td className="px-3 py-2 font-mono font-semibold text-blue-600 dark:text-blue-400">{p.name}</td>
+                                    <td className="px-3 py-2 font-mono font-semibold text-primary ">{p.name}</td>
                                     <td className="px-3 py-2 font-mono text-fd-muted-foreground">{p.type}</td>
                                     <td className="px-3 py-2 text-fd-muted-foreground">{p.desc}</td>
                                   </tr>
@@ -1286,12 +1286,12 @@ async def tracura_middleware(request: Request, call_next):
                       {/* Query Params */}
                       {ep.queryParams && ep.queryParams.length > 0 && (
                         <div>
-                          <div className="font-bold text-[11px] uppercase tracking-wider text-fd-muted-foreground mb-2">
+                          <div className="font-bold text-xs uppercase tracking-wider text-fd-muted-foreground mb-2">
                             Query Parameters
                           </div>
                           <div className="rounded-lg border border-fd-border overflow-hidden">
                             <table className="w-full text-left">
-                              <thead className="bg-fd-muted/40 text-[10px] uppercase text-fd-muted-foreground border-b border-fd-border">
+                              <thead className="bg-fd-muted/40 text-xs uppercase text-fd-muted-foreground border-b border-fd-border">
                                 <tr>
                                   <th className="px-3 py-2">Parameter</th>
                                   <th className="px-3 py-2">Type</th>
@@ -1302,11 +1302,11 @@ async def tracura_middleware(request: Request, call_next):
                               <tbody className="divide-y divide-fd-border">
                                 {ep.queryParams.map((q) => (
                                   <tr key={q.name}>
-                                    <td className="px-3 py-2 font-mono font-semibold text-blue-600 dark:text-blue-400">{q.name}</td>
+                                    <td className="px-3 py-2 font-mono font-semibold text-primary ">{q.name}</td>
                                     <td className="px-3 py-2 font-mono text-fd-muted-foreground">{q.type}</td>
                                     <td className="px-3 py-2 text-fd-muted-foreground">
                                       {q.required ? (
-                                        <span className="text-rose-500 font-bold">Yes</span>
+                                        <span className="text-error-text font-bold">Yes</span>
                                       ) : (
                                         'No'
                                       )}
@@ -1325,10 +1325,10 @@ async def tracura_middleware(request: Request, call_next):
                         {/* Request Body */}
                         {ep.requestBody && (
                           <div className="space-y-2">
-                            <div className="font-bold text-[11px] uppercase tracking-wider text-fd-muted-foreground flex items-center justify-between">
+                            <div className="font-bold text-xs uppercase tracking-wider text-fd-muted-foreground flex items-center justify-between">
                               <span>Request Body (JSON)</span>
                             </div>
-                            <pre className="rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-[11px] text-slate-300 overflow-x-auto max-h-64 leading-relaxed">
+                            <pre className="rounded-xl border border-border-strong bg-brand-navy p-4 font-mono text-xs text-sidebar-foreground overflow-x-auto max-h-64 leading-relaxed">
                               {ep.requestBody}
                             </pre>
                           </div>
@@ -1336,11 +1336,11 @@ async def tracura_middleware(request: Request, call_next):
 
                         {/* Response Body */}
                         <div className={`space-y-2 ${!ep.requestBody ? 'md:col-span-2' : ''}`}>
-                          <div className="font-bold text-[11px] uppercase tracking-wider text-fd-muted-foreground flex items-center justify-between">
+                          <div className="font-bold text-xs uppercase tracking-wider text-fd-muted-foreground flex items-center justify-between">
                             <span>Response ({ep.responseStatus} OK)</span>
-                            <span className="text-emerald-500 font-mono">application/json</span>
+                            <span className="text-success-text font-mono">application/json</span>
                           </div>
-                          <pre className="rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-[11px] text-slate-300 overflow-x-auto max-h-64 leading-relaxed">
+                          <pre className="rounded-xl border border-border-strong bg-brand-navy p-4 font-mono text-xs text-sidebar-foreground overflow-x-auto max-h-64 leading-relaxed">
                             {ep.responseBody}
                           </pre>
                         </div>
@@ -1348,10 +1348,10 @@ async def tracura_middleware(request: Request, call_next):
 
                       {/* Copyable cURL Snippet */}
                       <div className="space-y-2">
-                        <div className="font-bold text-[11px] uppercase tracking-wider text-fd-muted-foreground">
+                        <div className="font-bold text-xs uppercase tracking-wider text-fd-muted-foreground">
                           Example cURL Request
                         </div>
-                        <pre className="rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-[11px] text-slate-300 overflow-x-auto leading-relaxed">
+                        <pre className="rounded-xl border border-border-strong bg-brand-navy p-4 font-mono text-xs text-sidebar-foreground overflow-x-auto leading-relaxed">
                           {ep.curlExample}
                         </pre>
                       </div>

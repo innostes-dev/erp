@@ -98,13 +98,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore SalesFlow Suite',
     icon: <TrendingUp className="size-6" />,
     theme: {
-      iconBg: 'bg-blue-500/10 dark:bg-blue-500/20',
-      iconBorder: 'border-blue-500/20 dark:border-blue-500/30',
-      iconColor: 'text-blue-600 dark:text-blue-400',
-      badgeBg: 'bg-blue-50 dark:bg-blue-950/60',
-      badgeText: 'text-blue-700 dark:text-blue-300',
-      checkColor: 'text-blue-500 dark:text-blue-400',
-      hoverBorder: 'hover:border-blue-400/60 dark:hover:border-blue-500/40',
+      iconBg: 'bg-primary-tint ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-primary ',
+      badgeBg: 'bg-primary-tint ',
+      badgeText: 'text-primary ',
+      checkColor: 'text-primary ',
+      hoverBorder: 'hover:border-border ',
     },
   },
 
@@ -132,13 +132,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore PeopleOps Suite',
     icon: <Users className="size-6" />,
     theme: {
-      iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
-      iconBorder: 'border-emerald-500/20 dark:border-emerald-500/30',
-      iconColor: 'text-emerald-600 dark:text-emerald-400',
-      badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60',
-      badgeText: 'text-emerald-700 dark:text-emerald-300',
-      checkColor: 'text-emerald-500 dark:text-emerald-400',
-      hoverBorder: 'hover:border-emerald-400/60 dark:hover:border-emerald-500/40',
+      iconBg: 'bg-success-bg ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-success-text ',
+      badgeBg: 'bg-success-bg ',
+      badgeText: 'text-success-text ',
+      checkColor: 'text-success-text ',
+      hoverBorder: 'hover:border-border ',
     },
   },
   {
@@ -164,13 +164,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore HireFlow Suite',
     icon: <Briefcase className="size-6" />,
     theme: {
-      iconBg: 'bg-teal-500/10 dark:bg-teal-500/20',
-      iconBorder: 'border-teal-500/20 dark:border-teal-500/30',
-      iconColor: 'text-teal-600 dark:text-teal-400',
-      badgeBg: 'bg-teal-50 dark:bg-teal-950/60',
-      badgeText: 'text-teal-700 dark:text-teal-300',
-      checkColor: 'text-teal-500 dark:text-teal-400',
-      hoverBorder: 'hover:border-teal-400/60 dark:hover:border-teal-500/40',
+      iconBg: 'bg-ai-tint ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-ai ',
+      badgeBg: 'bg-ai-tint ',
+      badgeText: 'text-ai ',
+      checkColor: 'text-ai ',
+      hoverBorder: 'hover:border-border ',
     },
   },
 
@@ -198,13 +198,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore LedgerFlow Suite',
     icon: <DollarSign className="size-6" />,
     theme: {
-      iconBg: 'bg-amber-500/10 dark:bg-amber-500/20',
-      iconBorder: 'border-amber-500/20 dark:border-amber-500/30',
-      iconColor: 'text-amber-600 dark:text-amber-400',
-      badgeBg: 'bg-amber-50 dark:bg-amber-950/60',
-      badgeText: 'text-amber-700 dark:text-amber-300',
-      checkColor: 'text-amber-500 dark:text-amber-400',
-      hoverBorder: 'hover:border-amber-400/60 dark:hover:border-amber-500/40',
+      iconBg: 'bg-warning-bg ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-warning-text ',
+      badgeBg: 'bg-warning-bg ',
+      badgeText: 'text-warning-text ',
+      checkColor: 'text-warning-text ',
+      hoverBorder: 'hover:border-border ',
     },
   },
   {
@@ -230,13 +230,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore StockFlow Suite',
     icon: <Boxes className="size-6" />,
     theme: {
-      iconBg: 'bg-cyan-500/10 dark:bg-cyan-500/20',
-      iconBorder: 'border-cyan-500/20 dark:border-cyan-500/30',
-      iconColor: 'text-cyan-600 dark:text-cyan-400',
-      badgeBg: 'bg-cyan-50 dark:bg-cyan-950/60',
-      badgeText: 'text-cyan-700 dark:text-cyan-300',
-      checkColor: 'text-cyan-500 dark:text-cyan-400',
-      hoverBorder: 'hover:border-cyan-400/60 dark:hover:border-cyan-500/40',
+      iconBg: 'bg-info-bg ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-info-text ',
+      badgeBg: 'bg-info-bg ',
+      badgeText: 'text-info-text ',
+      checkColor: 'text-info-text ',
+      hoverBorder: 'hover:border-border ',
     },
   },
 
@@ -264,13 +264,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore SprintFlow Suite',
     icon: <FolderGit2 className="size-6" />,
     theme: {
-      iconBg: 'bg-rose-500/10 dark:bg-rose-500/20',
-      iconBorder: 'border-rose-500/20 dark:border-rose-500/30',
-      iconColor: 'text-rose-600 dark:text-rose-400',
-      badgeBg: 'bg-rose-50 dark:bg-rose-950/60',
-      badgeText: 'text-rose-700 dark:text-rose-300',
-      checkColor: 'text-rose-500 dark:text-rose-400',
-      hoverBorder: 'hover:border-rose-400/60 dark:hover:border-rose-500/40',
+      iconBg: 'bg-error-bg ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-error-text ',
+      badgeBg: 'bg-error-bg ',
+      badgeText: 'text-error-text ',
+      checkColor: 'text-error-text ',
+      hoverBorder: 'hover:border-border ',
     },
   },
   {
@@ -296,13 +296,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore DocFlow Suite',
     icon: <FileText className="size-6" />,
     theme: {
-      iconBg: 'bg-indigo-500/10 dark:bg-indigo-500/20',
-      iconBorder: 'border-indigo-500/20 dark:border-indigo-500/30',
-      iconColor: 'text-indigo-600 dark:text-indigo-400',
-      badgeBg: 'bg-indigo-50 dark:bg-indigo-950/60',
-      badgeText: 'text-indigo-700 dark:text-indigo-300',
-      checkColor: 'text-indigo-500 dark:text-indigo-400',
-      hoverBorder: 'hover:border-indigo-400/60 dark:hover:border-indigo-500/40',
+      iconBg: 'bg-primary-tint ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-primary ',
+      badgeBg: 'bg-primary-tint ',
+      badgeText: 'text-primary ',
+      checkColor: 'text-primary ',
+      hoverBorder: 'hover:border-border ',
     },
   },
 
@@ -330,13 +330,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore API Telemetry',
     icon: <Activity className="size-6" />,
     theme: {
-      iconBg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
-      iconBorder: 'border-emerald-500/20 dark:border-emerald-500/30',
-      iconColor: 'text-emerald-600 dark:text-emerald-400',
-      badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60',
-      badgeText: 'text-emerald-700 dark:text-emerald-300',
-      checkColor: 'text-emerald-500 dark:text-emerald-400',
-      hoverBorder: 'hover:border-emerald-400/60 dark:hover:border-emerald-500/40',
+      iconBg: 'bg-success-bg ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-success-text ',
+      badgeBg: 'bg-success-bg ',
+      badgeText: 'text-success-text ',
+      checkColor: 'text-success-text ',
+      hoverBorder: 'hover:border-border ',
     },
   },
   {
@@ -362,13 +362,13 @@ const ALL_DIRECTORY_ITEMS: DirectoryItem[] = [
     actionText: 'Explore Design System',
     icon: <Code2 className="size-6" />,
     theme: {
-      iconBg: 'bg-purple-500/10 dark:bg-purple-500/20',
-      iconBorder: 'border-purple-500/20 dark:border-purple-500/30',
-      iconColor: 'text-purple-600 dark:text-purple-400',
-      badgeBg: 'bg-purple-50 dark:bg-purple-950/60',
-      badgeText: 'text-purple-700 dark:text-purple-300',
-      checkColor: 'text-purple-500 dark:text-purple-400',
-      hoverBorder: 'hover:border-purple-400/60 dark:hover:border-purple-500/40',
+      iconBg: 'bg-muted ',
+      iconBorder: 'border-border ',
+      iconColor: 'text-strong-foreground ',
+      badgeBg: 'bg-muted ',
+      badgeText: 'text-strong-foreground ',
+      checkColor: 'text-muted-foreground ',
+      hoverBorder: 'hover:border-border ',
     },
   },
 ];
@@ -380,11 +380,11 @@ const PILLAR_GROUPS: PillarGroup[] = [
     badge: 'Sales & Customer Pillar',
     subtitle: 'Manage client accounts, high-velocity deal pipelines, and automated quote-to-cash conversions.',
     replacesText: 'Salesforce • HubSpot CRM • Pipedrive',
-    icon: <TrendingUp className="size-5 text-blue-500" />,
+    icon: <TrendingUp className="size-5 text-primary" />,
     theme: {
-      border: 'border-blue-500/20',
-      bgBadge: 'bg-blue-50 dark:bg-blue-950/60',
-      textBadge: 'text-blue-700 dark:text-blue-300',
+      border: 'border-border',
+      bgBadge: 'bg-primary-tint ',
+      textBadge: 'text-primary ',
     },
     items: ALL_DIRECTORY_ITEMS.filter((i) => i.pillarId === 'revenue'),
   },
@@ -394,11 +394,11 @@ const PILLAR_GROUPS: PillarGroup[] = [
     badge: 'Human Capital Pillar',
     subtitle: 'Maintain your complete workforce directory, org charts, leave policies, and candidate scorecards.',
     replacesText: 'Workday • BambooHR • Greenhouse • Lever',
-    icon: <Users className="size-5 text-emerald-500" />,
+    icon: <Users className="size-5 text-success-text" />,
     theme: {
-      border: 'border-emerald-500/20',
-      bgBadge: 'bg-emerald-50 dark:bg-emerald-950/60',
-      textBadge: 'text-emerald-700 dark:text-emerald-300',
+      border: 'border-border',
+      bgBadge: 'bg-success-bg ',
+      textBadge: 'text-success-text ',
     },
     items: ALL_DIRECTORY_ITEMS.filter((i) => i.pillarId === 'people'),
   },
@@ -408,11 +408,11 @@ const PILLAR_GROUPS: PillarGroup[] = [
     badge: 'Finance & Logistics Pillar',
     subtitle: 'Audit-proof double-entry general ledger, automated GAAP invoices, and multi-warehouse inventory.',
     replacesText: 'QuickBooks • NetSuite • SAP Inventory • TradeGecko',
-    icon: <DollarSign className="size-5 text-amber-500" />,
+    icon: <DollarSign className="size-5 text-warning-text" />,
     theme: {
-      border: 'border-amber-500/20',
-      bgBadge: 'bg-amber-50 dark:bg-amber-950/60',
-      textBadge: 'text-amber-700 dark:text-amber-300',
+      border: 'border-border',
+      bgBadge: 'bg-warning-bg ',
+      textBadge: 'text-warning-text ',
     },
     items: ALL_DIRECTORY_ITEMS.filter((i) => i.pillarId === 'finance'),
   },
@@ -422,11 +422,11 @@ const PILLAR_GROUPS: PillarGroup[] = [
     badge: 'Engineering & Docs Pillar',
     subtitle: 'Coordinate sprint roadmaps linked to Git pull requests, and maintain company SOPs & handbooks.',
     replacesText: 'Jira Software • Linear • Notion • Confluence',
-    icon: <FolderGit2 className="size-5 text-rose-500" />,
+    icon: <FolderGit2 className="size-5 text-error-text" />,
     theme: {
-      border: 'border-rose-500/20',
-      bgBadge: 'bg-rose-50 dark:bg-rose-950/60',
-      textBadge: 'text-rose-700 dark:text-rose-300',
+      border: 'border-border',
+      bgBadge: 'bg-error-bg ',
+      textBadge: 'text-error-text ',
     },
     items: ALL_DIRECTORY_ITEMS.filter((i) => i.pillarId === 'product'),
   },
@@ -436,11 +436,11 @@ const PILLAR_GROUPS: PillarGroup[] = [
     badge: 'Developer Tools Pillar',
     subtitle: 'Standalone developer tools to monitor APIs in real-time and build custom company applications.',
     replacesText: 'Datadog APM • New Relic • MUI Enterprise • Ant Design',
-    icon: <Code2 className="size-5 text-purple-500" />,
+    icon: <Code2 className="size-5 text-muted-foreground" />,
     theme: {
-      border: 'border-purple-500/20',
-      bgBadge: 'bg-purple-50 dark:bg-purple-950/60',
-      textBadge: 'text-purple-700 dark:text-purple-300',
+      border: 'border-border',
+      bgBadge: 'bg-muted ',
+      textBadge: 'text-strong-foreground ',
     },
     items: ALL_DIRECTORY_ITEMS.filter((i) => i.pillarId === 'developer'),
   },
@@ -495,33 +495,33 @@ export function ModulesDirectoryClient() {
         
         {/* Ambient Atmospheric Glow */}
         <div className="pointer-events-none absolute inset-x-0 top-1/4 -z-10 flex justify-center">
-          <div className="size-[500px] sm:size-[700px] rounded-full bg-gradient-to-tr from-amber-400/10 via-purple-500/10 to-indigo-500/10 blur-[130px] dark:from-orange-500/10 dark:via-purple-600/15 dark:to-blue-600/15" />
+          <div className="size-[500px] sm:size-[700px] rounded-full blur-[130px]   " />
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl text-center">
             
             {/* Floating Architecture Pill */}
-            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs sm:text-sm font-medium text-slate-800 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
-              <span className="flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-xs font-semibold text-violet-600 dark:bg-violet-400/20 dark:text-violet-300">
+            <div className="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs sm:text-sm font-medium text-foreground shadow-2xs dark:border-white/10 dark:bg-card ">
+              <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-strong-foreground ">
                 <Layers className="size-3" /> Modular Business OS
               </span>
               <span>4 Business Pillars + Dev Platform</span>
-              <span className="text-slate-300 dark:text-slate-600">•</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">100% Free to Self-Host</span>
-              <span className="text-slate-300 dark:text-slate-600">•</span>
-              <span className="text-slate-600 dark:text-slate-300">Zero Per-Seat Fees</span>
+              <span className="text-muted-foreground ">•</span>
+              <span className="font-semibold text-success-text ">100% Free to Self-Host</span>
+              <span className="text-muted-foreground ">•</span>
+              <span className="text-muted-foreground ">Zero Per-Seat Fees</span>
             </div>
 
             {/* Big Headline */}
-            <h1 className="animate-fade-up stagger-1 mt-5 sm:mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+            <h1 className="animate-fade-up stagger-1 mt-5 sm:mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground dark:text-white leading-[1.12]">
               Every department of your company,
               <br className="hidden sm:inline" />{' '}
               <span className="gradient-cadence">modular &amp; completely decoupled</span>
             </h1>
 
             {/* Subheadline — Explaining the Architecture Clearly */}
-            <p className="animate-fade-up stagger-2 mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+            <p className="animate-fade-up stagger-2 mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground ">
               Innostes is not just an HR or CRM tool—it is a complete, modular business operating system.
               Run every department on one calm platform, or activate individual domain engines via OpenAPI REST contracts.
             </p>
@@ -529,11 +529,11 @@ export function ModulesDirectoryClient() {
             {/* Quick Department Mental Model Navigation */}
             <div className="animate-fade-up stagger-3 mt-8 flex flex-wrap items-center justify-center gap-2.5">
               {[
-                { id: 'revenue', label: 'Revenue & CRM', icon: <TrendingUp className="size-3.5 text-blue-500" /> },
-                { id: 'people', label: 'People & HR', icon: <Users className="size-3.5 text-emerald-500" /> },
-                { id: 'finance', label: 'Finance & Supply', icon: <DollarSign className="size-3.5 text-amber-500" /> },
-                { id: 'product', label: 'Product & Docs', icon: <FolderGit2 className="size-3.5 text-rose-500" /> },
-                { id: 'developer', label: 'Developer Tools', icon: <Code2 className="size-3.5 text-purple-500" /> },
+                { id: 'revenue', label: 'Revenue & CRM', icon: <TrendingUp className="size-3.5 text-primary" /> },
+                { id: 'people', label: 'People & HR', icon: <Users className="size-3.5 text-success-text" /> },
+                { id: 'finance', label: 'Finance & Supply', icon: <DollarSign className="size-3.5 text-warning-text" /> },
+                { id: 'product', label: 'Product & Docs', icon: <FolderGit2 className="size-3.5 text-error-text" /> },
+                { id: 'developer', label: 'Developer Tools', icon: <Code2 className="size-3.5 text-muted-foreground" /> },
               ].map((pill) => (
                 <button
                   key={pill.id}
@@ -542,7 +542,7 @@ export function ModulesDirectoryClient() {
                     const el = document.getElementById('directory-content');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs backdrop-blur-sm transition-all hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-strong-foreground shadow-2xs transition-all hover:border-border-strong hover:bg-canvas dark:border-white/10 dark:bg-card  dark:hover:bg-card"
                 >
                   {pill.icon}
                   <span>{pill.label}</span>
@@ -554,24 +554,24 @@ export function ModulesDirectoryClient() {
       </section>
 
       {/* ── 2. Interactive Search & Department Filter Bar ──────────────────── */}
-      <section id="directory-content" className="sticky top-16 z-30 border-b border-slate-200/70 bg-white/80 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/80 transition-colors">
+      <section id="directory-content" className="sticky top-16 z-30 border-b border-border bg-card py-4 dark:border-white/10  transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3.5 lg:flex-row lg:items-center lg:justify-between">
             
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 dark:text-slate-500" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-subtle-foreground " />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by suite, department, or replacement (e.g. CRM, ATS, QuickBooks, Jira)..."
-                className="w-full rounded-full border border-slate-200/80 bg-slate-50/80 py-2 pl-9 pr-9 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:bg-slate-900"
+                className="w-full rounded-full border border-border bg-muted py-2 pl-9 pr-9 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-border dark:border-white/10 dark:bg-card dark:text-white "
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground "
                   aria-label="Clear search"
                 >
                   <X className="size-4" />
@@ -592,16 +592,16 @@ export function ModulesDirectoryClient() {
                       onClick={() => setActivePillar(tab.id)}
                       className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 ${
                         isActive
-                          ? 'bg-slate-950 text-white shadow-xs dark:bg-white dark:text-slate-950'
-                          : 'border border-slate-200/60 bg-white/60 text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white'
+                          ? 'bg-brand-navy text-white shadow-xs dark:bg-card '
+                          : 'border border-border bg-card text-muted-foreground hover:bg-muted dark:border-white/10 dark:bg-card  dark:hover:bg-card dark:hover:text-white'
                       }`}
                     >
                       <span>{tab.label}</span>
                       <span
-                        className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+                        className={`rounded-full px-1.5 py-0.2 text-xs font-bold ${
                           isActive
-                            ? 'bg-white/20 text-white dark:bg-slate-900/30 dark:text-slate-950'
-                            : 'bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-400'
+                            ? 'bg-card text-white  '
+                            : 'bg-muted text-muted-foreground dark:bg-card '
                         }`}
                       >
                         {tab.count}
@@ -612,14 +612,14 @@ export function ModulesDirectoryClient() {
               </div>
 
               {/* View Mode Toggle: Grouped vs Flat Grid */}
-              <div className="hidden sm:flex items-center rounded-full border border-slate-200/70 bg-slate-100/70 p-0.5 dark:border-white/10 dark:bg-white/5">
+              <div className="hidden sm:flex items-center rounded-full border border-border bg-muted p-0.5 dark:border-white/10 dark:bg-card">
                 <button
                   onClick={() => setViewMode('grouped')}
                   title="Grouped by Department Pillars"
                   className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
                     viewMode === 'grouped'
-                      ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-900 dark:text-white'
-                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                      ? 'bg-card text-foreground shadow-2xs  dark:text-white'
+                      : 'text-muted-foreground hover:text-foreground  '
                   }`}
                 >
                   <ListFilter className="size-3" />
@@ -630,8 +630,8 @@ export function ModulesDirectoryClient() {
                   title="Compact Grid View"
                   className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white text-slate-900 shadow-2xs dark:bg-slate-900 dark:text-white'
-                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                      ? 'bg-card text-foreground shadow-2xs  dark:text-white'
+                      : 'text-muted-foreground hover:text-foreground  '
                   }`}
                 >
                   <LayoutGrid className="size-3" />
@@ -650,11 +650,11 @@ export function ModulesDirectoryClient() {
           {/* No results message */}
           {filteredItems.length === 0 && (
             <div className="bento-card mx-auto max-w-md rounded-3xl p-10 text-center">
-              <Search className="mx-auto size-10 text-slate-400 dark:text-slate-500" />
-              <h3 className="mt-4 text-lg font-bold text-slate-950 dark:text-white">
+              <Search className="mx-auto size-10 text-subtle-foreground " />
+              <h3 className="mt-4 text-lg font-bold text-foreground dark:text-white">
                 No matching modules found
               </h3>
-              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-2 text-xs text-muted-foreground ">
                 No suites matched &ldquo;{searchQuery}&rdquo;. Try searching for &ldquo;CRM&rdquo;, &ldquo;HR&rdquo;, &ldquo;ledger&rdquo;, &ldquo;inventory&rdquo;, or &ldquo;telemetry&rdquo;.
               </p>
               <button
@@ -662,7 +662,7 @@ export function ModulesDirectoryClient() {
                   setSearchQuery('');
                   setActivePillar('all');
                 }}
-                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-950"
+                className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-brand-navy px-4 py-2 text-xs font-semibold text-white dark:bg-card "
               >
                 <span>Reset Filters</span>
               </button>
@@ -676,7 +676,7 @@ export function ModulesDirectoryClient() {
                 <div key={group.id} className="scroll-mt-36">
                   
                   {/* Department Pillar Header */}
-                  <div className="flex flex-col gap-3 pb-6 border-b border-slate-200/80 dark:border-white/10 md:flex-row md:items-end md:justify-between">
+                  <div className="flex flex-col gap-3 pb-6 border-b border-border dark:border-white/10 md:flex-row md:items-end md:justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <span
@@ -685,26 +685,26 @@ export function ModulesDirectoryClient() {
                           {group.icon}
                           <span>{group.badge}</span>
                         </span>
-                        <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <span className="text-xs text-muted-foreground ">•</span>
+                        <span className="text-xs font-medium text-muted-foreground ">
                           {group.items.length} {group.items.length === 1 ? 'Suite' : 'Suites'}
                         </span>
                       </div>
 
-                      <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">
+                      <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground dark:text-white">
                         {group.title}
                       </h2>
-                      <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+                      <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
                         {group.subtitle}
                       </p>
                     </div>
 
                     {/* Competitor / Alternative Anchor Tag */}
-                    <div className="flex flex-col md:items-end text-xs text-slate-500 dark:text-slate-400">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <div className="flex flex-col md:items-end text-xs text-muted-foreground ">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground ">
                         Modern Open Alternative to
                       </span>
-                      <span className="mt-0.5 font-medium text-slate-700 dark:text-slate-300">
+                      <span className="mt-0.5 font-medium text-strong-foreground ">
                         {group.replacesText}
                       </span>
                     </div>
@@ -733,22 +733,22 @@ export function ModulesDirectoryClient() {
       </section>
 
       {/* ── 4. Cross-Module Connected Company Ecosystem ────────────────────── */}
-      <section className="py-20 lg:py-28 section-divider bg-slate-50/50 dark:bg-slate-950/50 transition-colors">
+      <section className="py-20 lg:py-28 section-divider bg-muted transition-colors">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
           <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/80 bg-white/80 px-3.5 py-1 text-xs font-semibold text-blue-700 shadow-2xs backdrop-blur-md dark:border-blue-500/20 dark:bg-blue-950/30 dark:text-blue-300">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1 text-xs font-semibold text-primary shadow-2xs ">
               <Workflow className="size-3.5" />
               <span>Zero Circular Dependencies</span>
             </div>
 
-            <h2 className="mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white">
+            <h2 className="mt-5 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground dark:text-white">
               How these suites work together
               <br />
               <span className="gradient-cadence">across your entire company</span>
             </h2>
 
-            <p className="mt-4 text-sm sm:text-base leading-relaxed text-slate-600 dark:text-slate-400">
+            <p className="mt-4 text-sm sm:text-base leading-relaxed text-muted-foreground ">
               Unlike monolithic legacy ERPs where database schemas are tightly coupled and fragile,
               every Innostes suite communicates through asynchronous kernel events and strict REST schemas.
             </p>
@@ -760,18 +760,18 @@ export function ModulesDirectoryClient() {
             {/* Flow 1 */}
             <div className="bento-card flex flex-col justify-between rounded-3xl p-6">
               <div>
-                <div className="flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
+                <div className="flex items-center justify-between text-xs font-bold text-primary ">
                   <span>Step 1: Revenue</span>
-                  <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px]">SalesFlow</span>
+                  <span className="rounded-full bg-primary-tint px-2 py-0.5 text-xs">SalesFlow</span>
                 </div>
-                <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="mt-3 text-base font-bold text-foreground dark:text-white">
                   Quote Converted to Deal
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                  When a sales representative marks an enterprise deal as closed-won, the kernel broadcasts a <code className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">deal.won</code> event.
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground ">
+                  When a sales representative marks an enterprise deal as closed-won, the kernel broadcasts a <code className="text-xs font-semibold text-primary ">deal.won</code> event.
                 </p>
               </div>
-              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border-t border-slate-100 pt-3 dark:border-white/5">
+              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-success-text border-t border-border pt-3 dark:border-white/5">
                 <span>Automatic trigger</span>
                 <ArrowRight className="size-3" />
                 <span>LedgerFlow</span>
@@ -781,18 +781,18 @@ export function ModulesDirectoryClient() {
             {/* Flow 2 */}
             <div className="bento-card flex flex-col justify-between rounded-3xl p-6">
               <div>
-                <div className="flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
+                <div className="flex items-center justify-between text-xs font-bold text-warning-text ">
                   <span>Step 2: Accounting</span>
-                  <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px]">LedgerFlow</span>
+                  <span className="rounded-full bg-warning-bg px-2 py-0.5 text-xs">LedgerFlow</span>
                 </div>
-                <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="mt-3 text-base font-bold text-foreground dark:text-white">
                   Invoice &amp; Journal Creation
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground ">
                   LedgerFlow captures the event, generates a tax-compliant invoice, and logs balanced debit/credit journal entries without duplicate manual data entry.
                 </p>
               </div>
-              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-cyan-600 dark:text-cyan-400 border-t border-slate-100 pt-3 dark:border-white/5">
+              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-info-text border-t border-border pt-3 dark:border-white/5">
                 <span>Stock allocation</span>
                 <ArrowRight className="size-3" />
                 <span>StockFlow</span>
@@ -802,18 +802,18 @@ export function ModulesDirectoryClient() {
             {/* Flow 3 */}
             <div className="bento-card flex flex-col justify-between rounded-3xl p-6">
               <div>
-                <div className="flex items-center justify-between text-xs font-bold text-teal-600 dark:text-teal-400">
+                <div className="flex items-center justify-between text-xs font-bold text-ai ">
                   <span>Step 3: Talent</span>
-                  <span className="rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px]">HireFlow</span>
+                  <span className="rounded-full bg-ai-tint px-2 py-0.5 text-xs">HireFlow</span>
                 </div>
-                <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="mt-3 text-base font-bold text-foreground dark:text-white">
                   Candidate Offer Accepted
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground ">
                   A software engineer accepts an offer in HireFlow. The event automatically provisions their employee record, department assignment, and leave balances in PeopleOps.
                 </p>
               </div>
-              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border-t border-slate-100 pt-3 dark:border-white/5">
+              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-success-text border-t border-border pt-3 dark:border-white/5">
                 <span>Employee provision</span>
                 <ArrowRight className="size-3" />
                 <span>PeopleOps</span>
@@ -823,18 +823,18 @@ export function ModulesDirectoryClient() {
             {/* Flow 4 */}
             <div className="bento-card flex flex-col justify-between rounded-3xl p-6">
               <div>
-                <div className="flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
+                <div className="flex items-center justify-between text-xs font-bold text-strong-foreground ">
                   <span>Step 4: Observability</span>
-                  <span className="rounded-full bg-purple-500/10 px-2 py-0.5 text-[10px]">Tracura</span>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs">Tracura</span>
                 </div>
-                <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="mt-3 text-base font-bold text-foreground dark:text-white">
                   Real-Time APM Tracing
                 </h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground ">
                   Every asynchronous event, background job, and REST endpoint is traced in sub-millisecond real time by Tracura Telemetry with full payload inspection.
                 </p>
               </div>
-              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-purple-600 dark:text-purple-400 border-t border-slate-100 pt-3 dark:border-white/5">
+              <div className="mt-5 flex items-center gap-1.5 text-xs font-semibold text-strong-foreground border-t border-border pt-3 dark:border-white/5">
                 <span>Sub-0.2ms latency</span>
                 <ArrowRight className="size-3" />
                 <span>All APIs</span>
@@ -848,41 +848,41 @@ export function ModulesDirectoryClient() {
       {/* ── 5. Call To Action ────────────────────────────────────────────── */}
       <section className="relative overflow-hidden py-20 lg:py-24 section-divider transition-colors duration-300">
         <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
-          <div className="size-[500px] rounded-full bg-gradient-to-tr from-orange-400/10 via-purple-500/15 to-blue-500/10 blur-[130px] dark:from-orange-500/15 dark:via-purple-600/20 dark:to-blue-600/20" />
+          <div className="size-[500px] rounded-full blur-[130px]   " />
         </div>
 
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="bento-card relative overflow-hidden rounded-[2.5rem] p-8 text-center sm:p-12">
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-200/80 bg-white/80 px-4 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs backdrop-blur-md dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
-              <span className="flex items-center gap-1 rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-semibold text-orange-600 dark:bg-orange-400/20 dark:text-orange-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground shadow-2xs dark:border-white/10 dark:bg-card ">
+              <span className="flex items-center gap-1 rounded-full bg-warning-bg px-2 py-0.5 text-xs font-semibold text-warning-text ">
                 <Zap className="size-3" /> 5-Minute Setup
               </span>
               <span>All 7 Suites Included</span>
-              <span className="text-slate-300 dark:text-slate-600">•</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">100% Free Self-Hosted</span>
+              <span className="text-muted-foreground ">•</span>
+              <span className="font-semibold text-success-text ">100% Free Self-Hosted</span>
             </div>
 
-            <h2 className="mt-6 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12]">
+            <h2 className="mt-6 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground dark:text-white leading-[1.12]">
               Run your whole company on your own infrastructure
               <br />
               <span className="gradient-cadence">with zero seat taxes</span>
             </h2>
 
-            <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 dark:text-slate-400">
+            <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground ">
               Launch the official container image to deploy all business suites, PostgreSQL, and Tracura telemetry in minutes.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
               <Link
                 href="/docs/getting-started"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-7 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-navy px-7 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-brand-navy hover:shadow-lg dark:bg-card "
               >
                 <span>Read Getting Started Guide</span>
                 <ArrowRight className="size-4" />
               </Link>
               <Link
                 href="/services"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-6 py-3 text-sm font-semibold text-slate-800 shadow-2xs transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-secondary-border bg-card px-5 text-sm font-medium text-foreground transition-colors hover:border-border-strong hover:bg-canvas focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
                 <span>Assisted Enterprise Setup</span>
               </Link>
@@ -899,7 +899,7 @@ function DirectoryCardItem({ item }: { item: DirectoryItem }) {
   return (
     <Link
       href={item.href}
-      className={`bento-card group relative flex flex-col justify-between rounded-3xl p-6 sm:p-7 border border-slate-200/80 bg-white/80 dark:border-white/10 dark:bg-slate-900/80 backdrop-blur-xl shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${item.theme.hoverBorder}`}
+      className={`bento-card group relative flex flex-col justify-between rounded-3xl p-6 sm:p-7 border border-border bg-card dark:border-white/10   shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${item.theme.hoverBorder}`}
     >
       <div>
         {/* Top Header: Icon + Domain Badges */}
@@ -912,11 +912,11 @@ function DirectoryCardItem({ item }: { item: DirectoryItem }) {
 
           <div className="flex flex-col items-end gap-1 text-right">
             <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${item.theme.badgeBg} ${item.theme.badgeText}`}
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${item.theme.badgeBg} ${item.theme.badgeText}`}
             >
               {item.department}
             </span>
-            <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium text-muted-foreground ">
               {item.technicalSpec}
             </span>
           </div>
@@ -924,27 +924,27 @@ function DirectoryCardItem({ item }: { item: DirectoryItem }) {
 
         {/* Title, Tagline & Description */}
         <div className="mt-5">
-          <h3 className="text-xl font-bold tracking-tight text-slate-950 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
+          <h3 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary dark:text-white ">
             {item.name}
           </h3>
-          <p className="mt-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+          <p className="mt-1 text-xs font-semibold text-muted-foreground ">
             {item.tagline}
           </p>
-          <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-2">
+          <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-muted-foreground line-clamp-2">
             {item.heroDescription}
           </p>
         </div>
 
         {/* "Replaces" Pill Anchor */}
-        <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-1.5 text-[11px] dark:border-white/5 dark:bg-slate-950/60">
-          <span className="font-semibold text-slate-400 dark:text-slate-500">Replaces: </span>
-          <span className="font-medium text-slate-700 dark:text-slate-300">{item.replaces}</span>
+        <div className="mt-4 rounded-xl border border-border bg-muted px-3 py-1.5 text-xs dark:border-white/5 ">
+          <span className="font-semibold text-muted-foreground ">Replaces: </span>
+          <span className="font-medium text-strong-foreground ">{item.replaces}</span>
         </div>
 
         {/* Key Capabilities */}
-        <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 dark:border-white/5">
+        <div className="mt-4 space-y-2 border-t border-border pt-3 dark:border-white/5">
           {item.capabilities.map((cap) => (
-            <div key={cap} className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
+            <div key={cap} className="flex items-start gap-2 text-xs text-strong-foreground ">
               <CheckCircle2 className={`size-3.5 shrink-0 mt-0.5 ${item.theme.checkColor}`} />
               <span className="leading-snug">{cap}</span>
             </div>
@@ -953,21 +953,21 @@ function DirectoryCardItem({ item }: { item: DirectoryItem }) {
       </div>
 
       {/* Footer: Highlight Stat & Explore Link */}
-      <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+      <div className="mt-6 flex items-center justify-between border-t border-border pt-4 dark:border-white/5">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-strong-foreground ">
           {item.stats && item.stats[0] && (
             <>
-              <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
+              <span className="text-xs font-normal text-muted-foreground ">
                 {item.stats[0].label}:
               </span>
-              <span className="font-bold text-slate-900 dark:text-white">
+              <span className="font-bold text-foreground dark:text-white">
                 {item.stats[0].value}
               </span>
             </>
           )}
         </div>
 
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 transition-colors group-hover:text-blue-600 dark:text-slate-200 dark:group-hover:text-blue-400">
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-foreground transition-colors group-hover:text-primary ">
           <span>{item.actionText}</span>
           <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
         </div>

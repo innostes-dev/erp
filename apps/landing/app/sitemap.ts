@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { apiSource, devSource, source } from '@/lib/source';
+import { MODULES_DATA } from '@/lib/modules-data';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://innostes.com';
@@ -38,6 +39,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 1.0,
     },
+    { url: `${baseUrl}/modules`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    ...Object.values(MODULES_DATA).map((m) => ({
+      url: `${baseUrl}/modules/${m.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    })),
+    { url: `${baseUrl}/build`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     ...uiPages,
     ...devPages,
     ...apiPages,
