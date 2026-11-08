@@ -556,7 +556,7 @@ export const SidebarMenuButton = forwardRef<
           "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4.5",
           menuButtonSize[size],
           isActive &&
-            'bg-sidebar-primary-soft font-medium text-sidebar-primary hover:bg-sidebar-primary-soft hover:text-sidebar-primary',
+            'bg-sidebar-primary-soft font-medium text-sidebar-accent-foreground hover:bg-sidebar-primary-soft hover:text-sidebar-accent-foreground [&_svg]:text-sidebar-primary',
           isActive &&
             activeIndicator &&
             !collapsed &&
@@ -706,9 +706,10 @@ export const SidebarMenuSubButton = forwardRef<
     props: mergeProps<'a'>(
       {
         className: cn(
-          'flex h-8 w-full items-center gap-2 truncate rounded-md px-2.5 text-sm text-sidebar-muted-foreground transition-colors outline-none pointer-coarse:h-10',
+          'relative flex h-8 w-full cursor-pointer items-center gap-2 truncate rounded-md px-2.5 text-body-sm text-sidebar-foreground transition-colors outline-none pointer-coarse:h-10',
           'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-sidebar-ring',
-          isActive && 'font-medium text-sidebar-primary',
+          isActive &&
+            'bg-sidebar-primary-soft font-medium text-sidebar-accent-foreground hover:bg-sidebar-primary-soft before:absolute before:inset-y-1.5 before:start-0 before:w-0.75 before:rounded-full before:bg-sidebar-primary',
           className,
         ),
         'aria-current': isActive ? 'page' : undefined,

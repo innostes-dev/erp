@@ -177,8 +177,8 @@ export function MetricDelta({
       data-sentiment={sentiment}
       className={cn(
         'inline-flex items-center gap-0.5 text-xs font-medium tabular-nums',
-        sentiment === 'positive' && 'text-emerald-700 dark:text-emerald-400',
-        sentiment === 'negative' && 'text-red-700 dark:text-red-400',
+        sentiment === 'positive' && 'text-success-text',
+        sentiment === 'negative' && 'text-error-text',
         sentiment === 'neutral' && 'text-muted-foreground',
         className,
       )}
@@ -476,7 +476,7 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
       props: mergeProps<'div'>(
         {
           className: cn(
-            'relative flex flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card p-5 text-start text-card-foreground shadow-xs',
+            'relative flex flex-col gap-3 overflow-hidden rounded-lg border border-border bg-card p-5 text-start text-card-foreground',
             variant === 'compact' && 'p-4',
             variant === 'accent' &&
               cn(
@@ -484,7 +484,7 @@ export const MetricCard = forwardRef<HTMLDivElement, MetricCardProps>(
                 accentBar[tone],
               ),
             interactive &&
-              'cursor-pointer transition-[border-color,box-shadow] outline-none hover:border-ring/50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+              'cursor-pointer transition-[border-color,box-shadow] outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
             className,
           ),
           'aria-busy': loading || undefined,

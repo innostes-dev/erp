@@ -174,7 +174,7 @@ const positionClass: Record<NonNullable<ToasterProps['position']>, string> = {
 
 const typeIcon: Partial<Record<ToastType, ReactNode>> = {
   success: <CircleCheckIcon className="size-4 text-success" />,
-  error: <CircleAlertIcon className="size-4 text-destructive" />,
+  error: <CircleAlertIcon className="size-4 text-error" />,
   warning: <TriangleAlertIcon className="size-4 text-warning" />,
   info: <InfoIcon className="size-4 text-info" />,
   loading: <Spinner label={null} className="text-muted-foreground" />,
@@ -193,7 +193,9 @@ function ToastList({ closeLabel }: { closeLabel?: string }) {
         'translate-x-(--toast-swipe-movement-x) translate-y-(--toast-swipe-movement-y)',
         'data-starting-style:translate-y-2 data-starting-style:opacity-0',
         'data-ending-style:opacity-0 data-limited:hidden',
-        'data-[type=error]:border-destructive/40',
+        'overflow-hidden before:absolute before:inset-y-0 before:start-0 before:w-0.75',
+        'data-[type=success]:before:bg-success data-[type=error]:before:bg-error',
+        'data-[type=warning]:before:bg-warning data-[type=info]:before:bg-info',
       )}
     >
       {t.type && typeIcon[t.type as ToastType] && (

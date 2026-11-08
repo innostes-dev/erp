@@ -87,10 +87,10 @@ const avatarTone: Partial<Record<IconTileTone, string>> = {
   'chart-7': 'bg-chart-7 text-white',
   'chart-8': 'bg-chart-8 text-white',
   primary: 'bg-primary text-primary-foreground',
-  success: 'bg-emerald-700 text-white dark:bg-emerald-500 dark:text-zinc-950',
-  warning: 'bg-amber-700 text-white dark:bg-amber-400 dark:text-zinc-950',
+  success: 'bg-success-bg text-success-text',
+  warning: 'bg-warning-bg text-warning-text',
   destructive: 'bg-destructive text-destructive-foreground',
-  info: 'bg-sky-700 text-white dark:bg-sky-400 dark:text-zinc-950',
+  info: 'bg-info-bg text-info-text',
   neutral: 'bg-muted text-muted-foreground',
 };
 

@@ -21,11 +21,11 @@ export type IconTileTone =
 
 // Written out in full so Tailwind can find every class.
 const soft: Record<IconTileTone, string> = {
-    primary: 'bg-primary/10 text-primary',
-    success: 'bg-success/12 text-success',
-    warning: 'bg-warning/15 text-warning',
-    destructive: 'bg-destructive/10 text-destructive',
-    info: 'bg-info/10 text-info',
+    primary: 'bg-primary-tint text-primary',
+    success: 'bg-success-bg text-success-text',
+    warning: 'bg-warning-bg text-warning-text',
+    destructive: 'bg-error-bg text-error-text',
+    info: 'bg-info-bg text-info-text',
     neutral: 'bg-muted text-muted-foreground',
     'chart-1': 'bg-chart-1/12 text-chart-1',
     'chart-2': 'bg-chart-2/12 text-chart-2',

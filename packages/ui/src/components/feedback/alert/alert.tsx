@@ -18,13 +18,14 @@ const alertVariants = cva(
             /** Meaning of the message. Sets colour and the default icon. */
             variant: {
                 default: 'border-border bg-card text-card-foreground',
-                info: 'border-info/30 bg-info/8 text-foreground [&>[data-slot=alert-icon]]:text-info',
+                /* Soft status background + icon in the status colour (warning icons use the text shade: §4 D4). */
+                info: 'border-info/30 bg-info-bg text-foreground [&>[data-slot=alert-icon]]:text-info-text',
                 success:
-                    'border-success/30 bg-success/8 text-foreground [&>[data-slot=alert-icon]]:text-success',
+                    'border-success/30 bg-success-bg text-foreground [&>[data-slot=alert-icon]]:text-success-text',
                 warning:
-                    'border-warning/50 bg-warning/10 text-foreground [&>[data-slot=alert-icon]]:text-warning',
+                    'border-warning/40 bg-warning-bg text-foreground [&>[data-slot=alert-icon]]:text-warning-text',
                 destructive:
-                    'border-destructive/30 bg-destructive/8 text-foreground [&>[data-slot=alert-icon]]:text-destructive',
+                    'border-error/40 bg-error-bg text-foreground [&>[data-slot=alert-icon]]:text-error-text',
             },
         },
         defaultVariants: { variant: 'default' },

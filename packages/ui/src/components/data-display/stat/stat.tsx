@@ -65,7 +65,7 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
             ref={ref}
             data-slot="stat"
             className={cn(
-                'flex flex-col gap-2 rounded-xl border border-border bg-card p-5 text-card-foreground shadow-xs',
+                'flex flex-col gap-2 rounded-lg border border-border bg-card p-5 text-card-foreground',
                 className,
             )}
             {...props}
@@ -92,8 +92,8 @@ export const Stat = forwardRef<HTMLDivElement, StatProps>(function Stat(
                                 good === null
                                     ? 'text-muted-foreground'
                                     : good
-                                        ? 'text-emerald-700 dark:text-emerald-400'
-                                        : 'text-red-700 dark:text-red-400',
+                                        ? 'text-success-text'
+                                        : 'text-error-text',
                             )}
                         >
                             {inferred === 'up' && <ArrowUpIcon className="size-3" />}

@@ -1,95 +1,158 @@
 /*
- * innostes UI design tokens.
+ * INNOSTES Business OS: design tokens (tier 2 semantic + tier 3 component).
  *
- * `@theme default` makes every token a fallback: anything the app defines in its own
- * `@theme { ... }` wins. Defaults point at Tailwind's palette, so an app that customises
- * e.g. `--color-blue-600` changes `primary` too.
+ * One palette for the product (web-app), the website and the docs.
+ * `@theme default` keeps every token overridable, but brand colours are fixed by decision:
+ * change them here, once, never per app, module or page.
  *
  * Naming: `<role>` is a surface or fill, `<role>-foreground` is text/icons drawn on it,
- * `<role>-hover` is its hover state.
+ * `<role>-hover` its hover state. Status colours come as a triad:
+ *   `<status>` (icon / indicator) · `<status>-text` (text, AA on white and on its bg) · `<status>-bg`
+ * Never use an icon shade (`text-warning`) for small text: use `text-warning-text`.
  */
+@import './primitives.css';
+
 @theme default {
-  /* Surfaces */
-  --color-background: var(--color-white);
-  --color-foreground: var(--color-zinc-950);
-  --color-card: var(--color-white);
-  --color-card-foreground: var(--color-zinc-950);
-  --color-popover: var(--color-white);
-  --color-popover-foreground: var(--color-zinc-950);
+  /* ── Typography ───────────────────────────────────────────────────────────── */
+  --font-sans:
+    'InterVariable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Cascadia Mono', 'Liberation Mono',
+    'DejaVu Sans Mono', monospace;
 
-  /* Actions */
-  --color-primary: var(--color-blue-600);
-  --color-primary-hover: var(--color-blue-700);
-  --color-primary-foreground: var(--color-white);
-  --color-secondary: var(--color-zinc-100);
-  --color-secondary-hover: var(--color-zinc-200);
-  --color-secondary-foreground: var(--color-zinc-900);
+  /* Weights: 400 / 500 / 600 only. Heavier utilities resolve to 600 so legacy
+     `font-bold` / `font-extrabold` never shout. */
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 600;
 
-  /* Subtle UI: muted text/backgrounds, and the hover/highlight colour for items */
-  --color-muted: var(--color-zinc-100);
-  --color-muted-foreground: var(--color-zinc-600);
-  --color-accent: var(--color-zinc-100);
-  --color-accent-foreground: var(--color-zinc-900);
+  /* ── Surfaces ─────────────────────────────────────────────────────────────── */
+  --color-canvas: var(--ino-slate-50); /* app / page background */
+  --color-background: var(--ino-white); /* control surfaces (inputs, outline buttons) */
+  --color-foreground: var(--ino-gray-900);
+  --color-card: var(--ino-white);
+  --color-card-foreground: var(--ino-gray-900);
+  --color-popover: var(--ino-white);
+  --color-popover-foreground: var(--ino-gray-900);
 
-  /* Status */
-  --color-destructive: var(--color-red-600);
-  --color-destructive-hover: var(--color-red-700);
-  --color-destructive-foreground: var(--color-white);
-  --color-success: var(--color-emerald-700);
-  --color-success-foreground: var(--color-white);
-  --color-warning: var(--color-amber-500);
-  --color-warning-foreground: var(--color-amber-950);
-  --color-info: var(--color-sky-700);
-  --color-info-foreground: var(--color-white);
+  /* ── Actions ──────────────────────────────────────────────────────────────── */
+  --color-primary: var(--ino-blue-600);
+  --color-primary-hover: var(--ino-blue-700);
+  --color-primary-foreground: var(--ino-white);
+  --color-primary-tint: var(--ino-blue-50); /* selected rows, active tabs */
 
-  /* Lines and focus */
-  --color-border: var(--color-zinc-200);
-  --color-input: var(--color-zinc-300);
-  --color-ring: var(--color-blue-500);
+  /* Secondary actions stay neutral: white, grey border, dark text */
+  --color-secondary: var(--ino-white);
+  --color-secondary-hover: var(--ino-slate-50);
+  --color-secondary-foreground: var(--ino-gray-900);
+  --color-secondary-border: var(--ino-gray-300);
+
+  /* ── Neutral text & subtle UI ─────────────────────────────────────────────── */
+  --color-muted: var(--ino-slate-100); /* subtle surface: table header, toolbars */
+  --color-muted-foreground: var(--ino-gray-500); /* secondary text, placeholders */
+  --color-strong-foreground: var(--ino-gray-600); /* secondary text on tints */
+  --color-subtle-foreground: var(--ino-slate-400); /* disabled / decorative only (2.56:1) */
+  --color-accent: var(--ino-slate-100); /* hover / highlight */
+  --color-accent-foreground: var(--ino-gray-900);
+
+  /* ── Brand accents ────────────────────────────────────────────────────────── */
+  --color-brand-navy: var(--ino-navy-900);
+  --color-ai: var(--ino-teal-700); /* AI / intelligence only */
+  --color-ai-text: var(--ino-teal-800);
+  --color-ai-tint: var(--ino-teal-50);
+  --color-ai-on-dark: var(--ino-teal-300); /* teal on Midnight Navy surfaces */
+
+  /* ── Status ───────────────────────────────────────────────────────────────── */
+  --color-success: var(--ino-success-icon);
+  --color-success-text: var(--ino-success-text);
+  --color-success-bg: var(--ino-success-bg);
+  --color-success-foreground: var(--ino-white);
+
+  --color-warning: var(--ino-warning-icon); /* icons on white only */
+  --color-warning-text: var(--ino-warning-text); /* text, and icons on warning-bg */
+  --color-warning-bg: var(--ino-warning-bg);
+  --color-warning-foreground: var(--ino-gray-900);
+
+  --color-error: var(--ino-error-icon);
+  --color-error-text: var(--ino-error-text);
+  --color-error-bg: var(--ino-error-bg);
+  /* Filled destructive actions use the text shade: white on #DC4C4C is only 4.05:1 */
+  --color-destructive: var(--ino-error-text);
+  --color-destructive-hover: var(--ino-error-solid-hover);
+  --color-destructive-foreground: var(--ino-white);
+
+  --color-info: var(--ino-info-icon);
+  --color-info-text: var(--ino-info-text);
+  --color-info-bg: var(--ino-info-bg);
+  --color-info-foreground: var(--ino-white);
+
+  /* ── Lines & focus ────────────────────────────────────────────────────────── */
+  --color-border: var(--ino-slate-200); /* hairlines */
+  --color-border-strong: var(--ino-slate-300); /* emphasis, hover borders */
+  --color-input: var(--ino-gray-450); /* text-entry borders: 3:1 (WCAG 1.4.11) */
+  --color-ring: var(--ino-blue-600);
+
+  /* ── Charts (marks ≥ 3:1 on white). Never used for module identity. ──────── */
+  --color-chart-1: var(--ino-blue-600);
+  --color-chart-2: var(--ino-teal-700);
+  --color-chart-3: var(--ino-navy-900);
+  --color-chart-4: var(--ino-blue-400);
+  --color-chart-5: var(--ino-teal-500);
+  --color-chart-6: var(--ino-slate-500);
+  --color-chart-7: var(--ino-gray-600);
+  --color-chart-8: var(--ino-slate-400);
+
+  /* Backdrop behind dialogs and drawers (navy-based) */
+  --color-overlay: rgb(20 36 58 / 0.48);
+
+  /* ── App shell: solid Midnight Navy sidebar ───────────────────────────────── */
+  --color-sidebar: var(--ino-navy-900);
+  --color-sidebar-foreground: var(--ino-sidebar-text);
+  --color-sidebar-muted-foreground: var(--ino-slate-400);
+  --color-sidebar-accent: var(--ino-navy-800); /* hover */
+  --color-sidebar-accent-foreground: var(--ino-white);
+  --color-sidebar-primary: var(--ino-blue-300); /* active indicator / icon */
+  --color-sidebar-primary-foreground: var(--ino-navy-900);
+  --color-sidebar-primary-soft: var(--ino-navy-700); /* active item background */
+  --color-sidebar-border: rgb(255 255 255 / 0.08);
+  --color-sidebar-ring: var(--ino-blue-300);
+
+  /* ── Radius: max 8px. Legacy xl/2xl/3xl utilities are capped so nothing looks "bubbly". */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem; /* badges, checkboxes, chips */
+  --radius-md: 0.375rem; /* buttons, inputs, menu & nav items */
+  --radius-lg: 0.5rem; /* cards, dialogs, drawers, popovers */
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.5rem;
+  --radius-3xl: 0.5rem;
+
+  /* ── Elevation: quiet. Cards use hairlines, not shadows. ──────────────────── */
+  --shadow-2xs: 0 1px 1px rgb(16 24 40 / 0.03);
+  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 4px 12px rgb(16 24 40 / 0.08);
+  --shadow-lg: 0 12px 32px rgb(16 24 40 / 0.12);
+  --shadow-xl: 0 16px 40px rgb(16 24 40 / 0.14);
+  --shadow-2xl: 0 16px 40px rgb(16 24 40 / 0.14);
 
   /*
-   * Categorical colours for charts, icon tiles and avatars: distinct hues that work together.
-   * Use them in order (chart-1, chart-2, …) for data series.
+   * Type scale. Product UI uses fixed sizes (stable in dense screens);
+   * `text-display` stays fluid for marketing pages.
+   *   caption 12 · body-sm 13 · sm 14 · subheading 16 · heading 20 · metric 24
    */
-  --color-chart-1: var(--color-blue-600);
-  --color-chart-2: var(--color-violet-500);
-  --color-chart-3: var(--color-emerald-500);
-  --color-chart-4: var(--color-amber-500);
-  --color-chart-5: var(--color-rose-500);
-  --color-chart-6: var(--color-cyan-500);
-  --color-chart-7: var(--color-orange-500);
-  --color-chart-8: var(--color-slate-500);
-
-  /* Dimmed layer behind dialogs and drawers */
-  --color-overlay: rgb(0 0 0 / 0.4);
-
-  /*
-   * App shell (Sidebar, AppRail, TopBar). Separate from card/accent so a dark or brand-coloured
-   * sidebar doesn't change cards and menus.
-   */
-  --color-sidebar: var(--color-white);
-  --color-sidebar-foreground: var(--color-zinc-700);
-  --color-sidebar-muted-foreground: var(--color-zinc-600);
-  --color-sidebar-accent: var(--color-zinc-100);
-  --color-sidebar-accent-foreground: var(--color-zinc-900);
-  --color-sidebar-primary: var(--color-blue-600);
-  --color-sidebar-primary-foreground: var(--color-white);
-  --color-sidebar-primary-soft: var(--color-blue-50);
-  --color-sidebar-border: var(--color-zinc-200);
-  --color-sidebar-ring: var(--color-blue-500);
-
-  /*
-   * Fluid type: grows smoothly from phones to large screens, in rem so it still respects the
-   * user's browser font size. Use as text-heading, text-subheading, text-metric, text-display.
-   */
-  --text-display: clamp(1.75rem, 1.35rem + 1.6vw, 2.5rem);
-  --text-display--line-height: 1.15;
-  --text-heading: clamp(1.375rem, 1.2rem + 0.75vw, 1.875rem);
-  --text-heading--line-height: 1.2;
-  --text-subheading: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
-  --text-subheading--line-height: 1.4;
-  --text-metric: clamp(1.375rem, 1.15rem + 0.9vw, 1.875rem);
-  --text-metric--line-height: 1.15;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-body-sm: 0.8125rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-display: clamp(2rem, 1.4rem + 2.4vw, 3.5rem);
+  --text-display--line-height: 1.1;
+  --text-heading: 1.25rem;
+  --text-heading--line-height: 1.75rem;
+  --text-subheading: 1rem;
+  --text-subheading--line-height: 1.5rem;
+  --text-metric: 1.5rem;
+  --text-metric--line-height: 2rem;
 
   /* Motion: sliding bar for indeterminate progress */
   --animate-indeterminate: innostes-indeterminate 1.4s ease-in-out infinite;
@@ -101,5 +164,22 @@
     100% {
       transform: translateX(300%);
     }
+  }
+}
+
+/* Numbers line up in tables, KPIs and currency. */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

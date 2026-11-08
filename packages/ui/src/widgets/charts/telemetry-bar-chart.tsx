@@ -65,6 +65,7 @@ export const TelemetryBarChart = forwardRef<
       ref={ref}
       data-slot="telemetry-bar-chart"
       className={cn('relative w-full select-none font-sans', className)}
+      role="figure"
       aria-label={ariaLabel}
       {...props}
     >
@@ -201,12 +202,12 @@ export const TelemetryBarChart = forwardRef<
             {data[hoveredIndex].label}
           </div>
           <div className="mt-1 flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-blue-500 font-medium">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
+            <span className="flex items-center gap-1.5 text-chart-1 font-medium">
+              <span className="h-2 w-2 rounded-full bg-chart-1" />
               Requests: {data[hoveredIndex].requests.toLocaleString()}
             </span>
-            <span className="flex items-center gap-1.5 text-rose-500 font-medium">
-              <span className="h-2 w-2 rounded-full bg-rose-500" />
+            <span className="flex items-center gap-1.5 text-error font-medium">
+              <span className="h-2 w-2 rounded-full bg-error" />
               Errors: {data[hoveredIndex].errors.toLocaleString()}
             </span>
           </div>

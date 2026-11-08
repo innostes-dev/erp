@@ -79,6 +79,7 @@ export const TelemetryTrendChart = forwardRef<
       ref={ref}
       data-slot="telemetry-trend-chart"
       className={cn('relative w-full select-none font-sans', className)}
+      role="figure"
       aria-label={ariaLabel}
       {...props}
     >
@@ -234,12 +235,12 @@ export const TelemetryTrendChart = forwardRef<
             {data[hoveredIndex].label}
           </div>
           <div className="mt-1 flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-blue-500 font-medium">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
+            <span className="flex items-center gap-1.5 text-chart-1 font-medium">
+              <span className="h-2 w-2 rounded-full bg-chart-1" />
               Avg: {Math.round(data[hoveredIndex].avgLatency)} ms
             </span>
-            <span className="flex items-center gap-1.5 text-purple-500 font-medium">
-              <span className="h-2 w-2 rounded-full bg-purple-500" />
+            <span className="flex items-center gap-1.5 text-chart-2 font-medium">
+              <span className="h-2 w-2 rounded-full bg-chart-2" />
               P95: {Math.round(data[hoveredIndex].p95Latency)} ms
             </span>
           </div>

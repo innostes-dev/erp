@@ -32,3 +32,13 @@ describe('mergeClassName', () => {
         ).toBe('p-2');
     });
 });
+
+describe('cn with design-system font sizes', () => {
+    it('keeps a token font size next to a text colour', () => {
+        expect(cn('text-body-sm text-muted-foreground')).toBe('text-body-sm text-muted-foreground');
+        expect(cn('text-caption', 'text-sidebar-foreground')).toBe('text-caption text-sidebar-foreground');
+    });
+    it('still resolves font-size conflicts', () => {
+        expect(cn('text-sm', 'text-caption')).toBe('text-caption');
+    });
+});

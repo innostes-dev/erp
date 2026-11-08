@@ -13,7 +13,7 @@ export const inputVariants = cva(
         'aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive/25',
         'data-invalid:border-destructive data-invalid:focus-visible:ring-destructive/25',
         'disabled:cursor-not-allowed disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:opacity-50',
-        'read-only:bg-muted/40',
+        'read-only:bg-muted',
     ],
     {
         variants: {

@@ -45,13 +45,17 @@
     "./theme.css": "./tailwind/theme.css",
     "./dark.css": "./tailwind/dark.css",
     "./styles.css": "./dist/styles.css",
-    "./api.json": "./dist/api.json"
+    "./api.json": "./dist/api.json",
+    "./primitives.css": "./tailwind/primitives.css",
+    "./brand/*": "./assets/brand/*"
   },
   "files": [
     "dist",
     "tailwind/tailwind.css",
     "tailwind/theme.css",
     "tailwind/dark.css",
+    "tailwind/primitives.css",
+    "assets/brand",
     "CHANGELOG.md",
     "LICENSE",
     "README.md",
@@ -66,7 +70,9 @@
   },
   "scripts": {
     "check:size": "node ./scripts/check-bundle-size.mjs",
-    "verify-checklist": "node ./scripts/verify-checklist.mjs"
+    "verify-checklist": "node ./scripts/verify-checklist.mjs",
+    "tokens:docs": "node ./scripts/generate-token-data.mjs",
+    "check:contrast": "node ./scripts/generate-token-data.mjs --check"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

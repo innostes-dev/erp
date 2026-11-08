@@ -1,0 +1,57 @@
+/*
+ * INNOSTES Business OS: colour primitives (tier 1).
+ *
+ * Raw brand values. Defined as plain custom properties (not @theme) so Tailwind does NOT
+ * generate utilities for them: components and pages must use the semantic tokens in
+ * theme.css (bg-primary, text-muted-foreground, bg-success-bg, …), never these.
+ *
+ * Approved direction: Executive Blue + Midnight Navy + Neutral Foundation + Restrained Teal.
+ * See docs/ui-ux/ENTERPRISE_UI_AUDIT.md §3. Contrast pairs verified in §4.
+ */
+:root {
+  /* Brand */
+  --ino-navy-900: #14243a; /* Midnight Navy: sidebar, brand */
+  --ino-navy-800: #1e3350; /* sidebar hover */
+  --ino-navy-700: #22385a; /* sidebar active */
+  --ino-blue-600: #3157d5; /* Executive Blue: primary */
+  --ino-blue-700: #2447b8; /* primary hover */
+  --ino-blue-50: #eef2fd; /* primary tint */
+  --ino-blue-300: #8fa8f0; /* active indicator on navy */
+  --ino-blue-400: #6b86e0; /* chart series */
+  --ino-teal-700: #0f766e; /* AI / intelligence accent */
+  --ino-teal-800: #115e59; /* strong teal text */
+  --ino-teal-50: #f0fdfa; /* AI tint */
+  --ino-teal-500: #2c9a8f; /* chart series */
+  --ino-teal-300: #5ec4b6; /* teal accent on navy (8:1) */
+  --ino-blue-200: #a9bcf4; /* light blue on navy */
+
+  /* Neutral foundation */
+  --ino-white: #ffffff;
+  --ino-slate-50: #f8fafc; /* canvas */
+  --ino-slate-100: #f1f5f9; /* subtle surface */
+  --ino-slate-200: #e2e8f0; /* hairline border */
+  --ino-slate-300: #cbd5e1; /* strong border */
+  --ino-gray-300: #d0d5dd; /* secondary button border */
+  --ino-slate-400: #94a3b8; /* muted (disabled / decorative / on navy) */
+  --ino-gray-450: #8a94a6; /* input border (3.06:1) */
+  --ino-gray-500: #667085; /* secondary text */
+  --ino-slate-500: #64748b; /* chart "other" */
+  --ino-gray-600: #475467; /* strong secondary text */
+  --ino-gray-900: #1d2939; /* primary text */
+  --ino-sidebar-text: #c0c8d4;
+
+  /* Semantic: icon / text / background */
+  --ino-success-icon: #15803d;
+  --ino-success-text: #166534;
+  --ino-success-bg: #dcfce7;
+  --ino-warning-icon: #d97706;
+  --ino-warning-text: #b45309;
+  --ino-warning-bg: #fef3c7;
+  --ino-error-icon: #dc4c4c;
+  --ino-error-text: #b42318;
+  --ino-error-bg: #fee2e2;
+  --ino-error-solid-hover: #912018;
+  --ino-info-icon: #3478d4;
+  --ino-info-text: #2563b8;
+  --ino-info-bg: #dbeafe;
+}

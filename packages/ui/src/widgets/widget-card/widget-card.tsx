@@ -181,7 +181,7 @@ export const WidgetCard = forwardRef<HTMLElement, WidgetCardProps>(
         aria-labelledby={titleId}
         aria-busy={loading || undefined}
         className={cn(
-          'flex min-w-0 flex-col rounded-xl border border-border bg-card text-card-foreground shadow-xs',
+          'flex min-w-0 flex-col rounded-lg border border-border bg-card text-card-foreground',
           className,
         )}
         {...props}

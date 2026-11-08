@@ -26,10 +26,11 @@ export const buttonVariants = cva(
             variant: {
                 primary:
                     'bg-primary text-primary-foreground hover:not-data-disabled:bg-primary-hover',
+                /* Neutral secondary action: white, grey border, dark text. */
                 secondary:
-                    'bg-secondary text-secondary-foreground hover:not-data-disabled:bg-secondary-hover',
+                    'border-secondary-border bg-secondary text-secondary-foreground shadow-xs hover:not-data-disabled:border-border-strong hover:not-data-disabled:bg-secondary-hover',
                 outline:
-                    'border-input bg-background text-foreground hover:not-data-disabled:bg-accent hover:not-data-disabled:text-accent-foreground',
+                    'border-secondary-border bg-background text-foreground shadow-xs hover:not-data-disabled:border-border-strong hover:not-data-disabled:bg-secondary-hover',
                 ghost:
                     'bg-transparent text-foreground hover:not-data-disabled:bg-accent hover:not-data-disabled:text-accent-foreground',
                 link: 'h-auto! border-0 bg-transparent px-0! text-primary underline-offset-4 hover:not-data-disabled:underline',

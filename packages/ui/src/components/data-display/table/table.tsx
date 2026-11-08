@@ -41,7 +41,7 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
                 ref={ref}
                 data-slot="table"
                 className={cn(
-                    'w-full caption-bottom border-collapse text-sm',
+                    'w-full caption-bottom border-collapse text-body-sm tabular',
                     className,
                 )}
                 {...props}
@@ -58,7 +58,7 @@ export const TableHeader = forwardRef<
         <thead
             ref={ref}
             data-slot="table-header"
-            className={cn('[&_tr]:border-b [&_tr]:border-border', className)}
+            className={cn('bg-muted [&_tr]:border-b [&_tr]:border-border', className)}
             {...props}
         />
     );
@@ -102,7 +102,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, ComponentProps<'tr'>>(
                 ref={ref}
                 data-slot="table-row"
                 className={cn(
-                    'border-b border-border transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
+                    'border-b border-border transition-colors hover:bg-canvas data-[state=selected]:bg-primary-tint aria-selected:bg-primary-tint',
                     className,
                 )}
                 {...props}

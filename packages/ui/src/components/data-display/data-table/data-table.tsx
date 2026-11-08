@@ -307,7 +307,7 @@ function DataTableImpl<TRow>(
         >
           <TableHeader
             className={cn(
-              'bg-muted/50',
+              'bg-muted',
               stickyHeader && 'sticky top-0 z-10 bg-muted',
               stack && '@max-2xl:sr-only',
               classNames?.header,
