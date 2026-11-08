@@ -1,26 +1,26 @@
-import { Button, EmptyState } from '@innostes/ui';
+import { Button, EmptyState, PageHeader, IconTile } from '@innostes/ui';
 import { FileSpreadsheet, Plus, Users } from 'lucide-react';
 
 export function EmployeesTab() {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between pb-2">
-        <div>
-          <h3 className="text-lg font-semibold tracking-tight">Employee Directory</h3>
-          <p className="text-sm text-muted-foreground">Manage organization hierarchy, active workforce, and profiles.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" startIcon={<FileSpreadsheet />}>
-            Import CSV
-          </Button>
-          <Button size="sm" startIcon={<Plus />}>
-            New Employee
-          </Button>
-        </div>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Employee Directory"
+        description="Manage organization hierarchy, active workforce, and profiles."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="secondary" startIcon={<FileSpreadsheet />}>
+              Import CSV
+            </Button>
+            <Button size="sm" startIcon={<Plus />}>
+              New Employee
+            </Button>
+          </div>
+        }
+      />
 
       <EmptyState
-        icon={<Users />}
+        icon={<IconTile tone="neutral" size="lg"><Users /></IconTile>}
         title="No Employees Found"
         description="Build your organization directory by adding employees, assigning managers, and setting up departments."
         actions={

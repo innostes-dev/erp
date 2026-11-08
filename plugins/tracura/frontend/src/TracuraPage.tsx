@@ -10,12 +10,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  Stat,
-  PageHeader,
-  Tabs,
-  TabsList,
-  TabsPanel,
-  TabsTab,
+  EmptyState,
   Table,
   TableHeader,
   TableRow,
@@ -30,23 +25,9 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetBody,
-  SheetFooter,
   WidgetCard,
   MetricCard,
-  Sparkline,
-  Progress,
   TagInput,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
   TelemetryBarChart,
   TelemetryDonutChart,
   TelemetryTrendChart,
@@ -67,28 +48,22 @@ import {
   Columns,
   Copy,
   Database,
-  ExternalLink,
   Eye,
   Filter,
   Info,
   Key,
   Layers,
-  Lock,
   Plus,
   RefreshCw,
   Search,
   Server,
-  Settings,
   Share2,
   Shield,
   Sliders,
   Sparkles,
   Terminal,
   Trash2,
-  X,
-  Zap,
 } from 'lucide-react';
-import { apiLoggerManifest } from './manifest';
 
 // --- TYPES ---
 
@@ -201,7 +176,10 @@ export interface DashboardAnalytics {
 const isUuid = (val?: string | null): boolean =>
   Boolean(val && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val));
 
-async function tracuraFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function tracuraFetch<T>(
+  path: string,
+  options: Omit<RequestInit, 'body'> & { body?: unknown } = {},
+): Promise<T> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('innostes_access_token') : null;
   const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
   try {
@@ -219,8 +197,10 @@ async function tracuraFetch<T>(path: string, options: RequestInit = {}): Promise
           ? 'http://localhost:8001'
           : ''
         : '';
+    const { body, ...rest } = options;
     const res = await fetch(`${baseUrl}${path}`, {
-      ...options,
+      ...rest,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -265,10 +245,41 @@ export type TracuraTab =
   | 'settings-retention'
   | 'settings-integrations';
 
-export function TracuraPage() {
+export interface TracuraPageProps {
+  /** URL section from the host shell: `overview`, `logs`, `keys` or `settings`. */
+  section?: string;
+  /** Called when the user moves to another section, so the host can update the URL. */
+  onSectionChange?: (section: string) => void;
+}
+
+/** Map an internal tab to its URL section. */
+function sectionOf(tab: string): string {
+  return tab.startsWith('settings') ? 'settings' : tab;
+}
+
+export function TracuraPage({ section, onSectionChange }: TracuraPageProps = {}) {
   // Navigation & Subfeatures
-  const [activeTab, setActiveTab] = useState<TracuraTab>('overview');
-  const [settingsSubTab, setSettingsSubTab] = useState<'general' | 'datacapture' | 'filtering' | 'security' | 'retention' | 'alerts' | 'access' | 'integrations'>('general');
+  const [activeTab, setActiveTabState] = useState<TracuraTab>(() =>
+    section === 'settings' ? 'settings-general' : ((section as TracuraTab | undefined) ?? 'overview'),
+  );
+  const setActiveTab = useCallback(
+    (tab: TracuraTab) => {
+      setActiveTabState(tab);
+      onSectionChange?.(sectionOf(tab));
+    },
+    [onSectionChange],
+  );
+  // Follow the host URL (sidebar links, Back/Forward) without resetting a settings sub-tab.
+  useEffect(() => {
+    if (!section) return;
+    setActiveTabState((current) =>
+      sectionOf(current) === section
+        ? current
+        : section === 'settings'
+          ? 'settings-general'
+          : (section as TracuraTab),
+    );
+  }, [section]);
 
   // Hierarchy Scope States
   const [projects, setProjects] = useState<ProjectItem[]>([]);
@@ -690,14 +701,14 @@ export function TracuraPage() {
   const getMethodBadgeClass = (method: string) => {
     switch (method) {
       case 'GET':
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 font-bold';
+        return 'bg-primary-tint text-primary  border-border font-bold';
       case 'POST':
-        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-bold';
+        return 'bg-success-bg text-success-text  border-border font-bold';
       case 'PUT':
       case 'PATCH':
-        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-bold';
+        return 'bg-warning-bg text-warning-text  border-border font-bold';
       case 'DELETE':
-        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 font-bold';
+        return 'bg-error-bg text-error-text  border-border font-bold';
       default:
         return 'bg-muted text-muted-foreground font-bold';
     }
@@ -706,15 +717,15 @@ export function TracuraPage() {
   // Status Badge color helper
   const getStatusBadge = (code: number) => {
     if (code >= 200 && code < 300) {
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
+      return <Badge className="bg-success-bg text-success-text border-border px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
     }
     if (code >= 300 && code < 400) {
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/20 px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
+      return <Badge className="bg-warning-bg text-warning-text border-border px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
     }
     if (code >= 400 && code < 500) {
-      return <Badge className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/20 px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
+      return <Badge className="bg-error-bg text-error-text border-border px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
     }
-    return <Badge className="bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/20 px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
+    return <Badge className="bg-muted text-strong-foreground border-border px-2 py-0.5 font-semibold text-xs">{code}</Badge>;
   };
 
   // Create Project Handler
@@ -849,24 +860,25 @@ export function TracuraPage() {
   return (
     <div className="flex h-full w-full bg-background text-foreground antialiased font-sans overflow-hidden">
       {/* 1. LEFT VERTICAL SIDEMENU */}
-      <aside className="w-64 shrink-0 border-r border-border bg-sidebar flex flex-col justify-between select-none h-full overflow-hidden">
+      <aside aria-label="Tracura navigation" className="hidden w-60 shrink-0 border-r border-border bg-card lg:flex flex-col justify-between select-none h-full overflow-hidden">
         {/* Brand & Project Scope Section */}
-        <div className="p-4 border-b border-sidebar-border space-y-3 bg-sidebar/50">
+        <div className="p-4 border-b border-border space-y-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/20">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-muted text-strong-foreground">
               <Sparkles className="size-5" />
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-sm font-bold tracking-tight text-foreground">TRACURA</span>
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">API Telemetry</span>
+              <span className="text-xs uppercase font-semibold tracking-wider text-muted-foreground">API Telemetry</span>
             </div>
           </div>
 
           {/* Project Selector */}
           <div className="space-y-1">
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Project</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Project</label>
             <div className="relative">
               <select
+                aria-label="Project"
                 value={selectedProjectId}
                 onChange={(e) => {
                   if (e.target.value === '__NEW__') {
@@ -875,7 +887,7 @@ export function TracuraPage() {
                     setSelectedProjectId(e.target.value);
                   }
                 }}
-                className="h-8 w-full appearance-none rounded-lg border border-border/80 bg-background pl-2.5 pr-7 text-xs font-semibold text-foreground hover:bg-muted/50 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="h-8 w-full appearance-none rounded-lg border border-border bg-background pl-2.5 pr-7 text-xs font-semibold text-foreground hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
               >
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -890,12 +902,13 @@ export function TracuraPage() {
 
           {/* Environment Selector */}
           <div className="space-y-1">
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Environment</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Environment</label>
             <div className="relative">
               <select
+                aria-label="Environment"
                 value={selectedEnvSlug}
                 onChange={(e) => setSelectedEnvSlug(e.target.value)}
-                className="h-8 w-full appearance-none rounded-lg border border-border/80 bg-background pl-6 pr-7 text-xs font-semibold text-foreground hover:bg-muted/50 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="h-8 w-full appearance-none rounded-lg border border-border bg-background pl-6 pr-7 text-xs font-semibold text-foreground hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
               >
                 {currentProject?.environments.map((env) => (
                   <option key={env.id} value={env.slug}>
@@ -903,7 +916,7 @@ export function TracuraPage() {
                   </option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute left-2 top-3 size-2 rounded-full bg-emerald-500" />
+              <span className="pointer-events-none absolute left-2 top-3 size-2 rounded-full bg-success" />
               <ChevronDown className="pointer-events-none absolute right-2 top-2.5 size-3.5 text-muted-foreground" />
             </div>
           </div>
@@ -913,14 +926,14 @@ export function TracuraPage() {
         <div className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
           {/* Telemetry Group */}
           <div className="space-y-1">
-            <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Telemetry & Logs</p>
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Telemetry & Logs</p>
             <button
               onClick={() => setActiveTab('overview')}
               className={cn(
                 "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 activeTab === 'overview'
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <div className="flex items-center gap-2.5">
@@ -933,8 +946,8 @@ export function TracuraPage() {
               className={cn(
                 "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 activeTab === 'logs'
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <div className="flex items-center gap-2.5">
@@ -942,7 +955,7 @@ export function TracuraPage() {
                 <span>API Requests</span>
               </div>
               {logs.length > 0 && (
-                <Badge className="bg-muted text-muted-foreground px-1.5 py-0 text-[10px]">
+                <Badge className="bg-muted text-muted-foreground px-1.5 py-0 text-xs">
                   {logs.length.toLocaleString()}
                 </Badge>
               )}
@@ -951,14 +964,14 @@ export function TracuraPage() {
 
           {/* Access Control Group */}
           <div className="space-y-1">
-            <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Access & Security</p>
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Access & Security</p>
             <button
               onClick={() => setActiveTab('keys')}
               className={cn(
                 "w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 activeTab === 'keys'
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <div className="flex items-center gap-2.5">
@@ -966,21 +979,21 @@ export function TracuraPage() {
                 <span>Ingestion Keys</span>
               </div>
               {apiKeys.length > 0 && (
-                <Badge className="bg-muted text-muted-foreground px-1.5 py-0 text-[10px]">{apiKeys.length}</Badge>
+                <Badge className="bg-muted text-muted-foreground px-1.5 py-0 text-xs">{apiKeys.length}</Badge>
               )}
             </button>
           </div>
 
           {/* Configuration Group */}
           <div className="space-y-1">
-            <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Settings & Policies</p>
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Settings & Policies</p>
             <button
               onClick={() => setActiveTab('settings-general')}
               className={cn(
                 "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 (activeTab === 'settings-general' || activeTab === 'settings')
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <Sliders className="size-4" />
@@ -991,8 +1004,8 @@ export function TracuraPage() {
               className={cn(
                 "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 activeTab === 'settings-datacapture'
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <Server className="size-4" />
@@ -1003,8 +1016,8 @@ export function TracuraPage() {
               className={cn(
                 "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 activeTab === 'settings-security'
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <Shield className="size-4" />
@@ -1015,8 +1028,8 @@ export function TracuraPage() {
               className={cn(
                 "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 activeTab === 'settings-retention'
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <Clock className="size-4" />
@@ -1027,8 +1040,8 @@ export function TracuraPage() {
               className={cn(
                 "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer",
                 activeTab === 'settings-integrations'
-                  ? "bg-blue-600/10 text-blue-600 font-semibold dark:bg-blue-600/20 dark:text-blue-400"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-primary-tint text-primary font-semibold  "
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <Code2 className="size-4" />
@@ -1038,11 +1051,11 @@ export function TracuraPage() {
         </div>
 
         {/* Footer info */}
-        <div className="p-3 border-t border-sidebar-border bg-muted/20 text-[11px] text-muted-foreground flex items-center justify-between">
+        <div className="p-3 border-t border-border bg-canvas text-xs text-muted-foreground flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
             </span>
             <span className="font-medium text-foreground">Live Telemetry</span>
           </div>
@@ -1061,7 +1074,7 @@ export function TracuraPage() {
       {/* 2. RIGHT MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Top Context & Action Bar */}
-        <header className="h-14 shrink-0 flex items-center justify-between border-b border-border/80 bg-background/95 px-6 backdrop-blur z-20">
+        <header className="h-14 shrink-0 flex items-center justify-between border-b border-border bg-card px-6 z-20">
           <div className="flex items-center gap-3">
             <h2 className="text-sm font-semibold text-foreground">
               {activeTab === 'overview' && 'Telemetry Dashboard'}
@@ -1073,7 +1086,7 @@ export function TracuraPage() {
               {activeTab === 'settings-retention' && 'Log Retention Policy'}
               {activeTab === 'settings-integrations' && 'Integration & SDK Setup'}
             </h2>
-            <span className="text-muted-foreground/40">•</span>
+            <span className="text-muted-foreground">•</span>
             <span className="text-xs text-muted-foreground font-medium">
               {currentProject?.name} ({currentEnv?.name || selectedEnvSlug})
             </span>
@@ -1094,16 +1107,17 @@ export function TracuraPage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') setActiveTab('logs');
                 }}
-                className="h-8 w-full rounded-lg border border-border/70 bg-muted/40 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="h-8 w-full rounded-lg border border-border bg-muted pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
             {/* Time range selector */}
             <div className="relative">
               <select
+                aria-label="Time range"
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                className="h-8 appearance-none rounded-lg border border-border/70 bg-muted/40 pl-7 pr-7 text-xs font-medium text-foreground hover:bg-muted/60 focus:outline-none cursor-pointer"
+                className="h-8 appearance-none rounded-lg border border-border bg-muted pl-7 pr-7 text-xs font-medium text-foreground hover:bg-muted focus:outline-none cursor-pointer"
               >
                 <option value="1h">Last 1 hour</option>
                 <option value="6h">Last 6 hours</option>
@@ -1120,7 +1134,7 @@ export function TracuraPage() {
                 variant="primary"
                 size="sm"
                 onClick={() => setActiveTab('logs')}
-                className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3"
+                className="h-8 gap-1.5 bg-primary hover:bg-primary-hover text-white font-medium text-xs px-3"
               >
                 <span>View Logs</span>
                 <ArrowRight className="size-3.5" />
@@ -1132,7 +1146,7 @@ export function TracuraPage() {
                 variant="primary"
                 size="sm"
                 onClick={() => setIsKeyModalOpen(true)}
-                className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3"
+                className="h-8 gap-1.5 bg-primary hover:bg-primary-hover text-white font-medium text-xs px-3"
               >
                 <Plus className="size-3.5" />
                 <span>Generate Key</span>
@@ -1144,7 +1158,7 @@ export function TracuraPage() {
                 variant="primary"
                 size="sm"
                 onClick={handleSaveSettings}
-                className="h-8 gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-3"
+                className="h-8 gap-1.5 bg-primary hover:bg-primary-hover text-white font-medium text-xs px-3"
               >
                 <Check className="size-3.5" />
                 <span>Save Settings</span>
@@ -1179,7 +1193,7 @@ export function TracuraPage() {
                 tone="primary"
                 sparkline={totalSparkline}
                 icon={<Layers className="h-4 w-4" />}
-                className="bg-card border-border/70 shadow-sm"
+                className="bg-card border-border shadow-sm"
               />
               <MetricCard
                 label="Successful Requests"
@@ -1190,7 +1204,7 @@ export function TracuraPage() {
                 tone="success"
                 sparkline={successSparkline}
                 icon={<CheckCircle2 className="h-4 w-4" />}
-                className="bg-card border-border/70 shadow-sm"
+                className="bg-card border-border shadow-sm"
               />
               <MetricCard
                 label="Error Requests"
@@ -1202,7 +1216,7 @@ export function TracuraPage() {
                 tone="destructive"
                 sparkline={errorSparkline}
                 icon={<AlertTriangle className="h-4 w-4" />}
-                className="bg-card border-border/70 shadow-sm"
+                className="bg-card border-border shadow-sm"
               />
               <MetricCard
                 label="Avg. Response Time"
@@ -1214,7 +1228,7 @@ export function TracuraPage() {
                 tone="chart-4"
                 sparkline={avgLatencySparkline}
                 icon={<Clock className="h-4 w-4" />}
-                className="bg-card border-border/70 shadow-sm"
+                className="bg-card border-border shadow-sm"
               />
               <MetricCard
                 label="P95 Response Time"
@@ -1226,7 +1240,7 @@ export function TracuraPage() {
                 tone="warning"
                 sparkline={p95LatencySparkline}
                 icon={<Activity className="h-4 w-4" />}
-                className="bg-card border-border/70 shadow-sm"
+                className="bg-card border-border shadow-sm"
               />
             </div>
 
@@ -1238,18 +1252,18 @@ export function TracuraPage() {
                 description="Hourly volume distribution across the selected time window"
                 actions={
                   <div className="flex items-center gap-4 text-xs">
-                    <span className="flex items-center gap-1.5 text-blue-500 font-medium">
-                      <span className="h-2 w-2 rounded-full bg-blue-500" />
+                    <span className="flex items-center gap-1.5 text-primary font-medium">
+                      <span className="h-2 w-2 rounded-full bg-primary" />
                       Requests
                     </span>
-                    <span className="flex items-center gap-1.5 text-rose-500 font-medium">
-                      <span className="h-2 w-2 rounded-full bg-rose-500" />
+                    <span className="flex items-center gap-1.5 text-error-text font-medium">
+                      <span className="h-2 w-2 rounded-full bg-destructive" />
                       Errors
                     </span>
                     <span className="text-muted-foreground">Scope: {dateRange}</span>
                   </div>
                 }
-                className="lg:col-span-5 bg-card border-border/70 shadow-sm"
+                className="lg:col-span-5 bg-card border-border shadow-sm"
               >
                 <div className="pt-2">
                   <TelemetryBarChart data={barChartData} />
@@ -1260,7 +1274,7 @@ export function TracuraPage() {
               <WidgetCard
                 title="Status Code Distribution"
                 description="Classification of HTTP response codes"
-                className="lg:col-span-4 bg-card border-border/70 shadow-sm"
+                className="lg:col-span-4 bg-card border-border shadow-sm"
               >
                 <div className="pt-4 flex items-center justify-center">
                   <TelemetryDonutChart
@@ -1276,10 +1290,10 @@ export function TracuraPage() {
                 title="Environment Health"
                 description="Telemetry performance by deployment stage"
                 viewAll={{ label: 'View All →', onClick: () => setActiveTab('logs') }}
-                className="lg:col-span-3 bg-card border-border/70 shadow-sm"
+                className="lg:col-span-3 bg-card border-border shadow-sm"
               >
-                <div className="divide-y divide-border/50 text-xs">
-                  <div className="grid grid-cols-4 pb-2 font-semibold text-muted-foreground uppercase text-[10px]">
+                <div className="divide-y divide-border text-xs">
+                  <div className="grid grid-cols-4 pb-2 font-semibold text-muted-foreground uppercase text-xs">
                     <span className="col-span-1">Environment</span>
                     <span className="text-right">Requests</span>
                     <span className="text-right">Err Rate</span>
@@ -1293,10 +1307,10 @@ export function TracuraPage() {
                             className={cn(
                               'h-2 w-2 rounded-full shrink-0',
                               env.color_badge === 'emerald' || env.status === 'Healthy'
-                                ? 'bg-emerald-500'
+                                ? 'bg-success'
                                 : env.color_badge === 'amber' || env.status === 'Degraded'
-                                  ? 'bg-amber-500'
-                                  : 'bg-rose-500',
+                                  ? 'bg-warning'
+                                  : 'bg-destructive',
                             )}
                           />
                           <span className="truncate">{env.environment}</span>
@@ -1306,12 +1320,12 @@ export function TracuraPage() {
                         <span className="text-right">
                           <Badge
                             className={cn(
-                              'text-[10px] px-2',
+                              'text-xs px-2',
                               env.status === 'Healthy'
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                ? 'bg-success-bg text-success-text  border-border'
                                 : env.status === 'Degraded'
-                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                                  : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+                                  ? 'bg-warning-bg text-warning-text  border-border'
+                                  : 'bg-error-bg text-error-text  border-border',
                             )}
                           >
                             {env.status}
@@ -1335,10 +1349,10 @@ export function TracuraPage() {
                 title="Top API Endpoints"
                 description="Most frequented routes and error rates"
                 viewAll={{ label: 'View All →', onClick: () => setActiveTab('logs') }}
-                className="lg:col-span-4 bg-card border-border/70 shadow-sm"
+                className="lg:col-span-4 bg-card border-border shadow-sm"
               >
-                <div className="divide-y divide-border/50 text-xs">
-                  <div className="grid grid-cols-12 pb-2 font-semibold text-muted-foreground uppercase text-[10px]">
+                <div className="divide-y divide-border text-xs">
+                  <div className="grid grid-cols-12 pb-2 font-semibold text-muted-foreground uppercase text-xs">
                     <span className="col-span-6">Endpoint</span>
                     <span className="col-span-3 text-right">Requests</span>
                     <span className="col-span-3 text-right">Error Rate</span>
@@ -1347,10 +1361,10 @@ export function TracuraPage() {
                     dashboardData.top_endpoints.map((ep, i) => (
                       <div key={i} className="grid grid-cols-12 items-center py-2.5">
                         <div className="col-span-6 flex items-center gap-2 truncate">
-                          <Badge className={cn('text-[9px] px-1.5 py-0 border', getMethodBadgeClass(ep.http_method))}>
+                          <Badge className={cn('text-xs px-1.5 py-0 border', getMethodBadgeClass(ep.http_method))}>
                             {ep.http_method}
                           </Badge>
-                          <span className="font-mono text-[11px] text-foreground truncate">{ep.path}</span>
+                          <span className="font-mono text-xs text-foreground truncate">{ep.path}</span>
                         </div>
                         <span className="col-span-3 text-right tabular-nums text-foreground font-medium">
                           {ep.requests.toLocaleString()}
@@ -1359,7 +1373,7 @@ export function TracuraPage() {
                           <span
                             className={cn(
                               'h-1.5 w-1.5 rounded-full',
-                              ep.error_rate_pct > 2 ? 'bg-rose-500' : 'bg-emerald-500',
+                              ep.error_rate_pct > 2 ? 'bg-destructive' : 'bg-success',
                             )}
                           />
                           {ep.error_rate_pct}%
@@ -1379,10 +1393,10 @@ export function TracuraPage() {
                 title="Top Errors"
                 description="Critical exceptions grouped by category"
                 viewAll={{ label: 'View All →', onClick: () => { setStatusPill('errors'); setActiveTab('logs'); } }}
-                className="lg:col-span-4 bg-card border-border/70 shadow-sm"
+                className="lg:col-span-4 bg-card border-border shadow-sm"
               >
-                <div className="divide-y divide-border/50 text-xs">
-                  <div className="grid grid-cols-12 pb-2 font-semibold text-muted-foreground uppercase text-[10px]">
+                <div className="divide-y divide-border text-xs">
+                  <div className="grid grid-cols-12 pb-2 font-semibold text-muted-foreground uppercase text-xs">
                     <span className="col-span-6">Error</span>
                     <span className="col-span-3 text-right">Count</span>
                     <span className="col-span-3 text-right">Last Seen</span>
@@ -1390,9 +1404,9 @@ export function TracuraPage() {
                   {dashboardData.top_errors.length > 0 ? (
                     dashboardData.top_errors.map((err, i) => (
                       <div key={i} className="grid grid-cols-12 items-center py-2.5">
-                        <div className="col-span-6 flex items-center gap-2 truncate text-rose-500 font-medium">
+                        <div className="col-span-6 flex items-center gap-2 truncate text-error-text font-medium">
                           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                          <span className="truncate font-mono text-[11px]">{err.error_type}</span>
+                          <span className="truncate font-mono text-xs">{err.error_type}</span>
                         </div>
                         <span className="col-span-3 text-right tabular-nums text-foreground font-medium">
                           {err.count.toLocaleString()}
@@ -1403,7 +1417,7 @@ export function TracuraPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="py-6 text-center text-muted-foreground text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                    <div className="py-6 text-center text-muted-foreground text-xs text-success-text font-medium">
                       ✓ No errors recorded in this period
                     </div>
                   )}
@@ -1416,17 +1430,17 @@ export function TracuraPage() {
                 description="Latency comparison: Average vs P95"
                 actions={
                   <div className="flex items-center gap-3 text-xs">
-                    <span className="flex items-center gap-1.5 text-blue-500 font-medium">
-                      <span className="h-2 w-2 rounded-full bg-blue-500" />
+                    <span className="flex items-center gap-1.5 text-primary font-medium">
+                      <span className="h-2 w-2 rounded-full bg-primary" />
                       Average
                     </span>
-                    <span className="flex items-center gap-1.5 text-purple-500 font-medium">
-                      <span className="h-2 w-2 rounded-full bg-purple-500" />
+                    <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                      <span className="h-2 w-2 rounded-full bg-strong-foreground" />
                       P95
                     </span>
                   </div>
                 }
-                className="lg:col-span-4 bg-card border-border/70 shadow-sm"
+                className="lg:col-span-4 bg-card border-border shadow-sm"
               >
                 <div className="pt-2">
                   <TelemetryTrendChart data={trendChartData} />
@@ -1458,12 +1472,12 @@ export function TracuraPage() {
                   placeholder="Search by endpoint, method, status, trace ID, user ID..."
                   value={logFilterQuery}
                   onChange={(e) => setLogFilterQuery(e.target.value)}
-                  className="h-10 w-full rounded-lg border border-border/80 bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-10 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <Button
                 variant="primary"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 h-10"
+                className="bg-primary hover:bg-primary-hover text-white font-medium px-5 h-10"
               >
                 Search
               </Button>
@@ -1480,9 +1494,10 @@ export function TracuraPage() {
             {/* Filter Dropdowns Row */}
             <div className="flex items-center gap-3 flex-wrap text-xs">
               <select
+                aria-label="HTTP method"
                 value={selectedMethod}
                 onChange={(e) => setSelectedMethod(e.target.value)}
-                className="h-8 rounded-lg border border-border/70 bg-background px-3 text-xs font-medium text-foreground focus:outline-none cursor-pointer"
+                className="h-8 rounded-lg border border-border bg-background px-3 text-xs font-medium text-foreground focus:outline-none cursor-pointer"
               >
                 <option value="ALL">All Methods</option>
                 <option value="GET">GET</option>
@@ -1492,9 +1507,10 @@ export function TracuraPage() {
               </select>
 
               <select
+                aria-label="Status code"
                 value={selectedStatusCode}
                 onChange={(e) => setSelectedStatusCode(e.target.value)}
-                className="h-8 rounded-lg border border-border/70 bg-background px-3 text-xs font-medium text-foreground focus:outline-none cursor-pointer"
+                className="h-8 rounded-lg border border-border bg-background px-3 text-xs font-medium text-foreground focus:outline-none cursor-pointer"
               >
                 <option value="ALL">All Status Codes</option>
                 <option value="200">200 OK</option>
@@ -1506,9 +1522,10 @@ export function TracuraPage() {
               </select>
 
               <select
+                aria-label="Environment"
                 value={selectedEnvSlug}
                 onChange={(e) => setSelectedEnvSlug(e.target.value)}
-                className="h-8 rounded-lg border border-border/70 bg-background px-3 text-xs font-medium text-foreground focus:outline-none cursor-pointer"
+                className="h-8 rounded-lg border border-border bg-background px-3 text-xs font-medium text-foreground focus:outline-none cursor-pointer"
               >
                 <option value="production">Production</option>
                 <option value="staging">Staging</option>
@@ -1522,15 +1539,15 @@ export function TracuraPage() {
             </div>
 
             {/* Status Filter Count Pills */}
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setStatusPill('all')}
                   className={cn(
                     'rounded-full px-3 py-1 text-xs font-semibold transition-colors cursor-pointer',
                     statusPill === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted',
+                      ? 'bg-primary text-white'
+                      : 'bg-muted text-muted-foreground hover:bg-muted',
                   )}
                 >
                   All ({logs.length.toLocaleString()})
@@ -1540,11 +1557,11 @@ export function TracuraPage() {
                   className={cn(
                     'rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer',
                     statusPill === 'success'
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted',
+                      ? 'bg-success text-white'
+                      : 'bg-muted text-muted-foreground hover:bg-muted',
                   )}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-success" />
                   Success ({logs.filter((l) => l.status_code < 400).length})
                 </button>
                 <button
@@ -1552,11 +1569,11 @@ export function TracuraPage() {
                   className={cn(
                     'rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer',
                     statusPill === 'errors'
-                      ? 'bg-rose-600 text-white'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted',
+                      ? 'bg-destructive text-white'
+                      : 'bg-muted text-muted-foreground hover:bg-muted',
                   )}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
                   Errors ({logs.filter((l) => l.status_code >= 400).length})
                 </button>
                 <button
@@ -1564,11 +1581,11 @@ export function TracuraPage() {
                   className={cn(
                     'rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer',
                     statusPill === '4xx'
-                      ? 'bg-amber-600 text-white'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted',
+                      ? 'bg-warning text-white'
+                      : 'bg-muted text-muted-foreground hover:bg-muted',
                   )}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-warning" />
                   4xx ({logs.filter((l) => l.status_code >= 400 && l.status_code < 500).length})
                 </button>
                 <button
@@ -1576,11 +1593,11 @@ export function TracuraPage() {
                   className={cn(
                     'rounded-full px-3 py-1 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer',
                     statusPill === '5xx'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted',
+                      ? 'bg-strong-foreground text-white'
+                      : 'bg-muted text-muted-foreground hover:bg-muted',
                   )}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-strong-foreground" />
                   5xx ({logs.filter((l) => l.status_code >= 500).length})
                 </button>
               </div>
@@ -1594,13 +1611,13 @@ export function TracuraPage() {
             {/* SPLIT SCREEN VIEW: Table on Left, Detailed Inspector on Right */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
               {/* Left Pane: Requests Table */}
-              <div className="xl:col-span-6 rounded-xl border border-border/80 bg-card overflow-hidden shadow-sm">
+              <div className="xl:col-span-6 rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <Table className="text-xs">
-                    <TableHeader className="bg-muted/30">
+                    <TableHeader className="bg-muted">
                       <TableRow>
                         <TableHead className="w-10">
-                          <input type="checkbox" className="rounded border-border" />
+                          <input type="checkbox" className="rounded border-border" aria-label="Select all requests" />
                         </TableHead>
                         <TableHead className="w-20">Time ↓</TableHead>
                         <TableHead className="w-16">Method</TableHead>
@@ -1620,15 +1637,15 @@ export function TracuraPage() {
                             onClick={() => setSelectedLogId(log.id)}
                             className={cn(
                               'cursor-pointer transition-colors',
-                              isSelected ? 'bg-primary/5 font-medium' : 'hover:bg-muted/40',
+                              isSelected ? 'bg-primary-tint font-medium' : 'hover:bg-muted',
                             )}
                           >
                             <TableCell onClick={(e) => e.stopPropagation()}>
-                              <input type="checkbox" className="rounded border-border" />
+                              <input type="checkbox" className="rounded border-border" aria-label={`Select request ${log.id}`} />
                             </TableCell>
                             <TableCell className="font-mono text-muted-foreground">{log.created_at}</TableCell>
                             <TableCell>
-                              <Badge className={cn('text-[9px] px-1.5 py-0 border', getMethodBadgeClass(log.http_method))}>
+                              <Badge className={cn('text-xs px-1.5 py-0 border', getMethodBadgeClass(log.http_method))}>
                                 {log.http_method}
                               </Badge>
                             </TableCell>
@@ -1642,7 +1659,7 @@ export function TracuraPage() {
                             <TableCell className="tabular-nums text-muted-foreground">
                               {(log.size_bytes / 1024).toFixed(1)} KB
                             </TableCell>
-                            <TableCell className="text-right font-mono text-muted-foreground text-[11px]">
+                            <TableCell className="text-right font-mono text-muted-foreground text-xs">
                               <span className="flex items-center justify-end gap-1">
                                 {log.correlation_id}
                                 <Copy
@@ -1662,14 +1679,14 @@ export function TracuraPage() {
                 </div>
 
                 {/* Table Pagination Footer */}
-                <div className="flex items-center justify-between border-t border-border/60 bg-muted/20 px-4 py-2.5 text-xs text-muted-foreground">
+                <div className="flex items-center justify-between border-t border-border bg-canvas px-4 py-2.5 text-xs text-muted-foreground">
                   <span>Showing 1–{filteredLogs.length} of {logs.length} requests</span>
                   <div className="flex items-center gap-1.5">
-                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled>
+                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" disabled aria-label="Previous page">
                       <ChevronLeft className="h-3.5 w-3.5" />
                     </Button>
-                    <span className="px-2 py-0.5 rounded bg-primary/10 text-primary font-semibold text-xs">1</span>
-                    <Button variant="outline" size="sm" className="h-7 w-7 p-0">
+                    <span className="px-2 py-0.5 rounded bg-primary-tint text-primary font-semibold text-xs">1</span>
+                    <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label="Next page">
                       <ChevronRight className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -1677,9 +1694,10 @@ export function TracuraPage() {
               </div>
 
               {/* Right Pane: Deep Request Inspector */}
-              <div className="xl:col-span-6 rounded-xl border border-border/80 bg-card overflow-hidden shadow-sm sticky top-20">
+              {selectedLog ? (
+              <div className="xl:col-span-6 rounded-xl border border-border bg-card overflow-hidden shadow-sm sticky top-20">
                 {/* Inspector Header Banner */}
-                <div className="border-b border-border/70 p-4 bg-muted/10 space-y-2">
+                <div className="border-b border-border p-4 bg-canvas space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {getStatusBadge(selectedLog.status_code)}
@@ -1688,10 +1706,10 @@ export function TracuraPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="h-7 w-7 p-0">
+                      <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label="Previous request">
                         <ChevronLeft className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="outline" size="sm" className="h-7 w-7 p-0">
+                      <Button variant="outline" size="sm" className="h-7 w-7 p-0" aria-label="Next request">
                         <ChevronRight className="h-3.5 w-3.5" />
                       </Button>
                       <Button
@@ -1727,14 +1745,14 @@ export function TracuraPage() {
                 </div>
 
                 {/* Inspector Sub-Tabs */}
-                <div className="border-b border-border/60 bg-muted/20 px-4">
+                <div className="border-b border-border bg-canvas px-4">
                   <div className="flex space-x-4 text-xs font-semibold">
                     <button
                       onClick={() => setInspectorTab('overview')}
                       className={cn(
                         'py-2.5 border-b-2 transition-colors cursor-pointer',
                         inspectorTab === 'overview'
-                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          ? 'border-primary text-primary '
                           : 'border-transparent text-muted-foreground hover:text-foreground',
                       )}
                     >
@@ -1745,19 +1763,19 @@ export function TracuraPage() {
                       className={cn(
                         'py-2.5 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer',
                         inspectorTab === 'events'
-                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          ? 'border-primary text-primary '
                           : 'border-transparent text-muted-foreground hover:text-foreground',
                       )}
                     >
                       <span>Logs & Events</span>
-                      <Badge className="bg-muted px-1.5 py-0 text-[10px]">12</Badge>
+                      <Badge className="bg-muted px-1.5 py-0 text-xs">12</Badge>
                     </button>
                     <button
                       onClick={() => setInspectorTab('request')}
                       className={cn(
                         'py-2.5 border-b-2 transition-colors cursor-pointer',
                         inspectorTab === 'request'
-                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          ? 'border-primary text-primary '
                           : 'border-transparent text-muted-foreground hover:text-foreground',
                       )}
                     >
@@ -1768,7 +1786,7 @@ export function TracuraPage() {
                       className={cn(
                         'py-2.5 border-b-2 transition-colors cursor-pointer',
                         inspectorTab === 'response'
-                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          ? 'border-primary text-primary '
                           : 'border-transparent text-muted-foreground hover:text-foreground',
                       )}
                     >
@@ -1778,10 +1796,10 @@ export function TracuraPage() {
                       <button
                         onClick={() => setInspectorTab('error')}
                         className={cn(
-                          'py-2.5 border-b-2 transition-colors text-rose-500 cursor-pointer',
+                          'py-2.5 border-b-2 transition-colors text-error-text cursor-pointer',
                           inspectorTab === 'error'
-                            ? 'border-rose-600 font-bold'
-                            : 'border-transparent hover:text-rose-600',
+                            ? 'border-error font-bold'
+                            : 'border-transparent hover:text-error-text',
                         )}
                       >
                         Error
@@ -1792,7 +1810,7 @@ export function TracuraPage() {
                       className={cn(
                         'py-2.5 border-b-2 transition-colors cursor-pointer',
                         inspectorTab === 'timeline'
-                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          ? 'border-primary text-primary '
                           : 'border-transparent text-muted-foreground hover:text-foreground',
                       )}
                     >
@@ -1808,12 +1826,12 @@ export function TracuraPage() {
                       {/* Split: Request Info & Error Summary */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Request Information */}
-                        <div className="rounded-lg border border-border/70 p-3 space-y-2 bg-muted/10">
+                        <div className="rounded-lg border border-border p-3 space-y-2 bg-canvas">
                           <h4 className="font-semibold text-foreground text-xs">Request Information</h4>
-                          <div className="space-y-1.5 text-muted-foreground font-mono text-[11px]">
+                          <div className="space-y-1.5 text-muted-foreground font-mono text-xs">
                             <div className="flex justify-between">
                               <span className="font-sans text-muted-foreground">Method:</span>
-                              <Badge className={cn('text-[9px] px-1 py-0', getMethodBadgeClass(selectedLog.http_method))}>
+                              <Badge className={cn('text-xs px-1 py-0', getMethodBadgeClass(selectedLog.http_method))}>
                                 {selectedLog.http_method}
                               </Badge>
                             </div>
@@ -1835,7 +1853,7 @@ export function TracuraPage() {
                             </div>
                             <div className="flex justify-between">
                               <span className="font-sans">Environment:</span>
-                              <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0">
+                              <Badge className="bg-success-bg text-success-text text-xs px-1.5 py-0">
                                 {selectedLog.environment}
                               </Badge>
                             </div>
@@ -1856,22 +1874,22 @@ export function TracuraPage() {
 
                         {/* Error Summary (if error exists) */}
                         {selectedLog.error ? (
-                          <div className="rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 space-y-2">
-                            <div className="flex items-center gap-1.5 text-rose-500 font-semibold text-xs">
+                          <div className="rounded-lg border border-border bg-error-bg p-3 space-y-2">
+                            <div className="flex items-center gap-1.5 text-error-text font-semibold text-xs">
                               <AlertCircle className="h-4 w-4 shrink-0" />
                               <span>{selectedLog.error.type || 'Error Summary'}</span>
                             </div>
-                            <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">
+                            <p className="text-xs text-error-text font-medium">
                               {selectedLog.error.message}
                             </p>
-                            <div className="space-y-1 text-[11px] font-mono text-muted-foreground pt-1 border-t border-rose-500/20">
+                            <div className="space-y-1 text-xs font-mono text-muted-foreground pt-1 border-t border-border">
                               <div className="flex justify-between">
                                 <span className="font-sans">Error Type:</span>
                                 <span className="text-foreground">{selectedLog.error.type}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="font-sans">Status Code:</span>
-                                <span className="text-rose-500 font-bold">{selectedLog.status_code}</span>
+                                <span className="text-error-text font-bold">{selectedLog.status_code}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="font-sans">Source:</span>
@@ -1880,16 +1898,16 @@ export function TracuraPage() {
                             </div>
                             <button
                               onClick={() => setInspectorTab('events')}
-                              className="text-[11px] text-blue-500 hover:underline font-semibold block pt-1 cursor-pointer"
+                              className="text-xs text-primary hover:underline font-semibold block pt-1 cursor-pointer"
                             >
                               View in Logs & Events →
                             </button>
                           </div>
                         ) : (
-                          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 flex flex-col items-center justify-center text-center space-y-1">
-                            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
-                            <span className="font-semibold text-xs text-emerald-600 dark:text-emerald-400">Request Succeeded</span>
-                            <span className="text-[11px] text-muted-foreground">No application exceptions or errors recorded.</span>
+                          <div className="rounded-lg border border-border bg-success-bg p-3 flex flex-col items-center justify-center text-center space-y-1">
+                            <CheckCircle2 className="h-8 w-8 text-success-text" />
+                            <span className="font-semibold text-xs text-success-text ">Request Succeeded</span>
+                            <span className="text-xs text-muted-foreground">No application exceptions or errors recorded.</span>
                           </div>
                         )}
                       </div>
@@ -1897,71 +1915,71 @@ export function TracuraPage() {
                       {/* Request JSON and Response JSON Side by Side */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Request JSON */}
-                        <div className="rounded-lg border border-border/70 overflow-hidden bg-slate-950 text-slate-100">
-                          <div className="flex items-center justify-between border-b border-slate-800 px-3 py-1.5 bg-slate-900/60">
-                            <span className="font-semibold text-[11px]">Request (JSON)</span>
+                        <div className="rounded-lg border border-border overflow-hidden bg-brand-navy text-white">
+                          <div className="flex items-center justify-between border-b border-border-strong px-3 py-1.5 bg-brand-navy">
+                            <span className="font-semibold text-xs">Request (JSON)</span>
                             <div className="flex items-center gap-2">
-                              <div className="flex gap-1 text-[10px]">
+                              <div className="flex gap-1 text-xs">
                                 <button
                                   onClick={() => setJsonReqTab('headers')}
-                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonReqTab === 'headers' ? 'bg-blue-600 text-white font-medium' : 'text-slate-400 hover:text-white')}
+                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonReqTab === 'headers' ? 'bg-primary text-white font-medium' : 'text-sidebar-foreground hover:text-white')}
                                 >
                                   Headers
                                 </button>
                                 <button
                                   onClick={() => setJsonReqTab('body')}
-                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonReqTab === 'body' ? 'bg-blue-600 text-white font-medium' : 'text-slate-400 hover:text-white')}
+                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonReqTab === 'body' ? 'bg-primary text-white font-medium' : 'text-sidebar-foreground hover:text-white')}
                                 >
                                   Body
                                 </button>
                               </div>
                               <Copy
-                                className="h-3 w-3 text-slate-400 hover:text-white cursor-pointer"
+                                className="h-3 w-3 text-sidebar-muted-foreground hover:text-white cursor-pointer"
                                 onClick={() => navigator.clipboard.writeText(JSON.stringify(jsonReqTab === 'headers' ? selectedLog.request_headers : selectedLog.request_body, null, 2))}
                               />
                             </div>
                           </div>
-                          <pre className="p-3 text-[11px] font-mono leading-relaxed overflow-x-auto text-emerald-400 max-h-48">
+                          <pre className="p-3 text-xs font-mono leading-relaxed overflow-x-auto text-success max-h-48">
                             {JSON.stringify(jsonReqTab === 'headers' ? selectedLog.request_headers : selectedLog.request_body, null, 2)}
                           </pre>
                         </div>
 
                         {/* Response JSON */}
-                        <div className="rounded-lg border border-border/70 overflow-hidden bg-slate-950 text-slate-100">
-                          <div className="flex items-center justify-between border-b border-slate-800 px-3 py-1.5 bg-slate-900/60">
-                            <span className="font-semibold text-[11px]">Response (JSON)</span>
+                        <div className="rounded-lg border border-border overflow-hidden bg-brand-navy text-white">
+                          <div className="flex items-center justify-between border-b border-border-strong px-3 py-1.5 bg-brand-navy">
+                            <span className="font-semibold text-xs">Response (JSON)</span>
                             <div className="flex items-center gap-2">
-                              <div className="flex gap-1 text-[10px]">
+                              <div className="flex gap-1 text-xs">
                                 <button
                                   onClick={() => setJsonResTab('headers')}
-                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonResTab === 'headers' ? 'bg-blue-600 text-white font-medium' : 'text-slate-400 hover:text-white')}
+                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonResTab === 'headers' ? 'bg-primary text-white font-medium' : 'text-sidebar-foreground hover:text-white')}
                                 >
                                   Headers
                                 </button>
                                 <button
                                   onClick={() => setJsonResTab('body')}
-                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonResTab === 'body' ? 'bg-blue-600 text-white font-medium' : 'text-slate-400 hover:text-white')}
+                                  className={cn('px-1.5 py-0.5 rounded cursor-pointer', jsonResTab === 'body' ? 'bg-primary text-white font-medium' : 'text-sidebar-foreground hover:text-white')}
                                 >
                                   Body
                                 </button>
                               </div>
                               <Copy
-                                className="h-3 w-3 text-slate-400 hover:text-white cursor-pointer"
+                                className="h-3 w-3 text-sidebar-muted-foreground hover:text-white cursor-pointer"
                                 onClick={() => navigator.clipboard.writeText(JSON.stringify(jsonResTab === 'headers' ? selectedLog.response_headers : selectedLog.response_body, null, 2))}
                               />
                             </div>
                           </div>
-                          <pre className="p-3 text-[11px] font-mono leading-relaxed overflow-x-auto text-blue-400 max-h-48">
+                          <pre className="p-3 text-xs font-mono leading-relaxed overflow-x-auto text-primary max-h-48">
                             {JSON.stringify(jsonResTab === 'headers' ? selectedLog.response_headers : selectedLog.response_body, null, 2)}
                           </pre>
                         </div>
                       </div>
 
                       {/* Timeline Section */}
-                      <div className="rounded-lg border border-border/70 p-3 space-y-3 bg-muted/5">
+                      <div className="rounded-lg border border-border p-3 space-y-3 bg-canvas">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold text-foreground text-xs">Execution Timeline</h4>
-                          <div className="flex items-center gap-1.5 text-[10px]">
+                          <div className="flex items-center gap-1.5 text-xs">
                             <button
                               onClick={() => setTimelineFilter('all')}
                               className={cn('px-2 py-0.5 rounded cursor-pointer', timelineFilter === 'all' ? 'bg-primary text-primary-foreground font-semibold' : 'bg-muted text-muted-foreground')}
@@ -1995,28 +2013,28 @@ export function TracuraPage() {
                               return true;
                             })
                             .map((step, idx) => (
-                              <div key={idx} className="flex items-center justify-between gap-3 py-1 border-b border-border/40 last:border-none">
+                              <div key={idx} className="flex items-center justify-between gap-3 py-1 border-b border-border last:border-none">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground text-[11px]">{step.time}</span>
+                                  <span className="text-muted-foreground text-xs">{step.time}</span>
                                   <span
                                     className={cn(
                                       'h-2 w-2 rounded-full',
-                                      step.level === 'ERROR' ? 'bg-rose-500' : 'bg-blue-500',
+                                      step.level === 'ERROR' ? 'bg-destructive' : 'bg-primary',
                                     )}
                                   />
-                                  <span className="text-foreground text-[11px] font-sans">{step.message}</span>
+                                  <span className="text-foreground text-xs font-sans">{step.message}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge
                                     className={cn(
-                                      'text-[9px] px-1 py-0',
-                                      step.level === 'ERROR' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                                      'text-xs px-1 py-0',
+                                      step.level === 'ERROR' ? 'bg-error-bg text-error-text border-border' : 'bg-primary-tint text-primary border-border',
                                     )}
                                   >
                                     {step.level}
                                   </Badge>
                                   {step.duration && (
-                                    <span className="text-muted-foreground text-[10px]">{step.duration}</span>
+                                    <span className="text-muted-foreground text-xs">{step.duration}</span>
                                   )}
                                 </div>
                               </div>
@@ -2030,13 +2048,13 @@ export function TracuraPage() {
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-semibold text-foreground mb-1">Sanitized Request Headers</h4>
-                        <pre className="rounded-lg bg-slate-950 p-3 text-xs font-mono text-emerald-400 overflow-x-auto">
+                        <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-success overflow-x-auto">
                           {JSON.stringify(selectedLog.request_headers, null, 2)}
                         </pre>
                       </div>
                       <div>
                         <h4 className="font-semibold text-foreground mb-1">Sanitized Request Body</h4>
-                        <pre className="rounded-lg bg-slate-950 p-3 text-xs font-mono text-emerald-400 overflow-x-auto">
+                        <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-success overflow-x-auto">
                           {JSON.stringify(selectedLog.request_body, null, 2)}
                         </pre>
                       </div>
@@ -2047,13 +2065,13 @@ export function TracuraPage() {
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-semibold text-foreground mb-1">Response Headers</h4>
-                        <pre className="rounded-lg bg-slate-950 p-3 text-xs font-mono text-blue-400 overflow-x-auto">
+                        <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-primary overflow-x-auto">
                           {JSON.stringify(selectedLog.response_headers, null, 2)}
                         </pre>
                       </div>
                       <div>
                         <h4 className="font-semibold text-foreground mb-1">Response Body</h4>
-                        <pre className="rounded-lg bg-slate-950 p-3 text-xs font-mono text-blue-400 overflow-x-auto">
+                        <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-primary overflow-x-auto">
                           {JSON.stringify(selectedLog.response_body, null, 2)}
                         </pre>
                       </div>
@@ -2062,15 +2080,15 @@ export function TracuraPage() {
 
                   {inspectorTab === 'error' && selectedLog.error && (
                     <div className="space-y-3">
-                      <div className="rounded-lg bg-rose-500/10 border border-rose-500/20 p-3">
-                        <div className="font-bold text-rose-600 text-sm">{selectedLog.error.type}</div>
-                        <div className="text-xs text-rose-500 mt-1">{selectedLog.error.message}</div>
-                        <div className="text-[11px] text-muted-foreground font-mono mt-2">Source: {selectedLog.error.source}</div>
+                      <div className="rounded-lg bg-error-bg border border-border p-3">
+                        <div className="font-bold text-error-text text-sm">{selectedLog.error.type}</div>
+                        <div className="text-xs text-error-text mt-1">{selectedLog.error.message}</div>
+                        <div className="text-xs text-muted-foreground font-mono mt-2">Source: {selectedLog.error.source}</div>
                       </div>
                       {selectedLog.error.stack_trace && (
                         <div>
                           <h4 className="font-semibold text-foreground mb-1">Structured Stack Trace</h4>
-                          <pre className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-rose-300 overflow-x-auto">
+                          <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-error overflow-x-auto">
                             {selectedLog.error.stack_trace}
                           </pre>
                         </div>
@@ -2081,13 +2099,13 @@ export function TracuraPage() {
                   {inspectorTab === 'events' && (
                     <div className="space-y-2">
                       <h4 className="font-semibold text-foreground mb-2">Application Logs for Correlation ID: {selectedLog.correlation_id}</h4>
-                      <div className="rounded-lg border border-border bg-slate-950 p-3 font-mono text-xs space-y-1.5 text-slate-300">
+                      <div className="rounded-lg border border-border bg-brand-navy p-3 font-mono text-xs space-y-1.5 text-sidebar-foreground">
                         <div>[2026-10-31 10:23:45.104] [INFO]  [order-service] Starting new checkout session</div>
                         <div>[2026-10-31 10:23:45.212] [INFO]  [order-service] Cart validated: 2 items, currency INR</div>
                         <div>[2026-10-31 10:23:45.340] [INFO]  [auth-guard] Token verified for user usr_9921</div>
                         <div>[2026-10-31 10:23:45.823] [INFO]  [payment-proxy] Outbound call to https://api.razorpay.com/v1/orders</div>
-                        <div className="text-rose-400">[2026-10-31 10:23:46.021] [ERROR] [payment-proxy] Upstream returned 502 Bad Gateway</div>
-                        <div className="text-rose-400">[2026-10-31 10:23:46.022] [ERROR] [order-service] Order transaction cancelled due to gateway error</div>
+                        <div className="text-error">[2026-10-31 10:23:46.021] [ERROR] [payment-proxy] Upstream returned 502 Bad Gateway</div>
+                        <div className="text-error">[2026-10-31 10:23:46.022] [ERROR] [order-service] Order transaction cancelled due to gateway error</div>
                       </div>
                     </div>
                   )}
@@ -2095,24 +2113,29 @@ export function TracuraPage() {
                   {inspectorTab === 'timeline' && (
                     <div className="p-2 space-y-3">
                       <p className="text-xs text-muted-foreground">Detailed lifecycle trace across microservices:</p>
-                      <div className="border-l-2 border-blue-500 pl-4 space-y-4">
+                      <div className="border-l-2 border-primary pl-4 space-y-4">
                         <div>
                           <div className="font-semibold text-foreground">1. Gateway Ingestion</div>
-                          <div className="text-muted-foreground text-[11px]">Request parsed and authenticated in 2ms.</div>
+                          <div className="text-muted-foreground text-xs">Request parsed and authenticated in 2ms.</div>
                         </div>
                         <div>
                           <div className="font-semibold text-foreground">2. Application Controller</div>
-                          <div className="text-muted-foreground text-[11px]">Dispatched to OrderService.createOrder in 12ms.</div>
+                          <div className="text-muted-foreground text-xs">Dispatched to OrderService.createOrder in 12ms.</div>
                         </div>
                         <div>
-                          <div className="font-semibold text-rose-500">3. Outbound Payment Call</div>
-                          <div className="text-rose-400 text-[11px]">Upstream gateway timeout after 1820ms.</div>
+                          <div className="font-semibold text-error-text">3. Outbound Payment Call</div>
+                          <div className="text-error text-xs">Upstream gateway timeout after 1820ms.</div>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
+              ) : (
+                <div className="xl:col-span-6 flex items-center justify-center rounded-lg border border-border bg-card p-8">
+                  <EmptyState title="No request selected" description="Requests appear here as soon as your service sends telemetry. Select one to inspect headers, payloads and timing." />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -2132,7 +2155,7 @@ export function TracuraPage() {
               <Button
                 variant="primary"
                 onClick={() => { setCreatedRawKey(null); setIsKeyModalOpen(true); }}
-                className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                className="gap-2 bg-primary hover:bg-primary-hover text-white font-medium"
               >
                 <Plus className="h-4 w-4" />
                 <span>Generate Ingestion Key</span>
@@ -2140,9 +2163,9 @@ export function TracuraPage() {
             </div>
 
             {/* Ingestion Keys Table */}
-            <Card className="border-border/80">
+            <Card className="border-border">
               <Table className="text-xs">
-                <TableHeader className="bg-muted/40">
+                <TableHeader className="bg-muted">
                   <TableRow>
                     <TableHead>Key Name</TableHead>
                     <TableHead>Prefix</TableHead>
@@ -2163,7 +2186,7 @@ export function TracuraPage() {
                       <TableCell>
                         <div className="flex gap-1">
                           {k.allowed_environments.map((env, i) => (
-                            <Badge key={i} className="text-[10px] px-1.5 py-0 bg-blue-500/10 text-blue-500 border-blue-500/20">
+                            <Badge key={i} className="text-xs px-1.5 py-0 bg-primary-tint text-primary border-border">
                               {env}
                             </Badge>
                           ))}
@@ -2171,7 +2194,7 @@ export function TracuraPage() {
                       </TableCell>
                       <TableCell className="tabular-nums">{k.rate_limit_rpm.toLocaleString()} RPM</TableCell>
                       <TableCell>
-                        <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] px-2">
+                        <Badge className="bg-success-bg text-success-text border-border text-xs px-2">
                           Active
                         </Badge>
                       </TableCell>
@@ -2181,7 +2204,7 @@ export function TracuraPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRevokeKey(k.id)}
-                          className="h-7 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+                          className="h-7 text-error-text hover:text-error-text hover:bg-error-bg"
                         >
                           Revoke
                         </Button>
@@ -2200,7 +2223,7 @@ export function TracuraPage() {
         {(activeTab === 'settings' || activeTab.startsWith('settings-')) && (
           <div className="space-y-6 animate-in fade-in-50 duration-300">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border/60 pb-4">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
                   {activeTab === 'settings-datacapture' && 'Data Capture Policies'}
@@ -2215,7 +2238,7 @@ export function TracuraPage() {
               </div>
               <div className="flex items-center gap-3">
                 {saveSuccessMessage && (
-                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                  <span className="text-xs text-success-text font-semibold flex items-center gap-1">
                     <Check className="h-3.5 w-3.5" />
                     {saveSuccessMessage}
                   </span>
@@ -2223,7 +2246,7 @@ export function TracuraPage() {
                 <Button
                   variant="primary"
                   onClick={handleSaveSettings}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 h-9"
+                  className="bg-primary hover:bg-primary-hover text-white font-medium px-4 h-9"
                 >
                   Save Changes
                 </Button>
@@ -2235,9 +2258,9 @@ export function TracuraPage() {
               {/* Left Column: Form Controls */}
               <div className="lg:col-span-7 space-y-6">
                 {(activeTab === 'settings-general' || activeTab === 'settings') && (
-                <Card className="p-5 border-border/80 space-y-4">
+                <Card className="p-5 border-border space-y-4">
                   <div className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-blue-600" />
+                    <Database className="h-4 w-4 text-primary" />
                     <div>
                       <h3 className="font-semibold text-sm text-foreground">Project Information</h3>
                       <p className="text-xs text-muted-foreground">Basic details about this project.</p>
@@ -2249,33 +2272,35 @@ export function TracuraPage() {
                       <label className="font-medium text-foreground block mb-1">Project Name</label>
                       <input
                         type="text"
-                        value={projectNameInput}
+                        aria-label="Project name"
+                    value={projectNameInput}
                         onChange={(e) => setProjectNameInput(e.target.value)}
-                        className="h-9 w-full rounded-lg border border-border/80 bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="h-9 w-full rounded-lg border border-border bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                     <div>
                       <label className="font-medium text-muted-foreground block mb-1">Organization</label>
-                      <input
+                      <input aria-label="Organization"
                         type="text"
                         value={tenantOrgName || currentProject?.name || 'Innostes ERP'}
                         disabled
-                        className="h-9 w-full rounded-lg border border-border/50 bg-muted/30 px-3 text-xs text-muted-foreground cursor-not-allowed"
+                        className="h-9 w-full rounded-lg border border-border bg-muted px-3 text-xs text-muted-foreground cursor-not-allowed"
                       />
                     </div>
                     <div className="sm:col-span-2">
                       <label className="font-medium text-foreground block mb-1">Description</label>
                       <textarea
                         rows={2}
-                        value={projectDescInput}
+                        aria-label="Project description"
+                    value={projectDescInput}
                         onChange={(e) => setProjectDescInput(e.target.value)}
-                        className="w-full rounded-lg border border-border/80 bg-background p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full rounded-lg border border-border bg-background p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                       />
                     </div>
                     <div>
                       <label className="font-medium text-foreground block mb-1">Environment</label>
-                      <div className="flex items-center gap-2 h-9 rounded-lg border border-border/80 bg-background px-3 text-xs text-foreground">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <div className="flex items-center gap-2 h-9 rounded-lg border border-border bg-background px-3 text-xs text-foreground">
+                        <span className="h-2 w-2 rounded-full bg-success" />
                         <span>{currentEnv?.name || 'Production'}</span>
                       </div>
                     </div>
@@ -2284,10 +2309,10 @@ export function TracuraPage() {
                 )}
 
                 {(activeTab === 'settings-datacapture' || activeTab === 'settings') && (
-                <Card className="p-5 border-border/80 space-y-4">
+                <Card className="p-5 border-border space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Server className="h-4 w-4 text-blue-600" />
+                      <Server className="h-4 w-4 text-primary" />
                       <div>
                         <h3 className="font-semibold text-sm text-foreground">Data Capture</h3>
                         <p className="text-xs text-muted-foreground">Choose what data to capture from your API requests.</p>
@@ -2299,50 +2324,50 @@ export function TracuraPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/10">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-canvas">
                       <div>
                         <div className="font-medium text-foreground">Capture Request Headers</div>
-                        <div className="text-[11px] text-muted-foreground">Store HTTP request headers.</div>
+                        <div className="text-xs text-muted-foreground">Store HTTP request headers.</div>
                       </div>
                       <Switch checked={captureReqHeaders} onCheckedChange={setCaptureReqHeaders} />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/10">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-canvas">
                       <div>
                         <div className="font-medium text-foreground">Capture Response Headers</div>
-                        <div className="text-[11px] text-muted-foreground">Store HTTP response headers.</div>
+                        <div className="text-xs text-muted-foreground">Store HTTP response headers.</div>
                       </div>
                       <Switch checked={captureResHeaders} onCheckedChange={setCaptureResHeaders} />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/10">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-canvas">
                       <div>
                         <div className="font-medium text-foreground">Capture Request Body</div>
-                        <div className="text-[11px] text-muted-foreground">Store request body (JSON, form-data, text).</div>
+                        <div className="text-xs text-muted-foreground">Store request body (JSON, form-data, text).</div>
                       </div>
                       <Switch checked={captureReqBody} onCheckedChange={setCaptureReqBody} />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/10">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-canvas">
                       <div>
                         <div className="font-medium text-foreground">Capture Response Body</div>
-                        <div className="text-[11px] text-muted-foreground">Store response body (JSON, text, etc.).</div>
+                        <div className="text-xs text-muted-foreground">Store response body (JSON, text, etc.).</div>
                       </div>
                       <Switch checked={captureResBody} onCheckedChange={setCaptureResBody} />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/10">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-canvas">
                       <div>
                         <div className="font-medium text-foreground">Capture Errors & Stack Traces</div>
-                        <div className="text-[11px] text-muted-foreground">Store error details and stack traces.</div>
+                        <div className="text-xs text-muted-foreground">Store error details and stack traces.</div>
                       </div>
                       <Switch checked={captureErrors} onCheckedChange={setCaptureErrors} />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-muted/10">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-canvas">
                       <div>
                         <div className="font-medium text-foreground">Capture Custom Logs</div>
-                        <div className="text-[11px] text-muted-foreground">Store custom logs from your application.</div>
+                        <div className="text-xs text-muted-foreground">Store custom logs from your application.</div>
                       </div>
                       <Switch checked={captureCustomLogs} onCheckedChange={setCaptureCustomLogs} />
                     </div>
@@ -2352,9 +2377,9 @@ export function TracuraPage() {
 
                 {(activeTab === 'settings-security' || activeTab === 'settings') && (
                 <>
-                <Card className="p-5 border-border/80 space-y-4">
+                <Card className="p-5 border-border space-y-4">
                   <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-blue-600" />
+                    <Filter className="h-4 w-4 text-primary" />
                     <div>
                       <h3 className="font-semibold text-sm text-foreground">Filtering</h3>
                       <p className="text-xs text-muted-foreground">Exclude unnecessary requests and reduce storage usage.</p>
@@ -2369,7 +2394,7 @@ export function TracuraPage() {
                         onValueChange={setIgnoreStatusCodes}
                         placeholder="Add status code, e.g. 200, 204..."
                       />
-                      <span className="text-[11px] text-muted-foreground mt-1 block">
+                      <span className="text-xs text-muted-foreground mt-1 block">
                         Requests with these status codes will not be stored.
                       </span>
                     </div>
@@ -2381,7 +2406,7 @@ export function TracuraPage() {
                         onValueChange={setIgnoreEndpoints}
                         placeholder="Add pattern, e.g. /health, /metrics..."
                       />
-                      <span className="text-[11px] text-muted-foreground mt-1 block">
+                      <span className="text-xs text-muted-foreground mt-1 block">
                         Use exact path or wildcard patterns (e.g. /static/*).
                       </span>
                     </div>
@@ -2389,9 +2414,9 @@ export function TracuraPage() {
                 </Card>
 
                 {/* 4. Security & Redaction */}
-                <Card className="p-5 border-border/80 space-y-4">
+                <Card className="p-5 border-border space-y-4">
                   <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-blue-600" />
+                    <Shield className="h-4 w-4 text-primary" />
                     <div>
                       <h3 className="font-semibold text-sm text-foreground">Security & Redaction</h3>
                       <p className="text-xs text-muted-foreground">Protect sensitive information from being stored.</p>
@@ -2406,7 +2431,7 @@ export function TracuraPage() {
                         onValueChange={setRedactHeaders}
                         placeholder="Add header to mask..."
                       />
-                      <span className="text-[11px] text-muted-foreground mt-1 block">
+                      <span className="text-xs text-muted-foreground mt-1 block">
                         These headers will be masked in stored data.
                       </span>
                     </div>
@@ -2418,7 +2443,7 @@ export function TracuraPage() {
                         onValueChange={setRedactBodyFields}
                         placeholder="Add JSON field to mask..."
                       />
-                      <span className="text-[11px] text-muted-foreground mt-1 block">
+                      <span className="text-xs text-muted-foreground mt-1 block">
                         These fields will be masked in request/response bodies (JSON).
                       </span>
                     </div>
@@ -2428,9 +2453,9 @@ export function TracuraPage() {
                 )}
 
                 {(activeTab === 'settings-retention' || activeTab === 'settings') && (
-                <Card className="p-5 border-border/80 space-y-4">
+                <Card className="p-5 border-border space-y-4">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-blue-600" />
+                    <Clock className="h-4 w-4 text-primary" />
                     <div>
                       <h3 className="font-semibold text-sm text-foreground">Retention</h3>
                       <p className="text-xs text-muted-foreground">Configure how long to keep your data.</p>
@@ -2445,7 +2470,7 @@ export function TracuraPage() {
                           name="retention"
                           checked={retentionDays === d}
                           onChange={() => setRetentionDays(d)}
-                          className="text-blue-600 focus:ring-blue-500"
+                          className="text-primary focus:ring-primary"
                         />
                         <span className="text-foreground font-medium">
                           {d === '0' ? 'No expiry' : `${d} days`}
@@ -2458,20 +2483,20 @@ export function TracuraPage() {
 
                 {/* 6. Delete Project (Destructive) */}
                 {(activeTab === 'settings-general' || activeTab === 'settings') && (
-                <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-5 flex items-center justify-between">
+                <div className="rounded-xl border border-border bg-error-bg p-5 flex items-center justify-between">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-rose-600 font-bold text-sm">
+                    <div className="flex items-center gap-2 text-error-text font-bold text-sm">
                       <Trash2 className="h-4 w-4" />
                       <span>Delete Project</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-strong-foreground">
                       This will permanently delete all project data including logs, settings and API keys.
                     </p>
                   </div>
                   <Button
                     variant="outline"
                     onClick={() => setIsDeleteProjectModalOpen(true)}
-                    className="border-rose-500/40 text-rose-600 hover:bg-rose-500/10 text-xs font-semibold"
+                    className="border-border text-error-text hover:bg-error-bg text-xs font-semibold"
                   >
                     Delete Project
                   </Button>
@@ -2480,9 +2505,9 @@ export function TracuraPage() {
 
                 {/* 7. Integrations & Client SDK */}
                 {(activeTab === 'settings-integrations' || activeTab === 'settings') && (
-                  <Card className="p-5 border-border/80 space-y-4">
+                  <Card className="p-5 border-border space-y-4">
                     <div className="flex items-center gap-2">
-                      <Code2 className="h-4 w-4 text-blue-600" />
+                      <Code2 className="h-4 w-4 text-primary" />
                       <div>
                         <h3 className="font-semibold text-sm text-foreground">Integrations & Client SDK</h3>
                         <p className="text-xs text-muted-foreground">Connect external services, microservices, and client applications.</p>
@@ -2492,16 +2517,16 @@ export function TracuraPage() {
                     <div className="space-y-4 text-xs">
                       <div>
                         <label className="font-semibold text-foreground block mb-1">Universal Ingestion Endpoint</label>
-                        <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border/80 bg-muted/30 font-mono text-xs">
-                          <span className="text-blue-600 font-bold">POST</span>
+                        <div className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-muted font-mono text-xs">
+                          <span className="text-primary font-bold">POST</span>
                           <span className="text-foreground">/tracura/v1/ingest</span>
-                          <span className="ml-auto text-muted-foreground text-[11px]">Header: X-API-Key</span>
+                          <span className="ml-auto text-muted-foreground text-xs">Header: X-API-Key</span>
                         </div>
                       </div>
 
                       <div>
                         <label className="font-semibold text-foreground block mb-1">Sample cURL Command</label>
-                        <pre className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-blue-400 overflow-x-auto leading-relaxed">
+                        <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-primary overflow-x-auto leading-relaxed">
 {`curl -X POST "http://localhost:8000/tracura/v1/ingest" \
   -H "X-API-Key: inno_log_live_YOUR_KEY" \
   -H "Content-Type: application/json" \
@@ -2518,7 +2543,7 @@ export function TracuraPage() {
 
                       <div>
                         <label className="font-semibold text-foreground block mb-1">FastAPI / Python Drop-In Middleware</label>
-                        <pre className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-emerald-400 overflow-x-auto leading-relaxed">
+                        <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-success overflow-x-auto leading-relaxed">
 {`# Add this lightweight hook to any external Python service:
 import httpx, time
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -2555,17 +2580,17 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
               {/* Right Column: Settings Preview & Storage Impact */}
               <div className="lg:col-span-5 space-y-6 sticky top-20">
                 {/* Settings Preview */}
-                <Card className="border-border/80 overflow-hidden">
-                  <CardHeader className="bg-muted/20 pb-3">
+                <Card className="border-border overflow-hidden">
+                  <CardHeader className="bg-canvas pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-blue-600" />
+                        <Eye className="h-4 w-4 text-primary" />
                         <div>
                           <CardTitle className="text-sm">Settings Preview</CardTitle>
                           <CardDescription className="text-xs">See how your current settings work.</CardDescription>
                         </div>
                       </div>
-                      <div className="flex gap-1 text-[11px]">
+                      <div className="flex gap-1 text-xs">
                         <button
                           onClick={() => setSettingsPreviewTab('request')}
                           className={cn('px-2 py-1 rounded cursor-pointer', settingsPreviewTab === 'request' ? 'bg-primary text-primary-foreground font-semibold' : 'text-muted-foreground hover:bg-muted')}
@@ -2588,7 +2613,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                     </div>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <pre className="p-4 bg-slate-950 text-slate-100 text-[11px] font-mono leading-relaxed overflow-x-auto">
+                    <pre className="p-4 bg-brand-navy text-white text-xs font-mono leading-relaxed overflow-x-auto">
                       {`{
   "method": "POST",
   "url": "/api/orders",
@@ -2607,9 +2632,9 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                 </Card>
 
                 {/* Storage Impact */}
-                <Card className="p-5 border-border/80 space-y-3">
+                <Card className="p-5 border-border space-y-3">
                   <div className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-blue-600" />
+                    <Database className="h-4 w-4 text-primary" />
                     <div>
                       <h4 className="font-semibold text-sm text-foreground">Storage Impact</h4>
                       <p className="text-xs text-muted-foreground">Estimated storage based on current settings.</p>
@@ -2618,22 +2643,22 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
 
                   <div className="space-y-1">
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: '38%' }} />
+                      <div className="h-full bg-success rounded-full" style={{ width: '38%' }} />
                     </div>
                     <div className="text-sm font-bold text-foreground">~ 12 GB / month</div>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Based on your average request size and traffic.
                     </p>
                   </div>
                 </Card>
 
                 {/* Important Notes Card */}
-                <Card className="p-5 border-border/80 bg-blue-500/5 space-y-3">
-                  <div className="flex items-center gap-2 text-blue-600 font-semibold text-xs">
+                <Card className="p-5 border-border bg-primary-tint space-y-3">
+                  <div className="flex items-center gap-2 text-primary font-semibold text-xs">
                     <Info className="h-4 w-4" />
                     <span>Important Notes</span>
                   </div>
-                  <ul className="list-disc list-inside space-y-1.5 text-xs text-muted-foreground">
+                  <ul className="list-disc list-inside space-y-1.5 text-xs text-strong-foreground">
                     <li>Ignored status codes and endpoints will not be stored.</li>
                     <li>Redacted fields are masked in both request and response.</li>
                     <li>Retention policy is applied automatically via partition pruning.</li>
@@ -2668,7 +2693,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                   setNewProjName(e.target.value);
                   setNewProjSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
                 }}
-                className="h-9 w-full rounded-lg border border-border/80 bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="h-9 w-full rounded-lg border border-border bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <div>
@@ -2678,7 +2703,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                 placeholder="payment-gateway"
                 value={newProjSlug}
                 onChange={(e) => setNewProjSlug(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border/80 bg-background px-3 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="h-9 w-full rounded-lg border border-border bg-background px-3 text-xs font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <div>
@@ -2688,10 +2713,10 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                 placeholder="What does this service do?"
                 value={newProjDesc}
                 onChange={(e) => setNewProjDesc(e.target.value)}
-                className="w-full rounded-lg border border-border/80 bg-background p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-lg border border-border bg-background p-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
-            <div className="rounded-lg bg-muted/40 p-3 text-[11px] text-muted-foreground">
+            <div className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
               Default environments <strong>Production</strong> and <strong>Development</strong> will be provisioned automatically.
             </div>
           </div>
@@ -2702,7 +2727,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
               size="sm"
               onClick={handleCreateProject}
               disabled={!newProjName.trim()}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              className="bg-primary hover:bg-primary-hover text-white font-medium"
             >
               Create Project
             </Button>
@@ -2714,7 +2739,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
       <Dialog open={isDeleteProjectModalOpen} onOpenChange={setIsDeleteProjectModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-rose-600 flex items-center gap-2">
+            <DialogTitle className="text-error-text flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
               <span>Confirm Project Deletion</span>
             </DialogTitle>
@@ -2747,15 +2772,15 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
 
           {createdRawKey ? (
             <div className="space-y-4 py-3">
-              <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 space-y-2">
-                <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm">
+              <div className="rounded-xl border border-border bg-success-bg p-4 space-y-2">
+                <div className="flex items-center gap-2 text-success-text font-bold text-sm">
                   <CheckCircle2 className="h-5 w-5" />
                   <span>Key Generated Successfully!</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Copy this key now. For security reasons, you will never be able to see it again.
                 </p>
-                <div className="flex items-center justify-between gap-2 rounded-lg bg-background p-2.5 border border-border/80">
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-background p-2.5 border border-border">
                   <span className="font-mono text-xs font-bold text-foreground select-all break-all">
                     {createdRawKey}
                   </span>
@@ -2769,7 +2794,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                     }}
                     className="h-8 gap-1.5 shrink-0"
                   >
-                    {copiedKey ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedKey ? <Check className="h-3.5 w-3.5 text-success-text" /> : <Copy className="h-3.5 w-3.5" />}
                     <span>{copiedKey ? 'Copied' : 'Copy'}</span>
                   </Button>
                 </div>
@@ -2777,7 +2802,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
 
               <div>
                 <label className="text-xs font-semibold text-foreground block mb-1">Sample Ingestion cURL Command</label>
-                <pre className="rounded-lg bg-slate-950 p-3 text-[11px] font-mono text-blue-400 overflow-x-auto">
+                <pre className="rounded-lg bg-brand-navy p-3 text-xs font-mono text-primary overflow-x-auto">
                   {`curl -X POST "http://localhost:8000/tracura/v1/ingest" \\
   -H "X-API-Key: ${createdRawKey}" \\
   -H "Content-Type: application/json" \\
@@ -2790,7 +2815,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                   variant="primary"
                   size="sm"
                   onClick={() => setIsKeyModalOpen(false)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium w-full"
+                  className="bg-primary hover:bg-primary-hover text-white font-medium w-full"
                 >
                   Done
                 </Button>
@@ -2805,16 +2830,17 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                   placeholder="e.g. Production K8s Collector"
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-border/80 bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="h-9 w-full rounded-lg border border-border bg-background px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
                 <label className="font-medium text-foreground block mb-1">Project Scope</label>
                 <select
+                  aria-label="Project scope"
                   value={newKeyProject}
                   onChange={(e) => setNewKeyProject(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-border/80 bg-background px-3 text-xs text-foreground focus:outline-none"
+                  className="h-9 w-full rounded-lg border border-border bg-background px-3 text-xs text-foreground focus:outline-none"
                 >
                   {projects.map((p) => (
                     <option key={p.id} value={p.name}>
@@ -2837,7 +2863,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                           if (e.target.checked) setNewKeyEnvs([...newKeyEnvs, env]);
                           else setNewKeyEnvs(newKeyEnvs.filter((x) => x !== env));
                         }}
-                        className="rounded text-blue-600"
+                        className="rounded text-primary"
                       />
                       <span className="capitalize">{env}</span>
                     </label>
@@ -2852,7 +2878,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                   placeholder="10.0.0.0/16, 192.168.1.1"
                   value={newKeyIpAllowlist}
                   onChange={(e) => setNewKeyIpAllowlist(e.target.value)}
-                  className="h-9 w-full rounded-lg border border-border/80 bg-background px-3 text-xs font-mono text-foreground focus:outline-none"
+                  className="h-9 w-full rounded-lg border border-border bg-background px-3 text-xs font-mono text-foreground focus:outline-none"
                 />
               </div>
 
@@ -2862,7 +2888,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                   type="number"
                   value={newKeyRpm}
                   onChange={(e) => setNewKeyRpm(parseInt(e.target.value, 10) || 1200)}
-                  className="h-9 w-full rounded-lg border border-border/80 bg-background px-3 text-xs font-mono text-foreground focus:outline-none"
+                  className="h-9 w-full rounded-lg border border-border bg-background px-3 text-xs font-mono text-foreground focus:outline-none"
                 />
               </div>
 
@@ -2873,7 +2899,7 @@ class TracuraClientMiddleware(BaseHTTPMiddleware):
                   size="sm"
                   onClick={handleGenerateKey}
                   disabled={!newKeyName.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                  className="bg-primary hover:bg-primary-hover text-white font-medium"
                 >
                   Generate Key
                 </Button>

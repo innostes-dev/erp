@@ -50,7 +50,7 @@ export function TenantProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const token = getStoredAccessToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await apiRequest<TenantDetails>('/tenants/current', { headers });
       if (res && res.name) {
         setTenant(res);

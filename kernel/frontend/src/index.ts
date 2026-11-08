@@ -12,3 +12,4 @@ export { ApiError, apiRequest, configureApi, getApiConfig, type ApiConfig } from
 export { HttpStatus, isClientError, isServerError, type HttpStatusCode } from './core/api/http-status';
 export * from './setup';
 export * from './auth';
+export * from './brand';

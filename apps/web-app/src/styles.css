@@ -2,8 +2,36 @@
 @import '@innostes/ui/tailwind.css';
 @import '@innostes/ui/dark.css';
 
-/* Let Tailwind find the classes used by workspace packages (read from source, see vite.config.mts). */
+/*
+ * Let Tailwind find the classes used by workspace packages (read from source, see vite.config.mts).
+ * Module/plugin roots are listed as directories: the previous per-package globs (modules/<name>/frontend/src)
+ * matched nothing, so classes used only inside modules/plugins were silently never generated.
+ */
 @source '../../../packages/ui/src';
 @source '../../../kernel/frontend/src';
-@source '../../../modules/*/frontend/src';
-@source '../../../plugins/*/frontend/src';
+@source '../../../modules';
+@source '../../../plugins';
+
+/* Inter (self-hosted, SIL OFL 1.1: public/fonts/Inter-LICENSE.txt). No runtime call to a font CDN. */
+@font-face {
+  font-family: 'InterVariable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/InterVariable.woff2') format('woff2');
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-foreground);
+  }
+}

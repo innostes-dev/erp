@@ -1,3 +1,4 @@
+import { ModulePageHeader } from '../../components/ModulePageHeader';
 import { useState } from 'react';
 import { Badge, Button, Card } from '@innostes/ui';
 import {
@@ -23,29 +24,21 @@ export function SalesFlowDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Header & Quota Progress */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">SalesFlow Cockpit 🚀</h1>
-            <Badge variant="outline" className="border-amber-500/30 text-amber-600 bg-amber-500/5">
-              Sales & Pipeline
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Representative: Arun Kumar • Territory: India Mid-Market • 12 Days Remaining
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="primary" startIcon={<Plus className="size-4" />}>
+      <ModulePageHeader
+        preview
+        title="SalesFlow"
+        description="Representative: Arun Kumar • Territory: India Mid-Market • 12 Days Remaining"
+        actions={
+          <>
+            <Button disabled title="Available when this module launches" size="sm" variant="primary" startIcon={<Plus className="size-4" />}>
             New Lead
           </Button>
-          <Button size="sm" variant="outline" startIcon={<DollarSign className="size-4" />}>
+          <Button disabled title="Available when this module launches" size="sm" variant="secondary" startIcon={<DollarSign className="size-4" />}>
             Add Deal
           </Button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* 2. Target Progress & Core Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -55,19 +48,19 @@ export function SalesFlowDashboard() {
             <span className="text-2xl font-bold text-foreground">$85,000</span>
             <span className="text-xs text-muted-foreground">/ $100,000</span>
           </div>
-          <div className="w-full bg-muted/60 h-2 rounded-full mt-2.5 overflow-hidden">
-            <div className="bg-emerald-500 h-full rounded-full transition-all" style={{ width: '85%' }} />
+          <div className="w-full bg-muted h-2 rounded-full mt-2.5 overflow-hidden">
+            <div className="bg-success h-full rounded-full transition-all" style={{ width: '85%' }} />
           </div>
-          <span className="text-[11px] text-emerald-600 font-semibold mt-1 block">85% Achieved</span>
+          <span className="text-xs text-success-text font-semibold mt-1 block">85% Achieved</span>
         </Card>
 
         <Card className="p-4 border-border bg-card shadow-xs">
           <span className="text-xs text-muted-foreground uppercase font-semibold">Open Pipeline</span>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold text-foreground">$305,000</span>
-            <span className="text-xs text-emerald-600 font-semibold">+18% MoM</span>
+            <span className="text-xs text-success-text font-semibold">+18% MoM</span>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-2">11 Active Opportunities</p>
+          <p className="text-xs text-muted-foreground mt-2">11 Active Opportunities</p>
         </Card>
 
         <Card className="p-4 border-border bg-card shadow-xs">
@@ -76,16 +69,16 @@ export function SalesFlowDashboard() {
             <span className="text-2xl font-bold text-foreground">34.8%</span>
             <span className="text-xs text-muted-foreground">8 of 23 won</span>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-2">Industry avg: 22%</p>
+          <p className="text-xs text-muted-foreground mt-2">Industry avg: 22%</p>
         </Card>
 
         <Card className="p-4 border-border bg-card shadow-xs">
           <span className="text-xs text-muted-foreground uppercase font-semibold">Average Sales Cycle</span>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold text-foreground">24 Days</span>
-            <span className="text-xs text-emerald-600 font-semibold">-3 days faster</span>
+            <span className="text-xs text-success-text font-semibold">-3 days faster</span>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-2">Lead to Closed-Won</p>
+          <p className="text-xs text-muted-foreground mt-2">Lead to Closed-Won</p>
         </Card>
       </div>
 
@@ -102,52 +95,52 @@ export function SalesFlowDashboard() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-            <div className="p-3 rounded-xl bg-muted/20 border border-border">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="p-3 rounded-xl bg-canvas border border-border">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>1. Discovery</span>
-                <Badge variant="outline" className="text-[10px]">20%</Badge>
+                <Badge variant="outline" className="text-xs">20%</Badge>
               </div>
               <p className="text-lg font-bold text-foreground mt-1">$120,000</p>
-              <p className="text-[10px] text-muted-foreground">4 Opportunities</p>
+              <p className="text-xs text-muted-foreground">4 Opportunities</p>
             </div>
 
-            <div className="p-3 rounded-xl bg-muted/20 border border-border">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="p-3 rounded-xl bg-canvas border border-border">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>2. Demo</span>
-                <Badge variant="outline" className="text-[10px]">40%</Badge>
+                <Badge variant="outline" className="text-xs">40%</Badge>
               </div>
               <p className="text-lg font-bold text-foreground mt-1">$80,000</p>
-              <p className="text-[10px] text-muted-foreground">3 Opportunities</p>
+              <p className="text-xs text-muted-foreground">3 Opportunities</p>
             </div>
 
-            <div className="p-3 rounded-xl bg-muted/20 border border-border">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="p-3 rounded-xl bg-canvas border border-border">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>3. Proposal</span>
-                <Badge variant="outline" className="text-[10px]">70%</Badge>
+                <Badge variant="outline" className="text-xs">70%</Badge>
               </div>
               <p className="text-lg font-bold text-foreground mt-1">$65,000</p>
-              <p className="text-[10px] text-muted-foreground">2 Opportunities</p>
+              <p className="text-xs text-muted-foreground">2 Opportunities</p>
             </div>
 
-            <div className="p-3 rounded-xl bg-muted/20 border border-border">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="p-3 rounded-xl bg-canvas border border-border">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>4. Closing</span>
-                <Badge variant="outline" className="text-[10px]">90%</Badge>
+                <Badge variant="outline" className="text-xs">90%</Badge>
               </div>
               <p className="text-lg font-bold text-foreground mt-1">$40,000</p>
-              <p className="text-[10px] text-muted-foreground">1 Opportunity</p>
+              <p className="text-xs text-muted-foreground">1 Opportunity</p>
             </div>
           </div>
 
           {/* Hot Deals List */}
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              🔥 Hot Deals Closing This Month
+              Hot Deals Closing This Month
             </span>
-            <div className="p-3 rounded-xl bg-muted/15 border border-border flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-canvas border border-border flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-foreground">Acme Corporation — Enterprise Cloud Rollout</p>
-                <p className="text-[11px] text-muted-foreground">Decision Maker: Rajesh Kumar (VP Tech) • Target: Nov 15</p>
+                <p className="text-xs text-muted-foreground">Decision Maker: Rajesh Kumar (VP Tech) • Target: Nov 15</p>
               </div>
               <div className="text-right">
                 <span className="text-sm font-bold text-foreground">$45,000</span>
@@ -155,10 +148,10 @@ export function SalesFlowDashboard() {
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-muted/15 border border-border flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-canvas border border-border flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-foreground">Titan Labs — IoT Platform Integration</p>
-                <p className="text-[11px] text-muted-foreground">Decision Maker: Priya Sharma (Director) • Target: Nov 22</p>
+                <p className="text-xs text-muted-foreground">Decision Maker: Priya Sharma (Director) • Target: Nov 22</p>
               </div>
               <div className="text-right">
                 <span className="text-sm font-bold text-foreground">$40,000</span>
@@ -181,19 +174,18 @@ export function SalesFlowDashboard() {
 
             <div className="flex flex-col gap-2.5">
               {tasks.map((task) => (
-                <div
+                <label
                   key={task.id}
-                  onClick={() => toggleTask(task.id)}
                   className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
                     task.done
-                      ? 'bg-muted/10 border-border/40 opacity-60'
-                      : 'bg-muted/20 border-border hover:bg-muted/30'
+                      ? 'bg-canvas border-border'
+                      : 'bg-canvas border-border hover:bg-muted'
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={task.done}
-                    onChange={() => {}}
+                    onChange={() => toggleTask(task.id)}
                     className="mt-0.5 size-3.5 rounded border-border"
                   />
                   <div className="flex-1 min-w-0">
@@ -201,18 +193,18 @@ export function SalesFlowDashboard() {
                       <p className={`text-xs font-semibold truncate ${task.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                         {task.title}
                       </p>
-                      <span className="text-[10px] text-muted-foreground shrink-0">{task.time}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">{task.time}</span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground truncate">{task.subtitle}</p>
+                    <p className="text-xs text-muted-foreground truncate">{task.subtitle}</p>
                   </div>
-                </div>
+                </label>
               ))}
             </div>
           </div>
 
           <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Recent Win:</span>
-            <span className="text-emerald-600 font-semibold">Horizon Cloud ($50k) closed 🎉</span>
+            <span className="text-success-text font-semibold">Horizon Cloud ($50k) closed </span>
           </div>
         </Card>
       </div>

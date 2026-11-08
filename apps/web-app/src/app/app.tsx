@@ -1,59 +1,82 @@
-import { SidebarProvider, SidebarInset } from '@innostes/ui';
+import { useEffect, useRef } from 'react';
+import { SidebarInset, SidebarProvider, SkipLink } from '@innostes/ui';
 import { NavigationProvider, useNavigation } from './context/NavigationContext';
 import { TenantProvider } from './context/TenantContext';
 import { ModulesProvider } from './context/ModulesContext';
 import { PluginsProvider } from './context/PluginsContext';
-import { SidebarNav } from './components/SidebarNav';
+import { AppSidebar } from './components/AppSidebar';
 import { TopHeader } from './components/TopHeader';
 import { EcosystemHome } from './components/EcosystemHome';
 import { ModulesManagerPage } from './components/ModulesManagerPage';
 import { PluginsManagerPage } from './components/PluginsManagerPage';
-import { ModuleShellLayout } from './components/ModuleShellLayout';
-import { PluginShellLayout } from './components/PluginShellLayout';
+import { ModuleWorkspace } from './components/ModuleWorkspace';
+import { PluginWorkspace } from './components/PluginWorkspace';
 import { ApiKeysManager } from './components/ApiKeysManager';
 import { AuditTrailPage } from './components/AuditTrailPage';
+import { NotFoundPage } from './components/NotFoundPage';
+import { PageContainer } from './components/PageContainer';
 
-function AppRouter() {
+function RouteContent() {
+  const { route } = useNavigation();
+  switch (route.kind) {
+    case 'home':
+      return <PageContainer><EcosystemHome /></PageContainer>;
+    case 'modules-catalog':
+      return <PageContainer><ModulesManagerPage /></PageContainer>;
+    case 'plugins-catalog':
+      return <PageContainer><PluginsManagerPage /></PageContainer>;
+    case 'module':
+      return (
+        <PageContainer>
+          <ModuleWorkspace key={route.moduleId} moduleId={route.moduleId} subId={route.subId} />
+        </PageContainer>
+      );
+    case 'plugin':
+      // Plugins own a full-bleed workspace (e.g. Tracura's split views).
+      return <PluginWorkspace key={route.pluginId} pluginId={route.pluginId} subId={route.subId} />;
+    case 'audit':
+      return <PageContainer><AuditTrailPage /></PageContainer>;
+    case 'api-keys':
+      return <PageContainer width="default"><ApiKeysManager /></PageContainer>;
+    default:
+      return <NotFoundPage />;
+  }
+}
+
+/**
+ * The single application shell: persistent navy sidebar + top bar + content.
+ * Every page (home, modules, plugins, administration) renders inside it.
+ */
+function AppShell() {
   const { path } = useNavigation();
+  const mainRef = useRef<HTMLElement>(null);
+  const firstRender = useRef(true);
 
-  // 1. Dedicated Business Module Shell (e.g. /modules/peopleops, /modules/salesflow)
-  if (path.startsWith('/modules/')) {
-    const moduleId = path.replace('/modules/', '').split('/')[0];
-    if (moduleId) {
-      return <ModuleShellLayout moduleId={moduleId} />;
+  // Move focus to the new page on client-side navigation so keyboard and screen-reader
+  // users land on the content (WCAG 2.4.3); skip the initial load.
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
     }
-  }
+    mainRef.current?.focus({ preventScroll: true });
+  }, [path]);
 
-  // 2. Dedicated Plugin Shell (e.g. /plugins/tracura)
-  if (path.startsWith('/plugins/')) {
-    const pluginId = path.replace('/plugins/', '').split('/')[0];
-    if (pluginId) {
-      return <PluginShellLayout pluginId={pluginId} />;
-    }
-  }
-
-  // 3. Ecosystem Standard Shell (Home, Modules Catalog, Plugins Catalog)
   return (
-    <SidebarProvider width="16rem">
-      <div className="flex min-h-screen w-full bg-background">
-        <SidebarNav />
-        <SidebarInset className="flex-1 flex flex-col min-w-0 bg-muted/15">
-          <TopHeader />
-          <div className="flex-1 overflow-y-auto">
-            {path === '/modules' ? (
-              <ModulesManagerPage />
-            ) : path === '/plugins' ? (
-              <PluginsManagerPage />
-            ) : path === '/audit' || path === '/administration/audit' ? (
-              <AuditTrailPage />
-            ) : path.startsWith('/administration') || path === '/api-keys' ? (
-              <ApiKeysManager />
-            ) : (
-              <EcosystemHome />
-            )}
-          </div>
-        </SidebarInset>
-      </div>
+    <SidebarProvider width="15.5rem">
+      <SkipLink targetId="main-content">Skip to main content</SkipLink>
+      <AppSidebar />
+      <SidebarInset className="flex min-h-svh min-w-0 flex-1 flex-col bg-canvas">
+        <TopHeader />
+        <main
+          id="main-content"
+          ref={mainRef}
+          tabIndex={-1}
+          className="flex min-w-0 flex-1 flex-col outline-none"
+        >
+          <RouteContent />
+        </main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
@@ -64,7 +87,7 @@ export function App() {
       <TenantProvider>
         <ModulesProvider>
           <PluginsProvider>
-            <AppRouter />
+            <AppShell />
           </PluginsProvider>
         </ModulesProvider>
       </TenantProvider>

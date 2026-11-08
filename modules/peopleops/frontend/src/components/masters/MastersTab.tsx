@@ -1,23 +1,23 @@
-import { Button, EmptyState, Card, CardHeader, CardTitle, CardDescription, CardContent } from '@innostes/ui';
+import { Button, EmptyState, Card, CardHeader, CardTitle, CardDescription, CardContent, PageHeader } from '@innostes/ui';
 import { Database, Plus, RefreshCw, Building2, Briefcase, MapPin, CalendarDays, ListOrdered } from 'lucide-react';
 
 export function MastersTab() {
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <div className="flex items-center justify-between pb-2">
-        <div>
-          <h3 className="text-xl font-semibold tracking-tight text-foreground">Dynamic Masters & Picklists</h3>
-          <p className="text-sm text-muted-foreground mt-1">Configure departments, job designations, office locations, and dynamic dropdown lists to match your organization's hierarchy.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" startIcon={<RefreshCw className="w-4 h-4" />}>
-            Reseed Defaults
-          </Button>
-          <Button size="sm" startIcon={<Plus className="w-4 h-4" />}>
-            Add Department
-          </Button>
-        </div>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Dynamic Masters & Picklists"
+        description="Configure departments, job designations, office locations, and dynamic dropdown lists to match your organization's hierarchy."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" size="sm" startIcon={<RefreshCw className="w-4 h-4" />}>
+              Reseed Defaults
+            </Button>
+            <Button size="sm" startIcon={<Plus className="w-4 h-4" />}>
+              Add Department
+            </Button>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
@@ -86,7 +86,7 @@ export function MastersTab() {
         </Card>
       </div>
 
-      <div className="mt-4 border rounded-md bg-muted/20">
+      <div className="mt-4 border rounded-md bg-canvas">
         <EmptyState
           icon={<Database className="w-8 h-8 text-muted-foreground" />}
           title="Master Data Overview Ready"

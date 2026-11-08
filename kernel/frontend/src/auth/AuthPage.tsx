@@ -18,11 +18,11 @@ import {
   Check,
   Eye,
   EyeOff,
-  Lock,
   Mail,
 } from 'lucide-react';
 
 import { ApiError } from '../core/api/client';
+import { BrandLogo } from '../brand';
 import { changePassword, forgotPassword, login, resetPassword } from './api';
 import type { TokenResponse } from './types';
 
@@ -172,15 +172,29 @@ export function AuthPage({ initialMode = 'login', onSuccess }: AuthPageProps) {
   }
 
   return (
-    <div className="flex min-h-svh w-full items-center justify-center bg-muted/40 p-4 sm:p-6 md:p-10">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl shadow-slate-200/50 dark:shadow-none sm:p-8">
+    <div className="flex min-h-svh w-full bg-canvas">
+      {/* Brand panel (large screens): solid Midnight Navy, no decoration */}
+      <aside className="hidden w-[42%] max-w-xl flex-col justify-between bg-brand-navy p-12 text-white lg:flex" aria-hidden="true">
+        <BrandLogo variant="wordmark" surface="dark" imageClassName="h-7" />
+        <div className="flex flex-col gap-4">
+          <p className="text-2xl leading-snug font-semibold">
+            One operating system for your people, sales, finance and operations.
+          </p>
+          <ul className="flex flex-col gap-2 text-sm text-sidebar-foreground">
+            <li>Role-based access and a complete audit trail</li>
+            <li>Modules that share one data model</li>
+            <li>Self-hosted: your data stays yours</li>
+          </ul>
+        </div>
+        <p className="text-caption text-sidebar-muted-foreground">© {new Date().getFullYear()} INNOSTES</p>
+      </aside>
+
+      <main className="flex flex-1 items-center justify-center p-4 sm:p-8">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm sm:p-8">
         {/* Brand Header */}
-        <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Lock className="size-6" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">Innostes ERP</span>
-          <span className="text-xs uppercase tracking-wider text-muted-foreground">Enterprise Business Platform</span>
+        <div className="mb-6 flex flex-col items-center gap-2 text-center lg:hidden">
+          <BrandLogo variant="wordmark" imageClassName="h-7" />
+          <span className="text-caption font-medium text-muted-foreground">Business OS</span>
         </div>
 
         {/* Status Alerts */}
@@ -250,7 +264,9 @@ export function AuthPage({ initialMode = 'login', onSuccess }: AuthPageProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                  className="absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -331,7 +347,9 @@ export function AuthPage({ initialMode = 'login', onSuccess }: AuthPageProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                  className="absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -393,7 +411,9 @@ export function AuthPage({ initialMode = 'login', onSuccess }: AuthPageProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                  className="absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -422,6 +442,7 @@ export function AuthPage({ initialMode = 'login', onSuccess }: AuthPageProps) {
           </Form>
         )}
       </div>
+    </main>
     </div>
   );
 }

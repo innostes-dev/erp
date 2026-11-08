@@ -1,21 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
   Alert,
   AlertDescription,
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   AlertTitle,
   Badge,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  DataTable,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -23,62 +20,73 @@ import {
   DialogHeader,
   DialogTitle,
   EmptyState,
+  Field,
+  FieldDescription,
+  FieldLabel,
   IconTile,
   Input,
+  PageHeader,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  formatRelativeTime,
   toast,
+  type DataTableColumn,
 } from '@innostes/ui';
 import {
-  KeyRound,
-  Plus,
-  Copy,
-  Check,
-  Trash2,
-  ShieldCheck,
-  AlertTriangle,
-  Terminal,
-  Calendar,
-  Lock,
-} from 'lucide-react';
-import {
   createApiKey,
+  getApiConfig,
   listApiKeys,
   revokeApiKey,
   type ApiKeyCreatedResponse,
   type ApiKeyItem,
 } from '@innostes/kernel';
-import { useNavigation } from '../context/NavigationContext';
+import { Check, Copy, KeyRound, Plus } from 'lucide-react';
 
+const EXPIRATIONS = [
+  { value: '30', label: '30 days' },
+  { value: '60', label: '60 days' },
+  { value: '90', label: '90 days' },
+  { value: '365', label: '1 year' },
+  { value: 'never', label: 'No expiry' },
+];
+const SCOPES = [
+  { value: '*', label: 'Full access (*)' },
+  { value: '*:read', label: 'Read-only (*:read)' },
+  { value: 'peopleops:read', label: 'PeopleOps: read' },
+  { value: 'salesflow:write', label: 'SalesFlow: read and write' },
+];
+
+const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+
+/** API keys: personal access tokens for integrations (Settings template). */
 export function ApiKeysManager() {
-  const { navigate } = useNavigation();
   const [keys, setKeys] = useState<ApiKeyItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [revoking, setRevoking] = useState<ApiKeyItem | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
-  // Form State
   const [name, setName] = useState('');
-  const [expiration, setExpiration] = useState<string>('30');
-  const [scope, setScope] = useState<string>('*');
-
-  // Created Key Success State
-  const [createdKeyData, setCreatedKeyData] = useState<ApiKeyCreatedResponse | null>(null);
-  const [hasCopied, setHasCopied] = useState(false);
+  const [expiration, setExpiration] = useState('30');
+  const [scope, setScope] = useState('*');
+  const [created, setCreated] = useState<ApiKeyCreatedResponse | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const loadKeys = useCallback(async () => {
-    setIsLoading(true);
+    setLoading(true);
+    setLoadError(null);
     try {
       const res = await listApiKeys();
       setKeys(res.items || []);
-    } catch {
-      // Offline / dev fallback
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'API keys could not be loaded.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, []);
 
@@ -86,335 +94,251 @@ export function ApiKeysManager() {
     void loadKeys();
   }, [loadKeys]);
 
-  async function handleCreateKey(e: React.FormEvent) {
-    e.preventDefault();
+  function openCreate() {
+    setCreated(null);
+    setCopied(false);
+    setDialogOpen(true);
+  }
+
+  function closeDialog() {
+    setDialogOpen(false);
+    setCreated(null);
+    setCopied(false);
+  }
+
+  async function handleCreate(event: FormEvent) {
+    event.preventDefault();
     if (!name.trim()) return;
-
-    setIsCreating(true);
+    setCreating(true);
     try {
-      const expiresInDays = expiration === 'never' ? null : parseInt(expiration, 10);
-      const scopes = scope === '*' ? ['*'] : [scope];
-
       const res = await createApiKey({
         name: name.trim(),
-        expires_in_days: expiresInDays,
-        scopes,
+        expires_in_days: expiration === 'never' ? null : parseInt(expiration, 10),
+        scopes: [scope],
       });
-
-      setCreatedKeyData(res);
+      setCreated(res);
       setName('');
       setExpiration('30');
       setScope('*');
-      toast.success('API key generated successfully');
+      toast.success('API key created');
       await loadKeys();
-    } catch {
-      toast.error('Failed to generate API key');
+    } catch (err) {
+      toast.error("The API key couldn't be created", { description: err instanceof Error ? err.message : undefined });
     } finally {
-      setIsCreating(false);
+      setCreating(false);
     }
   }
 
-  async function handleRevoke(keyId: string) {
-    if (!confirm('Are you sure you want to revoke this API key? Any applications or integrations using it will immediately lose access.')) {
-      return;
-    }
-
-    setRevokingId(keyId);
+  async function confirmRevoke() {
+    const key = revoking;
+    setRevoking(null);
+    if (!key) return;
+    setRevokingId(key.id);
     try {
-      await revokeApiKey(keyId);
-      toast.success('API key revoked');
+      await revokeApiKey(key.id);
+      toast.success(`"${key.name}" was revoked`);
       await loadKeys();
-    } catch {
-      toast.error('Failed to revoke API key');
+    } catch (err) {
+      toast.error("The API key couldn't be revoked", { description: err instanceof Error ? err.message : undefined });
     } finally {
       setRevokingId(null);
     }
   }
 
-  function copyToClipboard(text: string) {
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(text);
-      setHasCopied(true);
-      toast.success('Copied API key to clipboard');
-      setTimeout(() => setHasCopied(false), 2500);
-    }
+  function copy(text: string) {
+    void navigator.clipboard?.writeText(text);
+    setCopied(true);
+    toast.success('API key copied');
+    setTimeout(() => setCopied(false), 2500);
   }
 
-  function handleCloseDialog() {
-    setIsDialogOpen(false);
-    setCreatedKeyData(null);
-    setHasCopied(false);
-  }
+  const columns: DataTableColumn<ApiKeyItem>[] = [
+    {
+      id: 'name',
+      header: 'Name',
+      cell: (k) => (
+        <span className="flex flex-col">
+          <span className="font-medium text-foreground">{k.name}</span>
+          <span className="font-mono text-caption text-muted-foreground">{k.key_prefix}…</span>
+        </span>
+      ),
+    },
+    {
+      id: 'scopes',
+      header: 'Access',
+      cell: (k) => (
+        <span className="flex flex-wrap gap-1">
+          {k.scopes.map((s) => (
+            <Badge key={s} variant="outline" size="sm" className="font-mono">
+              {s}
+            </Badge>
+          ))}
+        </span>
+      ),
+    },
+    { id: 'created', header: 'Created', cell: (k) => dateFmt.format(new Date(k.created_at)) },
+    {
+      id: 'used',
+      header: 'Last used',
+      cell: (k) => (k.last_used_at ? formatRelativeTime(new Date(k.last_used_at)) : <span className="text-muted-foreground">Never</span>),
+    },
+    {
+      id: 'expires',
+      header: 'Expires',
+      cell: (k) => (k.expires_at ? dateFmt.format(new Date(k.expires_at)) : <span className="text-muted-foreground">No expiry</span>),
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      cell: (k) =>
+        k.is_revoked ? <Badge variant="secondary">Revoked</Badge> : <Badge variant="success" dot>Active</Badge>,
+    },
+    {
+      id: 'actions',
+      header: <span className="sr-only">Actions</span>,
+      align: 'end',
+      cell: (k) =>
+        k.is_revoked ? null : (
+          <Button variant="secondary" size="sm" loading={revokingId === k.id} onClick={() => setRevoking(k)}>
+            Revoke
+          </Button>
+        ),
+    },
+  ];
 
   return (
-    <div className="flex flex-col gap-6 p-6 md:p-8 max-w-6xl mx-auto w-full">
-      {/* Breadcrumb Navigation */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
-              Home
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/')} className="cursor-pointer">
-              Administration
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>API Keys</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <>
+      <PageHeader
+        title="API keys"
+        description="Personal access tokens for scripts, CI pipelines and integrations. Send them as Authorization: Bearer <key>."
+        actions={
+          <Button startIcon={<Plus />} onClick={openCreate}>
+            Create API key
+          </Button>
+        }
+      />
 
-      {/* Header with Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <KeyRound className="size-6 text-primary" />
-            Personal Access Tokens & API Keys
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Generate and manage high-entropy keys for programmatic API access, automated scripts, and third-party integrations.
-          </p>
-        </div>
+      <Alert>
+        <AlertTitle>Keys are shown once</AlertTitle>
+        <AlertDescription>
+          Only a SHA-256 hash of each key is stored. Copy a new key when it's created; if it's lost, revoke it and create another.
+        </AlertDescription>
+      </Alert>
 
-        <Button
-          variant="primary"
-          startIcon={<Plus className="size-4" />}
-          onClick={() => {
-            setCreatedKeyData(null);
-            setIsDialogOpen(true);
-          }}
-        >
-          Generate New API Key
-        </Button>
-      </div>
-
-      {/* Security Context Banner */}
-      <div className="rounded-xl border border-border bg-card p-4 flex items-start gap-4 shadow-2xs">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-success/10 text-success">
-          <ShieldCheck className="size-5" />
-        </div>
-        <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-foreground">Zero-Trust Cryptographic Token Architecture</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            API keys use 256-bit entropy (<code className="font-mono text-primary font-bold">inno_live_...</code>). Plaintext keys are never stored in the database; only SHA-256 hashes are persisted. Pass them in the <code className="font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">Authorization: Bearer &lt;token&gt;</code> header.
-          </p>
-        </div>
-      </div>
-
-      {/* API Keys List */}
-      {keys.length === 0 && !isLoading ? (
-        <EmptyState
-          icon={
-            <IconTile tone="primary" size="lg">
-              <KeyRound className="size-6" />
-            </IconTile>
-          }
-          title="No API keys generated yet"
-          description="Create personal access tokens to securely authenticate scripts, CI/CD pipelines, or external ERP integrations without using your personal password."
-          actions={
-            <Button
-              variant="primary"
-              startIcon={<Plus className="size-4" />}
-              onClick={() => setIsDialogOpen(true)}
-            >
-              Generate First API Key
+      {loadError ? (
+        <Alert variant="destructive">
+          <AlertTitle>API keys couldn't be loaded</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center gap-3">
+            <span>{loadError}</span>
+            <Button size="sm" variant="secondary" onClick={() => void loadKeys()}>
+              Try again
             </Button>
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <DataTable
+          data={keys}
+          columns={columns}
+          getRowId={(k) => k.id}
+          loading={loading}
+          responsive="stack"
+          className="rounded-lg border border-border bg-card"
+          emptyState={
+            <EmptyState className="border-0"
+              icon={<IconTile tone="neutral" size="lg"><KeyRound /></IconTile>}
+              title="No API keys yet"
+              description="Create a key to authenticate scripts and integrations without sharing your password."
+              actions={<Button startIcon={<Plus />} onClick={openCreate}>Create API key</Button>}
+            />
           }
         />
-      ) : (
-        <div className="grid grid-cols-1 gap-3">
-          {keys.map((k) => (
-            <Card key={k.id} className="overflow-hidden">
-              <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-3">
-                    <span className="font-bold text-base text-foreground">{k.name}</span>
-                    <Badge
-                      variant={k.is_revoked ? 'destructive' : 'success'}
-                      dot={!k.is_revoked}
-                    >
-                      {k.is_revoked ? 'REVOKED' : 'ACTIVE'}
-                    </Badge>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span className="font-mono bg-muted px-2 py-0.5 rounded text-foreground font-semibold">
-                      {k.key_prefix}
-                    </span>
-                    <span>Created: {new Date(k.created_at).toLocaleDateString()}</span>
-                    {k.expires_at ? (
-                      <span>Expires: {new Date(k.expires_at).toLocaleDateString()}</span>
-                    ) : (
-                      <span>Never expires</span>
-                    )}
-                    {k.last_used_at && (
-                      <span>Last used: {new Date(k.last_used_at).toLocaleDateString()}</span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Scopes:</span>
-                    {k.scopes.map((s) => (
-                      <Badge key={s} variant="outline" className="text-[10px] py-0 px-1.5 font-mono">
-                        {s}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {!k.is_revoked && (
-                  <div className="flex items-center gap-2 self-end sm:self-center">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      loading={revokingId === k.id}
-                      startIcon={<Trash2 className="size-3.5 text-destructive" />}
-                      onClick={() => void handleRevoke(k.id)}
-                    >
-                      Revoke Key
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       )}
 
-      {/* Generation / Key Revealed Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(open) => (open ? setDialogOpen(true) : closeDialog())}>
         <DialogContent size="md">
-          {!createdKeyData ? (
-            /* Creation Form */
-            <form onSubmit={(e) => void handleCreateKey(e)}>
+          {!created ? (
+            <form onSubmit={(e) => void handleCreate(e)} className="flex flex-col gap-5">
               <DialogHeader>
-                <DialogTitle>Generate Personal API Key</DialogTitle>
-                <DialogDescription>
-                  Create an authentication key for machine-to-machine integrations or developer automation.
-                </DialogDescription>
+                <DialogTitle>Create API key</DialogTitle>
+                <DialogDescription>For machine-to-machine access. Choose the narrowest access that works.</DialogDescription>
               </DialogHeader>
-
-              <div className="space-y-4 py-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Key Name / Description</label>
-                  <Input
-                    placeholder="e.g. Zapier SalesFlow Sync, CI/CD Pipeline"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                  <p className="text-[11px] text-muted-foreground">
-                    What is this key for? A recognizable name helps you identify it later.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Expiration</label>
-                  <Select value={expiration} onValueChange={(val) => setExpiration(val || '30')}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select lifespan" />
-                    </SelectTrigger>
+              <Field>
+                <FieldLabel>Name</FieldLabel>
+                <Input
+                  placeholder="e.g. CI pipeline, Reporting export"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  autoFocus
+                />
+                <FieldDescription>A recognisable name helps you find and revoke it later.</FieldDescription>
+              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel>Expires after</FieldLabel>
+                  <Select items={EXPIRATIONS} value={expiration} onValueChange={(v) => setExpiration(v || '30')}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="30">30 days</SelectItem>
-                      <SelectItem value="60">60 days</SelectItem>
-                      <SelectItem value="90">90 days</SelectItem>
-                      <SelectItem value="365">1 year</SelectItem>
-                      <SelectItem value="never">No expiration (Perpetual)</SelectItem>
+                      {EXPIRATIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Scopes / Access Level</label>
-                  <Select value={scope} onValueChange={(val) => setScope(val || '*')}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select scopes" />
-                    </SelectTrigger>
+                </Field>
+                <Field>
+                  <FieldLabel>Access</FieldLabel>
+                  <Select items={SCOPES} value={scope} onValueChange={(v) => setScope(v || '*')}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="*">Full Platform Access (*)</SelectItem>
-                      <SelectItem value="*:read">Read-Only Access (*:read)</SelectItem>
-                      <SelectItem value="peopleops:read">PeopleOps Read Only</SelectItem>
-                      <SelectItem value="salesflow:write">SalesFlow Read & Write</SelectItem>
+                      {SCOPES.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                </div>
+                </Field>
               </div>
-
               <DialogFooter>
-                <Button variant="outline" type="button" onClick={handleCloseDialog}>
-                  Cancel
-                </Button>
-                <Button variant="primary" type="submit" loading={isCreating}>
-                  Generate API Key
-                </Button>
+                <Button variant="secondary" type="button" onClick={closeDialog}>Cancel</Button>
+                <Button type="submit" loading={creating}>Create key</Button>
               </DialogFooter>
             </form>
           ) : (
-            /* Key Revealed Success View */
-            <div>
+            <div className="flex flex-col gap-5">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-success">
-                  <Check className="size-5" />
-                  API Key Generated Successfully
-                </DialogTitle>
-                <DialogDescription>
-                  {createdKeyData.name} is ready for programmatic access.
-                </DialogDescription>
+                <DialogTitle>Copy your new key</DialogTitle>
+                <DialogDescription>"{created.name}" is ready. This is the only time the full key is shown.</DialogDescription>
               </DialogHeader>
-
-              <div className="space-y-4 py-4">
-                <Alert variant="warning">
-                  <AlertTriangle className="size-4" />
-                  <AlertTitle>Copy your secret API key now!</AlertTitle>
-                  <AlertDescription>
-                    For your security, this raw key will <strong>never be shown again</strong>. If you lose it, you will need to revoke it and generate a new one.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-foreground">Your Secret API Key</span>
-                  <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/60 p-2 font-mono text-xs">
-                    <span className="flex-1 break-all text-primary font-bold select-all">
-                      {createdKeyData.raw_key}
-                    </span>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      startIcon={hasCopied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
-                      onClick={() => copyToClipboard(createdKeyData.raw_key)}
-                    >
-                      {hasCopied ? 'Copied' : 'Copy'}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 pt-2">
-                  <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <Terminal className="size-3.5" />
-                    cURL Usage Example
-                  </span>
-                  <pre className="rounded-lg bg-zinc-950 p-3 text-[11px] text-zinc-100 overflow-x-auto font-mono">
-{`curl -H "Authorization: Bearer ${createdKeyData.raw_key}" \\
-     http://localhost:8001/api/v1/peopleops/info`}
-                  </pre>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="primary" onClick={handleCloseDialog}>
-                  Done (I have saved my key)
+              <div className="flex items-center gap-2 rounded-md border border-border bg-muted p-2">
+                <code className="flex-1 font-mono text-body-sm break-all text-foreground select-all">{created.raw_key}</code>
+                <Button variant="secondary" size="sm" startIcon={copied ? <Check /> : <Copy />} onClick={() => copy(created.raw_key)}>
+                  {copied ? 'Copied' : 'Copy'}
                 </Button>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-caption font-medium text-muted-foreground">Example request</span>
+                <pre className="overflow-x-auto rounded-md bg-brand-navy p-3 font-mono text-caption text-white">
+{`curl -H "Authorization: Bearer ${created.raw_key}" \\
+     ${getApiConfig().baseUrl}/auth/me`}
+                </pre>
+              </div>
+              <DialogFooter>
+                <Button onClick={closeDialog}>I've saved the key</Button>
               </DialogFooter>
             </div>
           )}
         </DialogContent>
       </Dialog>
-    </div>
+
+      <AlertDialog open={revoking !== null} onOpenChange={(open) => !open && setRevoking(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke "{revoking?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Scripts and integrations using this key stop working immediately. This can't be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogClose render={<Button variant="secondary" />}>Cancel</AlertDialogClose>
+            <Button variant="destructive" onClick={() => void confirmRevoke()}>Revoke key</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

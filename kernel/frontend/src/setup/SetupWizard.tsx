@@ -1,3 +1,4 @@
+import { BrandLogo } from '../brand';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   Alert,
@@ -71,7 +72,7 @@ const COMPLETE = 6;
 const DRAFT_STORAGE_KEY = 'innostes_setup_draft';
 
 const COLOR_PRESETS = [
-  { name: 'Innostes Blue', hex: '#2563EB' },
+  { name: 'Executive Blue', hex: '#3157D5' },
   { name: 'Emerald', hex: '#059669' },
   { name: 'Violet', hex: '#7C3AED' },
   { name: 'Indigo', hex: '#4F46E5' },
@@ -330,14 +331,14 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const canGoTo = (index: number) => step !== COMPLETE && index > VERIFY && index < step;
 
   return (
-    <div className="@container min-h-svh w-full bg-muted/40">
+    <div className="@container min-h-svh w-full bg-canvas">
       <div className="mx-auto grid max-w-6xl gap-8 p-6 @4xl:grid-cols-[minmax(0,22rem)_1fr] @4xl:p-10">
         <BrandPanel />
 
-        <div className="flex flex-col rounded-2xl border border-border bg-card shadow-sm">
+        <div className="flex flex-col rounded-lg border border-border bg-card">
           {/* Offline Warning Banner */}
           {!isOnline && (
-            <div className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/10 px-6 py-2.5 text-xs font-medium text-amber-700 dark:text-amber-400">
+            <div className="flex items-center gap-2 border-b border-border bg-warning-bg px-6 py-2.5 text-xs font-medium text-warning-text ">
               <WifiOff className="size-4 shrink-0" />
               <span>Network connection lost. Your setup progress is safely saved locally and will resume when you reconnect.</span>
             </div>
@@ -345,7 +346,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
 
           {/* Draft Restored Banner */}
           {draftRestored && step > VERIFY && step < COMPLETE && (
-            <div className="flex items-center justify-between border-b border-primary/20 bg-primary/10 px-6 py-2 text-xs font-medium text-primary">
+            <div className="flex items-center justify-between border-b border-border bg-primary-tint px-6 py-2 text-xs font-medium text-primary">
               <div className="flex items-center gap-2">
                 <Check className="size-3.5" />
                 <span>Restored your setup progress from draft.</span>
@@ -532,7 +533,7 @@ function OrganizationStep({
   return (
     <Form className="flex flex-col gap-6" onFormSubmit={onNext}>
       <StepHeader title="Organization details">
-        Establish the initial customer workspace for your ERP deployment.
+        Create the first organization workspace for your INNOSTES deployment.
       </StepHeader>
 
       <FormGrid>
@@ -779,9 +780,9 @@ function BrandingStep({
           <Label>Theme Mode</Label>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { id: 'system', label: '💻 System Default' },
-              { id: 'light', label: '☀️ Light' },
-              { id: 'dark', label: '🌙 Dark' },
+              { id: 'system', label: 'System Default' },
+              { id: 'light', label: 'Light' },
+              { id: 'dark', label: 'Dark' },
             ].map((t) => (
               <button
                 key={t.id}
@@ -789,8 +790,8 @@ function BrandingStep({
                 onClick={() => onChange({ theme: t.id as 'light' | 'dark' | 'system' })}
                 className={`flex items-center justify-center rounded-xl border p-3 text-sm font-medium transition-all ${
                   currentTheme === t.id
-                    ? 'border-primary bg-primary/10 text-primary shadow-xs ring-1 ring-primary'
-                    : 'border-border bg-card text-foreground hover:bg-muted/50'
+                    ? 'border-primary bg-primary-tint text-primary shadow-xs ring-1 ring-primary'
+                    : 'border-border bg-card text-foreground hover:bg-muted'
                 }`}
               >
                 {t.label}
@@ -989,7 +990,7 @@ function CompleteStep({ result, onFinish }: { result: SetupResult; onFinish: () 
   return (
     <div className="flex flex-col gap-6">
       <StepHeader title="Setup complete">
-        <strong>{result.tenant.name}</strong> is ready. Your ERP platform is initialized.
+        <strong>{result.tenant.name}</strong> is ready. INNOSTES Business OS is set up.
       </StepHeader>
       <Alert variant="success">
         <AlertTitle>Platform initialized</AlertTitle>
@@ -1025,7 +1026,7 @@ function BrandPanel() {
   return (
     <aside className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <span className="text-lg font-bold tracking-tight">innostes ERP</span>
+        <BrandLogo variant="wordmark" withProductLabel imageClassName="h-7" />
         <div className="flex flex-wrap gap-1.5">
           <Badge variant="info">Self-hosted</Badge>
           <Badge variant="info">First-time setup</Badge>

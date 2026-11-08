@@ -9,8 +9,8 @@ export function DashboardTab() {
         <Card className="p-4 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">Today's Workday</span>
-            <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live
+            <span className="flex items-center gap-1 text-xs text-success-text bg-success-bg px-2 py-0.5 rounded-full font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> Live
             </span>
           </div>
           <div className="text-2xl font-bold tracking-tight font-mono">00:00:00</div>

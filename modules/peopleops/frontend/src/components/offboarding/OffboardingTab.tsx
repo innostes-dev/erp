@@ -1,262 +1,297 @@
-import { useState, useEffect } from 'react';
-import { 
-  Button, 
-  EmptyState, 
-  Table,
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Alert,
+  AlertDescription,
+  AlertDialog,
+  AlertDialogClose,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertTitle,
   Badge,
+  Button,
+  DataTable,
+  EmptyState,
+  IconTile,
+  PageHeader,
   Sheet,
+  SheetBody,
   SheetContent,
+  SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
-  SheetBody,
-  Spinner,
-  toast
+  Skeleton,
+  toast,
+  type BadgeVariant,
+  type DataTableColumn,
 } from '@innostes/ui';
-import { LogOut, Plus, Calculator, Banknote, ShieldAlert } from 'lucide-react';
-import { apiRequest } from '@innostes/kernel';
+import { LogOut, Plus } from 'lucide-react';
+import { formatINR, peopleopsRequest } from '../../api';
 
+interface Separation {
+  id: string;
+  employee_id: string;
+  employee_name?: string;
+  exit_type: string;
+  separation_mode?: string;
+  approved_lwd?: string;
+  requested_lwd?: string;
+  status?: string;
+}
+
+interface SettlementSheet {
+  pro_rata_salary: number | string;
+  encashed_leave_days: number | string;
+  leave_encashment_amount: number | string;
+  tenure_years: number;
+  gratuity_amount: number | string;
+  reimbursements_payable: number | string;
+  notice_shortfall_deduction: number | string;
+  salary_advance_unrecovered: number | string;
+  departmental_asset_recoveries: number | string;
+  final_tds_tax: number | string;
+  final_professional_tax: number | string;
+  net_payable_amount: number | string;
+}
+
+const EXIT_TONE: Record<string, BadgeVariant> = {
+  TERMINATION: 'destructive',
+  VOLUNTARY_RESIGNATION: 'secondary',
+  RETIREMENT: 'info',
+};
+const humanize = (s?: string) => (s ? s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, ' ') : '—');
+const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+
+/** Separations and full & final settlement (List + Detail drawer templates). */
 export function OffboardingTab() {
-  const [selectedSeparationId, setSelectedSeparationId] = useState<string | null>(null);
-  const [separations, setSeparations] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDrawerLoading, setIsDrawerLoading] = useState(false);
-  const [settlementData, setSettlementData] = useState<any>(null);
+  const [separations, setSeparations] = useState<Separation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Separation | null>(null);
+  const [sheet, setSheet] = useState<SettlementSheet | null>(null);
+  const [sheetError, setSheetError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [disbursing, setDisbursing] = useState(false);
 
-  useEffect(() => {
-    fetchSeparations();
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await peopleopsRequest<{ items?: Separation[] }>('/offboarding/separations');
+      setSeparations(res?.items ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Separations could not be loaded.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const fetchSeparations = async () => {
-    try {
-      setIsLoading(true);
-      const res = await apiRequest<{ items?: any[] }>('/peopleops/offboarding/separations');
-      setSeparations(res.items || []);
-    } catch (error) {
-      console.error('Failed to fetch separations', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch separation records.',
-        variant: 'destructive',
-      });
-      // Fallback for demonstration since we can't fully boot the API in this environment
-      setSeparations([
-        {
-          id: '1',
-          employeeName: 'Sarah Chen',
-          exit_type: 'VOLUNTARY_RESIGNATION',
-          lwd: '2024-03-15',
-          status: 'INITIATED',
-        },
-        {
-          id: '2',
-          employeeName: 'Marcus Johnson',
-          exit_type: 'TERMINATION',
-          lwd: '2024-01-31',
-          status: 'AUDITED',
-        }
-      ]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  useEffect(() => {
+    void load();
+  }, [load]);
 
-  const fetchSettlement = async (separationId: string) => {
-    setSelectedSeparationId(separationId);
+  async function openSettlement(separation: Separation) {
+    setSelected(separation);
+    setSheet(null);
+    setSheetError(null);
     try {
-      setIsDrawerLoading(true);
-      const res = await apiRequest<any>(`/peopleops/offboarding/settlements/${separationId}`);
-      setSettlementData(res);
-    } catch (error) {
-      console.error('Failed to fetch settlement sheet', error);
-      // Fallback for demonstration
-      setSettlementData({
-        pro_rata_salary: 15000.00,
-        encashed_leave_days: 10.5,
-        leave_encashment_amount: 24230.77,
-        tenure_years: 6,
-        gratuity_amount: 207692.31,
-        reimbursements_payable: 0,
-        notice_shortfall_deduction: 11538.46,
-        salary_advance_unrecovered: 0,
-        departmental_asset_recoveries: 0,
-        final_tds_tax: 2000.00,
-        final_professional_tax: 200.00,
-        net_payable_amount: 233184.62
-      });
-    } finally {
-      setIsDrawerLoading(false);
+      setSheet(await peopleopsRequest<SettlementSheet>(`/offboarding/settlements/${separation.id}`));
+    } catch (err) {
+      setSheetError(err instanceof Error ? err.message : 'The settlement could not be calculated.');
     }
-  };
+  }
+
+  async function disburse() {
+    if (!selected) return;
+    setConfirmOpen(false);
+    setDisbursing(true);
+    try {
+      await peopleopsRequest(`/offboarding/settlements/${selected.id}/disburse`, { method: 'POST' });
+      toast.success('Settlement approved for disbursal');
+      setSelected(null);
+      await load();
+    } catch (err) {
+      toast.error("The settlement couldn't be disbursed", { description: err instanceof Error ? err.message : undefined });
+    } finally {
+      setDisbursing(false);
+    }
+  }
+
+  const columns: DataTableColumn<Separation>[] = [
+    {
+      id: 'employee',
+      header: 'Employee',
+      cell: (s) => <span className="font-medium text-foreground">{s.employee_name || s.employee_id}</span>,
+    },
+    {
+      id: 'type',
+      header: 'Exit type',
+      cell: (s) => <Badge variant={EXIT_TONE[s.exit_type] ?? 'secondary'}>{humanize(s.exit_type)}</Badge>,
+    },
+    {
+      id: 'lwd',
+      header: 'Last working day',
+      cell: (s) => {
+        const d = s.approved_lwd || s.requested_lwd;
+        return d ? dateFmt.format(new Date(d)) : '—';
+      },
+    },
+    { id: 'stage', header: 'Stage', cell: (s) => <Badge variant="outline">{humanize(s.status ?? 'INITIATED')}</Badge> },
+    {
+      id: 'actions',
+      header: <span className="sr-only">Actions</span>,
+      align: 'end',
+      cell: (s) => (
+        <Button variant="secondary" size="sm" onClick={() => void openSettlement(s)}>
+          View settlement
+        </Button>
+      ),
+    },
+  ];
+
+  const money = (v: number | string | undefined) => formatINR(Number(v ?? 0));
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between pb-2">
-        <div>
-          <h3 className="text-lg font-semibold tracking-tight">Separations & Final Settlement (F&F)</h3>
-          <p className="text-sm text-muted-foreground">Manage employee resignations, department clearance tasks, and Gratuity/Encashment settlements.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" startIcon={<Plus />}>
-            Initiate Separation
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Offboarding"
+        description="Separations, clearance and full & final (F&F) settlement with gratuity and leave encashment."
+        actions={
+          <Button startIcon={<Plus />} disabled title="Separation intake form is coming soon">
+            Initiate separation
           </Button>
-        </div>
-      </div>
+        }
+      />
 
-      {isLoading ? (
-        <div className="flex justify-center p-8"><LoadingSpinner /></div>
-      ) : separations.length === 0 ? (
-        <EmptyState
-          icon={<LogOut />}
-          title="No Active Separations"
-          description="Employee separation cases, department clearance sign-offs, and final settlement sheets will appear here."
-        />
+      {error ? (
+        <Alert variant="destructive">
+          <AlertTitle>Separations couldn't be loaded</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center gap-3">
+            <span>{error}</span>
+            <Button size="sm" variant="secondary" onClick={() => void load()}>Try again</Button>
+          </AlertDescription>
+        </Alert>
       ) : (
-        <div className="rounded-md border">
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                <Table.Head>Employee</Table.Head>
-                <Table.Head>Exit Type</Table.Head>
-                <Table.Head>Last Working Day</Table.Head>
-                <Table.Head>Stage</Table.Head>
-                <Table.Head className="text-right">Actions</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {separations.map((sep) => (
-                <Table.Row key={sep.id}>
-                  <Table.Cell className="font-medium">{sep.employeeName || sep.employee_id}</Table.Cell>
-                  <Table.Cell>
-                    <Badge variant={sep.exit_type === 'TERMINATION' ? 'destructive' : 'secondary'}>
-                      {(sep.exit_type || '').replace('_', ' ')}
-                    </Badge>
-                  </Table.Cell>
-                  <Table.Cell>{sep.approved_lwd || sep.lwd}</Table.Cell>
-                  <Table.Cell>
-                    <Badge variant="outline">{sep.status}</Badge>
-                  </Table.Cell>
-                  <Table.Cell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => fetchSettlement(sep.id)}
-                    >
-                      View F&F
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        </div>
+        <DataTable
+          data={separations}
+          columns={columns}
+          getRowId={(s) => s.id}
+          loading={loading}
+          responsive="stack"
+          className="rounded-lg border border-border bg-card"
+          emptyState={
+            <EmptyState className="border-0"
+              icon={<IconTile tone="neutral" size="lg"><LogOut /></IconTile>}
+              title="No active separations"
+              description="Resignations, clearance sign-offs and settlement sheets will appear here."
+            />
+          }
+        />
       )}
 
-      <Sheet
-        open={selectedSeparationId !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedSeparationId(null);
-            setSettlementData(null);
-          }
-        }}
-      >
-        <SheetContent side="right">
+      <Sheet open={selected !== null} onOpenChange={(open) => !open && setSelected(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg">
           <SheetHeader>
-            <SheetTitle>Full & Final (F&F) Settlement Breakdown</SheetTitle>
-            <SheetDescription>Review calculated earnings, statutory deductions, and asset recoveries.</SheetDescription>
+            <SheetTitle>Full & final settlement</SheetTitle>
+            <SheetDescription>{selected?.employee_name || selected?.employee_id}</SheetDescription>
           </SheetHeader>
-          <SheetBody className="flex flex-col gap-6 py-4">
-            {isDrawerLoading || !settlementData ? (
-              <div className="flex justify-center p-8"><Spinner /></div>
+          <SheetBody className="flex flex-col gap-4">
+            {sheetError ? (
+              <Alert variant="destructive">
+                <AlertTitle>Settlement unavailable</AlertTitle>
+                <AlertDescription>{sheetError}</AlertDescription>
+              </Alert>
+            ) : !sheet ? (
+              <div className="flex flex-col gap-3" aria-busy="true" aria-label="Calculating settlement">
+                <Skeleton className="h-28" />
+                <Skeleton className="h-24" />
+                <Skeleton className="h-16" />
+              </div>
             ) : (
-            <>
-              <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-                <div className="flex items-center gap-2 font-semibold mb-4">
-                  <Calculator className="h-5 w-5 text-primary" />
-                  <span>1. Settlement Earnings (+)</span>
+              <>
+                <SettlementGroup
+                  title="Earnings"
+                  rows={[
+                    ['Pro-rated salary (to last working day)', money(sheet.pro_rata_salary)],
+                    [`Leave encashment (${Number(sheet.encashed_leave_days)} days)`, money(sheet.leave_encashment_amount)],
+                    [`Gratuity (${sheet.tenure_years} years' service)`, money(sheet.gratuity_amount)],
+                    ['Pending reimbursements', money(sheet.reimbursements_payable)],
+                  ]}
+                />
+                <SettlementGroup
+                  title="Recoveries"
+                  negative
+                  rows={[
+                    ['Notice period shortfall', money(sheet.notice_shortfall_deduction)],
+                    ['Unrecovered salary advance', money(sheet.salary_advance_unrecovered)],
+                    ['Asset recovery', money(sheet.departmental_asset_recoveries)],
+                  ]}
+                />
+                <SettlementGroup
+                  title="Statutory withholdings"
+                  negative
+                  rows={[
+                    ['Income tax (TDS)', money(sheet.final_tds_tax)],
+                    ['Professional tax', money(sheet.final_professional_tax)],
+                  ]}
+                />
+                <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary-tint p-4">
+                  <span className="font-medium text-foreground">Net payable</span>
+                  <span className="text-metric font-semibold text-foreground tabular">{money(sheet.net_payable_amount)}</span>
                 </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Prorated Salary (up to LWD)</span>
-                    <span>₹{settlementData.pro_rata_salary?.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Leave Encashment ({settlementData.encashed_leave_days} days)</span>
-                    <span>₹{settlementData.leave_encashment_amount?.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between font-medium">
-                    <span className="text-muted-foreground">Statutory Gratuity (Tenure: {settlementData.tenure_years} Years)</span>
-                    <span className="text-primary">₹{settlementData.gratuity_amount?.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Pending Expense Reimbursements</span>
-                    <span>₹{settlementData.reimbursements_payable?.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-                <div className="flex items-center gap-2 font-semibold mb-4">
-                  <ShieldAlert className="h-5 w-5 text-destructive" />
-                  <span>2. Settlement Recoveries (-)</span>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Notice Period Shortfall Recovery</span>
-                    <span className="text-destructive">-₹{settlementData.notice_shortfall_deduction?.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Unsettled Salary Advances</span>
-                    <span className="text-destructive">-₹{settlementData.salary_advance_unrecovered?.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Unreturned Hardware / Damaged Asset Recovery</span>
-                    <span className="text-destructive">-₹{settlementData.departmental_asset_recoveries?.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-                <div className="flex items-center gap-2 font-semibold mb-4">
-                  <Banknote className="h-5 w-5 text-muted-foreground" />
-                  <span>3. Statutory Withholdings (-)</span>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Final Income Tax TDS</span>
-                    <span>-₹{settlementData.final_tds_tax?.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">State Professional Tax</span>
-                    <span>-₹{settlementData.final_professional_tax?.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mt-2">
-                <div className="flex items-center justify-between font-semibold text-lg">
-                  <span>Net Full & Final Payout Amount</span>
-                  <span>₹{settlementData.net_payable_amount?.toFixed(2)}</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  This amount will be committed to LedgerFlow and queued for bank batch disbursal.
+                <p className="text-caption text-muted-foreground">
+                  On approval, the amount is posted to LedgerFlow and queued for the next bank disbursal batch.
                 </p>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setSelectedSeparationId(null)}>
-                  Close
-                </Button>
-                <Button>
-                  Audit & Sign-Off F&F
-                </Button>
-              </div>
-            </>
-          )}
+              </>
+            )}
           </SheetBody>
+          <SheetFooter>
+            <Button variant="secondary" onClick={() => setSelected(null)}>Close</Button>
+            <Button disabled={!sheet} loading={disbursing} onClick={() => setConfirmOpen(true)}>
+              Approve & disburse
+            </Button>
+          </SheetFooter>
         </SheetContent>
       </Sheet>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Approve this settlement?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {sheet ? `${money(sheet.net_payable_amount)} will be queued for disbursal. ` : ''}
+              This posts to the ledger and can't be edited afterwards.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogClose render={<Button variant="secondary" />}>Cancel</AlertDialogClose>
+            <Button onClick={() => void disburse()}>Approve & disburse</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  );
+}
+
+function SettlementGroup({ title, rows, negative = false }: { title: string; rows: [string, string][]; negative?: boolean }) {
+  return (
+    <section className="rounded-lg border border-border bg-card" aria-label={title}>
+      <h3 className="border-b border-border px-4 py-2.5 text-sm font-semibold text-foreground">
+        {title} <span className="font-normal text-muted-foreground">({negative ? 'deducted' : 'added'})</span>
+      </h3>
+      <dl className="divide-y divide-border text-body-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-center justify-between gap-4 px-4 py-2">
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className={`tabular ${negative ? 'text-error-text' : 'text-foreground'}`}>
+              {negative ? `−${value}` : value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

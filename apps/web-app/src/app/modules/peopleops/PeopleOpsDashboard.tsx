@@ -1,3 +1,5 @@
+import { useAuth } from '@innostes/kernel';
+import { ModulePageHeader } from '../../components/ModulePageHeader';
 import { useState, useEffect } from 'react';
 import {
   Badge,
@@ -6,7 +8,6 @@ import {
 } from '@innostes/ui';
 import {
   Clock,
-  Calendar,
   CheckCircle2,
   FileText,
   Sun,
@@ -34,30 +35,31 @@ interface ApprovalItem {
   reason: string;
 }
 
+/** PeopleOps router: each sub-page is its own component, so hooks never change order. */
 export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activeSubFeatureId?: string }) {
-  // Delegate to specific sub-feature page when selected in sidemenu
-  if (activeSubFeatureId === 'employees') {
-    return <EmployeesTab />;
+  switch (activeSubFeatureId) {
+    case 'employees':
+      return <EmployeesTab />;
+    case 'attendance':
+      return <AttendanceTab />;
+    case 'leave':
+      return <LeaveTab />;
+    case 'payroll':
+      return <PayrollTab />;
+    case 'expenses':
+      return <ExpensesTab />;
+    case 'offboarding':
+      return <OffboardingTab />;
+    case 'masters':
+      return <MastersTab />;
+    default:
+      return <PeopleOpsHome />;
   }
-  if (activeSubFeatureId === 'attendance') {
-    return <AttendanceTab />;
-  }
-  if (activeSubFeatureId === 'leave') {
-    return <LeaveTab />;
-  }
-  if (activeSubFeatureId === 'payroll') {
-    return <PayrollTab />;
-  }
-  if (activeSubFeatureId === 'expenses') {
-    return <ExpensesTab />;
-  }
-  if (activeSubFeatureId === 'offboarding') {
-    return <OffboardingTab />;
-  }
-  if (activeSubFeatureId === 'masters') {
-    return <MastersTab />;
-  }
+}
 
+/** PeopleOps dashboard: check-in, balances, approvals. */
+function PeopleOpsHome() {
+  const { user } = useAuth();
   // Web Check-In & Timer state
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [secondsToday, setSecondsToday] = useState(4 * 3600 + 22 * 60 + 15); // e.g. 4h 22m
@@ -156,26 +158,16 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
     return `${hrs.toString().padStart(2, '0')}h : ${mins.toString().padStart(2, '0')}m : ${secs.toString().padStart(2, '0')}s`;
   }
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
   return (
     <div className="flex flex-col gap-6">
-      {/* 1. Welcome Greeting Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Good morning, Arun! 👋</h1>
-            <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5">
-              PeopleOps
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Senior Software Engineer • Engineering Team • Innostes HQ Bangalore
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground bg-background/80 px-3.5 py-2 rounded-xl border border-border shadow-xs">
-          <Calendar className="size-4 text-primary" />
-          <span>{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}</span>
-        </div>
-      </div>
+      <ModulePageHeader
+        preview
+        title={`${greeting}${user?.first_name ? `, ${user.first_name}` : ''}`}
+        description={`PeopleOps · ${new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}`}
+      />
 
       {/* 2. Top Interactive Operational Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -206,7 +198,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
           </div>
 
           {/* Location Mode Selector */}
-          <div className="flex items-center justify-between gap-1 p-1 bg-muted/40 rounded-xl mb-4 border border-border/60">
+          <div className="flex items-center justify-between gap-1 p-1 bg-muted rounded-xl mb-4 border border-border">
             <button
               type="button"
               onClick={() => setWorkMode('office')}
@@ -216,7 +208,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              🏢 Office
+              Office
             </button>
             <button
               type="button"
@@ -227,7 +219,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              🏠 Remote (WFH)
+              Remote (WFH)
             </button>
             <button
               type="button"
@@ -238,7 +230,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              ✈️ On Duty
+              ✈On Duty
             </button>
           </div>
 
@@ -249,7 +241,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
             className="w-full text-sm font-bold shadow-md cursor-pointer"
             onClick={handleCheckToggle}
           >
-            {isCheckedIn ? '🔴 Web Check-Out' : '🟢 Web Check-In'}
+            {isCheckedIn ? 'Web Check-Out' : 'Web Check-In'}
           </Button>
         </Card>
 
@@ -257,7 +249,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
         <Card className="p-6 flex flex-col justify-between border-border bg-card shadow-xs">
           <div className="flex items-center justify-between pb-3 border-b border-border">
             <div className="flex items-center gap-2">
-              <Sun className="size-4 text-amber-500" />
+              <Sun className="size-4 text-warning-text" />
               <h2 className="text-sm font-semibold text-foreground">My Leave Balances</h2>
             </div>
             <Button
@@ -271,25 +263,25 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 my-4">
-            <div className="p-3 rounded-xl bg-muted/30 border border-border/80 flex flex-col items-center justify-center text-center">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase">Casual</span>
+            <div className="p-3 rounded-xl bg-muted border border-border flex flex-col items-center justify-center text-center">
+              <span className="text-xs font-semibold text-muted-foreground uppercase">Casual</span>
               <span className="text-2xl font-bold text-foreground mt-1">{balances.casual.toFixed(1)}</span>
-              <span className="text-[10px] text-muted-foreground">Days left</span>
+              <span className="text-xs text-muted-foreground">Days left</span>
             </div>
-            <div className="p-3 rounded-xl bg-muted/30 border border-border/80 flex flex-col items-center justify-center text-center">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase">Sick</span>
+            <div className="p-3 rounded-xl bg-muted border border-border flex flex-col items-center justify-center text-center">
+              <span className="text-xs font-semibold text-muted-foreground uppercase">Sick</span>
               <span className="text-2xl font-bold text-foreground mt-1">{balances.sick.toFixed(1)}</span>
-              <span className="text-[10px] text-muted-foreground">Days left</span>
+              <span className="text-xs text-muted-foreground">Days left</span>
             </div>
-            <div className="p-3 rounded-xl bg-muted/30 border border-border/80 flex flex-col items-center justify-center text-center">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase">Paid / Earned</span>
+            <div className="p-3 rounded-xl bg-muted border border-border flex flex-col items-center justify-center text-center">
+              <span className="text-xs font-semibold text-muted-foreground uppercase">Paid / Earned</span>
               <span className="text-2xl font-bold text-foreground mt-1">{balances.paid.toFixed(1)}</span>
-              <span className="text-[10px] text-muted-foreground">Days left</span>
+              <span className="text-xs text-muted-foreground">Days left</span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 text-xs flex items-center justify-between">
-            <span className="text-muted-foreground">Upcoming Public Holiday:</span>
+          <div className="p-3 rounded-xl bg-primary-tint border border-border text-xs flex items-center justify-between">
+            <span className="text-strong-foreground">Upcoming Public Holiday:</span>
             <span className="font-semibold text-foreground">Diwali — Nov 12 (Thu)</span>
           </div>
         </Card>
@@ -307,12 +299,12 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
           <div className="flex flex-col gap-3 my-3">
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
-                <div className="size-7 rounded-full bg-amber-500/10 text-amber-600 font-bold flex items-center justify-center text-xs">
+                <div className="size-7 rounded-full bg-warning-bg text-warning-text font-bold flex items-center justify-center text-xs">
                   PS
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Priya Sharma</p>
-                  <p className="text-[11px] text-muted-foreground">QA Engineer</p>
+                  <p className="text-xs text-muted-foreground">QA Engineer</p>
                 </div>
               </div>
               <Badge variant="warning">On Leave</Badge>
@@ -320,12 +312,12 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
 
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
-                <div className="size-7 rounded-full bg-blue-500/10 text-blue-600 font-bold flex items-center justify-center text-xs">
+                <div className="size-7 rounded-full bg-primary-tint text-primary font-bold flex items-center justify-center text-xs">
                   VN
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Vikram Nair</p>
-                  <p className="text-[11px] text-muted-foreground">Backend Lead</p>
+                  <p className="text-xs text-muted-foreground">Backend Lead</p>
                 </div>
               </div>
               <Badge variant="outline">Remote (WFH)</Badge>
@@ -333,12 +325,12 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
 
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
-                <div className="size-7 rounded-full bg-emerald-500/10 text-emerald-600 font-bold flex items-center justify-center text-xs">
+                <div className="size-7 rounded-full bg-success-bg text-success-text font-bold flex items-center justify-center text-xs">
                   AD
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Anita Desai</p>
-                  <p className="text-[11px] text-muted-foreground">DevOps Specialist</p>
+                  <p className="text-xs text-muted-foreground">DevOps Specialist</p>
                 </div>
               </div>
               <Badge variant="success">On Duty (Client)</Badge>
@@ -366,7 +358,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
 
           {approvals.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground text-sm flex flex-col items-center justify-center gap-2">
-              <Check className="size-8 text-emerald-500 bg-emerald-500/10 p-1.5 rounded-full" />
+              <Check className="size-8 text-success-text bg-success-bg p-1.5 rounded-full" />
               <span>All clear! No pending team requests.</span>
             </div>
           ) : (
@@ -374,21 +366,21 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
               {approvals.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3.5 rounded-xl border border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-3.5 rounded-xl border border-border bg-canvas flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="size-9 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-xs shrink-0">
+                    <div className="size-9 rounded-full bg-primary-tint text-primary font-bold flex items-center justify-center text-xs shrink-0">
                       {item.avatar}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-semibold text-foreground">{item.name}</span>
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-xs">
                           {item.type}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">{item.details}</p>
-                      <p className="text-xs italic text-muted-foreground/90 mt-1">
+                      <p className="text-xs italic text-muted-foreground mt-1">
                         &ldquo;{item.reason}&rdquo;
                       </p>
                     </div>
@@ -398,7 +390,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
                     <Button
                       size="sm"
                       variant="primary"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-xs"
+                      className="bg-success hover:bg-success text-xs"
                       onClick={() => handleApprove(item.id)}
                     >
                       ✓ Approve
@@ -406,7 +398,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-destructive hover:bg-destructive/10 text-xs"
+                      className="text-destructive hover:bg-error-bg text-xs"
                       onClick={() => handleReject(item.id)}
                     >
                       ✗ Reject
@@ -429,14 +421,14 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
             </div>
 
             <div className="flex flex-col gap-2.5">
-              <div className="p-3 rounded-xl bg-muted/20 border border-border flex items-center justify-between hover:bg-muted/40 transition-colors">
+              <div className="p-3 rounded-xl bg-canvas border border-border flex items-center justify-between hover:bg-muted transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <div className="size-8 rounded-lg bg-success-bg text-success-text flex items-center justify-center">
                     <FileText className="size-4" />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-foreground">October 2026 Payslip</p>
-                    <p className="text-[10px] text-muted-foreground">₹85,400 • Net Disbursed</p>
+                    <p className="text-xs text-muted-foreground">₹85,400 • Net Disbursed</p>
                   </div>
                 </div>
                 <Button size="sm" variant="outline">
@@ -444,14 +436,14 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
                 </Button>
               </div>
 
-              <div className="p-3 rounded-xl bg-muted/20 border border-border flex items-center justify-between hover:bg-muted/40 transition-colors">
+              <div className="p-3 rounded-xl bg-canvas border border-border flex items-center justify-between hover:bg-muted transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <div className="size-8 rounded-lg bg-primary-tint text-primary flex items-center justify-center">
                     <Clock className="size-4" />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-foreground">Punch Regularization</p>
-                    <p className="text-[10px] text-muted-foreground">Request missing punch fix</p>
+                    <p className="text-xs text-muted-foreground">Request missing punch fix</p>
                   </div>
                 </div>
                 <Button size="sm" variant="outline">
@@ -461,7 +453,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
             </div>
           </div>
 
-          <div className="pt-4 border-t border-border text-[11px] text-muted-foreground text-center">
+          <div className="pt-4 border-t border-border text-xs text-muted-foreground text-center">
             Need HR assistance? Email <strong className="text-foreground">people@innostes.com</strong>
           </div>
         </Card>
@@ -469,7 +461,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
 
       {/* 4. Apply Leave Modal */}
       {showLeaveModal && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-card flex items-center justify-center p-4">
           <Card className="w-full max-w-md p-6 bg-card border-border shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <h2 className="text-base font-bold text-foreground">Apply for Time Off</h2>
@@ -484,7 +476,7 @@ export function PeopleOpsDashboard({ activeSubFeatureId = 'dashboard' }: { activ
 
             {leaveSuccess ? (
               <div className="py-8 flex flex-col items-center justify-center text-center gap-2">
-                <Check className="size-10 text-emerald-500 bg-emerald-500/10 p-2 rounded-full" />
+                <Check className="size-10 text-success-text bg-success-bg p-2 rounded-full" />
                 <p className="text-base font-bold text-foreground">Leave Submitted!</p>
                 <p className="text-xs text-muted-foreground">Your manager has been notified for sign-off.</p>
               </div>
