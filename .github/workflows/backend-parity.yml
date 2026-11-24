@@ -1,0 +1,207 @@
+name: Backend parity
+
+# Runs the backend-agnostic kernel parity suite (tests/parity) against every kernel backend,
+# diffs each backend's OpenAPI against the FastAPI reference, and verifies that all three
+# interoperate on one shared database.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'kernel/**'
+      - 'apps/api-server/**'
+      - 'tests/parity/**'
+      - 'scripts/parity/**'
+      - 'docs/backend-parity/schema.sql'
+      - '.github/workflows/backend-parity.yml'
+  pull_request:
+    paths:
+      - 'kernel/**'
+      - 'apps/api-server/**'
+      - 'tests/parity/**'
+      - 'scripts/parity/**'
+      - 'docs/backend-parity/schema.sql'
+      - '.github/workflows/backend-parity.yml'
+
+permissions:
+  contents: read
+
+env:
+  PGHOST: localhost
+  PGPORT: '5432'
+  PGUSER: postgres
+  PGPASSWORD: postgres
+  SETUP_TOKEN: parity-setup-token
+
+jobs:
+  parity:
+    name: parity (${{ matrix.backend }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [fastapi, laravel, nestjs]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: erp_parity
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # The scripts use `pg` from the NestJS package (reset-db.mjs), so install it for every backend.
+      - name: Install NestJS deps
+        working-directory: kernel/backend-nestjs
+        run: npm ci --no-audit --no-fund
+
+      # ---------------- FastAPI ----------------
+      - name: Start FastAPI
+        if: matrix.backend == 'fastapi'
+        run: |
+          python3 -m venv apps/api-server/.venv
+          apps/api-server/.venv/bin/pip install -q -r apps/api-server/requirements.txt
+          export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/erp_parity
+          (cd kernel/backend && ../../apps/api-server/.venv/bin/python -m alembic -c alembic.ini upgrade head)
+          cd apps/api-server
+          PORT=8001 SETUP_ENABLED=true nohup .venv/bin/python -m uvicorn app.main:app --port 8001 > /tmp/api.log 2>&1 &
+          echo "BASE_URL=http://127.0.0.1:8001" >> "$GITHUB_ENV"
+          echo "KNOWN_REFERENCE_BUGS=1" >> "$GITHUB_ENV"   # documented FastAPI defects, see docs/backend-parity/conventions.md
+
+      # ---------------- Laravel ----------------
+      - name: Start Laravel
+        if: matrix.backend == 'laravel'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_pgsql, mbstring, openssl
+      - name: Run Laravel
+        if: matrix.backend == 'laravel'
+        working-directory: kernel/backend-laravel
+        run: |
+          composer install --no-interaction --prefer-dist
+          cp .env.example .env && php artisan key:generate
+          export DB_CONNECTION=pgsql DB_HOST=localhost DB_PORT=5432 DB_DATABASE=erp_parity DB_USERNAME=postgres DB_PASSWORD=postgres SETUP_ENABLED=true
+          php artisan migrate --force
+          nohup php -S 127.0.0.1:8002 -t public public/index.php > /tmp/api.log 2>&1 &
+          echo "BASE_URL=http://127.0.0.1:8002" >> "$GITHUB_ENV"
+
+      # ---------------- NestJS ----------------
+      - name: Start NestJS
+        if: matrix.backend == 'nestjs'
+        working-directory: kernel/backend-nestjs
+        run: |
+          npm run build
+          export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/erp_parity PORT=8003 SETUP_ENABLED=true
+          node dist/migrate.js
+          nohup node dist/main.js > /tmp/api.log 2>&1 &
+          echo "BASE_URL=http://127.0.0.1:8003" >> "$GITHUB_ENV"
+
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do curl -fs "$BASE_URL/setup/status" >/dev/null && exit 0; sleep 1; done
+          echo "API did not start"; cat /tmp/api.log; exit 1
+
+      - name: Parity suite
+        run: node --test --test-reporter=spec tests/parity/kernel.parity.test.mjs
+
+      - name: OpenAPI gap report
+        if: matrix.backend != 'fastapi'
+        run: node scripts/parity/gap-report.mjs "$BASE_URL/openapi.json"
+
+      - name: API log on failure
+        if: failure()
+        run: cat /tmp/api.log || true
+
+  backend-checks:
+    name: unit tests and lint
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: erp_parity
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_pgsql, mbstring, openssl
+      # Laravel and NestJS apply copies of the FastAPI migration SQL; fail if any copy drifted.
+      - name: Shared migration SQL is identical in every backend
+        run: node scripts/parity/check-shared-sql.mjs
+      - name: NestJS
+        working-directory: kernel/backend-nestjs
+        run: |
+          npm ci --no-audit --no-fund
+          npm run lint && npm run typecheck && npm test && npm run test:e2e
+        env:
+          E2E_ADMIN_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      - name: Laravel
+        working-directory: kernel/backend-laravel
+        run: |
+          composer install --no-interaction --prefer-dist
+          cp .env.example .env && php artisan key:generate
+          composer lint && composer analyse && composer test
+        env:
+          DB_HOST: localhost
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+
+  interop:
+    name: cross-backend interoperability
+    needs: parity
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_pgsql, mbstring, openssl
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build all three backends
+        run: |
+          python3 -m venv apps/api-server/.venv
+          apps/api-server/.venv/bin/pip install -q -r apps/api-server/requirements.txt
+          (cd kernel/backend-laravel && composer install --no-interaction --prefer-dist && cp .env.example .env && php artisan key:generate)
+          (cd kernel/backend-nestjs && npm ci --no-audit --no-fund && npm run build)
+      - name: Run interoperability suite
+        run: scripts/parity/run-cross-backend.sh
+      # Identities + credentials on one shared DB: constraints, backfill, legacy fallback, no-resurrection.
+      # PERF=1 lifts rate limits (the suite logs in many times); SHARED_DB keeps it separate from the run above.
+      - name: Run identities + credentials suite
+        run: scripts/parity/run-cross-backend.sh
+        env:
+          PERF: '1'
+          SHARED_DB: erp_identities
+          TEST_FILE: tests/parity/identities.test.mjs

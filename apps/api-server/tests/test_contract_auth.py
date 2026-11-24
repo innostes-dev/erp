@@ -23,8 +23,9 @@ from kernel.auth.schemas import (
     MessageResponse,
     RefreshTokenResponse,
     TokenResponse,
+    UserProfileResponse,
 )
-from kernel.auth.services import InvalidCredentialsError, InvalidTokenError
+from kernel.auth.services import AuthService, InvalidCredentialsError, InvalidTokenError
 from kernel.core.database import get_db
 from kernel.core.security.jwt import create_access_token
 from kernel.core.services.errors import NotFoundError
@@ -39,7 +40,7 @@ class TestContractAuth(unittest.TestCase):
 
     def setUp(self) -> None:
         self.client = TestClient(app)
-        self.mock_auth = MagicMock()
+        self.mock_auth = MagicMock(spec=AuthService)
         self.mock_api_key = MagicMock()
         self.mock_user_svc = MagicMock()
         self.user_id = uuid.UUID("3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f")
@@ -84,6 +85,9 @@ class TestContractAuth(unittest.TestCase):
             yield session
 
         app.dependency_overrides[get_db] = fake_db
+        self.mock_auth.get_user_profile = AsyncMock(
+            return_value=UserProfileResponse(**self.mock_user_read.model_dump(), active_tenant=None, accessible_tenants=[], accessible_modules=[])
+        )
         app.dependency_overrides[get_auth_service] = lambda: self.mock_auth
         app.dependency_overrides[get_api_key_service] = lambda: self.mock_api_key
         app.dependency_overrides[dep_get_api_key_svc] = lambda: self.mock_api_key
@@ -189,7 +193,7 @@ class TestContractAuth(unittest.TestCase):
 
     def test_auth_reset_password__200_valid_token(self) -> None:
         """POST /auth/reset-password returns 200 confirming successful password change."""
-        self.mock_auth.reset_password = AsyncMock(return_value=MessageResponse(message="Password reset successfully."))
+        self.mock_auth.reset_password_with_token = AsyncMock(return_value=MessageResponse(message="Password reset successfully."))
         payload = {"token": "rst_valid123", "new_password": "NewNorthwindPass2026!"}
         res = self.client.post("/auth/reset-password", json=payload)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -197,7 +201,7 @@ class TestContractAuth(unittest.TestCase):
 
     def test_auth_reset_password__401_invalid_token(self) -> None:
         """POST /auth/reset-password returns 401 when reset token is invalid."""
-        self.mock_auth.reset_password = AsyncMock(side_effect=InvalidTokenError("Invalid token"))
+        self.mock_auth.reset_password_with_token = AsyncMock(side_effect=InvalidTokenError("Invalid token"))
         payload = {"token": "rst_invalid", "new_password": "NewNorthwindPass2026!"}
         res = self.client.post("/auth/reset-password", json=payload)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

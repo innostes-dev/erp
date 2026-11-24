@@ -15,11 +15,6 @@ class Installation(BaseModel):
     Setup is complete when this row exists. The database allows only one row:
     `singleton` is always true and unique, so a second (or concurrent) setup
     fails with an integrity error.
-
-    Attributes:
-        singleton: Always true; makes the table hold at most one row.
-        app_version: API version that ran the setup.
-        default_tenant_id: The first organisation created during setup.
     """
 
     __tablename__ = "installation"

@@ -15,8 +15,11 @@ from kernel.audit.schemas import (
 )
 from kernel.audit.services import (
     AuditService,
+    actor_fields,
+    audit_request,
     audit_service,
     compute_field_diff,
+    full_name,
 )
 from kernel.core.module import BaseModule
 
@@ -56,8 +59,11 @@ __all__ = [
     "AuditService",
     "AuditSummary",
     "EntityActivity",
+    "actor_fields",
+    "audit_request",
     "audit_service",
     "compute_field_diff",
+    "full_name",
     "module",
     "router",
 ]

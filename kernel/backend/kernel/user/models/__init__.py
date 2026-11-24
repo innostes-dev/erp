@@ -1,5 +1,6 @@
 """User and IAM Models Export."""
 
+from kernel.user.models.credentials import Credential, CredentialType, Identity, IdentityType
 from kernel.user.models.device import DeviceStatus, DeviceType, UserDevice
 from kernel.user.models.identity import UserIdentity
 from kernel.user.models.password_history import PasswordHistory
@@ -25,4 +26,8 @@ __all__ = [
     "UserRole",
     "UserModuleGrant",
     "UserIdentity",
+    "Identity",
+    "IdentityType",
+    "Credential",
+    "CredentialType",
 ]

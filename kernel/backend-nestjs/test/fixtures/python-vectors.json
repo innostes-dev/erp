@@ -1,0 +1,79 @@
+{
+  "hexKey": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "rawKey": "short-utf8-key",
+  "pepper": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+  "jwtSecret": "vector-secret-key-0123456789-abcdefghijklmnop",
+  "envelopes": [
+    {
+      "plaintext": "ada@example.com",
+      "version": 1,
+      "envelope": "v1:hUscyIIFmX38m7Mf:qMmEvlvjHIxgu5nmGpGJfESUCSnjUhLzPogLL7ngyQ=="
+    },
+    {
+      "plaintext": "ada@example.com",
+      "version": 2,
+      "envelope": "v2:m4ShGebnQjPmsc6C:zNkYb7lu/6g3Oj0J5CrtvU+7b9GKCr0r24hH793j3g=="
+    },
+    {
+      "plaintext": "+911234567890",
+      "version": 1,
+      "envelope": "v1:BcNqrSU1oO6k6pNT:u+cCveDh4B2zhGaNluBicOj4IQF/SNm3K0x/L7c="
+    },
+    {
+      "plaintext": "+911234567890",
+      "version": 2,
+      "envelope": "v2:4OA4yjnDbKAQg+zt:63ZwVdLcpfRlOrphGbjeVU3EpofXUmQ4eGZ8tOU="
+    },
+    {
+      "plaintext": "Ünïcödé ✓ 日本語",
+      "version": 1,
+      "envelope": "v1:sA3gXUNqNECU21sd:zPjV0+hnZW+vBLeOD1GjfeBc/69xpTdQsr3efoVc/1fa28dubre7d6E="
+    },
+    {
+      "plaintext": "Ünïcödé ✓ 日本語",
+      "version": 2,
+      "envelope": "v2:CpPVMnxx9mXLlf6V:QDH14oaILtxLY+HotSMXQPHrTsIufY/ZjQsja1gmgj2xCgUf7IuF0xI="
+    },
+    {
+      "plaintext": "x",
+      "version": 1,
+      "envelope": "v1:3RB1t0j4nLiVl3vq:Ostzv7ZEqB/shsTnsZquxzE="
+    },
+    {
+      "plaintext": "x",
+      "version": 2,
+      "envelope": "v2:lRzLAIbGJUk9GVXw:uKW4cu7o+zAfFeMaCIJvSLM="
+    }
+  ],
+  "blindIndex": [
+    {
+      "value": "Ada@Example.com",
+      "hash": "15bab211f4f9b232a671475894d571c3154168ff43196f8a7d31c1b3e2dc47b8"
+    },
+    {
+      "value": "  ada@example.com  ",
+      "hash": "15bab211f4f9b232a671475894d571c3154168ff43196f8a7d31c1b3e2dc47b8"
+    },
+    {
+      "value": "+911234567890",
+      "hash": "2433a7cff78aca89ceb902ab4ad59777cf93bd57f5c15525480a590d65eb2b73"
+    }
+  ],
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJlbWFpbCI6ImFkYUBleGFtcGxlLmNvbSIsInRva2VuX3ZlcnNpb24iOjMsImlzX3N1cGVyX2FkbWluIjp0cnVlLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzk1NDczNjM1LCJleHAiOjIxMTA4MzM2MzV9.cGZciPyhG_j0nmsbgSBY9bYBlC56RwWvM30zUkzosjQ",
+  "password": "Str0ng-Passw0rd!",
+  "bcryptHash": "$2b$12$eFgsEc2T2PmlK.WAfoRS3Oaa9LbHtHqsvVY5XrWP0Z9wqoLrOHPpm",
+  "bcryptHash2y": "$2y$12$/3c1SChz2dX7UcYBk85BpedUtfAE.cd8H/HYlavFpNSw21Dq5t3tK",
+  "refreshToken": "abc123",
+  "refreshTokenSha256": "6ca13d52ca70c883e0f0bb101e425a89e8624de51db2d2392593af6a84118090",
+  "defaultRow": {
+    "email": "Interop@Example.com",
+    "mobile": "+15550001111",
+    "password": "Interop-Passw0rd!",
+    "email_hash": "8573ccfb9ddffe5efe1c46ba05971210d2fee0df051bbb6d68f7324bf6124ee8",
+    "email_encrypted": "v1:L5dubf+WCGuW9ZA3:n2uux6C0G7jKP/2DCD4n6zVg1k9mqBhufyluwl23uCAE8nk=",
+    "mobile_hash": "4ba099519c2888a842014687a3949ac6bf7227afb6ae08dff6dca40c0b863e03",
+    "mobile_encrypted": "v1:mWun/KJfOktOmGD9:9wJ+xwDwGdC+KeO6ibP3hQHTXpggDE5/5KtWdQ==",
+    "password_hash_2b": "$2b$12$RT7coqQytkLqPD5b24zAuu6fhauAVkK94KoVVGrreKNpFnkpOGkim",
+    "password_hash_2y": "$2y$12$lsGLco09EuwxcQPrxhdDa.KN.uFVNRoNOJXnhnZ.i7pp85EaccrUy"
+  }
+}

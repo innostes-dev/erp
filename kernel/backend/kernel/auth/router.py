@@ -1,11 +1,12 @@
-"""Authentication router exposing endpoints for login, MFA, tokens, and API key management."""
+"""Auth endpoints: login, tokens, passwords, the current user and API keys."""
 
 import uuid
 
 from fastapi import APIRouter, Depends, Header, Path, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from kernel.auth.dependencies import get_current_user, get_user_service
+from kernel.audit.services import actor_fields, audit_request
+from kernel.auth.dependencies import get_current_user
 from kernel.auth.schemas import (
     ApiKeyCreatedResponse,
     ApiKeyListResponse,
@@ -35,14 +36,18 @@ from kernel.auth.services import (
     TemporaryPasswordExpiredError,
 )
 from kernel.core.database import get_db
+from kernel.core.http import client_ip
 from kernel.core.schemas import error_responses
 from kernel.core.services.errors import NotFoundError, UnauthorizedError
 from kernel.user.models.user import User
-from kernel.user.schemas import UserRead
-from kernel.user.services import UserService
 
 TAG = "Authentication"
 router = APIRouter(prefix="/auth", tags=[TAG])
+
+ACCESS_COOKIE_MAX_AGE = 900
+REFRESH_COOKIE_MAX_AGE = 7 * 86400
+PUBLIC = {"security": []}
+BEARER = {"security": [{"BearerAuth": []}]}
 
 
 def get_auth_service() -> AuthService:
@@ -53,14 +58,22 @@ def get_api_key_service() -> ApiKeyService:
     return ApiKeyService()
 
 
-def get_client_ip(request: Request) -> str | None:
-    """Extract client IP from X-Forwarded-For or socket address."""
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    if request.client:
-        return request.client.host
-    return None
+def _set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
+    response.set_cookie(
+        "access_token", access_token, httponly=True, secure=False, samesite="lax", path="/", max_age=ACCESS_COOKIE_MAX_AGE
+    )
+    response.set_cookie(
+        "refresh_token", refresh_token, httponly=True, secure=False, samesite="lax", path="/auth",
+        max_age=REFRESH_COOKIE_MAX_AGE,
+    )
+
+
+def _clear_auth_cookies(response: Response) -> None:
+    response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(key="refresh_token", path="/auth")
+
+
+# ---- login and refresh ------------------------------------------------
 
 
 @router.post(
@@ -69,7 +82,7 @@ def get_client_ip(request: Request) -> str | None:
     status_code=status.HTTP_200_OK,
     summary="Authenticate with email and password",
     operation_id="auth_login",
-    openapi_extra={"security": []},
+    openapi_extra=PUBLIC,
     responses=error_responses(
         InvalidCredentialsError,
         AccountLockedError,
@@ -89,63 +102,19 @@ async def login(
 
     Public endpoint. Sets secure HttpOnly cookies for web browsers and returns
     bearer credentials for programmatic API callers.
-    \f
-    Args:
-        body: Login credentials and device hardware fingerprint.
-        request: FastAPI HTTP request.
-        response: FastAPI HTTP response.
-        session: Active async database session.
-        auth_service: Injected authentication domain service.
-
-    Returns:
-        TokenResponse with access token, refresh token, and user profile.
     """
-    ip = get_client_ip(request)
-    ua = request.headers.get("User-Agent")
-    result = await auth_service.login(session, body, ip_address=ip, user_agent=ua)
+    result = await auth_service.login(
+        session, body, ip_address=client_ip(request), user_agent=request.headers.get("User-Agent")
+    )
 
-    try:
-        from kernel.audit import audit_service
-        await audit_service.record(
-            session=session,
-            action="LOGIN",
-            entity_type="user",
-            entity_id=str(result.user.id),
-            entity_name=f"{result.user.first_name} {result.user.last_name}".strip() or result.user.email,
-            actor_id=result.user.id,
-            actor_email=result.user.email,
-            actor_name=f"{result.user.first_name} {result.user.last_name}".strip() or result.user.email,
-            ip_address=ip,
-            user_agent=ua,
-            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
-            reason="User authenticated via password credentials",
-            status="SUCCESS",
-        )
-    except Exception:
-        pass
-
+    actor = actor_fields(result.user)
+    await audit_request(
+        session, request, action="LOGIN", entity_type="user", entity_id=str(result.user.id),
+        entity_name=actor["actor_name"], reason="User authenticated via password credentials", **actor,
+    )
     await session.commit()
 
-    # Set secure HttpOnly cookies for web browsers (XSS & CSRF protection)
-    response.set_cookie(
-        key="access_token",
-        value=result.access_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        path="/",
-        max_age=900,
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=result.refresh_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        path="/auth",
-        max_age=7 * 86400,
-    )
-
+    _set_auth_cookies(response, result.access_token, result.refresh_token)
     return result
 
 
@@ -155,7 +124,7 @@ async def login(
     status_code=status.HTTP_200_OK,
     summary="Rotate refresh token",
     operation_id="auth_refresh",
-    openapi_extra={"security": []},
+    openapi_extra=PUBLIC,
     responses=error_responses(
         InvalidTokenError,
         DeviceWipedError,
@@ -172,49 +141,24 @@ async def refresh_token(
 
     Public endpoint. Detects reuse attempts, invalidating compromised session
     families if reuse occurs.
-    \f
-    Args:
-        body: Request containing active refresh token.
-        request: FastAPI HTTP request.
-        response: FastAPI HTTP response.
-        session: Active async database session.
-        auth_service: Injected authentication domain service.
-
-    Returns:
-        RefreshTokenResponse with rotated access token and refresh token.
     """
-    ip = get_client_ip(request)
-    ua = request.headers.get("User-Agent")
-
-    # Fall back to cookie if request body is blank
-    token_str = body.refresh_token or request.cookies.get("refresh_token") or ""
-    if not token_str:
+    token = body.refresh_token or request.cookies.get("refresh_token")  # browsers send it as a cookie
+    if not token:
         raise InvalidTokenError("Refresh token missing.")
 
-    effective_body = RefreshTokenRequest(refresh_token=token_str)
-    result = await auth_service.refresh_token(session, effective_body, ip_address=ip, user_agent=ua)
+    result = await auth_service.refresh_token(
+        session,
+        RefreshTokenRequest(refresh_token=token),
+        ip_address=client_ip(request),
+        user_agent=request.headers.get("User-Agent"),
+    )
     await session.commit()
 
-    response.set_cookie(
-        key="access_token",
-        value=result.access_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        path="/",
-        max_age=900,
-    )
-    response.set_cookie(
-        key="refresh_token",
-        value=result.refresh_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        path="/auth",
-        max_age=7 * 86400,
-    )
-
+    _set_auth_cookies(response, result.access_token, result.refresh_token)
     return result
+
+
+# ---- passwords ---------------------------------------------------------------
 
 
 @router.post(
@@ -223,7 +167,7 @@ async def refresh_token(
     status_code=status.HTTP_200_OK,
     summary="Request password reset",
     operation_id="auth_forgot_password",
-    openapi_extra={"security": []},
+    openapi_extra=PUBLIC,
 )
 async def forgot_password(
     body: ForgotPasswordRequest,
@@ -234,14 +178,6 @@ async def forgot_password(
 
     Public endpoint. Always returns a 200 confirmation notice regardless of
     whether the email is registered in the system.
-    \f
-    Args:
-        body: Request containing target email address.
-        session: Active async database session.
-        auth_service: Injected authentication domain service.
-
-    Returns:
-        ForgotPasswordResponse with anti-enumeration message.
     """
     result = await auth_service.forgot_password(session, body)
     await session.commit()
@@ -254,7 +190,7 @@ async def forgot_password(
     status_code=status.HTTP_200_OK,
     summary="Reset password with token",
     operation_id="auth_reset_password",
-    openapi_extra={"security": []},
+    openapi_extra=PUBLIC,
     responses=error_responses(
         InvalidTokenError,
         PasswordRecentlyUsedError,
@@ -269,16 +205,8 @@ async def reset_password(
 
     Public endpoint. Enforces SOC 2 historical password reuse prevention and
     revokes all active sessions upon successful reset.
-    \f
-    Args:
-        body: Reset token and new password.
-        session: Active async database session.
-        auth_service: Injected authentication domain service.
-
-    Returns:
-        MessageResponse confirming successful password reset.
     """
-    result = await auth_service.reset_password(session, body)
+    result = await auth_service.reset_password_with_token(session, body)
     await session.commit()
     return result
 
@@ -289,7 +217,7 @@ async def reset_password(
     status_code=status.HTTP_200_OK,
     summary="Change user password",
     operation_id="auth_change_password",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(
         InvalidCredentialsError,
         PasswordRecentlyUsedError,
@@ -307,42 +235,15 @@ async def change_password(
 
     Requires Bearer authentication. Verifies existing credentials before
     applying the update and rotating active sessions.
-    \f
-    Args:
-        body: Current credentials and new password.
-        request: FastAPI HTTP request.
-        current_user: Authenticated actor.
-        session: Active async database session.
-        auth_service: Injected authentication domain service.
-
-    Returns:
-        MessageResponse confirming credential update.
     """
     result = await auth_service.change_password(session, current_user.id, body)
 
-    try:
-        from kernel.audit import audit_service
-        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
-        user_email = getattr(current_user, "email", None)
-        await audit_service.record(
-            session=session,
-            action="PASSWORD_RESET",
-            entity_type="user",
-            entity_id=str(current_user.id),
-            entity_name=user_name or user_email or "User",
-            tenant_id=getattr(current_user, "tenant_id", None),
-            actor_id=current_user.id,
-            actor_email=user_email,
-            actor_name=user_name or user_email,
-            ip_address=get_client_ip(request),
-            user_agent=request.headers.get("User-Agent"),
-            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
-            reason="User changed account password",
-            status="SUCCESS",
-        )
-    except Exception:
-        pass
-
+    actor = actor_fields(current_user)
+    await audit_request(
+        session, request, action="PASSWORD_RESET", entity_type="user", entity_id=str(current_user.id),
+        entity_name=actor["actor_name"] or "User", tenant_id=getattr(current_user, "tenant_id", None),
+        reason="User changed account password", **actor,
+    )
     await session.commit()
     return result
 
@@ -353,7 +254,7 @@ async def change_password(
     status_code=status.HTTP_200_OK,
     summary="Revoke session tokens",
     operation_id="auth_logout",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(UnauthorizedError),
 )
 async def logout(
@@ -368,50 +269,23 @@ async def logout(
 
     Requires Bearer authentication. Optionally revokes all active sessions
     across all client devices when logout_all is true.
-    \f
-    Args:
-        body: Revocation scope options.
-        request: FastAPI HTTP request.
-        response: FastAPI HTTP response.
-        current_user: Authenticated actor.
-        session: Active async database session.
-        auth_service: Injected authentication domain service.
-
-    Returns:
-        MessageResponse confirming session termination.
     """
     result = await auth_service.logout(session, current_user.id, body)
 
-    try:
-        from kernel.audit import audit_service
-        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
-        user_email = getattr(current_user, "email", None)
-        await audit_service.record(
-            session=session,
-            action="LOGOUT",
-            entity_type="user",
-            entity_id=str(current_user.id),
-            entity_name=user_name or user_email or "User",
-            tenant_id=getattr(current_user, "tenant_id", None),
-            actor_id=current_user.id,
-            actor_email=user_email,
-            actor_name=user_name or user_email,
-            ip_address=get_client_ip(request),
-            user_agent=request.headers.get("User-Agent"),
-            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
-            reason="User logged out of all active sessions" if body.logout_all else "User logged out of active session",
-            status="SUCCESS",
-        )
-    except Exception:
-        pass
-
+    actor = actor_fields(current_user)
+    await audit_request(
+        session, request, action="LOGOUT", entity_type="user", entity_id=str(current_user.id),
+        entity_name=actor["actor_name"] or "User", tenant_id=getattr(current_user, "tenant_id", None),
+        reason="User logged out of all active sessions" if body.logout_all else "User logged out of active session",
+        **actor,
+    )
     await session.commit()
 
-    # Clear HttpOnly cookies
-    response.delete_cookie(key="access_token", path="/")
-    response.delete_cookie(key="refresh_token", path="/auth")
-
+    _clear_auth_cookies(response)
     return result
+
+
+# ---- current user -------------------------------------------------------------
 
 
 @router.get(
@@ -420,14 +294,13 @@ async def logout(
     status_code=status.HTTP_200_OK,
     summary="Get current user profile",
     operation_id="auth_get_me",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(UnauthorizedError),
 )
 async def get_me(
     response: Response,
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
-    user_service: UserService = Depends(get_user_service),
     session: AsyncSession = Depends(get_db),
     x_tenant_id: uuid.UUID | None = Header(
         default=None,
@@ -444,48 +317,23 @@ async def get_me(
 
     Requires Bearer authentication. Decrypts PII fields (email, mobile) for
     the authorized user. Supports ETag conditional validation with 304 Not Modified.
-    \f
-    Args:
-        current_user: Authenticated actor.
-        auth_service: Injected auth domain service.
-        session: Database session.
-        x_tenant_id: Optional explicit tenant ID header.
-        if_none_match: ETag header.
-
-    Returns:
-        UserProfileResponse record for caller.
     """
-    etag_val = f'"{current_user.token_version}"'
-    if if_none_match and if_none_match.strip() == etag_val:
+    # token_version changes on every password change or logout-all, which is when the profile can change.
+    etag = f'"{current_user.token_version}"'
+    if if_none_match and if_none_match.strip() == etag:
         return Response(status_code=status.HTTP_304_NOT_MODIFIED)
 
-    res = auth_service.get_user_profile(
-        session=session,
-        user=current_user,
-        tenant_id=x_tenant_id,
-    )
-    if hasattr(res, "__await__"):
-        profile = await res
-    else:
-        profile = res
-
-    # Support unit test mocks where auth_service might be a raw MagicMock
-    if not isinstance(profile, UserProfileResponse):
-        user_read = user_service.to_user_read(current_user)
-        profile = UserProfileResponse(
-            **user_read.model_dump(),
-            active_tenant=None,
-            accessible_tenants=[],
-            accessible_modules=[],
-        )
-
-    response.headers["ETag"] = etag_val
+    profile = await auth_service.get_user_profile(session=session, user=current_user, tenant_id=x_tenant_id)
+    response.headers["ETag"] = etag
     return profile
 
 
-# =========================================================================
-# API Key / Personal Access Token Endpoints
-# =========================================================================
+# ---- API keys -------------------------------------------------------------------
+
+
+def _key_tenant(user: User) -> uuid.UUID:
+    """Tenant the user's API keys belong to (falls back to the user id when there is no tenant)."""
+    return getattr(user, "tenant_id", None) or user.id
 
 
 @router.get(
@@ -494,7 +342,7 @@ async def get_me(
     status_code=status.HTTP_200_OK,
     summary="List tenant API keys",
     operation_id="auth_list_api_keys",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(UnauthorizedError),
 )
 async def list_api_keys(
@@ -506,17 +354,8 @@ async def list_api_keys(
 
     Requires Bearer authentication. Omits secret hashes and reveals key
     metadata and permission scopes.
-    \f
-    Args:
-        current_user: Authenticated actor.
-        session: Active async database session.
-        api_key_service: Injected API key domain service.
-
-    Returns:
-        ApiKeyListResponse with all keys for caller organisation.
     """
-    tenant_id = getattr(current_user, "tenant_id", None) or current_user.id
-    keys = await api_key_service.list_api_keys(session, tenant_id)
+    keys = await api_key_service.list_api_keys(session, _key_tenant(current_user))
     return ApiKeyListResponse(items=[ApiKeyRead.model_validate(k) for k in keys])
 
 
@@ -526,7 +365,7 @@ async def list_api_keys(
     status_code=status.HTTP_201_CREATED,
     summary="Generate API key",
     operation_id="auth_create_api_key",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(UnauthorizedError),
 )
 async def create_api_key(
@@ -540,18 +379,8 @@ async def create_api_key(
 
     Requires Bearer authentication. Returns the plaintext secret key exactly once;
     it cannot be retrieved or reconstructed later.
-    \f
-    Args:
-        body: Key label, expiration duration, and permission scopes.
-        request: FastAPI HTTP request.
-        current_user: Authenticated actor.
-        session: Active async database session.
-        api_key_service: Injected API key domain service.
-
-    Returns:
-        ApiKeyCreatedResponse containing the secret raw_key.
     """
-    tenant_id = getattr(current_user, "tenant_id", None) or current_user.id
+    tenant_id = _key_tenant(current_user)
     key, raw_key = await api_key_service.create_api_key(
         session=session,
         tenant_id=tenant_id,
@@ -561,33 +390,14 @@ async def create_api_key(
         expires_in_days=body.expires_in_days,
     )
 
-    try:
-        from kernel.audit import audit_service
-        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
-        user_email = getattr(current_user, "email", None)
-        await audit_service.record(
-            session=session,
-            action="CREATE",
-            entity_type="api_key",
-            entity_id=str(key.id),
-            entity_name=key.name,
-            changes={"name": {"old": None, "new": key.name}, "scopes": {"old": None, "new": key.scopes}},
-            tenant_id=tenant_id,
-            actor_id=current_user.id,
-            actor_email=user_email,
-            actor_name=user_name or user_email,
-            ip_address=get_client_ip(request),
-            user_agent=request.headers.get("User-Agent"),
-            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
-            reason=f"Generated API key '{key.name}'",
-            status="SUCCESS",
-        )
-        await session.commit()
-    except Exception:
-        pass
+    await audit_request(
+        session, request, action="CREATE", entity_type="api_key", entity_id=str(key.id), entity_name=key.name,
+        changes={"name": {"old": None, "new": key.name}, "scopes": {"old": None, "new": key.scopes}},
+        tenant_id=tenant_id, reason=f"Generated API key '{key.name}'", **actor_fields(current_user),
+    )
+    await session.commit()
 
-    read_data = ApiKeyRead.model_validate(key).model_dump()
-    return ApiKeyCreatedResponse(**read_data, raw_key=raw_key)
+    return ApiKeyCreatedResponse(**ApiKeyRead.model_validate(key).model_dump(), raw_key=raw_key)
 
 
 @router.delete(
@@ -596,7 +406,7 @@ async def create_api_key(
     status_code=status.HTTP_200_OK,
     summary="Revoke API key",
     operation_id="auth_revoke_api_key",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(UnauthorizedError, NotFoundError),
 )
 async def revoke_api_key(
@@ -613,43 +423,15 @@ async def revoke_api_key(
 
     Requires Bearer authentication. Revocation takes effect immediately, blocking
     all subsequent calls made with this key.
-    \f
-    Args:
-        key_id: Unique UUID of target API key.
-        request: FastAPI HTTP request.
-        current_user: Authenticated actor.
-        session: Active async database session.
-        api_key_service: Injected API key domain service.
-
-    Returns:
-        ApiKeyRead reflecting revoked state.
     """
-    tenant_id = getattr(current_user, "tenant_id", None) or current_user.id
+    tenant_id = _key_tenant(current_user)
     revoked = await api_key_service.revoke_api_key(session, key_id, tenant_id)
 
-    try:
-        from kernel.audit import audit_service
-        user_name = f"{current_user.first_name} {current_user.last_name}".strip()
-        user_email = getattr(current_user, "email", None)
-        await audit_service.record(
-            session=session,
-            action="DELETE",
-            entity_type="api_key",
-            entity_id=str(key_id),
-            entity_name=revoked.name,
-            changes={"is_active": {"old": True, "new": False}},
-            tenant_id=tenant_id,
-            actor_id=current_user.id,
-            actor_email=user_email,
-            actor_name=user_name or user_email,
-            ip_address=get_client_ip(request),
-            user_agent=request.headers.get("User-Agent"),
-            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
-            reason=f"Revoked API key '{revoked.name}'",
-            status="SUCCESS",
-        )
-        await session.commit()
-    except Exception:
-        pass
+    await audit_request(
+        session, request, action="DELETE", entity_type="api_key", entity_id=str(key_id), entity_name=revoked.name,
+        changes={"is_active": {"old": True, "new": False}},
+        tenant_id=tenant_id, reason=f"Revoked API key '{revoked.name}'", **actor_fields(current_user),
+    )
+    await session.commit()
 
     return ApiKeyRead.model_validate(revoked)

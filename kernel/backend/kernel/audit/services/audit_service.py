@@ -1,10 +1,10 @@
-"""Audit subsystem service logic for recording and querying immutable compliance events."""
+"""Write audit rows and query them (list, entity history, summary)."""
 
 from datetime import datetime
 from typing import Any
 import uuid
 
-from sqlalchemy import desc, func, or_, select
+from sqlalchemy import ColumnElement, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from kernel.audit.models.audit_log import AuditLog
@@ -16,6 +16,7 @@ from kernel.audit.schemas.audit_log import (
     EntityActivity,
 )
 
+# Never written to the `changes` column, even if they changed.
 SENSITIVE_KEYS = {
     "password",
     "hashed_password",
@@ -27,6 +28,8 @@ SENSITIVE_KEYS = {
     "api_key",
     "key_hash",
 }
+MUTATION_ACTIONS = ["CREATE", "UPDATE", "DELETE", "RESTORE"]
+SECURITY_ACTIONS = ["LOGIN", "LOGOUT", "PASSWORD_RESET", "RBAC_CHANGE"]
 
 
 def compute_field_diff(
@@ -34,34 +37,19 @@ def compute_field_diff(
     new_state: dict[str, Any] | None,
     exclude_keys: set[str] | None = None,
 ) -> dict[str, dict[str, Any]]:
-    """Compute field-level changes between old and new state dictionaries.
-
-    Masks sensitive values such as passwords, tokens, and hashes.
-    """
+    """`{field: {"old": ..., "new": ...}}` for fields that changed, without sensitive ones."""
     if old_state is None and new_state is None:
         return {}
-
-    old = old_state or {}
-    new = new_state or {}
-    exclude = SENSITIVE_KEYS.union(exclude_keys or set())
-
-    all_keys = set(old.keys()).union(set(new.keys()))
-    diff: dict[str, dict[str, Any]] = {}
-
-    for k in sorted(all_keys):
-        if k in exclude:
-            continue
-        old_val = old.get(k)
-        new_val = new.get(k)
-        if old_val != new_val:
-            diff[k] = {"old": old_val, "new": new_val}
-
-    return diff
+    old, new = old_state or {}, new_state or {}
+    skip = SENSITIVE_KEYS | (exclude_keys or set())
+    return {
+        key: {"old": old.get(key), "new": new.get(key)}
+        for key in sorted(old.keys() | new.keys())
+        if key not in skip and old.get(key) != new.get(key)
+    }
 
 
 class AuditService:
-    """Service handling audit event recording, queries, entity timelines, and KPI aggregations."""
-
     async def record(
         self,
         session: AsyncSession,
@@ -82,10 +70,9 @@ class AuditService:
         reason: str | None = None,
         status: str = "SUCCESS",
     ) -> AuditLog:
-        """Record an immutable audit log entry."""
-        computed_changes = changes or {}
-        if not computed_changes and (old_state is not None or new_state is not None):
-            computed_changes = compute_field_diff(old_state, new_state)
+        """Add an audit row. `changes` is computed from old/new state when not given."""
+        if not changes and (old_state is not None or new_state is not None):
+            changes = compute_field_diff(old_state, new_state)
 
         record = AuditLog(
             id=uuid.uuid4(),
@@ -97,7 +84,7 @@ class AuditService:
             entity_type=entity_type.lower(),
             entity_id=str(entity_id),
             entity_name=entity_name,
-            changes=computed_changes,
+            changes=changes or {},
             ip_address=ip_address,
             user_agent=user_agent,
             correlation_id=correlation_id,
@@ -108,12 +95,7 @@ class AuditService:
         await session.flush()
         return record
 
-    async def record_from_schema(
-        self,
-        session: AsyncSession,
-        data: AuditLogCreate,
-    ) -> AuditLog:
-        """Record an audit log from a validated Pydantic schema."""
+    async def record_from_schema(self, session: AsyncSession, data: AuditLogCreate) -> AuditLog:
         return await self.record(
             session=session,
             action=data.action,
@@ -132,6 +114,8 @@ class AuditService:
             status=data.status,
         )
 
+    # ---- queries ---------------------------------------------------------
+
     async def query(
         self,
         session: AsyncSession,
@@ -148,64 +132,37 @@ class AuditService:
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[AuditLog], int]:
-        """Query audit logs with dynamic filtering and count."""
-        stmt = select(AuditLog)
-
-        if tenant_id:
-            stmt = stmt.where(AuditLog.tenant_id == tenant_id)
+        """One page of matching rows (newest first) and the total count. Empty filters are ignored."""
+        filters = _in_tenant(tenant_id)
         if entity_type:
-            stmt = stmt.where(AuditLog.entity_type == entity_type.lower())
+            filters.append(AuditLog.entity_type == entity_type.lower())
         if entity_id:
-            stmt = stmt.where(AuditLog.entity_id == entity_id)
+            filters.append(AuditLog.entity_id == entity_id)
         if action:
-            stmt = stmt.where(AuditLog.action == action.upper())
+            filters.append(AuditLog.action == action.upper())
         if actor_id:
-            stmt = stmt.where(AuditLog.actor_id == actor_id)
+            filters.append(AuditLog.actor_id == actor_id)
         if status:
-            stmt = stmt.where(AuditLog.status == status.upper())
+            filters.append(AuditLog.status == status.upper())
         if correlation_id:
-            stmt = stmt.where(AuditLog.correlation_id == correlation_id)
+            filters.append(AuditLog.correlation_id == correlation_id)
         if date_from:
-            stmt = stmt.where(AuditLog.created_at >= date_from)
+            filters.append(AuditLog.created_at >= date_from)
         if date_to:
-            stmt = stmt.where(AuditLog.created_at <= date_to)
+            filters.append(AuditLog.created_at <= date_to)
         if search:
-            term = f"%{search.strip()}%"
-            stmt = stmt.where(
-                or_(
-                    AuditLog.actor_email.ilike(term),
-                    AuditLog.actor_name.ilike(term),
-                    AuditLog.entity_name.ilike(term),
-                    AuditLog.entity_id.ilike(term),
-                    AuditLog.reason.ilike(term),
-                    AuditLog.ip_address.ilike(term),
-                )
-            )
+            filters.append(_matches(search))
+        stmt = select(AuditLog).where(*filters)
 
-        # Count total
-        count_stmt = select(func.count()).select_from(stmt.subquery())
-        total_res = await session.execute(count_stmt)
-        total = total_res.scalar_one() or 0
-
-        # Fetch items
-        fetch_stmt = stmt.order_by(desc(AuditLog.created_at)).offset(offset).limit(limit)
-        items_res = await session.execute(fetch_stmt)
-        items = list(items_res.scalars().all())
-
-        return items, total
+        total = (await session.execute(select(func.count()).select_from(stmt.subquery()))).scalar_one() or 0
+        page = stmt.order_by(desc(AuditLog.created_at)).offset(offset).limit(limit)
+        return list((await session.execute(page)).scalars().all()), total
 
     async def get_by_id(
-        self,
-        session: AsyncSession,
-        log_id: uuid.UUID,
-        tenant_id: uuid.UUID | None = None,
+        self, session: AsyncSession, log_id: uuid.UUID, tenant_id: uuid.UUID | None = None
     ) -> AuditLog | None:
-        """Fetch a single audit log entry by ID."""
-        stmt = select(AuditLog).where(AuditLog.id == log_id)
-        if tenant_id:
-            stmt = stmt.where(AuditLog.tenant_id == tenant_id)
-        res = await session.execute(stmt)
-        return res.scalar_one_or_none()
+        stmt = select(AuditLog).where(AuditLog.id == log_id, *_in_tenant(tenant_id))
+        return (await session.execute(stmt)).scalar_one_or_none()
 
     async def get_entity_history(
         self,
@@ -215,112 +172,74 @@ class AuditService:
         tenant_id: uuid.UUID | None = None,
         limit: int = 50,
     ) -> list[AuditLog]:
-        """Fetch the chronological change history for a specific entity."""
+        """Rows about one record, newest first."""
         stmt = (
             select(AuditLog)
-            .where(
-                AuditLog.entity_type == entity_type.lower(),
-                AuditLog.entity_id == str(entity_id),
-            )
+            .where(AuditLog.entity_type == entity_type.lower(), AuditLog.entity_id == str(entity_id), *_in_tenant(tenant_id))
             .order_by(desc(AuditLog.created_at))
             .limit(limit)
         )
-        if tenant_id:
-            stmt = stmt.where(AuditLog.tenant_id == tenant_id)
-        res = await session.execute(stmt)
-        return list(res.scalars().all())
+        return list((await session.execute(stmt)).scalars().all())
 
-    async def get_summary(
-        self,
-        session: AsyncSession,
-        tenant_id: uuid.UUID | None = None,
-    ) -> AuditSummary:
-        """Calculate high-level compliance KPIs and breakdown metrics."""
-        base_filter = []
-        if tenant_id:
-            base_filter.append(AuditLog.tenant_id == tenant_id)
+    async def get_summary(self, session: AsyncSession, tenant_id: uuid.UUID | None = None) -> AuditSummary:
+        """Counts for the audit dashboard."""
+        scope = _in_tenant(tenant_id)
 
-        # Total events
-        total_stmt = select(func.count(AuditLog.id))
-        if base_filter:
-            total_stmt = total_stmt.where(*base_filter)
-        total = (await session.execute(total_stmt)).scalar_one() or 0
+        async def count(*conditions: ColumnElement[bool]) -> int:
+            return (await session.execute(select(func.count(AuditLog.id)).where(*scope, *conditions))).scalar_one() or 0
 
-        # Mutations count
-        mutations_stmt = select(func.count(AuditLog.id)).where(
-            AuditLog.action.in_(["CREATE", "UPDATE", "DELETE", "RESTORE"]),
-            *base_filter,
-        )
-        mutations = (await session.execute(mutations_stmt)).scalar_one() or 0
-
-        # Security count
-        security_stmt = select(func.count(AuditLog.id)).where(
-            AuditLog.action.in_(["LOGIN", "LOGOUT", "PASSWORD_RESET", "RBAC_CHANGE"]),
-            *base_filter,
-        )
-        security = (await session.execute(security_stmt)).scalar_one() or 0
-
-        # Unique actors
-        actors_count_stmt = select(func.count(func.distinct(AuditLog.actor_email)))
-        if base_filter:
-            actors_count_stmt = actors_count_stmt.where(*base_filter)
-        unique_actors = (await session.execute(actors_count_stmt)).scalar_one() or 0
-
-        # Action breakdown
-        actions_stmt = (
-            select(AuditLog.action, func.count(AuditLog.id))
-            .where(*base_filter)
-            .group_by(AuditLog.action)
-            .order_by(desc(func.count(AuditLog.id)))
-            .limit(10)
-        )
-        actions_res = (await session.execute(actions_stmt)).all()
-        actions_breakdown = [ActionCount(action=row[0], count=row[1]) for row in actions_res]
-
-        # Entity breakdown
-        entity_stmt = (
-            select(AuditLog.entity_type, func.count(AuditLog.id))
-            .where(*base_filter)
-            .group_by(AuditLog.entity_type)
-            .order_by(desc(func.count(AuditLog.id)))
-            .limit(10)
-        )
-        entity_res = (await session.execute(entity_stmt)).all()
-        entity_breakdown = [EntityActivity(entity_type=row[0], count=row[1]) for row in entity_res]
-
-        # Top actors
-        top_actors_stmt = (
-            select(
-                AuditLog.actor_id,
-                AuditLog.actor_email,
-                AuditLog.actor_name,
-                func.count(AuditLog.id),
+        async def top(column: Any, limit: int) -> list[Any]:
+            stmt = (
+                select(column, func.count(AuditLog.id))
+                .where(*scope)
+                .group_by(column)
+                .order_by(desc(func.count(AuditLog.id)))
+                .limit(limit)
             )
-            .where(AuditLog.actor_email.isnot(None), *base_filter)
+            return (await session.execute(stmt)).all()
+
+        unique_actors = select(func.count(func.distinct(AuditLog.actor_email))).where(*scope)
+        top_actors = (
+            select(AuditLog.actor_id, AuditLog.actor_email, AuditLog.actor_name, func.count(AuditLog.id))
+            .where(AuditLog.actor_email.isnot(None), *scope)
             .group_by(AuditLog.actor_id, AuditLog.actor_email, AuditLog.actor_name)
             .order_by(desc(func.count(AuditLog.id)))
             .limit(5)
         )
-        top_res = (await session.execute(top_actors_stmt)).all()
-        top_actors = [
-            ActorSummary(
-                actor_id=str(row[0]) if row[0] else None,
-                actor_email=row[1] or "Unknown",
-                actor_name=row[2] or (row[1] or "Unknown").split("@")[0].capitalize(),
-                count=row[3],
-            )
-            for row in top_res
-        ]
 
         return AuditSummary(
-            total_events=total,
-            mutations_count=mutations,
-            security_count=security,
-            unique_actors_count=unique_actors,
-            actions_breakdown=actions_breakdown,
-            entity_breakdown=entity_breakdown,
-            top_actors=top_actors,
+            total_events=await count(),
+            mutations_count=await count(AuditLog.action.in_(MUTATION_ACTIONS)),
+            security_count=await count(AuditLog.action.in_(SECURITY_ACTIONS)),
+            unique_actors_count=(await session.execute(unique_actors)).scalar_one() or 0,
+            actions_breakdown=[ActionCount(action=a, count=n) for a, n in await top(AuditLog.action, 10)],
+            entity_breakdown=[EntityActivity(entity_type=e, count=n) for e, n in await top(AuditLog.entity_type, 10)],
+            top_actors=[
+                ActorSummary(
+                    actor_id=str(actor_id) if actor_id else None,
+                    actor_email=email or "Unknown",
+                    actor_name=name or (email or "Unknown").split("@")[0].capitalize(),
+                    count=n,
+                )
+                for actor_id, email, name, n in (await session.execute(top_actors)).all()
+            ],
         )
+
+
+def _in_tenant(tenant_id: uuid.UUID | None) -> list[ColumnElement[bool]]:
+    return [AuditLog.tenant_id == tenant_id] if tenant_id else []
+
+
+def _matches(search: str) -> ColumnElement[bool]:
+    term = f"%{search.strip()}%"
+    return or_(
+        AuditLog.actor_email.ilike(term),
+        AuditLog.actor_name.ilike(term),
+        AuditLog.entity_name.ilike(term),
+        AuditLog.entity_id.ilike(term),
+        AuditLog.reason.ilike(term),
+        AuditLog.ip_address.ilike(term),
+    )
 
 
 audit_service = AuditService()

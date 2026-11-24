@@ -62,6 +62,7 @@ class ErrorCode:
 
     # User Management
     EMAIL_ALREADY_EXISTS = "email_already_exists"
+    MOBILE_ALREADY_EXISTS = "mobile_already_exists"
     USER_NOT_FOUND = "user_not_found"
     DEVICE_NOT_FOUND = "device_not_found"
 

@@ -1,5 +1,6 @@
 """User Services Export."""
 
+from kernel.user.services.credential_service import CredentialService
 from kernel.user.services.device_service import DeviceNotFoundError, DeviceService
 from kernel.user.services.password import hash_password, verify_password
 from kernel.user.services.rbac_service import RBACService
@@ -9,13 +10,16 @@ from kernel.user.services.seeding import (
 )
 from kernel.user.services.user_service import (
     EmailAlreadyExistsError,
+    MobileAlreadyExistsError,
     UserNotFoundError,
     UserService,
 )
 
 __all__ = [
     "UserService",
+    "CredentialService",
     "EmailAlreadyExistsError",
+    "MobileAlreadyExistsError",
     "UserNotFoundError",
     "RBACService",
     "DeviceService",

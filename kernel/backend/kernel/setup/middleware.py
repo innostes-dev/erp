@@ -36,11 +36,7 @@ class SetupRequiredMiddleware:
     """Pure ASGI middleware: 503 `setup_required` for normal routes until installed."""
 
     def __init__(self, app: ASGIApp) -> None:
-        """Wrap an ASGI app.
-
-        Args:
-            app: The next ASGI app in the chain.
-        """
+        """Wrap an ASGI app."""
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:

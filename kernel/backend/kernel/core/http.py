@@ -6,6 +6,17 @@ from fastapi.responses import JSONResponse
 from kernel.core.services.errors import ServiceError
 
 
+def client_ip(request: Request) -> str | None:
+    """Caller's IP: first X-Forwarded-For entry, else the socket address.
+
+    Note: X-Forwarded-For is trusted as sent (known issue SEC-13 in docs/platform/core-readiness-audit.md).
+    """
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else None
+
+
 def error_body(exc: ServiceError) -> dict[str, str]:
     """JSON body for an error: `detail`, plus `code` when the error has one."""
     body = {"detail": exc.message}

@@ -70,6 +70,22 @@ def mock_session_factory():
     return session
 
 
+def answer_with(user):
+    """Fake `session.execute`: every query finds `user`, except identity and credential lookups.
+
+    Those find nothing, like a user created before migration 0010, so lookups use the `users` columns.
+    """
+
+    async def execute(stmt):
+        sql = str(stmt).lower()
+        res = MagicMock()
+        res.scalar_one_or_none.return_value = None if ("from identities" in sql or "from credentials" in sql) else user
+        res.scalars.return_value.all.return_value = []
+        return res
+
+    return AsyncMock(side_effect=execute)
+
+
 class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         key_32 = b"01234567890123456789012345678901"
@@ -106,13 +122,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         user = await self.create_test_user(session, email="alice@example.com", password="SecretPassword123!")
 
         # Mock user lookup returning created user
-        async def mock_exec(stmt):
-            res = MagicMock()
-            res.scalar_one_or_none.return_value = user
-            res.scalars.return_value.all.return_value = []
-            return res
-
-        session.execute = AsyncMock(side_effect=mock_exec)
+        session.execute = answer_with(user)
 
         login_req = LoginRequest(
             email="alice@example.com",
@@ -137,12 +147,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         session = mock_session_factory()
         user = await self.create_test_user(session, email="bob@example.com", password="CorrectPassword123!")
 
-        async def mock_exec(stmt):
-            res = MagicMock()
-            res.scalar_one_or_none.return_value = user
-            return res
-
-        session.execute = AsyncMock(side_effect=mock_exec)
+        session.execute = answer_with(user)
 
         login_req = LoginRequest(
             email="bob@example.com",
@@ -159,12 +164,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         user = await self.create_test_user(session, email="charlie@example.com", password="RealPassword123!")
         user.failed_login_attempts = 4
 
-        async def mock_exec(stmt):
-            res = MagicMock()
-            res.scalar_one_or_none.return_value = user
-            return res
-
-        session.execute = AsyncMock(side_effect=mock_exec)
+        session.execute = answer_with(user)
 
         login_req = LoginRequest(email="charlie@example.com", password="WrongPassword!")
 
@@ -185,12 +185,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         user.must_change_password = True
         user.temp_password_expires_at = datetime.now(timezone.utc) - timedelta(hours=1)
 
-        async def mock_exec(stmt):
-            res = MagicMock()
-            res.scalar_one_or_none.return_value = user
-            return res
-
-        session.execute = AsyncMock(side_effect=mock_exec)
+        session.execute = answer_with(user)
 
         login_req = LoginRequest(email="david@example.com", password="TempPass123!")
 
@@ -210,12 +205,7 @@ class TestEnterpriseAuth(unittest.IsolatedAsyncioTestCase):
         session = mock_session_factory()
         user = await self.create_test_user(session, email="elena@example.com", password="OldPassword123!")
 
-        async def mock_exec(stmt):
-            res = MagicMock()
-            res.scalar_one_or_none.return_value = user
-            return res
-
-        session.execute = AsyncMock(side_effect=mock_exec)
+        session.execute = answer_with(user)
 
         req = ForgotPasswordRequest(email="elena@example.com")
         res = await self.auth_service.forgot_password(session, req)

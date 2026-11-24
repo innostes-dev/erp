@@ -1,0 +1,56 @@
+# Alternative kernel backends. Layer on top of docker-compose.yml and pick ONE backend:
+#
+#   FastAPI (default):  docker compose up
+#   Laravel:            docker compose -f docker-compose.yml -f docker-compose.backends.yml --profile laravel up db api-laravel
+#   NestJS:             docker compose -f docker-compose.yml -f docker-compose.backends.yml --profile nestjs  up db api-nestjs
+#
+# All backends serve the same API on ${PORT:-8001} and share the same PostgreSQL schema, so you can
+# switch backends on an existing database. Use the same JWT_SECRET_KEY / ENCRYPTION_KEYS /
+# BLIND_INDEX_PEPPER on every backend, otherwise tokens and encrypted data will not be readable
+# after switching. Set real secrets in production (the backends refuse to boot with defaults).
+services:
+  api-laravel:
+    profiles: ["laravel"]
+    build:
+      context: ./kernel/backend-laravel
+    container_name: erp-api-laravel
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8001}:8000"
+    environment: &common_env
+      APP_ENV: ${APP_ENV:-development}
+      APP_NAME: ${APP_NAME:-Innostes ERP API}
+      APP_KEY: ${APP_KEY:-base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=}
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_NAME:-erp_dev}
+      DB_USERNAME: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-insecure-dev-secret-key-change-in-production}
+      ENCRYPTION_KEYS: ${ENCRYPTION_KEYS:-{"1":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"}}
+      ENCRYPTION_CURRENT_KEY_VERSION: ${ENCRYPTION_CURRENT_KEY_VERSION:-1}
+      BLIND_INDEX_PEPPER: ${BLIND_INDEX_PEPPER:-fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210}
+      SETUP_ENABLED: ${SETUP_ENABLED:-true}
+      SETUP_TOKEN: ${SETUP_TOKEN:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4200,http://127.0.0.1:4200}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4200}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api-nestjs:
+    profiles: ["nestjs"]
+    build:
+      context: ./kernel/backend-nestjs
+    container_name: erp-api-nestjs
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8001}:8001"
+    environment:
+      <<: *common_env
+      PORT: 8001
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-erp_dev}}
+    depends_on:
+      db:
+        condition: service_healthy

@@ -48,12 +48,6 @@ def get_service(session: AsyncSession = Depends(get_db)) -> SetupService:
     """FastAPI dependency that builds a `SetupService` for the request.
 
     Override it in tests with `app.dependency_overrides[get_service]`.
-
-    Args:
-        session: Request-scoped database session.
-
-    Returns:
-        A service bound to that session.
     """
     return SetupService(session, app_version=get_settings().app_version)
 
@@ -74,12 +68,6 @@ async def get_setup_status(
 
     Returns **503** if the database can't be reached: the setup state is
     unknown then, so the UI must not show the wizard.
-    \f
-    Returns:
-        The installed flag (cached per process once true).
-
-    Raises:
-        DatabaseUnavailableError: The database is unreachable (503).
     """
     return SetupStatus(installed=installed)
 
@@ -109,19 +97,6 @@ async def get_setup_checks(
 
     The wizard also uses it to verify the token. Returns **404** once setup is
     complete or when web setup is disabled.
-    \f
-    Args:
-        service: Injected setup service.
-        x_setup_token: Setup token header parameter.
-
-    Returns:
-        Database connectivity and the number of pending migrations.
-
-    Raises:
-        SetupNotAvailableError: Installed or disabled (404).
-        InvalidSetupTokenError: Missing or wrong token (401).
-        TooManyRequestsError: Too many wrong tokens (429).
-        DatabaseUnavailableError: The database is unreachable (503).
     """
     return await service.checks()
 
@@ -161,23 +136,6 @@ async def run_setup(
     \f
     Setup commits its own transaction (instead of leaving it to `get_db`) so
     the lock is only applied once the install is really saved.
-
-    Args:
-        body: Values collected by the setup wizard.
-        service: Injected setup service.
-        actor_id: Id of the calling user, if a token was sent.
-        x_setup_token: Setup token header parameter.
-
-    Returns:
-        The created organisation and install time.
-
-    Raises:
-        SetupNotAvailableError: Installed or disabled (404).
-        InvalidSetupTokenError: Missing or wrong token (401).
-        TooManyRequestsError: Too many wrong tokens (429).
-        AlreadyInstalledError: Another request installed at the same moment (409).
-        SlugTakenError: The organisation slug is taken (409).
-        DatabaseUnavailableError: The database is unreachable (503).
     """
     result = await service.install(body, actor_id)
     await service.session.commit()

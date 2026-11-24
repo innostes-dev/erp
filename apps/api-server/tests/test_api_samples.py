@@ -23,7 +23,8 @@ from fastapi.testclient import TestClient
 from app.main import app
 from kernel.auth.dependencies import get_current_user, get_user_service
 from kernel.auth.router import get_auth_service
-from kernel.auth.schemas import TokenResponse
+from kernel.auth.schemas import TokenResponse, UserProfileResponse
+from kernel.auth.services import AuthService
 from kernel.core.database import get_db
 from kernel.core.security.jwt import create_access_token
 from kernel.core.schemas import Page
@@ -171,7 +172,7 @@ class TestApiGuideSamples(unittest.TestCase):
         self.assertEqual(install_data["admin"]["email"], "priya.shah@northwind.example")
 
         # Step 4: Login (POST /auth/login)
-        mock_auth = MagicMock()
+        mock_auth = MagicMock(spec=AuthService)
         mock_auth.login = AsyncMock(
             return_value=TokenResponse(
                 access_token=self.valid_token,
@@ -181,6 +182,9 @@ class TestApiGuideSamples(unittest.TestCase):
                 must_change_password=False,
                 user=self.mock_user_read,
             )
+        )
+        mock_auth.get_user_profile = AsyncMock(
+            return_value=UserProfileResponse(**self.mock_user_read.model_dump(), active_tenant=None, accessible_tenants=[], accessible_modules=[])
         )
         app.dependency_overrides[get_auth_service] = lambda: mock_auth
 

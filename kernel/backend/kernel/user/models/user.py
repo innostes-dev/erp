@@ -69,6 +69,8 @@ class User(BaseModel):
     devices = relationship("UserDevice", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     identities = relationship("UserIdentity", back_populates="user", cascade="all, delete-orphan")
+    login_identities = relationship("Identity", back_populates="user", cascade="all, delete-orphan")
+    credentials = relationship("Credential", back_populates="user", cascade="all, delete-orphan")
     roles = relationship("UserRole", foreign_keys="UserRole.user_id", back_populates="user", cascade="all, delete-orphan")
 
     @property

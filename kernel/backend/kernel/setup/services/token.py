@@ -25,13 +25,7 @@ from kernel.core.config import Settings, get_settings
 
 @dataclass(frozen=True)
 class SetupToken:
-    """The current setup token and where it came from.
-
-    Attributes:
-        value: The token string.
-        from_env: True if it came from `SETUP_TOKEN` (never log it then).
-        path: File holding a generated token, or None.
-    """
+    """The current setup token and where it came from."""
 
     value: str
     from_env: bool
@@ -39,14 +33,7 @@ class SetupToken:
 
 
 def get_setup_token(settings: Settings | None = None) -> SetupToken:
-    """Return the setup token, generating and storing one if needed.
-
-    Args:
-        settings: Settings to use (defaults to the app settings).
-
-    Returns:
-        The token and its source.
-    """
+    """Return the setup token, generating and storing one if needed."""
     settings = settings or get_settings()
     if settings.setup_token is not None:
         return SetupToken(settings.setup_token.get_secret_value(), from_env=True, path=None)
@@ -70,15 +57,7 @@ def get_setup_token(settings: Settings | None = None) -> SetupToken:
 
 
 def verify_setup_token(candidate: str | None, settings: Settings | None = None) -> bool:
-    """Check a token sent by a client, in constant time.
-
-    Args:
-        candidate: Token from the request (None if missing).
-        settings: Settings to use (defaults to the app settings).
-
-    Returns:
-        True if it matches the current setup token.
-    """
+    """Check a token sent by a client, in constant time."""
     if not candidate:
         return False
     expected = get_setup_token(settings).value
@@ -86,11 +65,7 @@ def verify_setup_token(candidate: str | None, settings: Settings | None = None) 
 
 
 def discard_setup_token(settings: Settings | None = None) -> None:
-    """Delete the generated token file after setup (a `SETUP_TOKEN` is left alone).
-
-    Args:
-        settings: Settings to use (defaults to the app settings).
-    """
+    """Delete the generated token file after setup (a `SETUP_TOKEN` is left alone)."""
     settings = settings or get_settings()
     settings.setup_token_file.unlink(missing_ok=True)
 
@@ -100,19 +75,10 @@ class AttemptLimiter:
 
     In-memory, per process. It makes guessing impractical even though a
     256-bit token can't realistically be guessed anyway.
-
-    Attributes:
-        max_attempts: Wrong tokens allowed per window.
-        window_seconds: Length of the window.
     """
 
     def __init__(self, max_attempts: int = 10, window_seconds: float = 15 * 60) -> None:
-        """Create a limiter.
-
-        Args:
-            max_attempts: Wrong tokens allowed per window.
-            window_seconds: Length of the window in seconds.
-        """
+        """Create a limiter."""
         self.max_attempts = max_attempts
         self.window_seconds = window_seconds
         self._failures: dict[str, deque[float]] = {}
@@ -125,11 +91,7 @@ class AttemptLimiter:
         return failures
 
     def retry_after(self, client: str) -> int | None:
-        """Seconds the client must wait, or None if it may try now.
-
-        Args:
-            client: Client identifier (IP address).
-        """
+        """Seconds the client must wait, or None if it may try now."""
         now = time.monotonic()
         with self._lock:
             failures = self._recent(client, now)

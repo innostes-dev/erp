@@ -1,0 +1,1364 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "system_root",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Service information",
+        "tags": [
+          "General"
+        ]
+      }
+    },
+    "/config": {
+      "get": {
+        "operationId": "system_config",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Application configuration",
+        "tags": [
+          "General"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "system_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "System health check",
+        "tags": [
+          "Observability"
+        ]
+      }
+    },
+    "/setup/status": {
+      "get": {
+        "operationId": "setup_get_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get setup status",
+        "tags": [
+          "Setup"
+        ]
+      }
+    },
+    "/setup/checks": {
+      "get": {
+        "operationId": "setup_run_checks",
+        "parameters": [
+          {
+            "name": "x-setup-token",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Setup-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "SetupToken": []
+          }
+        ],
+        "summary": "Run pre-install checks",
+        "tags": [
+          "Setup"
+        ]
+      }
+    },
+    "/setup": {
+      "post": {
+        "operationId": "setup_execute_install",
+        "parameters": [
+          {
+            "name": "X-Setup-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "SetupToken": []
+          }
+        ],
+        "summary": "Run first-run setup",
+        "tags": [
+          "Setup"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "auth_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Authenticate with email and password",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "auth_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Rotate refresh token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "operationId": "auth_forgot_password",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Request password reset",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "operationId": "auth_reset_password",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Reset password with token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/change-password": {
+      "post": {
+        "operationId": "auth_change_password",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Change user password",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "auth_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Revoke session tokens",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "auth_get_me",
+        "parameters": [
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "description": "ETag token version for conditional revalidation.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "description": "Active tenant context override.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/api-keys": {
+      "get": {
+        "operationId": "auth_list_api_keys",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List tenant API keys",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "post": {
+        "operationId": "auth_create_api_key",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiKeyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Generate API key",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/api-keys/{key_id}": {
+      "delete": {
+        "operationId": "auth_revoke_api_key",
+        "parameters": [
+          {
+            "name": "key_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Revoke API key",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "users_create_user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create a user",
+        "tags": [
+          "User management"
+        ]
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "operationId": "users_get_user",
+        "parameters": [
+          {
+            "name": "user_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get user by ID",
+        "tags": [
+          "User management"
+        ]
+      }
+    },
+    "/tenants": {
+      "post": {
+        "operationId": "tenants_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create a tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      },
+      "get": {
+        "operationId": "tenants_list",
+        "parameters": [
+          {
+            "name": "include_deleted",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List tenants",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/current": {
+      "get": {
+        "operationId": "tenants_get_current",
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get current tenant organisation details",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/current/modules": {
+      "get": {
+        "operationId": "tenants_list_modules",
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List business modules for current tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/current/modules/{module_id}/activate": {
+      "post": {
+        "operationId": "tenants_activate_module",
+        "parameters": [
+          {
+            "name": "module_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Activate a business module for tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/current/modules/{module_id}/deactivate": {
+      "post": {
+        "operationId": "tenants_deactivate_module",
+        "parameters": [
+          {
+            "name": "module_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Deactivate a business module for tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/current/plugins": {
+      "get": {
+        "operationId": "tenants_list_plugins",
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List extensible plugins for current tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/current/plugins/{plugin_id}/activate": {
+      "post": {
+        "operationId": "tenants_activate_plugin",
+        "parameters": [
+          {
+            "name": "plugin_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Activate an extensible plugin for tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/current/plugins/{plugin_id}/deactivate": {
+      "post": {
+        "operationId": "tenants_deactivate_plugin",
+        "parameters": [
+          {
+            "name": "plugin_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Deactivate an extensible plugin for tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}": {
+      "get": {
+        "operationId": "tenants_get",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get a tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      },
+      "patch": {
+        "operationId": "tenants_update",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Update a tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      },
+      "delete": {
+        "operationId": "tenants_delete",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Delete a tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    },
+    "/tenants/{tenant_id}/restore": {
+      "post": {
+        "operationId": "tenants_restore",
+        "parameters": [
+          {
+            "name": "tenant_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Restore a deleted tenant",
+        "tags": [
+          "Tenancy"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Innostes ERP API",
+    "description": "Innostes ERP platform kernel API (NestJS implementation). Behaviourally identical to the FastAPI reference: authentication, first-run setup, tenancy and user management.",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "General",
+      "description": "Service identity, runtime metadata, and public configuration."
+    },
+    {
+      "name": "Observability",
+      "description": "Health probes and diagnostics."
+    },
+    {
+      "name": "Authentication",
+      "description": ""
+    },
+    {
+      "name": "Setup",
+      "description": ""
+    },
+    {
+      "name": "Tenancy",
+      "description": ""
+    },
+    {
+      "name": "User management",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "JWT Bearer access token or personal access token (inno_live_...)."
+      },
+      "SetupToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Setup-Token",
+        "description": "One-time system installation token (SETUP_TOKEN)."
+      }
+    },
+    "schemas": {
+      "TenantCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 63
+          },
+          "country": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "timezone": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "language": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 16
+          },
+          "date_format": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "name",
+          "slug"
+        ]
+      },
+      "AdminUserCreate": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "last_name": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 32
+          }
+        },
+        "required": [
+          "first_name",
+          "email",
+          "password"
+        ]
+      },
+      "SetupBrandingCreate": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "primary_color": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "logo_url": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 2048
+          }
+        }
+      },
+      "SetupRequest": {
+        "type": "object",
+        "properties": {
+          "organization": {
+            "$ref": "#/components/schemas/TenantCreate"
+          },
+          "admin": {
+            "$ref": "#/components/schemas/AdminUserCreate"
+          },
+          "branding": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SetupBrandingCreate"
+              }
+            ]
+          }
+        },
+        "required": [
+          "organization",
+          "admin"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "device_fingerprint": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 128
+          },
+          "device_name": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 255
+          },
+          "device_type": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile",
+              "tablet",
+              "scanner",
+              "kiosk"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RefreshTokenRequest": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ]
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "token",
+          "new_password"
+        ]
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "current_password": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "current_password",
+          "new_password"
+        ]
+      },
+      "LogoutRequest": {
+        "type": "object",
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "nullable": true
+          },
+          "logout_all": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateApiKeyRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "expires_in_days": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 365
+          },
+          "scopes": {
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UserCreate": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "last_name": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          },
+          "mobile": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 32
+          },
+          "is_super_admin": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "first_name",
+          "email",
+          "password"
+        ]
+      },
+      "TenantUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "maxLength": 63
+          },
+          "country": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "timezone": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "language": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 16
+          },
+          "date_format": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 20
+          }
+        }
+      }
+    }
+  }
+}

@@ -28,12 +28,16 @@ All business suites (`modules/*`) and developer tools (`plugins/*`) execute on t
 
 ## 1. Monorepo Organization
 
-The kernel is structured into two clean workspace packages:
+The kernel is structured into two clean workspace packages, plus two alternative backend implementations of the kernel API:
 
 | Directory | Package | Language | Purpose |
 | :--- | :--- | :--- | :--- |
 | **`kernel/backend/`** | `kernel` | Python 3.12+ | Core database abstractions, Alembic migrations, tenant context, audit logger, and module interfaces. |
+| **`kernel/backend-laravel/`** | n/a (Composer) | PHP 8.2 / Laravel 12 | Alternative kernel API backend (31 kernel operations). See [its README](backend-laravel/README.md). |
+| **`kernel/backend-nestjs/`** | n/a (npm) | Node 22 / NestJS 11 | Alternative kernel API backend (31 kernel operations). See [its README](backend-nestjs/README.md). |
 | **`kernel/frontend/`** | `@innostes/kernel` | TypeScript / React 19 | Setup gateway (`<SetupGate>`), initial admin setup wizard, and API client utilities. |
+
+> **Multiple backends.** `kernel/backend` (FastAPI) is the reference and default. The Laravel and NestJS backends serve the same kernel API on the same PostgreSQL schema; business modules and plugins run on FastAPI only. See the [Multi-Backend Guide](../docs/backends/README.md).
 
 ---
 

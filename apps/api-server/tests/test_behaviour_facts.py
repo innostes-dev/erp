@@ -29,7 +29,7 @@ from app.main import app
 from kernel.auth.dependencies import get_current_user, get_user_service
 from kernel.auth.router import get_auth_service
 from kernel.auth.schemas import MessageResponse, RefreshTokenResponse
-from kernel.auth.services import InvalidTokenError
+from kernel.auth.services import AuthService, InvalidTokenError
 from kernel.core.database import get_db
 from kernel.core.security.jwt import create_access_token
 from kernel.core.services import TooManyRequestsError
@@ -100,7 +100,7 @@ class TestBehaviourFacts(unittest.TestCase):
 
     def test_token_rotation__rejects_old_refresh_token(self) -> None:
         """Token rotation: an old refresh token is rejected after a new one is issued."""
-        mock_auth = MagicMock()
+        mock_auth = MagicMock(spec=AuthService)
         mock_auth.refresh_token = AsyncMock(side_effect=InvalidTokenError("Token has already been used and rotated."))
         app.dependency_overrides[get_auth_service] = lambda: mock_auth
 
@@ -131,7 +131,7 @@ class TestBehaviourFacts(unittest.TestCase):
 
     def test_logout_revocation__invalidates_subsequent_token_calls(self) -> None:
         """Logout: revoking token session prevents subsequent authorized operations."""
-        mock_auth = MagicMock()
+        mock_auth = MagicMock(spec=AuthService)
         mock_auth.logout = AsyncMock(return_value=MessageResponse(message="Successfully logged out."))
         app.dependency_overrides[get_auth_service] = lambda: mock_auth
 

@@ -1,0 +1,33 @@
+{
+  "name": "kernel-backend-laravel",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "kernel/backend-laravel/app",
+  "tags": ["scope:kernel", "backend:laravel"],
+  "targets": {
+    "install": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "kernel/backend-laravel", "command": "composer install --no-interaction" }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "kernel/backend-laravel", "command": "php artisan serve --port=8002" }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "kernel/backend-laravel", "command": "php artisan migrate --force" }
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "kernel/backend-laravel", "command": "php artisan kernel:openapi" }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "kernel/backend-laravel", "command": "composer lint && composer analyse" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "cwd": "kernel/backend-laravel", "command": "composer test" }
+    }
+  }
+}

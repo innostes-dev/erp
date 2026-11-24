@@ -61,20 +61,13 @@ class SetupModule(BaseModule):
     ]
 
     def configure(self, app: FastAPI) -> None:
-        """Block normal API routes until setup is complete.
-
-        Args:
-            app: The FastAPI application being built.
-        """
+        """Block normal API routes until setup is complete."""
         app.add_middleware(SetupRequiredMiddleware)
 
     async def on_startup(self, app: FastAPI) -> None:
         """Print the setup token if web setup is needed.
 
         A token from `SETUP_TOKEN` is never printed, only a generated one.
-
-        Args:
-            app: The running FastAPI application.
         """
         settings = get_settings()
         if not settings.setup_enabled:

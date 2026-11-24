@@ -4,12 +4,14 @@
 
 ### The Extensible, Open-Source Business Operating System (Business OS)
 
-Unify workforce, revenue, financials, inventory, and API telemetry on a single hardened enterprise core. Deploy the complete full-stack web application or consume the backend headlessly via strict OpenAPI 3.1 contracts.
+Unify workforce, revenue, financials, inventory, and API telemetry on a single hardened enterprise core. Deploy the complete full-stack web application or consume the backend headlessly via strict OpenAPI 3.1 contracts. The platform kernel ships with three interchangeable backends (FastAPI, Laravel, NestJS); see the [Multi-Backend Guide](docs/backends/README.md).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
 [![Python: 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg?style=flat-square)](https://www.python.org/)
 [![Node: 22+](https://img.shields.io/badge/node-22+-green.svg?style=flat-square)](https://nodejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?style=flat-square)](https://fastapi.tiangolo.com/)
+[![Laravel: 12](https://img.shields.io/badge/Laravel-12-FF2D20.svg?style=flat-square)](kernel/backend-laravel/README.md)
+[![NestJS: 11](https://img.shields.io/badge/NestJS-11-E0234E.svg?style=flat-square)](kernel/backend-nestjs/README.md)
 [![React: 19](https://img.shields.io/badge/React-19-61DAFB.svg?style=flat-square)](https://react.dev/)
 [![Tailwind CSS: v4](https://img.shields.io/badge/Tailwind-v4-38B2AC.svg?style=flat-square)](https://tailwindcss.com/)
 [![Architecture: Verified](https://img.shields.io/badge/Architecture-6%2F6%20Gates%20Passed-success.svg?style=flat-square)](#architecture--governance)
@@ -67,7 +69,7 @@ flowchart TD
 ### The Three Core Pillars
 
 1. **A Unified Operating System**: Run customer pipelines, employee directories, financial accounting, inventory, and API telemetry from one single, cohesive codebase.
-2. **True Decoupled Architecture (Key USP)**: Run the turnkey Next.js / React 19 web application (`apps/web-app`), or consume the FastAPI backend (`apps/api-server`) purely headlessly to power your own custom internal portals, mobile apps, or enterprise integrations via OpenAPI 3.1 specifications.
+2. **True Decoupled Architecture (Key USP)**: Run the turnkey Next.js / React 19 web application (`apps/web-app`), or consume the backend purely headlessly (FastAPI `apps/api-server` by default; the kernel can also run on Laravel or NestJS, see [Multi-Backend Guide](docs/backends/README.md)) to power your own custom internal portals, mobile apps, or enterprise integrations via OpenAPI 3.1 specifications.
 3. **100% Open-Source & Transparent**: Free to self-host forever under the MIT license. Unlimited users, unlimited seats, zero artificial paywalls, and complete PostgreSQL data sovereignty.
 
 ---
@@ -155,6 +157,17 @@ JWT_SECRET_KEY=insecure-dev-secret-key-change-in-production
 pnpm nx run kernel-backend:migrate
 ```
 
+#### 3b. Alternative kernel backends (optional)
+
+The kernel API can also run on Laravel or NestJS (kernel only; modules and plugins stay on FastAPI):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.backends.yml --profile laravel up db api-laravel
+docker compose -f docker-compose.yml -f docker-compose.backends.yml --profile nestjs  up db api-nestjs
+```
+
+Local run, tests and differences: [Multi-Backend Guide](docs/backends/README.md).
+
 #### 4. Launch Development Servers
 
 ```bash
@@ -176,7 +189,9 @@ innostes/
 │   ├── web-app/            # Turnkey React 19 UI engine and app shell (:4200)
 │   └── landing/            # Public marketing & Fumadocs documentation site (:3000)
 ├── kernel/
-│   ├── backend/            # Platform kernel: config, database, security, tenancy, audit
+│   ├── backend/            # Platform kernel (FastAPI/Python reference): config, database, security, tenancy, audit
+│   ├── backend-laravel/    # Kernel API on Laravel 12 / PHP 8.2 (dev :8002)
+│   ├── backend-nestjs/     # Kernel API on NestJS 11 / Node 22 (dev :8003)
 │   └── frontend/           # Kernel frontend: first-run setup gate & API client bindings
 ├── modules/
 │   ├── peopleops/          # PeopleOps: workforce & HRMS suite (backend + frontend)
@@ -188,7 +203,9 @@ innostes/
 │   └── eslint-config/      # Shared workspace lint configurations
 ├── tests/                  # Cross-runtime compatibility test suites (React 17/18/19)
 ├── agent-prompts/          # Prompt specifications and verification checklists
-├── docker-compose.yml      # Local container orchestration
+├── docker-compose.yml      # Local container orchestration (FastAPI backend)
+├── docker-compose.backends.yml  # Overlay: Laravel and NestJS backend profiles
+├── docs/backends/          # Multi-backend guide and release notes
 └── CONTRIBUTING.md         # Open source contributor guide
 ```
 
@@ -204,6 +221,7 @@ innostes/
 | **Swagger UI** | `apps/api-server`| `http://localhost:8001/docs` | Interactive Swagger API docs |
 | **ReDoc UI** | `apps/api-server`| `http://localhost:8001/redoc` | Interactive ReDoc API manual |
 | **Enterprise Kernel** | `kernel/` | Hardened platform foundation | [Kernel Architecture](kernel/README.md) |
+| **Alternative Backends** | `kernel/backend-laravel`, `kernel/backend-nestjs` | Laravel `:8002`, NestJS `:8003` (dev) | [Multi-Backend Guide](docs/backends/README.md) |
 | **Design System** | `packages/ui` | Accessible UI component library | [UI Documentation](packages/ui/README.md) |
 
 ---

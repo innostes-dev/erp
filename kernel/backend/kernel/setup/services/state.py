@@ -12,35 +12,16 @@ import time
 
 
 class InstallState:
-    """Cached installed flag for this process.
-
-    Attributes:
-        recheck_seconds: How long a "not installed" answer is trusted.
-    """
+    """Cached installed flag for this process."""
 
     def __init__(self, recheck_seconds: float = 2.0) -> None:
-        """Create an empty cache.
-
-        Args:
-            recheck_seconds: How long a "not installed" answer is trusted.
-        """
+        """Create an empty cache."""
         self.recheck_seconds = recheck_seconds
         self._installed = False
         self._checked_at: float | None = None
 
     async def is_installed(self, check: Callable[[], Awaitable[bool]]) -> bool:
-        """Return the cached answer, calling `check` when it is missing or stale.
-
-        Args:
-            check: Coroutine function that asks the database.
-
-        Returns:
-            True if the system is installed.
-
-        Raises:
-            Exception: Whatever `check` raises (e.g. the database is down).
-                Nothing is cached in that case.
-        """
+        """Return the cached answer, calling `check` when it is missing or stale."""
         if self._installed:
             return True
         now = time.monotonic()

@@ -15,6 +15,7 @@ from typing import Any
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 import uuid
+from types import SimpleNamespace
 
 from fastapi import Request, Response, status
 from sqlalchemy import select
@@ -414,16 +415,17 @@ class TestRequireSecurityContext(unittest.IsolatedAsyncioTestCase):
                 res.scalar_one_or_none.return_value = self.user
             elif "permissions.code" in stmt_str or "role_permissions" in stmt_str:
                 res.scalar_one_or_none.return_value = MagicMock()
+                # a database row: attribute access, like SQLAlchemy's Row
                 res.all.return_value = [
-                    {
-                        "code": "salesflow.deals.manage",
-                        "module": "salesflow",
-                        "resource": "deals",
-                        "action": "manage",
-                        "scope": "DEPARTMENT",
-                        "role_code": "sales_manager",
-                        "hierarchy_level": 40,
-                    }
+                    SimpleNamespace(
+                        code="salesflow.deals.manage",
+                        module="salesflow",
+                        resource="deals",
+                        action="manage",
+                        scope="DEPARTMENT",
+                        role_code="sales_manager",
+                        hierarchy_level=40,
+                    )
                 ]
             elif "user_roles.department_id" in stmt_str:
                 res.scalar_one_or_none.return_value = self.dept_id

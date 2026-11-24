@@ -19,7 +19,7 @@ from kernel.core.services import (
 )
 from kernel.setup.models import Installation
 from kernel.setup.schemas import SetupChecks, SetupRequest, SetupResult, SetupStatus
-from kernel.tenancy import TenantRead, TenantService
+from kernel.tenancy import Tenant, TenantRead, TenantService
 from kernel.tenancy.models.tenant_member import TenantMember, TenantMemberStatus
 from kernel.user.schemas import UserRead
 from kernel.user.services import (
@@ -38,7 +38,6 @@ class AlreadyInstalledError(ConflictError):
     code = ErrorCode.ALREADY_INSTALLED
 
     def __init__(self) -> None:
-        """Create the error with a fixed, client-safe message."""
         super().__init__("Setup has already been completed")
 
 
@@ -48,7 +47,6 @@ class DatabaseUnavailableError(ServiceUnavailableError):
     code = ErrorCode.DATABASE_UNAVAILABLE
 
     def __init__(self) -> None:
-        """Create the error with a fixed, client-safe message."""
         super().__init__("Cannot connect to the database")
 
 
@@ -58,7 +56,6 @@ class SetupNotAvailableError(NotFoundError):
     code = ErrorCode.SETUP_NOT_AVAILABLE
 
     def __init__(self) -> None:
-        """Create the error with the same message as any unknown route."""
         super().__init__("Not Found")
 
 
@@ -68,7 +65,6 @@ class InvalidSetupTokenError(UnauthorizedError):
     code = ErrorCode.INVALID_SETUP_TOKEN
 
     def __init__(self) -> None:
-        """Create the error; tells clients which header to send."""
         super().__init__(
             "Missing or invalid setup token",
             headers={"WWW-Authenticate": 'SetupToken header="X-Setup-Token"'},
@@ -81,7 +77,6 @@ class SetupRequiredError(ServiceUnavailableError):
     code = ErrorCode.SETUP_REQUIRED
 
     def __init__(self) -> None:
-        """Create the error with a fixed, client-safe message."""
         super().__init__("Setup has not been completed")
 
 
@@ -91,13 +86,6 @@ async def installation_exists(engine: AsyncEngine | None = None) -> bool:
     Uses its own short-lived connection, so no lock is held afterwards. A
     database without the `installation` table (fresh database) counts as
     not installed.
-
-    Args:
-        engine: Engine to use; defaults to the kernel's shared engine.
-
-    Raises:
-        Exception: Database errors propagate; an unreachable database must
-            never be mistaken for "not installed".
     """
     async with (engine or get_engine()).connect() as conn:
         has_table = await conn.run_sync(
@@ -110,12 +98,7 @@ async def installation_exists(engine: AsyncEngine | None = None) -> bool:
 
 
 class SetupService:
-    """Checks and performs the one-time installation of this ERP instance.
-
-    Attributes:
-        session: Request-scoped database session (committed by `get_db`).
-        app_version: Version recorded in the installation row.
-    """
+    """Checks and performs the one-time installation of this ERP instance."""
 
     def __init__(
         self,
@@ -123,14 +106,6 @@ class SetupService:
         app_version: str,
         engine: AsyncEngine | None = None,
     ) -> None:
-        """Create the service.
-
-        Args:
-            session: Database session used for reads and the install writes.
-            app_version: API version to record in the installation row.
-            engine: Engine for connection checks and migrations; defaults to
-                the kernel's shared engine.
-        """
         self.session = session
         self.app_version = app_version
         self._engine = engine
@@ -155,36 +130,17 @@ class SetupService:
         Uses its own short-lived connection, so no lock on `installation` is
         held while migrations run. A database without the `installation`
         table (fresh database) counts as not installed.
-
-        Raises:
-            Exception: Database errors propagate; an unreachable database
-                must never be mistaken for "not installed".
         """
         return await installation_exists(self.engine)
 
     async def status(self) -> SetupStatus:
-        """Public setup status: only whether the system is installed.
-
-        Returns:
-            The installed flag.
-
-        Raises:
-            DatabaseUnavailableError: The database can't be reached, so it is
-                unknown whether the system is installed.
-        """
+        """Public setup status: only whether the system is installed."""
         if not await self.database_connected():
             raise DatabaseUnavailableError()
         return SetupStatus(installed=await self.is_installed())
 
     async def checks(self) -> SetupChecks:
-        """Pre-install diagnostics for the wizard (token holders only).
-
-        Returns:
-            Whether the database is reachable and how many migrations are pending.
-
-        Raises:
-            DatabaseUnavailableError: The database can't be reached.
-        """
+        """Pre-install diagnostics for the wizard (token holders only)."""
         if not await self.database_connected():
             raise DatabaseUnavailableError()
         pending = await pending_migrations(self.engine)
@@ -198,19 +154,6 @@ class SetupService:
         The tenant and the installation row are written in the request
         transaction, so a failure leaves nothing half-installed. Migrations
         run first and are safe to run again.
-
-        Args:
-            data: Values collected by the setup wizard.
-            actor_id: User performing setup, if known (None on first run).
-
-        Returns:
-            The created tenant and the install time.
-
-        Raises:
-            AlreadyInstalledError: Setup was already completed, including when
-                another request completed it at the same moment.
-            SlugTakenError: The organisation slug is already used.
-            DatabaseUnavailableError: The database can't be reached.
         """
         if not await self.database_connected():
             raise DatabaseUnavailableError()
@@ -221,67 +164,17 @@ class SetupService:
         await run_migrations()
 
         try:
-            # 1. Create tenant
             tenant = await TenantService(self.session).create(data.organization, actor_id)
+            user_service = UserService()
+            admin = await user_service.create_user(session=self.session, data=data.admin, is_super_admin=True)
+            await self._make_owner(tenant.id, admin.id)
+            await self._seed_settings(tenant, data)
 
-            # 2. Create super admin user
-            user_svc = UserService()
-            admin_user = await user_svc.create_user(
-                session=self.session,
-                data=data.admin,
-                is_super_admin=True,
-            )
-
-            # 3. Associate admin with tenant as active member
-            member = TenantMember(
-                tenant_id=tenant.id,
-                user_id=admin_user.id,
-                status=TenantMemberStatus.ACTIVE,
-                joined_at=datetime.now(timezone.utc),
-            )
-            self.session.add(member)
-
-            # 4. Seed system RBAC permissions and default roles
-            roles = await seed_default_permissions_and_roles(self.session)
-
-            # 5. Assign roles: global super_admin & tenant owner
-            rbac_svc = RBACService()
-            if "super_admin" in roles:
-                await rbac_svc.assign_role_to_user(
-                    session=self.session,
-                    user_id=admin_user.id,
-                    role_id=roles["super_admin"].id,
-                    tenant_id=None,
-                    assigned_by=admin_user.id,
-                )
-            if "owner" in roles:
-                await rbac_svc.assign_role_to_user(
-                    session=self.session,
-                    user_id=admin_user.id,
-                    role_id=roles["owner"].id,
-                    tenant_id=tenant.id,
-                    assigned_by=admin_user.id,
-                )
-
-            # 6. Seed tenant modular settings (branding, auth, localization)
-            branding_dict = data.branding.model_dump() if data.branding else None
-            await seed_default_tenant_settings(
-                session=self.session,
-                tenant_id=tenant.id,
-                organization_name=tenant.name,
-                branding_input=branding_dict,
-                timezone=tenant.timezone or "UTC",
-                language=tenant.language or "en-US",
-                date_format=tenant.date_format or "YYYY-MM-DD",
-            )
-
-            # 7. Record installation singleton row
-            effective_actor = actor_id or admin_user.id
             installation = Installation(
                 app_version=self.app_version,
                 default_tenant_id=tenant.id,
-                created_by=effective_actor,
-                updated_by=effective_actor,
+                created_by=actor_id or admin.id,
+                updated_by=actor_id or admin.id,
             )
             self.session.add(installation)
             await self.session.flush()
@@ -293,6 +186,39 @@ class SetupService:
         logger.info("First-run setup completed for tenant %r with admin %r", tenant.slug, data.admin.email)
         return SetupResult(
             tenant=TenantRead.model_validate(tenant),
-            admin=user_svc.to_user_read(admin_user),
+            admin=user_service.to_user_read(admin),
             installed_at=installation.created_at,
+        )
+
+    async def _make_owner(self, tenant_id: uuid.UUID, admin_id: uuid.UUID) -> None:
+        """Make the admin an active member of the tenant, a global super admin and the tenant's owner."""
+        self.session.add(
+            TenantMember(
+                tenant_id=tenant_id,
+                user_id=admin_id,
+                status=TenantMemberStatus.ACTIVE,
+                joined_at=datetime.now(timezone.utc),
+            )
+        )
+        roles = await seed_default_permissions_and_roles(self.session)
+        rbac = RBACService()
+        for code, role_tenant in (("super_admin", None), ("owner", tenant_id)):
+            if code in roles:
+                await rbac.assign_role_to_user(
+                    session=self.session,
+                    user_id=admin_id,
+                    role_id=roles[code].id,
+                    tenant_id=role_tenant,
+                    assigned_by=admin_id,
+                )
+
+    async def _seed_settings(self, tenant: Tenant, data: SetupRequest) -> None:
+        await seed_default_tenant_settings(
+            session=self.session,
+            tenant_id=tenant.id,
+            organization_name=tenant.name,
+            branding_input=data.branding.model_dump() if data.branding else None,
+            timezone=tenant.timezone or "UTC",
+            language=tenant.language or "en-US",
+            date_format=tenant.date_format or "YYYY-MM-DD",
         )

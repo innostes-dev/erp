@@ -54,8 +54,8 @@ def parse_env_file(filepath: Path) -> dict[str, str]:
                     ):
                         val = val[1:-1]
                     env_vars[key] = val
-    except Exception:
-        pass
+    except (OSError, UnicodeDecodeError):
+        pass  # no readable .env file: fall back to the real environment
     return env_vars
 
 

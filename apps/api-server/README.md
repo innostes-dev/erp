@@ -4,6 +4,8 @@ The headless backend execution engine for the **Innostes Business Operating Syst
 
 `apps/api-server` is a high-performance, asynchronous Python execution host built on **FastAPI** and **Uvicorn**. Engineered around strict decoupling, it allows organizations to run Innostes as a complete full-stack platform or consume it purely headlessly to power custom internal portals, mobile apps, and third-party integrations via standard **OpenAPI 3.1** contracts.
 
+> `apps/api-server` hosts the FastAPI backend, the default and the only one that serves business modules and plugins. The kernel API can alternatively run on Laravel or NestJS; see the [Multi-Backend Guide](../../docs/backends/README.md).
+
 ---
 
 ## 1. Architectural Role

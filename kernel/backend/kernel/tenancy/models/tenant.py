@@ -11,15 +11,6 @@ class Tenant(BaseModel):
 
     The common columns (id, created_*, updated_*, deleted_*) come from
     `BaseModel`; only tenant-specific columns are declared here.
-
-    Attributes:
-        name: Display name of the organisation (max 255 chars).
-        slug: Short unique identifier used in URLs and system ids
-            (lowercase letters, digits and dashes).
-        country: ISO 3166-1 alpha-2 country code, e.g. "IN".
-        timezone: IANA time zone, e.g. "Asia/Kolkata".
-        language: BCP 47 language tag, e.g. "en-IN".
-        date_format: Preferred date format, e.g. "DD/MM/YYYY".
     """
 
     __tablename__ = "tenants"

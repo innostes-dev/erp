@@ -1,0 +1,81 @@
+{
+  "keys": {
+    "1": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "2": "short-utf8-key-not-hex"
+  },
+  "pepper": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+  "jwt_secret": "interop-test-secret-key-at-least-32-bytes-long",
+  "envelopes": [
+    {
+      "plaintext": "admin@example.com",
+      "version": 1,
+      "envelope": "v1:JIsY+vTvYUHjWEz4:2mH5I4m+nSZVxI9d0N3pazpBWoBgb2lLgVksBV48OlkX"
+    },
+    {
+      "plaintext": "+911234567890",
+      "version": 1,
+      "envelope": "v1:FkYZdNWRTWJgvM5D:EsDkbAbJhmQ65N0cURUsWTHSCTsEthIfjPU3RFs="
+    },
+    {
+      "plaintext": "Ünïcödé-名前@example.com",
+      "version": 1,
+      "envelope": "v1:oMQudn/UVD3zFOSB:Jr4q7E4nIiXreYBY3OQX3sl1zs0tR74bJtyoGNDMdpIoQRpjErdPA6hu4w9v5Q=="
+    },
+    {
+      "plaintext": "",
+      "version": 1,
+      "envelope": "v1:LgOdoiUYZ22Val1i:u1s0wDH3djzyMTGhYG1YJA=="
+    },
+    {
+      "plaintext": "rotated-key@example.com",
+      "version": 2,
+      "envelope": "v2:IPdMOGqiXHjU1qTi:QUQoTbRx0etDKsEXAhS0qv8Yp1hOCxm1WCSZNU7zZLglk4BYmzlc"
+    }
+  ],
+  "blind_index": [
+    {
+      "input": " Admin@Example.COM ",
+      "hash": "1da500f7e3d72475f1d6f013d8c49400c3fe749033bcbec985e89e701fdfb9d5"
+    },
+    {
+      "input": "user@example.com",
+      "hash": "975ec941ef2bb3c8f77fa57f6a6e13f902ea7b8f084c11b85c047294fa91b52a"
+    },
+    {
+      "input": "UPPER@EXAMPLE.COM",
+      "hash": "e0b4db5b50f71ab026965b4a04618472b641a6d4ac5dfe7dd9937935906c2abc"
+    },
+    {
+      "input": "+91 123",
+      "hash": "0dd95c76edd57b1616571dbbca996579d1c8ff95d926b6857495fca89509378c"
+    }
+  ],
+  "jwt": {
+    "claims": {
+      "sub": "3f2b1c9e-5d8a-4f6b-9c2e-1a3b5c7d9e0f",
+      "email": "priya@example.com",
+      "token_version": 3,
+      "is_super_admin": true,
+      "type": "access",
+      "iat": 1795473523,
+      "exp": 2110833523
+    },
+    "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJlbWFpbCI6InByaXlhQGV4YW1wbGUuY29tIiwidG9rZW5fdmVyc2lvbiI6MywiaXNfc3VwZXJfYWRtaW4iOnRydWUsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3OTU0NzM1MjMsImV4cCI6MjExMDgzMzUyM30.CdlBc8yC9ymVk49ZIsgxhtnoReJTCCU5akLgAY_kYGA",
+    "reset": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJ0eXBlIjoicGFzc3dvcmRfcmVzZXQiLCJ0b2tlbl92ZXJzaW9uIjozLCJpYXQiOjE3OTU0NzM1MjMsImV4cCI6MjExMDgzMzUyM30.v_2QcGJzP5ZFQJearaWA-zs2ZrhtF0m1slpbj97uJt4",
+    "expired": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZjJiMWM5ZS01ZDhhLTRmNmItOWMyZS0xYTNiNWM3ZDllMGYiLCJlbWFpbCI6InByaXlhQGV4YW1wbGUuY29tIiwidG9rZW5fdmVyc2lvbiI6MywiaXNfc3VwZXJfYWRtaW4iOnRydWUsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3OTU0NzM1MjMsImV4cCI6MTc5NTM4NzEyM30.PWRSJqN4Qkw1mZcGfjpMO7JpvbPmkoADY0F7ndxnFlU"
+  },
+  "bcrypt": [
+    {
+      "password": "Str0ng-Passw0rd!",
+      "hash": "$2b$12$3H.9YNSF3d3UCHRwQ5r2quPgzeNwDkiXIN9itjvI7d2TQO1OkV4LO"
+    },
+    {
+      "password": "pässwörd-ünï",
+      "hash": "$2b$12$rkFVL5t0tS0gkXkGmnxXYe5beiZ.RF0n/TVrSwNJR4pRdqHBzaSa6"
+    },
+    {
+      "password": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "hash": "$2b$12$3MernEfEMq8s68lrpEVoauG/Z9Ny431ZDcuq0uh7VMHrzUSELV5/G"
+    }
+  ]
+}

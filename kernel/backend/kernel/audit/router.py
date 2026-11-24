@@ -1,4 +1,4 @@
-"""Audit subsystem HTTP router exposing compliance logging and entity change timelines."""
+"""Audit endpoints (/audit): query the audit trail and record entries. Not mounted by the API server yet."""
 
 from datetime import datetime
 from typing import Any
@@ -16,7 +16,9 @@ from kernel.audit.schemas.audit_log import (
     AuditSummary,
 )
 from kernel.audit.services.audit_service import AuditService, audit_service
+from kernel.audit.services.request_audit import actor_fields
 from kernel.core.database import get_db
+from kernel.core.services.errors import ServiceError
 
 TAG = "Audit Trail"
 
@@ -30,8 +32,11 @@ _bearer_scheme = HTTPBearer(
 
 
 def get_audit_service() -> AuditService:
-    """Dependency provider for AuditService instance."""
     return audit_service
+
+
+ANONYMOUS = {"actor_id": None, "actor_email": "anonymous@system.local", "actor_name": "Anonymous", "is_admin": False}
+SYSTEM = {"actor_id": None, "actor_email": "system@innostes.local", "actor_name": "System Worker", "is_admin": False}
 
 
 async def get_current_actor_info(
@@ -39,32 +44,21 @@ async def get_current_actor_info(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     session: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Extract authenticated actor context if available, otherwise return anonymous/system."""
+    """Who is calling: the signed-in user, "Anonymous" without a token, "System Worker" if the token is rejected."""
     if not credentials:
-        return {
-            "actor_id": None,
-            "actor_email": "anonymous@system.local",
-            "actor_name": "Anonymous",
-            "is_admin": False,
-        }
+        return ANONYMOUS
+    # Imported here because kernel.auth imports kernel.audit.
+    from kernel.auth.dependencies import get_current_user
 
     try:
-        from kernel.auth.dependencies import get_current_user
         user = await get_current_user(request=request, credentials=credentials, session=session)
-        name = f"{user.first_name} {user.last_name}".strip() if hasattr(user, "first_name") and user.first_name else user.email.split("@")[0].capitalize()
-        return {
-            "actor_id": user.id,
-            "actor_email": user.email,
-            "actor_name": name,
-            "is_admin": getattr(user, "is_superuser", False),
-        }
-    except Exception:
-        return {
-            "actor_id": None,
-            "actor_email": "system@innostes.local",
-            "actor_name": "System Worker",
-            "is_admin": False,
-        }
+    except ServiceError:
+        return SYSTEM
+
+    actor = actor_fields(user)
+    if not actor["actor_name"] and actor["actor_email"]:
+        actor["actor_name"] = actor["actor_email"].split("@")[0].capitalize()
+    return {**actor, "is_admin": user.is_super_admin}
 
 
 @router.get(
@@ -218,22 +212,14 @@ async def create_audit_log(
     session: AsyncSession = Depends(get_db),
     service: AuditService = Depends(get_audit_service),
 ) -> AuditLogRead:
-    """Record an audit log entry."""
-    # Populate missing context from request
-    if not payload.tenant_id and x_tenant_id:
-        payload.tenant_id = x_tenant_id
-    if not payload.actor_id and actor_info.get("actor_id"):
-        payload.actor_id = actor_info["actor_id"]
-    if not payload.actor_email and actor_info.get("actor_email"):
-        payload.actor_email = actor_info["actor_email"]
-    if not payload.actor_name and actor_info.get("actor_name"):
-        payload.actor_name = actor_info["actor_name"]
-    if not payload.ip_address and request.client:
-        payload.ip_address = request.client.host
-    if not payload.user_agent:
-        payload.user_agent = request.headers.get("user-agent")
-    if not payload.correlation_id:
-        payload.correlation_id = request.headers.get("x-correlation-id")
+    """Record an audit log entry. Fields left empty are filled from the request and the caller."""
+    payload.tenant_id = payload.tenant_id or x_tenant_id
+    payload.actor_id = payload.actor_id or actor_info["actor_id"]
+    payload.actor_email = payload.actor_email or actor_info["actor_email"]
+    payload.actor_name = payload.actor_name or actor_info["actor_name"]
+    payload.ip_address = payload.ip_address or (request.client.host if request.client else None)
+    payload.user_agent = payload.user_agent or request.headers.get("user-agent")
+    payload.correlation_id = payload.correlation_id or request.headers.get("x-correlation-id")
 
     record = await service.record_from_schema(session=session, data=payload)
     await session.commit()

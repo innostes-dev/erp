@@ -29,7 +29,9 @@ from kernel.auth.schemas import (
     MessageResponse,
     RefreshTokenResponse,
     TokenResponse,
+    UserProfileResponse,
 )
+from kernel.auth.services import AuthService
 from kernel.core.database import get_db
 from kernel.core.security.jwt import create_access_token
 from kernel.setup.dependencies import is_installed_cached, require_setup_available, require_setup_token
@@ -159,7 +161,7 @@ class TestContractGuard(unittest.TestCase):
         app.dependency_overrides[is_installed_cached] = fake_installed
 
         # Auth service overrides
-        mock_auth = MagicMock()
+        mock_auth = MagicMock(spec=AuthService)
         mock_auth.login = AsyncMock(
             return_value=TokenResponse(
                 access_token="sample_jwt",
@@ -179,9 +181,12 @@ class TestContractGuard(unittest.TestCase):
             )
         )
         mock_auth.forgot_password = AsyncMock(return_value=ForgotPasswordResponse())
-        mock_auth.reset_password = AsyncMock(return_value=MessageResponse(message="Reset."))
+        mock_auth.reset_password_with_token = AsyncMock(return_value=MessageResponse(message="Reset."))
         mock_auth.change_password = AsyncMock(return_value=MessageResponse(message="Changed."))
         mock_auth.logout = AsyncMock(return_value=MessageResponse(message="Logged out."))
+        mock_auth.get_user_profile = AsyncMock(
+            return_value=UserProfileResponse(**self.mock_user_read.model_dump(), active_tenant=None, accessible_tenants=[], accessible_modules=[])
+        )
         app.dependency_overrides[get_auth_service] = lambda: mock_auth
 
         # API key service overrides

@@ -8,11 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from kernel.core.crypto import BlindIndex, FieldCipher
 from kernel.core.services import ConflictError, ErrorCode, NotFoundError
+from kernel.user.models.credentials import Identity, IdentityType
 from kernel.user.models.password_history import PasswordHistory
 from kernel.user.models.profile import UserProfile
 from kernel.user.models.security import UserSecurity
 from kernel.user.models.user import User, UserStatus
 from kernel.user.schemas.user import AdminUserInput, UserCreate, UserRead, UserUpdate
+from kernel.user.services.credential_service import CredentialService
 from kernel.user.services.password import hash_password
 
 
@@ -23,6 +25,15 @@ class EmailAlreadyExistsError(ConflictError):
 
     def __init__(self, email: str) -> None:
         super().__init__(f"User with email '{email}' already exists.")
+
+
+class MobileAlreadyExistsError(ConflictError):
+    """Raised when another account (active or soft-deleted) already uses the mobile number."""
+
+    code = ErrorCode.MOBILE_ALREADY_EXISTS
+
+    def __init__(self) -> None:
+        super().__init__("User with this mobile number already exists.")
 
 
 class UserNotFoundError(NotFoundError):
@@ -44,6 +55,7 @@ class UserService:
     ) -> None:
         self.cipher = cipher or FieldCipher()
         self.blind_index = blind_index or BlindIndex()
+        self.credentials = CredentialService(cipher=self.cipher, blind_index=self.blind_index)
 
     async def get_by_id(self, session: AsyncSession, user_id: uuid.UUID) -> User | None:
         """Find user by UUID (excluding soft-deleted)."""
@@ -52,11 +64,8 @@ class UserService:
         return result.scalar_one_or_none()
 
     async def get_by_email(self, session: AsyncSession, email: str) -> User | None:
-        """Find user by email using deterministic HMAC blind index."""
-        email_hash = self.blind_index.compute(email)
-        stmt = select(User).where(User.email_hash == email_hash, User.deleted_at.is_(None))
-        result = await session.execute(stmt)
-        return result.scalar_one_or_none()
+        """Find user by email through the `identities` table (falls back to the legacy column)."""
+        return await self.credentials.find_user_by_identifier(session, IdentityType.EMAIL, email)
 
     async def create_user(
         self,
@@ -76,6 +85,10 @@ class UserService:
         # Envelope encryption of PII
         email_encrypted = self.cipher.encrypt(data.email)
         mobile_hash = self.blind_index.compute(data.mobile) if data.mobile else None
+        if mobile_hash and await self._mobile_taken(session, mobile_hash):
+            # Same rule as the unique index users.mobile_hash (includes soft-deleted users); a clean 409
+            # instead of an IntegrityError 500. Matches the Laravel and NestJS kernels.
+            raise MobileAlreadyExistsError()
         mobile_encrypted = self.cipher.encrypt(data.mobile) if data.mobile else None
 
         password_hash = hash_password(data.password)
@@ -100,6 +113,12 @@ class UserService:
         session.add(user)
         await session.flush()
 
+        # Login identifiers and password in the dedicated tables (legacy columns above stay in sync).
+        session.add(self.credentials.new_identity(user.id, IdentityType.EMAIL, data.email, is_primary=True))
+        if data.mobile:
+            session.add(self.credentials.new_identity(user.id, IdentityType.PHONE, data.mobile, is_primary=True))
+        session.add(self.credentials.new_password_credential(user.id, password_hash))
+
         profile = UserProfile(user_id=user.id)
         security = UserSecurity(
             user_id=user.id,
@@ -113,6 +132,14 @@ class UserService:
         await session.flush()
 
         return user
+
+    async def _mobile_taken(self, session: AsyncSession, mobile_hash: str) -> bool:
+        """True if any user (also soft-deleted) or phone identity already has this mobile number."""
+        legacy = select(User.id).where(User.mobile_hash == mobile_hash).limit(1)
+        if (await session.execute(legacy)).scalar_one_or_none() is not None:
+            return True
+        ident = select(Identity.id).where(Identity.type == IdentityType.PHONE.value, Identity.value_hash == mobile_hash)
+        return (await session.execute(ident.limit(1))).scalar_one_or_none() is not None
 
     def decrypt_email(self, user: User) -> str:
         """Decrypt user's email ciphertext."""

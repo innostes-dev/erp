@@ -36,14 +36,7 @@ INSTALL_CHECK_TIMEOUT: float = 3.0
 
 
 async def is_installed_cached() -> bool:
-    """Installed flag via the process cache, with a timeout on the database check.
-
-    Returns:
-        True if setup has been completed.
-
-    Raises:
-        DatabaseUnavailableError: The database could not be checked.
-    """
+    """Installed flag via the process cache, with a timeout on the database check."""
     try:
         return await install_state.is_installed(
             lambda: asyncio.wait_for(installation_exists(), INSTALL_CHECK_TIMEOUT)
@@ -53,12 +46,7 @@ async def is_installed_cached() -> bool:
 
 
 async def require_setup_available() -> None:
-    """Allow the route only while web setup is enabled and not yet done.
-
-    Raises:
-        SetupNotAvailableError: 404 when installed or `SETUP_ENABLED=false`.
-        DatabaseUnavailableError: 503 when the database can't be checked.
-    """
+    """Allow the route only while web setup is enabled and not yet done."""
     if not get_settings().setup_enabled:
         raise SetupNotAvailableError()
     if await is_installed_cached():
@@ -69,19 +57,7 @@ async def require_setup_token(
     request: Request,
     token: str | None = Depends(_token_header),
 ) -> str:
-    """Require a valid `X-Setup-Token` header, with a limit on wrong guesses.
-
-    Args:
-        request: The current request (for the client address).
-        token: Value of the `X-Setup-Token` header.
-
-    Returns:
-        The verified token.
-
-    Raises:
-        TooManyRequestsError: 429 after too many wrong tokens from this client.
-        InvalidSetupTokenError: 401 when the header is missing or wrong.
-    """
+    """Require a valid `X-Setup-Token` header, with a limit on wrong guesses."""
     client = request.client.host if request.client else "unknown"
     wait = attempt_limiter.retry_after(client)
     if wait is not None:

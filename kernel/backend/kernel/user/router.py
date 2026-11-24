@@ -1,11 +1,12 @@
-"""User and IAM HTTP endpoints."""
+"""User endpoints (/users)."""
 
 import uuid
 
-from fastapi import APIRouter, Depends, Path, Query, Request, status
+from fastapi import APIRouter, Depends, Path, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from kernel.audit.services import actor_fields, audit_request, full_name
 from kernel.core.database import get_db
 from kernel.core.schemas import error_responses
 from kernel.core.services.errors import UnauthorizedError
@@ -15,6 +16,7 @@ from kernel.user.services import EmailAlreadyExistsError, UserNotFoundError, Use
 
 TAG = "User management"
 router = APIRouter(prefix="/users", tags=[TAG])
+BEARER = {"security": [{"BearerAuth": []}]}
 
 _bearer_scheme = HTTPBearer(
     auto_error=False,
@@ -33,11 +35,10 @@ async def get_current_user_dep(
     session: AsyncSession = Depends(get_db),
     service: UserService = Depends(get_service),
 ) -> User:
-    """Lazy-load get_current_user to eliminate circular import."""
+    # Imported here because kernel.auth imports kernel.user.
     from kernel.auth.dependencies import get_current_user
-    return await get_current_user(
-        request=request, credentials=credentials, session=session, user_service=service
-    )
+
+    return await get_current_user(request=request, credentials=credentials, session=session, user_service=service)
 
 
 @router.post(
@@ -46,7 +47,7 @@ async def get_current_user_dep(
     status_code=status.HTTP_201_CREATED,
     summary="Create a user",
     operation_id="users_create_user",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(
         EmailAlreadyExistsError,
         UnauthorizedError,
@@ -63,53 +64,21 @@ async def create_user(
 
     Requires Bearer authentication. Encrypts sensitive fields (email, mobile)
     and generates blind search indexes.
-    \f
-    Args:
-        body: User registration fields.
-        request: FastAPI HTTP request.
-        current_user: Authenticated actor.
-        session: Active async database session.
-        service: Injected user domain service.
-
-    Returns:
-        UserRead record with decrypted identifiers.
     """
     user = await service.create_user(session, body)
 
-    try:
-        from kernel.audit import audit_service
-        actor_name = f"{current_user.first_name} {current_user.last_name}".strip()
-        actor_email = getattr(current_user, "email", None)
-        target_name = f"{user.first_name} {user.last_name}".strip()
-        client_ip = request.client.host if request.client else None
-        forwarded = request.headers.get("X-Forwarded-For")
-        if forwarded:
-            client_ip = forwarded.split(",")[0].strip()
-
-        await audit_service.record(
-            session=session,
-            action="CREATE",
-            entity_type="user",
-            entity_id=str(user.id),
-            entity_name=target_name or body.email,
-            changes={
-                "first_name": {"old": None, "new": user.first_name},
-                "last_name": {"old": None, "new": user.last_name},
-                "email": {"old": None, "new": body.email},
-            },
-            tenant_id=getattr(current_user, "tenant_id", None) or getattr(user, "tenant_id", None),
-            actor_id=current_user.id,
-            actor_email=actor_email,
-            actor_name=actor_name or actor_email,
-            ip_address=client_ip,
-            user_agent=request.headers.get("User-Agent"),
-            correlation_id=request.headers.get("x-correlation-id") or getattr(request.state, "correlation_id", None),
-            reason=f"Registered user account '{body.email}'",
-            status="SUCCESS",
-        )
-    except Exception:
-        pass
-
+    await audit_request(
+        session, request, action="CREATE", entity_type="user", entity_id=str(user.id),
+        entity_name=full_name(user.first_name, user.last_name) or body.email,
+        changes={
+            "first_name": {"old": None, "new": user.first_name},
+            "last_name": {"old": None, "new": user.last_name},
+            "email": {"old": None, "new": body.email},
+        },
+        tenant_id=getattr(current_user, "tenant_id", None) or getattr(user, "tenant_id", None),
+        reason=f"Registered user account '{body.email}'",
+        **actor_fields(current_user),
+    )
     await session.commit()
     return service.to_user_read(user)
 
@@ -120,7 +89,7 @@ async def create_user(
     status_code=status.HTTP_200_OK,
     summary="Get user by ID",
     operation_id="users_get_user",
-    openapi_extra={"security": [{"BearerAuth": []}]},
+    openapi_extra=BEARER,
     responses=error_responses(
         UserNotFoundError,
         UnauthorizedError,
@@ -139,15 +108,6 @@ async def get_user(
 
     Requires Bearer authentication. Returns the user's decrypted email and
     mobile number for authorized callers.
-    \f
-    Args:
-        user_id: Unique UUID of target user.
-        current_user: Authenticated actor.
-        session: Active async database session.
-        service: Injected user domain service.
-
-    Returns:
-        UserRead record with decrypted identifiers.
     """
     user = await service.get_by_id(session, user_id)
     if not user:

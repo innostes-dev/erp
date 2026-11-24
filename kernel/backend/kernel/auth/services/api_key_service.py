@@ -31,12 +31,7 @@ class ApiKeyService:
         scopes: list[str] | None = None,
         expires_in_days: int | None = None,
     ) -> tuple[ApiKey, str]:
-        """Generate a cryptographically secure API key.
-
-        Returns:
-            Tuple of (ApiKey record, raw_key string). The raw_key must be shown
-            to the user immediately as it is never stored and cannot be recovered.
-        """
+        """Generate a cryptographically secure API key."""
         random_entropy = secrets.token_urlsafe(32)
         raw_key = f"{self.KEY_PREFIX}{random_entropy}"
         key_prefix = f"{raw_key[:14]}..."
@@ -103,11 +98,7 @@ class ApiKeyService:
         session: AsyncSession,
         raw_key: str,
     ) -> ApiKey | None:
-        """Authenticate a raw API key.
-
-        Returns:
-            The valid ApiKey record if active and unexpired, otherwise None.
-        """
+        """Authenticate a raw API key."""
         if not raw_key.startswith(self.KEY_PREFIX):
             return None
 

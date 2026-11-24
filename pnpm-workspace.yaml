@@ -2,6 +2,7 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'kernel/*'
+  - '!kernel/backend-nestjs'
   - 'tests/*'
   - 'modules/*/*'
   - 'plugins/*/*'

@@ -2,6 +2,8 @@
 
 This document details the exact technical architecture, code execution flow, security mechanisms, and database transactions governing the **First-Run Setup API** subsystem within Innostes ERP.
 
+> **Note:** this document describes the FastAPI implementation (`kernel/backend`). The Laravel and NestJS backends implement the same setup flow (`X-Setup-Token`, 503 `setup_required` gate, 404 `setup_not_available` after install) and are described in the [Multi-Backend Guide](backends/README.md); file paths below refer to the FastAPI code only.
+
 ---
 
 ## 1. Architectural Philosophy & System Invariants

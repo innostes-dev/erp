@@ -87,15 +87,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def organization_from_args(args: argparse.Namespace, env: Mapping[str, str]) -> dict[str, str]:
-    """Collect organisation fields from `--from-env` variables and/or flags (flags win).
-
-    Args:
-        args: Parsed `install` arguments.
-        env: Environment variables.
-
-    Returns:
-        Field name -> value, only for fields that were given.
-    """
+    """Collect organisation fields from `--from-env` variables and/or flags (flags win)."""
     values: dict[str, str] = {}
     if args.from_env:
         values.update({field: env[var] for field, var in ENV_FIELDS.items() if env.get(var)})
@@ -157,15 +149,7 @@ async def _install(request: SetupRequest) -> int:
 
 
 def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None) -> int:
-    """Run the installer.
-
-    Args:
-        argv: Command-line arguments (defaults to `sys.argv[1:]`).
-        env: Variables for `--from-env` (defaults to `.env` files + environment).
-
-    Returns:
-        Process exit code.
-    """
+    """Run the installer."""
     args = build_parser().parse_args(argv)
     env = load_env() if env is None else env
 
